@@ -1310,44 +1310,55 @@ function Field({
   prefix,
   suffix,
 }: {
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-  prefix?: string;
-  suffix?: string;
+  label: string
+  value: number
+  onChange: (v: number) => void
+  prefix?: string
+  suffix?: string
 }) {
-  const [raw, setRaw] = useState(String(value));
+  const [raw, setRaw] = useState(String(value))
 
   useEffect(() => {
-    setRaw(String(value));
-  }, [value]);
+    setRaw(String(value))
+  }, [value])
 
   return (
     <label className="block">
-      {/* Added px-0.5 to align label text with the input box border */}
-      <div className="mb-1.5 px-0.5 text-[11px] leading-tight font-medium text-slate-300">
+      <div className="mb-1 text-[11px] font-medium text-slate-300">
         {label}
       </div>
-      <div className="flex h-11 items-center rounded-xl border border-slate-700 bg-slate-900/80 px-3 shadow-inner transition focus-within:border-emerald-400/50 focus-within:ring-4 focus-within:ring-emerald-400/10">
-        {/* Fixed width prefix container (w-3) ensures text alignment is identical across all rows */}
-        <div className="flex w-3 items-center text-sm text-slate-400">
-          {prefix || ""}
-        </div>
+
+      <div className="relative flex h-11 items-center rounded-xl border border-slate-700 bg-slate-900/80 shadow-inner">
+
+        {/* Prefix column */}
+        {prefix && (
+          <div className="flex w-9 items-center justify-center text-sm text-slate-400">
+            {prefix}
+          </div>
+        )}
+
         <input
           type="text"
           inputMode="numeric"
-          className="ml-1 w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
+          className={`w-full bg-transparent text-sm text-white outline-none ${
+            prefix ? "" : "pl-3"
+          }`}
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
           onBlur={() => {
-            const n = Number(raw.replace(/[^0-9.-]/g, ''));
-            const safe = Number.isFinite(n) ? n : 0;
-            onChange(safe);
-            setRaw(String(safe));
+            const n = Number(raw)
+            const safe = Number.isFinite(n) ? n : 0
+            onChange(safe)
+            setRaw(String(safe))
           }}
         />
-        {suffix ? <span className="ml-2 text-sm text-slate-400">{suffix}</span> : null}
+
+        {suffix && (
+          <div className="absolute right-3 text-sm text-slate-400">
+            {suffix}
+          </div>
+        )}
       </div>
     </label>
-  );
+  )
 }
