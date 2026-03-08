@@ -623,30 +623,42 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
     setInputs((s) => ({ ...s, preset: "custom" }));
   }
 
-    const viralCityResults = useMemo(() => {
-    const baseAnnualExpenses = annualExpenses(inputs);
+  const viralCityResults = useMemo(() => {
+  const baseAnnualExpenses = annualExpenses(inputs);
 
-    return VIRAL_COMPARE_CITIES.map((cityId) => {
-      const city = findCity(cityId);
-      if (!city) return null;
+  return VIRAL_COMPARE_CITIES.map((cityId) => {
+    const city = findCity(cityId);
+    if (!city) return null;
 
-      const adjustedExpenses = expenseAdjustedForCity(baseAnnualExpenses, cityId);
-      const sim = simulateYearsToFI(inputs, netAnnual, {
-        expensesAnnualBase: adjustedExpenses,
-      });
-
-      const ageAtFI =
-        sim.yearsToFI === null ? null : inputs.age + sim.yearsToFI;
-
+    // ✅ FIX: If this row is NYC, use the actual current result
+    if (cityId === "nyc-ny") {
       return {
         cityId,
         cityName: city.name,
         state: city.state.toUpperCase(),
-        ageAtFI,
-        yearsToFI: sim.yearsToFI,
+        ageAtFI: fiAge,
+        yearsToFI: result.yearsToFI,
       };
-    }).filter(Boolean);
-  }, [inputs, netAnnual]);
+    }
+
+    const adjustedExpenses = expenseAdjustedForCity(baseAnnualExpenses, cityId);
+
+    const sim = simulateYearsToFI(inputs, netAnnual, {
+      expensesAnnualBase: adjustedExpenses,
+    });
+
+    const ageAtFI =
+      sim.yearsToFI === null ? null : inputs.age + sim.yearsToFI;
+
+    return {
+      cityId,
+      cityName: city.name,
+      state: city.state.toUpperCase(),
+      ageAtFI,
+      yearsToFI: sim.yearsToFI,
+    };
+  }).filter(Boolean);
+}, [inputs, netAnnual, fiAge, result.yearsToFI]);
 
 
   // Savings Rate → FIRE Table (uses NET income)
