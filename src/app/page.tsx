@@ -25,7 +25,7 @@ export default function Page() {
   See How Far Your Salary Goes in Another State
 </h1>
 
-       <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-slate-800 dark:text-slate-200">
+   <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-gray-900">
   Compare taxes, housing costs, and real affordability before you move.
 </p>
 
