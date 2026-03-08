@@ -1325,7 +1325,7 @@ function Field({
   return (
     <label className="block">
       {/* 1. Remove mb-1 and add px-0.5 to align label text with the box edge better */}
-      <div className="mb-1.5 px-0.5 text-[11px] leading-tight font-medium text-slate-300">
+      <div className="mb-2.5 px-0.5 text-[11px] leading-tight font-medium text-slate-300">
         {label}
       </div>
       
