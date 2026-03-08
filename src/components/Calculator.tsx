@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { STATES, type StateCode } from "../lib/states";
 import { citiesForState, findCity } from "../lib/cities";
 import { estimateNetAnnual, type FilingStatus } from "../lib/tax";
@@ -108,6 +108,7 @@ export default function Calculator({
   // Inputs
   // ===========
   const [mode, setMode] = useState<Mode>("rent");
+  const hasMounted = useRef(false);
 
   const [salary, setSalary] = useState<string>("");
   const [filing, setFiling] = useState<FilingStatus>("single");
@@ -253,59 +254,64 @@ export default function Calculator({
   // Shareable defaults (write as user changes)
   // ===========
   useEffect(() => {
-    const qs = new URLSearchParams();
+  if (!hasMounted.current) {
+    hasMounted.current = true;
+    return;
+  }
 
-    qs.set("from", fromState);
-    qs.set("to", toState);
-    qs.set("filing", filing);
-    qs.set("mode", mode);
+  const qs = new URLSearchParams();
 
-    if (salary !== "") qs.set("salary", salary);
-    if (k401Pct !== "") qs.set("k401", k401Pct);
+  qs.set("from", fromState);
+  qs.set("to", toState);
+  qs.set("filing", filing);
+  qs.set("mode", mode);
 
-    if (fromCityId !== "") qs.set("fromCity", fromCityId);
-    if (toCityId !== "") qs.set("toCity", toCityId);
+  if (salary !== "") qs.set("salary", salary);
+  if (k401Pct !== "") qs.set("k401", k401Pct);
 
-    if (fromCityOther !== "") qs.set("fromOther", fromCityOther);
-    if (toCityOther !== "") qs.set("toOther", toCityOther);
+  if (fromCityId !== "") qs.set("fromCity", fromCityId);
+  if (toCityId !== "") qs.set("toCity", toCityId);
 
-    // Buy
-    if (homePrice !== "") qs.set("homePrice", homePrice);
-    if (downPct !== "") qs.set("downPct", downPct);
-    if (ratePct !== "") qs.set("ratePct", ratePct);
-    if (termYears !== "") qs.set("termYears", termYears);
-    if (propertyTaxPct !== "") qs.set("propertyTaxPct", propertyTaxPct);
-    if (homeInsMonthly !== "") qs.set("homeInsMonthly", homeInsMonthly);
-    if (hoaMonthly !== "") qs.set("hoaMonthly", hoaMonthly);
-    if (pmiAnnualPct !== "") qs.set("pmiAnnualPct", pmiAnnualPct);
+  if (fromCityOther !== "") qs.set("fromOther", fromCityOther);
+  if (toCityOther !== "") qs.set("toOther", toCityOther);
 
-    // Rent
-    if (rentMonthly !== "") qs.set("rentMonthly", rentMonthly);
-    if (rentersInsMonthly !== "") qs.set("rentersInsMonthly", rentersInsMonthly);
+  // Buy
+  if (homePrice !== "") qs.set("homePrice", homePrice);
+  if (downPct !== "") qs.set("downPct", downPct);
+  if (ratePct !== "") qs.set("ratePct", ratePct);
+  if (termYears !== "") qs.set("termYears", termYears);
+  if (propertyTaxPct !== "") qs.set("propertyTaxPct", propertyTaxPct);
+  if (homeInsMonthly !== "") qs.set("homeInsMonthly", homeInsMonthly);
+  if (hoaMonthly !== "") qs.set("hoaMonthly", hoaMonthly);
+  if (pmiAnnualPct !== "") qs.set("pmiAnnualPct", pmiAnnualPct);
 
-    setQS(qs);
-  }, [
-    mode,
-    fromState,
-    toState,
-    filing,
-    salary,
-    k401Pct,
-    fromCityId,
-    toCityId,
-    fromCityOther,
-    toCityOther,
-    homePrice,
-    downPct,
-    ratePct,
-    termYears,
-    propertyTaxPct,
-    homeInsMonthly,
-    hoaMonthly,
-    pmiAnnualPct,
-    rentMonthly,
-    rentersInsMonthly,
-  ]);
+  // Rent
+  if (rentMonthly !== "") qs.set("rentMonthly", rentMonthly);
+  if (rentersInsMonthly !== "") qs.set("rentersInsMonthly", rentersInsMonthly);
+
+  setQS(qs);
+}, [
+  mode,
+  fromState,
+  toState,
+  filing,
+  salary,
+  k401Pct,
+  fromCityId,
+  toCityId,
+  fromCityOther,
+  toCityOther,
+  homePrice,
+  downPct,
+  ratePct,
+  termYears,
+  propertyTaxPct,
+  homeInsMonthly,
+  hoaMonthly,
+  pmiAnnualPct,
+  rentMonthly,
+  rentersInsMonthly,
+]);
 
   // ===========
   // Comparable salary
