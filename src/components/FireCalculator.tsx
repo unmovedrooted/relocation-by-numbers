@@ -730,7 +730,7 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
 
           {/* State dropdown (no default) */}
           <label className="block">
-            <div className="mb-0.5 text-xs font-medium text-slate-300">State (for taxes)</div>
+            <div className="mb-0 text-[11px] leading-none font-medium text-slate-300">State (for taxes)</div>
             <select
               className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
               value={inputs.state}
@@ -748,7 +748,7 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
           </label>
 
           <label className="block">
-            <div className="mb-0.5 text-xs font-medium text-slate-300">Filing status</div>
+            <div className="mb-0 text-[11px] leading-none font-medium text-slate-300">Filing status</div>
             <select
               className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
               value={inputs.filingStatus}
