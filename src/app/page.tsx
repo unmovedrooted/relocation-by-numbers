@@ -21,11 +21,11 @@ export default function Page() {
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       {/* Page header (normalized) */}
       <header className="py-10 text-center">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-          See How Far Your Salary Goes in Another State
-        </h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 text-center">
+  See How Far Your Salary Goes in Another State
+</h1>
 
-        <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-slate-600 dark:text-slate-300">
+        <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-slate-700 dark:text-slate-300">
           Compare taxes, housing costs, and real affordability before you move.
         </p>
 
