@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.relocationbynumbers.com"),
   title: "Salary vs Cost of Living Calculator | Relocation Affordability Tool",
   description:
     "Compare take-home pay and housing affordability across all 50 states. Buy vs rent, taxes, PMI, and real relocation cost analysis.",

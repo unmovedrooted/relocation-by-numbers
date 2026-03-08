@@ -3,7 +3,7 @@ import { majorCities } from "@/lib/cities"
 
 export default function sitemap(): MetadataRoute.Sitemap {
 
-  const baseUrl = "https://relocationbynumbers.com"
+  const baseUrl = "https://www.relocationbynumbers.com"
 
   const calculators = [
     "/fire-calculator",
@@ -25,10 +25,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/best-cities-for-fire",
     "/best-states-for-fire",
   ]
-const salaryNeededPages = majorCities().map((city) => ({
-  url: `${baseUrl}/salary-needed-in/${city.id}`,
-  lastModified: new Date(),
-}))
+
+  const salaryNeededPages = majorCities().map((city) => ({
+    url: `${baseUrl}/salary-needed-in/${city.id}`,
+    lastModified: new Date(),
+  }))
 
   const cityPages = majorCities().map((city) => ({
     url: `${baseUrl}/fire-in/${city.id}`,
@@ -36,9 +37,9 @@ const salaryNeededPages = majorCities().map((city) => ({
   }))
 
   const costOfLivingPages = majorCities().map((city) => ({
-  url: `${baseUrl}/cost-of-living-in/${city.id}`,
-  lastModified: new Date(),
-}))
+    url: `${baseUrl}/cost-of-living-in/${city.id}`,
+    lastModified: new Date(),
+  }))
 
   const staticPages = [
     ...calculators,
@@ -56,5 +57,7 @@ const salaryNeededPages = majorCities().map((city) => ({
     },
     ...staticPages,
     ...cityPages,
+    ...salaryNeededPages,
+    ...costOfLivingPages,
   ]
 }
