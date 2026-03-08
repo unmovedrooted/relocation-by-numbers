@@ -1324,7 +1324,7 @@ function Field({
 
   return (
     <label className="block">
-      <div className="mb-1 text-[11px] leading-tight font-medium text-slate-300">{label}</div>
+     <div className="mb-1 text-[11px] leading-tight font-medium text-slate-300">{label}</div>
       <div className="flex items-center rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 shadow-inner transition focus-within:border-emerald-400/50 focus-within:ring-4 focus-within:ring-emerald-400/10">
         {prefix ? <span className="mr-2 text-sm text-slate-400">{prefix}</span> : null}
         <input
