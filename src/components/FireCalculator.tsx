@@ -820,14 +820,16 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
                 if (next.advanced && next.contribBrokerage === 0 && next.yearlyInvestment > 0) {
                   next.contribBrokerage = next.yearlyInvestment;
                 }
-                <div className="sm:col-start-2 -mt-1 text-xs text-slate-400">
-  Leave blank to estimate savings from after-tax income.
-</div>
+        
                 return next;
               })
             }
             prefix="$"
           />
+
+                  <div className="sm:col-start-2 -mt-1 text-xs text-slate-400">
+  Leave blank to estimate savings from after-tax income.
+</div>
 
           {inputs.advanced ? (
             <>
