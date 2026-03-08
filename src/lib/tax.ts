@@ -75,7 +75,7 @@ function ficaTax(wagesAfter401k: number, filing: FilingStatus) {
 // --- Your existing state effective bands (keep for now; upgrade later) ---
 type RateBands = Array<{ upTo: number; rate: number }>; // effective %
 
-const STATE_EFFECTIVE: Record<StateCode, RateBands> = {
+const STATE_EFFECTIVE: Partial<Record<StateCode, RateBands>> = {
   ny: [
     { upTo: 100_000, rate: 5.5 },
     { upTo: 200_000, rate: 6.3 },
