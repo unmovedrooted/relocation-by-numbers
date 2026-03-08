@@ -1310,55 +1310,38 @@ function Field({
   prefix,
   suffix,
 }: {
-  label: string
-  value: number
-  onChange: (v: number) => void
-  prefix?: string
-  suffix?: string
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  prefix?: string;
+  suffix?: string;
 }) {
-  const [raw, setRaw] = useState(String(value))
+  const [raw, setRaw] = useState(String(value));
 
   useEffect(() => {
-    setRaw(String(value))
-  }, [value])
+    setRaw(String(value));
+  }, [value]);
 
   return (
     <label className="block">
-      <div className="mb-1 text-[11px] font-medium text-slate-300">
-        {label}
-      </div>
-
-      <div className="relative flex h-11 items-center rounded-xl border border-slate-700 bg-slate-900/80 shadow-inner">
-
-        {/* Prefix column */}
-        {prefix && (
-          <div className="flex w-9 items-center justify-center text-sm text-slate-400">
-            {prefix}
-          </div>
-        )}
-
+     <div className="mb-1 text-[11px] leading-tight font-medium text-slate-300">{label}</div>
+      <div className="flex items-center rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 shadow-inner transition focus-within:border-emerald-400/50 focus-within:ring-4 focus-within:ring-emerald-400/10">
+        {prefix ? <span className="mr-2 text-sm text-slate-400">{prefix}</span> : null}
         <input
           type="text"
           inputMode="numeric"
-          className={`w-full bg-transparent text-sm text-white outline-none ${
-            prefix ? "" : "pl-3"
-          }`}
+          className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
           onBlur={() => {
-            const n = Number(raw)
-            const safe = Number.isFinite(n) ? n : 0
-            onChange(safe)
-            setRaw(String(safe))
+            const n = Number(raw);
+            const safe = Number.isFinite(n) ? n : 0;
+            onChange(safe);
+            setRaw(String(safe));
           }}
         />
-
-        {suffix && (
-          <div className="absolute right-3 text-sm text-slate-400">
-            {suffix}
-          </div>
-        )}
+        {suffix ? <span className="ml-2 text-sm text-slate-400">{suffix}</span> : null}
       </div>
     </label>
-  )
+  );
 }
