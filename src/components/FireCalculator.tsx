@@ -15,6 +15,10 @@ import { STATES, type StateCode } from "@/lib/states";
 import { findCity } from "@/lib/cities";
 import { estimateNetAnnual, effectiveTaxRatePct, type FilingStatus } from "@/lib/tax";
 
+type FireCalculatorProps = {
+  initialIncome?: number;
+};
+
 type Preset = "custom" | "lean" | "fat";
 
 function clamp(n: number, min: number, max: number) {
@@ -516,8 +520,13 @@ function downloadFireCardImage(opts: {
   a.click();
 }
 
-export default function FireCalculator() {
-  const [inputs, setInputs] = useState<Inputs>(DEFAULT_INPUTS);
+export default function FireCalculator({
+  initialIncome = 0,
+}: FireCalculatorProps) {
+const [inputs, setInputs] = useState<Inputs>(() => ({
+  ...DEFAULT_INPUTS,
+  income: initialIncome,
+}));
 
   const annualExp = useMemo(() => annualExpenses(inputs), [inputs.expensesMonthly]);
 
