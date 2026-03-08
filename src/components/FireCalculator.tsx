@@ -1036,19 +1036,24 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
               />
             ) : null}
 
-            {/* Share Result */}
+{/* Share Result */}
 <button
-  onClick={() => {
-    const text = `
-🔥 My FIRE Results
+  onClick={async () => {
+    const text = `🔥 My FIRE Results
 
 FIRE Number: ${money(result.fireNumber)}
 Years to FI: ${result.yearsToFI ?? "Not reached"}
 Age at FI: ${fiAge ?? "—"}
 
-Calculated on RelocationByNumbers.com
-`;
-    navigator.clipboard.writeText(text);
+Calculated on https://RelocationByNumbers.com`;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      alert("Result copied! Paste it anywhere.");
+    } catch (err) {
+      console.error("Clipboard failed", err);
+      alert("Copy failed. Your browser may block clipboard access.");
+    }
   }}
   className="relative z-50 w-full rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm font-semibold text-emerald-100 hover:bg-emerald-400/20 transition"
 >
