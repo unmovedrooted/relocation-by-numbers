@@ -797,7 +797,7 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
           {/* Convenience fields (ALWAYS shown).
               In advanced mode these will auto-fill brokerage if brokerage is still 0. */}
           <Field
-            label="Current savings / investments (quick fill)"
+            label="Current savings / investments"
             value={inputs.currentPortfolio}
             onChange={(v) =>
               setInputs((s) => {
@@ -812,7 +812,7 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
           />
 
           <Field
-            label="Yearly investment (quick fill)"
+            label="Yearly investment (optional)"
             value={inputs.yearlyInvestment}
             onChange={(v) =>
               setInputs((s) => {
@@ -820,6 +820,9 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
                 if (next.advanced && next.contribBrokerage === 0 && next.yearlyInvestment > 0) {
                   next.contribBrokerage = next.yearlyInvestment;
                 }
+                <div className="sm:col-start-2 -mt-1 text-xs text-slate-400">
+  Leave blank to estimate savings from after-tax income.
+</div>
                 return next;
               })
             }
@@ -1045,8 +1048,23 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
                       : `${targetDelta} yrs behind`
                 }
                 helper={`Target FIRE age: ${inputs.targetFireAge}`}
+                
               />
             ) : null}
+            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+  <div className="text-sm font-semibold text-white">How we got these numbers</div>
+  <div className="mt-2 space-y-2 text-xs text-slate-400">
+    <div>
+      <span className="font-medium text-slate-200">FIRE number:</span> Annual expenses divided by your withdrawal rate.
+    </div>
+    <div>
+      <span className="font-medium text-slate-200">Years to FI:</span> Based on your current savings, contributions, expected returns, and inflation-adjusted expenses.
+    </div>
+    <div>
+      <span className="font-medium text-slate-200">Taxes:</span> If Yearly investment is blank, savings are estimated from after-tax income minus expenses.
+    </div>
+  </div>
+</div>
 
 {/* Share Result */}
 <button
@@ -1333,11 +1351,11 @@ function Field({
   prefix?: string;
   suffix?: string;
 }) {
-  const [raw, setRaw] = useState(String(value));
+const [raw, setRaw] = useState(value === 0 ? "" : String(value));
 
-  useEffect(() => {
-    setRaw(String(value));
-  }, [value]);
+useEffect(() => {
+  setRaw(value === 0 ? "" : String(value));
+}, [value]);
 
   return (
     <label className="block">
@@ -1350,12 +1368,13 @@ function Field({
           className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
-          onBlur={() => {
-            const n = Number(raw);
-            const safe = Number.isFinite(n) ? n : 0;
-            onChange(safe);
-            setRaw(String(safe));
-          }}
+         onBlur={() => {
+  const trimmed = raw.trim();
+  const n = trimmed === "" ? 0 : Number(trimmed);
+  const safe = Number.isFinite(n) ? n : 0;
+  onChange(safe);
+  setRaw(safe === 0 ? "" : String(safe));
+}}
         />
         {suffix ? <span className="ml-2 text-sm text-slate-400">{suffix}</span> : null}
       </div>
