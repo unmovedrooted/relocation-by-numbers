@@ -714,8 +714,7 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
             </button>
           </div>
         </div>
-
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <Field
             label="Current age"
             value={inputs.age}
@@ -730,33 +729,37 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
           />
 
           {/* State dropdown (no default) */}
-      <label className="block">
-  <div className="mb-1 text-xs font-medium text-slate-300">State (for taxes)</div>
-  <select
-    className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
-    value={inputs.state}
-    onChange={(e) => setInputs((s) => ({ ...s, state: e.target.value as StateChoice }))}
-  >
-    <option value="" disabled className="bg-slate-900 text-white">
-      Select a state…
-    </option>
-    {STATES.map((st) => (
-      <option key={st.code} value={st.code} className="bg-slate-900 text-white">
-        {st.name}
-      </option>
-    ))}
-  </select>
-</label>
+          <label className="block">
+            <div className="mb-0.5 text-xs font-medium text-slate-300">State (for taxes)</div>
+            <select
+              className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
+              value={inputs.state}
+              onChange={(e) => setInputs((s) => ({ ...s, state: e.target.value as StateChoice }))}
+            >
+              <option value="" disabled className="bg-slate-900 text-white">
+                Select a state…
+              </option>
+              {STATES.map((st) => (
+                <option key={st.code} value={st.code} className="bg-slate-900 text-white">
+                  {st.name}
+                </option>
+              ))}
+            </select>
+          </label>
 
           <label className="block">
-            <div className="mb-1 text-xs font-medium text-slate-300">Filing status</div>
+            <div className="mb-0.5 text-xs font-medium text-slate-300">Filing status</div>
             <select
               className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
               value={inputs.filingStatus}
               onChange={(e) => setInputs((s) => ({ ...s, filingStatus: e.target.value as FilingStatus }))}
             >
-              <option value="single">Single</option>
-              <option value="married">Married</option>
+              <option value="single" className="bg-slate-900 text-white">
+                Single
+              </option>
+              <option value="married" className="bg-slate-900 text-white">
+                Married
+              </option>
             </select>
           </label>
 
@@ -774,7 +777,7 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
             prefix="$"
           />
 
-          <div className="-mt-2 text-xs text-slate-400 sm:col-start-2">
+          <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">
             That’s about{" "}
             <span className="font-semibold text-slate-200">{money(annualExp, 0)}</span> / year
           </div>
@@ -787,7 +790,6 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
             onChange={(v) =>
               setInputs((s) => {
                 const next = { ...s, currentPortfolio: clamp(v, 0, 20_000_000) };
-                // Auto-fill brokerage balance only if advanced AND brokerage is empty
                 if (next.advanced && next.balBrokerage === 0 && next.currentPortfolio > 0) {
                   next.balBrokerage = next.currentPortfolio;
                 }
@@ -803,7 +805,6 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
             onChange={(v) =>
               setInputs((s) => {
                 const next = { ...s, yearlyInvestment: clamp(v, 0, 5_000_000) };
-                // Auto-fill brokerage contrib only if advanced AND brokerage contrib is empty
                 if (next.advanced && next.contribBrokerage === 0 && next.yearlyInvestment > 0) {
                   next.contribBrokerage = next.yearlyInvestment;
                 }
@@ -813,7 +814,6 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
             prefix="$"
           />
 
-          {/* Advanced accounts */}
           {inputs.advanced ? (
             <>
               <div className="sm:col-span-2 mt-2 text-xs font-semibold tracking-widest text-slate-300/80">
@@ -876,7 +876,6 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
             </>
           ) : null}
 
-          {/* Assumptions */}
           <Field
             label="Expected annual return (%) — Phase 1"
             value={inputs.annualReturnPct}
@@ -891,7 +890,6 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
             suffix="%"
           />
 
-          {/* NEW: Inflation & salary growth */}
           <Field
             label="Inflation (%) — expenses grow"
             value={inputs.inflationPct}
@@ -906,7 +904,6 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
             suffix="%"
           />
 
-          {/* NEW: Phase 2 */}
           <Field
             label="Phase 2 starts after (years)"
             value={inputs.phase2StartsYear}
@@ -926,7 +923,6 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
             onChange={(v) => setInputs((s) => ({ ...s, maxYears: clamp(v, 1, 80) }))}
           />
 
-          {/* Move Impact controls */}
           <div className="sm:col-span-2 mt-2 rounded-xl border border-white/10 bg-black/20 p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -1328,7 +1324,7 @@ function Field({
 
   return (
     <label className="block">
-      <div className="mb-1 text-xs font-medium text-slate-300">{label}</div>
+      <div className="mb-0.5 text-xs font-medium text-slate-300">{label}</div>
       <div className="flex items-center rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 shadow-inner transition focus-within:border-emerald-400/50 focus-within:ring-4 focus-within:ring-emerald-400/10">
         {prefix ? <span className="mr-2 text-sm text-slate-400">{prefix}</span> : null}
         <input
