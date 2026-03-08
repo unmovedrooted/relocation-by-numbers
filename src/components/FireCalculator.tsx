@@ -1324,9 +1324,16 @@ function Field({
 
   return (
     <label className="block">
-     <div className="mb-1 text-[11px] leading-tight font-medium text-slate-300">{label}</div>
-      <div className="flex items-center rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 shadow-inner transition focus-within:border-emerald-400/50 focus-within:ring-4 focus-within:ring-emerald-400/10">
-        {prefix ? <span className="mr-2 text-sm text-slate-400">{prefix}</span> : null}
+      {/* 1. Remove mb-1 and add px-0.5 to align label text with the box edge better */}
+      <div className="mb-1.5 px-0.5 text-[11px] leading-tight font-medium text-slate-300">
+        {label}
+      </div>
+      
+      {/* 2. Standardize height (h-11) and padding */}
+      <div className="flex h-11 items-center rounded-xl border border-slate-700 bg-slate-900/80 px-3 shadow-inner transition focus-within:border-emerald-400/50 focus-within:ring-4 focus-within:ring-emerald-400/10">
+        {prefix ? (
+          <span className="mr-1.5 text-sm text-slate-400">{prefix}</span>
+        ) : null}
         <input
           type="text"
           inputMode="numeric"
@@ -1334,13 +1341,13 @@ function Field({
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
           onBlur={() => {
-            const n = Number(raw);
+            const n = Number(raw.replace(/[^0-9.-]/g, '')); // Clean non-numeric input
             const safe = Number.isFinite(n) ? n : 0;
             onChange(safe);
             setRaw(String(safe));
           }}
         />
-        {suffix ? <span className="ml-2 text-sm text-slate-400">{suffix}</span> : null}
+        {suffix ? <span className="ml-1.5 text-sm text-slate-400">{suffix}</span> : null}
       </div>
     </label>
   );
