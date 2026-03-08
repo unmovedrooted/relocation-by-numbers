@@ -670,7 +670,7 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
   return (
     <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
       {/* Inputs */}
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
+     <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="text-sm font-semibold tracking-tight">Inputs</div>
@@ -730,23 +730,17 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
           />
 
           {/* State dropdown (no default) */}
-          <label className="block">
-            <div className="mb-1 text-xs font-medium text-slate-300">State (for taxes)</div>
-            <select
-              className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none"
-              value={inputs.state}
-              onChange={(e) => setInputs((s) => ({ ...s, state: e.target.value as StateChoice }))}
-            >
-              <option value="" disabled>
-                Select a state…
-              </option>
-              {STATES.map((st) => (
-                <option key={st.code} value={st.code}>
-                  {st.name}
-                </option>
-              ))}
-            </select>
-          </label>
+         <label className="block">
+  <div className="mb-1 text-xs font-medium text-slate-300">Filing status</div>
+  <select
+    className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
+    value={inputs.filingStatus}
+    onChange={(e) => setInputs((s) => ({ ...s, filingStatus: e.target.value as FilingStatus }))}
+  >
+    <option value="single" className="bg-slate-900 text-white">Single</option>
+    <option value="married" className="bg-slate-900 text-white">Married</option>
+  </select>
+</label>
 
           <label className="block">
             <div className="mb-1 text-xs font-medium text-slate-300">Filing status</div>
@@ -999,7 +993,7 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
 
       {/* Results */}
       <div className="space-y-4">
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-5">
+        <div className="rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 to-slate-950/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
           <div className="text-sm font-semibold">Results</div>
 
           <div className="mt-4 grid gap-3">
@@ -1329,12 +1323,12 @@ function Field({
   return (
     <label className="block">
       <div className="mb-1 text-xs font-medium text-slate-300">{label}</div>
-      <div className="flex items-center rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+      <div className="flex items-center rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 shadow-inner transition focus-within:border-emerald-400/50 focus-within:ring-4 focus-within:ring-emerald-400/10">
         {prefix ? <span className="mr-2 text-sm text-slate-400">{prefix}</span> : null}
         <input
           type="text"
           inputMode="numeric"
-          className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-600"
+          className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
           onBlur={() => {
