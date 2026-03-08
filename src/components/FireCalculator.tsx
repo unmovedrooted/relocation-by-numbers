@@ -730,22 +730,28 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
           />
 
           {/* State dropdown (no default) */}
-         <label className="block">
-  <div className="mb-1 text-xs font-medium text-slate-300">Filing status</div>
+      <label className="block">
+  <div className="mb-1 text-xs font-medium text-slate-300">State (for taxes)</div>
   <select
     className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
-    value={inputs.filingStatus}
-    onChange={(e) => setInputs((s) => ({ ...s, filingStatus: e.target.value as FilingStatus }))}
+    value={inputs.state}
+    onChange={(e) => setInputs((s) => ({ ...s, state: e.target.value as StateChoice }))}
   >
-    <option value="single" className="bg-slate-900 text-white">Single</option>
-    <option value="married" className="bg-slate-900 text-white">Married</option>
+    <option value="" disabled className="bg-slate-900 text-white">
+      Select a state…
+    </option>
+    {STATES.map((st) => (
+      <option key={st.code} value={st.code} className="bg-slate-900 text-white">
+        {st.name}
+      </option>
+    ))}
   </select>
 </label>
 
           <label className="block">
             <div className="mb-1 text-xs font-medium text-slate-300">Filing status</div>
             <select
-              className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none"
+              className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
               value={inputs.filingStatus}
               onChange={(e) => setInputs((s) => ({ ...s, filingStatus: e.target.value as FilingStatus }))}
             >
