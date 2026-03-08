@@ -116,7 +116,61 @@ export default function Page() {
             </div>
           </div>
         </section>
+
+                {/* SEO internal links */}
+        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
+          <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Popular relocation comparisons
+          </h2>
+
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+            <Link href="/compare/nyc-ny/raleigh-nc" className="text-blue-600 hover:underline dark:text-blue-400">
+              Moving from NYC to Raleigh
+            </Link>
+            <Link href="/compare/la-ca/austin-tx" className="text-blue-600 hover:underline dark:text-blue-400">
+              Moving from Los Angeles to Austin
+            </Link>
+            <Link href="/compare/seattle-wa/denver-co" className="text-blue-600 hover:underline dark:text-blue-400">
+              Moving from Seattle to Denver
+            </Link>
+            <Link href="/compare/boston-ma/miami-fl" className="text-blue-600 hover:underline dark:text-blue-400">
+              Moving from Boston to Miami
+            </Link>
+            <Link href="/compare/sf-ca/charlotte-nc" className="text-blue-600 hover:underline dark:text-blue-400">
+              Moving from San Francisco to Charlotte
+            </Link>
+            <Link href="/compare/chicago-il/dallas-tx" className="text-blue-600 hover:underline dark:text-blue-400">
+              Moving from Chicago to Dallas
+            </Link>
+          </div>
+        </section>
+
+        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
+          <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Financial Independence Tools
+          </h2>
+
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+            <Link href="/fire-calculator" className="text-blue-600 hover:underline dark:text-blue-400">
+              FIRE calculator
+            </Link>
+            <Link href="/fire-with-100k-salary" className="text-blue-600 hover:underline dark:text-blue-400">
+              FIRE with 100k salary
+            </Link>
+            <Link href="/fire-with-150k-salary" className="text-blue-600 hover:underline dark:text-blue-400">
+              FIRE with 150k salary
+            </Link>
+            <Link href="/best-cities-for-fire" className="text-blue-600 hover:underline dark:text-blue-400">
+              Best cities for FIRE
+            </Link>
+            <Link href="/best-states-for-fire" className="text-blue-600 hover:underline dark:text-blue-400">
+              Best states for FIRE
+            </Link>
+          </div>
+        </section>
       </section>
     </main>
+
+    
   );
 }
