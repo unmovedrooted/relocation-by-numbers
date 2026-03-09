@@ -1229,13 +1229,21 @@ const estHealthcare = useMemo(() => {
 
 </div>
 
-                  <button
-                    type="button"
-                    onClick={() => navigator.clipboard.writeText(window.location.href)}
-                    className="text-sm font-semibold text-slate-900 underline underline-offset-4"
-                  >
-                    Copy share link
-                  </button>
+                 <button
+  type="button"
+  onClick={async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      alert("Share link copied!");
+    } catch (err) {
+      console.error(err);
+      alert("Unable to copy link. Please copy it from the address bar.");
+    }
+  }}
+  className="text-sm font-semibold text-slate-900 underline underline-offset-4"
+>
+  Copy share link
+</button>
 
                   {isPremiumState && (
                     <AffiliateCard
