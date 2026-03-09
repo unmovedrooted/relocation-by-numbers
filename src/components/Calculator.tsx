@@ -1163,6 +1163,72 @@ const estHealthcare = useMemo(() => {
                       : `Next step: compare rates and listings in ${targetCityLabel} before making the move.`}
                   </p>
 
+                  <div className="mt-3 space-y-2">
+
+  {mode === "rent" && (
+    <>
+      <a
+        href="https://www.apartments.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block rounded-xl border border-slate-200 p-3 text-sm font-semibold hover:bg-slate-50"
+      >
+        Browse rentals on Apartments.com →
+      </a>
+
+      <a
+        href="https://www.zillow.com/homes/for_rent/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block rounded-xl border border-slate-200 p-3 text-sm font-semibold hover:bg-slate-50"
+      >
+        Search Zillow Rentals →
+      </a>
+
+      <a
+        href="https://www.rent.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block rounded-xl border border-slate-200 p-3 text-sm font-semibold hover:bg-slate-50"
+      >
+        Explore listings on Rent.com →
+      </a>
+    </>
+  )}
+
+  {mode === "buy" && (
+    <>
+      <a
+        href="https://www.zillow.com/homes/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block rounded-xl border border-slate-200 p-3 text-sm font-semibold hover:bg-slate-50"
+      >
+        Browse homes on Zillow →
+      </a>
+
+      <a
+        href="https://www.redfin.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block rounded-xl border border-slate-200 p-3 text-sm font-semibold hover:bg-slate-50"
+      >
+        Search homes on Redfin →
+      </a>
+
+      <a
+        href="https://www.nerdwallet.com/mortgages/mortgage-rates"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block rounded-xl border border-slate-200 p-3 text-sm font-semibold hover:bg-slate-50"
+      >
+        Check current mortgage rates →
+      </a>
+    </>
+  )}
+
+</div>
+
                   <button
                     type="button"
                     onClick={() => navigator.clipboard.writeText(window.location.href)}
