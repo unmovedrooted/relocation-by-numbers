@@ -1020,6 +1020,9 @@ export default function Calculator({
                   {Number.isFinite(results.pct) ? results.pct.toFixed(1) + "%" : "—"}
                 </span>
               </div>
+              <div className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500">
+  Results are estimates only. No information entered is stored or shared.
+</div>
             </div>
           </div>
 
@@ -1104,17 +1107,6 @@ export default function Calculator({
                 </div>
               )}
 
-              {fromCityId && toCityId && (
-                <div className="pt-4">
-                  <Link
-                    href={`/compare/${fromCityId}/${toCityId}?from=${fromState}&to=${toState}&mode=${mode}&filing=${filing}&fromCity=${fromCityId}&toCity=${toCityId}`}
-                    className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-                  >
-                    Compare {currentCityLabel} vs {targetCityLabel}
-                  </Link>
-                </div>
-              )}
-
               <div className="text-xs text-slate-500">
                 Tip: Your URL updates as you type — copy the page link to share this scenario.
               </div>
@@ -1128,9 +1120,6 @@ export default function Calculator({
             </div>
           )}
         </div>
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-500">
-              Results are estimates only. No information entered is stored or shared.
-          </div>
       </div>
     </div>
   );
