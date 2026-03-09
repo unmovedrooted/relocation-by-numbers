@@ -1128,6 +1128,9 @@ export default function Calculator({
             </div>
           )}
         </div>
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-500">
+              Results are estimates only. No information entered is stored or shared.
+          </div>
       </div>
     </div>
   );
