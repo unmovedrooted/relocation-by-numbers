@@ -379,6 +379,33 @@ export default function Calculator({
   };
 }, [homePrice, downPct, ratePct, termYears, propertyTaxPct, homeInsMonthly, hoaMonthly, pmiAnnualPct]);
 
+// ===========
+// Estimated Living Costs
+// ===========
+const estGroceries = useMemo(() => {
+  if (!fromCity || !toCity || !hasCOL(fromCity) || !hasCOL(toCity)) return 0;
+  const base = 600;
+  return base * (toCity.col.groceries / fromCity.col.groceries);
+}, [fromCity, toCity]);
+
+const estUtilities = useMemo(() => {
+  if (!fromCity || !toCity || !hasCOL(fromCity) || !hasCOL(toCity)) return 0;
+  const base = 250;
+  return base * (toCity.col.utilities / fromCity.col.utilities);
+}, [fromCity, toCity]);
+
+const estTransport = useMemo(() => {
+  if (!fromCity || !toCity || !hasCOL(fromCity) || !hasCOL(toCity)) return 0;
+  const base = 300;
+  return base * (toCity.col.transport / fromCity.col.transport);
+}, [fromCity, toCity]);
+
+const estHealthcare = useMemo(() => {
+  if (!fromCity || !toCity || !hasCOL(fromCity) || !hasCOL(toCity)) return 0;
+  const base = 200;
+  return base * (toCity.col.healthcare / fromCity.col.healthcare);
+}, [fromCity, toCity]);
+
   // ===========
   // Results
   // ===========
@@ -805,136 +832,184 @@ export default function Calculator({
           </div>
 
           {mode === "buy" && (
-            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-              <div className="mb-3 text-sm font-semibold">Buy Inputs</div>
+  <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+    <div className="mb-3 text-sm font-semibold">Buy Inputs</div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="block text-sm sm:col-span-2">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Home price</div>
-                  <input
-                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
-                    type="number"
-                    value={homePrice}
-                    onChange={(e) => setHomePrice(e.target.value)}
-                    placeholder=" "
-                  />
-                </label>
+    <div className="grid gap-3 sm:grid-cols-2">
+      <label className="block text-sm sm:col-span-2">
+        <div className="mb-1 text-xs font-medium text-slate-600">Home price</div>
+        <input
+          className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+          type="number"
+          value={homePrice}
+          onChange={(e) => setHomePrice(e.target.value)}
+          placeholder=" "
+        />
+      </label>
 
-                <label className="block text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Down payment %</div>
-                  <input
-                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
-                    type="number"
-                    value={downPct}
-                    onChange={(e) => setDownPct(e.target.value)}
-                    placeholder=" "
-                  />
-                </label>
+      <label className="block text-sm">
+        <div className="mb-1 text-xs font-medium text-slate-600">Down payment %</div>
+        <input
+          className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+          type="number"
+          value={downPct}
+          onChange={(e) => setDownPct(e.target.value)}
+          placeholder=" "
+        />
+      </label>
 
-                <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Interest rate %</div>
-                  <input
-                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
-                    type="number"
-                    step="0.01"
-                    value={ratePct}
-                    onChange={(e) => setRatePct(e.target.value)}
-                    placeholder=" "
-                  />
-                </label>
+      <label className="text-sm">
+        <div className="mb-1 text-xs font-medium text-slate-600">Interest rate %</div>
+        <input
+          className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+          type="number"
+          step="0.01"
+          value={ratePct}
+          onChange={(e) => setRatePct(e.target.value)}
+          placeholder=" "
+        />
+      </label>
 
-                <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Term (years)</div>
-                  <input
-                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
-                    type="number"
-                    value={termYears}
-                    onChange={(e) => setTermYears(e.target.value)}
-                    placeholder=" "
-                  />
-                </label>
+      <label className="text-sm">
+        <div className="mb-1 text-xs font-medium text-slate-600">Term (years)</div>
+        <input
+          className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+          type="number"
+          value={termYears}
+          onChange={(e) => setTermYears(e.target.value)}
+          placeholder=" "
+        />
+      </label>
 
-                <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Property tax % (annual)</div>
-                  <input
-                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
-                    type="number"
-                    step="0.01"
-                    value={propertyTaxPct}
-                    onChange={(e) => setPropertyTaxPct(e.target.value)}
-                    placeholder=" "
-                  />
-                </label>
+      <label className="text-sm">
+        <div className="mb-1 text-xs font-medium text-slate-600">Property tax % (annual)</div>
+        <input
+          className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+          type="number"
+          step="0.01"
+          value={propertyTaxPct}
+          onChange={(e) => setPropertyTaxPct(e.target.value)}
+          placeholder=" "
+        />
+      </label>
 
-                <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Home insurance (monthly)</div>
-                  <input
-                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
-                    type="number"
-                    value={homeInsMonthly}
-                    onChange={(e) => setHomeInsMonthly(e.target.value)}
-                    placeholder=" "
-                  />
-                </label>
+      <label className="text-sm">
+        <div className="mb-1 text-xs font-medium text-slate-600">Home insurance (monthly)</div>
+        <input
+          className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+          type="number"
+          value={homeInsMonthly}
+          onChange={(e) => setHomeInsMonthly(e.target.value)}
+          placeholder=" "
+        />
+      </label>
 
-                <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">HOA (monthly)</div>
-                  <input
-                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
-                    type="number"
-                    value={hoaMonthly}
-                    onChange={(e) => setHoaMonthly(e.target.value)}
-                    placeholder=" "
-                  />
-                </label>
+      <label className="text-sm">
+        <div className="mb-1 text-xs font-medium text-slate-600">HOA (monthly)</div>
+        <input
+          className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+          type="number"
+          value={hoaMonthly}
+          onChange={(e) => setHoaMonthly(e.target.value)}
+          placeholder=" "
+        />
+      </label>
 
-                <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">
-                    PMI % (annual, if down &lt; 20%)
-                  </div>
-                  <input
-                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
-                    type="number"
-                    step="0.01"
-                    value={pmiAnnualPct}
-                    onChange={(e) => setPmiAnnualPct(e.target.value)}
-                    placeholder=" "
-                  />
-                </label>
-              </div>
-            </div>
-          )}
-
-          {mode === "rent" && (
-            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-              <div className="mb-3 text-sm font-semibold">Rent Inputs</div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="text-sm sm:col-span-2">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Monthly rent</div>
-                  <input
-                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
-                    type="number"
-                    value={rentMonthly}
-                    onChange={(e) => setRentMonthly(e.target.value)}
-                    placeholder=" "
-                  />
-                </label>
-
-                <label className="text-sm sm:col-span-2">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Renter’s insurance (monthly)</div>
-                  <input
-                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
-                    type="number"
-                    value={rentersInsMonthly}
-                    onChange={(e) => setRentersInsMonthly(e.target.value)}
-                    placeholder=" "
-                  />
-                </label>
-              </div>
-            </div>
-          )}
+      <label className="text-sm">
+        <div className="mb-1 text-xs font-medium text-slate-600">
+          PMI % (annual, if down &lt; 20%)
         </div>
+        <input
+          className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+          type="number"
+          step="0.01"
+          value={pmiAnnualPct}
+          onChange={(e) => setPmiAnnualPct(e.target.value)}
+          placeholder=" "
+        />
+      </label>
+    </div>
+
+    <div className="mt-4 border-t border-slate-200 pt-4">
+      <div className="mb-2 text-sm font-semibold">Estimated Living Costs</div>
+
+      <div className="grid gap-2 text-sm text-slate-600">
+        <div>
+          Groceries: <span className="font-semibold">{money(estGroceries)}</span>
+        </div>
+        <div>
+          Utilities: <span className="font-semibold">{money(estUtilities)}</span>
+        </div>
+        <div>
+          Transportation: <span className="font-semibold">{money(estTransport)}</span>
+        </div>
+        <div>
+          Healthcare: <span className="font-semibold">{money(estHealthcare)}</span>
+        </div>
+      </div>
+
+      <div className="mt-2 text-xs text-slate-500">
+        Estimated costs adjust automatically based on the selected city.
+      </div>
+    </div>
+  </div>
+)}
+
+         {mode === "rent" && (
+  <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+    <div className="mb-3 text-sm font-semibold">Rent Inputs</div>
+
+    <div className="grid gap-3 sm:grid-cols-2">
+      <label className="text-sm sm:col-span-2">
+        <div className="mb-1 text-xs font-medium text-slate-600">Monthly rent</div>
+        <input
+          className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+          type="number"
+          value={rentMonthly}
+          onChange={(e) => setRentMonthly(e.target.value)}
+          placeholder=" "
+        />
+      </label>
+
+      <label className="text-sm sm:col-span-2">
+        <div className="mb-1 text-xs font-medium text-slate-600">Renter’s insurance (monthly)</div>
+        <input
+          className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+          type="number"
+          value={rentersInsMonthly}
+          onChange={(e) => setRentersInsMonthly(e.target.value)}
+          placeholder=" "
+        />
+      </label>
+    </div>
+
+    <div className="mt-4 border-t border-slate-200 pt-4">
+      <div className="mb-2 text-sm font-semibold">Estimated Living Costs</div>
+
+      <div className="grid gap-2 text-sm text-slate-600">
+        <div>
+          Groceries: <span className="font-semibold">{money(estGroceries)}</span>
+        </div>
+        <div>
+          Utilities: <span className="font-semibold">{money(estUtilities)}</span>
+        </div>
+        <div>
+          Transportation: <span className="font-semibold">{money(estTransport)}</span>
+        </div>
+        <div>
+          Healthcare: <span className="font-semibold">{money(estHealthcare)}</span>
+        </div>
+      </div>
+
+      <div className="mt-2 text-xs text-slate-500">
+        Estimated costs adjust automatically based on the selected city.
+      </div>
+    </div>
+  </div>
+)}
+        </div>
+
+        
 
         {/* RESULTS */}
         <div className="space-y-3">
