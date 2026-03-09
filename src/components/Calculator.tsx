@@ -1023,6 +1023,10 @@ export default function Calculator({
               <div className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500">
   Results are estimates only. No information entered is stored or shared.
 </div>
+
+<div className="text-xs text-slate-500">
+                Tip: Your URL updates as you type — copy the page link to share this scenario.
+              </div>
             </div>
           </div>
 
@@ -1107,9 +1111,7 @@ export default function Calculator({
                 </div>
               )}
 
-              <div className="text-xs text-slate-500">
-                Tip: Your URL updates as you type — copy the page link to share this scenario.
-              </div>
+              
             </div>
           )}
 
