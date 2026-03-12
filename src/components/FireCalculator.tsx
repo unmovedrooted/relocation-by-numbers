@@ -1011,55 +1011,71 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
         </div>
       </div>
 
-      {/* Results */}
-      <div className="space-y-4">
-        <div className="rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 to-slate-950/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
-         <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-  Your FIRE roadmap
-</h2>
 
-<p className="mb-4 mt-2 text-sm leading-6 text-slate-600 sm:text-base">
-  {result.yearsToFI === null || fiAge === null ? (
-    <>At your current pace, financial independence is not projected within {inputs.maxYears} years.</>
-  ) : (
-    <>
-      At your current pace, you’re projected to reach financial independence in{" "}
-      <strong>{fiYear}</strong> at age <strong>{fiAge}</strong>.
-    </>
-  )}
-</p>
+{/* Results */}
+<div className="space-y-4">
+  <div className="rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 to-slate-950/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+    <h2 className="text-2xl font-bold tracking-tight text-white">
+      Your FIRE roadmap
+    </h2>
 
-<Stat
-  label="Target FIRE Number"
-  value={Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"}
-  helper={`Inflation-adjusted expenses ÷ ${inputs.withdrawalRatePct}%`}
-/>
+    <p className="mt-2 text-sm leading-6 text-slate-300 sm:text-base">
+      {inputs.age <= 0 || inputs.income <= 0 || inputs.expensesMonthly <= 0 ? (
+        <>Enter your age, income, and monthly spending to see your FIRE roadmap.</>
+      ) : result.yearsToFI === null || fiAge === null ? (
+        <>At your current pace, financial independence is not projected within {inputs.maxYears} years.</>
+      ) : (
+        <>
+          At your current pace, you’re projected to reach financial independence in{" "}
+          <strong>{fiYear}</strong> at age <strong>{fiAge}</strong>.
+        </>
+      )}
+    </p>
 
-<Stat
-  label="Years Until FIRE"
-  value={result.yearsToFI === null ? "Not reached" : `${result.yearsToFI} years`}
-  helper={
-    result.yearsToFI === null
-      ? `Not hit within ${inputs.maxYears} years`
-      : `Projected FI year: ${fiYear}`
-  }
-/>
+    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <Stat
+        label="Target FIRE Number"
+        value={Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"}
+        helper={`Inflation-adjusted expenses ÷ ${inputs.withdrawalRatePct}%`}
+      />
 
-<Stat label="Estimated FIRE Age" value={fiAge === null ? "—" : `${fiAge}`} helper="Approximate" />
+      <Stat
+        label="Years Until FIRE"
+        value={result.yearsToFI === null ? "Not reached" : `${result.yearsToFI} years`}
+        helper={
+          result.yearsToFI === null
+            ? `Not hit within ${inputs.maxYears} years`
+            : `Projected FI year: ${fiYear}`
+        }
+      />
 
-{inputs.advanced ? (
-  <Stat
-    label="Target Tracking"
-    value={
-      result.yearsToFI === null || targetDelta === null
-        ? "—"
-        : targetDelta <= 0
-          ? `${Math.abs(targetDelta)} yrs ahead`
-          : `${targetDelta} yrs behind`
-    }
-    helper={`Target FIRE age: ${inputs.targetFireAge}`}
-  />
-) : null}
+      <Stat
+        label="Estimated FIRE Age"
+        value={fiAge === null ? "—" : `${fiAge}`}
+        helper="Approximate"
+      />
+
+      {inputs.advanced ? (
+        <Stat
+          label="Target Tracking"
+          value={
+            result.yearsToFI === null || targetDelta === null
+              ? "—"
+              : targetDelta <= 0
+                ? `${Math.abs(targetDelta)} yrs ahead`
+                : `${targetDelta} yrs behind`
+          }
+          helper={`Target FIRE age: ${inputs.targetFireAge}`}
+        />
+      ) : (
+        <Stat
+          label="Progress to FIRE"
+          value={`${Math.round(progress.pct * 100)}%`}
+          helper={`${money(progress.current, 0)} saved of ${Number.isFinite(progress.target) ? money(progress.target, 0) : "—"}`}
+        />
+      )}
+    </div>
+  </div>
 
 {/* Share Result */}
 <button
@@ -1324,7 +1340,6 @@ Share My FIRE Result
 
 
           </div>
-        </div>
       
     </section>
   );
@@ -1332,17 +1347,17 @@ Share My FIRE Result
 
 function Stat({ label, value, helper }: { label: string; value: ReactNode; helper?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
         {label}
       </div>
 
-      <div className="mt-2 text-2xl font-semibold tracking-tight text-white">
+      <div className="mt-3 text-xl font-semibold tracking-tight text-white sm:text-2xl">
         {value}
       </div>
 
       {helper ? (
-        <div className="mt-2 text-xs leading-5 text-slate-400">
+        <div className="mt-3 text-xs leading-5 text-slate-400">
           {helper}
         </div>
       ) : null}
