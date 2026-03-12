@@ -21,16 +21,35 @@ export default function Page() {
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       {/* Page header (normalized) */}
       <header className="py-10 text-center">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 text-center">
-  See How Far Your Salary Goes in Another State
+   <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+  See how taxes, expenses, and moving cities change your FIRE date
 </h1>
 
-   <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-gray-900">
-  Compare taxes, housing costs, and real affordability before you move.
+<p className="mt-3 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">
+  Your FIRE date can change depending on where you live. See by how much.
 </p>
-
         <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-blue-600/80" />
       </header>
+
+      {/* Add the How it works block here */}
+
+  <div className="mt-4 max-w-3xl rounded-2xl border border-slate-200 bg-slate-50 p-5">
+    <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+      How it works
+    </h2>
+
+    <p className="mt-3 text-sm leading-6 text-slate-700 sm:text-base">
+      Your FIRE number is based on a simple idea: <strong>how much you spend each year, divided by your withdrawal rate</strong>. But that target is not fixed—it changes with your location.
+    </p>
+
+    <p className="mt-3 text-sm leading-6 text-slate-700 sm:text-base">
+      Your <strong>state shapes your taxes</strong>. Your <strong>city shapes your spending</strong>. Together, they shape <strong>how quickly you can build wealth</strong>.
+    </p>
+
+    <p className="mt-3 text-sm leading-6 text-slate-700 sm:text-base">
+      This calculator estimates <strong>after-tax income by state</strong>, accounts for <strong>inflation and salary growth</strong>, and lets you compare your <strong>FIRE timeline across cities</strong>. The <strong>Move Impact</strong> section highlights how relocating could move your FIRE date closer.
+    </p>
+  </div>
 
       {/* Main content container (consistent rhythm) */}
       <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-12 space-y-10">
