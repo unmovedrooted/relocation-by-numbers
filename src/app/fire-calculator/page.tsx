@@ -22,8 +22,8 @@ export default function FireCalculatorPage() {
   See how taxes, expenses, and moving cities change your FIRE date
 </h1>
 
-<p className="mt-3 max-w-4xl text-base leading-7 text-slate-200 sm:text-lg">
-  Compare your FIRE timeline across states and cities using after-tax income, spending, and investing assumptions.
+<p className="mt-3 max-w-4xl text-base leading-7 text-slate-300 sm:text-lg">
+  Compare how location changes your FIRE timeline.
 </p>
 <div className="mt-6 max-w-4xl">
   <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-200">
