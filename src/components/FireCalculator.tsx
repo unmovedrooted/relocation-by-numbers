@@ -679,17 +679,19 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
     });
   }, [inputs, netAnnual]);
 
+  const hasCoreInputs = inputs.age > 0 && inputs.income > 0 && inputs.expensesMonthly > 0;
+
   return (
     <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
       {/* Inputs */}
      <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="text-sm font-semibold tracking-tight">Inputs</div>
-            <div className="text-xs text-slate-300">
-              Use after-tax income if you want the cleanest “years to FI” estimate.
-            </div>
-          </div>
+
+
+         <div className="text-sm font-semibold tracking-tight text-white">Calculator inputs</div>
+<div className="text-xs leading-5 text-slate-300">
+  Enter your income, spending, and investing assumptions to estimate your path to financial independence.
+</div>
 
           <div className="flex flex-wrap gap-2">
 
