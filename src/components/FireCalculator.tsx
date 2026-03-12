@@ -1036,7 +1036,7 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
 />
 
 <Stat
-  label="Years Until FI"
+  label="Years Until FIRE"
   value={result.yearsToFI === null ? "Not reached" : `${result.yearsToFI} years`}
   helper={
     result.yearsToFI === null
@@ -1045,11 +1045,7 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
   }
 />
 
-<Stat
-  label="Estimated FIRE Age"
-  value={fiAge === null ? "—" : `${fiAge}`}
-  helper="Approximate"
-/>
+<Stat label="Estimated FIRE Age" value={fiAge === null ? "—" : `${fiAge}`} helper="Approximate" />
 
 {inputs.advanced ? (
   <Stat
