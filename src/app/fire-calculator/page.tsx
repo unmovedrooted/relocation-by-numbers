@@ -25,21 +25,20 @@ export default function FireCalculatorPage() {
 <p className="mt-3 max-w-3xl text-base leading-7 text-slate-300 sm:text-lg">
   Compare your path to financial independence across states and cities using after-tax income, spending, and investing assumptions.
 </p>
-
-<div className="mt-5 max-w-3xl rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+<div className="mt-6 max-w-4xl">
   <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-200">
     How it works
   </h2>
 
-  <p className="mt-3 text-sm leading-6 text-slate-300 sm:text-base">
+  <p className="mt-3 text-sm leading-7 text-slate-300 sm:text-base">
     Your FIRE number is based on a simple idea: <strong>how much you spend each year, divided by your withdrawal rate</strong>. But that target is not fixed—it changes with your location.
   </p>
 
-  <p className="mt-3 text-sm leading-6 text-slate-300 sm:text-base">
+  <p className="mt-4 text-sm leading-7 text-slate-300 sm:text-base">
     Your <strong>state shapes your taxes</strong>. Your <strong>city shapes your spending</strong>. Together, they shape <strong>how quickly you can build wealth</strong>.
   </p>
 
-  <p className="mt-3 text-sm leading-6 text-slate-300 sm:text-base">
+  <p className="mt-4 text-sm leading-7 text-slate-300 sm:text-base">
     This calculator estimates <strong>after-tax income by state</strong>, accounts for <strong>inflation and salary growth</strong>, and lets you compare your <strong>FIRE timeline across cities</strong>. The <strong>Move Impact</strong> section highlights how relocating could move your FIRE date closer.
   </p>
 </div>
