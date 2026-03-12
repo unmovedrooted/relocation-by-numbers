@@ -2,7 +2,6 @@ import Calculator from "@/components/Calculator";
 import Link from "next/link";
 import AdSlot from "@/components/AdSlot";
 
-
 export const metadata = {
   title: "Relocation Affordability Calculator by State",
   description:
@@ -19,7 +18,7 @@ const POPULAR = [
 export default function Page() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      {/* Page header (normalized) */}
+      {/* Page header */}
       <header className="py-10 text-center">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
           See How Far Your Salary Goes in Another State
@@ -32,55 +31,56 @@ export default function Page() {
         <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-blue-600/80" />
       </header>
 
-  {/* FIRE CTA */}
+      {/* Main content container */}
+      <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-12 space-y-10">
+        <Calculator monetization="home" />
 
-<section className="rounded-2xl border border-emerald-200/60 bg-emerald-50 p-5">
-  <div className="flex items-center justify-between gap-6">
+        {/* FIRE CTA */}
+        <section className="rounded-2xl border border-emerald-200/60 bg-emerald-50 p-5">
+          <div className="flex items-center justify-between gap-6">
+            <div>
+              <div className="text-sm font-semibold text-slate-900">
+                Thinking Bigger Than Just Moving?
+              </div>
 
-    <div>
-      <div className="text-sm font-semibold text-slate-900">
-        Thinking Bigger Than Just Moving?
-      </div>
+              <p className="mt-1 text-sm text-slate-700">
+                See how this relocation impacts your FIRE timeline.
+              </p>
 
-      <p className="mt-1 text-sm text-slate-700">
-        See how this relocation impacts your FIRE timeline.
-      </p>
+              <div className="mt-3 flex items-center gap-4 flex-wrap">
+                <a
+                  href="/fire-calculator"
+                  className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                >
+                  🔥 Calculate My FIRE Timeline
+                </a>
 
-      <div className="mt-3 flex items-center gap-4 flex-wrap">
-        <a
-          href="/fire-calculator"
-          className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-        >
-          🔥 Calculate My FIRE Timeline
-        </a>
+                <div className="h-5 w-px bg-emerald-200" />
 
-        <div className="h-5 w-px bg-emerald-200" />
+                <div className="flex items-center gap-5 text-sm text-slate-600">
+                  <a href="/coast-fire-calculator" className="hover:text-slate-900">
+                    Coast FIRE
+                  </a>
 
-        <div className="flex items-center gap-5 text-sm text-slate-600">
-          <a href="/coast-fire-calculator" className="hover:text-slate-900">
-            Coast FIRE
-          </a>
+                  <a href="/barista-fire-calculator" className="hover:text-slate-900">
+                    Barista FIRE
+                  </a>
 
-          <a href="/barista-fire-calculator" className="hover:text-slate-900">
-            Barista FIRE
-          </a>
+                  <a href="/lean-fire-calculator" className="hover:text-slate-900">
+                    Lean FIRE
+                  </a>
+                </div>
+              </div>
+            </div>
 
-          <a href="/lean-fire-calculator" className="hover:text-slate-900">
-            Lean FIRE
-          </a>
-        </div>
-      </div>
-    </div>
-
-    {/* Ad */}
-{/* 
-    <div className="min-w-[250px] hidden lg:block">
-      <AdSlot />
-    </div>
-    */}
-
-  </div>
-</section>
+            {/* Ad */}
+            {/*
+            <div className="min-w-[250px] hidden lg:block">
+              <AdSlot />
+            </div>
+            */}
+          </div>
+        </section>
 
         {/* Popular comparisons (card) */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
@@ -98,7 +98,6 @@ export default function Page() {
               POPULAR COMPARISONS
             </div>
 
-            {/* Pills (half-size, true chips) */}
             <div className="mt-3 flex flex-wrap justify-center gap-2">
               {POPULAR.map((item) => (
                 <Link
@@ -113,7 +112,7 @@ export default function Page() {
           </div>
         </section>
 
-                {/* SEO internal links */}
+        {/* SEO internal links */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
           <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
             Popular relocation comparisons
@@ -164,9 +163,7 @@ export default function Page() {
             </Link>
           </div>
         </section>
-      
+      </section>
     </main>
-
-    
   );
 }
