@@ -18,7 +18,7 @@ export default function FireCalculatorPage() {
             FIRE Calculator
           </div>
 
-  <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+ <h1 className="max-w-5xl text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
   See how taxes, expenses, and moving cities change your FIRE date
 </h1>
 
