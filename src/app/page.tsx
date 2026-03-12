@@ -18,7 +18,7 @@ const POPULAR = [
 
 export default function Page() {
   return (
-   <main className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <main className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="py-10 text-center space-y-4">
         <h1 className="text-4xl font-extrabold">See How Far Your Salary Goes in Another State</h1>
 
@@ -159,7 +159,7 @@ export default function Page() {
             </Link>
           </div>
         </section>
-      </section>
+      
     </main>
 
     
