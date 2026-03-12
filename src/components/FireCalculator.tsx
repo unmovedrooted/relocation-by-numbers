@@ -1034,49 +1034,55 @@ const [inputs, setInputs] = useState<Inputs>(() => ({
       )}
     </p>
 
-    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-      <Stat
-        label="Target FIRE Number"
-        value={Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"}
-        helper={`Inflation-adjusted expenses ÷ ${inputs.withdrawalRatePct}%`}
-      />
+   <div className="mt-4 grid gap-3 sm:grid-cols-2">
+  <Stat
+    label="Target FIRE Number"
+    value={hasCoreInputs && Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"}
+    helper={hasCoreInputs ? `Inflation-adjusted expenses ÷ ${inputs.withdrawalRatePct}%` : "Enter your core inputs to calculate"}
+  />
 
-      <Stat
-        label="Years Until FIRE"
-        value={result.yearsToFI === null ? "Not reached" : `${result.yearsToFI} years`}
-        helper={
-          result.yearsToFI === null
-            ? `Not hit within ${inputs.maxYears} years`
-            : `Projected FI year: ${fiYear}`
-        }
-      />
+  <Stat
+    label="Years Until FIRE"
+    value={hasCoreInputs ? (result.yearsToFI === null ? "Not reached" : `${result.yearsToFI} years`) : "—"}
+    helper={
+      !hasCoreInputs
+        ? "Add age, income, and spending"
+        : result.yearsToFI === null
+          ? `Not hit within ${inputs.maxYears} years`
+          : `Projected FI year: ${fiYear}`
+    }
+  />
 
-      <Stat
-        label="Estimated FIRE Age"
-        value={fiAge === null ? "—" : `${fiAge}`}
-        helper="Approximate"
-      />
+  <Stat
+    label="Estimated FIRE Age"
+    value={hasCoreInputs ? (fiAge === null ? "—" : `${fiAge}`) : "—"}
+    helper={hasCoreInputs ? "Approximate" : "Calculated after inputs are entered"}
+  />
 
-      {inputs.advanced ? (
-        <Stat
-          label="Target Tracking"
-          value={
-            result.yearsToFI === null || targetDelta === null
-              ? "—"
-              : targetDelta <= 0
-                ? `${Math.abs(targetDelta)} yrs ahead`
-                : `${targetDelta} yrs behind`
-          }
-          helper={`Target FIRE age: ${inputs.targetFireAge}`}
-        />
-      ) : (
-        <Stat
-          label="Progress to FIRE"
-          value={`${Math.round(progress.pct * 100)}%`}
-          helper={`${money(progress.current, 0)} saved of ${Number.isFinite(progress.target) ? money(progress.target, 0) : "—"}`}
-        />
-      )}
-    </div>
+  {inputs.advanced ? (
+    <Stat
+      label="Target Tracking"
+      value={
+        !hasCoreInputs || result.yearsToFI === null || targetDelta === null
+          ? "—"
+          : targetDelta <= 0
+            ? `${Math.abs(targetDelta)} yrs ahead`
+            : `${targetDelta} yrs behind`
+      }
+      helper={hasCoreInputs ? `Target FIRE age: ${inputs.targetFireAge}` : "Available with inputs"}
+    />
+  ) : (
+    <Stat
+      label="Progress to FIRE"
+      value={hasCoreInputs ? `${Math.round(progress.pct * 100)}%` : "—"}
+      helper={
+        hasCoreInputs
+          ? `${money(progress.current, 0)} saved of ${Number.isFinite(progress.target) ? money(progress.target, 0) : "—"}`
+          : "Tracks progress toward your FIRE number"
+      }
+    />
+  )}
+</div>
   </div>
 
 {/* Share Result */}
