@@ -506,11 +506,11 @@ export default function FireCalculator({
     setInputs((s) => ({ ...s, preset: "custom" }));
   }
 
-  const viralCityResults = useMemo(() => {
+ const viralCityResults = useMemo(() => {
   const baseAnnualExpenses = annualExpenses(inputs);
   const baselineCityId = getBaselineCityIdForState(inputs.state);
 
-  return VIRAL_COMPARE_CITIES.map((cityId) => {
+  const rows = VIRAL_COMPARE_CITIES.map((cityId) => {
     const city = findCity(cityId);
     if (!city) return null;
 
@@ -522,6 +522,7 @@ export default function FireCalculator({
         ageAtFI: fiAge,
         yearsToFI: result.yearsToFI,
         isBaseline: true,
+        deltaYears: 0,
       };
     }
 
@@ -531,22 +532,49 @@ export default function FireCalculator({
       baselineCityId
     );
 
-      const sim = simulateYearsToFI(inputs, netAnnual, {
-        expensesAnnualBase: adjustedExpenses,
-      });
+    const sim = simulateYearsToFI(inputs, netAnnual, {
+      expensesAnnualBase: adjustedExpenses,
+    });
 
-      const ageAtFI =
-        sim.yearsToFI === null ? null : inputs.age + sim.yearsToFI;
+    const ageAtFI =
+      sim.yearsToFI === null ? null : inputs.age + sim.yearsToFI;
 
-      return {
-        cityId,
-        cityName: city.name,
-        state: city.state.toUpperCase(),
-        ageAtFI,
-        yearsToFI: sim.yearsToFI,
-      };
-    }).filter(Boolean);
-  }, [inputs, netAnnual, fiAge, result.yearsToFI]);
+    const deltaYears =
+      sim.yearsToFI !== null && result.yearsToFI !== null
+        ? result.yearsToFI - sim.yearsToFI
+        : null;
+
+    return {
+      cityId,
+      cityName: city.name,
+      state: city.state.toUpperCase(),
+      ageAtFI,
+      yearsToFI: sim.yearsToFI,
+      isBaseline: false,
+      deltaYears,
+    };
+  }).filter(Boolean);
+
+  return rows.sort((a, b) => {
+    if (a!.isBaseline) return -1;
+    if (b!.isBaseline) return 1;
+
+    const aDelta = a!.deltaYears ?? -999;
+    const bDelta = b!.deltaYears ?? -999;
+
+    return bDelta - aDelta;
+  });
+}, [inputs, netAnnual, fiAge, result.yearsToFI]);
+
+const bestMoveCityId = useMemo(() => {
+  const candidates = viralCityResults.filter(
+    (row) => !row!.isBaseline && (row!.deltaYears ?? 0) > 0
+  );
+
+  if (candidates.length === 0) return null;
+
+  return candidates[0]!.cityId;
+}, [viralCityResults]);
 
   const savingsTable = useMemo(() => {
     const income = netAnnual;
@@ -1138,40 +1166,64 @@ Calculated on https://RelocationByNumbers.com`;
           <div className="mt-2 text-[11px] leading-5 text-amber-100/70">
   Some cities can show a later FIRE age if the modeled spending increase outweighs any tax advantage.
 </div>
-<div className="mt-4 space-y-2">
-  {viralCityResults.map((row) => (
-    <div
-      key={row!.cityId}
-      className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm"
-    >
-      <div className="text-slate-200">
-        {row!.cityName}, {row!.state}
-       {row!.isBaseline ? (
-  <span className="ml-2 text-[11px] text-slate-400">(current)</span>
-) : null}
-      </div>
 
-      <div className="text-right">
-        <div className="font-semibold text-white">
-          {netAnnual <= 0 || annualExpenses(inputs) <= 0 || inputs.age <= 0
-            ? "Enter inputs"
-            : row!.ageAtFI === null
-              ? "Not reached"
-              : `FIRE at ${row!.ageAtFI}`}
+<div className="mt-4 space-y-2">
+  {viralCityResults.map((row) => {
+    const isBest = row!.cityId === bestMoveCityId;
+
+    return (
+      <div
+        key={row!.cityId}
+        className={[
+          "flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm border",
+          isBest
+            ? "border-emerald-300/40 bg-emerald-300/10"
+            : "border-white/10 bg-black/20",
+        ].join(" ")}
+      >
+        <div className="text-slate-200">
+          {row!.cityName}, {row!.state}
+          {row!.isBaseline ? (
+            <span className="ml-2 text-[11px] text-slate-400">(current)</span>
+          ) : null}
+          {isBest ? (
+            <span className="ml-2 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
+              Best move
+            </span>
+          ) : null}
         </div>
 
-        {row!.yearsToFI !== null && result.yearsToFI !== null && !row!.isBaseline ? (
-          <div className="mt-0.5 text-[11px] text-slate-400">
-            {row!.yearsToFI < result.yearsToFI
-              ? `${result.yearsToFI - row!.yearsToFI} yrs earlier`
-              : row!.yearsToFI > result.yearsToFI
-                ? `${row!.yearsToFI - result.yearsToFI} yrs slower`
-                : "Same timeline"}
+        <div className="text-right">
+          {row!.yearsToFI !== null && result.yearsToFI !== null && !row!.isBaseline ? (
+            <div
+              className={[
+                "font-semibold",
+                (row!.deltaYears ?? 0) > 0
+                  ? "text-emerald-200"
+                  : (row!.deltaYears ?? 0) < 0
+                    ? "text-slate-300"
+                    : "text-slate-200",
+              ].join(" ")}
+            >
+              {(row!.deltaYears ?? 0) > 0
+                ? `${row!.deltaYears} yrs earlier`
+                : (row!.deltaYears ?? 0) < 0
+                  ? `${Math.abs(row!.deltaYears ?? 0)} yrs slower`
+                  : "Same timeline"}
+            </div>
+          ) : null}
+
+          <div className="mt-0.5 text-[12px] text-slate-300">
+            {netAnnual <= 0 || annualExpenses(inputs) <= 0 || inputs.age <= 0
+              ? "Enter inputs"
+              : row!.ageAtFI === null
+                ? "Not reached"
+                : `FIRE at ${row!.ageAtFI}`}
           </div>
-        ) : null}
+        </div>
       </div>
-    </div>
-  ))}
+    );
+  })}
 </div>
          
            
