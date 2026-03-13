@@ -3,7 +3,22 @@ import Link from "next/link";
 import FireCalculator from "@/components/FireCalculator";
 import { SEOFAQItem } from "@/components/SeoFAQ";
 
-<div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+export const metadata: Metadata = {
+  title: "Coast FIRE Calculator – How Much Do You Need Invested to Coast?",
+  description:
+    "Estimate Coast FIRE: the amount you need invested today so you can stop contributing and still reach retirement by letting compounding do the work.",
+};
+
+export default function Page() {
+  return (
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto max-w-5xl px-4 py-10 space-y-10">
+        <header className="space-y-3">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            Coast FIRE Calculator
+          </h1>
+
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
     <a href="/about" className="transition hover:text-white">
       About
     </a>
@@ -20,21 +35,7 @@ import { SEOFAQItem } from "@/components/SeoFAQ";
       Terms
     </a>
   </div>
-
-export const metadata: Metadata = {
-  title: "Coast FIRE Calculator – How Much Do You Need Invested to Coast?",
-  description:
-    "Estimate Coast FIRE: the amount you need invested today so you can stop contributing and still reach retirement by letting compounding do the work.",
-};
-
-export default function Page() {
-  return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-5xl px-4 py-10 space-y-10">
-        <header className="space-y-3">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Coast FIRE Calculator
-          </h1>
+  
           <p className="text-slate-300 leading-relaxed">
             <span className="font-semibold text-white">Coast FIRE</span> means you’ve invested enough
             that your money can grow to a traditional retirement number—even if you{" "}
