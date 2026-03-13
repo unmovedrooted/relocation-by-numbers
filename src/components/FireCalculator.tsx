@@ -1227,15 +1227,15 @@ Calculated on https://RelocationByNumbers.com`;
         ) : null}
 
         <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4">
-          <div className="text-sm font-semibold text-amber-100">🔥 Your FIRE age if you moved</div>
-          <div className="mt-1 text-xs text-amber-100/80">
-            Same income and investing assumptions, different city cost profile.
-          </div>
-
-          <div className="mt-2 text-[11px] leading-5 text-amber-100/70">
-            These comparisons use your selected state’s major city as the baseline and adjust
-            spending by each city’s cost profile.
-          </div>
+          <div className="text-sm font-semibold text-amber-100">
+  🔥 How much a move could accelerate your FIRE timeline
+</div>
+<div className="mt-1 text-xs text-amber-100/80">
+  Same income and investing assumptions, with spending adjusted by each city’s cost profile.
+</div>
+<div className="mt-2 text-[11px] leading-5 text-amber-100/70">
+  These comparisons use your selected state’s major city as the baseline and adjust spending by each city’s cost profile.
+</div>
 
           <div className="mt-4 space-y-2">
             {viralCityResults.map((row) => {
@@ -1258,7 +1258,7 @@ Calculated on https://RelocationByNumbers.com`;
                     ) : null}
                     {isBest ? (
                       <span className="ml-2 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
-                        Best move
+                        Most years saved
                       </span>
                     ) : null}
                   </div>
