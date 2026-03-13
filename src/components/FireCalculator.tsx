@@ -12,7 +12,7 @@ import {
 } from "recharts";
 
 import { STATES, type StateCode } from "@/lib/states";
-import { findCity } from "@/lib/cities";
+import { findCity, citiesForState } from "@/lib/cities";
 import { estimateNetAnnual, effectiveTaxRatePct, type FilingStatus } from "@/lib/tax";
 
 type FireCalculatorProps = {
@@ -132,16 +132,25 @@ const VIRAL_COMPARE_CITIES = [
   "denver-co",
 ] as const;
 
-function expenseAdjustedForCity(baseAnnualExpenses: number, cityId: string) {
-  const city = findCity(cityId);
-  if (!city?.col?.housing) return baseAnnualExpenses;
+function expenseAdjustedForCity(
+  baseAnnualExpenses: number,
+  targetCityId: string,
+  baselineCityId: string
+) {
+  const targetCity = findCity(targetCityId);
+  const baselineCity = findCity(baselineCityId);
 
-  const housingFactor = city.col.housing;
-  const blended = baseAnnualExpenses * (0.4 + 0.6 * housingFactor);
+  if (!targetCity?.col?.housing || !baselineCity?.col?.housing) {
+    return baseAnnualExpenses;
+  }
 
-  return Math.max(0, blended);
+  const targetBlend = 0.4 + 0.6 * targetCity.col.housing;
+  const baselineBlend = 0.4 + 0.6 * baselineCity.col.housing;
+
+  const relativeFactor = targetBlend / baselineBlend;
+
+  return Math.max(0, baseAnnualExpenses * relativeFactor);
 }
-
 function annualExpensesFromMonthly(monthly: number) {
   return Math.max(0, (Number(monthly) || 0) * 12);
 }
@@ -152,6 +161,23 @@ function annualExpenses(i: Inputs) {
 
 function annualMovedExpenses(i: Inputs) {
   return annualExpensesFromMonthly(i.movedExpensesMonthly);
+}
+
+function getBaselineCityIdForState(stateCode: StateChoice) {
+  if (!stateCode) return "nyc-ny";
+
+  const stateCities = citiesForState(stateCode as StateCode);
+
+  const major = stateCities.find((city) => city.tier === "major" && !city.id.startsWith("other-"));
+  if (major) return major.id;
+
+  const mid = stateCities.find((city) => city.tier === "mid" && !city.id.startsWith("other-"));
+  if (mid) return mid.id;
+
+  const small = stateCities.find((city) => city.tier === "small" && !city.id.startsWith("other-"));
+  if (small) return small.id;
+
+  return "nyc-ny";
 }
 
 function applyBrokerageAutofill(i: Inputs) {
@@ -481,23 +507,29 @@ export default function FireCalculator({
   }
 
   const viralCityResults = useMemo(() => {
-    const baseAnnualExpenses = annualExpenses(inputs);
+  const baseAnnualExpenses = annualExpenses(inputs);
+  const baselineCityId = getBaselineCityIdForState(inputs.state);
 
-    return VIRAL_COMPARE_CITIES.map((cityId) => {
-      const city = findCity(cityId);
-      if (!city) return null;
+  return VIRAL_COMPARE_CITIES.map((cityId) => {
+    const city = findCity(cityId);
+    if (!city) return null;
 
-      if (cityId === "nyc-ny") {
-        return {
-          cityId,
-          cityName: city.name,
-          state: city.state.toUpperCase(),
-          ageAtFI: fiAge,
-          yearsToFI: result.yearsToFI,
-        };
-      }
+    if (cityId === baselineCityId) {
+      return {
+        cityId,
+        cityName: city.name,
+        state: city.state.toUpperCase(),
+        ageAtFI: fiAge,
+        yearsToFI: result.yearsToFI,
+        isBaseline: true,
+      };
+    }
 
-      const adjustedExpenses = expenseAdjustedForCity(baseAnnualExpenses, cityId);
+    const adjustedExpenses = expenseAdjustedForCity(
+      baseAnnualExpenses,
+      cityId,
+      baselineCityId
+    );
 
       const sim = simulateYearsToFI(inputs, netAnnual, {
         expensesAnnualBase: adjustedExpenses,
@@ -1114,9 +1146,9 @@ Calculated on https://RelocationByNumbers.com`;
     >
       <div className="text-slate-200">
         {row!.cityName}, {row!.state}
-        {row!.cityId === "nyc-ny" ? (
-          <span className="ml-2 text-[11px] text-slate-400">(current)</span>
-        ) : null}
+       {row!.isBaseline ? (
+  <span className="ml-2 text-[11px] text-slate-400">(current)</span>
+) : null}
       </div>
 
       <div className="text-right">
@@ -1128,7 +1160,7 @@ Calculated on https://RelocationByNumbers.com`;
               : `FIRE at ${row!.ageAtFI}`}
         </div>
 
-        {row!.yearsToFI !== null && result.yearsToFI !== null && row!.cityId !== "nyc-ny" ? (
+        {row!.yearsToFI !== null && result.yearsToFI !== null && !row!.isBaseline ? (
           <div className="mt-0.5 text-[11px] text-slate-400">
             {row!.yearsToFI < result.yearsToFI
               ? `${result.yearsToFI - row!.yearsToFI} yrs earlier`
@@ -1272,9 +1304,11 @@ Calculated on https://RelocationByNumbers.com`;
             </div>
           </div>
 
-          <div className="mt-3 text-xs leading-5 text-slate-400">
+        {!hasCoreInputs ? (
+  <div className="mt-3 text-xs leading-5 text-slate-400">
     Tip: This table becomes more useful after you set your income, monthly expenses, and yearly contributions.
   </div>
+) : null}
         </div>
 
         
