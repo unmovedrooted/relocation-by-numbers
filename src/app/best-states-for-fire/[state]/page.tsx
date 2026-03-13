@@ -4,11 +4,6 @@ import { notFound } from "next/navigation";
 import { STATES } from "@/lib/states";
 import { citiesForState } from "@/lib/cities";
 
-<div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-  <span className="h-2 w-2 rounded-full bg-emerald-400" />
-  Best State for FIRE
-</div>
-
 type PageProps = {
   params: Promise<{ state: string }>;
 };
@@ -40,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `Is ${found.name} Good for FIRE? | Best State for FIRE`,
+    title: `Is ${found.name} Good for FIRE? | Best States for FIRE`,
     description: `See whether ${found.name} is a good state for FIRE based on taxes, housing costs, and cost of living.`,
   };
 }
@@ -54,37 +49,24 @@ export default async function BestStateForFirePage({ params }: PageProps) {
   const stateCities = citiesForState(found.code).filter((c) => !c.id.startsWith("other-"));
   const featuredCities = stateCities.slice(0, 3);
 
-    const relatedStates = STATE_PAGES
+  const relatedStates = STATE_PAGES
     .filter((s) => s.slug !== found.slug)
     .slice(0, 6);
 
-      <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
-    <a href="/about" className="transition hover:text-white">
-      About
-    </a>
-    <span>•</span>
-    <a href="/disclaimer" className="transition hover:text-white">
-      Disclaimer
-    </a>
-    <span>•</span>
-    <a href="/privacy" className="transition hover:text-white">
-      Privacy
-    </a>
-    <span>•</span>
-    <a href="/terms" className="transition hover:text-white">
-      Terms
-    </a>
-  </div>
-
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
+      <div className="mx-auto max-w-5xl space-y-8 px-4 py-10">
         <header className="space-y-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            Best State for FIRE
+          </div>
+
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Is {found.name} a Good State for FIRE?
           </h1>
 
-          <p className="max-w-2xl text-sm text-slate-300 leading-relaxed">
+          <p className="max-w-2xl text-sm leading-relaxed text-slate-300">
             {found.name} may be a strong state for financial independence depending on
             taxes, housing costs, and how expensive daily life is compared with where
             you live now.
@@ -114,12 +96,12 @@ export default async function BestStateForFirePage({ params }: PageProps) {
           </div>
         </header>
 
-        <section className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4">
+        <section className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-5">
           <h2 className="text-xl font-semibold">
             Why {found.name} could be good for FIRE
           </h2>
 
-          <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
+          <div className="space-y-3 text-sm leading-relaxed text-slate-300">
             <p>
               The best state for FIRE is usually the one that helps you keep expenses
               low while maintaining the lifestyle you want. Housing, taxes, and
@@ -133,53 +115,54 @@ export default async function BestStateForFirePage({ params }: PageProps) {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4">
+        <section className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-5">
           <h2 className="text-xl font-semibold">
             Cities to explore in {found.name}
           </h2>
-
-          <section className="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4">
-  <h2 className="text-xl font-semibold">Related states for FIRE</h2>
-
-  <div className="grid gap-3 sm:grid-cols-2">
-    {relatedStates.map((s) => (
-      <Link
-        key={s.code}
-        href={`/best-states-for-fire/${s.slug}`}
-        className="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition"
-      >
-        <div className="text-sm font-semibold text-white">{s.name}</div>
-        <div className="mt-1 text-xs text-slate-400">
-          Explore FIRE-friendly cities in {s.name}
-        </div>
-      </Link>
-    ))}
-  </div>
-</section>
 
           <div className="grid gap-3 sm:grid-cols-3">
             {featuredCities.map((city) => (
               <Link
                 key={city.id}
                 href={`/best-cities-for-fire/${city.id}`}
-                className="rounded-2xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition"
+                className="rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:bg-white/10"
               >
                 <div className="text-sm font-semibold text-white">{city.name}</div>
                 <div className="mt-2 text-xs text-slate-400">
                   Rent: {city.defaultRent ? `$${city.defaultRent.toLocaleString()}` : "N/A"}
                 </div>
                 <div className="text-xs text-slate-400">
-                  Home price: {city.medianHomePrice ? `$${city.medianHomePrice.toLocaleString()}` : "N/A"}
+                  Home price:{" "}
+                  {city.medianHomePrice ? `$${city.medianHomePrice.toLocaleString()}` : "N/A"}
                 </div>
               </Link>
             ))}
           </div>
         </section>
 
-        <section className="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4">
+        <section className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-5">
+          <h2 className="text-xl font-semibold">Related states for FIRE</h2>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {relatedStates.map((s) => (
+              <Link
+                key={s.code}
+                href={`/best-states-for-fire/${s.slug}`}
+                className="rounded-xl border border-white/10 bg-white/5 p-4 transition hover:bg-white/10"
+              >
+                <div className="text-sm font-semibold text-white">{s.name}</div>
+                <div className="mt-1 text-xs text-slate-400">
+                  Explore FIRE-friendly cities in {s.name}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-5">
           <h2 className="text-xl font-semibold">Next step</h2>
 
-          <p className="text-sm text-slate-300 leading-relaxed">
+          <p className="text-sm leading-relaxed text-slate-300">
             Compare your current city against places in {found.name}, then use the FIRE
             calculator to estimate how lower expenses could change your timeline.
           </p>
@@ -200,6 +183,26 @@ export default async function BestStateForFirePage({ params }: PageProps) {
             </Link>
           </div>
         </section>
+
+        <footer className="pt-2">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+            <Link href="/about" className="transition hover:text-white">
+              About
+            </Link>
+            <span>•</span>
+            <Link href="/disclaimer" className="transition hover:text-white">
+              Disclaimer
+            </Link>
+            <span>•</span>
+            <Link href="/privacy" className="transition hover:text-white">
+              Privacy
+            </Link>
+            <span>•</span>
+            <Link href="/terms" className="transition hover:text-white">
+              Terms
+            </Link>
+          </div>
+        </footer>
       </div>
     </main>
   );
