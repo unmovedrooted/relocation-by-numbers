@@ -44,7 +44,7 @@ export default function Page() {
               </div>
 
               <Link
-                href={`/best-state-for-fire/${state.name.toLowerCase().replace(/\s/g, "-")}`}
+                href={`/best-states-for-fire/${state.name.toLowerCase().replace(/\s/g, "-")}`}
                 className="text-emerald-300"
               >
                 View →
