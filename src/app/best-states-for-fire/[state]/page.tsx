@@ -76,7 +76,6 @@ export default async function BestStateForFirePage({ params }: PageProps) {
     </a>
   </div>
 
-
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
@@ -146,7 +145,7 @@ export default async function BestStateForFirePage({ params }: PageProps) {
     {relatedStates.map((s) => (
       <Link
         key={s.code}
-        href={`/best-state-for-fire/${s.slug}`}
+        href={`/best-states-for-fire/${s.slug}`}
         className="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition"
       >
         <div className="text-sm font-semibold text-white">{s.name}</div>
