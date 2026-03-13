@@ -1039,10 +1039,6 @@ Calculated on https://RelocationByNumbers.com`;
           Share My FIRE Result
         </button>
 
-        <AdSenseBlock
-          slot={ADSENSE_SLOT_RESULTS}
-          className="rounded-xl border border-white/10 bg-black/20 p-3"
-        />
 
         {inputs.moveCompareOn ? (
           <>
@@ -1107,26 +1103,46 @@ Calculated on https://RelocationByNumbers.com`;
           <div className="mt-1 text-xs text-amber-100/80">
             Same income and investing assumptions, different city cost profile.
           </div>
+          <div className="mt-2 text-[11px] leading-5 text-amber-100/70">
+  Some cities can show a later FIRE age if the modeled spending increase outweighs any tax advantage.
+</div>
+<div className="mt-4 space-y-2">
+  {viralCityResults.map((row) => (
+    <div
+      key={row!.cityId}
+      className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm"
+    >
+      <div className="text-slate-200">
+        {row!.cityName}, {row!.state}
+        {row!.cityId === "nyc-ny" ? (
+          <span className="ml-2 text-[11px] text-slate-400">(current)</span>
+        ) : null}
+      </div>
 
-          <div className="mt-4 space-y-2">
-            {viralCityResults.map((row) => (
-              <div
-                key={row!.cityId}
-                className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm"
-              >
-                <div className="text-slate-200">
-                  {row!.cityName}, {row!.state}
-                </div>
-                <div className="font-semibold text-white">
-                  {netAnnual <= 0 || annualExpenses(inputs) <= 0 || inputs.age <= 0
-                    ? "Enter inputs"
-                    : row!.ageAtFI === null
-                      ? "Not reached"
-                      : `FIRE at ${row!.ageAtFI}`}
-                </div>
-              </div>
-            ))}
+      <div className="text-right">
+        <div className="font-semibold text-white">
+          {netAnnual <= 0 || annualExpenses(inputs) <= 0 || inputs.age <= 0
+            ? "Enter inputs"
+            : row!.ageAtFI === null
+              ? "Not reached"
+              : `FIRE at ${row!.ageAtFI}`}
+        </div>
+
+        {row!.yearsToFI !== null && result.yearsToFI !== null && row!.cityId !== "nyc-ny" ? (
+          <div className="mt-0.5 text-[11px] text-slate-400">
+            {row!.yearsToFI < result.yearsToFI
+              ? `${result.yearsToFI - row!.yearsToFI} yrs earlier`
+              : row!.yearsToFI > result.yearsToFI
+                ? `${row!.yearsToFI - result.yearsToFI} yrs slower`
+                : "Same timeline"}
           </div>
+        ) : null}
+      </div>
+    </div>
+  ))}
+</div>
+         
+           
         </div>
 
         <div className="rounded-xl border border-white/10 bg-black/20 p-4">
@@ -1257,28 +1273,13 @@ Calculated on https://RelocationByNumbers.com`;
           </div>
 
           <div className="mt-3 text-xs leading-5 text-slate-400">
-            Tip: This table becomes more useful after you set your income, monthly expenses, and
-            yearly contributions.
-          </div>
+    Tip: This table becomes more useful after you set your income, monthly expenses, and yearly contributions.
+  </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-          <div className="text-sm font-semibold text-white">Start investing toward FIRE</div>
-          <div className="mt-1 text-xs text-slate-400">
-            These are common platforms people use to invest for long-term goals. (Sponsored links)
-          </div>
+        
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {AFFILIATES.map((a) => (
-              <AffiliateCard key={a.name} a={a} />
-            ))}
-          </div>
-        </div>
 
-        <AdSenseBlock
-          slot={ADSENSE_SLOT_BOTTOM}
-          className="rounded-xl border border-white/10 bg-black/20 p-3"
-        />
       </div>
     </section>
   );
