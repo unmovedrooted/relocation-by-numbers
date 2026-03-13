@@ -20,6 +20,55 @@ type FireCalculatorProps = {
 };
 
 type Preset = "custom" | "lean" | "fat";
+type StateChoice = StateCode | "";
+
+type Inputs = {
+  preset: Preset;
+
+  age: number;
+  income: number;
+  expensesMonthly: number;
+
+  state: StateChoice;
+  filingStatus: FilingStatus;
+  k401Pct: number;
+
+  currentPortfolio: number;
+  yearlyInvestment: number;
+
+  advanced: boolean;
+  targetFireAge: number;
+
+  bal401k: number;
+  balIra: number;
+  balBrokerage: number;
+
+  contrib401k: number;
+  contribIra: number;
+  contribBrokerage: number;
+
+  annualReturnPct: number;
+  withdrawalRatePct: number;
+  maxYears: number;
+
+  inflationPct: number;
+  salaryGrowthPct: number;
+
+  phase2ReturnPct: number;
+  phase2StartsYear: number;
+
+  moveCompareOn: boolean;
+  movedExpensesMonthly: number;
+};
+
+type ProjectionPoint = { year: number; age: number; portfolio: number };
+
+type Affiliate = {
+  name: string;
+  blurb: string;
+  href: string;
+  tag: string;
+};
 
 function clamp(n: number, min: number, max: number) {
   return Math.min(max, Math.max(min, n));
@@ -38,53 +87,6 @@ function pct(n: number, digits: number = 1) {
   if (!Number.isFinite(n)) return "—";
   return `${(n * 100).toFixed(digits)}%`;
 }
-
-type StateChoice = StateCode | "";
-
-type Inputs = {
-  preset: Preset;
-
-  // Core
-  age: number;
-  income: number; // gross annual
-  expensesMonthly: number;
-
-  // Taxes
-  state: StateChoice;
-  filingStatus: FilingStatus;
-  k401Pct: number;
-
-  // Convenience totals
-  currentPortfolio: number;
-  yearlyInvestment: number; // annual (if 0 -> auto net - expenses)
-
-  // Advanced toggle + fields
-  advanced: boolean;
-  targetFireAge: number;
-
-  bal401k: number;
-  balIra: number;
-  balBrokerage: number;
-
-  contrib401k: number; // yearly
-  contribIra: number; // yearly
-  contribBrokerage: number; // yearly
-
-  // Assumptions
-  annualReturnPct: number;
-  withdrawalRatePct: number;
-  maxYears: number;
-
-  inflationPct: number;
-  salaryGrowthPct: number;
-
-  phase2ReturnPct: number;
-  phase2StartsYear: number;
-
-  // Move impact
-  moveCompareOn: boolean;
-  movedExpensesMonthly: number;
-};
 
 const DEFAULT_INPUTS: Inputs = {
   preset: "custom",
@@ -117,6 +119,7 @@ const DEFAULT_INPUTS: Inputs = {
 
   inflationPct: 2.5,
   salaryGrowthPct: 3,
+
   phase2ReturnPct: 5.5,
   phase2StartsYear: 10,
 
@@ -130,6 +133,56 @@ const VIRAL_COMPARE_CITIES = [
   "raleigh-nc",
   "charlotte-nc",
   "denver-co",
+] as const;
+
+const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "";
+const ADSENSE_SLOT_RESULTS = process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULTS || "";
+const ADSENSE_SLOT_BOTTOM = process.env.NEXT_PUBLIC_ADSENSE_SLOT_BOTTOM || "";
+
+const AFFILIATES: Affiliate[] = [
+  {
+    name: "Fidelity",
+    blurb: "Low-cost index funds + strong retirement tools. Great all-around choice.",
+    href: "https://www.fidelity.com/",
+    tag: "Brokerage / 401(k)",
+  },
+  {
+    name: "Vanguard",
+    blurb: "Classic FIRE favorite for low-fee index investing.",
+    href: "https://investor.vanguard.com/",
+    tag: "Index funds",
+  },
+  {
+    name: "Betterment",
+    blurb: "Hands-off robo-investing if you want automation and simplicity.",
+    href: "https://www.betterment.com/",
+    tag: "Robo-advisor",
+  },
+  {
+    name: "Wealthfront",
+    blurb: "Automated investing + cash management. Clean experience.",
+    href: "https://www.wealthfront.com/",
+    tag: "Robo + cash",
+  },
+];
+
+const FAQS = [
+  {
+    q: "Why does location affect my FIRE timeline?",
+    a: "Because location changes two of the biggest drivers of financial independence: taxes and spending. A lower-cost or lower-tax location can increase how much you keep and reduce how much you need to retire.",
+  },
+  {
+    q: "Does Move Impact assume the same salary?",
+    a: "Yes. Move Impact is designed to isolate the effect of location. It keeps your income and investing assumptions the same and shows how different expenses could change your FIRE timeline.",
+  },
+  {
+    q: "Are the tax numbers exact?",
+    a: "No. They are simplified estimates based on your selected state and filing status. They are meant for planning and comparison, not tax filing.",
+  },
+  {
+    q: "Why does my FIRE number change between cities?",
+    a: "Your FIRE number is based on spending. If your projected spending changes in a different city, the amount you need to reach financial independence changes too.",
+  },
 ] as const;
 
 function expenseAdjustedForCity(
@@ -151,6 +204,7 @@ function expenseAdjustedForCity(
 
   return Math.max(0, baseAnnualExpenses * relativeFactor);
 }
+
 function annualExpensesFromMonthly(monthly: number) {
   return Math.max(0, (Number(monthly) || 0) * 12);
 }
@@ -276,8 +330,6 @@ function simulateYearsToFI(
   };
 }
 
-type ProjectionPoint = { year: number; age: number; portfolio: number };
-
 function buildProjection(i: Inputs, netAnnualBase: number, yearsToFI: number | null) {
   const infl = (Number(i.inflationPct) || 0) / 100;
   const salG = (Number(i.salaryGrowthPct) || 0) / 100;
@@ -314,10 +366,6 @@ function buildProjection(i: Inputs, netAnnualBase: number, yearsToFI: number | n
   return points;
 }
 
-const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "";
-const ADSENSE_SLOT_RESULTS = process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULTS || "";
-const ADSENSE_SLOT_BOTTOM = process.env.NEXT_PUBLIC_ADSENSE_SLOT_BOTTOM || "";
-
 function AdSenseBlock({ slot, className = "" }: { slot: string; className?: string }) {
   const enabled = Boolean(ADSENSE_CLIENT && slot);
 
@@ -347,51 +395,17 @@ function AdSenseBlock({ slot, className = "" }: { slot: string; className?: stri
   );
 }
 
-type Affiliate = {
-  name: string;
-  blurb: string;
-  href: string;
-  tag: string;
-};
-
-const AFFILIATES: Affiliate[] = [
-  {
-    name: "Fidelity",
-    blurb: "Low-cost index funds + strong retirement tools. Great all-around choice.",
-    href: "https://www.fidelity.com/",
-    tag: "Brokerage / 401(k)",
-  },
-  {
-    name: "Vanguard",
-    blurb: "Classic FIRE favorite for low-fee index investing.",
-    href: "https://investor.vanguard.com/",
-    tag: "Index funds",
-  },
-  {
-    name: "Betterment",
-    blurb: "Hands-off robo-investing if you want automation and simplicity.",
-    href: "https://www.betterment.com/",
-    tag: "Robo-advisor",
-  },
-  {
-    name: "Wealthfront",
-    blurb: "Automated investing + cash management. Clean experience.",
-    href: "https://www.wealthfront.com/",
-    tag: "Robo + cash",
-  },
-];
-
 function AffiliateCard({ a }: { a: Affiliate }) {
   return (
     <a
       href={a.href}
       target="_blank"
       rel="noopener noreferrer nofollow sponsored"
-      className="group rounded-2xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition"
+      className="group rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:bg-white/10"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="text-sm font-semibold text-white">{a.name}</div>
-        <div className="text-[11px] rounded-full border border-white/10 bg-black/20 px-2 py-1 text-slate-300">
+        <div className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[11px] text-slate-300">
           {a.tag}
         </div>
       </div>
@@ -410,6 +424,8 @@ export default function FireCalculator({
     ...DEFAULT_INPUTS,
     income: initialIncome > 0 ? initialIncome : DEFAULT_INPUTS.income,
   }));
+
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const annualExp = useMemo(() => annualExpenses(inputs), [inputs.expensesMonthly]);
 
@@ -506,75 +522,74 @@ export default function FireCalculator({
     setInputs((s) => ({ ...s, preset: "custom" }));
   }
 
- const viralCityResults = useMemo(() => {
-  const baseAnnualExpenses = annualExpenses(inputs);
-  const baselineCityId = getBaselineCityIdForState(inputs.state);
+  const viralCityResults = useMemo(() => {
+    const baseAnnualExpenses = annualExpenses(inputs);
+    const baselineCityId = getBaselineCityIdForState(inputs.state);
 
-  const rows = VIRAL_COMPARE_CITIES.map((cityId) => {
-    const city = findCity(cityId);
-    if (!city) return null;
+    const rows = VIRAL_COMPARE_CITIES.map((cityId) => {
+      const city = findCity(cityId);
+      if (!city) return null;
 
-    if (cityId === baselineCityId) {
+      if (cityId === baselineCityId) {
+        return {
+          cityId,
+          cityName: city.name,
+          state: city.state.toUpperCase(),
+          ageAtFI: fiAge,
+          yearsToFI: result.yearsToFI,
+          isBaseline: true,
+          deltaYears: 0,
+        };
+      }
+
+      const adjustedExpenses = expenseAdjustedForCity(
+        baseAnnualExpenses,
+        cityId,
+        baselineCityId
+      );
+
+      const sim = simulateYearsToFI(inputs, netAnnual, {
+        expensesAnnualBase: adjustedExpenses,
+      });
+
+      const ageAtFI = sim.yearsToFI === null ? null : inputs.age + sim.yearsToFI;
+
+      const deltaYears =
+        sim.yearsToFI !== null && result.yearsToFI !== null
+          ? result.yearsToFI - sim.yearsToFI
+          : null;
+
       return {
         cityId,
         cityName: city.name,
         state: city.state.toUpperCase(),
-        ageAtFI: fiAge,
-        yearsToFI: result.yearsToFI,
-        isBaseline: true,
-        deltaYears: 0,
+        ageAtFI,
+        yearsToFI: sim.yearsToFI,
+        isBaseline: false,
+        deltaYears,
       };
-    }
+    }).filter(Boolean);
 
-    const adjustedExpenses = expenseAdjustedForCity(
-      baseAnnualExpenses,
-      cityId,
-      baselineCityId
+    return rows.sort((a, b) => {
+      if (a!.isBaseline) return -1;
+      if (b!.isBaseline) return 1;
+
+      const aDelta = a!.deltaYears ?? -999;
+      const bDelta = b!.deltaYears ?? -999;
+
+      return bDelta - aDelta;
+    });
+  }, [inputs, netAnnual, fiAge, result.yearsToFI]);
+
+  const bestMoveCityId = useMemo(() => {
+    const candidates = viralCityResults.filter(
+      (row) => !row!.isBaseline && (row!.deltaYears ?? 0) > 0
     );
 
-    const sim = simulateYearsToFI(inputs, netAnnual, {
-      expensesAnnualBase: adjustedExpenses,
-    });
+    if (candidates.length === 0) return null;
 
-    const ageAtFI =
-      sim.yearsToFI === null ? null : inputs.age + sim.yearsToFI;
-
-    const deltaYears =
-      sim.yearsToFI !== null && result.yearsToFI !== null
-        ? result.yearsToFI - sim.yearsToFI
-        : null;
-
-    return {
-      cityId,
-      cityName: city.name,
-      state: city.state.toUpperCase(),
-      ageAtFI,
-      yearsToFI: sim.yearsToFI,
-      isBaseline: false,
-      deltaYears,
-    };
-  }).filter(Boolean);
-
-  return rows.sort((a, b) => {
-    if (a!.isBaseline) return -1;
-    if (b!.isBaseline) return 1;
-
-    const aDelta = a!.deltaYears ?? -999;
-    const bDelta = b!.deltaYears ?? -999;
-
-    return bDelta - aDelta;
-  });
-}, [inputs, netAnnual, fiAge, result.yearsToFI]);
-
-const bestMoveCityId = useMemo(() => {
-  const candidates = viralCityResults.filter(
-    (row) => !row!.isBaseline && (row!.deltaYears ?? 0) > 0
-  );
-
-  if (candidates.length === 0) return null;
-
-  return candidates[0]!.cityId;
-}, [viralCityResults]);
+    return candidates[0]!.cityId;
+  }, [viralCityResults]);
 
   const savingsTable = useMemo(() => {
     const income = netAnnual;
@@ -606,10 +621,12 @@ const bestMoveCityId = useMemo(() => {
           <div>
             <div className="text-sm font-semibold tracking-tight text-white">Calculator inputs</div>
             <div className="text-xs leading-5 text-slate-300">
-              Enter your income, spending, and investing assumptions to estimate your path to financial independence.
+              Enter your income, spending, and investing assumptions to estimate your path to
+              financial independence.
             </div>
             <div className="mt-1 text-[11px] leading-5 text-slate-400">
-              Showing example values so you can see how the calculator works. Update them anytime with your own numbers.
+              Showing example values so you can see how the calculator works. Update them anytime
+              with your own numbers.
             </div>
           </div>
 
@@ -617,7 +634,7 @@ const bestMoveCityId = useMemo(() => {
             <button
               onClick={() => applyPreset("custom")}
               className={[
-                "rounded-xl px-3 py-2 text-xs font-medium border",
+                "rounded-xl border px-3 py-2 text-xs font-medium",
                 inputs.preset === "custom"
                   ? "border-white/20 bg-white/10 text-white"
                   : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10",
@@ -629,7 +646,7 @@ const bestMoveCityId = useMemo(() => {
             <button
               onClick={() => setInputs((s) => ({ ...s, advanced: !s.advanced }))}
               className={[
-                "rounded-xl px-3 py-2 text-xs font-medium border",
+                "rounded-xl border px-3 py-2 text-xs font-medium",
                 inputs.advanced
                   ? "border-violet-300/40 bg-violet-300/10 text-violet-100"
                   : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10",
@@ -645,14 +662,14 @@ const bestMoveCityId = useMemo(() => {
                   income: initialIncome > 0 ? initialIncome : DEFAULT_INPUTS.income,
                 })
               }
-              className="rounded-xl px-3 py-2 text-xs font-medium border border-red-300/40 bg-red-300/10 text-red-200 hover:bg-red-300/20"
+              className="rounded-xl border border-red-300/40 bg-red-300/10 px-3 py-2 text-xs font-medium text-red-200 hover:bg-red-300/20"
             >
               ↺ Reset
             </button>
           </div>
         </div>
 
-        <div className="mt-5 grid gap-y-3 gap-x-4 sm:grid-cols-2">
+        <div className="mt-5 grid gap-x-4 gap-y-3 sm:grid-cols-2">
           <Field
             label="Current age"
             value={inputs.age}
@@ -667,7 +684,7 @@ const bestMoveCityId = useMemo(() => {
           />
 
           <label className="block">
-            <div className="pt-[2px] mb-0.5 text-[11px] leading-tight font-medium text-slate-300">
+            <div className="mb-0.5 pt-[2px] text-[11px] font-medium leading-tight text-slate-300">
               State for tax estimate
             </div>
             <select
@@ -687,7 +704,7 @@ const bestMoveCityId = useMemo(() => {
           </label>
 
           <label className="block">
-            <div className="pt-[2px] mb-0.5 text-[11px] leading-tight font-medium text-slate-300">
+            <div className="mb-0.5 pt-[2px] text-[11px] font-medium leading-tight text-slate-300">
               Filing status
             </div>
             <select
@@ -723,8 +740,8 @@ const bestMoveCityId = useMemo(() => {
           />
 
           <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">
-            That’s about{" "}
-            <span className="font-semibold text-slate-200">{money(annualExp, 0)}</span> / year
+            That’s about <span className="font-semibold text-slate-200">{money(annualExp, 0)}</span>{" "}
+            / year
           </div>
 
           <Field
@@ -757,13 +774,13 @@ const bestMoveCityId = useMemo(() => {
             prefix="$"
           />
 
-          <div className="sm:col-start-2 -mt-1 text-xs text-slate-400">
+          <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">
             Leave blank to estimate savings from after-tax income.
           </div>
 
           {inputs.advanced ? (
             <>
-              <div className="sm:col-span-2 mt-2 text-xs font-semibold tracking-widest text-slate-300/80">
+              <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">
                 ACCOUNT BALANCES
               </div>
 
@@ -773,12 +790,14 @@ const bestMoveCityId = useMemo(() => {
                 onChange={(v) => setInputs((s) => ({ ...s, bal401k: clamp(v, 0, 50_000_000) }))}
                 prefix="$"
               />
+
               <Field
                 label="IRA balance"
                 value={inputs.balIra}
                 onChange={(v) => setInputs((s) => ({ ...s, balIra: clamp(v, 0, 50_000_000) }))}
                 prefix="$"
               />
+
               <Field
                 label="Brokerage balance"
                 value={inputs.balBrokerage}
@@ -788,26 +807,24 @@ const bestMoveCityId = useMemo(() => {
                 prefix="$"
               />
 
-              <div className="sm:col-span-2 mt-2 text-xs font-semibold tracking-widest text-slate-300/80">
+              <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">
                 YEARLY CONTRIBUTIONS
               </div>
 
               <Field
                 label="401(k) annual contribution"
                 value={inputs.contrib401k}
-                onChange={(v) =>
-                  setInputs((s) => ({ ...s, contrib401k: clamp(v, 0, 500_000) }))
-                }
+                onChange={(v) => setInputs((s) => ({ ...s, contrib401k: clamp(v, 0, 500_000) }))}
                 prefix="$"
               />
+
               <Field
                 label="IRA yearly contribution"
                 value={inputs.contribIra}
-                onChange={(v) =>
-                  setInputs((s) => ({ ...s, contribIra: clamp(v, 0, 500_000) }))
-                }
+                onChange={(v) => setInputs((s) => ({ ...s, contribIra: clamp(v, 0, 500_000) }))}
                 prefix="$"
               />
+
               <Field
                 label="Brokerage yearly contribution"
                 value={inputs.contribBrokerage}
@@ -817,7 +834,7 @@ const bestMoveCityId = useMemo(() => {
                 prefix="$"
               />
 
-              <div className="sm:col-span-2 mt-2 text-xs font-semibold tracking-widest text-slate-300/80">
+              <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">
                 TARGETING
               </div>
 
@@ -884,7 +901,7 @@ const bestMoveCityId = useMemo(() => {
             onChange={(v) => setInputs((s) => ({ ...s, maxYears: clamp(v, 1, 80) }))}
           />
 
-          <div className="sm:col-span-2 mt-2 rounded-xl border border-white/10 bg-black/20 p-4">
+          <div className="mt-2 rounded-xl border border-white/10 bg-black/20 p-4 sm:col-span-2">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <div className="text-sm font-semibold uppercase tracking-wide text-slate-200">
@@ -901,7 +918,7 @@ const bestMoveCityId = useMemo(() => {
               <button
                 onClick={() => setInputs((s) => ({ ...s, moveCompareOn: !s.moveCompareOn }))}
                 className={[
-                  "rounded-xl px-3 py-2 text-xs font-medium border",
+                  "rounded-xl border px-3 py-2 text-xs font-medium",
                   inputs.moveCompareOn
                     ? "border-emerald-300/40 bg-emerald-300/10 text-emerald-100"
                     : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10",
@@ -921,7 +938,8 @@ const bestMoveCityId = useMemo(() => {
                   }
                   prefix="$"
                 />
-                <div className="text-xs text-slate-400 self-end">
+
+                <div className="self-end text-xs text-slate-400">
                   Tip: Use your relocation calculator’s estimated monthly spending after the move.
                   <div className="mt-1">
                     Annual:{" "}
@@ -939,8 +957,7 @@ const bestMoveCityId = useMemo(() => {
           <div className="text-xs text-slate-300">Savings rate (net income vs expenses):</div>
           <div className="mt-1 text-lg font-semibold">{pct(savingsRate, 1)}</div>
           <div className="mt-2 text-xs text-slate-400">
-            Net income:{" "}
-            <span className="font-semibold text-slate-200">{money(netAnnual, 0)}</span>
+            Net income: <span className="font-semibold text-slate-200">{money(netAnnual, 0)}</span>
             {inputs.state ? (
               <>
                 {" "}
@@ -955,14 +972,46 @@ const bestMoveCityId = useMemo(() => {
             )}
           </div>
         </div>
+
+        <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+          <h3 className="text-lg font-semibold text-white">Frequently asked questions</h3>
+
+          <div className="mt-4 space-y-3">
+            {FAQS.map((faq, i) => {
+              const isOpen = openFaq === i;
+
+              return (
+                <div
+                  key={faq.q}
+                  className="overflow-hidden rounded-2xl border border-white/10 bg-white/5"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? null : i)}
+                    className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
+                  >
+                    <span className="text-sm font-medium text-white">{faq.q}</span>
+                    <span className="text-lg leading-none text-amber-400">
+                      {isOpen ? "−" : "+"}
+                    </span>
+                  </button>
+
+                  {isOpen ? (
+                    <div className="border-t border-white/10 px-4 py-4 text-sm leading-7 text-slate-300">
+                      {faq.a}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Results */}
       <div className="space-y-4">
         <div className="rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 to-slate-950/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
-          <h2 className="text-2xl font-bold tracking-tight text-white">
-            Your FIRE milestone
-          </h2>
+          <h2 className="text-2xl font-bold tracking-tight text-white">Your FIRE milestone</h2>
 
           <div className="mt-3 space-y-2">
             <p className="text-sm leading-6 text-slate-300 sm:text-base">
@@ -984,8 +1033,8 @@ const bestMoveCityId = useMemo(() => {
                 moveDeltaYears > 0 ? (
                   <>
                     If your monthly spending dropped to{" "}
-                    <strong>{money(inputs.movedExpensesMonthly, 0)}</strong> after a move,
-                    you could reach FIRE about <strong>{moveDeltaYears} years earlier</strong>.
+                    <strong>{money(inputs.movedExpensesMonthly, 0)}</strong> after a move, you
+                    could reach FIRE about <strong>{moveDeltaYears} years earlier</strong>.
                   </>
                 ) : moveDeltaYears < 0 ? (
                   <>
@@ -1058,7 +1107,9 @@ const bestMoveCityId = useMemo(() => {
                       ? `${Math.abs(targetDelta)} yrs ahead`
                       : `${targetDelta} yrs behind`
                 }
-                helper={hasCoreInputs ? `Target FIRE age: ${inputs.targetFireAge}` : "Available with inputs"}
+                helper={
+                  hasCoreInputs ? `Target FIRE age: ${inputs.targetFireAge}` : "Available with inputs"
+                }
               />
             ) : (
               <Stat
@@ -1073,6 +1124,26 @@ const bestMoveCityId = useMemo(() => {
                 }
               />
             )}
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+            <div className="text-sm font-semibold text-white">What this estimate includes</div>
+
+            <div className="mt-3 space-y-2">
+              <div>• FIRE number based on annual spending and withdrawal rate</div>
+              <div>• Estimated after-tax income by state and filing status</div>
+              <div>
+                • Portfolio growth using savings, contributions, returns, inflation, and salary
+                growth
+              </div>
+              <div>
+                • Move Impact using the same assumptions with different location-based spending
+              </div>
+            </div>
+
+            <div className="mt-3 text-xs text-slate-400">
+              Planning estimate only. Not financial or tax advice.
+            </div>
           </div>
         </div>
 
@@ -1094,11 +1165,10 @@ Calculated on https://RelocationByNumbers.com`;
               alert("Copy failed. Your browser may block clipboard access.");
             }
           }}
-          className="relative z-50 w-full rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm font-semibold text-emerald-100 hover:bg-emerald-400/20 transition"
+          className="relative z-50 w-full rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-400/20"
         >
           Share My FIRE Result
         </button>
-
 
         {inputs.moveCompareOn ? (
           <>
@@ -1157,76 +1227,74 @@ Calculated on https://RelocationByNumbers.com`;
         ) : null}
 
         <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4">
-          <div className="text-sm font-semibold text-amber-100">
-            🔥 Your FIRE age if you moved
-          </div>
+          <div className="text-sm font-semibold text-amber-100">🔥 Your FIRE age if you moved</div>
           <div className="mt-1 text-xs text-amber-100/80">
             Same income and investing assumptions, different city cost profile.
           </div>
-      <div className="mt-2 text-[11px] leading-5 text-amber-100/70">
-  These comparisons use your selected state’s major city as the baseline and adjust spending by each city’s cost profile.
-</div>
 
-<div className="mt-4 space-y-2">
-  {viralCityResults.map((row) => {
-    const isBest = row!.cityId === bestMoveCityId;
-
-    return (
-      <div
-        key={row!.cityId}
-        className={[
-          "flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm border",
-          isBest
-            ? "border-emerald-300/40 bg-emerald-300/10"
-            : "border-white/10 bg-black/20",
-        ].join(" ")}
-      >
-        <div className="text-slate-200">
-          {row!.cityName}, {row!.state}
-          {row!.isBaseline ? (
-            <span className="ml-2 text-[11px] text-slate-400">(current)</span>
-          ) : null}
-          {isBest ? (
-            <span className="ml-2 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
-              Best move
-            </span>
-          ) : null}
-        </div>
-
-        <div className="text-right">
-          {row!.yearsToFI !== null && result.yearsToFI !== null && !row!.isBaseline ? (
-            <div
-              className={[
-                "font-semibold",
-                (row!.deltaYears ?? 0) > 0
-                  ? "text-emerald-200"
-                  : (row!.deltaYears ?? 0) < 0
-                    ? "text-slate-300"
-                    : "text-slate-200",
-              ].join(" ")}
-            >
-              {(row!.deltaYears ?? 0) > 0
-                ? `${row!.deltaYears} yrs earlier`
-                : (row!.deltaYears ?? 0) < 0
-                  ? `${Math.abs(row!.deltaYears ?? 0)} yrs slower`
-                  : "Same timeline"}
-            </div>
-          ) : null}
-
-          <div className="mt-0.5 text-[12px] text-slate-300">
-            {netAnnual <= 0 || annualExpenses(inputs) <= 0 || inputs.age <= 0
-              ? "Enter inputs"
-              : row!.ageAtFI === null
-                ? "Not reached"
-                : `FIRE at ${row!.ageAtFI}`}
+          <div className="mt-2 text-[11px] leading-5 text-amber-100/70">
+            These comparisons use your selected state’s major city as the baseline and adjust
+            spending by each city’s cost profile.
           </div>
-        </div>
-      </div>
-    );
-  })}
-</div>
-         
-           
+
+          <div className="mt-4 space-y-2">
+            {viralCityResults.map((row) => {
+              const isBest = row!.cityId === bestMoveCityId;
+
+              return (
+                <div
+                  key={row!.cityId}
+                  className={[
+                    "flex items-center justify-between gap-3 rounded-xl border px-3 py-2 text-sm",
+                    isBest
+                      ? "border-emerald-300/40 bg-emerald-300/10"
+                      : "border-white/10 bg-black/20",
+                  ].join(" ")}
+                >
+                  <div className="text-slate-200">
+                    {row!.cityName}, {row!.state}
+                    {row!.isBaseline ? (
+                      <span className="ml-2 text-[11px] text-slate-400">(current)</span>
+                    ) : null}
+                    {isBest ? (
+                      <span className="ml-2 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
+                        Best move
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className="text-right">
+                    {row!.yearsToFI !== null && result.yearsToFI !== null && !row!.isBaseline ? (
+                      <div
+                        className={[
+                          "font-semibold",
+                          (row!.deltaYears ?? 0) > 0
+                            ? "text-emerald-200"
+                            : (row!.deltaYears ?? 0) < 0
+                              ? "text-slate-300"
+                              : "text-slate-200",
+                        ].join(" ")}
+                      >
+                        {(row!.deltaYears ?? 0) > 0
+                          ? `${row!.deltaYears} yrs earlier`
+                          : (row!.deltaYears ?? 0) < 0
+                            ? `${Math.abs(row!.deltaYears ?? 0)} yrs slower`
+                            : "Same timeline"}
+                      </div>
+                    ) : null}
+
+                    <div className="mt-0.5 text-[12px] text-slate-300">
+                      {netAnnual <= 0 || annualExpenses(inputs) <= 0 || inputs.age <= 0
+                        ? "Enter inputs"
+                        : row!.ageAtFI === null
+                          ? "Not reached"
+                          : `FIRE at ${row!.ageAtFI}`}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <div className="rounded-xl border border-white/10 bg-black/20 p-4">
@@ -1244,6 +1312,7 @@ Calculated on https://RelocationByNumbers.com`;
               style={{ width: `${Math.round(progress.pct * 100)}%` }}
             />
           </div>
+
           <div className="mt-2 text-xs text-slate-400">
             {Math.round(progress.pct * 100)}% funded
           </div>
@@ -1356,16 +1425,33 @@ Calculated on https://RelocationByNumbers.com`;
             </div>
           </div>
 
-        {!hasCoreInputs ? (
-  <div className="mt-3 text-xs leading-5 text-slate-400">
-    Tip: This table becomes more useful after you set your income, monthly expenses, and yearly contributions.
-  </div>
-) : null}
+          {!hasCoreInputs ? (
+            <div className="mt-3 text-xs leading-5 text-slate-400">
+              Tip: This table becomes more useful after you set your income, monthly expenses, and
+              yearly contributions.
+            </div>
+          ) : null}
         </div>
 
-        
+        {ADSENSE_SLOT_RESULTS ? (
+          <AdSenseBlock
+            slot={ADSENSE_SLOT_RESULTS}
+            className="rounded-2xl border border-white/10 bg-black/20 p-4"
+          />
+        ) : null}
 
+        {ADSENSE_SLOT_BOTTOM ? (
+          <AdSenseBlock
+            slot={ADSENSE_SLOT_BOTTOM}
+            className="rounded-2xl border border-white/10 bg-black/20 p-4"
+          />
+        ) : null}
 
+        <div className="grid gap-3 sm:grid-cols-2">
+          {AFFILIATES.map((a) => (
+            <AffiliateCard key={a.name} a={a} />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -1382,11 +1468,7 @@ function Stat({ label, value, helper }: { label: string; value: ReactNode; helpe
         {value}
       </div>
 
-      {helper ? (
-        <div className="mt-3 text-xs leading-5 text-slate-400">
-          {helper}
-        </div>
-      ) : null}
+      {helper ? <div className="mt-3 text-xs leading-5 text-slate-400">{helper}</div> : null}
     </div>
   );
 }
@@ -1412,7 +1494,7 @@ function Field({
 
   return (
     <label className="block">
-      <div className="mb-1 text-[11px] leading-tight font-medium text-slate-300">{label}</div>
+      <div className="mb-1 text-[11px] font-medium leading-tight text-slate-300">{label}</div>
       <div className="flex items-center rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 shadow-inner transition focus-within:border-emerald-400/50 focus-within:ring-4 focus-within:ring-emerald-400/10">
         {prefix ? <span className="mr-2 text-sm text-slate-400">{prefix}</span> : null}
         <input
