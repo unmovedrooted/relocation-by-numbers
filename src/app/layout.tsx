@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -30,25 +29,27 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-white text-slate-900 antialiased`}
       >
         <div className="flex min-h-screen flex-col">
-          <main className="flex-1">{children}</main>
+          <div className="border-b border-slate-200 bg-white">
+            <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-2 px-4 py-3 text-sm text-slate-500 sm:px-6 lg:px-8">
+              <a href="/about" className="transition hover:text-slate-900">
+                About
+              </a>
+              <span>•</span>
+              <a href="/disclaimer" className="transition hover:text-slate-900">
+                Disclaimer
+              </a>
+              <span>•</span>
+              <a href="/privacy" className="transition hover:text-slate-900">
+                Privacy
+              </a>
+              <span>•</span>
+              <a href="/terms" className="transition hover:text-slate-900">
+                Terms
+              </a>
+            </div>
+          </div>
 
-          <footer className="border-t border-slate-200 px-4 py-6 text-center text-xs text-slate-500">
-            <Link href="/about" className="hover:text-slate-700">
-              About
-            </Link>{" "}
-            •{" "}
-            <Link href="/disclaimer" className="hover:text-slate-700">
-              Disclaimer
-            </Link>{" "}
-            •{" "}
-            <Link href="/privacy" className="hover:text-slate-700">
-              Privacy
-            </Link>{" "}
-            •{" "}
-            <Link href="/terms" className="hover:text-slate-700">
-              Terms
-            </Link>
-          </footer>
+          <main className="flex-1">{children}</main>
         </div>
       </body>
     </html>
