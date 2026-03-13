@@ -4,6 +4,11 @@ import { notFound } from "next/navigation";
 import { STATES } from "@/lib/states";
 import { citiesForState } from "@/lib/cities";
 
+<div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+  <span className="h-2 w-2 rounded-full bg-emerald-400" />
+  Best State for FIRE
+</div>
+
 type PageProps = {
   params: Promise<{ state: string }>;
 };
@@ -52,6 +57,25 @@ export default async function BestStateForFirePage({ params }: PageProps) {
     const relatedStates = STATE_PAGES
     .filter((s) => s.slug !== found.slug)
     .slice(0, 6);
+
+      <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+    <a href="/about" className="transition hover:text-white">
+      About
+    </a>
+    <span>•</span>
+    <a href="/disclaimer" className="transition hover:text-white">
+      Disclaimer
+    </a>
+    <span>•</span>
+    <a href="/privacy" className="transition hover:text-white">
+      Privacy
+    </a>
+    <span>•</span>
+    <a href="/terms" className="transition hover:text-white">
+      Terms
+    </a>
+  </div>
+
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
