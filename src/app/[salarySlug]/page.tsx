@@ -89,6 +89,24 @@ export default async function FireWithSalaryPage({
             Can You Reach FIRE With a {label} Salary?
           </h1>
 
+            <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+    <a href="/about" className="transition hover:text-white">
+      About
+    </a>
+    <span>•</span>
+    <a href="/disclaimer" className="transition hover:text-white">
+      Disclaimer
+    </a>
+    <span>•</span>
+    <a href="/privacy" className="transition hover:text-white">
+      Privacy
+    </a>
+    <span>•</span>
+    <a href="/terms" className="transition hover:text-white">
+      Terms
+    </a>
+  </div>
+
           <p className="max-w-2xl text-sm text-slate-300 leading-relaxed">
             Reaching financial independence with a {label} salary depends on your
             savings rate, expenses, taxes, and cost of living. Lower expenses and
