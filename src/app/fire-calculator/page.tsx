@@ -17,6 +17,23 @@ export default function FireCalculatorPage() {
             <span className="h-2 w-2 rounded-full bg-emerald-400" />
             FIRE Calculator
           </div>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+      <a href="/about" className="transition hover:text-white">
+        About
+      </a>
+      <span>•</span>
+      <a href="/disclaimer" className="transition hover:text-white">
+        Disclaimer
+      </a>
+      <span>•</span>
+      <a href="/privacy" className="transition hover:text-white">
+        Privacy
+      </a>
+      <span>•</span>
+      <a href="/terms" className="transition hover:text-white">
+        Terms
+      </a>
+    </div>  
 
  <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
   See how taxes, expenses, and moving cities change your FIRE date
