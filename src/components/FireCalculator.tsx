@@ -1163,8 +1163,8 @@ Calculated on https://RelocationByNumbers.com`;
           <div className="mt-1 text-xs text-amber-100/80">
             Same income and investing assumptions, different city cost profile.
           </div>
-          <div className="mt-2 text-[11px] leading-5 text-amber-100/70">
-  Some cities can show a later FIRE age if the modeled spending increase outweighs any tax advantage.
+      <div className="mt-2 text-[11px] leading-5 text-amber-100/70">
+  These comparisons use your selected state’s major city as the baseline and adjust spending by each city’s cost profile.
 </div>
 
 <div className="mt-4 space-y-2">
