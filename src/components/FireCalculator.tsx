@@ -1493,25 +1493,29 @@ export default function FireCalculator({
 </div>
 
 
-            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
-              <div className="text-sm font-semibold text-white">What this estimate includes</div>
+           <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+  <div className="text-sm font-semibold text-white">What this estimate includes</div>
 
-              <div className="mt-3 space-y-2">
-                <div>• FIRE number based on annual spending and withdrawal rate</div>
-                <div>• Estimated after-tax income by state and filing status</div>
-                <div>
-                  • Portfolio growth using savings, contributions, returns, inflation, and salary
-                  growth
-                </div>
-                <div>
-                  • Move Impact using the same assumptions with different location-based spending
-                </div>
-              </div>
+  <div className="mt-3 space-y-2">
+    <div>• FIRE number based on your annual spending and selected withdrawal rate</div>
+    <div>
+      • Estimated after-tax income using your selected state, filing status, and 401(k)
+      contribution
+    </div>
+    <div>
+      • Portfolio growth based on current investments, contributions, returns, inflation, and
+      salary growth
+    </div>
+    <div>
+      • Move Impact using the same income and investing assumptions with different spending levels
+    </div>
+  </div>
 
-              <div className="mt-3 text-xs text-slate-400">
-                Planning estimate only. Not financial or tax advice.
-              </div>
-            </div>
+  <div className="mt-3 text-xs text-slate-400">
+    This is a planning estimate, not financial or tax advice. Tax and cost assumptions are
+    simplified for comparison purposes.
+  </div>
+</div>
 
             <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
               <div className="text-sm font-semibold text-white">Biggest FIRE drivers</div>
