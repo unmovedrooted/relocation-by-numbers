@@ -513,6 +513,8 @@ export default function FireCalculator({
     return { current, target, pct: p };
   }, [result.startPortfolio, result.fireNumber]);
 
+  const hasCoreInputs = inputs.age > 0 && inputs.income > 0 && inputs.expensesMonthly > 0;
+
   const progressHeadline = useMemo(() => {
     if (!hasCoreInputs) return "—";
     return `${Math.round(progress.pct * 100)}% of FIRE number`;
@@ -745,7 +747,7 @@ export default function FireCalculator({
     };
   }, [inputs, netAnnual, result.yearsToFI, viralCityResults]);
 
-  const hasCoreInputs = inputs.age > 0 && inputs.income > 0 && inputs.expensesMonthly > 0;
+ 
 
   return (
     <section className="space-y-4">
