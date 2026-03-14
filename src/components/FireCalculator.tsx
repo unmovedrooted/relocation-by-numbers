@@ -94,11 +94,12 @@ function pct(n: number, digits: number = 1) {
   return `${(n * 100).toFixed(digits)}%`;
 }
 
-function compactMoney(n: number) {
-  if (!Number.isFinite(n)) return "—";
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `$${Math.round(n / 1_000)}k`;
-  return `$${Math.round(n)}`;
+function impactLabel(yearsSaved: number | null) {
+  if (yearsSaved === null) return "—";
+  if (yearsSaved >= 5) return `high impact · save ${yearsSaved} years`;
+  if (yearsSaved >= 2) return `medium impact · save ${yearsSaved} years`;
+  if (yearsSaved >= 1) return `helpful · save ${yearsSaved} year`;
+  return "limited impact with current inputs";
 }
 
 const DEFAULT_INPUTS: Inputs = {
@@ -518,7 +519,7 @@ export default function FireCalculator({
   const progressHeadline = useMemo(() => {
     if (!hasCoreInputs) return "—";
     return `${Math.round(progress.pct * 100)}% of FIRE number`;
-  }, [progress.pct]);
+  }, [hasCoreInputs, progress.pct]);
 
   const progressSubline = useMemo(() => {
     if (!hasCoreInputs) return "Tracks progress toward your target portfolio.";
@@ -526,7 +527,7 @@ export default function FireCalculator({
       return `${money(progress.current, 0)} invested · On track for FIRE at ${fiAge}`;
     }
     return `${money(progress.current, 0)} invested · Keep adjusting your inputs to improve your path`;
-  }, [fiAge, progress.current]);
+  }, [hasCoreInputs, fiAge, progress.current]);
 
   const movedResult = useMemo(() => {
     if (!inputs.moveCompareOn) return null;
@@ -659,6 +660,19 @@ export default function FireCalculator({
     });
   }, [inputs, netAnnual]);
 
+  const currentSavingsRatePct = useMemo(() => {
+    return Math.round(savingsRate * 100);
+  }, [savingsRate]);
+
+  const nearestSavingsRateRow = useMemo(() => {
+    const rates = [10, 20, 30, 40, 50, 60, 70];
+    return rates.reduce((closest, rate) => {
+      return Math.abs(rate - currentSavingsRatePct) < Math.abs(closest - currentSavingsRatePct)
+        ? rate
+        : closest;
+    }, rates[0]);
+  }, [currentSavingsRatePct]);
+
   const biggestDrivers = useMemo(() => {
     const currentAnnualExpenses = annualExpenses(inputs);
     const moveSavingsYears =
@@ -747,10 +761,8 @@ export default function FireCalculator({
     };
   }, [inputs, netAnnual, result.yearsToFI, viralCityResults]);
 
- 
-
   return (
-    <section className="space-y-4">
+    <section className="space-y-6">
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1114,40 +1126,6 @@ export default function FireCalculator({
               )}
             </div>
           </div>
-
-          <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
-            <h3 className="text-lg font-semibold text-white">Frequently asked questions</h3>
-
-            <div className="mt-4 space-y-3">
-              {FAQS.map((faq, i) => {
-                const isOpen = openFaq === i;
-
-                return (
-                  <div
-                    key={faq.q}
-                    className="overflow-hidden rounded-2xl border border-white/10 bg-white/5"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setOpenFaq(isOpen ? null : i)}
-                      className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
-                    >
-                      <span className="text-sm font-medium text-white">{faq.q}</span>
-                      <span className="text-lg leading-none text-amber-400">
-                        {isOpen ? "−" : "+"}
-                      </span>
-                    </button>
-
-                    {isOpen ? (
-                      <div className="border-t border-white/10 px-4 py-4 text-sm leading-7 text-slate-300">
-                        {faq.a}
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </div>
 
         <div className="space-y-4">
@@ -1333,11 +1311,7 @@ export default function FireCalculator({
                     <strong>{money(fastestPath.lowerSpendingMonthly, 0)}</strong>
                   </span>
                   <span className="font-semibold text-emerald-200">
-                    {fastestPath.lowerSpendingYearsSaved === null
-                      ? "—"
-                      : fastestPath.lowerSpendingYearsSaved > 0
-                        ? `save ${fastestPath.lowerSpendingYearsSaved} years`
-                        : "small impact"}
+                    {impactLabel(fastestPath.lowerSpendingYearsSaved)}
                   </span>
                 </div>
 
@@ -1347,11 +1321,7 @@ export default function FireCalculator({
                     <strong>{money(fastestPath.higherContributionAnnual, 0)}</strong>
                   </span>
                   <span className="font-semibold text-emerald-200">
-                    {fastestPath.higherContributionYearsSaved === null
-                      ? "—"
-                      : fastestPath.higherContributionYearsSaved > 0
-                        ? `save ${fastestPath.higherContributionYearsSaved} years`
-                        : "small impact"}
+                    {impactLabel(fastestPath.higherContributionYearsSaved)}
                   </span>
                 </div>
 
@@ -1366,9 +1336,7 @@ export default function FireCalculator({
                     )}
                   </span>
                   <span className="font-semibold text-emerald-200">
-                    {fastestPath.bestMoveYearsSaved !== null && fastestPath.bestMoveYearsSaved > 0
-                      ? `save ${fastestPath.bestMoveYearsSaved} years`
-                      : "—"}
+                    {impactLabel(fastestPath.bestMoveYearsSaved)}
                   </span>
                 </div>
               </div>
@@ -1692,7 +1660,7 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
             </div>
 
             <div className="mt-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-slate-300">
-              Small changes in savings rate can move your FIRE date by years
+              Current savings rate: {pct(savingsRate, 1)} · nearest scenario highlighted below
             </div>
 
             <div className="mt-4 overflow-hidden rounded-xl border border-white/10">
@@ -1704,21 +1672,38 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
               </div>
 
               <div className="divide-y divide-white/10">
-                {savingsTable.map((row) => (
-                  <div
-                    key={row.savingsRatePct}
-                    className="grid grid-cols-4 items-center px-3 py-2 text-sm"
-                  >
-                    <div className="text-slate-200">{row.savingsRatePct}%</div>
-                    <div className="text-slate-200">{money(row.impliedExpenses, 0)}</div>
-                    <div className="text-slate-200">
-                      {netAnnual <= 0 ? "—" : row.yearsToFI === null ? "Not reached" : row.yearsToFI}
+                {savingsTable.map((row) => {
+                  const isCurrentRow = row.savingsRatePct === nearestSavingsRateRow;
+
+                  return (
+                    <div
+                      key={row.savingsRatePct}
+                      className={[
+                        "grid grid-cols-4 items-center px-3 py-2 text-sm",
+                        isCurrentRow ? "bg-emerald-300/10" : "",
+                      ].join(" ")}
+                    >
+                      <div className="text-slate-200">
+                        {row.savingsRatePct}%
+                        {isCurrentRow ? (
+                          <span className="ml-2 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
+                            You are here
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <div className="text-slate-200">{money(row.impliedExpenses, 0)}</div>
+
+                      <div className="text-slate-200">
+                        {netAnnual <= 0 ? "—" : row.yearsToFI === null ? "Not reached" : row.yearsToFI}
+                      </div>
+
+                      <div className="text-slate-200">
+                        {netAnnual <= 0 ? "—" : row.ageAtFI === null ? "—" : row.ageAtFI}
+                      </div>
                     </div>
-                    <div className="text-slate-200">
-                      {netAnnual <= 0 ? "—" : row.ageAtFI === null ? "—" : row.ageAtFI}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -1749,6 +1734,40 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
               <AffiliateCard key={a.name} a={a} />
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-white/10 bg-black/20 p-5">
+        <h3 className="text-lg font-semibold text-white">Frequently asked questions</h3>
+
+        <div className="mt-4 grid gap-3">
+          {FAQS.map((faq, i) => {
+            const isOpen = openFaq === i;
+
+            return (
+              <div
+                key={faq.q}
+                className="overflow-hidden rounded-2xl border border-white/10 bg-white/5"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq(isOpen ? null : i)}
+                  className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
+                >
+                  <span className="text-sm font-medium text-white">{faq.q}</span>
+                  <span className="text-lg leading-none text-amber-400">
+                    {isOpen ? "−" : "+"}
+                  </span>
+                </button>
+
+                {isOpen ? (
+                  <div className="border-t border-white/10 px-4 py-4 text-sm leading-7 text-slate-300">
+                    {faq.a}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
         </div>
       </section>
     </section>
