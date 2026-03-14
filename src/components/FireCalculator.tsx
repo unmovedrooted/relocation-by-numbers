@@ -8,7 +8,8 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  ReferenceLine,
+  CartesianGrid,
+  ReferenceDot,
 } from "recharts";
 
 import { STATES, type StateCode } from "@/lib/states";
@@ -61,7 +62,12 @@ type Inputs = {
   movedExpensesMonthly: number;
 };
 
-type ProjectionPoint = { year: number; age: number; portfolio: number };
+type ProjectionPoint = {
+  year: number;
+  age: number;
+  portfolio: number;
+  fireTarget: number;
+};
 
 type Affiliate = {
   name: string;
@@ -86,6 +92,13 @@ function money(n: number, digits: number = 0) {
 function pct(n: number, digits: number = 1) {
   if (!Number.isFinite(n)) return "—";
   return `${(n * 100).toFixed(digits)}%`;
+}
+
+function compactMoney(n: number) {
+  if (!Number.isFinite(n)) return "—";
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `$${Math.round(n / 1_000)}k`;
+  return `$${Math.round(n)}`;
 }
 
 const DEFAULT_INPUTS: Inputs = {
@@ -333,6 +346,7 @@ function simulateYearsToFI(
 function buildProjection(i: Inputs, netAnnualBase: number, yearsToFI: number | null) {
   const infl = (Number(i.inflationPct) || 0) / 100;
   const salG = (Number(i.salaryGrowthPct) || 0) / 100;
+  const swr = (Number(i.withdrawalRatePct) || 0) / 100;
 
   const { startPortfolio, annualContribution } = totals(i, netAnnualBase);
 
@@ -343,9 +357,15 @@ function buildProjection(i: Inputs, netAnnualBase: number, yearsToFI: number | n
   const points: ProjectionPoint[] = [];
   let portfolio = startPortfolio;
 
-  points.push({ year: 0, age: i.age, portfolio });
-
   const baseExpenses = annualExpenses(i);
+  const fireTarget0 = swr > 0 ? baseExpenses / swr : Infinity;
+
+  points.push({
+    year: 0,
+    age: i.age,
+    portfolio,
+    fireTarget: fireTarget0,
+  });
 
   for (let y = 1; y <= stopAt; y++) {
     const yearIndex = y - 1;
@@ -360,7 +380,16 @@ function buildProjection(i: Inputs, netAnnualBase: number, yearsToFI: number | n
     }
 
     portfolio = portfolio * (1 + r) + Math.max(0, contribThisYear);
-    points.push({ year: y, age: i.age + y, portfolio });
+
+    const nextExpenses = baseExpenses * Math.pow(1 + infl, y);
+    const fireTarget = swr > 0 ? nextExpenses / swr : Infinity;
+
+    points.push({
+      year: y,
+      age: i.age + y,
+      portfolio,
+      fireTarget,
+    });
   }
 
   return points;
@@ -466,6 +495,10 @@ export default function FireCalculator({
     [inputs, netAnnual, result.yearsToFI]
   );
 
+  const crossoverPoint = useMemo(() => {
+    return projection.find((p) => p.portfolio >= p.fireTarget) ?? null;
+  }, [projection]);
+
   const targetDelta = useMemo(() => {
     if (!inputs.advanced) return null;
     if (result.yearsToFI === null) return null;
@@ -479,6 +512,19 @@ export default function FireCalculator({
     const p = target > 0 && Number.isFinite(target) ? clamp(current / target, 0, 1) : 0;
     return { current, target, pct: p };
   }, [result.startPortfolio, result.fireNumber]);
+
+  const progressHeadline = useMemo(() => {
+    if (!hasCoreInputs) return "—";
+    return `${Math.round(progress.pct * 100)}% of FIRE number`;
+  }, [progress.pct]);
+
+  const progressSubline = useMemo(() => {
+    if (!hasCoreInputs) return "Tracks progress toward your target portfolio.";
+    if (fiAge !== null) {
+      return `${money(progress.current, 0)} invested · On track for FIRE at ${fiAge}`;
+    }
+    return `${money(progress.current, 0)} invested · Keep adjusting your inputs to improve your path`;
+  }, [fiAge, progress.current]);
 
   const movedResult = useMemo(() => {
     if (!inputs.moveCompareOn) return null;
@@ -702,10 +748,8 @@ export default function FireCalculator({
   const hasCoreInputs = inputs.age > 0 && inputs.income > 0 && inputs.expensesMonthly > 0;
 
   return (
-   
-     <section className="space-y-4">
-
-  <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+    <section className="space-y-4">
+      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -1210,15 +1254,9 @@ export default function FireCalculator({
                 />
               ) : (
                 <Stat
-                  label="Progress to FIRE"
-                  value={hasCoreInputs ? `${Math.round(progress.pct * 100)}%` : "—"}
-                  helper={
-                    hasCoreInputs
-                      ? `${money(progress.current, 0)} saved of ${
-                          Number.isFinite(progress.target) ? money(progress.target, 0) : "—"
-                        }`
-                      : "Tracks progress toward your FIRE number"
-                  }
+                  label="FIRE Progress"
+                  value={hasCoreInputs ? progressHeadline : "—"}
+                  helper={hasCoreInputs ? progressSubline : "Tracks progress toward your FIRE number"}
                 />
               )}
             </div>
@@ -1512,15 +1550,29 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
               </div>
             </div>
 
-            <div className="mt-3 h-2 w-full rounded-full bg-white/10">
+            <div className="mt-3 h-2.5 w-full rounded-full bg-white/10">
               <div
-                className="h-2 rounded-full bg-emerald-300"
+                className="h-2.5 rounded-full bg-emerald-300 transition-all"
                 style={{ width: `${Math.round(progress.pct * 100)}%` }}
               />
             </div>
 
-            <div className="mt-2 text-xs text-slate-400">
-              {Math.round(progress.pct * 100)}% funded
+            <div className="mt-3 text-sm font-medium text-slate-200">
+              {Math.round(progress.pct * 100)}% of FIRE number
+            </div>
+
+            <div className="mt-1 text-xs leading-5 text-slate-400">
+              {fiAge !== null ? (
+                <>
+                  {money(progress.current, 0)} invested so far · On track for FIRE at{" "}
+                  <span className="font-semibold text-slate-200">{fiAge}</span>
+                </>
+              ) : (
+                <>
+                  {money(progress.current, 0)} invested so far · This is your foundation, even if
+                  the target still looks far away
+                </>
+              )}
             </div>
           </div>
 
@@ -1534,15 +1586,22 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
               </div>
             </div>
 
-            <div className="mt-3 h-44 w-full">
+            <div className="mt-3 h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={projection} margin={{ top: 5, right: 10, bottom: 0, left: 0 }}>
-                  <XAxis dataKey="age" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis
-                    tick={{ fontSize: 11 }}
+                <LineChart data={projection} margin={{ top: 18, right: 24, bottom: 6, left: 6 }}>
+                  <CartesianGrid stroke="rgba(255,255,255,0.07)" vertical={false} />
+                  <XAxis
+                    dataKey="age"
+                    tick={{ fontSize: 12, fill: "rgba(148,163,184,0.95)" }}
                     axisLine={false}
                     tickLine={false}
-                    width={70}
+                    minTickGap={24}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12, fill: "rgba(148,163,184,0.95)" }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={74}
                     tickFormatter={(v) => {
                       const n = Number(v);
                       if (!Number.isFinite(n)) return "";
@@ -1552,10 +1611,13 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
                     }}
                   />
                   <Tooltip
-                    formatter={(value) => money(Number(value), 0)}
+                    formatter={(value, name) => [
+                      money(Number(value), 0),
+                      name === "portfolio" ? "Portfolio" : "FIRE target",
+                    ]}
                     labelFormatter={(label) => `Age ${label}`}
                     contentStyle={{
-                      background: "rgba(2,6,23,0.9)",
+                      background: "rgba(2,6,23,0.96)",
                       border: "1px solid rgba(255,255,255,0.12)",
                       borderRadius: 12,
                       color: "white",
@@ -1563,26 +1625,53 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
                     itemStyle={{ color: "white" }}
                     labelStyle={{ color: "rgba(226,232,240,0.9)" }}
                   />
-                  <ReferenceLine
-                    y={Number.isFinite(result.fireNumber) ? result.fireNumber : 0}
-                    stroke="rgba(226,232,240,0.55)"
-                    strokeDasharray="4 4"
+                  <Line
+                    type="monotone"
+                    dataKey="fireTarget"
+                    stroke="rgba(226,232,240,0.65)"
+                    strokeWidth={2}
+                    strokeDasharray="6 6"
+                    dot={false}
                   />
                   <Line
                     type="monotone"
                     dataKey="portfolio"
-                    stroke="currentColor"
-                    strokeWidth={2}
+                    stroke="rgb(110 231 183)"
+                    strokeWidth={3}
                     dot={false}
-                    className="text-emerald-300"
+                    activeDot={{ r: 5 }}
                   />
+                  {crossoverPoint ? (
+                    <ReferenceDot
+                      x={crossoverPoint.age}
+                      y={crossoverPoint.portfolio}
+                      r={6}
+                      fill="rgb(110 231 183)"
+                      stroke="rgb(15 23 42)"
+                      strokeWidth={2}
+                      label={{
+                        value: `FIRE at ${crossoverPoint.age} 🎯`,
+                        position: "top",
+                        fill: "rgb(209 250 229)",
+                        fontSize: 12,
+                        fontWeight: 600,
+                      }}
+                    />
+                  ) : null}
                 </LineChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="mt-2 text-xs leading-5 text-slate-400">
-              The dashed line shows your target FIRE number—the portfolio value needed to reach
-              financial independence based on your projected spending and withdrawal rate.
+            <div className="mt-3 text-xs leading-5 text-slate-400">
+              The green line shows your projected portfolio. The dashed line shows the FIRE target
+              needed over time as spending rises with inflation.
+              {crossoverPoint ? (
+                <>
+                  {" "}
+                  Your crossover point is marked at{" "}
+                  <span className="font-semibold text-slate-200">age {crossoverPoint.age}</span>.
+                </>
+              ) : null}
             </div>
           </div>
 
