@@ -9,7 +9,6 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  ReferenceDot,
 } from "recharts";
 
 import { STATES, type StateCode } from "@/lib/states";
@@ -344,7 +343,12 @@ function simulateYearsToFI(
   };
 }
 
-function buildProjection(i: Inputs, netAnnualBase: number, yearsToFI: number | null) {
+function buildProjectionWithExpenses(
+  i: Inputs,
+  netAnnualBase: number,
+  yearsToFI: number | null,
+  baseExpenses: number
+) {
   const infl = (Number(i.inflationPct) || 0) / 100;
   const salG = (Number(i.salaryGrowthPct) || 0) / 100;
   const swr = (Number(i.withdrawalRatePct) || 0) / 100;
@@ -358,7 +362,6 @@ function buildProjection(i: Inputs, netAnnualBase: number, yearsToFI: number | n
   const points: ProjectionPoint[] = [];
   let portfolio = startPortfolio;
 
-  const baseExpenses = annualExpenses(i);
   const fireTarget0 = swr > 0 ? baseExpenses / swr : Infinity;
 
   points.push({
@@ -394,6 +397,10 @@ function buildProjection(i: Inputs, netAnnualBase: number, yearsToFI: number | n
   }
 
   return points;
+}
+
+function buildProjection(i: Inputs, netAnnualBase: number, yearsToFI: number | null) {
+  return buildProjectionWithExpenses(i, netAnnualBase, yearsToFI, annualExpenses(i));
 }
 
 function AdSenseBlock({ slot, className = "" }: { slot: string; className?: string }) {
@@ -456,8 +463,9 @@ export default function FireCalculator({
   }));
 
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [pinnedCompareCityId, setPinnedCompareCityId] = useState<string | null>(null);
 
-  const annualExp = useMemo(() => annualExpenses(inputs), [inputs.expensesMonthly]);
+  const annualExp = useMemo(() => annualExpenses(inputs), [inputs]);
 
   const netAnnual = useMemo(() => {
     if (!inputs.state) return Math.max(0, inputs.income);
@@ -495,81 +503,6 @@ export default function FireCalculator({
     () => buildProjection(inputs, netAnnual, result.yearsToFI),
     [inputs, netAnnual, result.yearsToFI]
   );
-
-  const crossoverPoint = useMemo(() => {
-    return projection.find((p) => p.portfolio >= p.fireTarget) ?? null;
-  }, [projection]);
-
-  const targetDelta = useMemo(() => {
-    if (!inputs.advanced) return null;
-    if (result.yearsToFI === null) return null;
-    const targetYears = inputs.targetFireAge - inputs.age;
-    return result.yearsToFI - targetYears;
-  }, [inputs.advanced, inputs.targetFireAge, inputs.age, result.yearsToFI]);
-
-  const progress = useMemo(() => {
-    const current = Number(result.startPortfolio);
-    const target = Number(result.fireNumber);
-    const p = target > 0 && Number.isFinite(target) ? clamp(current / target, 0, 1) : 0;
-    return { current, target, pct: p };
-  }, [result.startPortfolio, result.fireNumber]);
-
-  const hasCoreInputs = inputs.age > 0 && inputs.income > 0 && inputs.expensesMonthly > 0;
-
-  const progressHeadline = useMemo(() => {
-    if (!hasCoreInputs) return "—";
-    return `${Math.round(progress.pct * 100)}% of FIRE number`;
-  }, [hasCoreInputs, progress.pct]);
-
-  const progressSubline = useMemo(() => {
-    if (!hasCoreInputs) return "Tracks progress toward your target portfolio.";
-    if (fiAge !== null) {
-      return `${money(progress.current, 0)} invested · On track for FIRE at ${fiAge}`;
-    }
-    return `${money(progress.current, 0)} invested · Keep adjusting your inputs to improve your path`;
-  }, [hasCoreInputs, fiAge, progress.current]);
-
-  const movedResult = useMemo(() => {
-    if (!inputs.moveCompareOn) return null;
-    return simulateYearsToFI(inputs, netAnnual, {
-      expensesAnnualBase: annualMovedExpenses(inputs),
-    });
-  }, [inputs, netAnnual]);
-
-  const movedFiAge = useMemo(() => {
-    if (!movedResult || movedResult.yearsToFI === null) return null;
-    return inputs.age + movedResult.yearsToFI;
-  }, [inputs.age, movedResult]);
-
-  const moveDeltaYears = useMemo(() => {
-    if (!inputs.moveCompareOn) return null;
-    if (fiAge === null || movedFiAge === null) return null;
-    return fiAge - movedFiAge;
-  }, [inputs.moveCompareOn, fiAge, movedFiAge]);
-
-  function applyPreset(p: Preset) {
-    if (p === "lean") {
-      setInputs((s) => ({
-        ...s,
-        preset: "lean",
-        expensesMonthly: s.expensesMonthly || 3000,
-        withdrawalRatePct: 4,
-      }));
-      return;
-    }
-
-    if (p === "fat") {
-      setInputs((s) => ({
-        ...s,
-        preset: "fat",
-        expensesMonthly: s.expensesMonthly || 10000,
-        withdrawalRatePct: 3.5,
-      }));
-      return;
-    }
-
-    setInputs((s) => ({ ...s, preset: "custom" }));
-  }
 
   const viralCityResults = useMemo(() => {
     const baseAnnualExpenses = annualExpenses(inputs);
@@ -629,6 +562,176 @@ export default function FireCalculator({
       return bDelta - aDelta;
     });
   }, [inputs, netAnnual, fiAge, result.yearsToFI]);
+
+  useEffect(() => {
+    if (!pinnedCompareCityId) return;
+
+    const stillVisible = viralCityResults.some((row) => row?.cityId === pinnedCompareCityId);
+
+    if (!stillVisible) {
+      setPinnedCompareCityId(null);
+    }
+  }, [pinnedCompareCityId, viralCityResults]);
+
+  const proposedComparison = useMemo(() => {
+    if (!pinnedCompareCityId) return null;
+
+    const baselineCityId = getBaselineCityIdForState(inputs.state);
+    const baseAnnualExpenses = annualExpenses(inputs);
+
+    const adjustedExpenses = expenseAdjustedForCity(
+      baseAnnualExpenses,
+      pinnedCompareCityId,
+      baselineCityId
+    );
+
+    const sim = simulateYearsToFI(inputs, netAnnual, {
+      expensesAnnualBase: adjustedExpenses,
+    });
+
+    const yearsToFI = sim.yearsToFI;
+    const ageAtFI = yearsToFI === null ? null : inputs.age + yearsToFI;
+
+    const projectionPoints = buildProjectionWithExpenses(
+      inputs,
+      netAnnual,
+      yearsToFI,
+      adjustedExpenses
+    );
+
+    const city = findCity(pinnedCompareCityId);
+
+    return {
+      city,
+      adjustedExpenses,
+      sim,
+      yearsToFI,
+      ageAtFI,
+      projectionPoints,
+    };
+  }, [pinnedCompareCityId, inputs, netAnnual]);
+
+  const comparisonChartData = useMemo(() => {
+    if (!proposedComparison) {
+      return projection.map((p) => ({
+        age: p.age,
+        currentPortfolio: p.portfolio,
+        currentFireTarget: p.fireTarget,
+      }));
+    }
+
+    const ageMap = new Map<
+      number,
+      {
+        age: number;
+        currentPortfolio?: number;
+        currentFireTarget?: number;
+        proposedPortfolio?: number;
+      }
+    >();
+
+    projection.forEach((p) => {
+      ageMap.set(p.age, {
+        ...(ageMap.get(p.age) || { age: p.age }),
+        age: p.age,
+        currentPortfolio: p.portfolio,
+        currentFireTarget: p.fireTarget,
+      });
+    });
+
+    proposedComparison.projectionPoints.forEach((p) => {
+      ageMap.set(p.age, {
+        ...(ageMap.get(p.age) || { age: p.age }),
+        age: p.age,
+        proposedPortfolio: p.portfolio,
+      });
+    });
+
+    return Array.from(ageMap.values()).sort((a, b) => a.age - b.age);
+  }, [projection, proposedComparison]);
+
+  const crossoverPoint = useMemo(() => {
+    return projection.find((p) => p.portfolio >= p.fireTarget) ?? null;
+  }, [projection]);
+
+  const targetDelta = useMemo(() => {
+    if (!inputs.advanced) return null;
+    if (result.yearsToFI === null) return null;
+    const targetYears = inputs.targetFireAge - inputs.age;
+    return result.yearsToFI - targetYears;
+  }, [inputs.advanced, inputs.targetFireAge, inputs.age, result.yearsToFI]);
+
+  const progress = useMemo(() => {
+    const current = Number(result.startPortfolio);
+    const target = Number(result.fireNumber);
+    const p = target > 0 && Number.isFinite(target) ? clamp(current / target, 0, 1) : 0;
+    return { current, target, pct: p };
+  }, [result.startPortfolio, result.fireNumber]);
+
+  const hasCoreInputs = inputs.age > 0 && inputs.income > 0 && inputs.expensesMonthly > 0;
+
+  const progressHeadline = useMemo(() => {
+    if (!hasCoreInputs) return "—";
+    return `${Math.round(progress.pct * 100)}% of FIRE number`;
+  }, [hasCoreInputs, progress.pct]);
+
+  const progressSubline = useMemo(() => {
+    if (!hasCoreInputs) return "Tracks progress toward your target portfolio.";
+    if (fiAge !== null) {
+      return `${money(progress.current, 0)} invested · On track for FIRE at ${fiAge}`;
+    }
+    return `${money(progress.current, 0)} invested · Keep adjusting your inputs to improve your path`;
+  }, [hasCoreInputs, fiAge, progress.current]);
+
+  const movedResult = useMemo(() => {
+    if (!inputs.moveCompareOn) return null;
+    return simulateYearsToFI(inputs, netAnnual, {
+      expensesAnnualBase: annualMovedExpenses(inputs),
+    });
+  }, [inputs, netAnnual]);
+
+  const movedFiAge = useMemo(() => {
+    if (!movedResult || movedResult.yearsToFI === null) return null;
+    return inputs.age + movedResult.yearsToFI;
+  }, [inputs.age, movedResult]);
+
+  const moveDeltaYears = useMemo(() => {
+    if (!inputs.moveCompareOn) return null;
+    if (fiAge === null || movedFiAge === null) return null;
+    return fiAge - movedFiAge;
+  }, [inputs.moveCompareOn, fiAge, movedFiAge]);
+
+ const comparisonYearsSaved = useMemo(() => {
+  if (fiAge === null) return null;
+  if (!proposedComparison) return null;
+  if (proposedComparison.ageAtFI === null) return null;
+
+  return fiAge - proposedComparison.ageAtFI;
+}, [fiAge, proposedComparison]);
+
+  function applyPreset(p: Preset) {
+    if (p === "lean") {
+      setInputs((s) => ({
+        ...s,
+        preset: "lean",
+        expensesMonthly: s.expensesMonthly || 3000,
+        withdrawalRatePct: 4,
+      }));
+      return;
+    }
+
+    if (p === "fat") {
+      setInputs((s) => ({
+        ...s,
+        preset: "fat",
+        expensesMonthly: s.expensesMonthly || 10000,
+        withdrawalRatePct: 3.5,
+      }));
+      return;
+    }
+
+    setInputs((s) => ({ ...s, preset: "custom" }));
+  }
 
   const bestMoveCityId = useMemo(() => {
     const candidates = viralCityResults.filter(
@@ -1082,50 +1185,159 @@ export default function FireCalculator({
                 </button>
               </div>
 
-              {inputs.moveCompareOn ? (
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <Field
-                    label="Projected monthly expenses after moving"
-                    value={inputs.movedExpensesMonthly}
-                    onChange={(v) =>
-                      setInputs((s) => ({ ...s, movedExpensesMonthly: clamp(v, 0, 200_000) }))
-                    }
-                    prefix="$"
-                  />
+             {inputs.moveCompareOn ? (
+  <>
+    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <Field
+        label="Projected monthly expenses after moving"
+        value={inputs.movedExpensesMonthly}
+        onChange={(v) =>
+          setInputs((s) => ({ ...s, movedExpensesMonthly: clamp(v, 0, 200_000) }))
+        }
+        prefix="$"
+      />
 
-                  <div className="self-end text-xs text-slate-400">
-                    Tip: Use your relocation calculator’s estimated monthly spending after the move.
-                    <div className="mt-1">
-                      Annual:{" "}
-                      <span className="font-semibold text-slate-200">
-                        {money(annualMovedExpenses(inputs), 0)}
-                      </span>
-                    </div>
-                  </div>
+      <div className="self-end text-xs text-slate-400">
+        Tip: Use your relocation calculator’s estimated monthly spending after the move.
+        <div className="mt-1">
+          Annual:{" "}
+          <span className="font-semibold text-slate-200">
+            {money(annualMovedExpenses(inputs), 0)}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div className="mt-4 grid gap-4">
+      <div className="rounded-xl border border-emerald-300/25 bg-emerald-300/10 p-4">
+        <div className="text-xs font-semibold tracking-widest text-emerald-100">
+          MOVE IMPACT
+        </div>
+
+        <div className="mt-3 grid gap-2 text-sm text-emerald-50">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-emerald-100/80">Current FIRE age</span>
+            <span className="font-semibold">{fiAge === null ? "—" : fiAge}</span>
+          </div>
+
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-emerald-100/80">FIRE age after move</span>
+            <span className="font-semibold">{movedFiAge === null ? "—" : movedFiAge}</span>
+          </div>
+
+          <div className="mt-1 flex items-center justify-between gap-3">
+            <span className="text-emerald-100/80">Moving accelerates FIRE by</span>
+            <span className="font-semibold">
+              {moveDeltaYears === null
+                ? "—"
+                : moveDeltaYears > 0
+                  ? `${moveDeltaYears} years`
+                  : moveDeltaYears === 0
+                    ? "0 years"
+                    : `${Math.abs(moveDeltaYears)} years slower`}
+            </span>
+          </div>
+
+          <div className="mt-2 text-xs text-emerald-100/70">
+            Same returns + salary growth assumptions, different expenses.
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4">
+        <div className="text-sm font-semibold text-emerald-100">
+          Thinking bigger than just moving?
+        </div>
+        <div className="mt-1 text-sm text-emerald-100/80">
+          See how a lower cost of living could shift your FIRE timeline.
+        </div>
+        <div className="mt-4">
+          <a
+            href="/"
+            className="inline-flex items-center justify-center rounded-xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:opacity-90"
+          >
+            Compare cities →
+          </a>
+        </div>
+      </div>
+    </div>
+  </>
+) : null}
+            </div>
+          </div>
+
+           <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+  <div className="flex items-center justify-between gap-3">
+    <div>
+      <div className="text-sm font-semibold text-white">
+        How your savings rate changes your FIRE timeline
+      </div>
+      <div className="mt-1 max-w-2xl text-xs leading-5 text-slate-400">
+        See how spending less and saving more could change the number of years until
+        financial independence. This table keeps your estimated after-tax income the same
+        and adjusts expenses to match each savings rate.
+      </div>
+    </div>
+  </div>
+
+  <div className="mt-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-slate-300">
+    Current savings rate: {pct(savingsRate, 1)} · nearest scenario highlighted below
+  </div>
+
+  <div className="mt-4 overflow-hidden rounded-xl border border-white/10">
+    <div className="grid grid-cols-[1.35fr_1.15fr_1fr_1fr] bg-white/5 px-3 py-2 text-[11px] font-semibold tracking-widest text-slate-300/80">
+      <div>SAVINGS RATE</div>
+      <div>ANNUAL SPENDING</div>
+      <div>YEARS TO FI</div>
+      <div>FIRE AGE</div>
+    </div>
+
+    <div className="divide-y divide-white/10">
+      {savingsTable.map((row) => {
+        const isCurrentRow = row.savingsRatePct === nearestSavingsRateRow;
+
+        return (
+          <div
+            key={row.savingsRatePct}
+            className={[
+              "grid grid-cols-[1.35fr_1.15fr_1fr_1fr] items-center px-3 py-3 text-sm",
+              isCurrentRow ? "bg-emerald-300/10" : "",
+            ].join(" ")}
+          >
+            <div className="text-slate-200">
+              <div className="font-medium">{row.savingsRatePct}%</div>
+              {isCurrentRow ? (
+                <div className="mt-1">
+                  <span className="inline-flex rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
+                    Current
+                  </span>
                 </div>
               ) : null}
             </div>
-          </div>
 
-          <div className="mt-5 rounded-xl border border-white/10 bg-black/20 p-4">
-            <div className="text-xs text-slate-300">Savings rate (net income vs expenses):</div>
-            <div className="mt-1 text-lg font-semibold">{pct(savingsRate, 1)}</div>
-            <div className="mt-2 text-xs text-slate-400">
-              Net income: <span className="font-semibold text-slate-200">{money(netAnnual, 0)}</span>
-              {inputs.state ? (
-                <>
-                  {" "}
-                  <span className="text-slate-500">•</span> Est. tax rate:{" "}
-                  <span className="font-semibold text-slate-200">{estTaxRate.toFixed(1)}%</span>
-                </>
-              ) : (
-                <>
-                  {" "}
-                  <span className="text-slate-500">•</span> Select a state to estimate taxes
-                </>
-              )}
+            <div className="text-slate-200">{money(row.impliedExpenses, 0)}</div>
+
+            <div className="text-slate-200">
+              {netAnnual <= 0 ? "—" : row.yearsToFI === null ? "Not reached" : row.yearsToFI}
+            </div>
+
+            <div className="text-slate-200">
+              {netAnnual <= 0 ? "—" : row.ageAtFI === null ? "—" : row.ageAtFI}
             </div>
           </div>
+        );
+      })}
+    </div>
+  </div>
+
+  {!hasCoreInputs ? (
+    <div className="mt-3 text-xs leading-5 text-slate-400">
+      Tip: This table becomes more useful after you set your income, monthly expenses, and
+      yearly contributions.
+    </div>
+  ) : null}
+</div>
+        
         </div>
 
         <div className="space-y-4">
@@ -1233,13 +1445,53 @@ export default function FireCalculator({
                   }
                 />
               ) : (
-                <Stat
-                  label="FIRE Progress"
-                  value={hasCoreInputs ? progressHeadline : "—"}
-                  helper={hasCoreInputs ? progressSubline : "Tracks progress toward your FIRE number"}
-                />
+               <Stat
+  label="Savings Rate"
+  value={hasCoreInputs ? pct(savingsRate, 1) : "—"}
+  helper={
+    hasCoreInputs
+      ? `${money(netAnnual, 0)} net income · ${estTaxRate.toFixed(1)}% est. tax rate`
+      : "Based on net income and annual spending"
+  }
+/>
               )}
             </div>
+
+            <div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-3">
+  <div className="flex items-center justify-between">
+    <div className="text-[11px] font-medium text-slate-300">Progress to FIRE</div>
+    <div className="text-[11px] text-slate-400">
+      {money(progress.current, 0)} /{" "}
+      {Number.isFinite(progress.target) ? money(progress.target, 0) : "—"}
+    </div>
+  </div>
+
+  <div className="mt-2 h-2 w-full rounded-full bg-white/10">
+    <div
+      className="h-2 rounded-full bg-emerald-300 transition-all"
+      style={{ width: `${Math.round(progress.pct * 100)}%` }}
+    />
+  </div>
+
+  <div className="mt-2 text-sm font-medium text-slate-200">
+    {Math.round(progress.pct * 100)}% of FIRE number
+  </div>
+
+  <div className="mt-1 text-[12px] leading-5 text-slate-400">
+    {fiAge !== null ? (
+      <>
+        {money(progress.current, 0)} invested so far · On track for FIRE at{" "}
+        <span className="font-semibold text-slate-200">{fiAge}</span>
+      </>
+    ) : (
+      <>
+        {money(progress.current, 0)} invested so far · This is your foundation, even if
+        the target still looks far away
+      </>
+    )}
+  </div>
+</div>
+
 
             <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
               <div className="text-sm font-semibold text-white">What this estimate includes</div>
@@ -1381,62 +1633,6 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
             Share My FIRE Result
           </button>
 
-          {inputs.moveCompareOn ? (
-            <>
-              <div className="rounded-xl border border-emerald-300/25 bg-emerald-300/10 p-4">
-                <div className="text-xs font-semibold tracking-widest text-emerald-100">
-                  MOVE IMPACT
-                </div>
-
-                <div className="mt-3 grid gap-2 text-sm text-emerald-50">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-emerald-100/80">Current FIRE age</span>
-                    <span className="font-semibold">{fiAge === null ? "—" : fiAge}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-emerald-100/80">FIRE age after move</span>
-                    <span className="font-semibold">{movedFiAge === null ? "—" : movedFiAge}</span>
-                  </div>
-
-                  <div className="mt-1 flex items-center justify-between gap-3">
-                    <span className="text-emerald-100/80">Moving accelerates FIRE by</span>
-                    <span className="font-semibold">
-                      {moveDeltaYears === null
-                        ? "—"
-                        : moveDeltaYears > 0
-                          ? `${moveDeltaYears} years`
-                          : moveDeltaYears === 0
-                            ? "0 years"
-                            : `${Math.abs(moveDeltaYears)} years slower`}
-                    </span>
-                  </div>
-
-                  <div className="mt-2 text-xs text-emerald-100/70">
-                    Same returns + salary growth assumptions, different expenses.
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-5">
-                <div className="text-sm font-semibold text-emerald-100">
-                  Thinking bigger than just moving?
-                </div>
-                <div className="mt-1 text-sm text-emerald-100/80">
-                  See how a lower cost of living could shift your FIRE timeline.
-                </div>
-                <div className="mt-4">
-                  <a
-                    href="/"
-                    className="inline-flex items-center justify-center rounded-xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:opacity-90"
-                  >
-                    Compare cities →
-                  </a>
-                </div>
-              </div>
-            </>
-          ) : null}
-
           <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4">
             <div className="text-sm font-semibold text-amber-100">
               🔥 How much a move could accelerate your FIRE timeline
@@ -1504,6 +1700,25 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
                             ? "Not reached"
                             : `FIRE at ${row!.ageAtFI}`}
                       </div>
+
+                      {!row!.isBaseline ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPinnedCompareCityId((current) =>
+                              current === row!.cityId ? null : row!.cityId
+                            )
+                          }
+                          className={[
+                            "mt-2 rounded-lg border px-2 py-1 text-[11px] font-medium transition",
+                            pinnedCompareCityId === row!.cityId
+                              ? "border-sky-300/40 bg-sky-300/10 text-sky-200"
+                              : "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10",
+                          ].join(" ")}
+                        >
+                          {pinnedCompareCityId === row!.cityId ? "Comparing" : "Compare"}
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 );
@@ -1511,40 +1726,14 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-            <div className="flex items-center justify-between">
-              <div className="text-xs font-medium text-slate-300">Progress to FIRE</div>
-              <div className="text-xs text-slate-400">
-                {money(progress.current, 0)} /{" "}
-                {Number.isFinite(progress.target) ? money(progress.target, 0) : "—"}
-              </div>
+      
+          {comparisonYearsSaved !== null && comparisonYearsSaved >= 5 ? (
+            <div className="rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100">
+              {comparisonYearsSaved >= 10
+                ? "That’s a decade of your life back."
+                : `You just brought FIRE forward by ${comparisonYearsSaved} years.`}
             </div>
-
-            <div className="mt-3 h-2.5 w-full rounded-full bg-white/10">
-              <div
-                className="h-2.5 rounded-full bg-emerald-300 transition-all"
-                style={{ width: `${Math.round(progress.pct * 100)}%` }}
-              />
-            </div>
-
-            <div className="mt-3 text-sm font-medium text-slate-200">
-              {Math.round(progress.pct * 100)}% of FIRE number
-            </div>
-
-            <div className="mt-1 text-xs leading-5 text-slate-400">
-              {fiAge !== null ? (
-                <>
-                  {money(progress.current, 0)} invested so far · On track for FIRE at{" "}
-                  <span className="font-semibold text-slate-200">{fiAge}</span>
-                </>
-              ) : (
-                <>
-                  {money(progress.current, 0)} invested so far · This is your foundation, even if
-                  the target still looks far away
-                </>
-              )}
-            </div>
-          </div>
+          ) : null}
 
           <div className="rounded-xl border border-white/10 bg-black/20 p-4">
             <div className="flex items-center justify-between">
@@ -1556,9 +1745,13 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
               </div>
             </div>
 
+
             <div className="mt-3 h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={projection} margin={{ top: 18, right: 24, bottom: 6, left: 6 }}>
+                <LineChart
+                  data={comparisonChartData}
+                  margin={{ top: 18, right: 24, bottom: 6, left: 6 }}
+                >
                   <CartesianGrid stroke="rgba(255,255,255,0.07)" vertical={false} />
                   <XAxis
                     dataKey="age"
@@ -1581,10 +1774,16 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
                     }}
                   />
                   <Tooltip
-                    formatter={(value, name) => [
-                      money(Number(value), 0),
-                      name === "portfolio" ? "Portfolio" : "FIRE target",
-                    ]}
+                    formatter={(value, name) => {
+                      const label =
+                        name === "currentPortfolio"
+                          ? "Current path"
+                          : name === "proposedPortfolio"
+                            ? "Proposed move"
+                            : "FIRE target";
+
+                      return [money(Number(value), 0), label];
+                    }}
                     labelFormatter={(label) => `Age ${label}`}
                     contentStyle={{
                       background: "rgba(2,6,23,0.96)",
@@ -1597,39 +1796,51 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
                   />
                   <Line
                     type="monotone"
-                    dataKey="fireTarget"
-                    stroke="rgba(226,232,240,0.65)"
+                    dataKey="currentFireTarget"
+                    stroke="rgba(226,232,240,0.55)"
                     strokeWidth={2}
                     strokeDasharray="6 6"
                     dot={false}
                   />
                   <Line
                     type="monotone"
-                    dataKey="portfolio"
+                    dataKey="currentPortfolio"
                     stroke="rgb(110 231 183)"
                     strokeWidth={3}
                     dot={false}
                     activeDot={{ r: 5 }}
                   />
-                  {crossoverPoint ? (
-                    <ReferenceDot
-                      x={crossoverPoint.age}
-                      y={crossoverPoint.portfolio}
-                      r={6}
-                      fill="rgb(110 231 183)"
-                      stroke="rgb(15 23 42)"
-                      strokeWidth={2}
-                      label={{
-                        value: `FIRE at ${crossoverPoint.age} 🎯`,
-                        position: "top",
-                        fill: "rgb(209 250 229)",
-                        fontSize: 12,
-                        fontWeight: 600,
-                      }}
+                  {proposedComparison ? (
+                    <Line
+                      type="monotone"
+                      dataKey="proposedPortfolio"
+                      stroke="rgb(56 189 248)"
+                      strokeWidth={3}
+                      dot={false}
+                      activeDot={{ r: 5 }}
                     />
                   ) : null}
                 </LineChart>
               </ResponsiveContainer>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-400">
+              <div className="inline-flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-300" />
+                Current path
+              </div>
+
+              {proposedComparison ? (
+                <div className="inline-flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-sky-400" />
+                  Proposed move
+                </div>
+              ) : null}
+
+              <div className="inline-flex items-center gap-2">
+                <span className="h-[2px] w-4 bg-slate-300/60" />
+                FIRE target
+              </div>
             </div>
 
             <div className="mt-3 text-xs leading-5 text-slate-400">
@@ -1643,79 +1854,6 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
                 </>
               ) : null}
             </div>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <div className="text-sm font-semibold text-white">
-                  How your savings rate changes your FIRE timeline
-                </div>
-                <div className="mt-1 max-w-2xl text-xs leading-5 text-slate-400">
-                  See how spending less and saving more could change the number of years until
-                  financial independence. This table keeps your estimated after-tax income the same
-                  and adjusts expenses to match each savings rate.
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-slate-300">
-              Current savings rate: {pct(savingsRate, 1)} · nearest scenario highlighted below
-            </div>
-
-           <div className="mt-4 overflow-hidden rounded-xl border border-white/10">
-  <div className="grid grid-cols-[1.35fr_1.15fr_1fr_1fr] bg-white/5 px-3 py-2 text-[11px] font-semibold tracking-widest text-slate-300/80">
-    <div>SAVINGS RATE</div>
-    <div>ANNUAL SPENDING</div>
-    <div>YEARS TO FI</div>
-    <div>FIRE AGE</div>
-  </div>
-
-  <div className="divide-y divide-white/10">
-    {savingsTable.map((row) => {
-      const isCurrentRow = row.savingsRatePct === nearestSavingsRateRow;
-
-      return (
-        <div
-          key={row.savingsRatePct}
-          className={[
-            "grid grid-cols-[1.35fr_1.15fr_1fr_1fr] items-center px-3 py-3 text-sm",
-            isCurrentRow ? "bg-emerald-300/10" : "",
-          ].join(" ")}
-        >
-          <div className="text-slate-200">
-            <div className="font-medium">{row.savingsRatePct}%</div>
-            {isCurrentRow ? (
-              <div className="mt-1">
-                <span className="inline-flex rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
-                  Current
-                </span>
-              </div>
-            ) : null}
-          </div>
-
-          <div className="text-slate-200">{money(row.impliedExpenses, 0)}</div>
-
-          <div className="text-slate-200">
-            {netAnnual <= 0 ? "—" : row.yearsToFI === null ? "Not reached" : row.yearsToFI}
-          </div>
-
-          <div className="text-slate-200">
-            {netAnnual <= 0 ? "—" : row.ageAtFI === null ? "—" : row.ageAtFI}
-          </div>
-        </div>
-      );
-    })}
-  </div>
-
-            </div>
-
-            {!hasCoreInputs ? (
-              <div className="mt-3 text-xs leading-5 text-slate-400">
-                Tip: This table becomes more useful after you set your income, monthly expenses, and
-                yearly contributions.
-              </div>
-            ) : null}
           </div>
 
           {ADSENSE_SLOT_RESULTS ? (
