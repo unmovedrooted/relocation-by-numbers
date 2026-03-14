@@ -1663,50 +1663,51 @@ Calculated on https://www.relocationbynumbers.com/fire-calculator`;
               Current savings rate: {pct(savingsRate, 1)} · nearest scenario highlighted below
             </div>
 
-            <div className="mt-4 overflow-hidden rounded-xl border border-white/10">
-              <div className="grid grid-cols-4 bg-white/5 px-3 py-2 text-[11px] font-semibold tracking-widest text-slate-300/80">
-                <div>SAVINGS RATE</div>
-                <div>ANNUAL SPENDING</div>
-                <div>YEARS TO FI</div>
-                <div>FIRE AGE</div>
+           <div className="mt-4 overflow-hidden rounded-xl border border-white/10">
+  <div className="grid grid-cols-[1.35fr_1.15fr_1fr_1fr] bg-white/5 px-3 py-2 text-[11px] font-semibold tracking-widest text-slate-300/80">
+    <div>SAVINGS RATE</div>
+    <div>ANNUAL SPENDING</div>
+    <div>YEARS TO FI</div>
+    <div>FIRE AGE</div>
+  </div>
+
+  <div className="divide-y divide-white/10">
+    {savingsTable.map((row) => {
+      const isCurrentRow = row.savingsRatePct === nearestSavingsRateRow;
+
+      return (
+        <div
+          key={row.savingsRatePct}
+          className={[
+            "grid grid-cols-[1.35fr_1.15fr_1fr_1fr] items-center px-3 py-3 text-sm",
+            isCurrentRow ? "bg-emerald-300/10" : "",
+          ].join(" ")}
+        >
+          <div className="text-slate-200">
+            <div className="font-medium">{row.savingsRatePct}%</div>
+            {isCurrentRow ? (
+              <div className="mt-1">
+                <span className="inline-flex rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
+                  Current
+                </span>
               </div>
+            ) : null}
+          </div>
 
-          <div className="divide-y divide-white/10">
-  {savingsTable.map((row) => {
-    const isCurrentRow = row.savingsRatePct === nearestSavingsRateRow;
+          <div className="text-slate-200">{money(row.impliedExpenses, 0)}</div>
 
-    return (
-      <div
-        key={row.savingsRatePct}
-        className={[
-          "grid grid-cols-4 items-center px-3 py-3 text-sm",
-          isCurrentRow ? "bg-emerald-300/10" : "",
-        ].join(" ")}
-      >
-        <div className="text-slate-200">
-          <div className="font-medium">{row.savingsRatePct}%</div>
-          {isCurrentRow ? (
-            <div className="mt-1">
-              <span className="inline-flex rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
-                Current
-              </span>
-            </div>
-          ) : null}
+          <div className="text-slate-200">
+            {netAnnual <= 0 ? "—" : row.yearsToFI === null ? "Not reached" : row.yearsToFI}
+          </div>
+
+          <div className="text-slate-200">
+            {netAnnual <= 0 ? "—" : row.ageAtFI === null ? "—" : row.ageAtFI}
+          </div>
         </div>
+      );
+    })}
+  </div>
 
-        <div className="text-slate-200">{money(row.impliedExpenses, 0)}</div>
-
-        <div className="text-slate-200">
-          {netAnnual <= 0 ? "—" : row.yearsToFI === null ? "Not reached" : row.yearsToFI}
-        </div>
-
-        <div className="text-slate-200">
-          {netAnnual <= 0 ? "—" : row.ageAtFI === null ? "—" : row.ageAtFI}
-        </div>
-      </div>
-    );
-  })}
-</div>
             </div>
 
             {!hasCoreInputs ? (
