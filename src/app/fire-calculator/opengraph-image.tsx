@@ -144,7 +144,7 @@ export default function Image() {
                     marginBottom: 8,
                   }}
                 >
-                  Example result
+                  Projected FIRE age
                 </div>
                 <div
                   style={{
@@ -206,7 +206,7 @@ export default function Image() {
                   marginBottom: 10,
                 }}
               >
-                Move impact
+                Why it changed
               </div>
               <div
                 style={{
@@ -226,7 +226,7 @@ export default function Image() {
                   marginTop: 10,
                 }}
               >
-                Lower taxes + lower monthly spending
+                Lower taxes + lower spending
               </div>
             </div>
 
