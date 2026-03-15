@@ -454,6 +454,25 @@ function AffiliateCard({ a }: { a: Affiliate }) {
   );
 }
 
+function InfoTip({ text }: { text: string }) {
+  return (
+    <span className="group relative ml-1 inline-flex align-middle">
+      <button
+        type="button"
+        tabIndex={0}
+        className="flex h-4 w-4 items-center justify-center rounded-full border border-white/15 bg-white/5 text-[10px] font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white"
+        aria-label={text}
+      >
+        i
+      </button>
+
+      <span className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden w-64 -translate-x-1/2 rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-[11px] leading-5 text-slate-200 shadow-2xl group-hover:block group-focus-within:block">
+        {text}
+      </span>
+    </span>
+  );
+}
+
 export default function FireCalculator({
   initialIncome = 0,
 }: FireCalculatorProps) {
@@ -935,9 +954,10 @@ export default function FireCalculator({
             />
 
             <label className="block">
-              <div className="mb-0.5 pt-[2px] text-[11px] font-medium leading-tight text-slate-300">
-                State for tax estimate
-              </div>
+             <div className="mb-0.5 flex items-center pt-[2px] text-[11px] font-medium leading-tight text-slate-300">
+  <span>State for tax estimate</span>
+  <InfoTip text="Used to estimate after-tax income with a simplified state-specific tax model for planning comparisons." />
+</div>
               <select
                 className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
                 value={inputs.state}
@@ -976,21 +996,23 @@ export default function FireCalculator({
               </select>
             </label>
 
-            <Field
-              label="401(k) contribution % (optional)"
-              value={inputs.k401Pct}
-              onChange={(v) => setInputs((s) => ({ ...s, k401Pct: clamp(v, 0, 60) }))}
-              suffix="%"
-            />
+        <Field
+  label="401(k) contribution % (optional)"
+  info="The percentage of your salary contributed to a 401(k). This can lower taxable income and affect take-home pay."
+  value={inputs.k401Pct}
+  onChange={(v) => setInputs((s) => ({ ...s, k401Pct: clamp(v, 0, 60) }))}
+  suffix="%"
+/>
 
             <Field
-              label="Monthly spending"
-              value={inputs.expensesMonthly}
-              onChange={(v) =>
-                setInputs((s) => ({ ...s, expensesMonthly: clamp(v, 0, 200_000) }))
-              }
-              prefix="$"
-            />
+  label="Monthly spending"
+  info="Your estimated monthly spending used to calculate your FIRE target. Higher spending means a larger FIRE number."
+  value={inputs.expensesMonthly}
+  onChange={(v) =>
+    setInputs((s) => ({ ...s, expensesMonthly: clamp(v, 0, 200_000) }))
+  }
+  prefix="$"
+/>
 
             <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">
               That’s about <span className="font-semibold text-slate-200">{money(annualExp, 0)}</span>{" "}
@@ -1013,19 +1035,20 @@ export default function FireCalculator({
             />
 
             <Field
-              label="Annual contributions (optional)"
-              value={inputs.yearlyInvestment}
-              onChange={(v) =>
-                setInputs((s) => {
-                  const next = { ...s, yearlyInvestment: clamp(v, 0, 5_000_000) };
-                  if (next.advanced && next.contribBrokerage === 0 && next.yearlyInvestment > 0) {
-                    next.contribBrokerage = next.yearlyInvestment;
-                  }
-                  return next;
-                })
-              }
-              prefix="$"
-            />
+  label="Annual contributions (optional)"
+  info="How much you expect to invest each year. Leave blank to let the calculator estimate savings from income minus expenses."
+  value={inputs.yearlyInvestment}
+  onChange={(v) =>
+    setInputs((s) => {
+      const next = { ...s, yearlyInvestment: clamp(v, 0, 5_000_000) };
+      if (next.advanced && next.contribBrokerage === 0 && next.yearlyInvestment > 0) {
+        next.contribBrokerage = next.yearlyInvestment;
+      }
+      return next;
+    })
+  }
+  prefix="$"
+/>
 
             <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">
               Leave blank to estimate savings from after-tax income.
@@ -1105,21 +1128,23 @@ export default function FireCalculator({
               </>
             ) : null}
 
-            <Field
-              label="Expected annual return (%) — Phase 1"
-              value={inputs.annualReturnPct}
-              onChange={(v) => setInputs((s) => ({ ...s, annualReturnPct: clamp(v, 0, 15) }))}
-              suffix="%"
-            />
+       <Field
+  label="Expected annual return (%) — Phase 1"
+  info="Your assumed yearly portfolio growth before Phase 2 begins. This is a planning estimate, not a guarantee."
+  value={inputs.annualReturnPct}
+  onChange={(v) => setInputs((s) => ({ ...s, annualReturnPct: clamp(v, 0, 15) }))}
+  suffix="%"
+/>
 
-            <Field
-              label="Withdrawal rate (%)"
-              value={inputs.withdrawalRatePct}
-              onChange={(v) =>
-                setInputs((s) => ({ ...s, withdrawalRatePct: clamp(v, 2, 6) }))
-              }
-              suffix="%"
-            />
+          <Field
+  label="Withdrawal rate (%)"
+  info="The percentage of your portfolio you plan to withdraw each year in retirement. Many FIRE plans use 4% as a starting point."
+  value={inputs.withdrawalRatePct}
+  onChange={(v) =>
+    setInputs((s) => ({ ...s, withdrawalRatePct: clamp(v, 2, 6) }))
+  }
+  suffix="%"
+/>
 
             <Field
               label="Inflation (%)"
@@ -1136,21 +1161,22 @@ export default function FireCalculator({
               }
               suffix="%"
             />
+<Field
+  label="Phase 2 starts after (years)"
+  info="The number of years before the calculator switches from Phase 1 return assumptions to Phase 2."
+  value={inputs.phase2StartsYear}
+  onChange={(v) =>
+    setInputs((s) => ({ ...s, phase2StartsYear: clamp(v, 0, 80) }))
+  }
+/>
 
-            <Field
-              label="Phase 2 starts after (years)"
-              value={inputs.phase2StartsYear}
-              onChange={(v) =>
-                setInputs((s) => ({ ...s, phase2StartsYear: clamp(v, 0, 80) }))
-              }
-            />
-
-            <Field
-              label="Expected annual return (%) — Phase 2"
-              value={inputs.phase2ReturnPct}
-              onChange={(v) => setInputs((s) => ({ ...s, phase2ReturnPct: clamp(v, 0, 15) }))}
-              suffix="%"
-            />
+           <Field
+  label="Expected annual return (%) — Phase 2"
+  info="A second investment return assumption for later years. Useful if you expect lower returns over time."
+  value={inputs.phase2ReturnPct}
+  onChange={(v) => setInputs((s) => ({ ...s, phase2ReturnPct: clamp(v, 0, 15) }))}
+  suffix="%"
+/>
 
             <Field
               label="Projection length (years)"
@@ -1949,12 +1975,14 @@ function Field({
   onChange,
   prefix,
   suffix,
+  info,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
   prefix?: string;
   suffix?: string;
+  info?: string;
 }) {
   const [raw, setRaw] = useState(value === 0 ? "" : String(value));
 
@@ -1964,7 +1992,11 @@ function Field({
 
   return (
     <label className="block">
-      <div className="mb-1 text-[11px] font-medium leading-tight text-slate-300">{label}</div>
+      <div className="mb-1 flex items-center text-[11px] font-medium leading-tight text-slate-300">
+        <span>{label}</span>
+        {info ? <InfoTip text={info} /> : null}
+      </div>
+
       <div className="flex items-center rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 shadow-inner transition focus-within:border-emerald-400/50 focus-within:ring-4 focus-within:ring-emerald-400/10">
         {prefix ? <span className="mr-2 text-sm text-slate-400">{prefix}</span> : null}
         <input
