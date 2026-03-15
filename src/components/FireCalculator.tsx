@@ -1226,16 +1226,15 @@ export default function FireCalculator({
           </div>
 
           <div className="mt-1 flex items-center justify-between gap-3">
-            <span className="text-emerald-100/80">Moving accelerates FIRE by</span>
-            <span className="font-semibold">
-              {moveDeltaYears === null
-                ? "—"
-                : moveDeltaYears > 0
-                  ? `${moveDeltaYears} years`
-                  : moveDeltaYears === 0
-                    ? "0 years"
-                    : `${Math.abs(moveDeltaYears)} years slower`}
-            </span>
+  <span className="text-emerald-100/80">
+    {moveDeltaYears === null
+      ? "Move impact"
+      : moveDeltaYears > 0
+        ? "Moving could bring FIRE forward by"
+        : moveDeltaYears < 0
+          ? "This move could delay FIRE by"
+          : "Move impact"}
+  </span>
           </div>
 
           <div className="mt-2 text-xs text-emerald-100/70">
@@ -1346,62 +1345,67 @@ export default function FireCalculator({
 
             <div className="mt-3 space-y-2">
               <p className="text-sm leading-6 text-slate-300 sm:text-base">
-                {result.yearsToFI === null || fiAge === null || fiYear === null ? (
-                  <>
-                    At your current pace, financial independence is not projected within{" "}
-                    <strong>{inputs.maxYears} years</strong>.
-                  </>
-                ) : (
-                  <>
-                    At your current pace, you could reach financial independence at age{" "}
-                    <strong>{fiAge}</strong> — around <strong>{fiYear}</strong>.
-                  </>
-                )}
-              </p>
+  {result.yearsToFI === null || fiAge === null || fiYear === null ? (
+    <>
+      At your current pace, financial independence is not projected within{" "}
+      <strong>{inputs.maxYears} years</strong>.
+    </>
+  ) : (
+    <>
+      At your current pace, you could reach financial independence at{" "}
+      <strong>age {fiAge}</strong>, in about{" "}
+      <strong>{result.yearsToFI} years</strong>, around{" "}
+      <strong>{fiYear}</strong>.
+    </>
+  )}
+</p>
 
-              <p className="text-sm leading-6 text-emerald-200/90">
-                {inputs.moveCompareOn && moveDeltaYears !== null && movedFiAge !== null ? (
-                  moveDeltaYears > 0 ? (
-                    <>
-                      If your monthly spending dropped to{" "}
-                      <strong>{money(inputs.movedExpensesMonthly, 0)}</strong> after a move, you
-                      could reach FIRE about <strong>{moveDeltaYears} years earlier</strong>.
-                    </>
-                  ) : moveDeltaYears < 0 ? (
-                    <>
-                      With post-move spending of{" "}
-                      <strong>{money(inputs.movedExpensesMonthly, 0)}</strong>, FIRE would be about{" "}
-                      <strong>{Math.abs(moveDeltaYears)} years slower</strong>.
-                    </>
-                  ) : (
-                    <>
-                      With post-move spending of{" "}
-                      <strong>{money(inputs.movedExpensesMonthly, 0)}</strong>, your FIRE timeline
-                      stays about the same.
-                    </>
-                  )
-                ) : (
-                  <>
-                    Compare another cost-of-living scenario to see how moving could bring your FIRE
-                    date closer.
-                  </>
-                )}
-              </p>
+       <p className="text-sm leading-6 text-emerald-200/90">
+  {inputs.moveCompareOn && moveDeltaYears !== null && movedFiAge !== null ? (
+    moveDeltaYears > 0 ? (
+      <>
+        If your monthly spending dropped to{" "}
+        <strong>{money(inputs.movedExpensesMonthly, 0)}</strong> after a move,
+        FIRE could move from <strong>age {fiAge}</strong> to{" "}
+        <strong>age {movedFiAge}</strong> — about{" "}
+        <strong>{moveDeltaYears} years sooner</strong>.
+      </>
+    ) : moveDeltaYears < 0 ? (
+      <>
+        With post-move spending of{" "}
+        <strong>{money(inputs.movedExpensesMonthly, 0)}</strong>, FIRE could shift
+        from <strong>age {fiAge}</strong> to <strong>age {movedFiAge}</strong> —
+        about <strong>{Math.abs(moveDeltaYears)} years slower</strong>.
+      </>
+    ) : (
+      <>
+        With post-move spending of{" "}
+        <strong>{money(inputs.movedExpensesMonthly, 0)}</strong>, your FIRE
+        timeline stays about the same.
+      </>
+    )
+  ) : (
+    <>
+      Compare another cost-of-living scenario to see how moving could bring your
+      FIRE timeline closer.
+    </>
+  )}
+</p>
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <Stat
-                label="Target FIRE Number"
+                label="FIRE Number"
                 value={
                   hasCoreInputs && Number.isFinite(result.fireNumber)
                     ? money(result.fireNumber, 0)
                     : "—"
                 }
-                helper={
-                  hasCoreInputs
-                    ? `Inflation-adjusted expenses ÷ ${inputs.withdrawalRatePct}%`
-                    : "Enter your core inputs to calculate"
-                }
+             helper={
+  hasCoreInputs
+    ? `Estimated target based on spending and a ${inputs.withdrawalRatePct}% withdrawal rate`
+    : "Enter your core inputs to calculate"
+}
               />
 
               <Stat
@@ -1414,18 +1418,22 @@ export default function FireCalculator({
                     : "—"
                 }
                 helper={
-                  !hasCoreInputs
-                    ? "Add age, income, and spending"
-                    : result.yearsToFI === null
-                      ? `Not hit within ${inputs.maxYears} years`
-                      : `Projected FI year: ${fiYear}`
-                }
+  !hasCoreInputs
+    ? "Add age, income, and spending"
+    : result.yearsToFI === null
+      ? `Not projected within ${inputs.maxYears} years`
+      : `Estimated FIRE year: ${fiYear}`
+}
               />
 
               <Stat
                 label="Estimated FIRE Age"
                 value={hasCoreInputs ? (fiAge === null ? "—" : `${fiAge}`) : "—"}
-                helper={hasCoreInputs ? "Approximate" : "Calculated after inputs are entered"}
+                helper={
+  hasCoreInputs
+    ? "Estimated age based on your current assumptions"
+    : "Calculated after inputs are entered"
+}
               />
 
               {inputs.advanced ? (
@@ -1448,11 +1456,11 @@ export default function FireCalculator({
                <Stat
   label="Savings Rate"
   value={hasCoreInputs ? pct(savingsRate, 1) : "—"}
-  helper={
-    hasCoreInputs
-      ? `${money(netAnnual, 0)} net income · ${estTaxRate.toFixed(1)}% est. tax rate`
-      : "Based on net income and annual spending"
-  }
+helper={
+  hasCoreInputs
+    ? `${money(netAnnual, 0)} estimated net income · ${estTaxRate.toFixed(1)}% estimated tax rate`
+    : "Based on estimated net income and annual spending"
+}
 />
               )}
             </div>
@@ -1494,7 +1502,7 @@ export default function FireCalculator({
 
 
            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
-  <div className="text-sm font-semibold text-white">What this estimate includes</div>
+  <div className="text-sm font-semibold text-white">Why this estimate is useful</div>
 
   <div className="mt-3 space-y-2">
     <div>• FIRE number based on your annual spending and selected withdrawal rate</div>
