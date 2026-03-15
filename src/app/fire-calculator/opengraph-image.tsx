@@ -1,5 +1,8 @@
 import { ImageResponse } from "next/og";
 
+export const runtime = "edge";
+export const dynamic = "force-dynamic";
+
 export const alt = "Relocation by Numbers FIRE Calculator";
 export const size = {
   width: 1200,
@@ -144,7 +147,7 @@ export default function Image() {
                     marginBottom: 8,
                   }}
                 >
-                  Projected FIRE age
+                  TEST 999
                 </div>
                 <div
                   style={{
@@ -174,7 +177,7 @@ export default function Image() {
                   fontWeight: 700,
                 }}
               >
-                15 years earlier
+                CACHE TEST
               </div>
             </div>
           </div>
@@ -206,7 +209,7 @@ export default function Image() {
                   marginBottom: 10,
                 }}
               >
-                Why it changed
+                HELLO TEST
               </div>
               <div
                 style={{
