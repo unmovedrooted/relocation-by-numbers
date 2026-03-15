@@ -5,6 +5,19 @@ export const metadata: Metadata = {
   title: "FIRE Calculator by Location | Compare Taxes, Spending, and FIRE Timeline",
   description:
     "Compare how taxes, spending, and moving cities can change your FIRE number, years to financial independence, and projected FIRE age.",
+      openGraph: {
+    title: "FIRE Calculator | Relocation by Numbers",
+    description:
+      "See how taxes, spending, and moving cities can change your FIRE date.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FIRE Calculator | Relocation by Numbers",
+    description:
+      "See how taxes, spending, and moving cities can change your FIRE date.",
+        },
+
 };
 
 export default function FireCalculatorPage() {
