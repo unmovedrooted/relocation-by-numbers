@@ -458,9 +458,11 @@ export default function FireCalculator({
     income: initialIncome > 0 ? initialIncome : DEFAULT_INPUTS.income,
   }));
 
- const [openFaq, setOpenFaq] = useState<number | null>(0);
+const [openFaq, setOpenFaq] = useState<number | null>(0);
 const [pinnedCompareCityId, setPinnedCompareCityId] = useState<string | null>(null);
 const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
+const [activeResultTab, setActiveResultTab] = useState<"milestone" | "move" | "savings">("milestone");
+
 
   const annualExp = useMemo(() => annualExpenses(inputs), [inputs]);
 
@@ -869,539 +871,532 @@ const baselineCity = useMemo(() => {
   }, [inputs, netAnnual, result.yearsToFI, viralCityResults]);
 
   return (
-    <section className="space-y-6">
-      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <div className="text-sm font-semibold tracking-tight text-white">Calculator inputs</div>
-              <div className="text-xs leading-5 text-slate-300">
-                Enter your income, spending, and investing assumptions to estimate your path to
-                financial independence.
-              </div>
-              <div className="mt-1 text-[11px] leading-5 text-slate-400">
-                Showing example values so you can see how the calculator works. Update them anytime
-                with your own numbers.
-              </div>
+  <section className="space-y-6">
+    <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="text-sm font-semibold tracking-tight text-white">Calculator inputs</div>
+            <div className="text-xs leading-5 text-slate-300">
+              Enter your income, spending, and investing assumptions to estimate your path to
+              financial independence.
             </div>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => applyPreset("custom")}
-                className={[
-                  "rounded-xl border px-3 py-2 text-xs font-medium",
-                  inputs.preset === "custom"
-                    ? "border-white/20 bg-white/10 text-white"
-                    : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10",
-                ].join(" ")}
-              >
-                Custom
-              </button>
-
-              <button
-                onClick={() => setInputs((s) => ({ ...s, advanced: !s.advanced }))}
-                className={[
-                  "rounded-xl border px-3 py-2 text-xs font-medium",
-                  inputs.advanced
-                    ? "border-violet-300/40 bg-violet-300/10 text-violet-100"
-                    : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10",
-                ].join(" ")}
-              >
-                {inputs.advanced ? "Advanced: ON" : "Advanced: OFF"}
-              </button>
-
-              <button
-                onClick={() =>
-                  setInputs({
-                    ...DEFAULT_INPUTS,
-                    income: initialIncome > 0 ? initialIncome : DEFAULT_INPUTS.income,
-                  })
-                }
-                className="rounded-xl border border-red-300/40 bg-red-300/10 px-3 py-2 text-xs font-medium text-red-200 hover:bg-red-300/20"
-              >
-                ↺ Reset
-              </button>
+            <div className="mt-1 text-[11px] leading-5 text-slate-400">
+              Showing example values so you can see how the calculator works. Update them anytime
+              with your own numbers.
             </div>
           </div>
 
-          <div className="mt-5 grid gap-x-4 gap-y-3 sm:grid-cols-2">
-            <Field
-              label="Current age"
-              value={inputs.age}
-              onChange={(v) => setInputs((s) => ({ ...s, age: clamp(v, 0, 100) }))}
-            />
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => applyPreset("custom")}
+              className={[
+                "rounded-xl border px-3 py-2 text-xs font-medium",
+                inputs.preset === "custom"
+                  ? "border-white/20 bg-white/10 text-white"
+                  : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10",
+              ].join(" ")}
+            >
+              Custom
+            </button>
 
-            <Field
-              label="Annual gross income"
-              value={inputs.income}
-              onChange={(v) => setInputs((s) => ({ ...s, income: clamp(v, 0, 2_000_000) }))}
-              prefix="$"
-            />
+            <button
+              onClick={() => setInputs((s) => ({ ...s, advanced: !s.advanced }))}
+              className={[
+                "rounded-xl border px-3 py-2 text-xs font-medium",
+                inputs.advanced
+                  ? "border-violet-300/40 bg-violet-300/10 text-violet-100"
+                  : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10",
+              ].join(" ")}
+            >
+              {inputs.advanced ? "Advanced: ON" : "Advanced: OFF"}
+            </button>
 
-            <label className="block">
-             <div className="mb-0.5 flex items-center pt-[2px] text-[11px] font-medium leading-tight text-slate-300">
-  <span>State for tax estimate</span>
-  <InfoTip text="Used to estimate after-tax income with a simplified state-specific tax model for planning comparisons." />
-</div>
-              <select
-                className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
-                value={inputs.state}
-                onChange={(e) =>
-                  setInputs((s) => ({ ...s, state: e.target.value as StateChoice }))
-                }
-              >
-                <option value="" disabled className="bg-slate-900 text-white">
-                  Select a state…
-                </option>
-                {STATES.map((st) => (
-                  <option key={st.code} value={st.code} className="bg-slate-900 text-white">
-                    {st.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="block">
-              <div className="mb-0.5 pt-[2px] text-[11px] font-medium leading-tight text-slate-300">
-                Filing status
-              </div>
-              <select
-                className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
-                value={inputs.filingStatus}
-                onChange={(e) =>
-                  setInputs((s) => ({ ...s, filingStatus: e.target.value as FilingStatus }))
-                }
-              >
-                <option value="single" className="bg-slate-900 text-white">
-                  Single
-                </option>
-                <option value="married" className="bg-slate-900 text-white">
-                  Married
-                </option>
-              </select>
-            </label>
-
-        <Field
-  label="401(k) contribution % (optional)"
-  info="The percentage of your salary contributed to a 401(k). This can lower taxable income and affect take-home pay."
-  value={inputs.k401Pct}
-  onChange={(v) => setInputs((s) => ({ ...s, k401Pct: clamp(v, 0, 60) }))}
-  suffix="%"
-/>
-
-            <Field
-  label="Monthly spending"
-  info="Your estimated monthly spending used to calculate your FIRE target. Higher spending means a larger FIRE number."
-  value={inputs.expensesMonthly}
-  onChange={(v) =>
-    setInputs((s) => ({ ...s, expensesMonthly: clamp(v, 0, 200_000) }))
-  }
-  prefix="$"
-/>
-
-            <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">
-              That’s about <span className="font-semibold text-slate-200">{money(annualExp, 0)}</span>{" "}
-              / year
-            </div>
-
-            <Field
-              label="Current invested portfolio"
-              value={inputs.currentPortfolio}
-              onChange={(v) =>
-                setInputs((s) => {
-                  const next = { ...s, currentPortfolio: clamp(v, 0, 20_000_000) };
-                  if (next.advanced && next.balBrokerage === 0 && next.currentPortfolio > 0) {
-                    next.balBrokerage = next.currentPortfolio;
-                  }
-                  return next;
+            <button
+              onClick={() =>
+                setInputs({
+                  ...DEFAULT_INPUTS,
+                  income: initialIncome > 0 ? initialIncome : DEFAULT_INPUTS.income,
                 })
               }
-              prefix="$"
-            />
+              className="rounded-xl border border-red-300/40 bg-red-300/10 px-3 py-2 text-xs font-medium text-red-200 hover:bg-red-300/20"
+            >
+              ↺ Reset
+            </button>
+          </div>
+        </div>
 
-            <Field
-  label="Annual contributions (optional)"
-  info="How much you expect to invest each year. Leave blank to let the calculator estimate savings from income minus expenses."
-  value={inputs.yearlyInvestment}
-  onChange={(v) =>
-    setInputs((s) => {
-      const next = { ...s, yearlyInvestment: clamp(v, 0, 5_000_000) };
-      if (next.advanced && next.contribBrokerage === 0 && next.yearlyInvestment > 0) {
-        next.contribBrokerage = next.yearlyInvestment;
-      }
-      return next;
-    })
-  }
-  prefix="$"
-/>
-
-            <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">
-              Leave blank to estimate savings from after-tax income.
-            </div>
-
-            {inputs.advanced ? (
-              <>
-                <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">
-                  ACCOUNT BALANCES
-                </div>
-
-                <Field
-                  label="401(k) balance"
-                  value={inputs.bal401k}
-                  onChange={(v) => setInputs((s) => ({ ...s, bal401k: clamp(v, 0, 50_000_000) }))}
-                  prefix="$"
-                />
-
-                <Field
-                  label="IRA balance"
-                  value={inputs.balIra}
-                  onChange={(v) => setInputs((s) => ({ ...s, balIra: clamp(v, 0, 50_000_000) }))}
-                  prefix="$"
-                />
-
-                <Field
-                  label="Brokerage balance"
-                  value={inputs.balBrokerage}
-                  onChange={(v) =>
-                    setInputs((s) => ({ ...s, balBrokerage: clamp(v, 0, 50_000_000) }))
-                  }
-                  prefix="$"
-                />
-
-                <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">
-                  YEARLY CONTRIBUTIONS
-                </div>
-
-                <Field
-                  label="401(k) annual contribution"
-                  value={inputs.contrib401k}
-                  onChange={(v) =>
-                    setInputs((s) => ({ ...s, contrib401k: clamp(v, 0, 500_000) }))
-                  }
-                  prefix="$"
-                />
-
-                <Field
-                  label="IRA yearly contribution"
-                  value={inputs.contribIra}
-                  onChange={(v) =>
-                    setInputs((s) => ({ ...s, contribIra: clamp(v, 0, 500_000) }))
-                  }
-                  prefix="$"
-                />
-
-                <Field
-                  label="Brokerage yearly contribution"
-                  value={inputs.contribBrokerage}
-                  onChange={(v) =>
-                    setInputs((s) => ({ ...s, contribBrokerage: clamp(v, 0, 5_000_000) }))
-                  }
-                  prefix="$"
-                />
-
-                <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">
-                  TARGETING
-                </div>
-
-                <Field
-                  label="Target FIRE age"
-                  value={inputs.targetFireAge}
-                  onChange={(v) =>
-                    setInputs((s) => ({ ...s, targetFireAge: clamp(v, inputs.age, 100) }))
-                  }
-                />
-              </>
-            ) : null}
-
-       <Field
-  label="Expected annual return (%) — Phase 1"
-  info="Your assumed yearly portfolio growth before Phase 2 begins. This is a planning estimate, not a guarantee."
-  value={inputs.annualReturnPct}
-  onChange={(v) => setInputs((s) => ({ ...s, annualReturnPct: clamp(v, 0, 15) }))}
-  suffix="%"
-/>
+        <div className="mt-5 grid gap-x-4 gap-y-3 sm:grid-cols-2">
+          <Field
+            label="Current age"
+            value={inputs.age}
+            onChange={(v) => setInputs((s) => ({ ...s, age: clamp(v, 0, 100) }))}
+          />
 
           <Field
-  label="Withdrawal rate (%)"
-  info="The percentage of your portfolio you plan to withdraw each year in retirement. Many FIRE plans use 4% as a starting point."
-  value={inputs.withdrawalRatePct}
-  onChange={(v) =>
-    setInputs((s) => ({ ...s, withdrawalRatePct: clamp(v, 2, 6) }))
-  }
-  suffix="%"
-/>
+            label="Annual gross income"
+            value={inputs.income}
+            onChange={(v) => setInputs((s) => ({ ...s, income: clamp(v, 0, 2_000_000) }))}
+            prefix="$"
+          />
 
-            <Field
-              label="Inflation (%)"
-              value={inputs.inflationPct}
-              onChange={(v) => setInputs((s) => ({ ...s, inflationPct: clamp(v, 0, 10) }))}
-              suffix="%"
-            />
-
-            <Field
-              label="Salary growth (%) — income grows"
-              value={inputs.salaryGrowthPct}
-              onChange={(v) =>
-                setInputs((s) => ({ ...s, salaryGrowthPct: clamp(v, 0, 15) }))
+          <label className="block">
+            <div className="mb-0.5 flex items-center pt-[2px] text-[11px] font-medium leading-tight text-slate-300">
+              <span>State for tax estimate</span>
+              <InfoTip text="Used to estimate after-tax income with a simplified state-specific tax model for planning comparisons." />
+            </div>
+            <select
+              className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
+              value={inputs.state}
+              onChange={(e) =>
+                setInputs((s) => ({ ...s, state: e.target.value as StateChoice }))
               }
-              suffix="%"
-            />
-<Field
-  label="Phase 2 starts after (years)"
-  info="The number of years before the calculator switches from Phase 1 return assumptions to Phase 2."
-  value={inputs.phase2StartsYear}
-  onChange={(v) =>
-    setInputs((s) => ({ ...s, phase2StartsYear: clamp(v, 0, 80) }))
-  }
-/>
+            >
+              <option value="" disabled className="bg-slate-900 text-white">
+                Select a state…
+              </option>
+              {STATES.map((st) => (
+                <option key={st.code} value={st.code} className="bg-slate-900 text-white">
+                  {st.name}
+                </option>
+              ))}
+            </select>
+          </label>
 
-           <Field
-  label="Expected annual return (%) — Phase 2"
-  info="A second investment return assumption for later years. Useful if you expect lower returns over time."
-  value={inputs.phase2ReturnPct}
-  onChange={(v) => setInputs((s) => ({ ...s, phase2ReturnPct: clamp(v, 0, 15) }))}
-  suffix="%"
-/>
+          <label className="block">
+            <div className="mb-0.5 pt-[2px] text-[11px] font-medium leading-tight text-slate-300">
+              Filing status
+            </div>
+            <select
+              className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
+              value={inputs.filingStatus}
+              onChange={(e) =>
+                setInputs((s) => ({ ...s, filingStatus: e.target.value as FilingStatus }))
+              }
+            >
+              <option value="single" className="bg-slate-900 text-white">
+                Single
+              </option>
+              <option value="married" className="bg-slate-900 text-white">
+                Married
+              </option>
+            </select>
+          </label>
 
-            <Field
-              label="Projection length (years)"
-              value={inputs.maxYears}
-              onChange={(v) => setInputs((s) => ({ ...s, maxYears: clamp(v, 1, 80) }))}
-            />
+          <Field
+            label="401(k) contribution % (optional)"
+            info="The percentage of your salary contributed to a 401(k). This can lower taxable income and affect take-home pay."
+            value={inputs.k401Pct}
+            onChange={(v) => setInputs((s) => ({ ...s, k401Pct: clamp(v, 0, 60) }))}
+            suffix="%"
+          />
 
-            <div className="mt-2 rounded-xl border border-white/10 bg-black/20 p-4 sm:col-span-2">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <div className="text-sm font-semibold uppercase tracking-wide text-slate-200">
-                    How moving could change your FIRE timeline
-                  </div>
-                  <div className="mt-1 max-w-2xl text-xs leading-5 text-slate-400">
-                    Most people pursuing FIRE focus on saving more. But geography may be one of the
-                    most powerful levers you can pull. See how your projected FIRE age changes when
-                    you move from a higher-cost city to a lower-cost one—using the same income, the
-                    same investing habits, and a different cost of living.
-                  </div>
-                </div>
+          <Field
+            label="Monthly spending"
+            info="Your estimated monthly spending used to calculate your FIRE target. Higher spending means a larger FIRE number."
+            value={inputs.expensesMonthly}
+            onChange={(v) =>
+              setInputs((s) => ({ ...s, expensesMonthly: clamp(v, 0, 200_000) }))
+            }
+            prefix="$"
+          />
 
-                <button
-                  onClick={() => setInputs((s) => ({ ...s, moveCompareOn: !s.moveCompareOn }))}
-                  className={[
-                    "rounded-xl border px-3 py-2 text-xs font-medium",
-                    inputs.moveCompareOn
-                      ? "border-emerald-300/40 bg-emerald-300/10 text-emerald-100"
-                      : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10",
-                  ].join(" ")}
-                >
-                  {inputs.moveCompareOn ? "Hide city comparison" : "Compare cities"}
-                </button>
+          <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">
+            That’s about{" "}
+            <span className="font-semibold text-slate-200">{money(annualExp, 0)}</span> / year
+          </div>
+
+          <Field
+            label="Current invested portfolio"
+            value={inputs.currentPortfolio}
+            onChange={(v) =>
+              setInputs((s) => {
+                const next = { ...s, currentPortfolio: clamp(v, 0, 20_000_000) };
+                if (next.advanced && next.balBrokerage === 0 && next.currentPortfolio > 0) {
+                  next.balBrokerage = next.currentPortfolio;
+                }
+                return next;
+              })
+            }
+            prefix="$"
+          />
+
+          <Field
+            label="Annual contributions (optional)"
+            info="How much you expect to invest each year. Leave blank to let the calculator estimate savings from income minus expenses."
+            value={inputs.yearlyInvestment}
+            onChange={(v) =>
+              setInputs((s) => {
+                const next = { ...s, yearlyInvestment: clamp(v, 0, 5_000_000) };
+                if (next.advanced && next.contribBrokerage === 0 && next.yearlyInvestment > 0) {
+                  next.contribBrokerage = next.yearlyInvestment;
+                }
+                return next;
+              })
+            }
+            prefix="$"
+          />
+
+          <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">
+            Leave blank to estimate savings from after-tax income.
+          </div>
+
+          {inputs.advanced ? (
+            <>
+              <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">
+                ACCOUNT BALANCES
               </div>
 
-             {inputs.moveCompareOn ? (
-  <>
-    <div className="mt-4 grid gap-4 sm:grid-cols-2">
-      <Field
-        label="Projected monthly expenses after moving"
-        value={inputs.movedExpensesMonthly}
-        onChange={(v) =>
-          setInputs((s) => ({ ...s, movedExpensesMonthly: clamp(v, 0, 200_000) }))
-        }
-        prefix="$"
-      />
+              <Field
+                label="401(k) balance"
+                value={inputs.bal401k}
+                onChange={(v) => setInputs((s) => ({ ...s, bal401k: clamp(v, 0, 50_000_000) }))}
+                prefix="$"
+              />
 
-      <div className="self-end text-xs text-slate-400">
-        Tip: Use your relocation calculator’s estimated monthly spending after the move.
-        <div className="mt-1">
-          Annual:{" "}
-          <span className="font-semibold text-slate-200">
-            {money(annualMovedExpenses(inputs), 0)}
-          </span>
-        </div>
-      </div>
-    </div>
+              <Field
+                label="IRA balance"
+                value={inputs.balIra}
+                onChange={(v) => setInputs((s) => ({ ...s, balIra: clamp(v, 0, 50_000_000) }))}
+                prefix="$"
+              />
 
-    <div className="mt-4 grid gap-4">
-      <div className="rounded-xl border border-emerald-300/25 bg-emerald-300/10 p-4">
-        <div className="text-xs font-semibold tracking-widest text-emerald-100">
-          MOVE IMPACT
-        </div>
+              <Field
+                label="Brokerage balance"
+                value={inputs.balBrokerage}
+                onChange={(v) =>
+                  setInputs((s) => ({ ...s, balBrokerage: clamp(v, 0, 50_000_000) }))
+                }
+                prefix="$"
+              />
 
-        <div className="mt-3 grid gap-2 text-sm text-emerald-50">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-emerald-100/80">Current FIRE age</span>
-            <span className="font-semibold">{fiAge === null ? "—" : fiAge}</span>
-          </div>
+              <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">
+                YEARLY CONTRIBUTIONS
+              </div>
 
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-emerald-100/80">FIRE age after move</span>
-            <span className="font-semibold">{movedFiAge === null ? "—" : movedFiAge}</span>
-          </div>
+              <Field
+                label="401(k) annual contribution"
+                value={inputs.contrib401k}
+                onChange={(v) =>
+                  setInputs((s) => ({ ...s, contrib401k: clamp(v, 0, 500_000) }))
+                }
+                prefix="$"
+              />
 
-          <div className="mt-1 flex items-center justify-between gap-3">
-  <span className="text-emerald-100/80">
-    {moveDeltaYears === null
-      ? "Move impact"
-      : moveDeltaYears > 0
-        ? "Moving could bring FIRE forward by"
-        : moveDeltaYears < 0
-          ? "This move could delay FIRE by"
-          : "Move impact"}
-  </span>
-          </div>
+              <Field
+                label="IRA yearly contribution"
+                value={inputs.contribIra}
+                onChange={(v) =>
+                  setInputs((s) => ({ ...s, contribIra: clamp(v, 0, 500_000) }))
+                }
+                prefix="$"
+              />
 
-          <div className="mt-2 text-xs text-emerald-100/70">
-            Same returns + salary growth assumptions, different expenses.
-          </div>
-        </div>
-      </div>
+              <Field
+                label="Brokerage yearly contribution"
+                value={inputs.contribBrokerage}
+                onChange={(v) =>
+                  setInputs((s) => ({ ...s, contribBrokerage: clamp(v, 0, 5_000_000) }))
+                }
+                prefix="$"
+              />
 
-      <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4">
-        <div className="text-sm font-semibold text-emerald-100">
-          Thinking bigger than just moving?
-        </div>
-        <div className="mt-1 text-sm text-emerald-100/80">
-          See how a lower cost of living could shift your FIRE timeline.
-        </div>
-        <div className="mt-4">
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:opacity-90"
-          >
-            Compare cities →
-          </a>
-        </div>
-      </div>
-    </div>
-  </>
-) : null}
-            </div>
-          </div>
+              <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">
+                TARGETING
+              </div>
 
-           <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-  <div className="flex items-center justify-between gap-3">
-    <div>
-      <div className="text-sm font-semibold text-white">
-        How your savings rate changes your FIRE timeline
-      </div>
-      <div className="mt-1 max-w-2xl text-xs leading-5 text-slate-400">
-        See how spending less and saving more could change the number of years until
-        financial independence. This table keeps your estimated after-tax income the same
-        and adjusts expenses to match each savings rate.
-      </div>
-    </div>
-  </div>
+              <Field
+                label="Target FIRE age"
+                value={inputs.targetFireAge}
+                onChange={(v) =>
+                  setInputs((s) => ({ ...s, targetFireAge: clamp(v, inputs.age, 100) }))
+                }
+              />
+            </>
+          ) : null}
 
-  <div className="mt-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-slate-300">
-    Current savings rate: {pct(savingsRate, 1)} · nearest scenario highlighted below
-  </div>
+          <Field
+            label="Expected annual return (%) — Phase 1"
+            info="Your assumed yearly portfolio growth before Phase 2 begins. This is a planning estimate, not a guarantee."
+            value={inputs.annualReturnPct}
+            onChange={(v) => setInputs((s) => ({ ...s, annualReturnPct: clamp(v, 0, 15) }))}
+            suffix="%"
+          />
 
-  <div className="mt-4 overflow-hidden rounded-xl border border-white/10">
-    <div className="grid grid-cols-[1.35fr_1.15fr_1fr_1fr] bg-white/5 px-3 py-2 text-[11px] font-semibold tracking-widest text-slate-300/80">
-      <div>SAVINGS RATE</div>
-      <div>ANNUAL SPENDING</div>
-      <div>YEARS TO FI</div>
-      <div>FIRE AGE</div>
-    </div>
+          <Field
+            label="Withdrawal rate (%)"
+            info="The percentage of your portfolio you plan to withdraw each year in retirement. Many FIRE plans use 4% as a starting point."
+            value={inputs.withdrawalRatePct}
+            onChange={(v) =>
+              setInputs((s) => ({ ...s, withdrawalRatePct: clamp(v, 2, 6) }))
+            }
+            suffix="%"
+          />
 
-    <div className="divide-y divide-white/10">
-      {savingsTable.map((row) => {
-        const isCurrentRow = row.savingsRatePct === nearestSavingsRateRow;
+          <Field
+            label="Inflation (%)"
+            value={inputs.inflationPct}
+            onChange={(v) => setInputs((s) => ({ ...s, inflationPct: clamp(v, 0, 10) }))}
+            suffix="%"
+          />
 
-        return (
-          <div
-            key={row.savingsRatePct}
-            className={[
-              "grid grid-cols-[1.35fr_1.15fr_1fr_1fr] items-center px-3 py-3 text-sm",
-              isCurrentRow ? "bg-emerald-300/10" : "",
-            ].join(" ")}
-          >
-            <div className="text-slate-200">
-              <div className="font-medium">{row.savingsRatePct}%</div>
-              {isCurrentRow ? (
-                <div className="mt-1">
-                  <span className="inline-flex rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
-                    Current
-                  </span>
+          <Field
+            label="Salary growth (%) — income grows"
+            value={inputs.salaryGrowthPct}
+            onChange={(v) =>
+              setInputs((s) => ({ ...s, salaryGrowthPct: clamp(v, 0, 15) }))
+            }
+            suffix="%"
+          />
+
+          <Field
+            label="Phase 2 starts after (years)"
+            info="The number of years before the calculator switches from Phase 1 return assumptions to Phase 2."
+            value={inputs.phase2StartsYear}
+            onChange={(v) =>
+              setInputs((s) => ({ ...s, phase2StartsYear: clamp(v, 0, 80) }))
+            }
+          />
+
+          <Field
+            label="Expected annual return (%) — Phase 2"
+            info="A second investment return assumption for later years. Useful if you expect lower returns over time."
+            value={inputs.phase2ReturnPct}
+            onChange={(v) => setInputs((s) => ({ ...s, phase2ReturnPct: clamp(v, 0, 15) }))}
+            suffix="%"
+          />
+
+          <Field
+            label="Projection length (years)"
+            value={inputs.maxYears}
+            onChange={(v) => setInputs((s) => ({ ...s, maxYears: clamp(v, 1, 80) }))}
+          />
+
+          <div className="mt-2 rounded-xl border border-white/10 bg-black/20 p-4 sm:col-span-2">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold uppercase tracking-wide text-slate-200">
+                  How moving could change your FIRE timeline
                 </div>
-              ) : null}
+                <div className="mt-1 max-w-2xl text-xs leading-5 text-slate-400">
+                  Most people pursuing FIRE focus on saving more. But geography may be one of the
+                  most powerful levers you can pull. See how your projected FIRE age changes when
+                  you move from a higher-cost city to a lower-cost one—using the same income, the
+                  same investing habits, and a different cost of living.
+                </div>
+              </div>
+
+              <button
+                onClick={() => setInputs((s) => ({ ...s, moveCompareOn: !s.moveCompareOn }))}
+                className={[
+                  "rounded-xl border px-3 py-2 text-xs font-medium",
+                  inputs.moveCompareOn
+                    ? "border-emerald-300/40 bg-emerald-300/10 text-emerald-100"
+                    : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10",
+                ].join(" ")}
+              >
+                {inputs.moveCompareOn ? "Hide city comparison" : "Compare cities"}
+              </button>
             </div>
 
-            <div className="text-slate-200">{money(row.impliedExpenses, 0)}</div>
+            {inputs.moveCompareOn ? (
+              <>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <Field
+                    label="Projected monthly expenses after moving"
+                    value={inputs.movedExpensesMonthly}
+                    onChange={(v) =>
+                      setInputs((s) => ({ ...s, movedExpensesMonthly: clamp(v, 0, 200_000) }))
+                    }
+                    prefix="$"
+                  />
 
-            <div className="text-slate-200">
-              {netAnnual <= 0 ? "—" : row.yearsToFI === null ? "Not reached" : row.yearsToFI}
-            </div>
+                  <div className="self-end text-xs text-slate-400">
+                    Tip: Use your relocation calculator’s estimated monthly spending after the move.
+                    <div className="mt-1">
+                      Annual:{" "}
+                      <span className="font-semibold text-slate-200">
+                        {money(annualMovedExpenses(inputs), 0)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-            <div className="text-slate-200">
-              {netAnnual <= 0 ? "—" : row.ageAtFI === null ? "—" : row.ageAtFI}
-            </div>
+                <div className="mt-4 grid gap-4">
+                  <div className="rounded-xl border border-emerald-300/25 bg-emerald-300/10 p-4">
+                    <div className="text-xs font-semibold tracking-widest text-emerald-100">
+                      MOVE IMPACT
+                    </div>
+
+                    <div className="mt-3 grid gap-2 text-sm text-emerald-50">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-emerald-100/80">Current FIRE age</span>
+                        <span className="font-semibold">{fiAge === null ? "—" : fiAge}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-emerald-100/80">FIRE age after move</span>
+                        <span className="font-semibold">{movedFiAge === null ? "—" : movedFiAge}</span>
+                      </div>
+
+                      <div className="mt-1 flex items-center justify-between gap-3">
+                        <span className="text-emerald-100/80">
+                          {moveDeltaYears === null
+                            ? "Move impact"
+                            : moveDeltaYears > 0
+                              ? "Moving could bring FIRE forward by"
+                              : moveDeltaYears < 0
+                                ? "This move could delay FIRE by"
+                                : "Move impact"}
+                        </span>
+                      </div>
+
+                      <div className="mt-2 text-xs text-emerald-100/70">
+                        Same returns + salary growth assumptions, different expenses.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4">
+                    <div className="text-sm font-semibold text-emerald-100">
+                      Thinking bigger than just moving?
+                    </div>
+                    <div className="mt-1 text-sm text-emerald-100/80">
+                      See how a lower cost of living could shift your FIRE timeline.
+                    </div>
+                    <div className="mt-4">
+                      <a
+                        href="/"
+                        className="inline-flex items-center justify-center rounded-xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:opacity-90"
+                      >
+                        Compare cities →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : null}
           </div>
-        );
-      })}
-    </div>
-  </div>
+        </div>
+      </div>
 
-  {!hasCoreInputs ? (
-    <div className="mt-3 text-xs leading-5 text-slate-400">
-      Tip: This table becomes more useful after you set your income, monthly expenses, and
-      yearly contributions.
-    </div>
-  ) : null}
-</div>
-        
+      <div className="space-y-4">
+        <div className="mt-6">
+          <div
+            role="tablist"
+            aria-label="FIRE calculator result sections"
+            className="inline-flex flex-wrap gap-2 rounded-2xl border border-white/10 bg-black/20 p-2"
+          >
+            <button
+              type="button"
+              role="tab"
+              id="tab-milestone"
+              aria-selected={activeResultTab === "milestone"}
+              aria-controls="panel-milestone"
+              onClick={() => setActiveResultTab("milestone")}
+              className={[
+                "rounded-xl px-4 py-2 text-sm font-medium transition border",
+                activeResultTab === "milestone"
+                  ? "border-emerald-300/30 bg-emerald-300/15 text-emerald-200"
+                  : "border-transparent text-slate-300 hover:bg-white/5 hover:text-white",
+              ].join(" ")}
+            >
+              FIRE milestone
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              id="tab-move"
+              aria-selected={activeResultTab === "move"}
+              aria-controls="panel-move"
+              onClick={() => setActiveResultTab("move")}
+              className={[
+                "rounded-xl px-4 py-2 text-sm font-medium transition border",
+                activeResultTab === "move"
+                  ? "border-emerald-300/30 bg-emerald-300/15 text-emerald-200"
+                  : "border-transparent text-slate-300 hover:bg-white/5 hover:text-white",
+              ].join(" ")}
+            >
+              Move impact
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              id="tab-savings"
+              aria-selected={activeResultTab === "savings"}
+              aria-controls="panel-savings"
+              onClick={() => setActiveResultTab("savings")}
+              className={[
+                "rounded-xl px-4 py-2 text-sm font-medium transition border",
+                activeResultTab === "savings"
+                  ? "border-emerald-300/30 bg-emerald-300/15 text-emerald-200"
+                  : "border-transparent text-slate-300 hover:bg-white/5 hover:text-white",
+              ].join(" ")}
+            >
+              Savings rate
+            </button>
+          </div>
         </div>
 
-        <div className="space-y-4">
+        <section
+          id="panel-milestone"
+          role="tabpanel"
+          aria-labelledby="tab-milestone"
+          className={activeResultTab === "milestone" ? "block" : "hidden"}
+        >
           <div className="rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 to-slate-950/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
             <h2 className="text-2xl font-bold tracking-tight text-white">Your FIRE milestone</h2>
 
             <div className="mt-3 space-y-2">
               <p className="text-sm leading-6 text-slate-300 sm:text-base">
-  {result.yearsToFI === null || fiAge === null || fiYear === null ? (
-    <>
-      At your current pace, financial independence is not projected within{" "}
-      <strong>{inputs.maxYears} years</strong>.
-    </>
-  ) : (
-    <>
-      At your current pace, you could reach financial independence at{" "}
-      <strong>age {fiAge}</strong>, in about{" "}
-      <strong>{result.yearsToFI} years</strong>, around{" "}
-      <strong>{fiYear}</strong>.
-    </>
-  )}
-</p>
+                {result.yearsToFI === null || fiAge === null || fiYear === null ? (
+                  <>
+                    At your current pace, financial independence is not projected within{" "}
+                    <strong>{inputs.maxYears} years</strong>.
+                  </>
+                ) : (
+                  <>
+                    At your current pace, you could reach financial independence at{" "}
+                    <strong>age {fiAge}</strong>, in about{" "}
+                    <strong>{result.yearsToFI} years</strong>, around{" "}
+                    <strong>{fiYear}</strong>.
+                  </>
+                )}
+              </p>
 
-       <p className="text-sm leading-6 text-emerald-200/90">
-  {inputs.moveCompareOn && moveDeltaYears !== null && movedFiAge !== null ? (
-    moveDeltaYears > 0 ? (
-      <>
-        If your monthly spending dropped to{" "}
-        <strong>{money(inputs.movedExpensesMonthly, 0)}</strong> after a move,
-        FIRE could move from <strong>age {fiAge}</strong> to{" "}
-        <strong>age {movedFiAge}</strong> — about{" "}
-        <strong>{moveDeltaYears} years sooner</strong>.
-      </>
-    ) : moveDeltaYears < 0 ? (
-      <>
-        With post-move spending of{" "}
-        <strong>{money(inputs.movedExpensesMonthly, 0)}</strong>, FIRE could shift
-        from <strong>age {fiAge}</strong> to <strong>age {movedFiAge}</strong> —
-        about <strong>{Math.abs(moveDeltaYears)} years slower</strong>.
-      </>
-    ) : (
-      <>
-        With post-move spending of{" "}
-        <strong>{money(inputs.movedExpensesMonthly, 0)}</strong>, your FIRE
-        timeline stays about the same.
-      </>
-    )
-  ) : (
-    <>
-      Compare another cost-of-living scenario to see how moving could bring your
-      FIRE timeline closer.
-    </>
-  )}
-</p>
+              <p className="text-sm leading-6 text-emerald-200/90">
+                {inputs.moveCompareOn && moveDeltaYears !== null && movedFiAge !== null ? (
+                  moveDeltaYears > 0 ? (
+                    <>
+                      If your monthly spending dropped to{" "}
+                      <strong>{money(inputs.movedExpensesMonthly, 0)}</strong> after a move,
+                      FIRE could move from <strong>age {fiAge}</strong> to{" "}
+                      <strong>age {movedFiAge}</strong> — about{" "}
+                      <strong>{moveDeltaYears} years sooner</strong>.
+                    </>
+                  ) : moveDeltaYears < 0 ? (
+                    <>
+                      With post-move spending of{" "}
+                      <strong>{money(inputs.movedExpensesMonthly, 0)}</strong>, FIRE could shift
+                      from <strong>age {fiAge}</strong> to <strong>age {movedFiAge}</strong> —
+                      about <strong>{Math.abs(moveDeltaYears)} years slower</strong>.
+                    </>
+                  ) : (
+                    <>
+                      With post-move spending of{" "}
+                      <strong>{money(inputs.movedExpensesMonthly, 0)}</strong>, your FIRE
+                      timeline stays about the same.
+                    </>
+                  )
+                ) : (
+                  <>
+                    Compare another cost-of-living scenario to see how moving could bring your
+                    FIRE timeline closer.
+                  </>
+                )}
+              </p>
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -1412,11 +1407,11 @@ const baselineCity = useMemo(() => {
                     ? money(result.fireNumber, 0)
                     : "—"
                 }
-             helper={
-  hasCoreInputs
-    ? `Estimated target based on spending and a ${inputs.withdrawalRatePct}% withdrawal rate`
-    : "Enter your core inputs to calculate"
-}
+                helper={
+                  hasCoreInputs
+                    ? `Estimated target based on spending and a ${inputs.withdrawalRatePct}% withdrawal rate`
+                    : "Enter your core inputs to calculate"
+                }
               />
 
               <Stat
@@ -1429,22 +1424,22 @@ const baselineCity = useMemo(() => {
                     : "—"
                 }
                 helper={
-  !hasCoreInputs
-    ? "Add age, income, and spending"
-    : result.yearsToFI === null
-      ? `Not projected within ${inputs.maxYears} years`
-      : `Estimated FIRE year: ${fiYear}`
-}
+                  !hasCoreInputs
+                    ? "Add age, income, and spending"
+                    : result.yearsToFI === null
+                      ? `Not projected within ${inputs.maxYears} years`
+                      : `Estimated FIRE year: ${fiYear}`
+                }
               />
 
               <Stat
                 label="Estimated FIRE Age"
                 value={hasCoreInputs ? (fiAge === null ? "—" : `${fiAge}`) : "—"}
                 helper={
-  hasCoreInputs
-    ? "Estimated age based on your current assumptions"
-    : "Calculated after inputs are entered"
-}
+                  hasCoreInputs
+                    ? "Estimated age based on your current assumptions"
+                    : "Calculated after inputs are entered"
+                }
               />
 
               {inputs.advanced ? (
@@ -1464,77 +1459,76 @@ const baselineCity = useMemo(() => {
                   }
                 />
               ) : (
-               <Stat
-  label="Savings Rate"
-  value={hasCoreInputs ? pct(savingsRate, 1) : "—"}
-helper={
-  hasCoreInputs
-    ? `${money(netAnnual, 0)} estimated net income · ${estTaxRate.toFixed(1)}% estimated tax rate`
-    : "Based on estimated net income and annual spending"
-}
-/>
+                <Stat
+                  label="Savings Rate"
+                  value={hasCoreInputs ? pct(savingsRate, 1) : "—"}
+                  helper={
+                    hasCoreInputs
+                      ? `${money(netAnnual, 0)} estimated net income · ${estTaxRate.toFixed(1)}% estimated tax rate`
+                      : "Based on estimated net income and annual spending"
+                  }
+                />
               )}
             </div>
 
             <div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-3">
-  <div className="flex items-center justify-between">
-    <div className="text-[11px] font-medium text-slate-300">Progress to FIRE</div>
-    <div className="text-[11px] text-slate-400">
-      {money(progress.current, 0)} /{" "}
-      {Number.isFinite(progress.target) ? money(progress.target, 0) : "—"}
-    </div>
-  </div>
+              <div className="flex items-center justify-between">
+                <div className="text-[11px] font-medium text-slate-300">Progress to FIRE</div>
+                <div className="text-[11px] text-slate-400">
+                  {money(progress.current, 0)} /{" "}
+                  {Number.isFinite(progress.target) ? money(progress.target, 0) : "—"}
+                </div>
+              </div>
 
-  <div className="mt-2 h-2 w-full rounded-full bg-white/10">
-    <div
-      className="h-2 rounded-full bg-emerald-300 transition-all"
-      style={{ width: `${Math.round(progress.pct * 100)}%` }}
-    />
-  </div>
+              <div className="mt-2 h-2 w-full rounded-full bg-white/10">
+                <div
+                  className="h-2 rounded-full bg-emerald-300 transition-all"
+                  style={{ width: `${Math.round(progress.pct * 100)}%` }}
+                />
+              </div>
 
-  <div className="mt-2 text-sm font-medium text-slate-200">
-    {Math.round(progress.pct * 100)}% of FIRE number
-  </div>
+              <div className="mt-2 text-sm font-medium text-slate-200">
+                {Math.round(progress.pct * 100)}% of FIRE number
+              </div>
 
-  <div className="mt-1 text-[12px] leading-5 text-slate-400">
-    {fiAge !== null ? (
-      <>
-        {money(progress.current, 0)} invested so far · On track for FIRE at{" "}
-        <span className="font-semibold text-slate-200">{fiAge}</span>
-      </>
-    ) : (
-      <>
-        {money(progress.current, 0)} invested so far · This is your foundation, even if
-        the target still looks far away
-      </>
-    )}
-  </div>
-</div>
+              <div className="mt-1 text-[12px] leading-5 text-slate-400">
+                {fiAge !== null ? (
+                  <>
+                    {money(progress.current, 0)} invested so far · On track for FIRE at{" "}
+                    <span className="font-semibold text-slate-200">{fiAge}</span>
+                  </>
+                ) : (
+                  <>
+                    {money(progress.current, 0)} invested so far · This is your foundation, even if
+                    the target still looks far away
+                  </>
+                )}
+              </div>
+            </div>
 
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+              <div className="text-sm font-semibold text-white">Why this estimate is useful</div>
 
-           <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
-  <div className="text-sm font-semibold text-white">Why this estimate is useful</div>
+              <div className="mt-3 space-y-2">
+                <div>• FIRE number based on your annual spending and selected withdrawal rate</div>
+                <div>
+                  • Estimated after-tax income using your selected state, filing status, and 401(k)
+                  contribution
+                </div>
+                <div>
+                  • Portfolio growth based on current investments, contributions, returns, inflation, and
+                  salary growth
+                </div>
+                <div>
+                  • Move Impact using the same income and investing assumptions with different spending levels
+                </div>
+              </div>
 
-  <div className="mt-3 space-y-2">
-    <div>• FIRE number based on your annual spending and selected withdrawal rate</div>
-    <div>
-      • Estimated after-tax income using your selected state, filing status, and 401(k)
-      contribution
-    </div>
-    <div>
-      • Portfolio growth based on current investments, contributions, returns, inflation, and
-      salary growth
-    </div>
-    <div>
-      • Move Impact using the same income and investing assumptions with different spending levels
-    </div>
-  </div>
-
-  <div className="mt-3 text-xs text-slate-400">
-    This is a planning estimate, not financial or tax advice. Tax and cost assumptions are
-    simplified for comparison purposes.
-  </div>
-</div>
+              <div className="mt-3 text-xs text-slate-400">
+                This is a planning estimate, not financial or tax advice. Tax and cost assumptions are
+                simplified for comparison purposes.
+              </div>
+            </div>
 
             <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
               <div className="text-sm font-semibold text-white">Biggest FIRE drivers</div>
@@ -1621,115 +1615,19 @@ helper={
               </div>
             </div>
           </div>
-<button
-  onClick={async () => {
-    try {
-      if (fiAge === null) {
-        alert("Add enough inputs to generate a shareable FIRE result.");
-        return;
-      }
+        </section>
 
-      const baselineAge = fiAge;
-      const movedAge = bestMoveRow?.ageAtFI ?? fiAge;
-      const yearsSaved = Math.max(0, bestMoveRow?.deltaYears ?? 0);
-
-      const fromCity = baselineCity ? baselineCity.name : "Current city";
-      const toCity = bestMoveRow ? bestMoveRow.cityName : fromCity;
-
-      const reason =
-        yearsSaved > 0
-          ? "Lower taxes + lower spending"
-          : "Same assumptions and current spending";
-
-      const shareUrl = new URL("/fire-calculator/share", window.location.origin);
-
-      shareUrl.searchParams.set("fireAge", String(movedAge));
-      shareUrl.searchParams.set("baselineAge", String(baselineAge));
-      shareUrl.searchParams.set("from", fromCity);
-      shareUrl.searchParams.set("to", toCity);
-      shareUrl.searchParams.set("years", String(yearsSaved));
-      shareUrl.searchParams.set("reason", reason);
-
-      const shareText =
-        yearsSaved > 0
-          ? `My FIRE result: Age ${movedAge} vs Age ${baselineAge}. ${fromCity} → ${toCity}. ${yearsSaved} years earlier.`
-          : `My FIRE result: Estimated FIRE age ${baselineAge}. Calculated with Relocation by Numbers.`;
-
-      const canNativeShare =
-        typeof navigator !== "undefined" && "share" in navigator;
-
-      if (canNativeShare) {
-        await (navigator as Navigator & {
-          share: (data: {
-            title?: string;
-            text?: string;
-            url?: string;
-          }) => Promise<void>;
-        }).share({
-          title: "My FIRE Result",
-          text: shareText,
-          url: shareUrl.toString(),
-        });
-        setShareStatus("shared");
-      } else {
-        await navigator.clipboard.writeText(shareUrl.toString());
-        setShareStatus("copied");
-      }
-
-      window.setTimeout(() => setShareStatus("idle"), 2500);
-    } catch (err) {
-      console.error("Share failed", err);
-
-      try {
-        const fallbackUrl = new URL(
-          "/fire-calculator/share",
-          window.location.origin
-        );
-
-        fallbackUrl.searchParams.set("fireAge", String(fiAge ?? 47));
-        fallbackUrl.searchParams.set("baselineAge", String(fiAge ?? 47));
-        fallbackUrl.searchParams.set("from", baselineCity?.name ?? "Current city");
-        fallbackUrl.searchParams.set(
-          "to",
-          bestMoveRow?.cityName ?? baselineCity?.name ?? "Current city"
-        );
-        fallbackUrl.searchParams.set(
-          "years",
-          String(Math.max(0, bestMoveRow?.deltaYears ?? 0))
-        );
-        fallbackUrl.searchParams.set(
-          "reason",
-          bestMoveRow?.deltaYears && bestMoveRow.deltaYears > 0
-            ? "Lower taxes + lower spending"
-            : "Same assumptions and current spending"
-        );
-
-        await navigator.clipboard.writeText(fallbackUrl.toString());
-        setShareStatus("copied");
-        window.setTimeout(() => setShareStatus("idle"), 2500);
-      } catch (clipboardErr) {
-        console.error("Clipboard failed", clipboardErr);
-        setShareStatus("error");
-        window.setTimeout(() => setShareStatus("idle"), 2500);
-        alert("Share failed. Your browser may block sharing or clipboard access.");
-      }
-    }
-  }}
-  className="relative z-50 w-full rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-400/20"
->
-  {shareStatus === "copied"
-    ? "Link copied!"
-    : shareStatus === "shared"
-      ? "Shared!"
-      : shareStatus === "error"
-        ? "Share failed"
-        : "Share My FIRE Result"}
-</button>
-
+        <section
+          id="panel-move"
+          role="tabpanel"
+          aria-labelledby="tab-move"
+          className={activeResultTab === "move" ? "block" : "hidden"}
+        >
           <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4">
             <div className="text-sm font-semibold text-amber-100">
               🔥 How much a move could accelerate your FIRE timeline
             </div>
+
             <div className="mt-1 text-xs text-amber-100/80">
               Same income and investing assumptions, with spending adjusted by each city’s cost
               profile.
@@ -1819,7 +1717,6 @@ helper={
             </div>
           </div>
 
-      
           {comparisonYearsSaved !== null && comparisonYearsSaved >= 5 ? (
             <div className="rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100">
               {comparisonYearsSaved >= 10
@@ -1837,7 +1734,6 @@ helper={
                   : ""}
               </div>
             </div>
-
 
             <div className="mt-3 h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -1968,42 +1864,227 @@ helper={
               <AffiliateCard key={a.name} a={a} />
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="rounded-3xl border border-white/10 bg-black/20 p-5">
-        <h3 className="text-lg font-semibold text-white">Frequently asked questions</h3>
-
-        <div className="mt-4 grid gap-3">
-          {FAQS.map((faq, i) => {
-            const isOpen = openFaq === i;
-
-            return (
-              <div
-                key={faq.q}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-white/5"
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenFaq(isOpen ? null : i)}
-                  className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
-                >
-                  <span className="text-sm font-medium text-white">{faq.q}</span>
-                  <span className="text-lg leading-none text-amber-400">
-                    {isOpen ? "−" : "+"}
-                  </span>
-                </button>
-
-                {isOpen ? (
-                  <div className="border-t border-white/10 px-4 py-4 text-sm leading-7 text-slate-300">
-                    {faq.a}
-                  </div>
-                ) : null}
+        <section
+          id="panel-savings"
+          role="tabpanel"
+          aria-labelledby="tab-savings"
+          className={activeResultTab === "savings" ? "block" : "hidden"}
+        >
+          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-semibold text-white">
+                  How your savings rate changes your FIRE timeline
+                </div>
+                <div className="mt-1 max-w-2xl text-xs leading-5 text-slate-400">
+                  See how spending less and saving more could change the number of years until
+                  financial independence. This table keeps your estimated after-tax income the same
+                  and adjusts expenses to match each savings rate.
+                </div>
               </div>
-            );
-          })}
-        </div>
-      </section>
+            </div>
+
+            <div className="mt-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-slate-300">
+              Current savings rate: {pct(savingsRate, 1)} · nearest scenario highlighted below
+            </div>
+
+            <div className="mt-4 overflow-hidden rounded-xl border border-white/10">
+              <div className="grid grid-cols-[1.35fr_1.15fr_1fr_1fr] bg-white/5 px-3 py-2 text-[11px] font-semibold tracking-widest text-slate-300/80">
+                <div>SAVINGS RATE</div>
+                <div>ANNUAL SPENDING</div>
+                <div>YEARS TO FI</div>
+                <div>FIRE AGE</div>
+              </div>
+
+              <div className="divide-y divide-white/10">
+                {savingsTable.map((row) => {
+                  const isCurrentRow = row.savingsRatePct === nearestSavingsRateRow;
+
+                  return (
+                    <div
+                      key={row.savingsRatePct}
+                      className={[
+                        "grid grid-cols-[1.35fr_1.15fr_1fr_1fr] items-center px-3 py-3 text-sm",
+                        isCurrentRow ? "bg-emerald-300/10" : "",
+                      ].join(" ")}
+                    >
+                      <div className="text-slate-200">
+                        <div className="font-medium">{row.savingsRatePct}%</div>
+                        {isCurrentRow ? (
+                          <div className="mt-1">
+                            <span className="inline-flex rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
+                              Current
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+
+                      <div className="text-slate-200">{money(row.impliedExpenses, 0)}</div>
+
+                      <div className="text-slate-200">
+                        {netAnnual <= 0 ? "—" : row.yearsToFI === null ? "Not reached" : row.yearsToFI}
+                      </div>
+
+                      <div className="text-slate-200">
+                        {netAnnual <= 0 ? "—" : row.ageAtFI === null ? "—" : row.ageAtFI}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {!hasCoreInputs ? (
+              <div className="mt-3 text-xs leading-5 text-slate-400">
+                Tip: This table becomes more useful after you set your income, monthly expenses, and
+                yearly contributions.
+              </div>
+            ) : null}
+          </div>
+        </section>
+
+        <button
+          onClick={async () => {
+            try {
+              if (fiAge === null) {
+                alert("Add enough inputs to generate a shareable FIRE result.");
+                return;
+              }
+
+              const baselineAge = fiAge;
+              const movedAge = bestMoveRow?.ageAtFI ?? fiAge;
+              const yearsSaved = Math.max(0, bestMoveRow?.deltaYears ?? 0);
+
+              const fromCity = baselineCity ? baselineCity.name : "Current city";
+              const toCity = bestMoveRow ? bestMoveRow.cityName : fromCity;
+
+              const reason =
+                yearsSaved > 0
+                  ? "Lower taxes + lower spending"
+                  : "Same assumptions and current spending";
+
+              const shareUrl = new URL("/fire-calculator/share", window.location.origin);
+
+              shareUrl.searchParams.set("fireAge", String(movedAge));
+              shareUrl.searchParams.set("baselineAge", String(baselineAge));
+              shareUrl.searchParams.set("from", fromCity);
+              shareUrl.searchParams.set("to", toCity);
+              shareUrl.searchParams.set("years", String(yearsSaved));
+              shareUrl.searchParams.set("reason", reason);
+
+              const shareText =
+                yearsSaved > 0
+                  ? `My FIRE result: Age ${movedAge} vs Age ${baselineAge}. ${fromCity} → ${toCity}. ${yearsSaved} years earlier.`
+                  : `My FIRE result: Estimated FIRE age ${baselineAge}. Calculated with Relocation by Numbers.`;
+
+              const canNativeShare =
+                typeof navigator !== "undefined" && "share" in navigator;
+
+              if (canNativeShare) {
+                await (navigator as Navigator & {
+                  share: (data: {
+                    title?: string;
+                    text?: string;
+                    url?: string;
+                  }) => Promise<void>;
+                }).share({
+                  title: "My FIRE Result",
+                  text: shareText,
+                  url: shareUrl.toString(),
+                });
+                setShareStatus("shared");
+              } else {
+                await navigator.clipboard.writeText(shareUrl.toString());
+                setShareStatus("copied");
+              }
+
+              window.setTimeout(() => setShareStatus("idle"), 2500);
+            } catch (err) {
+              console.error("Share failed", err);
+
+              try {
+                const fallbackUrl = new URL(
+                  "/fire-calculator/share",
+                  window.location.origin
+                );
+
+                fallbackUrl.searchParams.set("fireAge", String(fiAge ?? 47));
+                fallbackUrl.searchParams.set("baselineAge", String(fiAge ?? 47));
+                fallbackUrl.searchParams.set("from", baselineCity?.name ?? "Current city");
+                fallbackUrl.searchParams.set(
+                  "to",
+                  bestMoveRow?.cityName ?? baselineCity?.name ?? "Current city"
+                );
+                fallbackUrl.searchParams.set(
+                  "years",
+                  String(Math.max(0, bestMoveRow?.deltaYears ?? 0))
+                );
+                fallbackUrl.searchParams.set(
+                  "reason",
+                  bestMoveRow?.deltaYears && bestMoveRow.deltaYears > 0
+                    ? "Lower taxes + lower spending"
+                    : "Same assumptions and current spending"
+                );
+
+                await navigator.clipboard.writeText(fallbackUrl.toString());
+                setShareStatus("copied");
+                window.setTimeout(() => setShareStatus("idle"), 2500);
+              } catch (clipboardErr) {
+                console.error("Clipboard failed", clipboardErr);
+                setShareStatus("error");
+                window.setTimeout(() => setShareStatus("idle"), 2500);
+                alert("Share failed. Your browser may block sharing or clipboard access.");
+              }
+            }
+          }}
+          className="relative z-50 w-full rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-400/20"
+        >
+          {shareStatus === "copied"
+            ? "Link copied!"
+            : shareStatus === "shared"
+              ? "Shared!"
+              : shareStatus === "error"
+                ? "Share failed"
+                : "Share My FIRE Result"}
+        </button>
+      </div>
+    </section>
+
+    <section className="rounded-3xl border border-white/10 bg-black/20 p-5">
+      <h3 className="text-lg font-semibold text-white">Frequently asked questions</h3>
+
+      <div className="mt-4 grid gap-3">
+        {FAQS.map((faq, i) => {
+          const isOpen = openFaq === i;
+
+          return (
+            <div
+              key={faq.q}
+              className="overflow-hidden rounded-2xl border border-white/10 bg-white/5"
+            >
+              <button
+                type="button"
+                onClick={() => setOpenFaq(isOpen ? null : i)}
+                className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
+              >
+                <span className="text-sm font-medium text-white">{faq.q}</span>
+                <span className="text-lg leading-none text-amber-400">
+                  {isOpen ? "−" : "+"}
+                </span>
+              </button>
+
+              {isOpen ? (
+                <div className="border-t border-white/10 px-4 py-4 text-sm leading-7 text-slate-300">
+                  {faq.a}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+        </section>
     </section>
   );
 }
