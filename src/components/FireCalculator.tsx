@@ -9,6 +9,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  ReferenceDot,
 } from "recharts";
 
 import { STATES, type StateCode } from "@/lib/states";
@@ -1784,31 +1785,50 @@ const baselineCity = useMemo(() => {
                     labelStyle={{ color: "rgba(226,232,240,0.9)" }}
                   />
                   <Line
-                    type="monotone"
-                    dataKey="currentFireTarget"
-                    stroke="rgba(226,232,240,0.55)"
-                    strokeWidth={2}
-                    strokeDasharray="6 6"
-                    dot={false}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="currentPortfolio"
-                    stroke="rgb(110 231 183)"
-                    strokeWidth={3}
-                    dot={false}
-                    activeDot={{ r: 5 }}
-                  />
-                  {proposedComparison ? (
-                    <Line
-                      type="monotone"
-                      dataKey="proposedPortfolio"
-                      stroke="rgb(56 189 248)"
-                      strokeWidth={3}
-                      dot={false}
-                      activeDot={{ r: 5 }}
-                    />
-                  ) : null}
+  type="monotone"
+  dataKey="currentFireTarget"
+  stroke="rgba(226,232,240,0.55)"
+  strokeWidth={2}
+  strokeDasharray="6 6"
+  dot={false}
+/>
+<Line
+  type="monotone"
+  dataKey="currentPortfolio"
+  stroke="rgb(110 231 183)"
+  strokeWidth={3}
+  dot={false}
+  activeDot={{ r: 5 }}
+/>
+
+{crossoverPoint ? (
+  <ReferenceDot
+    x={crossoverPoint.age}
+    y={crossoverPoint.portfolio}
+    r={7}
+    fill="rgb(16 185 129)"
+    stroke="white"
+    strokeWidth={2}
+    ifOverflow="visible"
+    label={{
+      value: `FIRE reached · ${crossoverPoint.age}`,
+      position: "top",
+      fill: "rgba(226,232,240,0.95)",
+      fontSize: 12,
+    }}
+  />
+) : null}
+
+{proposedComparison ? (
+  <Line
+    type="monotone"
+    dataKey="proposedPortfolio"
+    stroke="rgb(56 189 248)"
+    strokeWidth={3}
+    dot={false}
+    activeDot={{ r: 5 }}
+  />
+) : null}
                 </LineChart>
               </ResponsiveContainer>
             </div>
