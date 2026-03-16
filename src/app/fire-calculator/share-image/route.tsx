@@ -1,13 +1,12 @@
 import { ImageResponse } from "next/og";
+import { getFireShareData } from "@/lib/fireShare";
 
-export const alt = "Relocation by Numbers FIRE Calculator";
-export const size = {
-  width: 1200,
-  height: 630,
-};
-export const contentType = "image/png";
+export const runtime = "edge";
 
-export default function Image() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const data = getFireShareData(searchParams);
+
   return new ImageResponse(
     (
       <div
@@ -23,7 +22,6 @@ export default function Image() {
           position: "relative",
         }}
       >
-        {/* soft glow */}
         <div
           style={{
             position: "absolute",
@@ -60,7 +58,6 @@ export default function Image() {
             zIndex: 1,
           }}
         >
-          {/* top */}
           <div
             style={{
               display: "flex",
@@ -107,7 +104,7 @@ export default function Image() {
               <div
                 style={{
                   display: "flex",
-                  fontSize: 28,
+                  fontSize: 30,
                   color: "#cbd5e1",
                   maxWidth: 760,
                   lineHeight: 1.3,
@@ -123,7 +120,7 @@ export default function Image() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 14,
-                minWidth: 260,
+                minWidth: 300,
               }}
             >
               <div
@@ -153,7 +150,9 @@ export default function Image() {
                     gap: 10,
                   }}
                 >
-                  <span style={{ fontSize: 64, fontWeight: 800 }}>47</span>
+                  <span style={{ fontSize: 64, fontWeight: 800 }}>
+                    {data.fireAge}
+                  </span>
                   <span style={{ fontSize: 24, color: "#cbd5e1" }}>
                     FIRE age
                   </span>
@@ -174,12 +173,11 @@ export default function Image() {
                   fontWeight: 700,
                 }}
               >
-                15 years earlier
+                {data.years} years earlier
               </div>
             </div>
           </div>
 
-          {/* bottom cards */}
           <div
             style={{
               display: "flex",
@@ -216,7 +214,7 @@ export default function Image() {
                   lineHeight: 1.2,
                 }}
               >
-                NYC → Charlotte
+                {data.from} → {data.to}
               </div>
               <div
                 style={{
@@ -226,7 +224,7 @@ export default function Image() {
                   marginTop: 10,
                 }}
               >
-                Lower taxes + lower spending
+                {data.reason}
               </div>
             </div>
 
@@ -258,7 +256,7 @@ export default function Image() {
                   fontWeight: 800,
                 }}
               >
-                Age 62
+                Age {data.baselineAge}
               </div>
             </div>
 
@@ -291,7 +289,7 @@ export default function Image() {
                   color: "#86efac",
                 }}
               >
-                Age 47
+                Age {data.fireAge}
               </div>
             </div>
           </div>
@@ -299,7 +297,8 @@ export default function Image() {
       </div>
     ),
     {
-      ...size,
+      width: 1200,
+      height: 630,
     }
   );
 }
