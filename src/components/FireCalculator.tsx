@@ -1811,7 +1811,7 @@ const baselineCity = useMemo(() => {
     strokeWidth={2}
     ifOverflow="visible"
     label={{
-      value: `FIRE reached · ${crossoverPoint.age}`,
+      value: `Age · ${crossoverPoint.age}`,
       position: "top",
       fill: "rgba(226,232,240,0.95)",
       fontSize: 12,
