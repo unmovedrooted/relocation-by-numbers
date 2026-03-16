@@ -153,30 +153,7 @@ const ADSENSE_SLOT_RESULTS = process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULTS || "";
 const ADSENSE_SLOT_BOTTOM = process.env.NEXT_PUBLIC_ADSENSE_SLOT_BOTTOM || "";
 
 const AFFILIATES: Affiliate[] = [
-  {
-    name: "Fidelity",
-    blurb: "Low-cost index funds + strong retirement tools. Great all-around choice.",
-    href: "https://www.fidelity.com/",
-    tag: "Brokerage / 401(k)",
-  },
-  {
-    name: "Vanguard",
-    blurb: "Classic FIRE favorite for low-fee index investing.",
-    href: "https://investor.vanguard.com/",
-    tag: "Index funds",
-  },
-  {
-    name: "Betterment",
-    blurb: "Hands-off robo-investing if you want automation and simplicity.",
-    href: "https://www.betterment.com/",
-    tag: "Robo-advisor",
-  },
-  {
-    name: "Wealthfront",
-    blurb: "Automated investing + cash management. Clean experience.",
-    href: "https://www.wealthfront.com/",
-    tag: "Robo + cash",
-  },
+ 
 ];
 
 const FAQS = [
@@ -481,8 +458,9 @@ export default function FireCalculator({
     income: initialIncome > 0 ? initialIncome : DEFAULT_INPUTS.income,
   }));
 
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [pinnedCompareCityId, setPinnedCompareCityId] = useState<string | null>(null);
+ const [openFaq, setOpenFaq] = useState<number | null>(0);
+const [pinnedCompareCityId, setPinnedCompareCityId] = useState<string | null>(null);
+const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
 
   const annualExp = useMemo(() => annualExpenses(inputs), [inputs]);
 
@@ -752,15 +730,22 @@ export default function FireCalculator({
     setInputs((s) => ({ ...s, preset: "custom" }));
   }
 
-  const bestMoveCityId = useMemo(() => {
-    const candidates = viralCityResults.filter(
-      (row) => !row!.isBaseline && (row!.deltaYears ?? 0) > 0
-    );
+ const bestMoveRow = useMemo(() => {
+  const candidates = viralCityResults.filter(
+    (row) => !row!.isBaseline && (row!.deltaYears ?? 0) > 0
+  );
 
-    if (candidates.length === 0) return null;
+  if (candidates.length === 0) return null;
 
-    return candidates[0]!.cityId;
-  }, [viralCityResults]);
+  return candidates[0]!;
+}, [viralCityResults]);
+
+const bestMoveCityId = bestMoveRow?.cityId ?? null;
+
+const baselineCity = useMemo(() => {
+  const baselineCityId = getBaselineCityIdForState(inputs.state);
+  return findCity(baselineCityId);
+}, [inputs.state]);
 
   const savingsTable = useMemo(() => {
     const income = netAnnual;
@@ -1636,40 +1621,110 @@ helper={
               </div>
             </div>
           </div>
+<button
+  onClick={async () => {
+    try {
+      if (fiAge === null) {
+        alert("Add enough inputs to generate a shareable FIRE result.");
+        return;
+      }
 
-          <button
-            onClick={async () => {
-              const bestMoveRow =
-                viralCityResults.find((row) => !row!.isBaseline && (row!.deltaYears ?? 0) > 0) ??
-                null;
+      const baselineAge = fiAge;
+      const movedAge = bestMoveRow?.ageAtFI ?? fiAge;
+      const yearsSaved = Math.max(0, bestMoveRow?.deltaYears ?? 0);
 
-              const text = `🔥 My FIRE timeline by city
+      const fromCity = baselineCity ? baselineCity.name : "Current city";
+      const toCity = bestMoveRow ? bestMoveRow.cityName : fromCity;
 
-Current path: ${fiAge === null ? "Not reached" : `FIRE at ${fiAge}`}
-Target FIRE number: ${money(result.fireNumber)}
-Years to FIRE: ${result.yearsToFI ?? "Not reached"}
+      const reason =
+        yearsSaved > 0
+          ? "Lower taxes + lower spending"
+          : "Same assumptions and current spending";
 
-Best city tested: ${
-                bestMoveRow ? `${bestMoveRow.cityName}, ${bestMoveRow.state}` : "No better move found"
-              }
-Time saved: ${
-                bestMoveRow?.deltaYears ? `${bestMoveRow.deltaYears} years` : "—"
-              }
+      const shareUrl = new URL("/fire-calculator/share", window.location.origin);
 
-Calculated on https://www.relocationbynumbers.com/fire-calculator`;
+      shareUrl.searchParams.set("fireAge", String(movedAge));
+      shareUrl.searchParams.set("baselineAge", String(baselineAge));
+      shareUrl.searchParams.set("from", fromCity);
+      shareUrl.searchParams.set("to", toCity);
+      shareUrl.searchParams.set("years", String(yearsSaved));
+      shareUrl.searchParams.set("reason", reason);
 
-              try {
-                await navigator.clipboard.writeText(text);
-                alert("Result copied! Paste it anywhere.");
-              } catch (err) {
-                console.error("Clipboard failed", err);
-                alert("Copy failed. Your browser may block clipboard access.");
-              }
-            }}
-            className="relative z-50 w-full rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-400/20"
-          >
-            Share My FIRE Result
-          </button>
+      const shareText =
+        yearsSaved > 0
+          ? `My FIRE result: Age ${movedAge} vs Age ${baselineAge}. ${fromCity} → ${toCity}. ${yearsSaved} years earlier.`
+          : `My FIRE result: Estimated FIRE age ${baselineAge}. Calculated with Relocation by Numbers.`;
+
+      const canNativeShare =
+        typeof navigator !== "undefined" && "share" in navigator;
+
+      if (canNativeShare) {
+        await (navigator as Navigator & {
+          share: (data: {
+            title?: string;
+            text?: string;
+            url?: string;
+          }) => Promise<void>;
+        }).share({
+          title: "My FIRE Result",
+          text: shareText,
+          url: shareUrl.toString(),
+        });
+        setShareStatus("shared");
+      } else {
+        await navigator.clipboard.writeText(shareUrl.toString());
+        setShareStatus("copied");
+      }
+
+      window.setTimeout(() => setShareStatus("idle"), 2500);
+    } catch (err) {
+      console.error("Share failed", err);
+
+      try {
+        const fallbackUrl = new URL(
+          "/fire-calculator/share",
+          window.location.origin
+        );
+
+        fallbackUrl.searchParams.set("fireAge", String(fiAge ?? 47));
+        fallbackUrl.searchParams.set("baselineAge", String(fiAge ?? 47));
+        fallbackUrl.searchParams.set("from", baselineCity?.name ?? "Current city");
+        fallbackUrl.searchParams.set(
+          "to",
+          bestMoveRow?.cityName ?? baselineCity?.name ?? "Current city"
+        );
+        fallbackUrl.searchParams.set(
+          "years",
+          String(Math.max(0, bestMoveRow?.deltaYears ?? 0))
+        );
+        fallbackUrl.searchParams.set(
+          "reason",
+          bestMoveRow?.deltaYears && bestMoveRow.deltaYears > 0
+            ? "Lower taxes + lower spending"
+            : "Same assumptions and current spending"
+        );
+
+        await navigator.clipboard.writeText(fallbackUrl.toString());
+        setShareStatus("copied");
+        window.setTimeout(() => setShareStatus("idle"), 2500);
+      } catch (clipboardErr) {
+        console.error("Clipboard failed", clipboardErr);
+        setShareStatus("error");
+        window.setTimeout(() => setShareStatus("idle"), 2500);
+        alert("Share failed. Your browser may block sharing or clipboard access.");
+      }
+    }
+  }}
+  className="relative z-50 w-full rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-400/20"
+>
+  {shareStatus === "copied"
+    ? "Link copied!"
+    : shareStatus === "shared"
+      ? "Shared!"
+      : shareStatus === "error"
+        ? "Share failed"
+        : "Share My FIRE Result"}
+</button>
 
           <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4">
             <div className="text-sm font-semibold text-amber-100">
