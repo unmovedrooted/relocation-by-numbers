@@ -28,31 +28,55 @@ export default async function ComparePage({ params }: PageProps) {
 
   // Curated popular links (safe / common)
   const popular = [
-    { href: "/compare/nyc-ny/charlotte-nc", label: "NYC vs Charlotte" },
-    { href: "/compare/la-ca/austin-tx", label: "LA vs Austin" },
-    { href: "/compare/seattle-wa/dallas-tx", label: "Seattle vs Dallas" },
-    { href: "/compare/boston-ma/miami-fl", label: "Boston vs Miami" },
-  ];
+  { href: `/compare/${fromCity.id}/nyc-ny`, label: `${fromCity.name} vs NYC` },
+  { href: `/compare/${fromCity.id}/austin-tx`, label: `${fromCity.name} vs Austin` },
+  { href: `/compare/${toCity.id}/nyc-ny`, label: `${toCity.name} vs NYC` },
+  { href: `/compare/${toCity.id}/charlotte-nc`, label: `${toCity.name} vs Charlotte` },
+  { href: `/compare/${toCity.id}/miami-fl`, label: `${toCity.name} vs Miami` },
+  { href: `/compare/${fromCity.id}/seattle-wa`, label: `${fromCity.name} vs Seattle` },
+]
+  .filter((x) => x.href !== `/compare/${fromCity.id}/${toCity.id}`)
+  .filter((x) => {
+    const parts = x.href.split("/compare/")[1]?.split("/");
+    const a = parts?.[0];
+    const b = parts?.[1];
+    if (!a || !b) return false;
+    return !!findCity(a) && !!findCity(b);
+  })
+  .slice(0, 4);
 
   // Dynamic links based on current route (keeps people clicking)
   // NOTE: make sure these city ids exist in your dataset.
   const dynamicLinks = [
-    { href: `/compare/${fromCity.id}/nyc-ny`, label: `${fromCity.name} vs NYC` },
-    { href: `/compare/${fromCity.id}/charlotte-nc`, label: `${fromCity.name} vs Charlotte` },
-    { href: `/compare/${toCity.id}/nyc-ny`, label: `${toCity.name} vs NYC` },
-    { href: `/compare/${toCity.id}/austin-tx`, label: `${toCity.name} vs Austin` },
-  ]
-    // avoid linking to the same exact page
-    .filter((x) => x.href !== `/compare/${fromCity.id}/${toCity.id}`)
-    // avoid links that point to missing cities
-    .filter((x) => {
-      const parts = x.href.split("/compare/")[1]?.split("/");
-      const a = parts?.[0];
-      const b = parts?.[1];
-      if (!a || !b) return false;
-      return !!findCity(a) && !!findCity(b);
-    })
-    .slice(0, 4);
+  { href: `/compare/${fromCity.id}/nyc-ny`, label: `${fromCity.name} vs NYC` },
+  { href: `/compare/${fromCity.id}/charlotte-nc`, label: `${fromCity.name} vs Charlotte` },
+  { href: `/compare/${fromCity.id}/austin-tx`, label: `${fromCity.name} vs Austin` },
+  { href: `/compare/${fromCity.id}/seattle-wa`, label: `${fromCity.name} vs Seattle` },
+  { href: `/compare/${fromCity.id}/boston-ma`, label: `${fromCity.name} vs Boston` },
+  { href: `/compare/${fromCity.id}/miami-fl`, label: `${fromCity.name} vs Miami` },
+
+  { href: `/compare/${toCity.id}/nyc-ny`, label: `${toCity.name} vs NYC` },
+  { href: `/compare/${toCity.id}/charlotte-nc`, label: `${toCity.name} vs Charlotte` },
+  { href: `/compare/${toCity.id}/austin-tx`, label: `${toCity.name} vs Austin` },
+  { href: `/compare/${toCity.id}/seattle-wa`, label: `${toCity.name} vs Seattle` },
+  { href: `/compare/${toCity.id}/boston-ma`, label: `${toCity.name} vs Boston` },
+  { href: `/compare/${toCity.id}/miami-fl`, label: `${toCity.name} vs Miami` },
+]
+  .filter((x) => x.href !== `/compare/${fromCity.id}/${toCity.id}`)
+  .filter((x, i, arr) => arr.findIndex((y) => y.href === x.href) === i)
+  .filter((x) => {
+    const parts = x.href.split("/compare/")[1]?.split("/");
+    const a = parts?.[0];
+    const b = parts?.[1];
+    if (!a || !b) return false;
+    return !!findCity(a) && !!findCity(b);
+  })
+  .slice(0, 4);
+
+     const compareWhyTitle = `Why compare ${fromCity.name} and ${toCity.name}?`;
+
+  const compareWhyTitleClass =
+  "text-[1.8rem] sm:text-[2rem] lg:text-[2.05rem]";
 
   return (
     <main className="min-h-screen bg-slate-50 py-10">
@@ -69,17 +93,35 @@ export default async function ComparePage({ params }: PageProps) {
 
           {/* Popular comparisons (1 row of 4 on desktop) */}
           <div className="mx-auto mt-4 grid max-w-4xl grid-cols-2 gap-3 text-sm font-semibold sm:grid-cols-4">
-            {popular.map((x) => (
-              <Link
-                key={x.href}
-                href={x.href}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 hover:bg-slate-50"
-              >
+           {dynamicLinks.map((x) => (
+  <Link
+    key={x.href}
+    href={x.href}
+    className="rounded-xl border border-slate-200 bg-white px-3 py-2 hover:bg-slate-50"
+  >
                 {x.label}
               </Link>
             ))}
           </div>
         </header>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+       <h2 className={`${compareWhyTitleClass} font-semibold tracking-tight text-slate-900 lg:whitespace-nowrap`}>
+  {compareWhyTitle}
+</h2>
+
+          <div className="mt-3 space-y-3 text-sm leading-6 text-slate-600">
+            <p>
+             Moving from <span className="font-semibold text-slate-900">{fromCity.name}</span> to{" "}
+<span className="font-semibold text-slate-900">{toCity.name}</span> can change taxes, housing costs, and monthly affordability.
+            </p>
+
+            <p>
+              Use this calculator to compare take-home pay, estimate housing costs, and see how much
+              monthly flexibility you may have in each location.
+            </p>
+          </div>
+        </section>
 
         <Calculator
           monetization="compare"

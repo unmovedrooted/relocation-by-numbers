@@ -41,12 +41,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function BestStateForFirePage({ params }: PageProps) {
+  console.log("DYNAMIC STATE PAGE IS RUNNING");
   const { state } = await params;
   const found = STATE_PAGES.find((s) => s.slug === state);
 
   if (!found) return notFound();
 
-  const stateCities = citiesForState(found.code).filter((c) => !c.id.startsWith("other-"));
+  const stateCities = citiesForState(found.code).filter(
+    (c) => !c.id.startsWith("other-")
+  );
   const featuredCities = stateCities.slice(0, 3);
 
   const relatedStates = STATE_PAGES
@@ -67,9 +70,9 @@ export default async function BestStateForFirePage({ params }: PageProps) {
           </h1>
 
           <p className="max-w-2xl text-sm leading-relaxed text-slate-300">
-            {found.name} may be a strong state for financial independence depending on
-            taxes, housing costs, and how expensive daily life is compared with where
-            you live now.
+            Whether {found.name} is good for FIRE depends on your income, housing costs,
+tax burden, and lifestyle. For some people, moving within the state to a
+lower-cost city can meaningfully improve the path to financial independence.
           </p>
 
           <div className="flex flex-wrap gap-2">
@@ -119,6 +122,27 @@ export default async function BestStateForFirePage({ params }: PageProps) {
           <h2 className="text-xl font-semibold">
             Cities to explore in {found.name}
           </h2>
+
+          <section className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-5">
+  <h2 className="text-lg font-semibold text-white">Where these numbers come from</h2>
+
+  <div className="space-y-2 text-sm leading-relaxed text-slate-300">
+    <p>
+      Rent and home price figures shown here come from the city-level planning data used
+      throughout Relocation by Numbers.
+    </p>
+    <p>
+      These values are designed to help compare cities and states on a consistent basis.
+      They are not live listings or real-time market quotes.
+    </p>
+    <p>
+      Use them as directional estimates for FIRE and relocation planning, not as a
+      substitute for current local market research.
+    </p>
+  </div>
+</section>
+
+
 
           <div className="grid gap-3 sm:grid-cols-3">
             {featuredCities.map((city) => (

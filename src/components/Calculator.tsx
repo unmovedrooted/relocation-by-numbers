@@ -110,9 +110,11 @@ export default function Calculator({
   const [mode, setMode] = useState<Mode>("rent");
   const hasMounted = useRef(false);
 
-  const [salary, setSalary] = useState<string>("");
-  const [filing, setFiling] = useState<FilingStatus>("single");
-  const [k401Pct, setK401Pct] = useState<string>("");
+  const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
+
+  const [salary, setSalary] = useState<string>("150000");
+const [filing, setFiling] = useState<FilingStatus>("single");
+const [k401Pct, setK401Pct] = useState<string>("10");
 
   const [fromState, setFromState] = useState<StateCode>(initialFromState ?? "ny");
   const [toState, setToState] = useState<StateCode>(initialToState ?? "nc");
@@ -124,18 +126,19 @@ export default function Calculator({
   const [toCityOther, setToCityOther] = useState("");
 
   // Buy inputs
-  const [homePrice, setHomePrice] = useState<string>("");
-  const [downPct, setDownPct] = useState<string>("");
-  const [ratePct, setRatePct] = useState<string>("");
-  const [termYears, setTermYears] = useState<string>("");
-  const [propertyTaxPct, setPropertyTaxPct] = useState<string>("");
-  const [homeInsMonthly, setHomeInsMonthly] = useState<string>("");
-  const [hoaMonthly, setHoaMonthly] = useState<string>("");
-  const [pmiAnnualPct, setPmiAnnualPct] = useState<string>("");
+  const [homePrice, setHomePrice] = useState<string>("450000");
+const [downPct, setDownPct] = useState<string>("20");
+const [ratePct, setRatePct] = useState<string>("6.5");
+const [termYears, setTermYears] = useState<string>("30");
+const [propertyTaxPct, setPropertyTaxPct] = useState<string>("1.0");
+const [homeInsMonthly, setHomeInsMonthly] = useState<string>("150");
+const [hoaMonthly, setHoaMonthly] = useState<string>("0");
+const [pmiAnnualPct, setPmiAnnualPct] = useState<string>("0");
 
   // Rent inputs
-  const [rentMonthly, setRentMonthly] = useState<string>("");
-  const [rentersInsMonthly, setRentersInsMonthly] = useState<string>("");
+  const [rentMonthly, setRentMonthly] = useState<string>("2200");
+const [rentersInsMonthly, setRentersInsMonthly] = useState<string>("20");
+const [parkingMonthly, setParkingMonthly] = useState<string>("150");
 
   // ===========
   // City dropdowns
@@ -248,6 +251,10 @@ export default function Calculator({
 
     const ri = qs.get("rentersInsMonthly");
     if (typeof ri === "string") setRentersInsMonthly(ri);
+
+    const park = qs.get("parkingMonthly");
+if (typeof park === "string") setParkingMonthly(park);
+
   }, []);
 
   // ===========
@@ -310,6 +317,7 @@ export default function Calculator({
   hoaMonthly,
   pmiAnnualPct,
   rentMonthly,
+  parkingMonthly,
   rentersInsMonthly,
 ]);
 
@@ -486,7 +494,10 @@ const estHealthcare = useMemo(() => {
     }
 
     // RENT
-    const rentTotal = mode === "rent" ? nz(rentMonthly) + nz(rentersInsMonthly) : 0;
+    const rentTotal =
+  mode === "rent"
+    ? nz(rentMonthly) + nz(rentersInsMonthly) + nz(parkingMonthly)
+    : 0;
 
     // % of net (target)
     const activeHousing = mode === "buy" ? buyTotal : rentTotal;
@@ -571,6 +582,7 @@ const estHealthcare = useMemo(() => {
     setPmiAnnualPct("");
 
     setRentMonthly("");
+    setParkingMonthly("");
     setRentersInsMonthly("");
   }
 
@@ -971,7 +983,7 @@ const estHealthcare = useMemo(() => {
         />
       </label>
 
-      <label className="text-sm sm:col-span-2">
+      <label className="mb-2 text-sm sm:col-span-2">
         <div className="mb-1 text-xs font-medium text-slate-600">Renter’s insurance (monthly)</div>
         <input
           className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
@@ -982,6 +994,17 @@ const estHealthcare = useMemo(() => {
         />
       </label>
     </div>
+
+    <label className="mb-3 text-sm sm:col-span-2">
+  <div className="mb-1 text-xs font-medium text-slate-600">Parking (monthly)</div>
+  <input
+    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+    type="number"
+    value={parkingMonthly}
+    onChange={(e) => setParkingMonthly(e.target.value)}
+    placeholder=" "
+  />
+</label>
 
     <div className="mt-4 border-t border-slate-200 pt-4">
       <div className="mb-2 text-sm font-semibold">Estimated Living Costs</div>
@@ -1084,7 +1107,7 @@ const estHealthcare = useMemo(() => {
                 <>
                   <div className="mt-2 font-semibold">Monthly housing (rent)</div>
                   <div>
-                    Total (rent + renter’s ins): <span className="font-bold">{money(results.rentTotal, 2)}</span>
+                    Total (rent + renter’s ins + parking): <span className="font-bold">{money(results.rentTotal, 2)}</span>
                   </div>
                 </>
               )}
@@ -1106,13 +1129,51 @@ const estHealthcare = useMemo(() => {
           </div>
 
           {/* Monthly Flexibility */}
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-            <div className="text-xs font-semibold tracking-widest text-amber-700">MONTHLY FLEXIBILITY</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">
-              {results.netToMonthly > 0 ? money(monthlyFlexibility, 2) : "—"}
-            </div>
-            <div className="mt-1 text-sm text-slate-700">Left after housing expenses.</div>
-          </div>
+         <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+  <div className="flex items-start justify-between gap-3">
+    <div>
+      <div className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
+        Monthly Flexibility
+      </div>
+
+      <div className="mt-2 text-3xl font-bold text-slate-900">
+        {results.netToMonthly > 0 ? money(monthlyFlexibility, 2) : "—"}
+      </div>
+    </div>
+
+    <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+      After housing
+    </div>
+  </div>
+
+  <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-amber-100">
+    <div
+      className={`h-full rounded-full ${
+        !results.netToMonthly
+          ? "w-[0%] bg-slate-300"
+          : monthlyFlexibility >= 3000
+          ? "w-[92%] bg-emerald-500"
+          : monthlyFlexibility >= 2000
+          ? "w-[76%] bg-emerald-400"
+          : monthlyFlexibility >= 1000
+          ? "w-[58%] bg-amber-400"
+          : monthlyFlexibility >= 500
+          ? "w-[40%] bg-orange-400"
+          : "w-[24%] bg-rose-400"
+      }`}
+    />
+  </div>
+
+  <div className="mt-3 text-sm text-slate-700">
+    {!results.netToMonthly
+      ? "Add salary and housing inputs to estimate how much room you have left each month."
+      : `This is what you have left each month in ${targetCityLabel} after housing costs.`}
+  </div>
+
+  <div className="mt-2 text-xs text-slate-500">
+    Higher flexibility gives you more room for saving, investing, and unexpected expenses.
+  </div>
+</div>
 
           {comparable && (
             <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
@@ -1142,136 +1203,137 @@ const estHealthcare = useMemo(() => {
               </button>
             </div>
           )}
+<div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+  <div className="flex items-start justify-between gap-3">
+    <div>
+      <div className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">
+        Comfort Score™
+      </div>
 
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="text-xs text-slate-600">Comfort Score™</div>
-            <div className="text-lg font-bold">
-              {results.comfort.band} {results.comfort.label}
-            </div>
-            <div className="mt-1 text-xs text-slate-600">{results.comfort.note}</div>
-          </div>
-
-          {(results.salaryReady || !showEnterNumbersHint) && (
-            <div className="mt-8">
-              <h3 className="mb-3 text-sm font-semibold text-slate-900">Next step</h3>
-
-              {!showEnterNumbersHint && (
-                <div className="mt-6 space-y-3">
-                  <p className="text-sm text-slate-600">
-                    {mode === "rent"
-                      ? `Next step: check real listings in ${targetCityLabel} to confirm pricing and availability.`
-                      : `Next step: compare rates and listings in ${targetCityLabel} before making the move.`}
-                  </p>
-
-                  <div className="mt-3 space-y-2">
-
-  {mode === "rent" && (
-    <>
-      <a
-        href="https://www.apartments.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block rounded-xl border border-slate-200 p-3 text-sm font-semibold hover:bg-slate-50"
-      >
-        Browse rentals on Apartments.com →
-      </a>
-
-      <a
-        href="https://www.zillow.com/homes/for_rent/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block rounded-xl border border-slate-200 p-3 text-sm font-semibold hover:bg-slate-50"
-      >
-        Search Zillow Rentals →
-      </a>
-
-      <a
-        href="https://www.rent.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block rounded-xl border border-slate-200 p-3 text-sm font-semibold hover:bg-slate-50"
-      >
-        Explore listings on Rent.com →
-      </a>
-    </>
-  )}
-
-  {mode === "buy" && (
-    <>
-      <a
-        href="https://www.zillow.com/homes/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block rounded-xl border border-slate-200 p-3 text-sm font-semibold hover:bg-slate-50"
-      >
-        Browse homes on Zillow →
-      </a>
-
-      <a
-        href="https://www.redfin.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block rounded-xl border border-slate-200 p-3 text-sm font-semibold hover:bg-slate-50"
-      >
-        Search homes on Redfin →
-      </a>
-
-      <a
-        href="https://www.nerdwallet.com/mortgages/mortgage-rates"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block rounded-xl border border-slate-200 p-3 text-sm font-semibold hover:bg-slate-50"
-      >
-        Check current mortgage rates →
-      </a>
-    </>
-  )}
-
-</div>
-
-                 <button
-  type="button"
-  onClick={async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      alert("Share link copied!");
-    } catch (err) {
-      console.error(err);
-      alert("Unable to copy link. Please copy it from the address bar.");
-    }
-  }}
-  className="text-sm font-semibold text-slate-900 underline underline-offset-4"
->
-  Copy share link
-</button>
-
-                  {isPremiumState && (
-                    <AffiliateCard
-                      stateCode={toState}
-                      stateName={stateName}
-                      cityName={findCity(toCityId)?.name}
-                      mode={mode}
-                    />
-                  )}
-
-                  <div className="pt-2">
-                    <AdSlot />
-                  </div>
-                </div>
-              )}
-
-              
-            </div>
-          )}
-
-          {/* Optional: ad slot at bottom of results column */}
-          {isStatePage && (
-            <div className="pt-2">
-              <AdSlot />
-            </div>
-          )}
-        </div>
+      <div className="mt-2 text-2xl font-bold text-slate-900">
+        {results.comfort.band} · {results.comfort.label}
       </div>
     </div>
+
+    <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
+      Target housing
+    </div>
+  </div>
+
+  <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-emerald-100">
+    <div
+      className={`h-full rounded-full ${
+        results.comfort.band === "A"
+          ? "w-[92%] bg-emerald-500"
+          : results.comfort.band === "B"
+          ? "w-[78%] bg-emerald-400"
+          : results.comfort.band === "C"
+          ? "w-[60%] bg-amber-400"
+          : results.comfort.band === "D"
+          ? "w-[42%] bg-orange-400"
+          : "w-[28%] bg-rose-400"
+      }`}
+    />
+  </div>
+
+  <div className="mt-3 text-sm text-slate-700">
+    {results.comfort.note}
+  </div>
+
+  <div className="mt-2 text-xs text-slate-500">
+    Based on how much of your target net monthly income goes toward housing.
+  </div>
+</div>
+
+<div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <div className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700">
+        Share this scenario
+      </div>
+      <div className="mt-1 text-sm text-slate-700">
+        Copy your current comparison link and send it to a partner, friend, or future self.
+      </div>
+    </div>
+
+    <button
+      type="button"
+      onClick={async () => {
+        try {
+          const shareUrl = new URL(window.location.href);
+
+          const shareText =
+            mode === "rent"
+              ? `My relocation scenario: ${currentCityLabel} → ${targetCityLabel}. Monthly flexibility ${money(monthlyFlexibility, 0)} after housing.`
+              : `My relocation scenario: ${currentCityLabel} → ${targetCityLabel}. Comparing take-home pay, housing costs, and affordability with Relocation by Numbers.`;
+
+          const canNativeShare =
+            typeof navigator !== "undefined" && "share" in navigator;
+
+          if (canNativeShare) {
+            await (navigator as Navigator & {
+              share: (data: {
+                title?: string;
+                text?: string;
+                url?: string;
+              }) => Promise<void>;
+            }).share({
+              title: "My Relocation Scenario",
+              text: shareText,
+              url: shareUrl.toString(),
+            });
+            setShareStatus("shared");
+          } else {
+            await navigator.clipboard.writeText(shareUrl.toString());
+            setShareStatus("copied");
+          }
+
+          window.setTimeout(() => setShareStatus("idle"), 2500);
+        } catch (err) {
+          console.error("Share failed", err);
+
+          try {
+            await navigator.clipboard.writeText(window.location.href);
+            setShareStatus("copied");
+            window.setTimeout(() => setShareStatus("idle"), 2500);
+          } catch (clipboardErr) {
+            console.error("Clipboard failed", clipboardErr);
+            setShareStatus("error");
+            window.setTimeout(() => setShareStatus("idle"), 2500);
+          }
+        }
+      }}
+      className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+    >
+      {shareStatus === "copied"
+        ? "Link copied!"
+        : shareStatus === "shared"
+          ? "Shared!"
+          : shareStatus === "error"
+            ? "Share failed"
+            : "Share scenario"}
+    </button>
+  </div>
+</div>
+
+        
+
+  </div>
+
+  
+
+                  
+                
+                </div>
+            
+  
+              
+            </div>
+        
+
+        
+
+    
+  
   );
 }

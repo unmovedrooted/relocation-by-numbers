@@ -98,45 +98,26 @@ export default function Page() {
               POPULAR COMPARISONS
             </div>
 
-            <div className="mt-3 flex flex-wrap justify-center gap-2">
-              {POPULAR.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-700"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
+           <div className="mt-3 flex flex-wrap justify-center gap-2">
+  {POPULAR.map((item) => (
+    <Link
+      key={item.href}
+      href={item.href}
+      className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-700"
+    >
+      {item.label}
+    </Link>
+  ))}
+</div>
 
-        {/* SEO internal links */}
-        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
-          <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
-            Popular relocation comparisons
-          </h2>
-
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-            <Link href="/compare/nyc-ny/raleigh-nc" className="text-blue-600 hover:underline dark:text-blue-400">
-              Moving from NYC to Raleigh
-            </Link>
-            <Link href="/compare/la-ca/austin-tx" className="text-blue-600 hover:underline dark:text-blue-400">
-              Moving from Los Angeles to Austin
-            </Link>
-            <Link href="/compare/seattle-wa/denver-co" className="text-blue-600 hover:underline dark:text-blue-400">
-              Moving from Seattle to Denver
-            </Link>
-            <Link href="/compare/boston-ma/miami-fl" className="text-blue-600 hover:underline dark:text-blue-400">
-              Moving from Boston to Miami
-            </Link>
-            <Link href="/compare/sf-ca/charlotte-nc" className="text-blue-600 hover:underline dark:text-blue-400">
-              Moving from San Francisco to Charlotte
-            </Link>
-            <Link href="/compare/chicago-il/dallas-tx" className="text-blue-600 hover:underline dark:text-blue-400">
-              Moving from Chicago to Dallas
-            </Link>
+<div className="mt-5">
+  <Link
+    href="/compare"
+    className="text-sm font-semibold text-slate-700 transition hover:text-slate-900"
+  >
+    Explore all relocation comparisons →
+  </Link>
+</div>
           </div>
         </section>
 
@@ -164,6 +145,27 @@ export default function Page() {
           </div>
         </section>
       </section>
+      <footer className="border-t border-slate-200 bg-slate-50">
+  <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+      <a href="/about" className="transition hover:text-slate-900">
+        About
+      </a>
+      <span>•</span>
+      <a href="/disclaimer" className="transition hover:text-slate-900">
+        Disclaimer
+      </a>
+      <span>•</span>
+      <a href="/privacy" className="transition hover:text-slate-900">
+        Privacy
+      </a>
+      <span>•</span>
+      <a href="/terms" className="transition hover:text-slate-900">
+        Terms
+      </a>
+    </div>
+  </div>
+</footer>
     </main>
   );
 }

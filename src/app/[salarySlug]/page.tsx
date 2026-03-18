@@ -114,32 +114,70 @@ export default async function FireWithSalaryPage({
           </p>
         </header>
 
+        <p className="text-sm text-slate-400">
+  Assumptions updated: March 2026
+</p>
+      
+<section>
+  <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-slate-300">
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <h2 className="text-lg font-semibold text-white">Example starting point</h2>
+
+ <div className="flex flex-wrap gap-3 lg:justify-end">
+  <a
+    href="/lean-fire-calculator"
+    className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-medium text-white transition hover:border-white/20 hover:bg-white/10"
+  >
+    Lean FIRE
+  </a>
+  <a
+    href="/barista-fire-calculator"
+    className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-medium text-white transition hover:border-white/20 hover:bg-white/10"
+  >
+    Barista FIRE
+  </a>
+  <a
+    href="/coast-fire-calculator"
+    className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-medium text-white transition hover:border-white/20 hover:bg-white/10"
+  >
+    Coast FIRE
+  </a>
+  <a
+    href="/compare"
+    className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-3.5 py-1.5 text-sm font-medium text-emerald-200 transition hover:border-emerald-300/60 hover:bg-emerald-400/15 hover:text-emerald-100"
+  >
+    Compare Cities →
+  </a>
+</div>
+    </div>
+
+    <p className="mt-4">
+      Here’s one sample setup for a{" "}
+      <span className="font-semibold text-white">{label}</span> salary:
+    </p>
+
+    <div className="mt-4 grid gap-2 sm:grid-cols-2">
+      <div>
+        Annual income:{" "}
+        <span className="font-semibold text-white">${income.toLocaleString()}</span>
+      </div>
+      <div>
+        Monthly expenses:{" "}
+        <span className="font-semibold text-white">$3,000–$4,500</span>
+      </div>
+      <div>
+        Savings goal: <span className="font-semibold text-white">20%–40%</span>
+      </div>
+      <div>
+        Return assumption: <span className="font-semibold text-white">7%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
     <FireCalculator initialIncome={income} />
 
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold">Example starting point</h2>
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-slate-300">
-            <p>
-              A person earning <span className="font-semibold text-white">{label}</span> might test:
-            </p>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <div>
-                Annual income:{" "}
-                <span className="font-semibold text-white">${income.toLocaleString()}</span>
-              </div>
-              <div>
-                Monthly expenses:{" "}
-                <span className="font-semibold text-white">$3,000–$4,500</span>
-              </div>
-              <div>
-                Savings goal: <span className="font-semibold text-white">20%–40%</span>
-              </div>
-              <div>
-                Return assumption: <span className="font-semibold text-white">7%</span>
-              </div>
-            </div>
-          </div>
-        </section>
+       
       </div>
     </main>
   );
