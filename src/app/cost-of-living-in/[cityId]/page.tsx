@@ -17,24 +17,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { cityId } = await params;
   const city = findCity(cityId);
 
-  <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
-    <a href="/about" className="transition hover:text-white">
-      About
-    </a>
-    <span>•</span>
-    <a href="/disclaimer" className="transition hover:text-white">
-      Disclaimer
-    </a>
-    <span>•</span>
-    <a href="/privacy" className="transition hover:text-white">
-      Privacy
-    </a>
-    <span>•</span>
-    <a href="/terms" className="transition hover:text-white">
-      Terms
-    </a>
-  </div>
-
   if (!city) {
     return { title: "City not found" };
   }
@@ -44,6 +26,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: `See housing costs, rent, and home prices in ${city.name}, ${city.state.toUpperCase()} and compare how affordable it may be.`,
   };
 }
+
+<div className="text-red-400 text-xl font-bold">TEST TOP</div>
 
 export default async function Page({ params }: Props) {
   const { cityId } = await params;
@@ -64,11 +48,11 @@ export default async function Page({ params }: Props) {
       ? `${city.name} looks relatively affordable compared with many major U.S. cities, especially on rent.`
       : rent <= 2200
         ? `${city.name} sits in the middle range for cost of living, so affordability depends a lot on your income and housing choice.`
-        : `${city.name} is on the more expensive side for rent, so housing costs may have a bigger impact on your budget.`
+        : `${city.name} is on the more expensive side for rent, so housing costs may have a bigger impact on your budget.`;
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
+      <div className="mx-auto max-w-5xl space-y-8 px-4 py-10">
         <header className="space-y-4">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Cost of Living in {city.name}
@@ -103,7 +87,7 @@ export default async function Page({ params }: Props) {
           </div>
         </header>
 
-        <section className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4">
+        <section className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-5">
           <h2 className="text-xl font-semibold">Cost of living snapshot</h2>
 
           <div className="grid gap-3 sm:grid-cols-3">
@@ -115,26 +99,28 @@ export default async function Page({ params }: Props) {
             </div>
 
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-              <div className="text-xs uppercase tracking-widest text-slate-400">Median home price</div>
+              <div className="text-xs uppercase tracking-widest text-slate-400">
+                Median home price
+              </div>
               <div className="mt-2 text-lg font-semibold text-white">
                 {homePrice ? `$${homePrice.toLocaleString()}` : "N/A"}
               </div>
             </div>
 
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-              <div className="text-xs uppercase tracking-widest text-slate-400">Property tax rate</div>
+              <div className="text-xs uppercase tracking-widest text-slate-400">
+                Property tax rate
+              </div>
               <div className="mt-2 text-lg font-semibold text-white">
                 {typeof taxRate === "number" ? `${taxRate}%` : "N/A"}
               </div>
             </div>
           </div>
 
-          <p className="text-sm leading-relaxed text-slate-300">
-            {affordabilityNote}
-          </p>
+          <p className="text-sm leading-relaxed text-slate-300">{affordabilityNote}</p>
         </section>
 
-        <section className="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4">
+        <section className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-5">
           <h2 className="text-xl font-semibold">What affects affordability in {city.name}?</h2>
 
           <div className="space-y-3 text-sm leading-relaxed text-slate-300">
@@ -150,7 +136,7 @@ export default async function Page({ params }: Props) {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4">
+        <section className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-5">
           <h2 className="text-xl font-semibold">Use this page with your other tools</h2>
 
           <div className="space-y-3 text-sm leading-relaxed text-slate-300">
@@ -178,15 +164,15 @@ export default async function Page({ params }: Props) {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4">
+        <section className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-5">
           <h2 className="text-xl font-semibold">Related cities</h2>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {relatedCities.map((c) => (
               <Link
                 key={c.id}
-                href={`/cost-of-living-in/${c.id}`}
-                className="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition"
+                href={`/cost-of-living/${c.id}`}
+                className="rounded-xl border border-white/10 bg-white/5 p-4 transition hover:bg-white/10"
               >
                 <div className="text-sm font-semibold text-white">{c.name}</div>
                 <div className="mt-1 text-xs text-slate-400">
@@ -198,7 +184,7 @@ export default async function Page({ params }: Props) {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4">
+        <section className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-5">
           <h2 className="text-xl font-semibold">FAQ</h2>
 
           <div className="space-y-3">
@@ -233,6 +219,28 @@ export default async function Page({ params }: Props) {
             </div>
           </div>
         </section>
+
+                <div className="mt-8 text-center">
+
+
+          <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-slate-300">
+            <Link href="/about" className="font-medium text-slate-300 transition hover:text-white">
+              About
+            </Link>
+            <span>•</span>
+            <Link href="/disclaimer" className="font-medium text-slate-300 transition hover:text-white">
+              Disclaimer
+            </Link>
+            <span>•</span>
+            <Link href="/privacy" className="font-medium text-slate-300 transition hover:text-white">
+              Privacy
+            </Link>
+            <span>•</span>
+            <Link href="/terms" className="font-medium text-slate-300 transition hover:text-white">
+              Terms
+            </Link>
+          </div>
+        </div>
       </div>
     </main>
   );

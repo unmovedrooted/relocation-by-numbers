@@ -50,24 +50,6 @@ export async function generateMetadata({ params }: PageProps) {
   };
 }
 
-  <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
-    <a href="/about" className="transition hover:text-white">
-      About
-    </a>
-    <span>•</span>
-    <a href="/disclaimer" className="transition hover:text-white">
-      Disclaimer
-    </a>
-    <span>•</span>
-    <a href="/privacy" className="transition hover:text-white">
-      Privacy
-    </a>
-    <span>•</span>
-    <a href="/terms" className="transition hover:text-white">
-      Terms
-    </a>
-  </div>
-
 export default async function CostOfLivingPage({ params }: PageProps) {
   const { cityId } = await params;
   const city = findCity(cityId);
@@ -100,6 +82,10 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           <p className="mx-auto mt-2 max-w-3xl text-sm sm:text-base text-slate-600">
             {intro}
           </p>
+
+          <div className="mt-3 text-xs text-slate-500">
+  Assumptions updated: March 2026
+</div>
 
           <div className="mx-auto mt-5 h-1 w-16 rounded-full bg-blue-600/80" />
 
@@ -300,6 +286,31 @@ export default async function CostOfLivingPage({ params }: PageProps) {
             </div>
           ) : null}
         </section>
+        
+
+        <div className="mt-8 text-center">
+          <div className="mb-3 text-xs text-slate-500">
+            Assumptions updated: March 2026
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-slate-500">
+            <Link href="/about" className="transition hover:text-slate-900">
+              About
+            </Link>
+            <span>•</span>
+            <Link href="/disclaimer" className="transition hover:text-slate-900">
+              Disclaimer
+            </Link>
+            <span>•</span>
+            <Link href="/privacy" className="transition hover:text-slate-900">
+              Privacy
+            </Link>
+            <span>•</span>
+            <Link href="/terms" className="transition hover:text-slate-900">
+              Terms
+            </Link>
+          </div>
+        </div>
       </div>
     </main>
   );

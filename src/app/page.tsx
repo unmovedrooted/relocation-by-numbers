@@ -121,6 +121,33 @@ export default function Page() {
           </div>
         </section>
 
+        <div className="mt-8 text-center">
+  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+    Popular cost of living
+  </div>
+
+  <div className="mt-4 flex flex-wrap justify-center gap-3">
+    {[
+      { href: "/cost-of-living/charlotte-nc", label: "Charlotte" },
+      { href: "/cost-of-living/nyc-ny", label: "NYC" },
+      { href: "/cost-of-living/austin-tx", label: "Austin" },
+      { href: "/cost-of-living/la-ca", label: "Los Angeles" },
+      { href: "/cost-of-living/seattle-wa", label: "Seattle" },
+      { href: "/cost-of-living/boston-ma", label: "Boston" },
+      { href: "/cost-of-living/miami-fl", label: "Miami" },
+    ].map((x) => (
+      <Link
+        key={x.href}
+        href={x.href}
+        className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+      >
+        {x.label}
+      </Link>
+    ))}
+  </div>
+</div>
+
+
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
           <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
             Financial Independence Tools
@@ -145,6 +172,8 @@ export default function Page() {
           </div>
         </section>
       </section>
+ 
+
       <footer className="border-t border-slate-200 bg-slate-50">
   <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
     <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">

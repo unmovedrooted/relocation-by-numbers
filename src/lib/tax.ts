@@ -73,7 +73,7 @@ function ficaTax(wagesAfter401k: number, filing: FilingStatus) {
   return ss + medicare + addl;
 }
 
-// --- New state tax structure ---
+// --- State tax structure ---
 type StateBracketSet = {
   single: Bracket[];
   married: Bracket[];
@@ -184,27 +184,27 @@ const STATE_BRACKETS: Partial<Record<StateCode, StateBracketSet>> = {
       { upTo: Number.POSITIVE_INFINITY, rate: 0.0699 },
     ],
   },
+
   va: {
-  single: [
-    { upTo: 3_000, rate: 0.02 },
-    { upTo: 5_000, rate: 0.03 },
-    { upTo: 17_000, rate: 0.05 },
-    { upTo: Number.POSITIVE_INFINITY, rate: 0.0575 },
-  ],
-  married: [
-    { upTo: 3_000, rate: 0.02 },
-    { upTo: 5_000, rate: 0.03 },
-    { upTo: 17_000, rate: 0.05 },
-    { upTo: Number.POSITIVE_INFINITY, rate: 0.0575 },
-  ],
-},
+    single: [
+      { upTo: 3_000, rate: 0.02 },
+      { upTo: 5_000, rate: 0.03 },
+      { upTo: 17_000, rate: 0.05 },
+      { upTo: Number.POSITIVE_INFINITY, rate: 0.0575 },
+    ],
+    married: [
+      { upTo: 3_000, rate: 0.02 },
+      { upTo: 5_000, rate: 0.03 },
+      { upTo: 17_000, rate: 0.05 },
+      { upTo: Number.POSITIVE_INFINITY, rate: 0.0575 },
+    ],
+  },
 };
+
 // --- Existing state effective bands (fallback until you upgrade more states) ---
 type RateBands = Array<{ upTo: number; rate: number }>; // effective %
 
 const STATE_EFFECTIVE: Partial<Record<StateCode, RateBands>> = {
- 
-  
   ma: [{ upTo: Infinity, rate: 5.0 }],
   pa: [{ upTo: Infinity, rate: 3.1 }],
   nc: [{ upTo: Infinity, rate: 4.5 }],
@@ -215,7 +215,6 @@ const STATE_EFFECTIVE: Partial<Record<StateCode, RateBands>> = {
   fl: [{ upTo: Infinity, rate: 0.0 }],
   tx: [{ upTo: Infinity, rate: 0.0 }],
   wa: [{ upTo: Infinity, rate: 0.0 }],
- 
   il: [{ upTo: Infinity, rate: 4.6 }],
   co: [{ upTo: Infinity, rate: 4.5 }],
   az: [{ upTo: Infinity, rate: 3.0 }],
@@ -264,30 +263,76 @@ function estimateStateTax(
   return taxableState * effectiveRate(STATE_EFFECTIVE[state], taxableState);
 }
 
-// --- NYC local tax (only if cityId is NYC) ---
-function isNYC(cityId?: string) {
-  if (!cityId) return false;
-  const id = cityId.toLowerCase();
-  // NOTE: adjust these once you confirm your NYC id from cities.ts
-  return id === "nyc" || id.includes("new-york") || id.includes("newyork");
-}
+type LocalTaxRule =
+  | {
+      type: "flat";
+      rate: number;
+    }
+  | {
+      type: "brackets";
+      single: Bracket[];
+      married: Bracket[];
+    };
 
-function nycBrackets(filing: FilingStatus): Bracket[] {
-  // NYC resident PIT rates (MVP)
-  if (filing === "married") {
-    return [
+const LOCAL_TAX_RULES: Record<string, LocalTaxRule> = {
+  "nyc-ny": {
+    type: "brackets",
+    single: [
+      { upTo: 12_000, rate: 0.03078 },
+      { upTo: 25_000, rate: 0.03762 },
+      { upTo: 50_000, rate: 0.03819 },
+      { upTo: Number.POSITIVE_INFINITY, rate: 0.03876 },
+    ],
+    married: [
       { upTo: 21_600, rate: 0.03078 },
       { upTo: 45_000, rate: 0.03762 },
       { upTo: 90_000, rate: 0.03819 },
       { upTo: Number.POSITIVE_INFINITY, rate: 0.03876 },
-    ];
+    ],
+  },
+
+  "philadelphia-pa": {
+    type: "flat",
+    rate: 0.0375,
+  },
+
+  "kansas-city-mo": {
+    type: "flat",
+    rate: 0.01,
+  },
+
+  "columbus-oh": {
+    type: "flat",
+    rate: 0.025,
+  },
+
+  "cleveland-oh": {
+    type: "flat",
+    rate: 0.025,
+  },
+
+  "cincinnati-oh": {
+    type: "flat",
+    rate: 0.018,
+  },
+};
+
+function estimateLocalIncomeTax(
+  cityId: string | undefined,
+  taxableIncome: number,
+  filing: FilingStatus
+): number {
+  if (!cityId || taxableIncome <= 0) return 0;
+
+  const rule = LOCAL_TAX_RULES[cityId.toLowerCase()];
+  if (!rule) return 0;
+
+  if (rule.type === "flat") {
+    return taxableIncome * rule.rate;
   }
-  return [
-    { upTo: 12_000, rate: 0.03078 },
-    { upTo: 25_000, rate: 0.03762 },
-    { upTo: 50_000, rate: 0.03819 },
-    { upTo: Number.POSITIVE_INFINITY, rate: 0.03876 },
-  ];
+
+  const brackets = filing === "married" ? rule.married : rule.single;
+  return sumBrackets(taxableIncome, brackets);
 }
 
 export function estimateNetAnnual(opts: {
@@ -300,27 +345,20 @@ export function estimateNetAnnual(opts: {
   const gross = Math.max(0, Number(opts.grossAnnual) || 0);
 
   const k401Pct = clamp(Number(opts.k401Pct) || 0, 0, 60);
-  // Keep your simple cap (optional)
   const k401 = Math.min(gross * (k401Pct / 100), 23_000);
 
   const after401k = Math.max(0, gross - k401);
 
-  // Federal taxable income (MVP: standard deduction only)
   const taxableFederal = Math.max(0, after401k - standardDeduction(opts.filing));
 
   const fed = sumBrackets(taxableFederal, federalBrackets(opts.filing));
   const fica = ficaTax(after401k, opts.filing);
 
-  // State tax base (MVP: use same taxable as federal)
   const taxableState = taxableFederal;
   const stateTax = estimateStateTax(opts.state, taxableState, opts.filing);
+  const localTax = estimateLocalIncomeTax(opts.cityId, taxableState, opts.filing);
 
-  const nycTax =
-    opts.state === "ny" && isNYC(opts.cityId)
-      ? sumBrackets(taxableState, nycBrackets(opts.filing))
-      : 0;
-
-  return Math.max(0, after401k - fed - fica - stateTax - nycTax);
+  return Math.max(0, after401k - fed - fica - stateTax - localTax);
 }
 
 export function effectiveTaxRatePct(netAnnual: number, grossAnnual: number) {

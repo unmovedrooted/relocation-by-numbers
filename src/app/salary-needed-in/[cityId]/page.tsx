@@ -13,24 +13,6 @@ export async function generateStaticParams() {
   }));
 }
 
-<div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
-    <a href="/about" className="transition hover:text-white">
-      About
-    </a>
-    <span>•</span>
-    <a href="/disclaimer" className="transition hover:text-white">
-      Disclaimer
-    </a>
-    <span>•</span>
-    <a href="/privacy" className="transition hover:text-white">
-      Privacy
-    </a>
-    <span>•</span>
-    <a href="/terms" className="transition hover:text-white">
-      Terms
-    </a>
-  </div>
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { cityId } = await params;
   const city = findCity(cityId);
@@ -58,18 +40,20 @@ export default async function Page({ params }: Props) {
     .filter((c) => c.id !== city.id)
     .slice(0, 6);
 
-  return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
+return (
+  <main className="min-h-screen bg-slate-950 text-white">
+    <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
+      <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl lg:whitespace-nowrap">
+        Salary Needed to Live in {city.name}
+      </h1>
 
-        <h1 className="text-3xl font-semibold">
-          Salary Needed to Live in {city.name}
-        </h1>
+      <p className="max-w-4xl text-sm text-slate-300 sm:text-base lg:whitespace-nowrap">
+        Housing costs are usually the biggest factor in the salary needed to live comfortably in {city.name}, {city.state.toUpperCase()}.
+      </p>
 
-        <p className="text-slate-300 max-w-2xl">
-          Housing costs are usually the biggest factor in the salary needed
-          to live comfortably in {city.name}, {city.state.toUpperCase()}.
-        </p>
+        <div className="mt-3 text-center text-xs text-slate-500">
+  Assumptions updated: March 2026
+</div>
 
         {/* Salary estimates */}
 
@@ -164,7 +148,23 @@ export default async function Page({ params }: Props) {
           </div>
 
         </div>
-
+<div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+    <a href="/about" className="transition hover:text-white">
+      About
+    </a>
+    <span>•</span>
+    <a href="/disclaimer" className="transition hover:text-white">
+      Disclaimer
+    </a>
+    <span>•</span>
+    <a href="/privacy" className="transition hover:text-white">
+      Privacy
+    </a>
+    <span>•</span>
+    <a href="/terms" className="transition hover:text-white">
+      Terms
+    </a>
+  </div>
       </div>
     </main>
   );

@@ -1033,11 +1033,13 @@ const estHealthcare = useMemo(() => {
         </div>
 
         
-
         {/* RESULTS */}
         <div className="space-y-3">
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-2 text-sm font-semibold">Results</div>
+     <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+  <div className="mb-2 text-sm font-semibold">Results</div>
+  <div className="mb-3 text-xs text-slate-500">
+    Assumptions updated: March 2026 · Planning estimates only
+  </div>
 
             <div className="mb-2 space-y-1 text-sm text-slate-600">
               <div>
@@ -1073,6 +1075,10 @@ const estHealthcare = useMemo(() => {
                     Est. taxes (target):{" "}
                     <span className="font-semibold">{money(results.estTaxesToMonthly, 2)}</span>{" "}
                     <span className="text-xs text-slate-500">({results.effTaxToPct.toFixed(1)}%)</span>
+                  </div>
+
+                  <div className="text-xs text-slate-500">
+                    Includes supported local city income tax where applicable.
                   </div>
                 </>
               )}
@@ -1118,11 +1124,17 @@ const estHealthcare = useMemo(() => {
                   {Number.isFinite(results.pct) ? results.pct.toFixed(1) + "%" : "—"}
                 </span>
               </div>
-              <div className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500">
-  Results are estimates only. No information entered is stored or shared.
-</div>
 
-<div className="text-xs text-slate-500">
+              <div className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500 space-y-1">
+                <div>
+                  Results are estimates only. No information entered is stored or shared.
+                </div>
+                <div>
+                  Tax estimates include federal income tax, FICA, state income tax, and supported local city income taxes where applicable.
+                </div>
+              </div>
+
+              <div className="text-xs text-slate-500">
                 Tip: Your URL updates as you type — copy the page link to share this scenario.
               </div>
             </div>

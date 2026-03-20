@@ -3,7 +3,6 @@ import Link from "next/link";
 import FireCalculator from "@/components/FireCalculator";
 import { SEOFAQItem } from "@/components/SeoFAQ";
 
-
 export const metadata: Metadata = {
   title: "Barista FIRE Calculator – Partial Retirement and Part-Time Income",
   description:
@@ -18,29 +17,17 @@ export default function Page() {
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
             Barista FIRE Calculator
           </h1>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
-    <a href="/about" className="transition hover:text-white">
-      About
-    </a>
-    <span>•</span>
-    <a href="/disclaimer" className="transition hover:text-white">
-      Disclaimer
-    </a>
-    <span>•</span>
-    <a href="/privacy" className="transition hover:text-white">
-      Privacy
-    </a>
-    <span>•</span>
-    <a href="/terms" className="transition hover:text-white">
-      Terms
-    </a>
-  </div>
-          <p className="text-slate-300 leading-relaxed">
+
+          <p className="leading-relaxed text-slate-300">
             <span className="font-semibold text-white">Barista FIRE</span> is a middle ground:
             you “retire” from full-time work but still earn part-time income to cover some expenses.
             Tonight we’ll use the main calculator as the engine; next we can add a Barista input for
             part-time income that reduces the portfolio needed.
           </p>
+
+          <div className="text-xs text-slate-400">
+            Assumptions updated: March 2026
+          </div>
 
           <div className="flex flex-wrap gap-2 pt-2">
             <Link
@@ -63,7 +50,14 @@ export default function Page() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold">FAQ</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold">FAQ</h2>
+
+            <div className="text-xs text-slate-400">
+              Assumptions updated: March 2026
+            </div>
+          </div>
+
           <div className="grid gap-3">
             <SEOFAQItem
               q="What is Barista FIRE?"
@@ -79,6 +73,30 @@ export default function Page() {
             />
           </div>
         </section>
+
+        <footer className="pt-2">
+          <div className="mb-3 text-xs text-slate-400">
+            Assumptions updated: March 2026
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+            <Link href="/about" className="transition hover:text-white">
+              About
+            </Link>
+            <span>•</span>
+            <Link href="/disclaimer" className="transition hover:text-white">
+              Disclaimer
+            </Link>
+            <span>•</span>
+            <Link href="/privacy" className="transition hover:text-white">
+              Privacy
+            </Link>
+            <span>•</span>
+            <Link href="/terms" className="transition hover:text-white">
+              Terms
+            </Link>
+          </div>
+        </footer>
       </div>
     </main>
   );

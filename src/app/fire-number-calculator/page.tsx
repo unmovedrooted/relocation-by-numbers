@@ -9,24 +9,6 @@ export const metadata: Metadata = {
     "Calculate your FIRE number (financial independence number) based on your expenses and withdrawal rate. Estimate years to FI and FIRE age.",
 };
 
-<div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
-    <a href="/about" className="transition hover:text-white">
-      About
-    </a>
-    <span>•</span>
-    <a href="/disclaimer" className="transition hover:text-white">
-      Disclaimer
-    </a>
-    <span>•</span>
-    <a href="/privacy" className="transition hover:text-white">
-      Privacy
-    </a>
-    <span>•</span>
-    <a href="/terms" className="transition hover:text-white">
-      Terms
-    </a>
-  </div>
-
 export default function Page() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -35,12 +17,17 @@ export default function Page() {
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
             FIRE Number Calculator
           </h1>
-          <p className="text-slate-300 leading-relaxed">
+
+          <p className="leading-relaxed text-slate-300">
             Your <span className="font-semibold text-white">FIRE number</span> is the amount of money
             you need invested so you can live off your portfolio. Most people estimate it using the{" "}
             <span className="font-semibold text-white">4% rule</span> (about{" "}
             <span className="font-semibold text-white">25× annual expenses</span>).
           </p>
+
+          <div className="text-xs text-slate-400">
+            Assumptions updated: March 2026
+          </div>
 
           <div className="flex flex-wrap gap-2 pt-2">
             <Link
@@ -63,7 +50,14 @@ export default function Page() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold">FAQ</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold">FAQ</h2>
+
+            <div className="text-xs text-slate-400">
+              Assumptions updated: March 2026
+            </div>
+          </div>
+
           <div className="grid gap-3">
             <SEOFAQItem
               q="What is a FIRE number?"
@@ -79,6 +73,30 @@ export default function Page() {
             />
           </div>
         </section>
+
+        <footer className="pt-2">
+          <div className="mb-3 text-xs text-slate-400">
+            Assumptions updated: March 2026
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+            <Link href="/about" className="transition hover:text-white">
+              About
+            </Link>
+            <span>•</span>
+            <Link href="/disclaimer" className="transition hover:text-white">
+              Disclaimer
+            </Link>
+            <span>•</span>
+            <Link href="/privacy" className="transition hover:text-white">
+              Privacy
+            </Link>
+            <span>•</span>
+            <Link href="/terms" className="transition hover:text-white">
+              Terms
+            </Link>
+          </div>
+        </footer>
       </div>
     </main>
   );

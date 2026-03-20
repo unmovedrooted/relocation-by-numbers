@@ -50,14 +50,13 @@ export default async function Page({ params }: Props) {
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
         <header className="space-y-4">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            FIRE in {city.name}
-          </h1>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:whitespace-nowrap">
+  FIRE in {city.name}
+</h1>
 
-          <p className="max-w-2xl text-slate-300">
-            Reaching financial independence in {city.name}, {city.state.toUpperCase()}{" "}
-            depends heavily on housing costs, taxes, and your savings rate.
-          </p>
+<p className="max-w-4xl text-sm leading-relaxed text-slate-300 lg:whitespace-nowrap">
+  Reaching financial independence in {city.name}, {city.state.toUpperCase()} depends heavily on housing costs, taxes, and your savings rate.
+</p>
 
           <div className="flex flex-wrap gap-2 pt-1">
             <Link
@@ -85,6 +84,10 @@ export default async function Page({ params }: Props) {
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4">
           <h2 className="text-xl font-semibold">FIRE snapshot: {city.name}</h2>
+
+          <div className="text-xs text-slate-400">
+    Assumptions updated: March 2026
+  </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
@@ -166,6 +169,10 @@ export default async function Page({ params }: Props) {
         <section className="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4">
           <h2 className="text-xl font-semibold">Related FIRE cities</h2>
 
+          <div className="text-xs text-slate-400">
+    Assumptions updated: March 2026
+  </div>
+
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {relatedCities.map((c) => (
               <Link
@@ -218,6 +225,23 @@ export default async function Page({ params }: Props) {
             </div>
           </div>
         </section>
+        <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+    <a href="/about" className="transition hover:text-white">
+      About
+    </a>
+    <span>•</span>
+    <a href="/disclaimer" className="transition hover:text-white">
+      Disclaimer
+    </a>
+    <span>•</span>
+    <a href="/privacy" className="transition hover:text-white">
+      Privacy
+    </a>
+    <span>•</span>
+    <a href="/terms" className="transition hover:text-white">
+      Terms
+    </a>
+  </div>
       </div>
     </main>
   );

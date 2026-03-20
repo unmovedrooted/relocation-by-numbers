@@ -468,14 +468,18 @@ const [activeResultTab, setActiveResultTab] = useState<"milestone" | "move" | "s
   const annualExp = useMemo(() => annualExpenses(inputs), [inputs]);
 
   const netAnnual = useMemo(() => {
-    if (!inputs.state) return Math.max(0, inputs.income);
-    return estimateNetAnnual({
-      grossAnnual: inputs.income,
-      state: inputs.state as StateCode,
-      filing: inputs.filingStatus,
-      k401Pct: inputs.k401Pct,
-    });
-  }, [inputs.income, inputs.state, inputs.filingStatus, inputs.k401Pct]);
+  if (!inputs.state) return Math.max(0, inputs.income);
+
+  const baselineCityId = getBaselineCityIdForState(inputs.state);
+
+  return estimateNetAnnual({
+    grossAnnual: inputs.income,
+    state: inputs.state as StateCode,
+    filing: inputs.filingStatus,
+    k401Pct: inputs.k401Pct,
+    cityId: baselineCityId,
+  });
+}, [inputs.income, inputs.state, inputs.filingStatus, inputs.k401Pct]);
 
   const estTaxRate = useMemo(() => {
     if (!inputs.state) return 0;

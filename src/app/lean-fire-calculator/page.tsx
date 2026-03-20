@@ -18,28 +18,15 @@ export default function Page() {
             Lean FIRE Calculator
           </h1>
 
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
-    <a href="/about" className="transition hover:text-white">
-      About
-    </a>
-    <span>•</span>
-    <a href="/disclaimer" className="transition hover:text-white">
-      Disclaimer
-    </a>
-    <span>•</span>
-    <a href="/privacy" className="transition hover:text-white">
-      Privacy
-    </a>
-    <span>•</span>
-    <a href="/terms" className="transition hover:text-white">
-      Terms
-    </a>
-  </div>
-          <p className="text-slate-300 leading-relaxed">
+          <p className="leading-relaxed text-slate-300">
             <span className="font-semibold text-white">Lean FIRE</span> is financial independence on a
             smaller spending level. If your expenses are lower, your FIRE number is lower—so you can
             reach FI faster.
           </p>
+
+          <div className="text-xs text-slate-400">
+            Assumptions updated: March 2026
+          </div>
 
           <div className="flex flex-wrap gap-2 pt-2">
             <Link
@@ -62,7 +49,14 @@ export default function Page() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold">FAQ</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold">FAQ</h2>
+
+            <div className="text-xs text-slate-400">
+              Assumptions updated: March 2026
+            </div>
+          </div>
+
           <div className="grid gap-3">
             <SEOFAQItem
               q="What counts as Lean FIRE?"
@@ -78,6 +72,30 @@ export default function Page() {
             />
           </div>
         </section>
+
+        <footer className="pt-2">
+          <div className="mb-3 text-xs text-slate-400">
+            Assumptions updated: March 2026
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+            <Link href="/about" className="transition hover:text-white">
+              About
+            </Link>
+            <span>•</span>
+            <Link href="/disclaimer" className="transition hover:text-white">
+              Disclaimer
+            </Link>
+            <span>•</span>
+            <Link href="/privacy" className="transition hover:text-white">
+              Privacy
+            </Link>
+            <span>•</span>
+            <Link href="/terms" className="transition hover:text-white">
+              Terms
+            </Link>
+          </div>
+        </footer>
       </div>
     </main>
   );

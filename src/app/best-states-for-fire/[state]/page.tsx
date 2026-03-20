@@ -75,6 +75,10 @@ tax burden, and lifestyle. For some people, moving within the state to a
 lower-cost city can meaningfully improve the path to financial independence.
           </p>
 
+            <div className="text-xs text-slate-400">
+    Assumptions updated: March 2026
+  </div>
+
           <div className="flex flex-wrap gap-2">
             <Link
               href="/fire-calculator"
@@ -209,6 +213,9 @@ lower-cost city can meaningfully improve the path to financial independence.
         </section>
 
         <footer className="pt-2">
+          <div className="mb-3 text-xs text-slate-400">
+    Assumptions updated: March 2026
+  </div>
           <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
             <Link href="/about" className="transition hover:text-white">
               About
