@@ -86,6 +86,12 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           <div className="mt-3 text-xs text-slate-500">
   Assumptions updated: March 2026
 </div>
+<Link
+  href="/explore"
+  className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+>
+  Explore All Tools
+</Link>
 
           <div className="mx-auto mt-5 h-1 w-16 rounded-full bg-blue-600/80" />
 

@@ -30,8 +30,27 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-white text-slate-900 antialiased`}
       >
         <div className="flex min-h-screen flex-col">
-          <main className="flex-1">{children}</main>
+          <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
+            <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+              <Link href="/" className="text-lg font-semibold tracking-tight text-slate-900">
+                Relocation by Numbers
+              </Link>
 
+              <nav className="flex items-center gap-4 text-sm text-slate-600">
+                <Link href="/explore" className="transition hover:text-slate-900">
+                  Explore
+                </Link>
+                <Link href="/fire-calculator" className="transition hover:text-slate-900">
+                  FIRE Calculator
+                </Link>
+                <Link href="/best-cities-for-fire" className="transition hover:text-slate-900">
+                  Best Cities for FIRE
+                </Link>
+              </nav>
+            </div>
+          </header>
+
+          <main className="flex-1">{children}</main>
         </div>
       </body>
     </html>
