@@ -1,0 +1,316 @@
+export type FilingStatus = "single" | "married";
+
+export type CountryRelocationProfile = {
+  code: string;
+  name: string;
+  currency: string;
+  currencySymbol: string;
+  region:
+    | "Europe"
+    | "North America"
+    | "Latin America"
+    | "Asia-Pacific"
+    | "Middle East & Africa";
+  featured: boolean;
+
+  taxModel: "standard" | "enhanced";
+  salaryMode: "manual" | "supported";
+
+  monthlyCostIndexSingle: number;
+  monthlyCostIndexFamily: number;
+
+  defaultRentSingle: number;
+  defaultRentFamily: number;
+
+  startupCosts: {
+    visa: number;
+    flight: number;
+    temporaryHousing: number;
+    setup: number;
+    depositMonths: number;
+  };
+
+  healthcareMonthlySingle: number;
+  healthcareMonthlyFamily: number;
+
+  notes?: string;
+};
+
+export const INTERNATIONAL_COUNTRIES: CountryRelocationProfile[] = [
+  {
+    code: "PT",
+    name: "Portugal",
+    currency: "EUR",
+    currencySymbol: "€",
+    region: "Europe",
+    featured: true,
+    taxModel: "enhanced",
+    salaryMode: "supported",
+    monthlyCostIndexSingle: 0.72,
+    monthlyCostIndexFamily: 0.78,
+    defaultRentSingle: 1600,
+    defaultRentFamily: 2400,
+    startupCosts: {
+      visa: 250,
+      flight: 650,
+      temporaryHousing: 1800,
+      setup: 1800,
+      depositMonths: 2,
+    },
+    healthcareMonthlySingle: 120,
+    healthcareMonthlyFamily: 300,
+    notes: "Good featured starter market.",
+  },
+  {
+    code: "ES",
+    name: "Spain",
+    currency: "EUR",
+    currencySymbol: "€",
+    region: "Europe",
+    featured: true,
+    taxModel: "enhanced",
+    salaryMode: "supported",
+    monthlyCostIndexSingle: 0.76,
+    monthlyCostIndexFamily: 0.82,
+    defaultRentSingle: 1700,
+    defaultRentFamily: 2500,
+    startupCosts: {
+      visa: 300,
+      flight: 650,
+      temporaryHousing: 1900,
+      setup: 1900,
+      depositMonths: 2,
+    },
+    healthcareMonthlySingle: 130,
+    healthcareMonthlyFamily: 320,
+  },
+  {
+  code: "US",
+  name: "United States",
+  currency: "USD",
+  currencySymbol: "$",
+  region: "North America",
+  featured: true,
+  taxModel: "standard",
+  salaryMode: "supported",
+  monthlyCostIndexSingle: 1.0,
+  monthlyCostIndexFamily: 1.0,
+  defaultRentSingle: 1500,
+  defaultRentFamily: 2200,
+  startupCosts: {
+    visa: 235,
+    flight: 700,
+    temporaryHousing: 2400,
+    setup: 2000,
+    depositMonths: 1,
+  },
+  healthcareMonthlySingle: 120,
+  healthcareMonthlyFamily: 571,
+},
+  {
+    code: "MX",
+    name: "Mexico",
+    currency: "MXN",
+    currencySymbol: "$",
+    region: "Latin America",
+    featured: true,
+    taxModel: "enhanced",
+    salaryMode: "supported",
+    monthlyCostIndexSingle: 0.58,
+    monthlyCostIndexFamily: 0.66,
+    defaultRentSingle: 1100,
+    defaultRentFamily: 1700,
+    startupCosts: {
+      visa: 150,
+      flight: 400,
+      temporaryHousing: 1200,
+      setup: 1300,
+      depositMonths: 1,
+    },
+    healthcareMonthlySingle: 100,
+    healthcareMonthlyFamily: 240,
+  },
+  {
+    code: "GB",
+    name: "United Kingdom",
+    currency: "GBP",
+    currencySymbol: "£",
+    region: "Europe",
+    featured: true,
+    taxModel: "enhanced",
+    salaryMode: "supported",
+    monthlyCostIndexSingle: 0.98,
+    monthlyCostIndexFamily: 1.02,
+    defaultRentSingle: 2200,
+    defaultRentFamily: 3200,
+    startupCosts: {
+      visa: 500,
+      flight: 550,
+      temporaryHousing: 2200,
+      setup: 2100,
+      depositMonths: 1,
+    },
+    healthcareMonthlySingle: 80,
+    healthcareMonthlyFamily: 180,
+  },
+  {
+    code: "CA",
+    name: "Canada",
+    currency: "CAD",
+    currencySymbol: "$",
+    region: "North America",
+    featured: true,
+    taxModel: "enhanced",
+    salaryMode: "supported",
+    monthlyCostIndexSingle: 0.93,
+    monthlyCostIndexFamily: 0.98,
+    defaultRentSingle: 2100,
+    defaultRentFamily: 3000,
+    startupCosts: {
+      visa: 350,
+      flight: 250,
+      temporaryHousing: 1700,
+      setup: 1800,
+      depositMonths: 1,
+    },
+    healthcareMonthlySingle: 90,
+    healthcareMonthlyFamily: 210,
+  },
+  {
+    code: "DE",
+    name: "Germany",
+    currency: "EUR",
+    currencySymbol: "€",
+    region: "Europe",
+    featured: true,
+    taxModel: "enhanced",
+    salaryMode: "supported",
+    monthlyCostIndexSingle: 0.88,
+    monthlyCostIndexFamily: 0.94,
+    defaultRentSingle: 1800,
+    defaultRentFamily: 2700,
+    startupCosts: {
+      visa: 300,
+      flight: 700,
+      temporaryHousing: 1900,
+      setup: 2100,
+      depositMonths: 2,
+    },
+    healthcareMonthlySingle: 180,
+    healthcareMonthlyFamily: 420,
+  },
+  {
+    code: "NL",
+    name: "Netherlands",
+    currency: "EUR",
+    currencySymbol: "€",
+    region: "Europe",
+    featured: true,
+    taxModel: "enhanced",
+    salaryMode: "supported",
+    monthlyCostIndexSingle: 0.95,
+    monthlyCostIndexFamily: 1.0,
+    defaultRentSingle: 2100,
+    defaultRentFamily: 3100,
+    startupCosts: {
+      visa: 300,
+      flight: 700,
+      temporaryHousing: 2200,
+      setup: 2200,
+      depositMonths: 2,
+    },
+    healthcareMonthlySingle: 170,
+    healthcareMonthlyFamily: 390,
+  },
+  {
+    code: "CR",
+    name: "Costa Rica",
+    currency: "CRC",
+    currencySymbol: "₡",
+    region: "Latin America",
+    featured: true,
+    taxModel: "enhanced",
+    salaryMode: "supported",
+    monthlyCostIndexSingle: 0.68,
+    monthlyCostIndexFamily: 0.74,
+    defaultRentSingle: 1400,
+    defaultRentFamily: 2100,
+    startupCosts: {
+      visa: 200,
+      flight: 350,
+      temporaryHousing: 1300,
+      setup: 1500,
+      depositMonths: 1,
+    },
+    healthcareMonthlySingle: 110,
+    healthcareMonthlyFamily: 260,
+  },
+
+  { code: "FR", name: "France", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.92, monthlyCostIndexFamily: 0.97, defaultRentSingle: 2000, defaultRentFamily: 2900, startupCosts: { visa: 300, flight: 700, temporaryHousing: 2000, setup: 2000, depositMonths: 1 }, healthcareMonthlySingle: 150, healthcareMonthlyFamily: 350 },
+  { code: "IT", name: "Italy", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.80, monthlyCostIndexFamily: 0.86, defaultRentSingle: 1700, defaultRentFamily: 2500, startupCosts: { visa: 300, flight: 700, temporaryHousing: 1800, setup: 1800, depositMonths: 2 }, healthcareMonthlySingle: 120, healthcareMonthlyFamily: 300 },
+  { code: "IE", name: "Ireland", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 1.02, monthlyCostIndexFamily: 1.06, defaultRentSingle: 2400, defaultRentFamily: 3400, startupCosts: { visa: 350, flight: 650, temporaryHousing: 2300, setup: 2200, depositMonths: 1 }, healthcareMonthlySingle: 140, healthcareMonthlyFamily: 320 },
+  { code: "AU", name: "Australia", currency: "AUD", currencySymbol: "$", region: "Asia-Pacific", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 1.0, monthlyCostIndexFamily: 1.06, defaultRentSingle: 2300, defaultRentFamily: 3300, startupCosts: { visa: 450, flight: 1200, temporaryHousing: 2500, setup: 2400, depositMonths: 1 }, healthcareMonthlySingle: 140, healthcareMonthlyFamily: 320 },
+  { code: "NZ", name: "New Zealand", currency: "NZD", currencySymbol: "$", region: "Asia-Pacific", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.95, monthlyCostIndexFamily: 1.0, defaultRentSingle: 2100, defaultRentFamily: 3000, startupCosts: { visa: 450, flight: 1300, temporaryHousing: 2200, setup: 2100, depositMonths: 1 }, healthcareMonthlySingle: 130, healthcareMonthlyFamily: 300 },
+  { code: "JP", name: "Japan", currency: "JPY", currencySymbol: "¥", region: "Asia-Pacific", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.89, monthlyCostIndexFamily: 0.96, defaultRentSingle: 1800, defaultRentFamily: 2600, startupCosts: { visa: 350, flight: 1100, temporaryHousing: 2200, setup: 2300, depositMonths: 2 }, healthcareMonthlySingle: 140, healthcareMonthlyFamily: 310 },
+  { code: "KR", name: "South Korea", currency: "KRW", currencySymbol: "₩", region: "Asia-Pacific", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.83, monthlyCostIndexFamily: 0.9, defaultRentSingle: 1700, defaultRentFamily: 2500, startupCosts: { visa: 300, flight: 1100, temporaryHousing: 2000, setup: 2100, depositMonths: 2 }, healthcareMonthlySingle: 120, healthcareMonthlyFamily: 290 },
+  { code: "AE", name: "United Arab Emirates", currency: "AED", currencySymbol: "د.إ", region: "Middle East & Africa", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.97, monthlyCostIndexFamily: 1.03, defaultRentSingle: 2200, defaultRentFamily: 3200, startupCosts: { visa: 400, flight: 900, temporaryHousing: 2400, setup: 2300, depositMonths: 1 }, healthcareMonthlySingle: 180, healthcareMonthlyFamily: 420 },
+  { code: "SG", name: "Singapore", currency: "SGD", currencySymbol: "$", region: "Asia-Pacific", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 1.08, monthlyCostIndexFamily: 1.15, defaultRentSingle: 2800, defaultRentFamily: 3900, startupCosts: { visa: 350, flight: 1100, temporaryHousing: 2600, setup: 2400, depositMonths: 1 }, healthcareMonthlySingle: 190, healthcareMonthlyFamily: 450 },
+  { code: "CH", name: "Switzerland", currency: "CHF", currencySymbol: "CHF", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 1.18, monthlyCostIndexFamily: 1.24, defaultRentSingle: 3000, defaultRentFamily: 4200, startupCosts: { visa: 350, flight: 700, temporaryHousing: 2800, setup: 2600, depositMonths: 2 }, healthcareMonthlySingle: 320, healthcareMonthlyFamily: 780 },
+  { code: "BE", name: "Belgium", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.9, monthlyCostIndexFamily: 0.96, defaultRentSingle: 1900, defaultRentFamily: 2800, startupCosts: { visa: 300, flight: 700, temporaryHousing: 1900, setup: 1900, depositMonths: 2 }, healthcareMonthlySingle: 150, healthcareMonthlyFamily: 340 },
+  { code: "AT", name: "Austria", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.91, monthlyCostIndexFamily: 0.97, defaultRentSingle: 1900, defaultRentFamily: 2800, startupCosts: { visa: 300, flight: 700, temporaryHousing: 1900, setup: 1900, depositMonths: 2 }, healthcareMonthlySingle: 150, healthcareMonthlyFamily: 340 },
+
+  { code: "DK", name: "Denmark", currency: "DKK", currencySymbol: "kr", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 1.06, monthlyCostIndexFamily: 1.12, defaultRentSingle: 2500, defaultRentFamily: 3600, startupCosts: { visa: 350, flight: 700, temporaryHousing: 2300, setup: 2200, depositMonths: 3 }, healthcareMonthlySingle: 120, healthcareMonthlyFamily: 260 },
+  { code: "SE", name: "Sweden", currency: "SEK", currencySymbol: "kr", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.97, monthlyCostIndexFamily: 1.02, defaultRentSingle: 2200, defaultRentFamily: 3200, startupCosts: { visa: 350, flight: 750, temporaryHousing: 2200, setup: 2100, depositMonths: 2 }, healthcareMonthlySingle: 120, healthcareMonthlyFamily: 280 },
+  { code: "NO", name: "Norway", currency: "NOK", currencySymbol: "kr", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 1.1, monthlyCostIndexFamily: 1.16, defaultRentSingle: 2600, defaultRentFamily: 3700, startupCosts: { visa: 350, flight: 750, temporaryHousing: 2400, setup: 2200, depositMonths: 2 }, healthcareMonthlySingle: 130, healthcareMonthlyFamily: 290 },
+  { code: "FI", name: "Finland", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.95, monthlyCostIndexFamily: 1.0, defaultRentSingle: 2100, defaultRentFamily: 3000, startupCosts: { visa: 350, flight: 800, temporaryHousing: 2100, setup: 2000, depositMonths: 2 }, healthcareMonthlySingle: 120, healthcareMonthlyFamily: 270 },
+  { code: "PL", name: "Poland", currency: "PLN", currencySymbol: "zł", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.61, monthlyCostIndexFamily: 0.68, defaultRentSingle: 1200, defaultRentFamily: 1800, startupCosts: { visa: 250, flight: 750, temporaryHousing: 1500, setup: 1600, depositMonths: 1 }, healthcareMonthlySingle: 90, healthcareMonthlyFamily: 220 },
+  { code: "CZ", name: "Czech Republic", currency: "CZK", currencySymbol: "Kč", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.68, monthlyCostIndexFamily: 0.74, defaultRentSingle: 1400, defaultRentFamily: 2100, startupCosts: { visa: 250, flight: 750, temporaryHousing: 1600, setup: 1700, depositMonths: 1 }, healthcareMonthlySingle: 100, healthcareMonthlyFamily: 240 },
+  { code: "HU", name: "Hungary", currency: "HUF", currencySymbol: "Ft", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.58, monthlyCostIndexFamily: 0.65, defaultRentSingle: 1100, defaultRentFamily: 1700, startupCosts: { visa: 250, flight: 750, temporaryHousing: 1500, setup: 1500, depositMonths: 1 }, healthcareMonthlySingle: 90, healthcareMonthlyFamily: 220 },
+  { code: "GR", name: "Greece", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.70, monthlyCostIndexFamily: 0.76, defaultRentSingle: 1400, defaultRentFamily: 2000, startupCosts: { visa: 250, flight: 700, temporaryHousing: 1600, setup: 1600, depositMonths: 2 }, healthcareMonthlySingle: 100, healthcareMonthlyFamily: 240 },
+  { code: "TR", name: "Turkey", currency: "TRY", currencySymbol: "₺", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.49, monthlyCostIndexFamily: 0.58, defaultRentSingle: 900, defaultRentFamily: 1400, startupCosts: { visa: 200, flight: 800, temporaryHousing: 1300, setup: 1400, depositMonths: 1 }, healthcareMonthlySingle: 90, healthcareMonthlyFamily: 220 },
+  { code: "HR", name: "Croatia", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.66, monthlyCostIndexFamily: 0.73, defaultRentSingle: 1300, defaultRentFamily: 1900, startupCosts: { visa: 250, flight: 750, temporaryHousing: 1500, setup: 1500, depositMonths: 1 }, healthcareMonthlySingle: 95, healthcareMonthlyFamily: 230 },
+  { code: "EE", name: "Estonia", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.73, monthlyCostIndexFamily: 0.79, defaultRentSingle: 1500, defaultRentFamily: 2200, startupCosts: { visa: 250, flight: 800, temporaryHousing: 1600, setup: 1600, depositMonths: 1 }, healthcareMonthlySingle: 100, healthcareMonthlyFamily: 240 },
+  { code: "LV", name: "Latvia", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.67, monthlyCostIndexFamily: 0.73, defaultRentSingle: 1300, defaultRentFamily: 1900, startupCosts: { visa: 250, flight: 800, temporaryHousing: 1500, setup: 1500, depositMonths: 1 }, healthcareMonthlySingle: 95, healthcareMonthlyFamily: 230 },
+  { code: "LT", name: "Lithuania", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.68, monthlyCostIndexFamily: 0.74, defaultRentSingle: 1300, defaultRentFamily: 1900, startupCosts: { visa: 250, flight: 800, temporaryHousing: 1500, setup: 1500, depositMonths: 1 }, healthcareMonthlySingle: 95, healthcareMonthlyFamily: 230 },
+  { code: "RO", name: "Romania", currency: "RON", currencySymbol: "lei", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.56, monthlyCostIndexFamily: 0.63, defaultRentSingle: 1000, defaultRentFamily: 1600, startupCosts: { visa: 220, flight: 800, temporaryHousing: 1400, setup: 1400, depositMonths: 1 }, healthcareMonthlySingle: 85, healthcareMonthlyFamily: 210 },
+  { code: "BG", name: "Bulgaria", currency: "BGN", currencySymbol: "лв", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.52, monthlyCostIndexFamily: 0.60, defaultRentSingle: 950, defaultRentFamily: 1500, startupCosts: { visa: 220, flight: 800, temporaryHousing: 1350, setup: 1400, depositMonths: 1 }, healthcareMonthlySingle: 85, healthcareMonthlyFamily: 210 },
+  { code: "SI", name: "Slovenia", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.74, monthlyCostIndexFamily: 0.80, defaultRentSingle: 1500, defaultRentFamily: 2200, startupCosts: { visa: 250, flight: 750, temporaryHousing: 1600, setup: 1600, depositMonths: 1 }, healthcareMonthlySingle: 100, healthcareMonthlyFamily: 240 },
+  { code: "SK", name: "Slovakia", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.66, monthlyCostIndexFamily: 0.72, defaultRentSingle: 1300, defaultRentFamily: 1900, startupCosts: { visa: 250, flight: 750, temporaryHousing: 1500, setup: 1500, depositMonths: 1 }, healthcareMonthlySingle: 95, healthcareMonthlyFamily: 230 },
+  { code: "MT", name: "Malta", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.78, monthlyCostIndexFamily: 0.84, defaultRentSingle: 1700, defaultRentFamily: 2400, startupCosts: { visa: 250, flight: 700, temporaryHousing: 1700, setup: 1700, depositMonths: 1 }, healthcareMonthlySingle: 100, healthcareMonthlyFamily: 250 },
+  { code: "CY", name: "Cyprus", currency: "EUR", currencySymbol: "€", region: "Europe", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.76, monthlyCostIndexFamily: 0.82, defaultRentSingle: 1600, defaultRentFamily: 2300, startupCosts: { visa: 250, flight: 750, temporaryHousing: 1650, setup: 1650, depositMonths: 1 }, healthcareMonthlySingle: 105, healthcareMonthlyFamily: 250 },
+
+  { code: "PA", name: "Panama", currency: "USD", currencySymbol: "$", region: "Latin America", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.69, monthlyCostIndexFamily: 0.76, defaultRentSingle: 1400, defaultRentFamily: 2100, startupCosts: { visa: 180, flight: 450, temporaryHousing: 1300, setup: 1500, depositMonths: 1 }, healthcareMonthlySingle: 110, healthcareMonthlyFamily: 260 },
+  { code: "CO", name: "Colombia", currency: "COP", currencySymbol: "$", region: "Latin America", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.50, monthlyCostIndexFamily: 0.58, defaultRentSingle: 950, defaultRentFamily: 1500, startupCosts: { visa: 160, flight: 450, temporaryHousing: 1200, setup: 1300, depositMonths: 1 }, healthcareMonthlySingle: 90, healthcareMonthlyFamily: 220 },
+  { code: "BR", name: "Brazil", currency: "BRL", currencySymbol: "R$", region: "Latin America", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.56, monthlyCostIndexFamily: 0.64, defaultRentSingle: 1000, defaultRentFamily: 1600, startupCosts: { visa: 180, flight: 700, temporaryHousing: 1300, setup: 1400, depositMonths: 1 }, healthcareMonthlySingle: 95, healthcareMonthlyFamily: 230 },
+  { code: "AR", name: "Argentina", currency: "ARS", currencySymbol: "$", region: "Latin America", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.47, monthlyCostIndexFamily: 0.56, defaultRentSingle: 850, defaultRentFamily: 1400, startupCosts: { visa: 180, flight: 850, temporaryHousing: 1200, setup: 1300, depositMonths: 1 }, healthcareMonthlySingle: 90, healthcareMonthlyFamily: 220 },
+  { code: "CL", name: "Chile", currency: "CLP", currencySymbol: "$", region: "Latin America", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.66, monthlyCostIndexFamily: 0.73, defaultRentSingle: 1300, defaultRentFamily: 2000, startupCosts: { visa: 180, flight: 850, temporaryHousing: 1400, setup: 1500, depositMonths: 1 }, healthcareMonthlySingle: 100, healthcareMonthlyFamily: 240 },
+  { code: "PE", name: "Peru", currency: "PEN", currencySymbol: "S/", region: "Latin America", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.48, monthlyCostIndexFamily: 0.56, defaultRentSingle: 900, defaultRentFamily: 1450, startupCosts: { visa: 150, flight: 700, temporaryHousing: 1200, setup: 1300, depositMonths: 1 }, healthcareMonthlySingle: 90, healthcareMonthlyFamily: 220 },
+
+  { code: "TH", name: "Thailand", currency: "THB", currencySymbol: "฿", region: "Asia-Pacific", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.46, monthlyCostIndexFamily: 0.55, defaultRentSingle: 850, defaultRentFamily: 1400, startupCosts: { visa: 180, flight: 950, temporaryHousing: 1200, setup: 1300, depositMonths: 1 }, healthcareMonthlySingle: 95, healthcareMonthlyFamily: 230 },
+  { code: "VN", name: "Vietnam", currency: "VND", currencySymbol: "₫", region: "Asia-Pacific", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.40, monthlyCostIndexFamily: 0.49, defaultRentSingle: 750, defaultRentFamily: 1250, startupCosts: { visa: 150, flight: 950, temporaryHousing: 1100, setup: 1200, depositMonths: 1 }, healthcareMonthlySingle: 90, healthcareMonthlyFamily: 210 },
+  { code: "MY", name: "Malaysia", currency: "MYR", currencySymbol: "RM", region: "Asia-Pacific", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.44, monthlyCostIndexFamily: 0.52, defaultRentSingle: 800, defaultRentFamily: 1300, startupCosts: { visa: 170, flight: 950, temporaryHousing: 1150, setup: 1250, depositMonths: 1 }, healthcareMonthlySingle: 90, healthcareMonthlyFamily: 220 },
+  { code: "ID", name: "Indonesia", currency: "IDR", currencySymbol: "Rp", region: "Asia-Pacific", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.39, monthlyCostIndexFamily: 0.48, defaultRentSingle: 700, defaultRentFamily: 1200, startupCosts: { visa: 170, flight: 1000, temporaryHousing: 1100, setup: 1200, depositMonths: 1 }, healthcareMonthlySingle: 90, healthcareMonthlyFamily: 210 },
+
+  { code: "ZA", name: "South Africa", currency: "ZAR", currencySymbol: "R", region: "Middle East & Africa", featured: false, taxModel: "standard", salaryMode: "manual", monthlyCostIndexSingle: 0.54, monthlyCostIndexFamily: 0.62, defaultRentSingle: 950, defaultRentFamily: 1550, startupCosts: { visa: 180, flight: 1100, temporaryHousing: 1300, setup: 1400, depositMonths: 1 }, healthcareMonthlySingle: 110, healthcareMonthlyFamily: 260 },
+];
+
+export const FEATURED_COUNTRIES = INTERNATIONAL_COUNTRIES.filter(
+  (country) => country.featured
+);
+
+export function getCountryByCode(code: string) {
+  return INTERNATIONAL_COUNTRIES.find((country) => country.code === code);
+}
+
+export function getCountriesByRegion() {
+  return {
+    featured: INTERNATIONAL_COUNTRIES.filter((c) => c.featured),
+    europe: INTERNATIONAL_COUNTRIES.filter((c) => c.region === "Europe" && !c.featured),
+    northAmerica: INTERNATIONAL_COUNTRIES.filter((c) => c.region === "North America" && !c.featured),
+    latinAmerica: INTERNATIONAL_COUNTRIES.filter((c) => c.region === "Latin America" && !c.featured),
+    asiaPacific: INTERNATIONAL_COUNTRIES.filter((c) => c.region === "Asia-Pacific" && !c.featured),
+    middleEastAfrica: INTERNATIONAL_COUNTRIES.filter(
+      (c) => c.region === "Middle East & Africa" && !c.featured
+    ),
+  };
+}
