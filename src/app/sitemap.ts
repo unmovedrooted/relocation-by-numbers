@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/coast-fire-calculator",
     "/barista-fire-calculator",
     "/lean-fire-calculator",
+    "/international-relocation",
   ];
 
   const salaryPages = [
