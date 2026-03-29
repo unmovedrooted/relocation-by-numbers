@@ -15,21 +15,56 @@ import {
 import {
   estimateInternationalTax,
 } from "@/lib/internationalTaxes";
+import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
+import { USD_TO_LOCAL } from "@/lib/internationalFx";
 import AdSlot from "./AdSlot";
 import AffiliateCard from "./AffiliateCard";
+
+// Fallback FX rates for countries not in USD_TO_LOCAL
+const FX_FALLBACK: Record<string, number> = {
+  AT: 0.92, // EUR
+  BE: 0.92, // EUR
+  RM: 0.92, // EUR (likely bad code in data)
+};
+
+// Convert a local-currency amount to USD for internal calculations
+function convertLocalToUsd(amountLocal: number, countryCode: string): number {
+  const rate = (USD_TO_LOCAL[countryCode] ?? FX_FALLBACK[countryCode]) ?? 1;
+  return rate > 0 ? amountLocal / rate : amountLocal;
+}
+
+// Convert USD to any country's local currency for display
+function convertUsdToLocal(amountUsd: number, countryCode: string): number {
+  const rate = (USD_TO_LOCAL[countryCode] ?? FX_FALLBACK[countryCode]) ?? 1;
+  return amountUsd * rate;
+}
+
+const COUNTRY_TO_CURRENCY: Record<string, string> = {
+  US: "USD", GB: "GBP", PT: "EUR", ES: "EUR", MX: "MXN", CA: "CAD",
+  DE: "EUR", NL: "EUR", CR: "CRC", FR: "EUR", IT: "EUR", IE: "EUR",
+  AU: "AUD", NZ: "NZD", JP: "JPY", KR: "KRW", AE: "AED", SG: "SGD",
+  CH: "CHF", DK: "DKK", SE: "SEK", NO: "NOK", FI: "EUR", PL: "PLN",
+  CZ: "CZK", HU: "HUF", GR: "EUR", TR: "TRY", HR: "EUR", EE: "EUR",
+  LV: "EUR", LT: "EUR", RO: "RON", BG: "BGN", SI: "EUR", SK: "EUR",
+  MT: "EUR", CY: "EUR", PA: "USD", CO: "COP", BR: "BRL", AR: "ARS",
+  CL: "CLP", PE: "PEN", TH: "THB", VN: "VND", MY: "MYR", ID: "IDR",
+  ZA: "ZAR",
+  // Additional eurozone / European countries
+  AT: "EUR", BE: "EUR", RM: "EUR",
+};
 
 type Mode = "working" | "retired";
 type FilingStatus = "single" | "married";
 type SalaryType = "remote" | "local" | "freelance";
 type FurnishedType = "furnished" | "unfurnished";
 type YesNo = "yes" | "no";
-type CurrencyDisplay = "USD" | "LOCAL";
+type CurrencyDisplay = "USD" | "CURRENT" | "DESTINATION";
 
-function money(n: number, digits: number = 0) {
+function money(n: number, digits: number = 0, currency: string = "USD") {
   if (!Number.isFinite(n)) return "—";
   return n.toLocaleString(undefined, {
     style: "currency",
-    currency: "USD",
+    currency,
     maximumFractionDigits: digits,
     minimumFractionDigits: digits,
   });
@@ -88,7 +123,40 @@ const inputCls =
   "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15";
 const selectCls =
   "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15";
-const labelHeadCls = "mb-1 text-xs font-medium text-slate-600 sm:whitespace-nowrap";
+const labelHeadCls = "mb-1 text-xs font-medium leading-4 text-slate-600";
+
+function InfoTip({
+  text,
+  align = "left",
+}: {
+  text: string;
+  align?: "left" | "right" | "center";
+}) {
+  const positionClass =
+    align === "right"
+      ? "right-0"
+      : align === "center"
+      ? "left-1/2 -translate-x-1/2"
+      : "left-0";
+
+  return (
+    <span className="group relative ml-1 inline-flex align-middle">
+      <button
+        type="button"
+        aria-label="More info"
+        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 bg-white text-[10px] font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+      >
+        i
+      </button>
+
+      <span
+        className={`pointer-events-none absolute top-full z-50 mt-2 hidden max-w-[calc(100vw-2rem)] w-72 rounded-xl bg-slate-900 px-3 py-2 text-xs leading-5 text-white shadow-xl group-hover:block group-focus-within:block ${positionClass}`}
+      >
+        {text}
+      </span>
+    </span>
+  );
+}
 
 export default function InternationalRelocationCalculator() {
   const hasMounted = useRef(false);
@@ -109,6 +177,27 @@ const [fromCityCode, setFromCityCode] = useState<string>("US-NYC");
 const [toCityCode, setToCityCode] = useState<string>("PT-LIS");
 
 const [currencyDisplay, setCurrencyDisplay] = useState<CurrencyDisplay>("USD");
+
+  // The currency code used for all displayed amounts
+  const displayCurrency = useMemo(() => {
+    if (currencyDisplay === "CURRENT") return COUNTRY_TO_CURRENCY[fromCountry] ?? "USD";
+    if (currencyDisplay === "DESTINATION") return COUNTRY_TO_CURRENCY[toCountry] ?? "USD";
+    return "USD";
+  }, [currencyDisplay, fromCountry, toCountry]);
+
+  // The currency code of the origin country (for salary input labeling)
+  const originCurrency = COUNTRY_TO_CURRENCY[fromCountry] ?? "USD";
+
+  // Display a USD-denominated internal value in the selected display currency
+  const displayAmount = (amountUsd: number, digits: number = 0) => {
+    if (currencyDisplay === "CURRENT") {
+      return money(convertUsdToLocal(amountUsd, fromCountry), digits, COUNTRY_TO_CURRENCY[fromCountry] ?? "USD");
+    }
+    if (currencyDisplay === "DESTINATION") {
+      return money(convertUsdToLocal(amountUsd, toCountry), digits, COUNTRY_TO_CURRENCY[toCountry] ?? "USD");
+    }
+    return money(amountUsd, digits, "USD");
+  };
   const [salaryType, setSalaryType] = useState<SalaryType>("remote");
   const [adults, setAdults] = useState<string>("1");
   const [children, setChildren] = useState<string>("0");
@@ -150,6 +239,13 @@ const [currencyDisplay, setCurrencyDisplay] = useState<CurrencyDisplay>("USD");
   const fromCities = useMemo(() => citiesForCountry(fromCountry), [fromCountry]);
   const toCities = useMemo(() => citiesForCountry(toCountry), [toCountry]);
 
+  const fromCityLabel =
+  getInternationalCityByCode(fromCityCode)?.name ?? "Current city";
+const toCityLabel =
+  getInternationalCityByCode(toCityCode)?.name ?? "Target city";
+
+const isUSDomesticRoute = fromCountry === "US" && toCountry === "US";
+
 const selectedCityDefaults = useMemo(() => {
   return getCityDefaultsByCode(toCityCode);
 }, [toCityCode]);
@@ -160,6 +256,14 @@ const currentCityDefaults = useMemo(() => {
 
 const targetCityDefaults = useMemo(() => {
   return getCityDefaultsByCode(toCityCode);
+}, [toCityCode]);
+
+const fromCityMultipliers = useMemo(() => {
+  return getCityCostMultipliers(fromCityCode);
+}, [fromCityCode]);
+
+const toCityMultipliers = useMemo(() => {
+  return getCityCostMultipliers(toCityCode);
 }, [toCityCode]);
 
   useEffect(() => {
@@ -237,7 +341,7 @@ if (vToCityCode) setToCityCode(vToCityCode);
     if (vRetirement) setRetirementIncome(vRetirement);
 
     const vCurrency = qs.get("currency") as CurrencyDisplay | null;
-    if (vCurrency === "USD" || vCurrency === "LOCAL") setCurrencyDisplay(vCurrency);
+    if (vCurrency === "USD" || vCurrency === "CURRENT" || vCurrency === "DESTINATION") setCurrencyDisplay(vCurrency);
 
     const vSalaryType = qs.get("salaryType") as SalaryType | null;
     if (vSalaryType === "remote" || vSalaryType === "local" || vSalaryType === "freelance") {
@@ -379,20 +483,30 @@ const results = useMemo(() => {
   const salaryReady = baseAnnualIncome > 0;
 
   const salaryTypeMultiplier = mode === "retired" ? 1 : getSalaryTypeMultiplier(salaryType);
-  const annualIncome = baseAnnualIncome * salaryTypeMultiplier;
 
- const grossMonthly = annualIncome / 12;
+  // salary is entered in origin country currency — convert to USD as internal base
+  const annualIncomeLocalOrigin = baseAnnualIncome * salaryTypeMultiplier;
+  const annualIncome = convertLocalToUsd(annualIncomeLocalOrigin, fromCountry); // USD base
+
+  // All cost inputs are entered in destination currency — convert to USD for internal math
+  const destToUsd = (v: number) => convertLocalToUsd(v, toCountry);
+
+  const grossMonthly = annualIncome / 12; // USD
+
+  // Convert USD income to each country's local currency for tax estimation
+  const annualIncomeForFromTax = convertUsdToLocal(annualIncome, fromCountry);
+  const annualIncomeForToTax = convertUsdToLocal(annualIncome, toCountry);
 
 const currentTaxEstimate = estimateInternationalTax({
   countryCode: fromCountry,
-  annualIncome,
+  annualIncome: annualIncomeForFromTax,
   filing,
   isRetired: mode === "retired",
 });
 
 const targetTaxEstimate = estimateInternationalTax({
   countryCode: toCountry,
-  annualIncome,
+  annualIncome: annualIncomeForToTax,
   filing,
   isRetired: mode === "retired",
 });
@@ -404,50 +518,67 @@ const netMonthlyFrom = grossMonthly * (1 - currentTaxRate);
 const netMonthlyTo = grossMonthly * (1 - targetTaxRate);
   const monthlyIncomeDiff = netMonthlyTo - netMonthlyFrom;
 
-  const adultCount = Math.max(1, nz(adults));
-  const childCount = Math.max(0, nz(children));
+const adultCount = Math.max(1, nz(adults));
+const childCount = Math.max(0, nz(children));
 
-  const groceriesAdj =
-    nz(groceries) * (1 + (adultCount - 1) * 0.55 + childCount * 0.35);
+const familyGroceries =
+  destToUsd(nz(groceries)) * (1 + (adultCount - 1) * 0.55 + childCount * 0.35);
 
-  const transportationAdj =
-    nz(transportation) * (1 + (adultCount - 1) * 0.35 + childCount * 0.15);
+const familyTransportation =
+  destToUsd(nz(transportation)) * (1 + (adultCount - 1) * 0.35 + childCount * 0.15);
 
-  const healthcareAdj =
-    nz(healthcare) * (1 + (adultCount - 1) * 0.7 + childCount * 0.5);
+const healthcareAdj =
+  destToUsd(nz(healthcare)) * (1 + (adultCount - 1) * 0.7 + childCount * 0.5);
 
-  const utilitiesAdj =
-    nz(utilities) * (1 + (adultCount - 1) * 0.25 + childCount * 0.15);
+const familyUtilities =
+  destToUsd(nz(utilities)) * (1 + (adultCount - 1) * 0.25 + childCount * 0.15);
 
-  const carCost = needCar === "yes" ? 350 : 0;
-  const housingUtilities = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
-  const housingTotal = nz(destinationRent) + housingUtilities + carCost;
+// current city view
+const groceriesFrom = familyGroceries * fromCityMultipliers.groceries;
+const transportationFrom = familyTransportation * fromCityMultipliers.transit;
+const utilitiesFrom = familyUtilities * fromCityMultipliers.utilities;
+const rentFrom = destToUsd(nz(destinationRent)) * fromCityMultipliers.housing;
 
-  const livingCosts = groceriesAdj + transportationAdj + healthcareAdj;
+// target city view
+const groceriesAdj = familyGroceries * toCityMultipliers.groceries;
+const transportationAdj = familyTransportation * toCityMultipliers.transit;
+const utilitiesAdj = familyUtilities * toCityMultipliers.utilities;
+const rentTo = destToUsd(nz(destinationRent)) * toCityMultipliers.housing;
+
+const carCost = needCar === "yes" ? destToUsd(350) : 0;
+
+const housingUtilitiesFrom = utilitiesIncluded === "yes" ? 0 : utilitiesFrom;
+const housingUtilities = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
+
+const housingTotalFrom = rentFrom + housingUtilitiesFrom + carCost;
+const housingTotal = rentTo + housingUtilities + carCost;
+
+const livingCostsFrom = groceriesFrom + transportationFrom + healthcareAdj;
+const livingCosts = groceriesAdj + transportationAdj + healthcareAdj;
 
   const monthlyFlexibility = netMonthlyTo - housingTotal - livingCosts;
   const housingPctOfNet = netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
   const pct = housingPctOfNet * 100;
   const comfort = getReadinessBand(housingPctOfNet);
 
-  const furnitureAdj = furnished === "furnished" ? 0 : nz(furnitureSetup);
+  const furnitureAdj = furnished === "furnished" ? 0 : destToUsd(nz(furnitureSetup));
 
   const upfrontCashNeeded =
-    nz(depositRequired) +
-    nz(firstMonthRent) +
-    nz(lastMonthRent) +
-    nz(visaCost) +
-    nz(flightCost) +
-    nz(shippingCost) +
-    nz(temporaryStay) +
-    nz(adminFees) +
+    destToUsd(nz(depositRequired)) +
+    destToUsd(nz(firstMonthRent)) +
+    destToUsd(nz(lastMonthRent)) +
+    destToUsd(nz(visaCost)) +
+    destToUsd(nz(flightCost)) +
+    destToUsd(nz(shippingCost)) +
+    destToUsd(nz(temporaryStay)) +
+    destToUsd(nz(adminFees)) +
     furnitureAdj +
-    nz(emergencyCashBuffer);
+    destToUsd(nz(emergencyCashBuffer));
 
   const totalMonthlyOutflow = housingTotal + livingCosts;
 
   const monthsCovered =
-    totalMonthlyOutflow > 0 ? nz(currentSavings) / totalMonthlyOutflow : 0;
+    totalMonthlyOutflow > 0 ? destToUsd(nz(currentSavings)) / totalMonthlyOutflow : 0;
 
   const currentProfile = getCountryByCode(fromCountry);
 
@@ -468,7 +599,7 @@ const toIndex =
     fromIndex > 0 ? (toIndex - fromIndex) / fromIndex : 0;
 
  return {
-  salaryReady,
+ salaryReady,
   annualIncome,
   grossMonthly,
   currentTaxRate,
@@ -487,21 +618,29 @@ const toIndex =
   netMonthlyFrom,
   netMonthlyTo,
   monthlyIncomeDiff,
-    groceriesAdj,
-    transportationAdj,
-    healthcareAdj,
-    utilitiesAdj,
-    housingTotal,
-    housingUtilities,
-    carCost,
-    livingCosts,
-    monthlyFlexibility,
-    pct,
-    comfort,
-    upfrontCashNeeded,
-    monthsCovered,
-    comparableSalary,
-    relativeDifference,
+
+  groceriesFrom,
+  transportationFrom,
+  utilitiesFrom,
+  housingTotalFrom,
+  livingCostsFrom,
+
+  groceriesAdj,
+  transportationAdj,
+  healthcareAdj,
+  utilitiesAdj,
+  housingTotal,
+  rentTo,
+  housingUtilities,
+  carCost,
+  livingCosts,
+  monthlyFlexibility,
+  pct,
+  comfort,
+  upfrontCashNeeded,
+  monthsCovered,
+  comparableSalary,
+  relativeDifference,
   };
 }, [
   mode,
@@ -511,9 +650,10 @@ const toIndex =
   filing,
   fromCountry,
   toCountry,
+  fromCityMultipliers,
+  toCityMultipliers,
   currentCityDefaults,
   targetCityDefaults,
-  salaryType,
   adults,
   children,
   needCar,
@@ -625,8 +765,7 @@ const childrenNum = Math.max(0, Number(children) || 0);
   setCurrentSavings("");
 }
 
-  const fromCityLabel = fromCity || "—";
-  const toCityLabel = toCity || "your target city";
+  
 
   return (
     <div className="text-slate-900">
@@ -674,7 +813,8 @@ const childrenNum = Math.max(0, Number(children) || 0);
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm">
                 <div className={labelHeadCls}>
-                  {mode === "retired" ? "Gross annual retirement income" : "Gross annual salary"}
+                  {mode === "retired" ? "Gross annual retirement income" : "Gross annual salary"}{" "}
+                  <span className="text-slate-400">({originCurrency})</span>
                 </div>
                 <input
                   className={inputCls}
@@ -769,20 +909,33 @@ const childrenNum = Math.max(0, Number(children) || 0);
                 </select>
               </label>
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>Currency display</div>
-                <select
-                  className={selectCls}
-                  value={currencyDisplay}
-                  onChange={(e) => setCurrencyDisplay(e.target.value as CurrencyDisplay)}
-                >
-                  <option value="USD">US Dollars (USD)</option>
-                  <option value="LOCAL">Destination currency</option>
+             <label className="text-sm">
+  <div className={labelHeadCls}>
+    Currency display
+    <InfoTip
+  align="right"
+  text="Choose how amounts appear in the calculator. You can view results in U.S. dollars, your current country's currency, or your destination country's currency."
+/>
+  </div>
+  <select
+    className={selectCls}
+    value={currencyDisplay}
+    onChange={(e) => setCurrencyDisplay(e.target.value as CurrencyDisplay)}
+  >
+                  <option value="USD">US Dollar (USD)</option>
+                  <option value="CURRENT">Current currency ({COUNTRY_TO_CURRENCY[fromCountry] ?? "USD"})</option>
+                  <option value="DESTINATION">Destination currency ({COUNTRY_TO_CURRENCY[toCountry] ?? "USD"})</option>
                 </select>
               </label>
 
               <div className="text-sm">
-                <div className={labelHeadCls}>Income impact</div>
+                <div className={labelHeadCls}>
+  Income impact
+  <InfoTip
+  align="right"
+  text="Shows how your estimated monthly take-home pay changes between your current location and your destination after taxes."
+/>
+</div>
                 <div className="flex h-11 w-full items-center justify-between rounded-xl border border-slate-300 px-3">
                   {results.salaryReady ? (
                     <>
@@ -796,7 +949,7 @@ const childrenNum = Math.max(0, Number(children) || 0);
                         }`}
                       >
                         {results.monthlyIncomeDiff > 0 ? "+" : ""}
-                        {money(results.monthlyIncomeDiff, 0)}
+                        {displayAmount(results.monthlyIncomeDiff, 0)}
                       </span>
                       <span className="whitespace-nowrap text-xs text-slate-500">
                         {results.monthlyIncomeDiff > 0
@@ -935,7 +1088,10 @@ const childrenNum = Math.max(0, Number(children) || 0);
           </div>
 
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-3 text-sm font-semibold">Estimated Living Costs</div>
+            <div className="mb-3 text-sm font-semibold">
+  Estimated Living Costs
+  <InfoTip text="These costs are treated as your destination-budget scenario and adjusted across cities using local cost multipliers. This is a normalized comparison, not a reconstruction of your exact current spending." />
+</div>
 
             <div className="mt-3 space-y-1 text-sm text-slate-500">
     <div>Estimated costs adjust automatically based on the selected city.</div>
@@ -943,33 +1099,33 @@ const childrenNum = Math.max(0, Number(children) || 0);
             <div className="space-y-3 text-[15px] text-slate-700">
               <div>
                 Groceries:{" "}
-                <span className="font-semibold text-slate-900">{money(nz(groceries), 0)}</span>
+                <span className="font-semibold text-slate-900">{displayAmount(results.groceriesAdj, 0)}</span>
               </div>
               <div>
                 Utilities:{" "}
-                <span className="font-semibold text-slate-900">{money(nz(utilities), 0)}</span>
+                <span className="font-semibold text-slate-900">{displayAmount(results.utilitiesAdj, 0)}</span>
               </div>
               <div>
                 Transportation:{" "}
                 <span className="font-semibold text-slate-900">
-                  {money(nz(transportation), 0)}
+                  {displayAmount(results.transportationAdj, 0)}
                 </span>
               </div>
               <div>
                 Car estimate:{" "}
                 <span className="font-semibold text-slate-900">
-                  {needCar === "yes" ? money(350, 0) : money(0, 0)}
+                  {needCar === "yes" ? displayAmount(results.carCost, 0) : displayAmount(0, 0)}
                 </span>
               </div>
               <div>
                 Healthcare:{" "}
-                <span className="font-semibold text-slate-900">{money(nz(healthcare), 0)}</span>
+                <span className="font-semibold text-slate-900">{displayAmount(results.healthcareAdj, 0)}</span>
               </div>
             </div>
 
-             <div className="mt-4 w-full text-xs text-slate-500">
-  Source: City default assumptions.
-</div>
+     <div className="mt-2 text-xs text-slate-500">
+        Estimated costs adjust automatically based on the selected city.
+      </div>
   </div>
           </div>
 
@@ -1060,12 +1216,40 @@ const childrenNum = Math.max(0, Number(children) || 0);
           </div>
         </div>
 
+   {isUSDomesticRoute ? (
+  <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+    <div className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
+      Domestic U.S. move detected
+    </div>
+
+    <div className="mt-2 text-lg font-semibold text-slate-900">
+      Use your U.S. relocation calculator for state-to-state comparisons.
+    </div>
+
+    <p className="mt-2 text-sm leading-6 text-slate-700">
+      This calculator is designed for international moves. For{" "}
+      <span className="font-medium">United States → United States</span>,
+      your domestic calculator will give a more trustworthy result for taxes,
+      housing, and state-level cost differences.
+    </p>
+
+    <a
+      href="https://www.relocationbynumbers.com/"
+      target="_blank"
+      rel="noreferrer"
+      className="mt-4 inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+    >
+      Go to Relocation by Numbers
+    </a>
+  </div>
+) : null}
+
         <div className="space-y-3">
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
             <div className="mb-2 text-sm font-semibold">Results</div>
             <div className="mb-3 text-xs text-slate-500">
-              Planning estimates only
-            </div>
+    Assumptions updated: March 2026 · Planning estimates only
+  </div>
 
             <div className="mb-2 space-y-1 text-sm text-slate-600">
               <div>
@@ -1079,23 +1263,23 @@ const childrenNum = Math.max(0, Number(children) || 0);
             <div className="grid gap-2 text-sm">
               <div>
                 Net monthly (current):{" "}
-                <span className="font-semibold">{money(results.netMonthlyFrom)}</span>
+                <span className="font-semibold">{displayAmount(results.netMonthlyFrom)}</span>
               </div>
               <div>
                 Net monthly (target):{" "}
-                <span className="font-semibold">{money(results.netMonthlyTo)}</span>
+                <span className="font-semibold">{displayAmount(results.netMonthlyTo)}</span>
               </div>
 
              {results.salaryReady && (
   <>
     <div className="mt-2">
       Gross monthly:{" "}
-      <span className="font-semibold">{money(results.grossMonthly, 2)}</span>
+      <span className="font-semibold">{displayAmount(results.grossMonthly, 2)}</span>
     </div>
     <div>
       Est. taxes (current):{" "}
       <span className="font-semibold">
-        {money(results.grossMonthly * results.currentTaxRate, 2)}
+        {displayAmount(results.grossMonthly * results.currentTaxRate, 2)}
       </span>{" "}
       <span className="text-xs text-slate-500">
         ({(results.currentTaxRate * 100).toFixed(1)}%)
@@ -1104,54 +1288,61 @@ const childrenNum = Math.max(0, Number(children) || 0);
     <div>
       Est. taxes (target):{" "}
       <span className="font-semibold">
-        {money(results.grossMonthly * results.targetTaxRate, 2)}
+        {displayAmount(results.grossMonthly * results.targetTaxRate, 2)}
       </span>{" "}
       <span className="text-xs text-slate-500">
         ({(results.targetTaxRate * 100).toFixed(1)}%)
       </span>
     </div>
 
-    <div className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-500 ring-1 ring-slate-200/70 space-y-1">
-      <div>
-        Tax model status:{" "}
-        <span className="font-medium text-slate-700">
-          {results.targetTaxLabel}
-        </span>
-      </div>
-      <div>{results.targetTaxNote}</div>
-    </div>
+    <div className="mt-3 rounded-2xl border border-sky-200 bg-sky-50/80 px-4 py-3 shadow-sm">
+  <div className="flex items-center gap-2 text-xs">
+    <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 font-semibold tracking-wide text-sky-700 ring-1 ring-sky-200">
+      Tax model status
+    </span>
+    <InfoTip text="This describes how complete or simplified the tax estimate is for the selected destination. Some countries are modeled more precisely than others." />
+  </div>
+
+  <div className="mt-2 text-sm font-semibold text-slate-900">
+    {results.targetTaxLabel}
+  </div>
+
+  <div className="mt-1 text-sm leading-6 text-slate-700">
+    {results.targetTaxNote}
+  </div>
+</div>
   </>
 )}
 
               <div className="mt-2 font-semibold">Monthly housing</div>
               <div className="grid gap-1 text-sm">
                 <div>
-                  Rent: <span className="font-semibold">{money(nz(destinationRent), 2)}</span>
+                  Rent: <span className="font-semibold">{displayAmount(results.rentTo, 2)}</span>
                 </div>
                 {results.housingUtilities > 0 && (
                   <div>
                     Utilities gap:{" "}
-                    <span className="font-semibold">{money(results.housingUtilities, 2)}</span>
+                    <span className="font-semibold">{displayAmount(results.housingUtilities, 2)}</span>
                   </div>
                 )}
                 {results.carCost > 0 && (
                   <div>
-                    Car: <span className="font-semibold">{money(results.carCost, 2)}</span>
+                    Car: <span className="font-semibold">{displayAmount(results.carCost, 2)}</span>
                   </div>
                 )}
                 <div className="pt-1">
-                  Total housing: <span className="font-bold">{money(results.housingTotal, 2)}</span>
+                  Total housing: <span className="font-bold">{displayAmount(results.housingTotal, 2)}</span>
                 </div>
               </div>
 
               <div className="mt-2 font-semibold">Monthly living costs</div>
               <div>
-                Total: <span className="font-bold">{money(results.livingCosts, 2)}</span>
+                Total: <span className="font-bold">{displayAmount(results.livingCosts, 2)}</span>
               </div>
 
               <div className="mt-2">
                 Upfront cash needed:{" "}
-                <span className="font-semibold">{money(results.upfrontCashNeeded)}</span>
+                <span className="font-semibold">{displayAmount(results.upfrontCashNeeded)}</span>
               </div>
               <div>
                 Months covered by savings:{" "}
@@ -1190,7 +1381,7 @@ const childrenNum = Math.max(0, Number(children) || 0);
                   Monthly Flexibility
                 </div>
                 <div className="mt-2 text-3xl font-bold text-slate-900">
-                  {results.salaryReady ? money(results.monthlyFlexibility, 2) : "—"}
+                  {results.salaryReady ? displayAmount(results.monthlyFlexibility, 2) : "—"}
                 </div>
               </div>
               <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
@@ -1231,7 +1422,7 @@ const childrenNum = Math.max(0, Number(children) || 0);
             <div className="text-xs font-semibold tracking-widest text-slate-500">
               COMPARABLE SALARY
             </div>
-            <div className="mt-2 text-3xl font-bold">{money(results.comparableSalary)}</div>
+            <div className="mt-2 text-3xl font-bold">{displayAmount(results.comparableSalary)}</div>
             <p className="mt-2 text-sm text-slate-600">
               {toCityLabel} is roughly{" "}
               <span className="font-semibold">
@@ -1279,8 +1470,6 @@ const childrenNum = Math.max(0, Number(children) || 0);
             </div>
           </div>
 
-          <AffiliateCard />
-
           <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -1297,7 +1486,7 @@ const childrenNum = Math.max(0, Number(children) || 0);
                 onClick={async () => {
                   try {
                     const shareUrl = new URL(window.location.href);
-                    const shareText = `My international relocation scenario: ${fromCityLabel} → ${toCityLabel}. Monthly flexibility ${money(results.monthlyFlexibility, 0)} after housing.`;
+                    const shareText = `My international relocation scenario: ${fromCityLabel} → ${toCityLabel}. Monthly flexibility ${displayAmount(results.monthlyFlexibility, 0)} after housing.`;
                     const canNativeShare =
                       typeof navigator !== "undefined" && "share" in navigator;
 

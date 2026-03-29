@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import FireCalculator from "@/components/FireCalculator";
+import Link from "next/link";
 
 const ALLOWED_SLUGS = [
   "fire-with-50k-salary",
@@ -60,7 +61,7 @@ export async function generateMetadata({
 
   return {
     title: `Can You Reach FIRE With a ${label} Salary?`,
-    description: `Estimate your financial independence timeline with a ${label} salary using this FIRE calculator.`,
+    description: `Estimate your financial independence timeline with a ${label} salary and see how savings rate, expenses, taxes, and location affect your path to FIRE.`,
   };
 }
 
@@ -89,95 +90,242 @@ export default async function FireWithSalaryPage({
             Can You Reach FIRE With a {label} Salary?
           </h1>
 
-            <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
-    <a href="/about" className="transition hover:text-white">
-      About
-    </a>
-    <span>•</span>
-    <a href="/disclaimer" className="transition hover:text-white">
-      Disclaimer
-    </a>
-    <span>•</span>
-    <a href="/privacy" className="transition hover:text-white">
-      Privacy
-    </a>
-    <span>•</span>
-    <a href="/terms" className="transition hover:text-white">
-      Terms
-    </a>
-  </div>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+            <Link href="/about" className="transition hover:text-white">
+              About
+            </Link>
+            <span>•</span>
+            <Link href="/disclaimer" className="transition hover:text-white">
+              Disclaimer
+            </Link>
+            <span>•</span>
+            <Link href="/privacy" className="transition hover:text-white">
+              Privacy
+            </Link>
+            <span>•</span>
+            <Link href="/terms" className="transition hover:text-white">
+              Terms
+            </Link>
+          </div>
 
-          <p className="max-w-2xl text-sm text-slate-300 leading-relaxed">
+          <p className="max-w-2xl text-sm leading-relaxed text-slate-300">
             Reaching financial independence with a {label} salary depends on your
-            savings rate, expenses, taxes, and cost of living. Lower expenses and
-            higher savings rates can dramatically shorten the path to FIRE.
+            spending, savings rate, taxes, investment returns, and where you live.
+            A lower-cost city can shorten the timeline, while high housing costs can
+            push FIRE much further out.
           </p>
         </header>
 
-        <p className="text-sm text-slate-400">
-  Assumptions updated: March 2026
-</p>
-      
-<section>
-  <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-slate-300">
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <h2 className="text-lg font-semibold text-white">Example starting point</h2>
+        <p className="text-sm text-slate-400">Assumptions updated: March 2026</p>
 
- <div className="flex flex-wrap gap-3 lg:justify-end">
-  <a
-    href="/lean-fire-calculator"
-    className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-medium text-white transition hover:border-white/20 hover:bg-white/10"
-  >
-    Lean FIRE
-  </a>
-  <a
-    href="/barista-fire-calculator"
-    className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-medium text-white transition hover:border-white/20 hover:bg-white/10"
-  >
-    Barista FIRE
-  </a>
-  <a
-    href="/coast-fire-calculator"
-    className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-medium text-white transition hover:border-white/20 hover:bg-white/10"
-  >
-    Coast FIRE
-  </a>
-  <a
-    href="/compare"
-    className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-3.5 py-1.5 text-sm font-medium text-emerald-200 transition hover:border-emerald-300/60 hover:bg-emerald-400/15 hover:text-emerald-100"
-  >
-    Compare Cities →
-  </a>
-</div>
-    </div>
+        <section>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-slate-300">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <h2 className="text-lg font-semibold text-white">Example starting point</h2>
 
-    <p className="mt-4">
-      Here’s one sample setup for a{" "}
-      <span className="font-semibold text-white">{label}</span> salary:
-    </p>
+              <div className="flex flex-wrap gap-3 lg:justify-end">
+                <Link
+                  href="/lean-fire-calculator"
+                  className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-medium text-white transition hover:border-white/20 hover:bg-white/10"
+                >
+                  Lean FIRE
+                </Link>
+                <Link
+                  href="/barista-fire-calculator"
+                  className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-medium text-white transition hover:border-white/20 hover:bg-white/10"
+                >
+                  Barista FIRE
+                </Link>
+                <Link
+                  href="/coast-fire-calculator"
+                  className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-medium text-white transition hover:border-white/20 hover:bg-white/10"
+                >
+                  Coast FIRE
+                </Link>
+                <Link
+                  href="/compare"
+                  className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-3.5 py-1.5 text-sm font-medium text-emerald-200 transition hover:border-emerald-300/60 hover:bg-emerald-400/15 hover:text-emerald-100"
+                >
+                  Compare Cities →
+                </Link>
+              </div>
+            </div>
 
-    <div className="mt-4 grid gap-2 sm:grid-cols-2">
-      <div>
-        Annual income:{" "}
-        <span className="font-semibold text-white">${income.toLocaleString()}</span>
-      </div>
-      <div>
-        Monthly expenses:{" "}
-        <span className="font-semibold text-white">$3,000–$4,500</span>
-      </div>
-      <div>
-        Savings goal: <span className="font-semibold text-white">20%–40%</span>
-      </div>
-      <div>
-        Return assumption: <span className="font-semibold text-white">7%</span>
-      </div>
-    </div>
-  </div>
-</section>
+            <p className="mt-4">
+              Here’s one sample setup for a{" "}
+              <span className="font-semibold text-white">{label}</span> salary:
+            </p>
 
-    <FireCalculator initialIncome={income} />
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              <div>
+                Annual income:{" "}
+                <span className="font-semibold text-white">${income.toLocaleString()}</span>
+              </div>
+              <div>
+                Monthly expenses:{" "}
+                <span className="font-semibold text-white">$3,000–$4,500</span>
+              </div>
+              <div>
+                Savings goal: <span className="font-semibold text-white">20%–40%</span>
+              </div>
+              <div>
+                Return assumption: <span className="font-semibold text-white">7%</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
-       
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-2xl font-semibold tracking-tight text-white">
+            Is FIRE realistic on a {label} salary?
+          </h2>
+
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-300">
+            <p>
+              Yes, FIRE can be realistic on a {label} salary, but the answer depends
+              much more on spending than income alone. At this pay level, housing
+              costs, taxes, and consistency matter more than trying to optimize tiny
+              details.
+            </p>
+
+            <p>
+              Someone living in a high-cost city with rent taking a large share of
+              take-home pay may find the path to FIRE very slow. Someone earning the
+              same amount in a lower-cost location may be able to save a much larger
+              percentage of income and reach financial independence meaningfully sooner.
+            </p>
+
+            <p>
+              That is why this page is less about a single yes-or-no answer and more
+              about helping you test the real tradeoffs. If your expenses stay under
+              control and your savings rate remains strong over time, a {label} salary
+              can support a workable path to FIRE.
+            </p>
+          </div>
+        </section>
+
+        <FireCalculator initialIncome={income} />
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-2xl font-semibold tracking-tight text-white">
+            What matters most at this income level
+          </h2>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+              <h3 className="font-semibold text-white">Housing cost</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Housing is often the biggest variable. A lower rent or mortgage burden
+                can create more room for saving and investing without changing your salary.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+              <h3 className="font-semibold text-white">Savings rate</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                The percentage of income you save usually matters more than the income
+                number by itself. A strong savings rate can dramatically shorten the FIRE timeline.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+              <h3 className="font-semibold text-white">Taxes</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                State taxes and take-home pay can materially change how far a salary
+                actually goes. Two people earning the same amount may have very different outcomes.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+              <h3 className="font-semibold text-white">Time horizon</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                A longer runway gives compound growth more time to work. Starting
+                earlier and staying consistent can matter just as much as income growth.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-2xl font-semibold tracking-tight text-white">
+            Why location changes the answer
+          </h2>
+
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-300">
+            <p>
+              This is where relocation can change the math. If you can lower your
+              monthly spending by moving to a cheaper city or lower-tax state, your
+              FIRE target may fall and your timeline may improve.
+            </p>
+
+            <p>
+              That does not mean every lower-cost city is automatically a better choice.
+              Salary opportunities, lifestyle fit, transportation, and housing quality
+              all still matter. But if your goal is to make a {label} salary stretch
+              further, location can be one of the most powerful levers you have.
+            </p>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link
+              href="/compare/nyc-ny/charlotte-nc"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              NYC vs Charlotte
+            </Link>
+            <Link
+              href="/compare/la-ca/austin-tx"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              LA vs Austin
+            </Link>
+            <Link
+              href="/fire-in/charlotte-nc"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              FIRE in Charlotte
+            </Link>
+            <Link
+              href="/cost-of-living/austin-tx"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              Cost of Living in Austin
+            </Link>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-2xl font-semibold tracking-tight text-white">
+            Related FIRE tools
+          </h2>
+
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link
+              href="/fire-calculator"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              FIRE Calculator
+            </Link>
+            <Link
+              href="/lean-fire-calculator"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              Lean FIRE Calculator
+            </Link>
+            <Link
+              href="/barista-fire-calculator"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              Barista FIRE Calculator
+            </Link>
+            <Link
+              href="/coast-fire-calculator"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              Coast FIRE Calculator
+            </Link>
+          </div>
+        </section>
       </div>
     </main>
   );
