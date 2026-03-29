@@ -69,18 +69,94 @@ export default function Page() {
           </div>
         </section>
 
-        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white sm:text-xl">
-              Thinking About Moving to Another Country?
-            </h2>
+<section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
+  <div className="grid gap-6 lg:grid-cols-2">
+    <div>
+      <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+        What this calculator includes
+      </h2>
 
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              A higher salary can shrink fast after taxes and housing. Compare
-              take-home pay and real monthly costs before you relocate.
-            </p>
+      <div className="mt-4 space-y-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
+        <p>
+          This calculator estimates how a move abroad may affect your monthly budget
+          using income, taxes, housing, living costs, and one-time relocation expenses.
+        </p>
+
+        <p>
+          It is built for planning, not exact prediction. The goal is to help you compare
+          locations consistently before you commit to a move.
+        </p>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+          <div className="text-sm font-semibold text-slate-900 dark:text-white">
+            Income and taxes
           </div>
-        </section>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            Estimated take-home income based on your salary, filing status, country,
+            and selected tax model.
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+          <div className="text-sm font-semibold text-slate-900 dark:text-white">
+            Housing and essentials
+          </div>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            Rent, utilities, groceries, transportation, and healthcare adjusted
+            for the selected destination scenario.
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+          <div className="text-sm font-semibold text-slate-900 dark:text-white">
+            One-time move costs
+          </div>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            Deposit, first month rent, visa fees, travel, setup costs, and a
+            recommended emergency buffer.
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+          <div className="text-sm font-semibold text-slate-900 dark:text-white">
+            Planning signals
+          </div>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            Monthly flexibility, comparable salary, savings coverage, and comfort
+            score to help you judge whether the move looks realistic.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div className="rounded-2xl border border-blue-200/70 bg-blue-50 p-5 dark:border-blue-900/60 dark:bg-blue-950/30">
+      <div className="text-sm font-semibold text-slate-900 dark:text-white">
+        Good to know before you use it
+      </div>
+
+      <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
+        <p>
+          Results are estimates only. Real taxes, rent, healthcare, immigration
+          rules, and household costs vary by residency status, visa path, and local market conditions.
+        </p>
+
+        <p>
+          The current-city side is best treated as a normalized comparison when you enter
+          destination-based budget assumptions. That makes the destination view coherent,
+          while the current side acts more like a planning baseline than a perfect snapshot
+          of what you spend today.
+        </p>
+
+        <p>
+          This tool is most useful for testing scenarios, comparing countries, and seeing
+          whether your income and savings create enough room to make the move comfortably.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
       </section>
 
       <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">

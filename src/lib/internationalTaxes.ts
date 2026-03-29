@@ -93,8 +93,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
         effectiveRate: clampRate(rate),
         model: "progressive-country",
         confidence: "partial",
-        label: "Partial: US federal retirement estimate",
-        note: "Models federal tax on retirement income. State taxes not included.",
+        label: "Federal tax estimate only",
+        note: "Uses a U.S. federal tax estimate for planning. State and city taxes are not included.",
       };
     }
     const brackets =
@@ -145,8 +145,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       effectiveRate: clampRate(incomeTaxRate + ni),
       model: "progressive-country",
       confidence: "partial",
-      label: "Partial: UK income tax + NI estimate",
-      note: "UK has no joint filing. Models income tax with personal allowance and broad NI overlay. Scotland uses different rates. Income must be passed in GBP.",
+     label: "UK tax and NI estimate",
+note: "Uses a simplified UK income tax and National Insurance estimate for planning. Scotland uses different rates, and some location-specific rules are not fully modeled.",
     };
   },
 
@@ -167,13 +167,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       { upTo: Infinity, rate: 0.48 },
     ]);
     const retiredAdj = isRetired ? -0.03 : 0;
-    return {
-      effectiveRate: clampRate(rate + retiredAdj),
-      model: "progressive-country",
-      confidence: "placeholder",
-      label: "Simplified: Portugal progressive estimate",
-      note: "Married household split and deductions not modeled — rate same as single. Retirement adjustment is a broad estimate. Income must be passed in EUR.",
-    };
+ return {
+  effectiveRate: clampRate(rate + retiredAdj),
+  model: "progressive-country",
+  confidence: "placeholder",
+  label: "Simplified Portugal tax estimate",
+  note: "Uses a simplified Portugal tax estimate for planning. Household splitting, detailed deductions, and some residency-specific rules are not fully modeled.",
+};
   },
 
   // -------------------------------------------------------------------------
@@ -196,8 +196,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       effectiveRate: clampRate(effectiveRate),
       model: "progressive-country",
       confidence: "partial",
-      label: "Partial: Spain national income tax",
-      note: "Married models joint filing with EUR 3,400 deduction. Regional surcharges not included. Retirement income uses same brackets. Income must be passed in EUR.",
+     label: "Spain tax estimate",
+note: "Uses a simplified Spain income tax estimate for planning. Joint filing is modeled with a basic deduction, but regional surcharges and some detailed rules are not fully included.",
     };
   },
 
@@ -248,8 +248,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       effectiveRate: clampRate(federalRate + provincialOverlay - spousalCredit - ageCredit),
       model: "country-plus-province",
       confidence: "partial",
-      label: "Partial: Canadian federal + broad provincial estimate",
-      note: "Married and retired adjustments modeled as tax credit equivalents. Provincial rates vary widely. Income must be passed in CAD.",
+      label: "Canada federal and provincial estimate",
+note: "Uses a simplified Canada tax estimate for planning. Provincial taxes vary widely, so this uses a broad provincial adjustment rather than a province-specific calculation.",
     };
   },
 
@@ -275,8 +275,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       effectiveRate: clampRate(baseTaxRate + solidarity),
       model: "progressive-country",
       confidence: "partial",
-      label: "Partial: Germany Ehegattensplitting + Soli",
-      note: "Married uses legal income-splitting (Ehegattensplitting). Solidarity surcharge applied above threshold. Church tax and social contributions not included. Income must be passed in EUR.",
+      label: "Germany tax estimate",
+note: "Uses a simplified Germany tax estimate for planning. Married filing includes income splitting, but church tax, social contributions, and some detailed rules are not fully modeled.",
     };
   },
 
@@ -298,8 +298,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       effectiveRate: clampRate(progressiveTax(annualIncome, brackets)),
       model: "progressive-country",
       confidence: "partial",
-      label: "Partial: Netherlands Box 1",
-      note: "No joint filing in NL. Retired uses AOW-recipient reduced rate below EUR 38,098. Box 2/3 not included. Income must be passed in EUR.",
+     label: "Netherlands income tax estimate",
+note: "Uses a simplified Netherlands Box 1 tax estimate for planning. Joint filing is not modeled, and Box 2 and Box 3 taxes are not included.",
     };
   },
 
@@ -499,8 +499,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     effectiveRate: 0,
     model: "none",
     confidence: "verified",
-    label: "Verified: no personal income tax",
-    note: "UAE levies no personal income tax regardless of filing status or retirement.",
+   label: "No personal income tax",
+note: "The UAE does not levy personal income tax on employment income in this planning model.",
   }),
 
   // -------------------------------------------------------------------------

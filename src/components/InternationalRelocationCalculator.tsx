@@ -236,8 +236,21 @@ const [currencyDisplay, setCurrencyDisplay] = useState<CurrencyDisplay>("USD");
   );
 }, []);
 
-  const fromCities = useMemo(() => citiesForCountry(fromCountry), [fromCountry]);
-  const toCities = useMemo(() => citiesForCountry(toCountry), [toCountry]);
+const fromCities = useMemo(() => {
+  return [...citiesForCountry(fromCountry)].sort((a, b) =>
+    a.name.trim().localeCompare(b.name.trim(), undefined, {
+      sensitivity: "base",
+    })
+  );
+}, [fromCountry]);
+
+const toCities = useMemo(() => {
+  return [...citiesForCountry(toCountry)].sort((a, b) =>
+    a.name.trim().localeCompare(b.name.trim(), undefined, {
+      sensitivity: "base",
+    })
+  );
+}, [toCountry]);
 
   const fromCityLabel =
   getInternationalCityByCode(fromCityCode)?.name ?? "Current city";
@@ -1094,7 +1107,7 @@ const childrenNum = Math.max(0, Number(children) || 0);
 </div>
 
             <div className="mt-3 space-y-1 text-sm text-slate-500">
-    <div>Estimated costs adjust automatically based on the selected city.</div>
+
 
             <div className="space-y-3 text-[15px] text-slate-700">
               <div>

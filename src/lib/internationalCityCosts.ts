@@ -12,792 +12,261 @@ export type InternationalCityCostConfig = {
   multipliers: CityCostMultipliers;
 };
 
-// ---------------------------------------------------------------------------
-// All multipliers are relative to each country's own average (1.0 = country avg).
-// defaultRent is in USD/month for a 1-bedroom apartment in the city center.
-// ---------------------------------------------------------------------------
-
 export const INTERNATIONAL_CITY_COSTS: Record<string, InternationalCityCostConfig> = {
-
-  // =========================================================================
-  // UNITED STATES
-  // Country avg rent reference: ~$1,800/mo
-  // =========================================================================
-  "US-NYC": {
-    countryCode: "US", city: "New York City", defaultRent: 3800,
-    multipliers: { housing: 1.45, transit: 1.30, groceries: 1.20, utilities: 1.10 },
-  },
-  "US-LAX": {
-    countryCode: "US", city: "Los Angeles", defaultRent: 2900,
-    multipliers: { housing: 1.25, transit: 0.95, groceries: 1.10, utilities: 1.05 },
-  },
-  "US-MIA": {
-    countryCode: "US", city: "Miami", defaultRent: 2700,
-    multipliers: { housing: 1.18, transit: 0.85, groceries: 1.08, utilities: 1.12 },
-  },
-  "US-CHI": {
-    countryCode: "US", city: "Chicago", defaultRent: 2200,
-    multipliers: { housing: 1.05, transit: 1.10, groceries: 1.05, utilities: 1.05 },
-  },
-  "US-ATL": {
-    countryCode: "US", city: "Atlanta", defaultRent: 1850,
-    multipliers: { housing: 0.95, transit: 0.80, groceries: 0.98, utilities: 0.98 },
-  },
-  "US-AUS": {
-    countryCode: "US", city: "Austin", defaultRent: 1900,
-    multipliers: { housing: 0.97, transit: 0.75, groceries: 1.00, utilities: 1.02 },
-  },
-  "US-DAL": {
-    countryCode: "US", city: "Dallas", defaultRent: 1750,
-    multipliers: { housing: 0.90, transit: 0.78, groceries: 0.97, utilities: 0.97 },
-  },
-  "US-SEA": {
-    countryCode: "US", city: "Seattle", defaultRent: 2500,
-    multipliers: { housing: 1.15, transit: 1.05, groceries: 1.10, utilities: 1.08 },
-  },
-  "US-BNA": {
-    countryCode: "US", city: "Nashville", defaultRent: 1900,
-    multipliers: { housing: 0.97, transit: 0.72, groceries: 0.97, utilities: 0.95 },
-  },
-  "US-CLT": {
-    countryCode: "US", city: "Charlotte", defaultRent: 1750,
-    multipliers: { housing: 0.90, transit: 0.75, groceries: 0.96, utilities: 0.95 },
-  },
-
-  // =========================================================================
-  // UNITED KINGDOM
-  // Country avg rent reference: ~£1,200/mo (~$1,500 USD)
-  // =========================================================================
-  "GB-LON": {
-    countryCode: "GB", city: "London", defaultRent: 2800,
-    multipliers: { housing: 1.55, transit: 1.40, groceries: 1.15, utilities: 1.10 },
-  },
-  "GB-BIR": {
-    countryCode: "GB", city: "Birmingham", defaultRent: 1300,
-    multipliers: { housing: 0.88, transit: 0.92, groceries: 0.97, utilities: 0.97 },
-  },
-  "GB-MAN": {
-    countryCode: "GB", city: "Manchester", defaultRent: 1450,
-    multipliers: { housing: 0.93, transit: 0.95, groceries: 0.98, utilities: 0.98 },
-  },
-  "GB-LIV": {
-    countryCode: "GB", city: "Liverpool", defaultRent: 1100,
-    multipliers: { housing: 0.82, transit: 0.88, groceries: 0.95, utilities: 0.96 },
-  },
-
-  // =========================================================================
-  // PORTUGAL
-  // Country avg rent reference: ~€900/mo (~$980 USD)
-  // =========================================================================
-  "PT-LIS": {
-    countryCode: "PT", city: "Lisbon", defaultRent: 1600,
-    multipliers: { housing: 1.35, transit: 1.15, groceries: 1.12, utilities: 1.08 },
-  },
-  "PT-OPO": {
-    countryCode: "PT", city: "Porto", defaultRent: 1200,
-    multipliers: { housing: 1.05, transit: 1.00, groceries: 1.02, utilities: 1.00 },
-  },
-  "PT-FAO": {
-    countryCode: "PT", city: "Faro", defaultRent: 1000,
-    multipliers: { housing: 0.88, transit: 0.85, groceries: 0.96, utilities: 0.96 },
-  },
-  "PT-BRG": {
-    countryCode: "PT", city: "Braga", defaultRent: 850,
-    multipliers: { housing: 0.80, transit: 0.82, groceries: 0.95, utilities: 0.95 },
-  },
-
-  // =========================================================================
-  // SPAIN
-  // Country avg rent reference: ~€900/mo (~$980 USD)
-  // =========================================================================
-  "ES-MAD": {
-    countryCode: "ES", city: "Madrid", defaultRent: 1700,
-    multipliers: { housing: 1.40, transit: 1.15, groceries: 1.10, utilities: 1.05 },
-  },
-  "ES-BCN": {
-    countryCode: "ES", city: "Barcelona", defaultRent: 1800,
-    multipliers: { housing: 1.45, transit: 1.18, groceries: 1.12, utilities: 1.07 },
-  },
-  "ES-VLC": {
-    countryCode: "ES", city: "Valencia", defaultRent: 1050,
-    multipliers: { housing: 0.90, transit: 0.95, groceries: 0.98, utilities: 0.98 },
-  },
-  "ES-SVQ": {
-    countryCode: "ES", city: "Seville", defaultRent: 950,
-    multipliers: { housing: 0.82, transit: 0.90, groceries: 0.96, utilities: 0.97 },
-  },
-
-  // =========================================================================
-  // MEXICO
-  // Country avg rent reference: ~MXN 12,000/mo (~$710 USD)
-  // =========================================================================
-  "MX-MEX": {
-    countryCode: "MX", city: "Mexico City", defaultRent: 1000,
-    multipliers: { housing: 1.35, transit: 1.20, groceries: 1.15, utilities: 1.10 },
-  },
-  "MX-GDL": {
-    countryCode: "MX", city: "Guadalajara", defaultRent: 650,
-    multipliers: { housing: 0.90, transit: 0.95, groceries: 0.98, utilities: 0.97 },
-  },
-  "MX-MTY": {
-    countryCode: "MX", city: "Monterrey", defaultRent: 750,
-    multipliers: { housing: 1.02, transit: 0.98, groceries: 1.00, utilities: 1.02 },
-  },
-  "MX-CUN": {
-    countryCode: "MX", city: "Cancún", defaultRent: 700,
-    multipliers: { housing: 0.95, transit: 0.85, groceries: 1.05, utilities: 1.08 },
-  },
-
-  // =========================================================================
-  // CANADA
-  // Country avg rent reference: ~CAD 2,000/mo (~$1,480 USD)
-  // =========================================================================
-  "CA-TOR": {
-    countryCode: "CA", city: "Toronto", defaultRent: 2300,
-    multipliers: { housing: 1.38, transit: 1.15, groceries: 1.10, utilities: 1.08 },
-  },
-  "CA-YVR": {
-    countryCode: "CA", city: "Vancouver", defaultRent: 2500,
-    multipliers: { housing: 1.45, transit: 1.12, groceries: 1.08, utilities: 1.05 },
-  },
-  "CA-YUL": {
-    countryCode: "CA", city: "Montreal", defaultRent: 1500,
-    multipliers: { housing: 0.90, transit: 1.00, groceries: 0.97, utilities: 0.97 },
-  },
-  "CA-YYC": {
-    countryCode: "CA", city: "Calgary", defaultRent: 1700,
-    multipliers: { housing: 1.00, transit: 0.95, groceries: 1.02, utilities: 1.02 },
-  },
-
-  // =========================================================================
-  // GERMANY
-  // Country avg rent reference: ~€900/mo (~$980 USD)
-  // =========================================================================
-  "DE-BER": {
-    countryCode: "DE", city: "Berlin", defaultRent: 1400,
-    multipliers: { housing: 1.25, transit: 1.10, groceries: 1.05, utilities: 1.05 },
-  },
-  "DE-MUC": {
-    countryCode: "DE", city: "Munich", defaultRent: 1900,
-    multipliers: { housing: 1.50, transit: 1.15, groceries: 1.12, utilities: 1.08 },
-  },
-  "DE-FRA": {
-    countryCode: "DE", city: "Frankfurt", defaultRent: 1600,
-    multipliers: { housing: 1.30, transit: 1.12, groceries: 1.08, utilities: 1.05 },
-  },
-  "DE-HAM": {
-    countryCode: "DE", city: "Hamburg", defaultRent: 1500,
-    multipliers: { housing: 1.22, transit: 1.08, groceries: 1.05, utilities: 1.03 },
-  },
-
-  // =========================================================================
-  // NETHERLANDS
-  // Country avg rent reference: ~€1,200/mo (~$1,300 USD)
-  // =========================================================================
-  "NL-AMS": {
-    countryCode: "NL", city: "Amsterdam", defaultRent: 2000,
-    multipliers: { housing: 1.40, transit: 1.15, groceries: 1.10, utilities: 1.08 },
-  },
-  "NL-RTM": {
-    countryCode: "NL", city: "Rotterdam", defaultRent: 1500,
-    multipliers: { housing: 1.05, transit: 1.05, groceries: 1.00, utilities: 1.00 },
-  },
-  "NL-UTR": {
-    countryCode: "NL", city: "Utrecht", defaultRent: 1600,
-    multipliers: { housing: 1.10, transit: 1.00, groceries: 1.02, utilities: 1.00 },
-  },
-  "NL-EIN": {
-    countryCode: "NL", city: "Eindhoven", defaultRent: 1300,
-    multipliers: { housing: 0.90, transit: 0.92, groceries: 0.97, utilities: 0.97 },
-  },
-
-  // =========================================================================
-  // COSTA RICA
-  // Country avg rent reference: ~$650 USD/mo
-  // =========================================================================
-  "CR-SJO": {
-    countryCode: "CR", city: "San José", defaultRent: 850,
-    multipliers: { housing: 1.25, transit: 1.15, groceries: 1.10, utilities: 1.08 },
-  },
-  "CR-LIR": {
-    countryCode: "CR", city: "Liberia", defaultRent: 550,
-    multipliers: { housing: 0.85, transit: 0.85, groceries: 0.95, utilities: 1.05 },
-  },
-  "CR-HER": {
-    countryCode: "CR", city: "Heredia", defaultRent: 750,
-    multipliers: { housing: 1.05, transit: 1.00, groceries: 1.02, utilities: 1.00 },
-  },
-  "CR-ALA": {
-    countryCode: "CR", city: "Alajuela", defaultRent: 680,
-    multipliers: { housing: 0.95, transit: 0.95, groceries: 0.98, utilities: 0.98 },
-  },
-
-  // =========================================================================
-  // FRANCE
-  // Country avg rent reference: ~€900/mo (~$980 USD)
-  // =========================================================================
-  "FR-PAR": {
-    countryCode: "FR", city: "Paris", defaultRent: 2000,
-    multipliers: { housing: 1.55, transit: 1.25, groceries: 1.15, utilities: 1.10 },
-  },
-  "FR-LYO": {
-    countryCode: "FR", city: "Lyon", defaultRent: 1100,
-    multipliers: { housing: 1.05, transit: 1.05, groceries: 1.02, utilities: 1.00 },
-  },
-  "FR-MRS": {
-    countryCode: "FR", city: "Marseille", defaultRent: 900,
-    multipliers: { housing: 0.90, transit: 0.95, groceries: 0.98, utilities: 0.98 },
-  },
-  "FR-NCE": {
-    countryCode: "FR", city: "Nice", defaultRent: 1300,
-    multipliers: { housing: 1.12, transit: 1.00, groceries: 1.05, utilities: 1.02 },
-  },
-
-  // =========================================================================
-  // ITALY
-  // Country avg rent reference: ~€800/mo (~$870 USD)
-  // =========================================================================
-  "IT-ROM": {
-    countryCode: "IT", city: "Rome", defaultRent: 1400,
-    multipliers: { housing: 1.35, transit: 1.10, groceries: 1.08, utilities: 1.05 },
-  },
-  "IT-MIL": {
-    countryCode: "IT", city: "Milan", defaultRent: 1700,
-    multipliers: { housing: 1.55, transit: 1.18, groceries: 1.12, utilities: 1.08 },
-  },
-  "IT-FLR": {
-    countryCode: "IT", city: "Florence", defaultRent: 1200,
-    multipliers: { housing: 1.10, transit: 1.00, groceries: 1.02, utilities: 1.00 },
-  },
-  "IT-NAP": {
-    countryCode: "IT", city: "Naples", defaultRent: 800,
-    multipliers: { housing: 0.82, transit: 0.90, groceries: 0.95, utilities: 0.95 },
-  },
-
-  // =========================================================================
-  // IRELAND
-  // Country avg rent reference: ~€1,600/mo (~$1,750 USD)
-  // =========================================================================
-  "IE-DUB": {
-    countryCode: "IE", city: "Dublin", defaultRent: 2400,
-    multipliers: { housing: 1.45, transit: 1.20, groceries: 1.12, utilities: 1.10 },
-  },
-  "IE-CRK": {
-    countryCode: "IE", city: "Cork", defaultRent: 1600,
-    multipliers: { housing: 0.98, transit: 0.92, groceries: 0.98, utilities: 0.98 },
-  },
-  "IE-GWY": {
-    countryCode: "IE", city: "Galway", defaultRent: 1500,
-    multipliers: { housing: 0.90, transit: 0.85, groceries: 0.96, utilities: 0.96 },
-  },
-  "IE-LMK": {
-    countryCode: "IE", city: "Limerick", defaultRent: 1300,
-    multipliers: { housing: 0.82, transit: 0.82, groceries: 0.94, utilities: 0.95 },
-  },
-
-  // =========================================================================
-  // AUSTRALIA
-  // Country avg rent reference: ~AUD 2,000/mo (~$1,300 USD)
-  // =========================================================================
-  "AU-SYD": {
-    countryCode: "AU", city: "Sydney", defaultRent: 2200,
-    multipliers: { housing: 1.40, transit: 1.15, groceries: 1.10, utilities: 1.08 },
-  },
-  "AU-MEL": {
-    countryCode: "AU", city: "Melbourne", defaultRent: 1900,
-    multipliers: { housing: 1.22, transit: 1.12, groceries: 1.05, utilities: 1.05 },
-  },
-  "AU-BNE": {
-    countryCode: "AU", city: "Brisbane", defaultRent: 1600,
-    multipliers: { housing: 1.00, transit: 0.95, groceries: 1.00, utilities: 1.02 },
-  },
-  "AU-PER": {
-    countryCode: "AU", city: "Perth", defaultRent: 1500,
-    multipliers: { housing: 0.95, transit: 0.90, groceries: 0.98, utilities: 1.00 },
-  },
-
-  // =========================================================================
-  // NEW ZEALAND
-  // Country avg rent reference: ~NZD 2,000/mo (~$1,200 USD)
-  // =========================================================================
-  "NZ-AKL": {
-    countryCode: "NZ", city: "Auckland", defaultRent: 1800,
-    multipliers: { housing: 1.35, transit: 1.10, groceries: 1.08, utilities: 1.05 },
-  },
-  "NZ-WLG": {
-    countryCode: "NZ", city: "Wellington", defaultRent: 1500,
-    multipliers: { housing: 1.05, transit: 1.02, groceries: 1.02, utilities: 1.02 },
-  },
-  "NZ-CHC": {
-    countryCode: "NZ", city: "Christchurch", defaultRent: 1200,
-    multipliers: { housing: 0.85, transit: 0.88, groceries: 0.95, utilities: 0.96 },
-  },
-
-  // =========================================================================
-  // JAPAN
-  // Country avg rent reference: ~¥120,000/mo (~$820 USD)
-  // =========================================================================
-  "JP-TYO": {
-    countryCode: "JP", city: "Tokyo", defaultRent: 1600,
-    multipliers: { housing: 1.45, transit: 1.20, groceries: 1.12, utilities: 1.08 },
-  },
-  "JP-OSA": {
-    countryCode: "JP", city: "Osaka", defaultRent: 1100,
-    multipliers: { housing: 1.05, transit: 1.05, groceries: 1.02, utilities: 1.00 },
-  },
-  "JP-KYO": {
-    countryCode: "JP", city: "Kyoto", defaultRent: 950,
-    multipliers: { housing: 0.92, transit: 0.95, groceries: 0.98, utilities: 0.97 },
-  },
-  "JP-FUK": {
-    countryCode: "JP", city: "Fukuoka", defaultRent: 780,
-    multipliers: { housing: 0.78, transit: 0.88, groceries: 0.95, utilities: 0.96 },
-  },
-
-  // =========================================================================
-  // SOUTH KOREA
-  // Country avg rent reference: ~₩800,000/mo (~$620 USD)
-  // =========================================================================
-  "KR-SEL": {
-    countryCode: "KR", city: "Seoul", defaultRent: 1400,
-    multipliers: { housing: 1.50, transit: 1.15, groceries: 1.12, utilities: 1.08 },
-  },
-  "KR-BUS": {
-    countryCode: "KR", city: "Busan", defaultRent: 850,
-    multipliers: { housing: 0.88, transit: 0.95, groceries: 0.97, utilities: 0.97 },
-  },
-  "KR-ICN": {
-    countryCode: "KR", city: "Incheon", defaultRent: 900,
-    multipliers: { housing: 0.92, transit: 0.98, groceries: 0.97, utilities: 0.97 },
-  },
-
-  // =========================================================================
-  // UNITED ARAB EMIRATES
-  // Country avg rent reference: ~AED 6,000/mo (~$1,630 USD)
-  // =========================================================================
-  "AE-DXB": {
-    countryCode: "AE", city: "Dubai", defaultRent: 2500,
-    multipliers: { housing: 1.35, transit: 1.10, groceries: 1.12, utilities: 1.15 },
-  },
-  "AE-AUH": {
-    countryCode: "AE", city: "Abu Dhabi", defaultRent: 2200,
-    multipliers: { housing: 1.15, transit: 1.00, groceries: 1.05, utilities: 1.05 },
-  },
-
-  // =========================================================================
-  // SINGAPORE
-  // Country avg rent reference: ~SGD 3,200/mo (~$2,400 USD)
-  // =========================================================================
-  "SG-SIN": {
-    countryCode: "SG", city: "Singapore", defaultRent: 2800,
-    multipliers: { housing: 1.0, transit: 1.0, groceries: 1.0, utilities: 1.0 },
-  },
-
-  // =========================================================================
-  // SWITZERLAND
-  // Country avg rent reference: ~CHF 1,900/mo (~$2,100 USD)
-  // =========================================================================
-  "CH-ZRH": {
-    countryCode: "CH", city: "Zurich", defaultRent: 2800,
-    multipliers: { housing: 1.30, transit: 1.15, groceries: 1.12, utilities: 1.08 },
-  },
-  "CH-GVA": {
-    countryCode: "CH", city: "Geneva", defaultRent: 2900,
-    multipliers: { housing: 1.35, transit: 1.10, groceries: 1.15, utilities: 1.10 },
-  },
-  "CH-BSL": {
-    countryCode: "CH", city: "Basel", defaultRent: 1900,
-    multipliers: { housing: 0.92, transit: 0.95, groceries: 0.98, utilities: 0.97 },
-  },
-
-  // =========================================================================
-  // DENMARK
-  // Country avg rent reference: ~DKK 10,000/mo (~$1,450 USD)
-  // =========================================================================
-  "DK-CPH": {
-    countryCode: "DK", city: "Copenhagen", defaultRent: 2000,
-    multipliers: { housing: 1.30, transit: 1.15, groceries: 1.10, utilities: 1.08 },
-  },
-  "DK-AAR": {
-    countryCode: "DK", city: "Aarhus", defaultRent: 1400,
-    multipliers: { housing: 0.88, transit: 0.92, groceries: 0.96, utilities: 0.96 },
-  },
-
-  // =========================================================================
-  // SWEDEN
-  // Country avg rent reference: ~SEK 12,000/mo (~$1,150 USD)
-  // =========================================================================
-  "SE-STO": {
-    countryCode: "SE", city: "Stockholm", defaultRent: 1800,
-    multipliers: { housing: 1.38, transit: 1.20, groceries: 1.10, utilities: 1.08 },
-  },
-  "SE-GOT": {
-    countryCode: "SE", city: "Gothenburg", defaultRent: 1300,
-    multipliers: { housing: 1.00, transit: 1.00, groceries: 1.00, utilities: 1.00 },
-  },
-  "SE-MMA": {
-    countryCode: "SE", city: "Malmö", defaultRent: 1100,
-    multipliers: { housing: 0.85, transit: 0.90, groceries: 0.95, utilities: 0.96 },
-  },
-
-  // =========================================================================
-  // NORWAY
-  // Country avg rent reference: ~NOK 13,000/mo (~$1,200 USD)
-  // =========================================================================
-  "NO-OSL": {
-    countryCode: "NO", city: "Oslo", defaultRent: 1900,
-    multipliers: { housing: 1.35, transit: 1.20, groceries: 1.12, utilities: 1.08 },
-  },
-  "NO-BGO": {
-    countryCode: "NO", city: "Bergen", defaultRent: 1400,
-    multipliers: { housing: 0.92, transit: 0.95, groceries: 0.98, utilities: 0.97 },
-  },
-
-  // =========================================================================
-  // FINLAND
-  // Country avg rent reference: ~€900/mo (~$980 USD)
-  // =========================================================================
-  "FI-HEL": {
-    countryCode: "FI", city: "Helsinki", defaultRent: 1500,
-    multipliers: { housing: 1.38, transit: 1.18, groceries: 1.10, utilities: 1.08 },
-  },
-  "FI-TMP": {
-    countryCode: "FI", city: "Tampere", defaultRent: 950,
-    multipliers: { housing: 0.85, transit: 0.88, groceries: 0.95, utilities: 0.96 },
-  },
-
-  // =========================================================================
-  // POLAND
-  // Country avg rent reference: ~PLN 2,500/mo (~$620 USD)
-  // =========================================================================
-  "PL-WAW": {
-    countryCode: "PL", city: "Warsaw", defaultRent: 1100,
-    multipliers: { housing: 1.40, transit: 1.20, groceries: 1.12, utilities: 1.10 },
-  },
-  "PL-KRK": {
-    countryCode: "PL", city: "Kraków", defaultRent: 850,
-    multipliers: { housing: 1.05, transit: 1.00, groceries: 1.02, utilities: 1.00 },
-  },
-  "PL-WRO": {
-    countryCode: "PL", city: "Wrocław", defaultRent: 800,
-    multipliers: { housing: 0.95, transit: 0.95, groceries: 0.98, utilities: 0.98 },
-  },
-
-  // =========================================================================
-  // CZECH REPUBLIC
-  // Country avg rent reference: ~CZK 18,000/mo (~$800 USD)
-  // =========================================================================
-  "CZ-PRG": {
-    countryCode: "CZ", city: "Prague", defaultRent: 1400,
-    multipliers: { housing: 1.40, transit: 1.20, groceries: 1.12, utilities: 1.10 },
-  },
-  "CZ-BRQ": {
-    countryCode: "CZ", city: "Brno", defaultRent: 900,
-    multipliers: { housing: 0.85, transit: 0.90, groceries: 0.95, utilities: 0.95 },
-  },
-
-  // =========================================================================
-  // HUNGARY
-  // Country avg rent reference: ~HUF 250,000/mo (~$680 USD)
-  // =========================================================================
-  "HU-BUD": {
-    countryCode: "HU", city: "Budapest", defaultRent: 950,
-    multipliers: { housing: 1.0, transit: 1.0, groceries: 1.0, utilities: 1.0 },
-  },
-
-  // =========================================================================
-  // GREECE
-  // Country avg rent reference: ~€600/mo (~$650 USD)
-  // =========================================================================
-  "GR-ATH": {
-    countryCode: "GR", city: "Athens", defaultRent: 900,
-    multipliers: { housing: 1.30, transit: 1.20, groceries: 1.12, utilities: 1.10 },
-  },
-  "GR-THS": {
-    countryCode: "GR", city: "Thessaloniki", defaultRent: 650,
-    multipliers: { housing: 0.85, transit: 0.90, groceries: 0.95, utilities: 0.95 },
-  },
-
-  // =========================================================================
-  // TURKEY
-  // Country avg rent reference: ~TRY 15,000/mo (~$470 USD, volatile)
-  // =========================================================================
-  "TR-IST": {
-    countryCode: "TR", city: "Istanbul", defaultRent: 750,
-    multipliers: { housing: 1.45, transit: 1.25, groceries: 1.15, utilities: 1.12 },
-  },
-  "TR-ANK": {
-    countryCode: "TR", city: "Ankara", defaultRent: 450,
-    multipliers: { housing: 0.85, transit: 0.92, groceries: 0.97, utilities: 0.97 },
-  },
-  "TR-IZM": {
-    countryCode: "TR", city: "Izmir", defaultRent: 500,
-    multipliers: { housing: 0.95, transit: 0.95, groceries: 0.98, utilities: 0.98 },
-  },
-
-  // =========================================================================
-  // CROATIA
-  // Country avg rent reference: ~€600/mo (~$650 USD)
-  // =========================================================================
-  "HR-ZAG": {
-    countryCode: "HR", city: "Zagreb", defaultRent: 850,
-    multipliers: { housing: 1.25, transit: 1.15, groceries: 1.10, utilities: 1.08 },
-  },
-  "HR-SPU": {
-    countryCode: "HR", city: "Split", defaultRent: 900,
-    multipliers: { housing: 1.30, transit: 0.95, groceries: 1.08, utilities: 1.05 },
-  },
-
-  // =========================================================================
-  // ESTONIA
-  // Country avg rent reference: ~€700/mo (~$760 USD)
-  // =========================================================================
-  "EE-TLL": {
-    countryCode: "EE", city: "Tallinn", defaultRent: 900,
-    multipliers: { housing: 1.0, transit: 1.0, groceries: 1.0, utilities: 1.0 },
-  },
-
-  // =========================================================================
-  // LATVIA
-  // Country avg rent reference: ~€600/mo (~$650 USD)
-  // =========================================================================
-  "LV-RIX": {
-    countryCode: "LV", city: "Riga", defaultRent: 750,
-    multipliers: { housing: 1.0, transit: 1.0, groceries: 1.0, utilities: 1.0 },
-  },
-
-  // =========================================================================
-  // LITHUANIA
-  // Country avg rent reference: ~€550/mo (~$600 USD)
-  // =========================================================================
-  "LT-VNO": {
-    countryCode: "LT", city: "Vilnius", defaultRent: 750,
-    multipliers: { housing: 1.0, transit: 1.0, groceries: 1.0, utilities: 1.0 },
-  },
-
-  // =========================================================================
-  // ROMANIA
-  // Country avg rent reference: ~RON 2,000/mo (~$430 USD)
-  // =========================================================================
-  "RO-BUH": {
-    countryCode: "RO", city: "Bucharest", defaultRent: 650,
-    multipliers: { housing: 1.35, transit: 1.20, groceries: 1.12, utilities: 1.10 },
-  },
-  "RO-CLJ": {
-    countryCode: "RO", city: "Cluj-Napoca", defaultRent: 500,
-    multipliers: { housing: 0.88, transit: 0.90, groceries: 0.96, utilities: 0.96 },
-  },
-
-  // =========================================================================
-  // BULGARIA
-  // Country avg rent reference: ~BGN 700/mo (~$380 USD)
-  // =========================================================================
-  "BG-SOF": {
-    countryCode: "BG", city: "Sofia", defaultRent: 550,
-    multipliers: { housing: 1.0, transit: 1.0, groceries: 1.0, utilities: 1.0 },
-  },
-
-  // =========================================================================
-  // SLOVENIA
-  // Country avg rent reference: ~€700/mo (~$760 USD)
-  // =========================================================================
-  "SI-LJU": {
-    countryCode: "SI", city: "Ljubljana", defaultRent: 950,
-    multipliers: { housing: 1.0, transit: 1.0, groceries: 1.0, utilities: 1.0 },
-  },
-
-  // =========================================================================
-  // SLOVAKIA
-  // Country avg rent reference: ~€700/mo (~$760 USD)
-  // =========================================================================
-  "SK-BTS": {
-    countryCode: "SK", city: "Bratislava", defaultRent: 1000,
-    multipliers: { housing: 1.0, transit: 1.0, groceries: 1.0, utilities: 1.0 },
-  },
-
-  // =========================================================================
-  // MALTA
-  // Country avg rent reference: ~€900/mo (~$980 USD)
-  // =========================================================================
-  "MT-VLT": {
-    countryCode: "MT", city: "Valletta", defaultRent: 1200,
-    multipliers: { housing: 1.0, transit: 1.0, groceries: 1.0, utilities: 1.0 },
-  },
-
-  // =========================================================================
-  // CYPRUS
-  // Country avg rent reference: ~€750/mo (~$820 USD)
-  // =========================================================================
-  "CY-NIC": {
-    countryCode: "CY", city: "Nicosia", defaultRent: 900,
-    multipliers: { housing: 1.10, transit: 1.05, groceries: 1.05, utilities: 1.05 },
-  },
-  "CY-LMS": {
-    countryCode: "CY", city: "Limassol", defaultRent: 1200,
-    multipliers: { housing: 1.35, transit: 1.00, groceries: 1.08, utilities: 1.08 },
-  },
-
-  // =========================================================================
-  // PANAMA
-  // Country avg rent reference: ~$900 USD/mo
-  // =========================================================================
-  "PA-PTY": {
-    countryCode: "PA", city: "Panama City", defaultRent: 1100,
-    multipliers: { housing: 1.0, transit: 1.0, groceries: 1.0, utilities: 1.0 },
-  },
-
-  // =========================================================================
-  // COLOMBIA
-  // Country avg rent reference: ~COP 1,800,000/mo (~$440 USD)
-  // =========================================================================
-  "CO-BOG": {
-    countryCode: "CO", city: "Bogotá", defaultRent: 700,
-    multipliers: { housing: 1.35, transit: 1.20, groceries: 1.12, utilities: 1.10 },
-  },
-  "CO-MDE": {
-    countryCode: "CO", city: "Medellín", defaultRent: 550,
-    multipliers: { housing: 0.95, transit: 1.00, groceries: 0.98, utilities: 0.97 },
-  },
-  "CO-CTG": {
-    countryCode: "CO", city: "Cartagena", defaultRent: 600,
-    multipliers: { housing: 1.05, transit: 0.88, groceries: 1.02, utilities: 1.05 },
-  },
-
-  // =========================================================================
-  // BRAZIL
-  // Country avg rent reference: ~BRL 2,500/mo (~$500 USD)
-  // =========================================================================
-  "BR-SAO": {
-    countryCode: "BR", city: "São Paulo", defaultRent: 900,
-    multipliers: { housing: 1.40, transit: 1.20, groceries: 1.12, utilities: 1.10 },
-  },
-  "BR-RIO": {
-    countryCode: "BR", city: "Rio de Janeiro", defaultRent: 800,
-    multipliers: { housing: 1.25, transit: 1.10, groceries: 1.08, utilities: 1.08 },
-  },
-
-  // =========================================================================
-  // ARGENTINA
-  // Country avg rent reference: ~$350 USD/mo (USD-denominated)
-  // =========================================================================
-  "AR-BUE": {
-    countryCode: "AR", city: "Buenos Aires", defaultRent: 600,
-    multipliers: { housing: 1.35, transit: 1.20, groceries: 1.15, utilities: 1.12 },
-  },
-  "AR-COR": {
-    countryCode: "AR", city: "Córdoba", defaultRent: 380,
-    multipliers: { housing: 0.88, transit: 0.92, groceries: 0.97, utilities: 0.97 },
-  },
-
-  // =========================================================================
-  // CHILE
-  // Country avg rent reference: ~CLP 450,000/mo (~$500 USD)
-  // =========================================================================
-  "CL-SCL": {
-    countryCode: "CL", city: "Santiago", defaultRent: 800,
-    multipliers: { housing: 1.30, transit: 1.15, groceries: 1.10, utilities: 1.08 },
-  },
-  "CL-VAP": {
-    countryCode: "CL", city: "Valparaíso", defaultRent: 550,
-    multipliers: { housing: 0.88, transit: 0.92, groceries: 0.97, utilities: 0.97 },
-  },
-
-  // =========================================================================
-  // PERU
-  // Country avg rent reference: ~PEN 1,500/mo (~$400 USD)
-  // =========================================================================
-  "PE-LIM": {
-    countryCode: "PE", city: "Lima", defaultRent: 650,
-    multipliers: { housing: 1.35, transit: 1.15, groceries: 1.12, utilities: 1.08 },
-  },
-  "PE-CUZ": {
-    countryCode: "PE", city: "Cusco", defaultRent: 380,
-    multipliers: { housing: 0.80, transit: 0.85, groceries: 0.95, utilities: 0.97 },
-  },
-
-  // =========================================================================
-  // THAILAND
-  // Country avg rent reference: ~THB 15,000/mo (~$420 USD)
-  // =========================================================================
-  "TH-BKK": {
-    countryCode: "TH", city: "Bangkok", defaultRent: 750,
-    multipliers: { housing: 1.40, transit: 1.25, groceries: 1.12, utilities: 1.10 },
-  },
-  "TH-CNX": {
-    countryCode: "TH", city: "Chiang Mai", defaultRent: 450,
-    multipliers: { housing: 0.85, transit: 0.85, groceries: 0.95, utilities: 0.95 },
-  },
-  "TH-HKT": {
-    countryCode: "TH", city: "Phuket", defaultRent: 700,
-    multipliers: { housing: 1.25, transit: 0.90, groceries: 1.05, utilities: 1.08 },
-  },
-
-  // =========================================================================
-  // VIETNAM
-  // Country avg rent reference: ~VND 8,000,000/mo (~$330 USD)
-  // =========================================================================
-  "VN-SGN": {
-    countryCode: "VN", city: "Ho Chi Minh City", defaultRent: 600,
-    multipliers: { housing: 1.40, transit: 1.15, groceries: 1.10, utilities: 1.08 },
-  },
-  "VN-HAN": {
-    countryCode: "VN", city: "Hanoi", defaultRent: 550,
-    multipliers: { housing: 1.25, transit: 1.10, groceries: 1.05, utilities: 1.05 },
-  },
-  "VN-DAD": {
-    countryCode: "VN", city: "Da Nang", defaultRent: 380,
-    multipliers: { housing: 0.88, transit: 0.85, groceries: 0.96, utilities: 0.97 },
-  },
-
-  // =========================================================================
-  // MALAYSIA
-  // Country avg rent reference: ~MYR 2,000/mo (~$430 USD)
-  // =========================================================================
-  "MY-KUL": {
-    countryCode: "MY", city: "Kuala Lumpur", defaultRent: 750,
-    multipliers: { housing: 1.40, transit: 1.20, groceries: 1.12, utilities: 1.08 },
-  },
-  "MY-PEN": {
-    countryCode: "MY", city: "Penang", defaultRent: 480,
-    multipliers: { housing: 0.90, transit: 0.88, groceries: 0.96, utilities: 0.97 },
-  },
-
-  // =========================================================================
-  // INDONESIA
-  // Country avg rent reference: ~IDR 5,000,000/mo (~$320 USD)
-  // =========================================================================
-  "ID-JKT": {
-    countryCode: "ID", city: "Jakarta", defaultRent: 650,
-    multipliers: { housing: 1.45, transit: 1.20, groceries: 1.12, utilities: 1.10 },
-  },
-  "ID-DPS": {
-    countryCode: "ID", city: "Bali / Denpasar", defaultRent: 550,
-    multipliers: { housing: 1.15, transit: 0.85, groceries: 1.05, utilities: 1.05 },
-  },
-
-  // =========================================================================
-  // SOUTH AFRICA
-  // Country avg rent reference: ~ZAR 12,000/mo (~$650 USD)
-  // =========================================================================
-  "ZA-CPT": {
-    countryCode: "ZA", city: "Cape Town", defaultRent: 900,
-    multipliers: { housing: 1.30, transit: 1.00, groceries: 1.10, utilities: 1.08 },
-  },
-  "ZA-JNB": {
-    countryCode: "ZA", city: "Johannesburg", defaultRent: 750,
-    multipliers: { housing: 1.05, transit: 1.00, groceries: 1.05, utilities: 1.05 },
-  },
+  "US-NYC": { countryCode: "US", city: "New York City", defaultRent: 3800, multipliers: { housing: 1.45, transit: 1.30, groceries: 1.20, utilities: 1.10 } },
+  "US-LAX": { countryCode: "US", city: "Los Angeles", defaultRent: 2900, multipliers: { housing: 1.25, transit: 0.95, groceries: 1.10, utilities: 1.05 } },
+  "US-MIA": { countryCode: "US", city: "Miami", defaultRent: 2700, multipliers: { housing: 1.18, transit: 0.85, groceries: 1.08, utilities: 1.12 } },
+  "US-CHI": { countryCode: "US", city: "Chicago", defaultRent: 2200, multipliers: { housing: 1.05, transit: 1.10, groceries: 1.05, utilities: 1.05 } },
+  "US-ATL": { countryCode: "US", city: "Atlanta", defaultRent: 1850, multipliers: { housing: 0.95, transit: 0.80, groceries: 0.98, utilities: 0.98 } },
+  "US-AUS": { countryCode: "US", city: "Austin", defaultRent: 1900, multipliers: { housing: 0.97, transit: 0.75, groceries: 1.00, utilities: 1.02 } },
+  "US-DAL": { countryCode: "US", city: "Dallas", defaultRent: 1750, multipliers: { housing: 0.90, transit: 0.78, groceries: 0.97, utilities: 0.97 } },
+  "US-SEA": { countryCode: "US", city: "Seattle", defaultRent: 2500, multipliers: { housing: 1.15, transit: 1.05, groceries: 1.10, utilities: 1.08 } },
+  "US-BNA": { countryCode: "US", city: "Nashville", defaultRent: 1900, multipliers: { housing: 0.97, transit: 0.72, groceries: 0.97, utilities: 0.95 } },
+  "US-CLT": { countryCode: "US", city: "Charlotte", defaultRent: 1750, multipliers: { housing: 0.90, transit: 0.75, groceries: 0.96, utilities: 0.95 } },
+  "GB-LON": { countryCode: "GB", city: "London", defaultRent: 2800, multipliers: { housing: 1.55, transit: 1.40, groceries: 1.15, utilities: 1.10 } },
+  "GB-BIR": { countryCode: "GB", city: "Birmingham", defaultRent: 1300, multipliers: { housing: 0.88, transit: 0.92, groceries: 0.97, utilities: 0.97 } },
+  "GB-MAN": { countryCode: "GB", city: "Manchester", defaultRent: 1450, multipliers: { housing: 0.93, transit: 0.95, groceries: 0.98, utilities: 0.98 } },
+  "GB-LIV": { countryCode: "GB", city: "Liverpool", defaultRent: 1100, multipliers: { housing: 0.82, transit: 0.88, groceries: 0.95, utilities: 0.96 } },
+  "GB-EDI": { countryCode: "GB", city: "Edinburgh", defaultRent: 1600, multipliers: { housing: 1.05, transit: 0.98, groceries: 1.02, utilities: 1.00 } },
+  "PT-LIS": { countryCode: "PT", city: "Lisbon", defaultRent: 1600, multipliers: { housing: 1.35, transit: 1.15, groceries: 1.12, utilities: 1.08 } },
+  "PT-OPO": { countryCode: "PT", city: "Porto", defaultRent: 1200, multipliers: { housing: 1.05, transit: 1.00, groceries: 1.02, utilities: 1.00 } },
+  "PT-FAO": { countryCode: "PT", city: "Faro", defaultRent: 1000, multipliers: { housing: 0.88, transit: 0.85, groceries: 0.96, utilities: 0.96 } },
+  "PT-BRG": { countryCode: "PT", city: "Braga", defaultRent: 850, multipliers: { housing: 0.80, transit: 0.82, groceries: 0.95, utilities: 0.95 } },
+  "PT-SET": { countryCode: "PT", city: "Setubal", defaultRent: 900, multipliers: { housing: 0.82, transit: 0.80, groceries: 0.94, utilities: 0.95 } },
+  "ES-MAD": { countryCode: "ES", city: "Madrid", defaultRent: 1700, multipliers: { housing: 1.40, transit: 1.15, groceries: 1.10, utilities: 1.05 } },
+  "ES-BCN": { countryCode: "ES", city: "Barcelona", defaultRent: 1800, multipliers: { housing: 1.45, transit: 1.18, groceries: 1.12, utilities: 1.07 } },
+  "ES-VLC": { countryCode: "ES", city: "Valencia", defaultRent: 1050, multipliers: { housing: 0.90, transit: 0.95, groceries: 0.98, utilities: 0.98 } },
+  "ES-SVQ": { countryCode: "ES", city: "Seville", defaultRent: 950, multipliers: { housing: 0.82, transit: 0.90, groceries: 0.96, utilities: 0.97 } },
+  "ES-BIO": { countryCode: "ES", city: "Bilbao", defaultRent: 1100, multipliers: { housing: 0.95, transit: 0.98, groceries: 1.00, utilities: 0.99 } },
+  "MX-MEX": { countryCode: "MX", city: "Mexico City", defaultRent: 1000, multipliers: { housing: 1.35, transit: 1.20, groceries: 1.15, utilities: 1.10 } },
+  "MX-GDL": { countryCode: "MX", city: "Guadalajara", defaultRent: 650, multipliers: { housing: 0.90, transit: 0.95, groceries: 0.98, utilities: 0.97 } },
+  "MX-MTY": { countryCode: "MX", city: "Monterrey", defaultRent: 750, multipliers: { housing: 1.02, transit: 0.98, groceries: 1.00, utilities: 1.02 } },
+  "MX-CUN": { countryCode: "MX", city: "Cancun", defaultRent: 700, multipliers: { housing: 0.95, transit: 0.85, groceries: 1.05, utilities: 1.08 } },
+  "MX-OAX": { countryCode: "MX", city: "Oaxaca", defaultRent: 480, multipliers: { housing: 0.72, transit: 0.75, groceries: 0.90, utilities: 0.90 } },
+  "CA-TOR": { countryCode: "CA", city: "Toronto", defaultRent: 2300, multipliers: { housing: 1.38, transit: 1.15, groceries: 1.10, utilities: 1.08 } },
+  "CA-YVR": { countryCode: "CA", city: "Vancouver", defaultRent: 2500, multipliers: { housing: 1.45, transit: 1.12, groceries: 1.08, utilities: 1.05 } },
+  "CA-YUL": { countryCode: "CA", city: "Montreal", defaultRent: 1500, multipliers: { housing: 0.90, transit: 1.00, groceries: 0.97, utilities: 0.97 } },
+  "CA-YYC": { countryCode: "CA", city: "Calgary", defaultRent: 1700, multipliers: { housing: 1.00, transit: 0.95, groceries: 1.02, utilities: 1.02 } },
+  "CA-YOW": { countryCode: "CA", city: "Ottawa", defaultRent: 1800, multipliers: { housing: 1.05, transit: 0.98, groceries: 1.02, utilities: 1.03 } },
+  "DE-BER": { countryCode: "DE", city: "Berlin", defaultRent: 1400, multipliers: { housing: 1.25, transit: 1.10, groceries: 1.05, utilities: 1.05 } },
+  "DE-MUC": { countryCode: "DE", city: "Munich", defaultRent: 1900, multipliers: { housing: 1.50, transit: 1.15, groceries: 1.12, utilities: 1.08 } },
+  "DE-FRA": { countryCode: "DE", city: "Frankfurt", defaultRent: 1600, multipliers: { housing: 1.30, transit: 1.12, groceries: 1.08, utilities: 1.05 } },
+  "DE-HAM": { countryCode: "DE", city: "Hamburg", defaultRent: 1500, multipliers: { housing: 1.22, transit: 1.08, groceries: 1.05, utilities: 1.03 } },
+  "DE-DUS": { countryCode: "DE", city: "Dusseldorf", defaultRent: 1400, multipliers: { housing: 1.18, transit: 1.05, groceries: 1.03, utilities: 1.02 } },
+  "NL-AMS": { countryCode: "NL", city: "Amsterdam", defaultRent: 2000, multipliers: { housing: 1.40, transit: 1.15, groceries: 1.10, utilities: 1.08 } },
+  "NL-RTM": { countryCode: "NL", city: "Rotterdam", defaultRent: 1500, multipliers: { housing: 1.05, transit: 1.05, groceries: 1.00, utilities: 1.00 } },
+  "NL-UTR": { countryCode: "NL", city: "Utrecht", defaultRent: 1600, multipliers: { housing: 1.10, transit: 1.00, groceries: 1.02, utilities: 1.00 } },
+  "NL-EIN": { countryCode: "NL", city: "Eindhoven", defaultRent: 1300, multipliers: { housing: 0.90, transit: 0.92, groceries: 0.97, utilities: 0.97 } },
+  "NL-HAG": { countryCode: "NL", city: "The Hague", defaultRent: 1550, multipliers: { housing: 1.08, transit: 1.00, groceries: 1.00, utilities: 1.00 } },
+  "CR-SJO": { countryCode: "CR", city: "San Jose", defaultRent: 850, multipliers: { housing: 1.25, transit: 1.15, groceries: 1.10, utilities: 1.08 } },
+  "CR-LIR": { countryCode: "CR", city: "Liberia", defaultRent: 550, multipliers: { housing: 0.85, transit: 0.85, groceries: 0.95, utilities: 1.05 } },
+  "CR-HER": { countryCode: "CR", city: "Heredia", defaultRent: 750, multipliers: { housing: 1.05, transit: 1.00, groceries: 1.02, utilities: 1.00 } },
+  "CR-ALA": { countryCode: "CR", city: "Alajuela", defaultRent: 680, multipliers: { housing: 0.95, transit: 0.95, groceries: 0.98, utilities: 0.98 } },
+  "CR-CAR": { countryCode: "CR", city: "Cartago", defaultRent: 600, multipliers: { housing: 0.88, transit: 0.90, groceries: 0.96, utilities: 0.96 } },
+  "FR-PAR": { countryCode: "FR", city: "Paris", defaultRent: 2000, multipliers: { housing: 1.55, transit: 1.25, groceries: 1.15, utilities: 1.10 } },
+  "FR-LYO": { countryCode: "FR", city: "Lyon", defaultRent: 1100, multipliers: { housing: 1.05, transit: 1.05, groceries: 1.02, utilities: 1.00 } },
+  "FR-MRS": { countryCode: "FR", city: "Marseille", defaultRent: 900, multipliers: { housing: 0.90, transit: 0.95, groceries: 0.98, utilities: 0.98 } },
+  "FR-NCE": { countryCode: "FR", city: "Nice", defaultRent: 1300, multipliers: { housing: 1.12, transit: 1.00, groceries: 1.05, utilities: 1.02 } },
+  "FR-BDX": { countryCode: "FR", city: "Bordeaux", defaultRent: 1050, multipliers: { housing: 0.98, transit: 0.95, groceries: 0.99, utilities: 0.99 } },
+  "IT-ROM": { countryCode: "IT", city: "Rome", defaultRent: 1400, multipliers: { housing: 1.35, transit: 1.10, groceries: 1.08, utilities: 1.05 } },
+  "IT-MIL": { countryCode: "IT", city: "Milan", defaultRent: 1700, multipliers: { housing: 1.55, transit: 1.18, groceries: 1.12, utilities: 1.08 } },
+  "IT-FLR": { countryCode: "IT", city: "Florence", defaultRent: 1200, multipliers: { housing: 1.10, transit: 1.00, groceries: 1.02, utilities: 1.00 } },
+  "IT-NAP": { countryCode: "IT", city: "Naples", defaultRent: 800, multipliers: { housing: 0.82, transit: 0.90, groceries: 0.95, utilities: 0.95 } },
+  "IT-BOL": { countryCode: "IT", city: "Bologna", defaultRent: 1050, multipliers: { housing: 0.95, transit: 0.98, groceries: 0.99, utilities: 0.99 } },
+  "IE-DUB": { countryCode: "IE", city: "Dublin", defaultRent: 2400, multipliers: { housing: 1.45, transit: 1.20, groceries: 1.12, utilities: 1.10 } },
+  "IE-CRK": { countryCode: "IE", city: "Cork", defaultRent: 1600, multipliers: { housing: 0.98, transit: 0.92, groceries: 0.98, utilities: 0.98 } },
+  "IE-GWY": { countryCode: "IE", city: "Galway", defaultRent: 1500, multipliers: { housing: 0.90, transit: 0.85, groceries: 0.96, utilities: 0.96 } },
+  "IE-LMK": { countryCode: "IE", city: "Limerick", defaultRent: 1300, multipliers: { housing: 0.82, transit: 0.82, groceries: 0.94, utilities: 0.95 } },
+  "IE-WAT": { countryCode: "IE", city: "Waterford", defaultRent: 1200, multipliers: { housing: 0.78, transit: 0.80, groceries: 0.93, utilities: 0.94 } },
+  "AU-SYD": { countryCode: "AU", city: "Sydney", defaultRent: 2200, multipliers: { housing: 1.40, transit: 1.15, groceries: 1.10, utilities: 1.08 } },
+  "AU-MEL": { countryCode: "AU", city: "Melbourne", defaultRent: 1900, multipliers: { housing: 1.22, transit: 1.12, groceries: 1.05, utilities: 1.05 } },
+  "AU-BNE": { countryCode: "AU", city: "Brisbane", defaultRent: 1600, multipliers: { housing: 1.00, transit: 0.95, groceries: 1.00, utilities: 1.02 } },
+  "AU-PER": { countryCode: "AU", city: "Perth", defaultRent: 1500, multipliers: { housing: 0.95, transit: 0.90, groceries: 0.98, utilities: 1.00 } },
+  "AU-ADL": { countryCode: "AU", city: "Adelaide", defaultRent: 1400, multipliers: { housing: 0.88, transit: 0.88, groceries: 0.96, utilities: 0.97 } },
+  "NZ-AKL": { countryCode: "NZ", city: "Auckland", defaultRent: 1800, multipliers: { housing: 1.35, transit: 1.10, groceries: 1.08, utilities: 1.05 } },
+  "NZ-WLG": { countryCode: "NZ", city: "Wellington", defaultRent: 1500, multipliers: { housing: 1.05, transit: 1.02, groceries: 1.02, utilities: 1.02 } },
+  "NZ-CHC": { countryCode: "NZ", city: "Christchurch", defaultRent: 1200, multipliers: { housing: 0.85, transit: 0.88, groceries: 0.95, utilities: 0.96 } },
+  "NZ-HAM": { countryCode: "NZ", city: "Hamilton", defaultRent: 1100, multipliers: { housing: 0.80, transit: 0.82, groceries: 0.94, utilities: 0.95 } },
+  "NZ-DUD": { countryCode: "NZ", city: "Dunedin", defaultRent: 1000, multipliers: { housing: 0.75, transit: 0.80, groceries: 0.93, utilities: 0.94 } },
+  "JP-TYO": { countryCode: "JP", city: "Tokyo", defaultRent: 1600, multipliers: { housing: 1.45, transit: 1.20, groceries: 1.12, utilities: 1.08 } },
+  "JP-OSA": { countryCode: "JP", city: "Osaka", defaultRent: 1100, multipliers: { housing: 1.05, transit: 1.05, groceries: 1.02, utilities: 1.00 } },
+  "JP-KYO": { countryCode: "JP", city: "Kyoto", defaultRent: 950, multipliers: { housing: 0.92, transit: 0.95, groceries: 0.98, utilities: 0.97 } },
+  "JP-FUK": { countryCode: "JP", city: "Fukuoka", defaultRent: 780, multipliers: { housing: 0.78, transit: 0.88, groceries: 0.95, utilities: 0.96 } },
+  "JP-SAP": { countryCode: "JP", city: "Sapporo", defaultRent: 720, multipliers: { housing: 0.72, transit: 0.85, groceries: 0.94, utilities: 0.98 } },
+  "KR-SEL": { countryCode: "KR", city: "Seoul", defaultRent: 1400, multipliers: { housing: 1.50, transit: 1.15, groceries: 1.12, utilities: 1.08 } },
+  "KR-BUS": { countryCode: "KR", city: "Busan", defaultRent: 850, multipliers: { housing: 0.88, transit: 0.95, groceries: 0.97, utilities: 0.97 } },
+  "KR-ICN": { countryCode: "KR", city: "Incheon", defaultRent: 900, multipliers: { housing: 0.92, transit: 0.98, groceries: 0.97, utilities: 0.97 } },
+  "KR-DAE": { countryCode: "KR", city: "Daegu", defaultRent: 750, multipliers: { housing: 0.82, transit: 0.88, groceries: 0.96, utilities: 0.96 } },
+  "KR-DJN": { countryCode: "KR", city: "Daejeon", defaultRent: 720, multipliers: { housing: 0.80, transit: 0.86, groceries: 0.95, utilities: 0.95 } },
+  "AE-DXB": { countryCode: "AE", city: "Dubai", defaultRent: 2500, multipliers: { housing: 1.35, transit: 1.10, groceries: 1.12, utilities: 1.15 } },
+  "AE-AUH": { countryCode: "AE", city: "Abu Dhabi", defaultRent: 2200, multipliers: { housing: 1.15, transit: 1.00, groceries: 1.05, utilities: 1.05 } },
+  "AE-SHJ": { countryCode: "AE", city: "Sharjah", defaultRent: 1500, multipliers: { housing: 0.82, transit: 0.90, groceries: 0.97, utilities: 0.98 } },
+  "AE-AJM": { countryCode: "AE", city: "Ajman", defaultRent: 1200, multipliers: { housing: 0.72, transit: 0.85, groceries: 0.95, utilities: 0.96 } },
+  "AE-RAK": { countryCode: "AE", city: "Ras Al Khaimah", defaultRent: 1100, multipliers: { housing: 0.68, transit: 0.82, groceries: 0.94, utilities: 0.95 } },
+  "SG-SIN": { countryCode: "SG", city: "Singapore (Central)", defaultRent: 3200, multipliers: { housing: 1.35, transit: 1.05, groceries: 1.08, utilities: 1.05 } },
+  "SG-ORC": { countryCode: "SG", city: "Singapore (Orchard)", defaultRent: 3500, multipliers: { housing: 1.45, transit: 1.05, groceries: 1.10, utilities: 1.05 } },
+  "SG-JUR": { countryCode: "SG", city: "Singapore (Jurong)", defaultRent: 2200, multipliers: { housing: 0.88, transit: 0.98, groceries: 0.97, utilities: 0.98 } },
+  "SG-WDL": { countryCode: "SG", city: "Singapore (Woodlands)", defaultRent: 2000, multipliers: { housing: 0.80, transit: 0.95, groceries: 0.95, utilities: 0.97 } },
+  "SG-TMP": { countryCode: "SG", city: "Singapore (Tampines)", defaultRent: 2100, multipliers: { housing: 0.85, transit: 0.97, groceries: 0.96, utilities: 0.97 } },
+  "CH-ZRH": { countryCode: "CH", city: "Zurich", defaultRent: 2800, multipliers: { housing: 1.30, transit: 1.15, groceries: 1.12, utilities: 1.08 } },
+  "CH-GVA": { countryCode: "CH", city: "Geneva", defaultRent: 2900, multipliers: { housing: 1.35, transit: 1.10, groceries: 1.15, utilities: 1.10 } },
+  "CH-BSL": { countryCode: "CH", city: "Basel", defaultRent: 1900, multipliers: { housing: 0.92, transit: 0.95, groceries: 0.98, utilities: 0.97 } },
+  "CH-BRN": { countryCode: "CH", city: "Bern", defaultRent: 2000, multipliers: { housing: 0.95, transit: 0.98, groceries: 0.98, utilities: 0.98 } },
+  "CH-LUZ": { countryCode: "CH", city: "Lucerne", defaultRent: 1800, multipliers: { housing: 0.88, transit: 0.92, groceries: 0.96, utilities: 0.96 } },
+  "DK-CPH": { countryCode: "DK", city: "Copenhagen", defaultRent: 2000, multipliers: { housing: 1.30, transit: 1.15, groceries: 1.10, utilities: 1.08 } },
+  "DK-AAR": { countryCode: "DK", city: "Aarhus", defaultRent: 1400, multipliers: { housing: 0.88, transit: 0.92, groceries: 0.96, utilities: 0.96 } },
+  "DK-ODE": { countryCode: "DK", city: "Odense", defaultRent: 1200, multipliers: { housing: 0.80, transit: 0.88, groceries: 0.95, utilities: 0.95 } },
+  "DK-AAL": { countryCode: "DK", city: "Aalborg", defaultRent: 1100, multipliers: { housing: 0.75, transit: 0.85, groceries: 0.94, utilities: 0.94 } },
+  "DK-EBJ": { countryCode: "DK", city: "Esbjerg", defaultRent: 1000, multipliers: { housing: 0.70, transit: 0.82, groceries: 0.93, utilities: 0.93 } },
+  "SE-STO": { countryCode: "SE", city: "Stockholm", defaultRent: 1800, multipliers: { housing: 1.38, transit: 1.20, groceries: 1.10, utilities: 1.08 } },
+  "SE-GOT": { countryCode: "SE", city: "Gothenburg", defaultRent: 1300, multipliers: { housing: 1.00, transit: 1.00, groceries: 1.00, utilities: 1.00 } },
+  "SE-MMA": { countryCode: "SE", city: "Malmo", defaultRent: 1100, multipliers: { housing: 0.85, transit: 0.90, groceries: 0.95, utilities: 0.96 } },
+  "SE-UPP": { countryCode: "SE", city: "Uppsala", defaultRent: 1200, multipliers: { housing: 0.90, transit: 0.92, groceries: 0.97, utilities: 0.97 } },
+  "SE-LKP": { countryCode: "SE", city: "Linkoping", defaultRent: 1050, multipliers: { housing: 0.82, transit: 0.88, groceries: 0.96, utilities: 0.96 } },
+  "NO-OSL": { countryCode: "NO", city: "Oslo", defaultRent: 1900, multipliers: { housing: 1.35, transit: 1.20, groceries: 1.12, utilities: 1.08 } },
+  "NO-BGO": { countryCode: "NO", city: "Bergen", defaultRent: 1400, multipliers: { housing: 0.92, transit: 0.95, groceries: 0.98, utilities: 0.97 } },
+  "NO-TRD": { countryCode: "NO", city: "Trondheim", defaultRent: 1300, multipliers: { housing: 0.88, transit: 0.92, groceries: 0.97, utilities: 0.97 } },
+  "NO-SVG": { countryCode: "NO", city: "Stavanger", defaultRent: 1500, multipliers: { housing: 0.98, transit: 0.95, groceries: 1.00, utilities: 1.00 } },
+  "NO-TRO": { countryCode: "NO", city: "Tromso", defaultRent: 1250, multipliers: { housing: 0.85, transit: 0.90, groceries: 1.02, utilities: 1.05 } },
+  "FI-HEL": { countryCode: "FI", city: "Helsinki", defaultRent: 1500, multipliers: { housing: 1.38, transit: 1.18, groceries: 1.10, utilities: 1.08 } },
+  "FI-TMP": { countryCode: "FI", city: "Tampere", defaultRent: 950, multipliers: { housing: 0.85, transit: 0.88, groceries: 0.95, utilities: 0.96 } },
+  "FI-TKU": { countryCode: "FI", city: "Turku", defaultRent: 950, multipliers: { housing: 0.85, transit: 0.88, groceries: 0.96, utilities: 0.96 } },
+  "FI-OUL": { countryCode: "FI", city: "Oulu", defaultRent: 850, multipliers: { housing: 0.78, transit: 0.82, groceries: 0.94, utilities: 0.96 } },
+  "FI-JYV": { countryCode: "FI", city: "Jyvaskyla", defaultRent: 820, multipliers: { housing: 0.75, transit: 0.80, groceries: 0.94, utilities: 0.95 } },
+  "PL-WAW": { countryCode: "PL", city: "Warsaw", defaultRent: 1100, multipliers: { housing: 1.40, transit: 1.20, groceries: 1.12, utilities: 1.10 } },
+  "PL-KRK": { countryCode: "PL", city: "Krakow", defaultRent: 850, multipliers: { housing: 1.05, transit: 1.00, groceries: 1.02, utilities: 1.00 } },
+  "PL-WRO": { countryCode: "PL", city: "Wroclaw", defaultRent: 800, multipliers: { housing: 0.95, transit: 0.95, groceries: 0.98, utilities: 0.98 } },
+  "PL-GDN": { countryCode: "PL", city: "Gdansk", defaultRent: 850, multipliers: { housing: 1.00, transit: 0.98, groceries: 1.00, utilities: 0.99 } },
+  "PL-POZ": { countryCode: "PL", city: "Poznan", defaultRent: 780, multipliers: { housing: 0.92, transit: 0.95, groceries: 0.97, utilities: 0.97 } },
+  "CZ-PRG": { countryCode: "CZ", city: "Prague", defaultRent: 1400, multipliers: { housing: 1.40, transit: 1.20, groceries: 1.12, utilities: 1.10 } },
+  "CZ-BRQ": { countryCode: "CZ", city: "Brno", defaultRent: 900, multipliers: { housing: 0.85, transit: 0.90, groceries: 0.95, utilities: 0.95 } },
+  "CZ-OSR": { countryCode: "CZ", city: "Ostrava", defaultRent: 700, multipliers: { housing: 0.72, transit: 0.85, groceries: 0.93, utilities: 0.94 } },
+  "CZ-PLZ": { countryCode: "CZ", city: "Plzen", defaultRent: 750, multipliers: { housing: 0.75, transit: 0.85, groceries: 0.94, utilities: 0.94 } },
+  "CZ-LBR": { countryCode: "CZ", city: "Liberec", defaultRent: 700, multipliers: { housing: 0.72, transit: 0.83, groceries: 0.93, utilities: 0.93 } },
+  "HU-BUD": { countryCode: "HU", city: "Budapest", defaultRent: 1000, multipliers: { housing: 1.40, transit: 1.25, groceries: 1.15, utilities: 1.12 } },
+  "HU-DEB": { countryCode: "HU", city: "Debrecen", defaultRent: 600, multipliers: { housing: 0.85, transit: 0.88, groceries: 0.95, utilities: 0.96 } },
+  "HU-MIS": { countryCode: "HU", city: "Miskolc", defaultRent: 520, multipliers: { housing: 0.75, transit: 0.82, groceries: 0.93, utilities: 0.94 } },
+  "HU-PEC": { countryCode: "HU", city: "Pecs", defaultRent: 540, multipliers: { housing: 0.78, transit: 0.84, groceries: 0.94, utilities: 0.95 } },
+  "HU-GYO": { countryCode: "HU", city: "Gyor", defaultRent: 580, multipliers: { housing: 0.82, transit: 0.86, groceries: 0.95, utilities: 0.96 } },
+  "GR-ATH": { countryCode: "GR", city: "Athens", defaultRent: 900, multipliers: { housing: 1.30, transit: 1.20, groceries: 1.12, utilities: 1.10 } },
+  "GR-THS": { countryCode: "GR", city: "Thessaloniki", defaultRent: 650, multipliers: { housing: 0.85, transit: 0.90, groceries: 0.95, utilities: 0.95 } },
+  "GR-PAT": { countryCode: "GR", city: "Patras", defaultRent: 550, multipliers: { housing: 0.78, transit: 0.85, groceries: 0.93, utilities: 0.94 } },
+  "GR-HER": { countryCode: "GR", city: "Heraklion", defaultRent: 600, multipliers: { housing: 0.82, transit: 0.80, groceries: 0.95, utilities: 0.96 } },
+  "GR-LAR": { countryCode: "GR", city: "Larissa", defaultRent: 500, multipliers: { housing: 0.72, transit: 0.78, groceries: 0.92, utilities: 0.93 } },
+  "TR-IST": { countryCode: "TR", city: "Istanbul", defaultRent: 750, multipliers: { housing: 1.45, transit: 1.25, groceries: 1.15, utilities: 1.12 } },
+  "TR-ANK": { countryCode: "TR", city: "Ankara", defaultRent: 450, multipliers: { housing: 0.85, transit: 0.92, groceries: 0.97, utilities: 0.97 } },
+  "TR-IZM": { countryCode: "TR", city: "Izmir", defaultRent: 500, multipliers: { housing: 0.95, transit: 0.95, groceries: 0.98, utilities: 0.98 } },
+  "TR-ANT": { countryCode: "TR", city: "Antalya", defaultRent: 480, multipliers: { housing: 0.90, transit: 0.88, groceries: 0.97, utilities: 0.98 } },
+  "TR-BUR": { countryCode: "TR", city: "Bursa", defaultRent: 420, multipliers: { housing: 0.82, transit: 0.88, groceries: 0.95, utilities: 0.96 } },
+  "HR-ZAG": { countryCode: "HR", city: "Zagreb", defaultRent: 850, multipliers: { housing: 1.25, transit: 1.15, groceries: 1.10, utilities: 1.08 } },
+  "HR-SPU": { countryCode: "HR", city: "Split", defaultRent: 900, multipliers: { housing: 1.30, transit: 0.95, groceries: 1.08, utilities: 1.05 } },
+  "HR-RJK": { countryCode: "HR", city: "Rijeka", defaultRent: 680, multipliers: { housing: 0.95, transit: 0.90, groceries: 0.97, utilities: 0.97 } },
+  "HR-OSJ": { countryCode: "HR", city: "Osijek", defaultRent: 550, multipliers: { housing: 0.78, transit: 0.82, groceries: 0.93, utilities: 0.94 } },
+  "HR-DBV": { countryCode: "HR", city: "Dubrovnik", defaultRent: 1100, multipliers: { housing: 1.45, transit: 0.88, groceries: 1.12, utilities: 1.05 } },
+  "EE-TLL": { countryCode: "EE", city: "Tallinn", defaultRent: 1000, multipliers: { housing: 1.35, transit: 1.20, groceries: 1.12, utilities: 1.10 } },
+  "EE-TAR": { countryCode: "EE", city: "Tartu", defaultRent: 700, multipliers: { housing: 0.92, transit: 0.90, groceries: 0.97, utilities: 0.97 } },
+  "EE-NAR": { countryCode: "EE", city: "Narva", defaultRent: 480, multipliers: { housing: 0.65, transit: 0.78, groceries: 0.90, utilities: 0.92 } },
+  "EE-PRN": { countryCode: "EE", city: "Parnu", defaultRent: 600, multipliers: { housing: 0.80, transit: 0.80, groceries: 0.94, utilities: 0.95 } },
+  "EE-VLJ": { countryCode: "EE", city: "Viljandi", defaultRent: 500, multipliers: { housing: 0.68, transit: 0.75, groceries: 0.92, utilities: 0.93 } },
+  "LV-RIX": { countryCode: "LV", city: "Riga", defaultRent: 850, multipliers: { housing: 1.35, transit: 1.20, groceries: 1.12, utilities: 1.10 } },
+  "LV-DGV": { countryCode: "LV", city: "Daugavpils", defaultRent: 420, multipliers: { housing: 0.68, transit: 0.78, groceries: 0.90, utilities: 0.92 } },
+  "LV-JLG": { countryCode: "LV", city: "Jelgava", defaultRent: 480, multipliers: { housing: 0.75, transit: 0.80, groceries: 0.93, utilities: 0.93 } },
+  "LV-JRM": { countryCode: "LV", city: "Jurmala", defaultRent: 700, multipliers: { housing: 1.05, transit: 0.85, groceries: 1.00, utilities: 0.98 } },
+  "LV-VNT": { countryCode: "LV", city: "Ventspils", defaultRent: 480, multipliers: { housing: 0.75, transit: 0.80, groceries: 0.93, utilities: 0.94 } },
+  "LT-VNO": { countryCode: "LT", city: "Vilnius", defaultRent: 850, multipliers: { housing: 1.38, transit: 1.20, groceries: 1.12, utilities: 1.10 } },
+  "LT-KAU": { countryCode: "LT", city: "Kaunas", defaultRent: 650, multipliers: { housing: 1.02, transit: 0.95, groceries: 0.98, utilities: 0.98 } },
+  "LT-KLP": { countryCode: "LT", city: "Klaipeda", defaultRent: 580, multipliers: { housing: 0.90, transit: 0.88, groceries: 0.96, utilities: 0.96 } },
+  "LT-SIA": { countryCode: "LT", city: "Siauliai", defaultRent: 450, multipliers: { housing: 0.72, transit: 0.80, groceries: 0.92, utilities: 0.93 } },
+  "LT-PAV": { countryCode: "LT", city: "Panevezys", defaultRent: 430, multipliers: { housing: 0.70, transit: 0.78, groceries: 0.91, utilities: 0.92 } },
+  "RO-BUH": { countryCode: "RO", city: "Bucharest", defaultRent: 650, multipliers: { housing: 1.35, transit: 1.20, groceries: 1.12, utilities: 1.10 } },
+  "RO-CLJ": { countryCode: "RO", city: "Cluj-Napoca", defaultRent: 550, multipliers: { housing: 1.10, transit: 1.00, groceries: 1.02, utilities: 1.00 } },
+  "RO-TIM": { countryCode: "RO", city: "Timisoara", defaultRent: 480, multipliers: { housing: 0.95, transit: 0.92, groceries: 0.98, utilities: 0.97 } },
+  "RO-IAS": { countryCode: "RO", city: "Iasi", defaultRent: 420, multipliers: { housing: 0.85, transit: 0.88, groceries: 0.95, utilities: 0.95 } },
+  "RO-BRV": { countryCode: "RO", city: "Brasov", defaultRent: 450, multipliers: { housing: 0.90, transit: 0.88, groceries: 0.96, utilities: 0.96 } },
+  "BG-SOF": { countryCode: "BG", city: "Sofia", defaultRent: 600, multipliers: { housing: 1.40, transit: 1.20, groceries: 1.15, utilities: 1.12 } },
+  "BG-PLV": { countryCode: "BG", city: "Plovdiv", defaultRent: 380, multipliers: { housing: 0.88, transit: 0.90, groceries: 0.95, utilities: 0.95 } },
+  "BG-VAR": { countryCode: "BG", city: "Varna", defaultRent: 420, multipliers: { housing: 0.95, transit: 0.88, groceries: 0.97, utilities: 0.97 } },
+  "BG-BUR": { countryCode: "BG", city: "Burgas", defaultRent: 380, multipliers: { housing: 0.88, transit: 0.85, groceries: 0.95, utilities: 0.96 } },
+  "BG-RSE": { countryCode: "BG", city: "Ruse", defaultRent: 320, multipliers: { housing: 0.75, transit: 0.80, groceries: 0.92, utilities: 0.93 } },
+  "SI-LJU": { countryCode: "SI", city: "Ljubljana", defaultRent: 1050, multipliers: { housing: 1.38, transit: 1.18, groceries: 1.10, utilities: 1.08 } },
+  "SI-MBX": { countryCode: "SI", city: "Maribor", defaultRent: 700, multipliers: { housing: 0.90, transit: 0.88, groceries: 0.96, utilities: 0.96 } },
+  "SI-CEL": { countryCode: "SI", city: "Celje", defaultRent: 620, multipliers: { housing: 0.80, transit: 0.82, groceries: 0.94, utilities: 0.95 } },
+  "SI-KOP": { countryCode: "SI", city: "Koper", defaultRent: 750, multipliers: { housing: 0.95, transit: 0.85, groceries: 0.98, utilities: 0.97 } },
+  "SI-KRJ": { countryCode: "SI", city: "Kranj", defaultRent: 700, multipliers: { housing: 0.88, transit: 0.88, groceries: 0.96, utilities: 0.96 } },
+  "SK-BTS": { countryCode: "SK", city: "Bratislava", defaultRent: 1100, multipliers: { housing: 1.42, transit: 1.20, groceries: 1.12, utilities: 1.10 } },
+  "SK-KSC": { countryCode: "SK", city: "Kosice", defaultRent: 700, multipliers: { housing: 0.90, transit: 0.90, groceries: 0.96, utilities: 0.96 } },
+  "SK-PRE": { countryCode: "SK", city: "Presov", defaultRent: 580, multipliers: { housing: 0.75, transit: 0.82, groceries: 0.93, utilities: 0.94 } },
+  "SK-ZIL": { countryCode: "SK", city: "Zilina", defaultRent: 620, multipliers: { housing: 0.80, transit: 0.85, groceries: 0.94, utilities: 0.95 } },
+  "SK-BBY": { countryCode: "SK", city: "Banska Bystrica", defaultRent: 580, multipliers: { housing: 0.75, transit: 0.82, groceries: 0.93, utilities: 0.94 } },
+  "MT-VLT": { countryCode: "MT", city: "Valletta", defaultRent: 1400, multipliers: { housing: 1.42, transit: 1.05, groceries: 1.08, utilities: 1.05 } },
+  "MT-SLM": { countryCode: "MT", city: "Sliema", defaultRent: 1500, multipliers: { housing: 1.50, transit: 1.05, groceries: 1.10, utilities: 1.05 } },
+  "MT-STJ": { countryCode: "MT", city: "St. Julians", defaultRent: 1600, multipliers: { housing: 1.55, transit: 1.02, groceries: 1.12, utilities: 1.05 } },
+  "MT-MDN": { countryCode: "MT", city: "Mdina", defaultRent: 1000, multipliers: { housing: 0.95, transit: 0.85, groceries: 0.98, utilities: 0.98 } },
+  "MT-MST": { countryCode: "MT", city: "Mosta", defaultRent: 950, multipliers: { housing: 0.88, transit: 0.88, groceries: 0.96, utilities: 0.97 } },
+  "CY-NIC": { countryCode: "CY", city: "Nicosia", defaultRent: 900, multipliers: { housing: 1.10, transit: 1.05, groceries: 1.05, utilities: 1.05 } },
+  "CY-LMS": { countryCode: "CY", city: "Limassol", defaultRent: 1200, multipliers: { housing: 1.35, transit: 1.00, groceries: 1.08, utilities: 1.08 } },
+  "CY-LAR": { countryCode: "CY", city: "Larnaca", defaultRent: 800, multipliers: { housing: 0.95, transit: 0.92, groceries: 0.98, utilities: 0.98 } },
+  "CY-PAF": { countryCode: "CY", city: "Paphos", defaultRent: 850, multipliers: { housing: 0.98, transit: 0.85, groceries: 0.99, utilities: 0.99 } },
+  "CY-FMG": { countryCode: "CY", city: "Famagusta", defaultRent: 650, multipliers: { housing: 0.78, transit: 0.80, groceries: 0.93, utilities: 0.94 } },
+  "PA-PTY": { countryCode: "PA", city: "Panama City", defaultRent: 1300, multipliers: { housing: 1.40, transit: 1.10, groceries: 1.12, utilities: 1.10 } },
+  "PA-CHT": { countryCode: "PA", city: "Chitre", defaultRent: 550, multipliers: { housing: 0.62, transit: 0.80, groceries: 0.90, utilities: 0.92 } },
+  "PA-SAN": { countryCode: "PA", city: "Santiago", defaultRent: 500, multipliers: { housing: 0.58, transit: 0.78, groceries: 0.90, utilities: 0.92 } },
+  "PA-DAV": { countryCode: "PA", city: "David", defaultRent: 600, multipliers: { housing: 0.68, transit: 0.82, groceries: 0.92, utilities: 0.94 } },
+  "PA-COL": { countryCode: "PA", city: "Colon", defaultRent: 520, multipliers: { housing: 0.60, transit: 0.80, groceries: 0.90, utilities: 0.92 } },
+  "CO-BOG": { countryCode: "CO", city: "Bogota", defaultRent: 700, multipliers: { housing: 1.35, transit: 1.20, groceries: 1.12, utilities: 1.10 } },
+  "CO-MDE": { countryCode: "CO", city: "Medellin", defaultRent: 550, multipliers: { housing: 0.95, transit: 1.00, groceries: 0.98, utilities: 0.97 } },
+  "CO-CTG": { countryCode: "CO", city: "Cartagena", defaultRent: 600, multipliers: { housing: 1.05, transit: 0.88, groceries: 1.02, utilities: 1.05 } },
+  "CO-CLO": { countryCode: "CO", city: "Cali", defaultRent: 480, multipliers: { housing: 0.88, transit: 0.92, groceries: 0.96, utilities: 0.96 } },
+  "CO-BAQ": { countryCode: "CO", city: "Barranquilla", defaultRent: 500, multipliers: { housing: 0.90, transit: 0.90, groceries: 0.97, utilities: 1.02 } },
+  "BR-SAO": { countryCode: "BR", city: "Sao Paulo", defaultRent: 900, multipliers: { housing: 1.40, transit: 1.20, groceries: 1.12, utilities: 1.10 } },
+  "BR-RIO": { countryCode: "BR", city: "Rio de Janeiro", defaultRent: 800, multipliers: { housing: 1.25, transit: 1.10, groceries: 1.08, utilities: 1.08 } },
+  "BR-BSB": { countryCode: "BR", city: "Brasilia", defaultRent: 750, multipliers: { housing: 1.18, transit: 0.95, groceries: 1.05, utilities: 1.02 } },
+  "BR-FOR": { countryCode: "BR", city: "Fortaleza", defaultRent: 480, multipliers: { housing: 0.78, transit: 0.88, groceries: 0.93, utilities: 0.95 } },
+  "BR-CUR": { countryCode: "BR", city: "Curitiba", defaultRent: 580, multipliers: { housing: 0.92, transit: 0.95, groceries: 0.97, utilities: 0.97 } },
+  "AR-BUE": { countryCode: "AR", city: "Buenos Aires", defaultRent: 600, multipliers: { housing: 1.35, transit: 1.20, groceries: 1.15, utilities: 1.12 } },
+  "AR-COR": { countryCode: "AR", city: "Cordoba", defaultRent: 380, multipliers: { housing: 0.88, transit: 0.92, groceries: 0.97, utilities: 0.97 } },
+  "AR-ROS": { countryCode: "AR", city: "Rosario", defaultRent: 360, multipliers: { housing: 0.85, transit: 0.90, groceries: 0.96, utilities: 0.96 } },
+  "AR-MZA": { countryCode: "AR", city: "Mendoza", defaultRent: 340, multipliers: { housing: 0.80, transit: 0.88, groceries: 0.95, utilities: 0.95 } },
+  "AR-BAR": { countryCode: "AR", city: "Bariloche", defaultRent: 420, multipliers: { housing: 0.95, transit: 0.75, groceries: 1.05, utilities: 1.02 } },
+  "CL-SCL": { countryCode: "CL", city: "Santiago", defaultRent: 800, multipliers: { housing: 1.30, transit: 1.15, groceries: 1.10, utilities: 1.08 } },
+  "CL-VAP": { countryCode: "CL", city: "Valparaiso", defaultRent: 550, multipliers: { housing: 0.88, transit: 0.92, groceries: 0.97, utilities: 0.97 } },
+  "CL-CON": { countryCode: "CL", city: "Concepcion", defaultRent: 520, multipliers: { housing: 0.85, transit: 0.90, groceries: 0.96, utilities: 0.96 } },
+  "CL-LAR": { countryCode: "CL", city: "La Serena", defaultRent: 500, multipliers: { housing: 0.82, transit: 0.85, groceries: 0.95, utilities: 0.96 } },
+  "CL-ANT": { countryCode: "CL", city: "Antofagasta", defaultRent: 580, multipliers: { housing: 0.92, transit: 0.88, groceries: 1.02, utilities: 1.05 } },
+  "PE-LIM": { countryCode: "PE", city: "Lima", defaultRent: 650, multipliers: { housing: 1.35, transit: 1.15, groceries: 1.12, utilities: 1.08 } },
+  "PE-CUZ": { countryCode: "PE", city: "Cusco", defaultRent: 380, multipliers: { housing: 0.80, transit: 0.85, groceries: 0.95, utilities: 0.97 } },
+  "PE-AQP": { countryCode: "PE", city: "Arequipa", defaultRent: 350, multipliers: { housing: 0.75, transit: 0.82, groceries: 0.93, utilities: 0.95 } },
+  "PE-TRU": { countryCode: "PE", city: "Trujillo", defaultRent: 320, multipliers: { housing: 0.70, transit: 0.80, groceries: 0.92, utilities: 0.94 } },
+  "PE-IQT": { countryCode: "PE", city: "Iquitos", defaultRent: 300, multipliers: { housing: 0.65, transit: 0.75, groceries: 1.05, utilities: 1.02 } },
+  "TH-BKK": { countryCode: "TH", city: "Bangkok", defaultRent: 750, multipliers: { housing: 1.40, transit: 1.25, groceries: 1.12, utilities: 1.10 } },
+  "TH-CNX": { countryCode: "TH", city: "Chiang Mai", defaultRent: 450, multipliers: { housing: 0.85, transit: 0.85, groceries: 0.95, utilities: 0.95 } },
+  "TH-HKT": { countryCode: "TH", city: "Phuket", defaultRent: 700, multipliers: { housing: 1.25, transit: 0.90, groceries: 1.05, utilities: 1.08 } },
+  "TH-PAT": { countryCode: "TH", city: "Pattaya", defaultRent: 580, multipliers: { housing: 1.05, transit: 0.82, groceries: 1.02, utilities: 1.05 } },
+  "TH-KSM": { countryCode: "TH", city: "Koh Samui", defaultRent: 650, multipliers: { housing: 1.15, transit: 0.78, groceries: 1.05, utilities: 1.08 } },
+  "VN-SGN": { countryCode: "VN", city: "Ho Chi Minh City", defaultRent: 600, multipliers: { housing: 1.40, transit: 1.15, groceries: 1.10, utilities: 1.08 } },
+  "VN-HAN": { countryCode: "VN", city: "Hanoi", defaultRent: 550, multipliers: { housing: 1.25, transit: 1.10, groceries: 1.05, utilities: 1.05 } },
+  "VN-DAD": { countryCode: "VN", city: "Da Nang", defaultRent: 380, multipliers: { housing: 0.88, transit: 0.85, groceries: 0.96, utilities: 0.97 } },
+  "VN-HPH": { countryCode: "VN", city: "Hai Phong", defaultRent: 320, multipliers: { housing: 0.75, transit: 0.82, groceries: 0.93, utilities: 0.94 } },
+  "VN-HOI": { countryCode: "VN", city: "Hoi An", defaultRent: 400, multipliers: { housing: 0.92, transit: 0.72, groceries: 0.98, utilities: 0.97 } },
+  "MY-KUL": { countryCode: "MY", city: "Kuala Lumpur", defaultRent: 750, multipliers: { housing: 1.40, transit: 1.20, groceries: 1.12, utilities: 1.08 } },
+  "MY-PEN": { countryCode: "MY", city: "Penang", defaultRent: 480, multipliers: { housing: 0.90, transit: 0.88, groceries: 0.96, utilities: 0.97 } },
+  "MY-JHB": { countryCode: "MY", city: "Johor Bahru", defaultRent: 520, multipliers: { housing: 0.95, transit: 0.85, groceries: 0.97, utilities: 0.98 } },
+  "MY-KCH": { countryCode: "MY", city: "Kuching", defaultRent: 400, multipliers: { housing: 0.75, transit: 0.78, groceries: 0.93, utilities: 0.95 } },
+  "MY-KKB": { countryCode: "MY", city: "Kota Kinabalu", defaultRent: 430, multipliers: { housing: 0.80, transit: 0.78, groceries: 0.95, utilities: 0.96 } },
+  "ID-JKT": { countryCode: "ID", city: "Jakarta", defaultRent: 650, multipliers: { housing: 1.45, transit: 1.20, groceries: 1.12, utilities: 1.10 } },
+  "ID-DPS": { countryCode: "ID", city: "Bali / Denpasar", defaultRent: 550, multipliers: { housing: 1.15, transit: 0.85, groceries: 1.05, utilities: 1.05 } },
+  "ID-SBY": { countryCode: "ID", city: "Surabaya", defaultRent: 380, multipliers: { housing: 0.88, transit: 0.90, groceries: 0.95, utilities: 0.96 } },
+  "ID-BDG": { countryCode: "ID", city: "Bandung", defaultRent: 320, multipliers: { housing: 0.75, transit: 0.82, groceries: 0.93, utilities: 0.95 } },
+  "ID-YOG": { countryCode: "ID", city: "Yogyakarta", defaultRent: 280, multipliers: { housing: 0.68, transit: 0.78, groceries: 0.90, utilities: 0.93 } },
+  "ZA-CPT": { countryCode: "ZA", city: "Cape Town", defaultRent: 900, multipliers: { housing: 1.30, transit: 1.00, groceries: 1.10, utilities: 1.08 } },
+  "ZA-JNB": { countryCode: "ZA", city: "Johannesburg", defaultRent: 750, multipliers: { housing: 1.05, transit: 1.00, groceries: 1.05, utilities: 1.05 } },
+  "ZA-DUR": { countryCode: "ZA", city: "Durban", defaultRent: 620, multipliers: { housing: 0.88, transit: 0.90, groceries: 0.97, utilities: 0.97 } },
+  "ZA-PRE": { countryCode: "ZA", city: "Pretoria", defaultRent: 680, multipliers: { housing: 0.95, transit: 0.92, groceries: 0.98, utilities: 0.98 } },
+  "ZA-PLZ": { countryCode: "ZA", city: "Port Elizabeth", defaultRent: 560, multipliers: { housing: 0.80, transit: 0.85, groceries: 0.95, utilities: 0.96 } },
 };
 
-// ---------------------------------------------------------------------------
-// HELPERS
-// ---------------------------------------------------------------------------
-
 export const DEFAULT_CITY_COST_MULTIPLIERS: CityCostMultipliers = {
-  housing: 1,
-  transit: 1,
-  groceries: 1,
-  utilities: 1,
+  housing: 1, transit: 1, groceries: 1, utilities: 1,
 };
 
 export function getCityCostMultipliers(cityCode?: string | null): CityCostMultipliers {
@@ -810,9 +279,7 @@ export function getCityDefaultRent(cityCode?: string | null): number | undefined
   return INTERNATIONAL_CITY_COSTS[cityCode]?.defaultRent;
 }
 
-export function getCityCostConfig(
-  cityCode?: string | null
-): InternationalCityCostConfig | undefined {
+export function getCityCostConfig(cityCode?: string | null): InternationalCityCostConfig | undefined {
   if (!cityCode) return undefined;
   return INTERNATIONAL_CITY_COSTS[cityCode];
 }
