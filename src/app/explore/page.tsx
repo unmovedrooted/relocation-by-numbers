@@ -362,6 +362,12 @@ export default function ExplorePage() {
         href="/best-cities-for-fire"
         className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]"
       >
+        <Link
+  href="/international-relocation"
+  className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]"
+>
+  International Relocation
+</Link>
         Best Cities for FIRE
       </Link>
       <Link
