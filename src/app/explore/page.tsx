@@ -39,6 +39,11 @@ const quickLinks: HubLink[] = [
     description: "Estimate your FIRE age and financial independence number.",
   },
   {
+    href: "/international-relocation",
+    title: "International Relocation Calculator",
+    description: "Compare taxes, rent, living costs, and moving expenses across countries.",
+  },
+  {
     href: "/best-cities-for-fire",
     title: "Best Cities for FIRE",
     description: "Browse cities where your money may go further.",
