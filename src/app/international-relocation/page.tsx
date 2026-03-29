@@ -13,17 +13,17 @@ export default function Page() {
       <header className="py-10 text-center">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-            International Relocation Cost Calculator
+                International Relocation Calculator | Moving Abroad Cost, Taxes, Rent & Budget
+
           </h1>
 
          <p className="mx-auto mt-3 max-w-5xl text-sm text-slate-600 dark:text-slate-300 sm:text-base lg:whitespace-nowrap">
-  Compare your move across countries using take-home income, taxes, housing, living costs, and one-time relocation expenses.
+    Compare taxes, rent, living costs, take-home pay, and one-time moving expenses when relocating abroad. Plan an international move with a clearer budget.
 </p>
 
-            <p className="mx-auto mt-3 max-w-4xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-      Built for early-stage planning. Use it to pressure-test whether a move abroad looks realistic before you commit.
-    </p>
-
+     <p className="mx-auto mt-2 max-w-4xl text-sm text-slate-500 dark:text-slate-400">
+  Use this international move calculator to pressure-test your budget before relocating overseas.
+</p>
 
           <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-blue-600/80" />
         </div>
@@ -68,6 +68,37 @@ export default function Page() {
             </div>
           </div>
         </section>
+
+        <section className="rounded-2xl border border-emerald-200/60 bg-emerald-50 p-5">
+  <h2 className="text-lg font-semibold tracking-tight text-slate-900">
+    Explore more relocation planning tools
+  </h2>
+
+  <p className="mt-2 text-sm leading-6 text-slate-700">
+    Keep comparing your options with more relocation, budgeting, and FIRE tools from Relocation by Numbers.
+  </p>
+
+  <div className="mt-4 flex flex-wrap gap-3">
+    <a
+      href="/explore"
+      className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+    >
+      Explore all tools
+    </a>
+    <a
+      href="/fire-calculator"
+      className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+    >
+      FIRE Calculator
+    </a>
+    <a
+      href="/best-cities-for-fire"
+      className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+    >
+      Best Cities for FIRE
+    </a>
+  </div>
+</section>
 
 <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
   <div className="grid gap-6 lg:grid-cols-2">

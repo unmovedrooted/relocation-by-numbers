@@ -16,6 +16,7 @@ import {
   estimateInternationalTax,
 } from "@/lib/internationalTaxes";
 import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
+import InternationalRelocationFAQ from "@/components/InternationalRelocationFAQ";
 import { USD_TO_LOCAL } from "@/lib/internationalFx";
 import AdSlot from "./AdSlot";
 import AffiliateCard from "./AffiliateCard";
@@ -1547,8 +1548,13 @@ const childrenNum = Math.max(0, Number(children) || 0);
           </div>
 
           <AdSlot />
+          
         </div>
+
       </div>
+     <div className="mt-8">
+  <InternationalRelocationFAQ />
+</div>
     </div>
   );
 }
