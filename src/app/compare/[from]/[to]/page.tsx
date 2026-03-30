@@ -6,9 +6,15 @@ import { notFound } from "next/navigation";
 
 export const dynamicParams = true;
 
+function isSameCompare(a?: string, b?: string) {
+  return !!a && !!b && a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
 // Pre-generate major city compare routes
 export async function generateStaticParams() {
-  return majorCityPairs.map(({ from, to }) => ({ from, to }));
+  return majorCityPairs
+    .filter(({ from, to }) => !isSameCompare(from, to))
+    .map(({ from, to }) => ({ from, to }));
 }
 
 type PageProps = {
@@ -18,6 +24,9 @@ type PageProps = {
 export default async function ComparePage({ params }: PageProps) {
   const { from, to } = await params;
 
+  // Block same-city compare pages like /compare/boston-ma/boston-ma
+  if (isSameCompare(from, to)) return notFound();
+
   const fromCity = findCity(from);
   const toCity = findCity(to);
 
@@ -25,6 +34,15 @@ export default async function ComparePage({ params }: PageProps) {
 
   // allow "major vs anything", block only "non-major vs non-major"
   if (!isMajorCity(fromCity) && !isMajorCity(toCity)) return notFound();
+
+  const isValidCompareHref = (href: string) => {
+    const parts = href.split("/compare/")[1]?.split("/");
+    const a = parts?.[0];
+    const b = parts?.[1];
+    if (!a || !b) return false;
+    if (isSameCompare(a, b)) return false;
+    return !!findCity(a) && !!findCity(b);
+  };
 
   const popular = [
     { href: `/compare/${fromCity.id}/nyc-ny`, label: `${fromCity.name} vs NYC` },
@@ -35,13 +53,8 @@ export default async function ComparePage({ params }: PageProps) {
     { href: `/compare/${fromCity.id}/seattle-wa`, label: `${fromCity.name} vs Seattle` },
   ]
     .filter((x) => x.href !== `/compare/${fromCity.id}/${toCity.id}`)
-    .filter((x) => {
-      const parts = x.href.split("/compare/")[1]?.split("/");
-      const a = parts?.[0];
-      const b = parts?.[1];
-      if (!a || !b) return false;
-      return !!findCity(a) && !!findCity(b);
-    })
+    .filter((x) => isValidCompareHref(x.href))
+    .filter((x, i, arr) => arr.findIndex((y) => y.href === x.href) === i)
     .slice(0, 6);
 
   const dynamicLinks = [
@@ -60,14 +73,8 @@ export default async function ComparePage({ params }: PageProps) {
     { href: `/compare/${toCity.id}/miami-fl`, label: `${toCity.name} vs Miami` },
   ]
     .filter((x) => x.href !== `/compare/${fromCity.id}/${toCity.id}`)
+    .filter((x) => isValidCompareHref(x.href))
     .filter((x, i, arr) => arr.findIndex((y) => y.href === x.href) === i)
-    .filter((x) => {
-      const parts = x.href.split("/compare/")[1]?.split("/");
-      const a = parts?.[0];
-      const b = parts?.[1];
-      if (!a || !b) return false;
-      return !!findCity(a) && !!findCity(b);
-    })
     .slice(0, 4);
 
   return (
