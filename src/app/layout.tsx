@@ -17,9 +17,12 @@ const geistMono = Geist_Mono({
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export const metadata: Metadata = {
-  title: "Salary vs Cost of Living Calculator | Relocation Affordability Tool",
+  title: {
+    default: "Relocation by Numbers",
+    template: "%s | Relocation by Numbers",
+  },
   description:
-    "Compare take-home pay and housing affordability across all 50 states. Buy vs rent, taxes, PMI, and real relocation cost analysis.",
+    "Compare cost of living, take-home pay, housing, and FIRE impact before you move.",
 };
 
 export default function RootLayout({
@@ -58,15 +61,18 @@ export default function RootLayout({
               </Link>
 
               <nav className="flex items-center gap-4 text-sm text-slate-600">
-                <Link href="/explore" className="transition hover:text-slate-900">
-                  Explore
-                </Link>
-                <Link href="/fire-calculator" className="transition hover:text-slate-900">
-                  FIRE Calculator
-                </Link>
-                <Link href="/best-cities-for-fire" className="transition hover:text-slate-900">
-                  Best Cities for FIRE
-                </Link>
+  <Link href="/explore" className="transition hover:text-slate-900">
+    Explore
+  </Link>
+  <Link href="/fire-calculator" className="transition hover:text-slate-900">
+    FIRE Calculator
+  </Link>
+  <Link href="/international-relocation" className="transition hover:text-slate-900">
+    International
+  </Link>
+  <Link href="/best-cities-for-fire" className="transition hover:text-slate-900">
+    Best Cities for FIRE
+  </Link>
               </nav>
             </div>
           </header>

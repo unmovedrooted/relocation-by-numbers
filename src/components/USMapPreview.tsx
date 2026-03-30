@@ -241,62 +241,56 @@ export default function USMapPreview() {
                   className="h-auto w-full"
                 >
                   <Geographies geography={usStates as any}>
-                    {({ geographies }) =>
-                      geographies.map((geo) => {
-                        const stateId = String(geo.id).padStart(2, "0");
-                        const stateName = String(geo.properties?.name ?? "");
-                        const state = allStatesById[stateId];
-                        const isHighlighted = activeStateIds.has(stateId);
-                        const isHovered = hoveredId === stateId;
+  {({ geographies }) =>
+    geographies.map((geo, index) => {
+      const stateId = String(geo.id).padStart(2, "0");
+      const stateName = String(geo.properties?.name ?? "");
+      const state = allStatesById[stateId];
+      const isHighlighted = activeStateIds.has(stateId);
+      const isHovered = hoveredId === stateId;
 
-                        return (
-                          <Geography
-                            key={geo.rsmKey}
-                            geography={geo}
-                            onMouseEnter={() => setHoveredId(stateId)}
-                            onMouseLeave={() => setHoveredId(null)}
-                            onFocus={() => setHoveredId(stateId)}
-                            onBlur={() => setHoveredId(null)}
-                            onClick={() => {
-                              if (state && isHighlighted) router.push(state.href);
-                            }}
-                            tabIndex={0}
-                            style={{
-                              default: {
-                                fill: isHighlighted ? "#10b981" : "#182235",
-                                stroke: isHighlighted ? "#d1fae5" : "#334155",
-                                strokeWidth: isHovered ? 1.5 : 0.8,
-                                outline: "none",
-                                cursor:
-                                  state && isHighlighted ? "pointer" : "default",
-                                opacity: isHighlighted ? 1 : 0.9,
-                              },
-                              hover: {
-                                fill: isHighlighted ? "#2dd4bf" : "#22304a",
-                                stroke: isHighlighted ? "#f0fdf4" : "#475569",
-                                strokeWidth: isHighlighted ? 1.8 : 1,
-                                outline: "none",
-                                cursor:
-                                  state && isHighlighted ? "pointer" : "default",
-                                opacity: 1,
-                              },
-                              pressed: {
-                                fill: isHighlighted ? "#6ee7b7" : "#22304a",
-                                stroke: isHighlighted ? "#f0fdf4" : "#475569",
-                                strokeWidth: 1.8,
-                                outline: "none",
-                              },
-                            }}
-                            aria-label={
-                              state
-                                ? `Explore ${state.name}`
-                                : stateName || "State"
-                            }
-                          />
-                        );
-                      })
-                    }
-                  </Geographies>
+      return (
+        <Geography
+          key={`${geo.rsmKey}-${stateId}-${index}`}
+          geography={geo}
+          onMouseEnter={() => setHoveredId(stateId)}
+          onMouseLeave={() => setHoveredId(null)}
+          onFocus={() => setHoveredId(stateId)}
+          onBlur={() => setHoveredId(null)}
+          onClick={() => {
+            if (state && isHighlighted) router.push(state.href);
+          }}
+          tabIndex={0}
+          style={{
+            default: {
+              fill: isHighlighted ? "#10b981" : "#182235",
+              stroke: isHighlighted ? "#d1fae5" : "#334155",
+              strokeWidth: isHovered ? 1.5 : 0.8,
+              outline: "none",
+              cursor: state && isHighlighted ? "pointer" : "default",
+              opacity: isHighlighted ? 1 : 0.9,
+            },
+            hover: {
+              fill: isHighlighted ? "#2dd4bf" : "#22304a",
+              stroke: isHighlighted ? "#f0fdf4" : "#475569",
+              strokeWidth: isHighlighted ? 1.8 : 1,
+              outline: "none",
+              cursor: state && isHighlighted ? "pointer" : "default",
+              opacity: 1,
+            },
+            pressed: {
+              fill: isHighlighted ? "#6ee7b7" : "#22304a",
+              stroke: isHighlighted ? "#f0fdf4" : "#475569",
+              strokeWidth: 1.8,
+              outline: "none",
+            },
+          }}
+          aria-label={state ? `Explore ${state.name}` : stateName || "State"}
+        />
+      );
+    })
+  }
+</Geographies>
                 </ComposableMap>
 
                 <div className="mt-4 flex flex-wrap gap-3 text-xs">

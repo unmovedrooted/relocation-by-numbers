@@ -31,6 +31,15 @@ export default function Page() {
         <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-blue-600/80" />
       </header>
 
+      <div className="text-center">
+  <Link
+    href="/methodology"
+    className="text-sm font-medium text-slate-600 underline decoration-slate-300 underline-offset-4 transition hover:text-slate-900 dark:text-slate-300 dark:decoration-slate-600 dark:hover:text-white"
+  >
+    See methodology and data sources
+  </Link>
+</div>
+
       {/* Main content container */}
       <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-12 space-y-10">
         <Calculator monetization="home" />
@@ -48,27 +57,27 @@ export default function Page() {
               </p>
 
               <div className="mt-3 flex items-center gap-4 flex-wrap">
-                <a
-                  href="/fire-calculator"
-                  className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-                >
-                  🔥 Calculate My FIRE Timeline
-                </a>
+              <Link
+  href="/fire-calculator"
+  className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+>
+  🔥 Calculate My FIRE Timeline
+</Link>
 
                 <div className="h-5 w-px bg-emerald-200" />
 
                 <div className="flex items-center gap-5 text-sm text-slate-600">
-                  <a href="/coast-fire-calculator" className="hover:text-slate-900">
-                    Coast FIRE
-                  </a>
+                 <Link href="/coast-fire-calculator" className="hover:text-slate-900">
+  Coast FIRE
+</Link>
 
-                  <a href="/barista-fire-calculator" className="hover:text-slate-900">
-                    Barista FIRE
-                  </a>
+<Link href="/barista-fire-calculator" className="hover:text-slate-900">
+  Barista FIRE
+</Link>
 
-                  <a href="/lean-fire-calculator" className="hover:text-slate-900">
-                    Lean FIRE
-                  </a>
+<Link href="/lean-fire-calculator" className="hover:text-slate-900">
+  Lean FIRE
+</Link>
                 </div>
               </div>
             </div>
@@ -81,6 +90,29 @@ export default function Page() {
             */}
           </div>
         </section>
+
+        <section className="rounded-2xl border border-sky-200/60 bg-sky-50 p-5">
+  <div className="flex items-center justify-between gap-6">
+    <div>
+      <div className="text-sm font-semibold text-slate-900">
+        Planning a Move Abroad?
+      </div>
+
+      <p className="mt-1 text-sm text-slate-700">
+        Compare taxes, rent, living costs, and take-home pay across countries before you relocate.
+      </p>
+
+      <div className="mt-3">
+        <Link
+          href="/international-relocation"
+          className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+        >
+          Explore International Relocation →
+        </Link>
+      </div>
+    </div>
+  </div>
+</section>
 
         {/* Popular comparisons (card) */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
@@ -98,6 +130,7 @@ export default function Page() {
               POPULAR COMPARISONS
             </div>
 
+
            <div className="mt-3 flex flex-wrap justify-center gap-2">
   {POPULAR.map((item) => (
     <Link
@@ -109,6 +142,7 @@ export default function Page() {
     </Link>
   ))}
 </div>
+
 
 <div className="mt-5">
   <Link
@@ -172,6 +206,27 @@ export default function Page() {
           </div>
         </section>
       </section>
+
+      <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
+  <div className="text-center">
+    <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+      Explore More Relocation Tools
+    </h2>
+
+    <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300">
+      Browse calculators, salary tools, cost of living pages, and FIRE planning resources in one place.
+    </p>
+
+    <div className="mt-5">
+      <Link
+        href="/explore"
+        className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+      >
+        Explore All Tools
+      </Link>
+    </div>
+  </div>
+</section>
  
 
       <footer className="border-t border-slate-200 bg-slate-50">
@@ -193,8 +248,11 @@ export default function Page() {
         Terms
       </a>
     </div>
+    
   </div>
+  
 </footer>
+
     </main>
   );
 }

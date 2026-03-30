@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import FireCalculator from "@/components/FireCalculator";
 
 export const metadata: Metadata = {
   title: "FIRE Calculator by Location | Compare Taxes, Spending, and FIRE Timeline",
   description:
     "Compare how taxes, spending, and moving cities can change your FIRE number, years to financial independence, and projected FIRE age.",
-      openGraph: {
+  openGraph: {
     title: "FIRE Calculator | Relocation by Numbers",
     description:
       "See how taxes, spending, and moving cities can change your FIRE date.",
@@ -16,8 +17,7 @@ export const metadata: Metadata = {
     title: "FIRE Calculator | Relocation by Numbers",
     description:
       "See how taxes, spending, and moving cities can change your FIRE date.",
-        },
-
+  },
 };
 
 export default function FireCalculatorPage() {
@@ -31,21 +31,21 @@ export default function FireCalculatorPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
-            <a href="/about" className="transition hover:text-white">
+            <Link href="/about" className="transition hover:text-white">
               About
-            </a>
+            </Link>
             <span>•</span>
-            <a href="/disclaimer" className="transition hover:text-white">
+            <Link href="/disclaimer" className="transition hover:text-white">
               Disclaimer
-            </a>
+            </Link>
             <span>•</span>
-            <a href="/privacy" className="transition hover:text-white">
+            <Link href="/privacy" className="transition hover:text-white">
               Privacy
-            </a>
+            </Link>
             <span>•</span>
-            <a href="/terms" className="transition hover:text-white">
+            <Link href="/terms" className="transition hover:text-white">
               Terms
-            </a>
+            </Link>
           </div>
 
           <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -63,59 +63,115 @@ export default function FireCalculatorPage() {
           </p>
 
           <p className="max-w-4xl text-xs leading-6 text-slate-500">
-  Assumptions updated: March 2026
-</p>
+            Assumptions updated: March 2026
+          </p>
+
+          <div className="pt-1">
+  <Link
+    href="/methodology"
+    className="text-sm font-medium text-emerald-200 underline decoration-emerald-300/40 underline-offset-4 transition hover:text-emerald-100"
+  >
+    See methodology and data sources
+  </Link>
+</div>
 
           <div className="flex flex-wrap gap-2 pt-2">
-            <a
+            <Link
               href="/lean-fire-calculator"
               className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
             >
               Lean FIRE
-            </a>
+            </Link>
 
-            <a
+            <Link
               href="/barista-fire-calculator"
               className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
             >
               Barista FIRE
-            </a>
+            </Link>
 
-            <a
+            <Link
               href="/coast-fire-calculator"
               className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
             >
               Coast FIRE
-            </a>
+            </Link>
 
-            <a
-              href="/"
+            <Link
+              href="/compare"
               className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-3 py-2 text-sm font-semibold text-emerald-200 hover:bg-emerald-400/20"
             >
               Compare Cities →
-            </a>
+            </Link>
+
+            <Link
+              href="/explore"
+              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
+            >
+              Explore More Tools
+            </Link>
           </div>
         </header>
 
+        <section className="max-w-4xl">
+  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-200">
+    How the model works
+  </h2>
+
+  <p className="mt-3 text-sm leading-7 text-slate-300 sm:text-base">
+    Your FIRE target is based on how much you spend each year and your
+    withdrawal rate. But where you live also matters.
+  </p>
+
+  <p className="mt-4 text-sm leading-7 text-slate-300 sm:text-base">
+    This calculator estimates after-tax income using federal tax
+    brackets, FICA, filing status, optional 401(k) contributions, and a
+    simplified state-specific tax model. It also adjusts spending by
+    location so you can compare how different cities may change your
+    path to FIRE.
+  </p>
+</section>
+
         <FireCalculator />
 
-        <section className="max-w-4xl">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-200">
-            How the model works
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+          <h2 className="text-lg font-semibold tracking-tight text-white">
+            Explore more FIRE and relocation tools
           </h2>
 
-          <p className="mt-3 text-sm leading-7 text-slate-300 sm:text-base">
-            Your FIRE target is based on how much you spend each year and your
-            withdrawal rate. But where you live also matters.
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
+            Compare other FIRE styles, explore city-to-city moves, or browse more tools across the site.
           </p>
 
-          <p className="mt-4 text-sm leading-7 text-slate-300 sm:text-base">
-            This calculator estimates after-tax income using federal tax
-            brackets, FICA, filing status, optional 401(k) contributions, and a
-            simplified state-specific tax model. It also adjusts spending by
-            location so you can compare how different cities may change your
-            path to FIRE.
-          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link
+              href="/compare"
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+            >
+              Relocation Comparisons
+            </Link>
+
+            <Link
+              href="/explore"
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+            >
+              Explore Hub
+            </Link>
+
+            <Link
+              href="/best-cities-for-fire"
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+            >
+              Best Cities for FIRE
+            </Link>
+
+            <Link
+              href="/best-states-for-fire"
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+            >
+              Best States for FIRE
+            </Link>
+          </div>
         </section>
 
         <p className="text-center text-xs text-slate-500">

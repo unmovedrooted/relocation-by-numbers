@@ -3,7 +3,7 @@ import Link from "next/link";
 import USMapPreview from "@/components/USMapPreview";
 
 export const metadata: Metadata = {
-  title: "Explore Relocation Tools | Relocation by Numbers",
+  title: "Cost of Living, Relocation & FIRE Tools | Relocation by Numbers",
   description:
     "Explore relocation comparisons, cost of living guides, FIRE calculators, salary tools, and state-by-state financial independence resources.",
 };
@@ -73,8 +73,8 @@ const sections: HubSection[] = [
       { href: "/compare/boston-ma/miami-fl", title: "Compare Boston vs Miami" },
       { href: "/compare/charlotte-nc/miami-fl", title: "Compare Charlotte vs Miami" },
     ],
-    ctaHref: "/compare/nyc-ny/charlotte-nc",
-    ctaLabel: "Start with a featured comparison",
+   ctaHref: "/compare",
+ctaLabel: "Explore all relocation comparisons",
   },
   {
     title: "City Cost of Living Guides",
@@ -243,7 +243,7 @@ export default function ExplorePage() {
                   href="/compare/nyc-ny/charlotte-nc"
                   className="inline-flex items-center rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:opacity-90"
                 >
-                  Start Comparing
+                    Explore Comparisons
                 </Link>
 
                 <Link
@@ -317,6 +317,15 @@ export default function ExplorePage() {
                 salary needs, taxes, and FIRE timelines across places. These pages are
                 planning tools, not financial, tax, or legal advice.
               </p>
+              <div className="pt-1">
+  <Link
+    href="/methodology"
+    className="text-sm font-medium text-emerald-200 underline decoration-emerald-300/40 underline-offset-4 transition hover:text-emerald-100"
+  >
+    See methodology and data sources
+  </Link>
+</div>
+
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="/fire-calculator"
@@ -350,7 +359,7 @@ export default function ExplorePage() {
         href="/explore"
         className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]"
       >
-        Explore Hub
+          International Relocation
       </Link>
       <Link
         href="/fire-calculator"
