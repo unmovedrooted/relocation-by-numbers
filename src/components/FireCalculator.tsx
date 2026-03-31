@@ -385,13 +385,12 @@ function AdSenseBlock({ slot, className = "" }: { slot: string; className?: stri
   const enabled = Boolean(ADSENSE_CLIENT && slot);
 
   useEffect(() => {
-    if (!enabled) return;
-    try {
-      // @ts-expect-error
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch {
-      // ignore
-    }
+   if (!enabled) return;
+try {
+  (window.adsbygoogle = window.adsbygoogle || []).push({});
+} catch {
+  // ignore
+}
   }, [enabled, slot]);
 
   if (!enabled) return null;
