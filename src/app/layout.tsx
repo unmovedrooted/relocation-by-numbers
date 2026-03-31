@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   },
   description:
     "Compare cost of living, take-home pay, housing, and FIRE impact before you move.",
+  other: {
+    "google-adsense-account": "ca-pub-5257549146198249",
+  },
 };
 
 export default function RootLayout({
