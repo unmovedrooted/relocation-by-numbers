@@ -1,9 +1,50 @@
 "use client";
 
-export default function AdSlot() {
+import { useEffect } from "react";
+
+type Props = {
+  slot?: string;
+  className?: string;
+  format?: "auto" | "fluid" | "rectangle" | "horizontal" | "vertical";
+  responsive?: boolean;
+};
+
+declare global {
+  interface Window {
+    adsbygoogle?: unknown[];
+  }
+}
+
+export default function AdSlot({
+  slot,
+  className = "",
+  format = "auto",
+  responsive = true,
+}: Props) {
+  useEffect(() => {
+    if (!slot) return;
+
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch {
+      // ignore dev / duplicate push errors
+    }
+  }, [slot]);
+
+  if (!slot || !process.env.NEXT_PUBLIC_ADSENSE_CLIENT) {
+    return null;
+  }
+
   return (
-    <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
-      Advertisement
+    <div className={className}>
+      <ins
+        className="adsbygoogle"
+        style={{ display: "block" }}
+        data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_CLIENT}
+        data-ad-slot={slot}
+        data-ad-format={format}
+        data-full-width-responsive={responsive ? "true" : "false"}
+      />
     </div>
   );
 }

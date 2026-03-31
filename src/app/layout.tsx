@@ -53,6 +53,13 @@ export default function RootLayout({
           </>
         ) : null}
 
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5257549146198249"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+
         <div className="flex min-h-screen flex-col">
           <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
@@ -61,18 +68,18 @@ export default function RootLayout({
               </Link>
 
               <nav className="flex items-center gap-4 text-sm text-slate-600">
-  <Link href="/explore" className="transition hover:text-slate-900">
-    Explore
-  </Link>
-  <Link href="/fire-calculator" className="transition hover:text-slate-900">
-    FIRE Calculator
-  </Link>
-  <Link href="/international-relocation" className="transition hover:text-slate-900">
-    International
-  </Link>
-  <Link href="/best-cities-for-fire" className="transition hover:text-slate-900">
-    Best Cities for FIRE
-  </Link>
+                <Link href="/explore" className="transition hover:text-slate-900">
+                  Explore
+                </Link>
+                <Link href="/fire-calculator" className="transition hover:text-slate-900">
+                  FIRE Calculator
+                </Link>
+                <Link href="/international-relocation" className="transition hover:text-slate-900">
+                  International
+                </Link>
+                <Link href="/best-cities-for-fire" className="transition hover:text-slate-900">
+                  Best Cities for FIRE
+                </Link>
               </nav>
             </div>
           </header>

@@ -42,7 +42,19 @@ export default function Page() {
 
       {/* Main content container */}
       <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-12 space-y-10">
-        <Calculator monetization="home" />
+        <Calculator monetization="home" /> </section>
+
+        <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-12 space-y-10">
+  <Calculator monetization="home" />
+
+  {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <AdSlot
+        slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP}
+        className="min-h-[100px]"
+      />
+    </section>
+  ) : null}
 
         {/* FIRE CTA */}
         <section className="rounded-2xl border border-emerald-200/60 bg-emerald-50 p-5">
