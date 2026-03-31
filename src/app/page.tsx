@@ -41,8 +41,6 @@ export default function Page() {
 </div>
 
       {/* Main content container */}
-      <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-12 space-y-10">
-        <Calculator monetization="home" /> </section>
 
         <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-12 space-y-10">
   <Calculator monetization="home" />
