@@ -14,6 +14,9 @@ import {
 } from "@/lib/internationalCityDefaults";
 import {
   estimateInternationalTax,
+  getConditionalQuestionsForCountry,
+  type TaxConfidence,
+  type ConditionalQuestion,
 } from "@/lib/internationalTaxes";
 import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
 import { USD_TO_LOCAL } from "@/lib/internationalFx";
@@ -326,8 +329,6 @@ type SalaryType = "local" | "remote";
 type FurnishedType = "furnished" | "unfurnished";
 type YesNo = "yes" | "no";
 type CurrencyDisplay = "USD" | "CURRENT" | "DESTINATION";
-type Confidence = "high" | "moderate" | "simplified" | "pending";
-
 // ---------------------------------------------------------------------------
 // UTILITIES
 // ---------------------------------------------------------------------------
@@ -360,26 +361,25 @@ function getReadinessBand(ratio: number) {
   return { band: "D", label: "Stretched", note: "Housing is taking up a large share of the budget." };
 }
 
-function confidenceBadge(confidence: Confidence) {
+// Maps the TaxConfidence values from internationalTaxes.ts to UI badge styles.
+// "verified"    → green  (exact or trivially exact)
+// "partial"     → blue   (sound structure, named small gap)
+// "simplified"  → amber  (structurally believable, 5-10 pp gap possible)
+// "placeholder" → red    (directional only, thresholds unstable)
+function confidenceBadge(confidence: TaxConfidence) {
   switch (confidence) {
-    case "high":       return { label: "● High confidence",     cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" };
-    case "moderate":   return { label: "● Moderate",            cls: "bg-amber-50 text-amber-700 ring-amber-200" };
-    case "simplified": return { label: "● Simplified estimate", cls: "bg-orange-50 text-orange-700 ring-orange-200" };
-    default:           return { label: "⚠ Pending",             cls: "bg-slate-50 text-slate-500 ring-slate-200" };
+    case "verified":    return { label: "● Verified",           cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" };
+    case "partial":     return { label: "● Planning estimate",  cls: "bg-blue-50 text-blue-700 ring-blue-200" };
+    case "simplified":  return { label: "● Simplified estimate",cls: "bg-amber-50 text-amber-700 ring-amber-200" };
+    case "placeholder": return { label: "⚠ Directional only",  cls: "bg-rose-50 text-rose-700 ring-rose-200" };
+    default:            return { label: "⚠ Unknown",            cls: "bg-slate-50 text-slate-500 ring-slate-200" };
   }
-}
-
-// Derive a confidence level from the existing tax estimate model string
-function taxModelToConfidence(model: string): Confidence {
-  if (model === "progressive" || model === "flat") return "high";
-  if (model === "simplified" || model === "estimated") return "simplified";
-  return "moderate";
 }
 
 // ---------------------------------------------------------------------------
 // TAX ASSUMPTIONS LABEL
 // ---------------------------------------------------------------------------
-const EUROPE_TAX_ASSUMPTIONS_LABEL = "Tax estimates: March 2026";
+const EUROPE_TAX_ASSUMPTIONS_LABEL = "Tax model updated March 2026 · figures are 2024, 2024–25, or 2025 by jurisdiction";
 
 const inputCls  = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-indigo-500/15";
 const selectCls = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-indigo-500/15";
@@ -455,6 +455,7 @@ export default function EuropeRelocationCalculator() {
   const hasMounted = useRef(false);
   const [qsHydrated, setQsHydrated] = useState(false);
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
+  const [taxNotesExpanded, setTaxNotesExpanded] = useState(false);
 
   const [mode, setMode] = useState<Mode>("working");
   const [salary, setSalary] = useState<string>("150000");
@@ -685,42 +686,35 @@ export default function EuropeRelocationCalculator() {
       annualIncome: annualIncomeForFromTax,
       filing,
       isRetired: mode === "retired",
+      incomeScenario,
     });
 
-   const targetTaxEstimate = estimateInternationalTax({
-  countryCode: toCountry,
-  annualIncome: annualIncomeForToTax,
-  filing,
-  isRetired: mode === "retired",
-  incomeScenario,
-  answers: conditionalAnswers,
-});
+    const targetTaxEstimate = estimateInternationalTax({
+      countryCode: toCountry,
+      annualIncome: annualIncomeForToTax,
+      filing,
+      isRetired: mode === "retired",
+      incomeScenario,
+      answers: conditionalAnswers,
+    });
 
     const currentTaxRate = currentTaxEstimate.effectiveRate;
     const targetTaxRate  = targetTaxEstimate.effectiveRate;
 
-    // Build confidence + notes from the existing tax estimate shape
-    const targetConfidence: Confidence = taxModelToConfidence(targetTaxEstimate.model ?? "");
+    // Pull confidence, note, missingFactor, and label directly from the tax engine.
+    const targetConfidence: TaxConfidence = targetTaxEstimate.confidence;
+    const targetMissingFactor: string = targetTaxEstimate.missingFactor ?? "";
+    const targetTaxLabel: string = targetTaxEstimate.label;
     const targetTaxNotes: string[] = [];
     if (targetTaxEstimate.note) targetTaxNotes.push(targetTaxEstimate.note);
-    if (incomeScenario === "remote") {
-      targetTaxNotes.push("Remote / foreign-source income treatment varies by country. Some European countries offer special regimes for new residents.");
-    }
-    // Portugal NHR note
-    if (toCountry === "PT" && incomeScenario === "remote") {
-      targetTaxNotes.push("Portugal's IFICI (formerly NHR) regime may significantly reduce taxes for qualifying new residents. Consult a tax advisor.");
-    }
-    // Spain Beckham note
-    if (toCountry === "ES" && incomeScenario === "remote") {
-      targetTaxNotes.push("Spain's Beckham Law (Régimen de Impatriados) applies a 24% flat rate on Spanish-source income for qualifying workers. Check eligibility.");
-    }
-    // Italy flat tax note
-    if (toCountry === "IT") {
-      targetTaxNotes.push("Italy offers a €100k/yr flat tax on foreign-source income for qualifying new residents (Flat Tax for New Residents).");
-    }
-    // Netherlands 30% ruling
-    if (toCountry === "NL") {
-      targetTaxNotes.push("The Netherlands' 30% ruling provides a tax-free allowance on up to 30% of gross salary for qualifying expat workers for 5 years.");
+
+    // Prompt user to answer unanswered conditional questions that would improve the estimate.
+    const unansweredQuestions = getConditionalQuestionsForCountry(toCountry, incomeScenario)
+      .filter(q => !conditionalAnswers[q.key]);
+    if (unansweredQuestions.length > 0) {
+      targetTaxNotes.push(
+        `Answer the tax question${unansweredQuestions.length > 1 ? "s" : ""} above to refine this estimate.`
+      );
     }
 
     const currentAnnualNetUsd  = annualIncome * (1 - currentTaxRate);
@@ -783,6 +777,8 @@ export default function EuropeRelocationCalculator() {
       targetMonthlyTaxUsd,
       targetTaxNotes,
       targetConfidence,
+      targetMissingFactor,
+      targetTaxLabel,
       netMonthlyFrom,
       netMonthlyTo,
       monthlyIncomeDiff,
@@ -808,7 +804,7 @@ export default function EuropeRelocationCalculator() {
     };
   }, [
     mode, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
-    incomeScenario,
+    incomeScenario, conditionalAnswers,
     fromCityMultipliers, toCityMultipliers, currentCityDefaults, targetCityDefaults,
     adults, children, needCar, furnished, utilitiesIncluded, utilities, destinationRent,
     groceries, transportation, healthcare, depositRequired, firstMonthRent, lastMonthRent,
@@ -1032,55 +1028,42 @@ export default function EuropeRelocationCalculator() {
             </div>
           </div>
 
-          {/* Portugal NHR / IFICI conditional question */}
-          {toCountry === "PT" && incomeScenario === "remote" && (
-            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-              <div className="mb-3 text-sm font-semibold">Portugal — Tax Regime</div>
+          {/* Dynamic conditional tax questions — driven by getConditionalQuestionsForCountry */}
+          {getConditionalQuestionsForCountry(toCountry, incomeScenario).map((q: ConditionalQuestion) => (
+            <div key={q.key} className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+              <div className="mb-3 text-sm font-semibold">{getCountryByCode(toCountry)?.name ?? toCountry} — Tax Question</div>
               <label className="text-sm">
                 <div className={labelHeadCls}>
-                  Are you applying for the IFICI (formerly NHR) special tax regime?
-                  <InfoTip text="Portugal's IFICI regime offers a 20% flat rate on qualifying Portuguese-source income and exemptions on many foreign-source income types for eligible new residents." />
+                  {q.label}
+                  {q.helpText && <InfoTip text={q.helpText} />}
                 </div>
-                <select
-                  className={selectCls}
-                  value={conditionalAnswers["pt_nhr"] ?? ""}
-                  onChange={(e) =>
-                    setConditionalAnswers((prev) => ({ ...prev, pt_nhr: e.target.value }))
-                  }
-                >
-                  <option value="">Select...</option>
-                  <option value="yes">Yes — applying for IFICI / NHR</option>
-                  <option value="no">No — standard progressive rates apply</option>
-                  <option value="unsure">Not sure yet</option>
-                </select>
+                {/* Province/canton questions use a plain select with all options */}
+                {q.options.length > 6 ? (
+                  <select
+                    className={selectCls}
+                    value={conditionalAnswers[q.key] ?? ""}
+                    onChange={(e) => setConditionalAnswers((prev) => ({ ...prev, [q.key]: e.target.value }))}
+                  >
+                    <option value="">Select…</option>
+                    {q.options.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <select
+                    className={selectCls}
+                    value={conditionalAnswers[q.key] ?? ""}
+                    onChange={(e) => setConditionalAnswers((prev) => ({ ...prev, [q.key]: e.target.value }))}
+                  >
+                    <option value="">Select…</option>
+                    {q.options.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                )}
               </label>
             </div>
-          )}
-
-          {/* Spain Beckham Law conditional question */}
-          {toCountry === "ES" && incomeScenario === "remote" && (
-            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-              <div className="mb-3 text-sm font-semibold">Spain — Beckham Law</div>
-              <label className="text-sm">
-                <div className={labelHeadCls}>
-                  Are you eligible for the Beckham Law (Régimen de Impatriados)?
-                  <InfoTip text="Spain's Beckham Law applies a 24% flat rate on Spanish-source income up to €600k for qualifying workers who move to Spain for employment." />
-                </div>
-                <select
-                  className={selectCls}
-                  value={conditionalAnswers["es_beckham"] ?? ""}
-                  onChange={(e) =>
-                    setConditionalAnswers((prev) => ({ ...prev, es_beckham: e.target.value }))
-                  }
-                >
-                  <option value="">Select...</option>
-                  <option value="yes">Yes — eligible for Beckham Law</option>
-                  <option value="no">No — standard progressive rates apply</option>
-                  <option value="unsure">Not sure yet</option>
-                </select>
-              </label>
-            </div>
-          )}
+          ))}
 
           {/* Visa & Permit Context */}
           <VisaContextCard countryCode={toCountry} />
@@ -1194,23 +1177,53 @@ export default function EuropeRelocationCalculator() {
                   <div>Est. taxes (current): <span className="font-semibold">{displayAmount(results.currentMonthlyTaxUsd, 2)}</span>{" "}<span className="text-xs text-slate-500">({(results.currentTaxRate * 100).toFixed(1)}%)</span></div>
                   <div>Est. taxes (target): <span className="font-semibold">{displayAmount(results.targetMonthlyTaxUsd, 2)}</span>{" "}<span className="text-xs text-slate-500">({(results.targetTaxRate * 100).toFixed(1)}%)</span></div>
 
-                  {/* Tax model status box — matches Caribbean confidence badge pattern */}
-                  <div className="mt-3 rounded-2xl border border-indigo-200 bg-indigo-50/80 px-4 py-3 shadow-sm">
-                    <div className="flex flex-wrap items-center gap-2 text-xs">
-                      <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 font-semibold tracking-wide text-indigo-700 ring-1 ring-indigo-200">
-                        Tax model status
-                      </span>
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${badge.cls}`}>
+                  {/* ── Confidence banner with inline missingFactor and expandable detail ── */}
+                  <div className={`mt-3 rounded-xl ring-1 overflow-hidden ${
+                    results.targetConfidence === "verified"    ? "bg-emerald-50 ring-emerald-200"
+                    : results.targetConfidence === "partial"  ? "bg-blue-50 ring-blue-200"
+                    : results.targetConfidence === "placeholder" ? "bg-rose-50 ring-rose-200"
+                    : "bg-amber-50 ring-amber-200"
+                  }`}>
+                    {/* Top row: badge + plain-English meaning */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-3 pb-2">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${badge.cls}`}>
                         {badge.label}
                       </span>
-                      <InfoTip text="Describes how complete and verified the tax estimate is for this destination and scenario. Some countries are modeled more precisely than others." />
+                      <span className="text-xs text-slate-500">
+                        {results.targetConfidence === "verified"    && "Exact or near-exact for most incomes"}
+                        {results.targetConfidence === "partial"     && "Sound structure · named gap ≤ ~4 pp"}
+                        {results.targetConfidence === "simplified"  && "Reasonable ballpark · gap may be 5–10 pp"}
+                        {results.targetConfidence === "placeholder" && "Directional only · verify before planning"}
+                      </span>
                     </div>
-                    {results.targetTaxNotes.length > 0 && (
-                      <div className="mt-2 space-y-1">
-                        {results.targetTaxNotes.map((note, i) => (
-                          <div key={i} className="text-sm leading-6 text-slate-700">• {note}</div>
-                        ))}
+                    {/* Largest missing factor — always visible */}
+                    {results.targetMissingFactor && (
+                      <div className="px-4 pb-2 text-xs text-slate-600">
+                        <span className="font-medium">Key gap: </span>{results.targetMissingFactor}
                       </div>
+                    )}
+                    {/* Expandable full detail */}
+                    {results.targetTaxNotes.length > 0 && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setTaxNotesExpanded(v => !v)}
+                          className="flex w-full items-center justify-between border-t border-black/5 px-4 py-2 text-xs font-medium text-slate-600 hover:bg-black/[0.03] transition-colors"
+                        >
+                          <span>{taxNotesExpanded ? "Hide detail" : "Show full detail"}</span>
+                          <span className="opacity-50">{taxNotesExpanded ? "▲" : "▼"}</span>
+                        </button>
+                        {taxNotesExpanded && (
+                          <div className="space-y-1.5 border-t border-black/5 px-4 py-3">
+                            {results.targetTaxNotes.map((note, i) => (
+                              <div key={i} className="flex gap-2 text-xs leading-5 text-slate-700">
+                                <span className="mt-px shrink-0 opacity-40">•</span>
+                                <span>{note}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </>

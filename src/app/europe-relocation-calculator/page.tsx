@@ -29,10 +29,7 @@ export default function Page() {
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="py-10 text-center">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-semibold tracking-widest text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300">
-            🇪🇺 EUROPE RELOCATION
-          </div>
-
+        
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
             Europe Relocation Calculator
           </h1>
