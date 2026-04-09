@@ -275,11 +275,11 @@ export default async function FireWithSalaryPage({
               </dt>
               <dd className="mt-1">
                 It depends on your spending. At a 30% savings rate, annual expenses would be
-                roughly ${conservative.data?.annualExpenses.toLocaleString() ?? "—"}, giving a FIRE
-                number of ~${conservative.data?.fireTarget.toLocaleString() ?? "—"}. At a 50%
-                savings rate, annual expenses drop to ~$
-                {aggressive.data?.annualExpenses.toLocaleString() ?? "—"}, with a FIRE number of
-                ~${aggressive.data?.fireTarget.toLocaleString() ?? "—"}. These are pre-tax estimates
+                roughly ${conservative?.annualExpenses?.toLocaleString() ?? "—"}, giving a FIRE
+number of ~${conservative?.fireTarget?.toLocaleString() ?? "—"}. At a 50%
+savings rate, annual expenses drop to ~${
+  aggressive?.annualExpenses?.toLocaleString() ?? "—"
+}, with a FIRE number of ~${aggressive?.fireTarget?.toLocaleString() ?? "—"}.. These are pre-tax estimates
                 — the calculator above applies state-specific tax adjustments.
               </dd>
             </div>
