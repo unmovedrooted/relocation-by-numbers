@@ -57,7 +57,7 @@ type TaxEstimatorArgs = {
   annualIncome: number;
   filing: FilingStatus;
   isRetired: boolean;
-  incomeScenario: IncomeScenario;
+  incomeScenario?: IncomeScenario;
   answers?: Record<string, string>;
 };
 
@@ -67,6 +67,15 @@ export type CountryTaxConfig = {
   code: string;
   estimator: TaxEstimator;
   conditionalQuestions?: ConditionalQuestion[];
+};
+
+export type EstimateInternationalTaxArgs = {
+  countryCode: string;
+  annualIncome: number;
+  filing: FilingStatus;
+  isRetired: boolean;
+  incomeScenario?: IncomeScenario;
+  answers?: Record<string, string>;
 };
 
 function clampRate(rate: number): number {
@@ -1276,26 +1285,33 @@ note: "The UAE does not levy personal income tax on employment income in this pl
 // PUBLIC API
 // ---------------------------------------------------------------------------
 
-export function estimateInternationalTax(args: {
-  countryCode: string;
-  annualIncome: number; // LOCAL CURRENCY — caller must convert before calling
-  filing: FilingStatus;
-  isRetired: boolean;
-}): TaxEstimateResult {
-  const { countryCode, annualIncome, filing, isRetired } = args;
+export function estimateInternationalTax({
+  countryCode,
+  annualIncome,
+  filing,
+  isRetired,
+  incomeScenario = isRetired ? "retired" : "local",
+  answers = {},
+}: EstimateInternationalTaxArgs): TaxEstimateResult {
   const estimator = TAX_ESTIMATORS[countryCode];
 
-  if (estimator) {
-    return estimator({ annualIncome, filing, isRetired });
+  if (!estimator) {
+    return {
+      effectiveRate: 0,
+      model: "placeholder",
+      confidence: "placeholder",
+      label: "Tax estimate unavailable",
+      note: "Tax model not yet configured for this country.",
+    };
   }
 
-  return {
-    effectiveRate: 0.25,
-    model: "placeholder",
-    confidence: "placeholder",
-    label: "Simplified tax estimate",
-    note: `No tax model configured for country code: ${countryCode}. Income must be in local currency.`,
-  };
+  return estimator({
+    annualIncome,
+    filing,
+    isRetired,
+    incomeScenario,
+    answers,
+  });
 }
 
 export function getTaxModelStatus(countryCode: string): {

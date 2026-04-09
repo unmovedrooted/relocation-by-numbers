@@ -687,12 +687,14 @@ export default function EuropeRelocationCalculator() {
       isRetired: mode === "retired",
     });
 
-    const targetTaxEstimate = estimateInternationalTax({
-      countryCode: toCountry,
-      annualIncome: annualIncomeForToTax,
-      filing,
-      isRetired: mode === "retired",
-    });
+   const targetTaxEstimate = estimateInternationalTax({
+  countryCode: toCountry,
+  annualIncome: annualIncomeForToTax,
+  filing,
+  isRetired: mode === "retired",
+  incomeScenario,
+  answers: conditionalAnswers,
+});
 
     const currentTaxRate = currentTaxEstimate.effectiveRate;
     const targetTaxRate  = targetTaxEstimate.effectiveRate;

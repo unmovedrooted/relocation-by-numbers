@@ -1,12 +1,12 @@
 // /lib/caribbeanTax/country-template.ts
-
-import type {
+import {
+  ScenarioConfig,
   CaribbeanTaxCode,
   CountryTaxConfig,
-  ScenarioConfig,
   TaxSource,
-} from "./types";
-import { TAX_YEAR_LABEL } from "./types";
+  TAX_YEAR_LABEL,
+} from "./caribbeanTax/types";
+
 
 // ---------------------------------------------------------------------------
 // PENDING SCENARIO STUB
