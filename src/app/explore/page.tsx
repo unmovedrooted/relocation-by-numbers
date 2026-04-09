@@ -3,9 +3,26 @@ import Link from "next/link";
 import USMapPreview from "@/components/USMapPreview";
 
 export const metadata: Metadata = {
-  title: "Cost of Living, Relocation & FIRE Tools | Relocation by Numbers",
+  title: "Relocation & FIRE Tools Hub | Cost of Living, Salary & Tax Calculators",
   description:
-    "Explore relocation comparisons, cost of living guides, FIRE calculators, salary tools, and state-by-state financial independence resources.",
+    "Compare cost of living, taxes, and take-home pay across US cities and states. Explore FIRE calculators, relocation comparisons, salary guides, and financial independence tools in one place.",
+  alternates: {
+    canonical: "https://www.relocationbynumbers.com/explore",
+  },
+  openGraph: {
+    title: "Relocation & FIRE Tools Hub | Cost of Living, Salary & Tax Calculators",
+    description:
+      "Compare cost of living, taxes, and take-home pay across US cities and states. Explore FIRE calculators, relocation comparisons, salary guides, and financial independence tools.",
+    url: "https://www.relocationbynumbers.com/explore",
+    siteName: "Relocation by Numbers",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Relocation & FIRE Tools Hub | Cost of Living, Salary & Tax Calculators",
+    description:
+      "Compare cost of living, taxes, and take-home pay across US cities and states. Explore FIRE calculators, relocation comparisons, and salary guides.",
+  },
 };
 
 type HubLink = {
@@ -64,7 +81,7 @@ const sections: HubSection[] = [
   {
     title: "Featured Relocation Comparisons",
     description:
-      "Start with some of the most popular city-to-city moves on the site.",
+      "Start with some of the most popular city-to-city moves on the site. Compare take-home pay, housing costs, and monthly budgets side by side.",
     links: [
       { href: "/compare/nyc-ny/charlotte-nc", title: "Compare NYC vs Charlotte" },
       { href: "/compare/nyc-ny/austin-tx", title: "Compare NYC vs Austin" },
@@ -73,13 +90,13 @@ const sections: HubSection[] = [
       { href: "/compare/boston-ma/miami-fl", title: "Compare Boston vs Miami" },
       { href: "/compare/charlotte-nc/miami-fl", title: "Compare Charlotte vs Miami" },
     ],
-   ctaHref: "/compare",
-ctaLabel: "Explore all relocation comparisons",
+    ctaHref: "/compare",
+    ctaLabel: "Explore all relocation comparisons",
   },
   {
     title: "City Cost of Living Guides",
     description:
-      "Browse current cost-of-living pages for major cities.",
+      "Browse cost of living pages for major US cities — covering rent, median home prices, property tax, and the salary you need to live comfortably.",
     links: [
       { href: "/cost-of-living/charlotte-nc", title: "Charlotte Cost of Living" },
       { href: "/cost-of-living/nyc-ny", title: "NYC Cost of Living" },
@@ -91,9 +108,43 @@ ctaLabel: "Explore all relocation comparisons",
     ],
   },
   {
-    title: "FIRE & Retirement Tools",
+    title: "International Relocation Calculators",
     description:
-      "Use calculators built to estimate your FIRE number, retirement target, and independence timeline.",
+      "Compare taxes, rent, living costs, and take-home pay across international destinations. Estimate your moving budget for cities in Europe, Asia, the Caribbean, and South America.",
+    links: [
+      {
+        href: "/international-relocation",
+        title: "International Relocation Calculator",
+        description: "Compare cities across Europe, Asia, the Middle East, and North America.",
+      },
+      {
+        href: "/europe-relocation-calculator",
+        title: "Europe Relocation Calculator",
+        description: "Compare Lisbon, Porto, London, and 35+ European destinations.",
+      },
+      {
+        href: "/asia-relocation-calculator",
+        title: "Asia Relocation Calculator",
+        description: "Compare Bangkok, Tokyo, Singapore, Kuala Lumpur, Seoul, Dubai, and more.",
+      },
+      {
+        href: "/caribbean-relocation-calculator",
+        title: "Caribbean Relocation Calculator",
+        description: "Compare 10 Caribbean destinations including Jamaica, Barbados, and Cayman Islands.",
+      },
+      {
+        href: "/south-america-relocation-calculator",
+        title: "South America Relocation Calculator",
+        description: "Compare Medellín, Bogotá, Buenos Aires, Santiago, Lima, and São Paulo.",
+      },
+    ],
+    ctaHref: "/international-relocation",
+    ctaLabel: "Open the international calculator",
+  },
+  {
+    title: "FIRE & Retirement Calculators",
+    description:
+      "Calculate your FIRE number, retirement target, and financial independence timeline. Compare FIRE styles — Lean, Barista, Coast — and see how location affects your path.",
     links: [
       { href: "/fire-calculator", title: "FIRE Calculator" },
       { href: "/fire-number-calculator", title: "FIRE Number Calculator" },
@@ -107,9 +158,9 @@ ctaLabel: "Explore all relocation comparisons",
     ctaLabel: "Open the main FIRE calculator",
   },
   {
-    title: "FIRE by Income",
+    title: "FIRE by Income Level",
     description:
-      "Quick-entry pages for exploring FIRE timelines at different salary levels.",
+      "Explore FIRE timelines at specific salary levels. See how income, taxes, and location interact for common earnings.",
     links: [
       { href: "/fire-with-70k-salary", title: "Can You FIRE on a $70K Salary?" },
       { href: "/fire-with-100k-salary", title: "Can You FIRE on a $100K Salary?" },
@@ -119,7 +170,7 @@ ctaLabel: "Explore all relocation comparisons",
   {
     title: "Best Cities for FIRE",
     description:
-      "Explore city-specific FIRE pages and broader city rankings.",
+      "Explore which cities offer the best combination of low taxes, affordable housing, and strong FIRE potential.",
     links: [
       { href: "/best-cities-for-fire", title: "Best Cities for FIRE" },
       { href: "/best-cities-for-fire/nyc-ny", title: "FIRE in NYC" },
@@ -134,18 +185,18 @@ ctaLabel: "Explore all relocation comparisons",
   {
     title: "Best States for FIRE",
     description:
-      "State-level pages focused on taxes, affordability, and FIRE potential.",
+      "State-level pages covering income taxes, affordability, housing costs, and financial independence potential by state.",
     links: [
-      { href: "/best-states-for-fire/north-carolina", title: "North Carolina" },
-      { href: "/best-states-for-fire/texas", title: "Texas" },
-      { href: "/best-states-for-fire/florida", title: "Florida" },
-      { href: "/best-states-for-fire/new-york", title: "New York" },
+      { href: "/best-states-for-fire/north-carolina", title: "North Carolina for FIRE" },
+      { href: "/best-states-for-fire/texas", title: "Texas for FIRE" },
+      { href: "/best-states-for-fire/florida", title: "Florida for FIRE" },
+      { href: "/best-states-for-fire/new-york", title: "New York for FIRE" },
     ],
   },
   {
     title: "Can You FIRE in This City?",
     description:
-      "City pages focused specifically on financial independence in individual metros.",
+      "City-specific pages focused on whether financial independence is realistic — covering costs, taxes, and timeline estimates.",
     links: [
       { href: "/fire-in/raleigh-nc", title: "Can You FIRE in Raleigh?" },
       { href: "/fire-in/austin-tx", title: "Can You FIRE in Austin?" },
@@ -156,7 +207,7 @@ ctaLabel: "Explore all relocation comparisons",
   {
     title: "Salary Needed by City",
     description:
-      "Estimate what income level is needed to live in key cities.",
+      "Estimate the gross income required to cover rent and living costs in key US cities based on the 30% housing rule.",
     links: [
       { href: "/salary-needed-in/austin-tx", title: "Salary Needed in Austin" },
       { href: "/salary-needed-in/raleigh-nc", title: "Salary Needed in Raleigh" },
@@ -222,6 +273,7 @@ export default function ExplorePage() {
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="space-y-12">
+
           {/* Hero */}
           <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 px-6 py-10 shadow-[0_20px_80px_rgba(0,0,0,0.35)] sm:px-8">
             <div className="max-w-4xl space-y-5">
@@ -230,12 +282,14 @@ export default function ExplorePage() {
               </div>
 
               <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                Compare States, Cities, and FIRE Paths in One Place
+                Compare States, Cities &amp; FIRE Paths in One Place
               </h1>
 
               <p className="max-w-3xl text-base leading-7 text-slate-300 sm:text-lg">
                 Explore relocation comparisons, cost of living guides, salary tools,
-                and FIRE calculators to find places where your money may go further.
+                and FIRE calculators to find places where your money goes further.
+                Compare take-home pay and taxes across all 50 states, estimate your
+                FIRE number, and see how moving changes your financial independence timeline.
               </p>
 
               <div className="flex flex-wrap gap-3 pt-2">
@@ -243,16 +297,14 @@ export default function ExplorePage() {
                   href="/compare/nyc-ny/charlotte-nc"
                   className="inline-flex items-center rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:opacity-90"
                 >
-                    Explore Comparisons
+                  Explore Comparisons
                 </Link>
-
                 <Link
                   href="/fire-calculator"
                   className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
                 >
                   Open FIRE Tools
                 </Link>
-
                 <a
                   href="#map"
                   className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
@@ -270,7 +322,8 @@ export default function ExplorePage() {
                 Start Here
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                Jump into some of the most useful pages on the site.
+                Jump into the most popular tools and pages on the site — relocation
+                comparisons, FIRE calculators, and cost of living guides.
               </p>
             </div>
 
@@ -299,7 +352,7 @@ export default function ExplorePage() {
             <USMapPreview />
           </section>
 
-          {/* Sections */}
+          {/* All sections */}
           <div className="space-y-8">
             {sections.map((section) => (
               <SectionCard key={section.title} section={section} />
@@ -314,18 +367,19 @@ export default function ExplorePage() {
               </h2>
               <p className="text-sm leading-7 text-slate-300">
                 Relocation by Numbers is designed to help you compare cost of living,
-                salary needs, taxes, and FIRE timelines across places. These pages are
-                planning tools, not financial, tax, or legal advice.
+                salary needs, taxes, and FIRE timelines across places. Tax estimates
+                use federal brackets, FICA, filing status, and state-specific models.
+                Cost of living figures use city-level defaults updated regularly.
+                These are planning tools, not financial, tax, or legal advice.
               </p>
               <div className="pt-1">
-  <Link
-    href="/methodology"
-    className="text-sm font-medium text-emerald-200 underline decoration-emerald-300/40 underline-offset-4 transition hover:text-emerald-100"
-  >
-    See methodology and data sources
-  </Link>
-</div>
-
+                <Link
+                  href="/methodology"
+                  className="text-sm font-medium text-emerald-200 underline decoration-emerald-300/40 underline-offset-4 transition hover:text-emerald-100"
+                >
+                  See methodology and data sources
+                </Link>
+              </div>
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="/fire-calculator"
@@ -345,110 +399,130 @@ export default function ExplorePage() {
         </div>
 
         <section className="mt-12 space-y-8">
-  {/* Related links */}
-  <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-    <h2 className="text-2xl font-semibold tracking-tight text-white">
-      Explore more
-    </h2>
-    <p className="mt-2 text-sm leading-6 text-slate-300">
-      Keep exploring related calculators, state guides, and relocation tools.
-    </p>
 
-    <div className="mt-5 flex flex-wrap gap-3">
-      <Link
-        href="/explore"
-        className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]"
-      >
-          International Relocation
-      </Link>
-      <Link
-        href="/fire-calculator"
-        className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]"
-      >
-        
-        FIRE Calculator
-      </Link>
-      <Link
-        href="/best-cities-for-fire"
-        className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]"
-      >
+          {/* Related links */}
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+            <h2 className="text-2xl font-semibold tracking-tight text-white">
+              More tools to explore
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              Keep exploring calculators, state guides, and relocation tools across the site.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link href="/international-relocation" className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]">
+                International Relocation Calculator
+              </Link>
+              <Link href="/europe-relocation-calculator" className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]">
+                Europe Calculator
+              </Link>
+              <Link href="/asia-relocation-calculator" className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]">
+                Asia Calculator
+              </Link>
+              <Link href="/caribbean-relocation-calculator" className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]">
+                Caribbean Relocation Calculator
+              </Link>
+              <Link href="/south-america-relocation-calculator" className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]">
+                South America Calculator
+              </Link>
+              <Link href="/fire-calculator" className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]">
+                FIRE Calculator
+              </Link>
+              <Link href="/best-cities-for-fire" className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]">
+                Best Cities for FIRE
+              </Link>
+              <Link href="/best-states-for-fire/north-carolina" className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]">
+                North Carolina for FIRE
+              </Link>
+            </div>
+          </div>
 
-        Best Cities for FIRE
-      </Link>
-      <Link
-        href="/best-states-for-fire/north-carolina"
-        className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]"
-      >
-        North Carolina for FIRE
-      </Link>
-    </div>
-  </div>
+          {/* FAQ */}
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+            <h2 className="text-2xl font-semibold tracking-tight text-white">
+              Frequently asked questions about Relocation by Numbers
+            </h2>
 
-  {/* FAQ */}
-  <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-    <h2 className="text-2xl font-semibold tracking-tight text-white">
-      Frequently asked questions
-    </h2>
+            <div className="mt-5 space-y-4">
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <h3 className="text-base font-semibold text-white">
+                  What tools does Relocation by Numbers offer?
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  The site includes a state-by-state relocation calculator, city cost of
+                  living guides, salary comparison tools, FIRE calculators (including Lean,
+                  Barista, and Coast FIRE), and international relocation calculators covering
+                  Europe, Asia, the Caribbean, and South America — plus city and state-level
+                  financial independence pages.
+                </p>
+              </div>
 
-    <div className="mt-5 space-y-4">
-      <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-        <h3 className="text-base font-semibold text-white">
-          How are these estimates calculated?
-        </h3>
-        <p className="mt-2 text-sm leading-6 text-slate-300">
-          These pages use location-based assumptions, tax estimates, spending inputs,
-          and financial independence formulas to help compare places and planning scenarios.
-        </p>
-      </div>
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <h3 className="text-base font-semibold text-white">
+                  How are cost of living and tax estimates calculated?
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  Tax estimates use federal income tax brackets, FICA, filing status, optional
+                  401(k) contributions, and simplified state-specific tax models. Cost of living
+                  figures use city-level rent, utilities, groceries, transportation, and
+                  healthcare defaults updated regularly. These are planning estimates, not
+                  exact figures.
+                </p>
+              </div>
 
-      <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-        <h3 className="text-base font-semibold text-white">
-          Are these results financial or tax advice?
-        </h3>
-        <p className="mt-2 text-sm leading-6 text-slate-300">
-          No. These tools are planning estimates only and should be used for educational
-          and comparison purposes.
-        </p>
-      </div>
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <h3 className="text-base font-semibold text-white">
+                  Which states have no income tax?
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  Nine states currently have no state income tax: Alaska, Florida, Nevada,
+                  New Hampshire, South Dakota, Tennessee, Texas, Washington, and Wyoming.
+                  The relocation calculator accounts for each state's tax rules so you can
+                  see the real take-home difference when comparing locations.
+                </p>
+              </div>
 
-      <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-        <h3 className="text-base font-semibold text-white">
-          Why can the numbers change over time?
-        </h3>
-        <p className="mt-2 text-sm leading-6 text-slate-300">
-          Taxes, housing, salaries, insurance, and cost-of-living assumptions can change,
-          so estimates may be updated as newer data becomes available.
-        </p>
-      </div>
-    </div>
-  </div>
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <h3 className="text-base font-semibold text-white">
+                  Are these results financial or tax advice?
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  No. All tools on this site are planning estimates intended for educational
+                  and comparison purposes only. They are not financial, tax, or legal advice.
+                  Always verify figures with a qualified professional before making relocation
+                  or retirement decisions.
+                </p>
+              </div>
 
-  {/* Assumptions + footer links */}
-  <div className="flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-    <div>Assumptions updated: March 2026</div>
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <h3 className="text-base font-semibold text-white">
+                  How often are the estimates updated?
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  Tax brackets, cost of living defaults, and housing assumptions are reviewed
+                  and updated regularly. The most recent update across the site was March 2026.
+                  If you notice a figure that looks outdated, the methodology page has more
+                  detail on sources and assumptions.
+                </p>
+              </div>
+            </div>
+          </div>
 
-    <div className="flex flex-wrap items-center gap-2">
-      <Link href="/about" className="transition hover:text-white">
-        About
-      </Link>
-      <span>•</span>
-      <Link href="/disclaimer" className="transition hover:text-white">
-        Disclaimer
-      </Link>
-      <span>•</span>
-      <Link href="/privacy" className="transition hover:text-white">
-        Privacy
-      </Link>
-      <span>•</span>
-      <Link href="/terms" className="transition hover:text-white">
-        Terms
-      </Link>
-    </div>
-  </div>
-</section>
+          {/* Assumptions + footer links */}
+          <div className="flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+            <div>Assumptions updated: March 2026</div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href="/about" className="transition hover:text-white">About</Link>
+              <span>•</span>
+              <Link href="/disclaimer" className="transition hover:text-white">Disclaimer</Link>
+              <span>•</span>
+              <Link href="/privacy" className="transition hover:text-white">Privacy</Link>
+              <span>•</span>
+              <Link href="/terms" className="transition hover:text-white">Terms</Link>
+            </div>
+          </div>
+
+        </section>
       </div>
     </main>
-
-    
   );
 }

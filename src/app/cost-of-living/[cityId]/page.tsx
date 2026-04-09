@@ -3,6 +3,7 @@ import Calculator from "@/components/Calculator";
 import { findCity } from "@/lib/cities";
 import Link from "next/link";
 import { estimateMortgageMonthly } from "@/lib/mortgage";
+import type { Metadata } from "next";
 
 type PageProps = {
   params: Promise<{ cityId: string }>;
@@ -39,14 +40,32 @@ export async function generateStaticParams() {
   ];
 }
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { cityId } = await params;
   const city = findCity(cityId);
   if (!city) return {};
 
+  const title = `Cost of Living in ${city.name}, ${city.state.toUpperCase()} — Rent, Taxes & Salary Guide`;
+  const description = `How much does it cost to live in ${city.name}? Compare rent, median home prices, income taxes, and take-home pay. See the salary you need to live comfortably in ${city.name}.`;
+
   return {
-    title: `Cost of Living in ${city.name}, ${city.state.toUpperCase()} (2026)`,
-    description: `Housing, taxes, and salary comparison for ${city.name}. Use our relocation calculator to estimate rent, buy affordability, and compare ${city.name} to other major cities.`,
+    title,
+    description,
+    alternates: {
+      canonical: `https://www.relocationbynumbers.com/cost-of-living/${cityId}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://www.relocationbynumbers.com/cost-of-living/${cityId}`,
+      siteName: "Relocation by Numbers",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 
@@ -61,7 +80,6 @@ export default async function CostOfLivingPage({ params }: PageProps) {
     .filter(Boolean)
     .slice(0, 15) as { id: string; name: string; state: string }[];
 
- const intro = `The cost of living in ${city.name} is shaped mostly by housing, taxes, transportation, and take-home pay. Use the calculator below to estimate what it may take to rent, buy, and live comfortably in ${city.name}.`;
   const popular = [
     { href: "/compare/nyc-ny/charlotte-nc", label: "NYC vs Charlotte" },
     { href: "/compare/la-ca/austin-tx", label: "LA vs Austin" },
@@ -77,13 +95,17 @@ export default async function CostOfLivingPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 py-10">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 space-y-10">
+
         <header className="py-2 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
             Cost of Living in {city.name}, {city.state.toUpperCase()}
           </h1>
 
           <p className="mx-auto mt-3 max-w-3xl text-sm sm:text-base leading-7 text-slate-600">
-            {intro}
+            How much does it cost to live in {city.name}? This page covers rent,
+            median home prices, property taxes, income taxes, and the salary you
+            need to live comfortably — with a calculator to compare{" "}
+            {city.name} against other cities.
           </p>
 
           <div className="mt-3 text-xs text-slate-500">
@@ -97,12 +119,11 @@ export default async function CostOfLivingPage({ params }: PageProps) {
             >
               Explore All Tools
             </Link>
-
             <Link
               href={`/compare/nyc-ny/${city.id}`}
               className="inline-flex items-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
             >
-              Compare with NYC
+              Compare {city.name} with NYC
             </Link>
           </div>
 
@@ -121,8 +142,11 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           </div>
         </header>
 
+        {/* Snapshot */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
-          <h2 className="text-sm font-semibold">Snapshot for {city.name}</h2>
+          <h2 className="text-sm font-semibold">
+            {city.name} cost of living snapshot
+          </h2>
           <div className="mt-4 h-px w-full bg-slate-100" />
 
           <div className="mt-4 mb-4 grid grid-cols-1 gap-2 sm:grid-cols-4">
@@ -172,7 +196,6 @@ export default async function CostOfLivingPage({ params }: PageProps) {
                     {item.value}
                   </span>
                 </div>
-
                 {item.extra && (
                   <div className="mt-1 text-xs text-slate-500">{item.extra}</div>
                 )}
@@ -183,9 +206,8 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           {rent ? (
             <>
               <div className="mt-4 mb-2 text-sm font-semibold text-slate-900">
-                Salary guidance (rent ≈ ${rent.toLocaleString()}/mo)
+                Salary needed in {city.name} (rent ≈ ${rent.toLocaleString()}/mo)
               </div>
-
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                 {[
                   { label: "Tighter", value: tighter },
@@ -205,7 +227,6 @@ export default async function CostOfLivingPage({ params }: PageProps) {
                   </div>
                 ))}
               </div>
-
               <div className="mt-2 text-xs text-slate-500">
                 Rule of thumb: rent is roughly 28–35% of gross income.
               </div>
@@ -217,34 +238,32 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           )}
         </section>
 
+        {/* What makes this city expensive */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-            What makes {city.name} expensive or affordable?
+            Is {city.name} expensive to live in?
           </h2>
-
           <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
             <p>
-              In most cities, housing drives the biggest part of the cost-of-living
-              conversation. Rent, mortgage size, insurance, and property taxes all
-              affect how much flexibility you have left after monthly essentials.
+              In most cities, housing drives the biggest part of the cost of living.
+              Rent, mortgage size, insurance, and property taxes all affect how much
+              flexibility you have left after monthly essentials.
             </p>
-
             <p>
               In {city.name}, the real question is not just what homes or apartments
               cost on paper, but how those costs compare with local salary levels and
-              your take-home pay after taxes. A city can feel manageable at one income
-              level and extremely tight at another.
+              your take-home pay after state and federal income taxes. A city can feel
+              manageable at one income level and extremely tight at another.
             </p>
-
             <p>
-              This page is designed to help you think through that tradeoff. Use the
-              numbers above as a starting point, then compare {city.name} against other
-              major cities to see whether your income would stretch further somewhere
-              else or whether staying put still makes sense.
+              Use the calculator below to compare {city.name} against other major
+              cities and see whether your income would stretch further somewhere else,
+              or whether staying put still makes financial sense.
             </p>
           </div>
         </section>
 
+        {/* Calculator */}
         <section>
           <Calculator
             monetization="state"
@@ -253,34 +272,31 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           />
         </section>
 
+        {/* Salary section */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-            What salary feels realistic in {city.name}?
+            What salary do you need to live in {city.name}?
           </h2>
-
           <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
             <p>
-              Salary targets matter because “affordable” means different things at
-              different income levels. Someone renting conservatively may be fine with
-              a tighter budget, while someone trying to save, invest, or buy later may
+              Salary targets matter because "affordable" means different things at
+              different income levels. Someone renting conservatively may manage on a
+              tighter budget, while someone trying to save, invest, or buy later may
               need a much larger buffer.
             </p>
-
             <p>
               That is why the guidance above shows a tighter, target, and comfort
-              range. It gives you a simple way to think about what salary may feel
-              barely workable versus what may create more breathing room month to
-              month.
+              range — giving you a simple way to think about what salary may feel
+              barely workable versus what creates real breathing room month to month.
             </p>
-
             {target ? (
               <p>
                 Based on the current rent estimate for {city.name}, a salary around{" "}
                 <span className="font-semibold text-slate-900">
                   ${target.toLocaleString()}
                 </span>{" "}
-                is a more balanced starting point for many renters, while a comfort
-                range closer to{" "}
+                is a reasonable starting point for most renters, while a salary closer
+                to{" "}
                 <span className="font-semibold text-slate-900">
                   ${comfort?.toLocaleString()}
                 </span>{" "}
@@ -290,11 +306,11 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           </div>
         </section>
 
+        {/* Rent comparison */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
           <h2 className="text-sm font-semibold">
-            How {city.name} compares (rent)
+            How {city.name} rent compares to other cities
           </h2>
-
           <div className="mt-4 grid gap-3 text-sm">
             {[
               { id: "nyc-ny", label: "New York City" },
@@ -333,18 +349,16 @@ export default async function CostOfLivingPage({ params }: PageProps) {
                 );
               })}
           </div>
-
           <div className="mt-3 text-xs text-slate-500">
-            Based on the starter rent estimates in your dataset. Real listings can vary
-            by neighborhood, housing type, and timing.
+            Based on average rent estimates. Real listings vary by neighborhood,
+            housing type, and timing.
           </div>
 
           {moreCompare.length > 0 ? (
             <div className="mt-6 border-t border-slate-200 pt-5">
               <div className="mb-3 text-xs font-semibold text-slate-700">
-                More comparisons
+                More {city.name} comparisons
               </div>
-
               <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3 lg:grid-cols-5">
                 {moreCompare.map((c) => (
                   <Link
@@ -361,11 +375,75 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           ) : null}
         </section>
 
+        {/* FAQ */}
+        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+            Frequently asked questions about {city.name}
+          </h2>
+          <dl className="mt-5 space-y-5 text-sm text-slate-600">
+            <div>
+              <dt className="font-semibold text-slate-900">
+                What is the cost of living in {city.name}?
+              </dt>
+              <dd className="mt-1">
+                The cost of living in {city.name} is driven primarily by housing,
+                state income taxes, and transportation. The average rent estimate is
+                {rent ? ` $${rent.toLocaleString()} per month` : " available in the snapshot above"}.
+                Use the calculator on this page to see a full monthly budget breakdown
+                based on your income.
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-900">
+                What salary do you need to live comfortably in {city.name}?
+              </dt>
+              <dd className="mt-1">
+                {target && comfort ? (
+                  <>
+                    Based on current rent estimates, a salary of around $
+                    {target.toLocaleString()} is a reasonable target for most renters
+                    in {city.name}. A salary closer to ${comfort.toLocaleString()} provides
+                    more room for savings, emergencies, and discretionary spending.
+                  </>
+                ) : (
+                  <>
+                    The salary you need depends on your rent, lifestyle, and savings
+                    goals. Use the calculator above to estimate based on your specific
+                    income.
+                  </>
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-900">
+                Is {city.name} a good place to move for affordability?
+              </dt>
+              <dd className="mt-1">
+                It depends on where you are moving from and what your income is.
+                Use the comparison links above to see how {city.name} stacks up
+                against other major cities on rent, taxes, and take-home pay side
+                by side.
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-900">
+                How does {city.state.toUpperCase()} state income tax affect take-home pay in {city.name}?
+              </dt>
+              <dd className="mt-1">
+                State income tax is one of the biggest factors in how far your salary
+                goes. The calculator on this page applies {city.state.toUpperCase()} state
+                tax rules to your income so you can see your actual take-home pay, not
+                just your gross salary.
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        {/* Related pages */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
             Related pages for {city.name}
           </h2>
-
           <div className="mt-4 flex flex-wrap gap-3">
             <Link
               href={`/salary-needed-in/${city.id}`}
@@ -398,25 +476,17 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           <div className="mb-3 text-xs text-slate-500">
             Assumptions updated: March 2026
           </div>
-
           <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-slate-500">
-            <Link href="/about" className="transition hover:text-slate-900">
-              About
-            </Link>
+            <Link href="/about" className="transition hover:text-slate-900">About</Link>
             <span>•</span>
-            <Link href="/disclaimer" className="transition hover:text-slate-900">
-              Disclaimer
-            </Link>
+            <Link href="/disclaimer" className="transition hover:text-slate-900">Disclaimer</Link>
             <span>•</span>
-            <Link href="/privacy" className="transition hover:text-slate-900">
-              Privacy
-            </Link>
+            <Link href="/privacy" className="transition hover:text-slate-900">Privacy</Link>
             <span>•</span>
-            <Link href="/terms" className="transition hover:text-slate-900">
-              Terms
-            </Link>
+            <Link href="/terms" className="transition hover:text-slate-900">Terms</Link>
           </div>
         </div>
+
       </div>
     </main>
   );

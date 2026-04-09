@@ -18,6 +18,8 @@
 
 export type FilingStatus = "single" | "married";
 
+export type IncomeScenario = "local" | "remote" | "retired";
+
 export type TaxModelKind =
   | "none"
   | "progressive-country"
@@ -36,11 +38,36 @@ export type TaxEstimateResult = {
   note: string;
 };
 
-type TaxEstimator = (args: {
-  annualIncome: number; // always in local currency — caller converts
+export type ConditionalQuestionOption = {
+  value: string;
+  label: string;
+};
+
+export type ConditionalQuestion = {
+  key: string;
+  label: string;
+  helpText?: string;
+  when?: {
+    incomeScenario?: IncomeScenario[];
+  };
+  options: ConditionalQuestionOption[];
+};
+
+type TaxEstimatorArgs = {
+  annualIncome: number;
   filing: FilingStatus;
   isRetired: boolean;
-}) => TaxEstimateResult;
+  incomeScenario: IncomeScenario;
+  answers?: Record<string, string>;
+};
+
+type TaxEstimator = (args: TaxEstimatorArgs) => TaxEstimateResult;
+
+export type CountryTaxConfig = {
+  code: string;
+  estimator: TaxEstimator;
+  conditionalQuestions?: ConditionalQuestion[];
+};
 
 function clampRate(rate: number): number {
   if (!Number.isFinite(rate)) return 0;
@@ -80,52 +107,62 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // UNITED STATES — USD — Federal only
   // Real separate brackets for single vs married filing jointly.
   // -------------------------------------------------------------------------
-  US: ({ annualIncome, filing, isRetired }) => {
-    if (isRetired) {
-      const rate = progressiveTax(annualIncome, [
-        { upTo: 25000, rate: 0.00 },
-        { upTo: 34000, rate: 0.085 },
-        { upTo: 80000, rate: 0.15 },
-        { upTo: 150000, rate: 0.22 },
-        { upTo: Infinity, rate: 0.24 },
-      ]);
-      return {
-        effectiveRate: clampRate(rate),
-        model: "progressive-country",
-        confidence: "partial",
-        label: "Federal tax estimate only",
-        note: "Uses a U.S. federal tax estimate for planning. State and city taxes are not included.",
-      };
-    }
-    const brackets =
-      filing === "married"
-        ? [
-            { upTo: 23200, rate: 0.10 },
-            { upTo: 94300, rate: 0.12 },
-            { upTo: 201050, rate: 0.22 },
-            { upTo: 383900, rate: 0.24 },
-            { upTo: 487450, rate: 0.32 },
-            { upTo: 731200, rate: 0.35 },
-            { upTo: Infinity, rate: 0.37 },
-          ]
-        : [
-            { upTo: 11600, rate: 0.10 },
-            { upTo: 47150, rate: 0.12 },
-            { upTo: 100525, rate: 0.22 },
-            { upTo: 191950, rate: 0.24 },
-            { upTo: 243725, rate: 0.32 },
-            { upTo: 609350, rate: 0.35 },
-            { upTo: Infinity, rate: 0.37 },
-          ];
-    return {
-      effectiveRate: clampRate(progressiveTax(annualIncome, brackets)),
-      model: "progressive-country",
-      confidence: "partial",
-      label: "Partial: US federal tax only",
-      note: "2024 federal brackets (single or MFJ). State and local taxes not included.",
-    };
-  },
+  
+US: ({ annualIncome, filing, isRetired }) => {
+  const standardDeduction = filing === "married" ? 29200 : 14600;
+  const taxable = Math.max(0, annualIncome - standardDeduction);
 
+  const brackets =
+    filing === "married"
+      ? [
+          { upTo: 23200, rate: 0.10 },
+          { upTo: 94300, rate: 0.12 },
+          { upTo: 201050, rate: 0.22 },
+          { upTo: 383900, rate: 0.24 },
+          { upTo: 487450, rate: 0.32 },
+          { upTo: 731200, rate: 0.35 },
+          { upTo: Infinity, rate: 0.37 },
+        ]
+      : [
+          { upTo: 11600, rate: 0.10 },
+          { upTo: 47150, rate: 0.12 },
+          { upTo: 100525, rate: 0.22 },
+          { upTo: 191950, rate: 0.24 },
+          { upTo: 243725, rate: 0.32 },
+          { upTo: 609350, rate: 0.35 },
+          { upTo: Infinity, rate: 0.37 },
+        ];
+
+  const federalTaxAmount = progressiveTax(taxable, brackets) * taxable;
+  const federalEffectiveRate =
+    annualIncome > 0 ? federalTaxAmount / annualIncome : 0;
+
+  let payrollEffectiveRate = 0;
+
+  if (!isRetired && annualIncome > 0) {
+    const socialSecurityWageBase = 168600;
+    const socialSecurityTax = Math.min(annualIncome, socialSecurityWageBase) * 0.062;
+    const medicareTax = annualIncome * 0.0145;
+    const additionalMedicareThreshold = filing === "married" ? 250000 : 200000;
+    const additionalMedicareTax =
+      Math.max(0, annualIncome - additionalMedicareThreshold) * 0.009;
+
+    payrollEffectiveRate =
+      (socialSecurityTax + medicareTax + additionalMedicareTax) / annualIncome;
+  }
+
+  return {
+    effectiveRate: clampRate(federalEffectiveRate + payrollEffectiveRate),
+    model: "progressive-country",
+    confidence: "partial",
+    label: isRetired
+      ? "US federal estimate"
+      : "US federal + payroll estimate",
+    note: isRetired
+      ? "Uses a simplified U.S. federal tax estimate with standard deduction for planning. State and local taxes are not included."
+      : "Uses a simplified U.S. federal tax estimate with standard deduction plus employee payroll taxes for planning. State and local taxes are not included.",
+  };
+},
   // -------------------------------------------------------------------------
   // UNITED KINGDOM — GBP
   // UK has no joint filing — married rate is identical to single.

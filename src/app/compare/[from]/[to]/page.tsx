@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Calculator from "@/components/Calculator";
 import { findCity, isMajorCity } from "@/lib/cities";
 import { majorCityPairs } from "@/lib/majorCities";
@@ -10,7 +11,6 @@ function isSameCompare(a?: string, b?: string) {
   return !!a && !!b && a.trim().toLowerCase() === b.trim().toLowerCase();
 }
 
-// Pre-generate major city compare routes
 export async function generateStaticParams() {
   return majorCityPairs
     .filter(({ from, to }) => !isSameCompare(from, to))
@@ -21,10 +21,40 @@ type PageProps = {
   params: Promise<{ from: string; to: string }>;
 };
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { from, to } = await params;
+  const fromCity = findCity(from);
+  const toCity = findCity(to);
+
+  if (!fromCity || !toCity) return {};
+
+  const title = `${fromCity.name} vs ${toCity.name} Cost of Living, Taxes & Salary Comparison`;
+  const description = `Compare cost of living, take-home pay, rent, housing costs, and taxes between ${fromCity.name}, ${fromCity.state.toUpperCase()} and ${toCity.name}, ${toCity.state.toUpperCase()}. See what salary feels equivalent after moving.`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `https://www.relocationbynumbers.com/compare/${from}/${to}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://www.relocationbynumbers.com/compare/${from}/${to}`,
+      siteName: "Relocation by Numbers",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
+
 export default async function ComparePage({ params }: PageProps) {
   const { from, to } = await params;
 
-  // Block same-city compare pages like /compare/boston-ma/boston-ma
   if (isSameCompare(from, to)) return notFound();
 
   const fromCity = findCity(from);
@@ -32,7 +62,6 @@ export default async function ComparePage({ params }: PageProps) {
 
   if (!fromCity || !toCity) return notFound();
 
-  // allow "major vs anything", block only "non-major vs non-major"
   if (!isMajorCity(fromCity) && !isMajorCity(toCity)) return notFound();
 
   const isValidCompareHref = (href: string) => {
@@ -80,17 +109,22 @@ export default async function ComparePage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-slate-50 py-10">
       <div className="mx-auto max-w-5xl px-4 space-y-10">
+
         <header className="space-y-4 text-center">
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {fromCity.name}, {fromCity.state.toUpperCase()} vs {toCity.name},{" "}
-            {toCity.state.toUpperCase()} Cost of Living, Salary, and Housing Comparison
+            {fromCity.name} vs {toCity.name} Cost of Living Comparison
           </h1>
 
+          <p className="mt-1 text-lg font-semibold text-slate-700">
+            {fromCity.name}, {fromCity.state.toUpperCase()} vs {toCity.name},{" "}
+            {toCity.state.toUpperCase()} — Salary, Taxes &amp; Housing
+          </p>
+
           <p className="mx-auto max-w-3xl text-slate-600">
-            Compare take-home pay, estimated housing costs, and affordability between{" "}
+            Compare take-home pay, housing costs, and affordability between{" "}
             <span className="font-semibold text-slate-900">{fromCity.name}</span> and{" "}
             <span className="font-semibold text-slate-900">{toCity.name}</span>. See how far
-            your salary may go in each city and what income could feel equivalent after a move.
+            your salary goes in each city and what income would feel equivalent after a move.
           </p>
 
           <div className="mx-auto mt-4 grid max-w-4xl grid-cols-2 gap-3 text-sm font-semibold sm:grid-cols-4">
@@ -110,31 +144,33 @@ export default async function ComparePage({ params }: PageProps) {
           Assumptions updated: March 2026
         </div>
 
+        {/* Is it worth it */}
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-          <h2 className="text-[1.8rem] font-semibold tracking-tight text-slate-900 sm:text-[2rem] lg:text-[2.05rem]">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
             Is moving from {fromCity.name} to {toCity.name} worth it?
           </h2>
 
           <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
             <p>
-              Moving from <span className="font-semibold text-slate-900">{fromCity.name}</span> to{" "}
-              <span className="font-semibold text-slate-900">{toCity.name}</span> can change more
-              than just rent. State taxes, home prices, monthly housing pressure, and how much
-              flexibility you have left after bills can all shift in meaningful ways.
+              Moving from{" "}
+              <span className="font-semibold text-slate-900">{fromCity.name}</span> to{" "}
+              <span className="font-semibold text-slate-900">{toCity.name}</span> can change
+              more than just rent. State income taxes, home prices, monthly housing pressure,
+              and how much is left after bills can all shift in meaningful ways — even if your
+              gross salary stays exactly the same.
             </p>
-
             <p>
-              This comparison is built to help you look past headline salary and focus on what your
-              money may actually feel like in each place. A move that lowers housing pressure or
-              improves take-home pay can make a salary stretch further even if the sticker salary
-              stays the same.
+              This comparison is built to help you look past headline salary and focus on what
+              your money may actually feel like in each place. A move that lowers housing
+              pressure or improves take-home pay can make your income stretch further even if the
+              gross number doesn't change.
             </p>
-
             <p>
-              Use the calculator below to compare both cities side by side, then look at how taxes,
-              housing, and affordability work together. This is especially useful if you are trying
-              to decide whether a move could improve monthly breathing room or reduce the salary you
-              would need to maintain a similar lifestyle.
+              Use the calculator below to compare{" "}
+              {fromCity.name} and {toCity.name} side by side on taxes, housing, and monthly
+              affordability. This is especially useful if you are deciding whether a move could
+              improve monthly breathing room or reduce the salary you would need to maintain a
+              similar lifestyle.
             </p>
           </div>
         </section>
@@ -147,50 +183,103 @@ export default async function ComparePage({ params }: PageProps) {
           initialToCityId={toCity.id}
         />
 
+        {/* Who this move is best for */}
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-            Who this move may be best for
+            Who this {fromCity.name} to {toCity.name} move may be best for
           </h2>
-
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <h3 className="font-semibold text-slate-900">Remote workers</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                If you can keep a stronger salary while moving to a lower-cost city, your take-home
-                pay and monthly flexibility may improve faster than expected.
+                If you can keep a stronger salary while moving to a lower-cost city, your
+                take-home pay and monthly flexibility may improve significantly — especially
+                if the move means a lower state income tax rate.
               </p>
             </div>
-
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">Future buyers</h3>
+              <h3 className="font-semibold text-slate-900">Future home buyers</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Housing differences matter most for people planning to buy. Mortgage pressure,
-                taxes, insurance, and down-payment expectations can change the full affordability
-                picture.
+                Housing differences matter most for people planning to buy. Median home price,
+                mortgage size, property tax, and insurance can all shift the full affordability
+                picture between {fromCity.name} and {toCity.name}.
               </p>
             </div>
-
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">People leaving high housing pressure</h3>
+              <h3 className="font-semibold text-slate-900">People in high housing pressure</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                If a large share of your income currently goes to rent or a mortgage, comparing a
-                lower-cost city can show whether a move could improve monthly breathing room.
+                If a large share of your income currently goes to rent or a mortgage, comparing
+                a lower-cost city can show whether a move could meaningfully improve monthly
+                breathing room.
               </p>
             </div>
           </div>
         </section>
 
+        {/* FAQ */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+            {fromCity.name} vs {toCity.name} — common questions
+          </h2>
+          <dl className="mt-5 space-y-5 text-sm text-slate-600">
+            <div>
+              <dt className="font-semibold text-slate-900">
+                Is {toCity.name} cheaper than {fromCity.name}?
+              </dt>
+              <dd className="mt-1">
+                It depends on your income, housing choice, and lifestyle. The calculator above
+                compares both cities based on your specific salary, state tax rules, and local
+                housing costs — giving you a more accurate picture than generic cost-of-living
+                indexes.
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-900">
+                How does moving from {fromCity.name} to {toCity.name} affect taxes?
+              </dt>
+              <dd className="mt-1">
+                State income tax is one of the biggest variables when comparing{" "}
+                {fromCity.state.toUpperCase()} and {toCity.state.toUpperCase()}.{" "}
+                {fromCity.state.toUpperCase() === toCity.state.toUpperCase()
+                  ? `Both cities are in the same state, so the state tax rate stays the same. The biggest differences will come from housing costs and local cost of living.`
+                  : `The calculator applies the tax rules for each state to your gross income so you can see the real take-home difference.`}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-900">
+                What salary do I need in {toCity.name} to match my lifestyle in {fromCity.name}?
+              </dt>
+              <dd className="mt-1">
+                The calculator above includes a "comparable salary" estimate — the gross income
+                you would need in {toCity.name} to maintain the same monthly budget as your
+                current salary in {fromCity.name}. It accounts for the difference in taxes,
+                housing costs, and cost of living between the two cities.
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-900">
+                What is the cost of living difference between {fromCity.name} and {toCity.name}?
+              </dt>
+              <dd className="mt-1">
+                Cost of living differences between cities are driven primarily by housing costs
+                and state income taxes. Enter your income in the calculator above to see a
+                side-by-side monthly budget breakdown for both cities, including rent, take-home
+                pay, and estimated monthly flexibility.
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        {/* Related comparisons */}
         {popular.length > 0 ? (
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
             <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-              Related relocation comparisons
+              Related city comparisons
             </h2>
-
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Explore other city-to-city comparisons to see how taxes, housing costs, and salary
-              needs change across major relocation paths.
+              Explore more city-to-city comparisons to see how taxes, housing costs, and salary
+              needs change across popular relocation paths.
             </p>
-
             <div className="mt-4 flex flex-wrap gap-3">
               {popular.map((x) => (
                 <Link
@@ -209,25 +298,17 @@ export default async function ComparePage({ params }: PageProps) {
           <div className="mb-3 text-xs text-slate-500">
             Assumptions updated: March 2026
           </div>
-
           <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-slate-500">
-            <Link href="/about" className="transition hover:text-slate-900">
-              About
-            </Link>
+            <Link href="/about" className="transition hover:text-slate-900">About</Link>
             <span>•</span>
-            <Link href="/disclaimer" className="transition hover:text-slate-900">
-              Disclaimer
-            </Link>
+            <Link href="/disclaimer" className="transition hover:text-slate-900">Disclaimer</Link>
             <span>•</span>
-            <Link href="/privacy" className="transition hover:text-slate-900">
-              Privacy
-            </Link>
+            <Link href="/privacy" className="transition hover:text-slate-900">Privacy</Link>
             <span>•</span>
-            <Link href="/terms" className="transition hover:text-slate-900">
-              Terms
-            </Link>
+            <Link href="/terms" className="transition hover:text-slate-900">Terms</Link>
           </div>
         </div>
+
       </div>
     </main>
   );

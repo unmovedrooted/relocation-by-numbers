@@ -40,6 +40,7 @@ export const USD_TO_LOCAL: Record<string, number> = {
   PA: 1,
   CO: 3920,
   BR: 4.95,
+  DO: 58.5,
   AR: 900,
   CL: 970,
   PE: 3.72,
