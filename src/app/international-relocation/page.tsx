@@ -29,25 +29,20 @@ export default function Page() {
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="py-10 text-center">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
-
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
             International Relocation Calculator
           </h1>
-
           <p className="mt-2 text-xl font-semibold text-slate-700 dark:text-slate-300 sm:text-2xl">
             Compare Cost of Living, Taxes, Rent &amp; Moving Budget by City
           </p>
-
           <p className="mx-auto mt-3 max-w-5xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
             Compare taxes, rent, living costs, take-home pay, and one-time moving expenses
             across Lisbon, London, Tokyo, Dubai, Singapore, Bangkok, Kuala Lumpur, Toronto,
             Seoul, and more. Plan your international move with a clearer budget.
           </p>
-
           <p className="mx-auto mt-2 max-w-4xl text-sm text-slate-500 dark:text-slate-400">
             Use this calculator to pressure-test your budget before relocating overseas.
           </p>
-
           <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-blue-600/80" />
         </div>
       </header>
@@ -104,7 +99,7 @@ export default function Page() {
             <a href="/asia-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
               Asia Calculator
             </a>
-             <a href="/south-america-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+            <a href="/south-america-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
               South America Calculator
             </a>
             <a href="/fire-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
@@ -191,7 +186,7 @@ export default function Page() {
           </div>
         </section>
 
-        {/* FAQ — long-tail search + structured data ready */}
+        {/* FAQ */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
           <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
             Frequently asked questions

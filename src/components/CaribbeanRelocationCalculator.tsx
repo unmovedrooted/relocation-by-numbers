@@ -528,8 +528,9 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
     const housingTotal     = rentTo + housingUtilities + carCost;
     const livingCosts      = groceriesAdj + transportationAdj + healthcareAdj;
     const monthlyFlexibility = netMonthlyTo - housingTotal - livingCosts;
+    const totalPctOfNet  = netMonthlyTo > 0 ? (housingTotal + livingCosts) / netMonthlyTo : 0;
     const housingPctOfNet    = netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
-    const comfort            = getReadinessBand(housingPctOfNet);
+    const comfort            = getReadinessBand(totalPctOfNet);
 
     const furnitureAdj = furnished === "furnished" ? 0 : destToUsd(nz(furnitureSetup));
     const upfrontCashNeeded =

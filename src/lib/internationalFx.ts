@@ -18,6 +18,8 @@ export const USD_TO_LOCAL: Record<string, number> = {
   NL: 0.92,
   IE: 0.92,
   CH: 0.90,
+  AT: 0.92, 
+  BE: 0.92,
   DK: 6.85,
   SE: 10.45,
   NO: 10.7,

@@ -883,16 +883,28 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2025 rates. Married (single-earner): standard rate band widens to €51,000.
   // USC 2025: threshold raised, revised bands.
   // PRSI 4.1% from Oct 2024 (increased from 4%).
+  // Tax credits 2025: personal €1,875, PAYE employee €1,875 (working only),
+  //   married person's credit €1,875 additional (married), age credit €245 (65+).
   // Retired: USC and PRSI waived.
   // -------------------------------------------------------------------------
   IE: ({ annualIncome, filing, isRetired }) => {
     const standardBand = filing === "married" ? 51000 : 42000;
-    const payeRate = progressiveTax(annualIncome, [
+    const grossTaxAmount = progressiveTax(annualIncome, [
       { upTo: standardBand, rate: 0.20 },
       { upTo: Infinity,     rate: 0.40 },
-    ]);
+    ]) * annualIncome;
 
-    // 2025 USC bands (revised threshold €13,000 → exempt; bands updated)
+    // 2025 tax credits — applied directly against tax liability
+    const personalCredit  = 1875;
+    const payeCredit      = isRetired ? 0    : 1875; // working only
+    const marriedCredit   = filing === "married" ? 1875 : 0;
+    const ageCredit       = isRetired ? 245 : 0;     // 65+ age credit
+    const totalCredits    = personalCredit + payeCredit + marriedCredit + ageCredit;
+
+    const netTaxAmount    = Math.max(0, grossTaxAmount - totalCredits);
+    const payeRate        = annualIncome > 0 ? netTaxAmount / annualIncome : 0;
+
+    // 2025 USC bands
     const uscRate = isRetired ? 0 : progressiveTax(annualIncome, [
       { upTo: 13000,  rate: 0.00  },
       { upTo: 25760,  rate: 0.02  },
@@ -906,10 +918,10 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     return {
       effectiveRate: clampRate(payeRate + uscRate + prsi),
       model: "progressive-country",
-      confidence: "simplified",
-      label: "Ireland PAYE + USC + PRSI (2025)",
-      missingFactor: "Personal + PAYE tax credits (~€3,750/yr) not applied — estimate overstates by 2–5 pp.",
-      note: "Rate structure is current (2025). Critical omission: the personal tax credit (€1,875) and PAYE employee credit (€1,875) together reduce tax by €3,750/year — not modelling these means this estimate overstates income tax liability for most employees by approximately 2–5 percentage points of effective rate. USC and PRSI are correctly excluded for retirees. Income must be passed in EUR.",
+      confidence: "partial",
+      label: "Ireland PAYE + USC + PRSI + tax credits (2025)",
+      missingFactor: "Home carer credit, rent credit, and other personal reliefs not modelled.",
+      note: "2025 rate structure with key tax credits applied: personal credit (€1,875), PAYE employee credit (€1,875 for workers), married person's credit (€1,875), and age credit (€245 for 65+). USC and PRSI correctly excluded for retirees. Remaining omissions: home carer credit (€1,800), rent tax credit (€1,000), medical/tuition expenses, and pension contribution relief — these reduce tax further for eligible filers. Income must be passed in EUR.",
     };
   },
 
@@ -1163,7 +1175,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // National state tax: 20% on income above ~SEK 598,500 (2024).
   // No joint filing. Social insurance not modeled (employer-side).
   // -------------------------------------------------------------------------
-   SE: ({ annualIncome }) => {
+  SE: ({ annualIncome }) => {
   if (annualIncome <= 0) {
     return {
       effectiveRate: 0,
@@ -1196,6 +1208,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     note: "Municipal average (32.37%) and national threshold (SEK 598,500) are correct for 2024. Key omission: the jobbskatteavdrag (earned income tax credit) reduces income tax for employed residents — it is income-dependent and can be worth SEK 20,000–35,000/yr, meaning this model overstates effective income tax on employment income by roughly 3–5 pp at mid-range incomes. Municipal rates vary: Stockholm 29.83%, Gothenburg 32.35%. Income must be passed in SEK.",
   };
 },
+
   // -------------------------------------------------------------------------
   // NORWAY — NOK
   // 2024 rates. Ordinary income tax 22% flat + bracket tax (trinnskatt).
@@ -1962,6 +1975,7 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
       label: "Which autonomous community will you live in?",
       helpText:
         "Spain's 17 autonomous communities each set their own income tax rates on top of the national rate. Madrid has the lowest combined rates; Catalonia and Valencia have the highest. Selecting your region significantly improves accuracy.",
+      when: { incomeScenario: ["local", "remote"] },
       options: [
         { value: "AN", label: "Andalusia" },
         { value: "AR", label: "Aragón" },

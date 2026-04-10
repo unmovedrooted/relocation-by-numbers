@@ -354,11 +354,12 @@ function setQS(params: URLSearchParams) {
   window.history.replaceState(null, "", url);
 }
 
+// Thresholds are for total essential outflow (housing + living costs) as a share of net income.
 function getReadinessBand(ratio: number) {
-  if (ratio <= 0.25) return { band: "A", label: "Comfortable", note: "This looks healthy relative to your estimated target net income." };
-  if (ratio <= 0.35) return { band: "B", label: "Manageable", note: "Doable, but keep an eye on recurring costs and setup cash." };
-  if (ratio <= 0.45) return { band: "C", label: "Tight", note: "Possible, but the margin for error is thinner." };
-  return { band: "D", label: "Stretched", note: "Housing is taking up a large share of the budget." };
+  if (ratio <= 0.60) return { band: "A", label: "Comfortable", note: "Total essential costs look healthy relative to your estimated net income." };
+  if (ratio <= 0.75) return { band: "B", label: "Manageable", note: "Doable, but keep an eye on recurring costs and setup cash." };
+  if (ratio <= 0.90) return { band: "C", label: "Tight", note: "Possible, but the margin for error is thinner." };
+  return { band: "D", label: "Stretched", note: "Essential costs are taking up a very large share of the budget." };
 }
 
 // Maps the TaxConfidence values from internationalTaxes.ts to UI badge styles.
@@ -749,8 +750,9 @@ export default function EuropeRelocationCalculator() {
     const housingTotal     = rentTo + housingUtilities + carCost;
     const livingCosts      = groceriesAdj + transportationAdj + healthcareAdj;
     const monthlyFlexibility = netMonthlyTo - housingTotal - livingCosts;
+    const totalPctOfNet      = netMonthlyTo > 0 ? (housingTotal + livingCosts) / netMonthlyTo : 0;
     const housingPctOfNet    = netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
-    const comfort            = getReadinessBand(housingPctOfNet);
+    const comfort            = getReadinessBand(totalPctOfNet);
 
     const furnitureAdj = furnished === "furnished" ? 0 : destToUsd(nz(furnitureSetup));
     const upfrontCashNeeded =
@@ -1309,7 +1311,7 @@ export default function EuropeRelocationCalculator() {
                 </div>
               </div>
               <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-200">
-                Target housing
+                Essential costs
               </div>
             </div>
 
@@ -1323,7 +1325,7 @@ export default function EuropeRelocationCalculator() {
             </div>
 
             <div className="mt-3 text-sm text-slate-700">{results.comfort.note}</div>
-            <div className="mt-2 text-xs text-slate-500">Based on how much of your target net monthly income goes toward housing.</div>
+            <div className="mt-2 text-xs text-slate-500">Based on how much of your net monthly income goes toward housing and essential living costs.</div>
           </div>
 
           {/* Share */}
