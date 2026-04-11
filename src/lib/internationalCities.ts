@@ -368,6 +368,54 @@ export const INTERNATIONAL_CITIES: InternationalCity[] = [
   { code: "ZA-DUR", countryCode: "ZA", name: "Durban" },
   { code: "ZA-PRE", countryCode: "ZA", name: "Pretoria" },
   { code: "ZA-PLZ", countryCode: "ZA", name: "Port Elizabeth" },
+
+  // Philippines
+{ code: "PH-MNL", countryCode: "PH", name: "Manila", featured: true },
+{ code: "PH-CEB", countryCode: "PH", name: "Cebu" },
+{ code: "PH-DVO", countryCode: "PH", name: "Davao" },
+{ code: "PH-BAG", countryCode: "PH", name: "Baguio" },
+
+// Taiwan
+{ code: "TW-TPE", countryCode: "TW", name: "Taipei", featured: true },
+{ code: "TW-TXG", countryCode: "TW", name: "Taichung" },
+{ code: "TW-TNN", countryCode: "TW", name: "Tainan" },
+{ code: "TW-KHH", countryCode: "TW", name: "Kaohsiung" },
+
+// Hong Kong
+{ code: "HK-CEN", countryCode: "HK", name: "Hong Kong (Central)", featured: true },
+{ code: "HK-KOW", countryCode: "HK", name: "Hong Kong (Kowloon)" },
+{ code: "HK-NTW", countryCode: "HK", name: "Hong Kong (New Territories)" },
+{ code: "HK-TCW", countryCode: "HK", name: "Hong Kong (Tung Chung)" },
+
+// India
+{ code: "IN-BLR", countryCode: "IN", name: "Bangalore", featured: true },
+{ code: "IN-BOM", countryCode: "IN", name: "Mumbai" },
+{ code: "IN-HYD", countryCode: "IN", name: "Hyderabad" },
+{ code: "IN-DEL", countryCode: "IN", name: "Delhi NCR" },
+
+// China
+{ code: "CN-SHA", countryCode: "CN", name: "Shanghai", featured: true },
+{ code: "CN-BJS", countryCode: "CN", name: "Beijing" },
+{ code: "CN-SZX", countryCode: "CN", name: "Shenzhen" },
+{ code: "CN-CTU", countryCode: "CN", name: "Chengdu" },
+
+// Qatar
+{ code: "QA-DOH", countryCode: "QA", name: "Doha", featured: true },
+{ code: "QA-WAK", countryCode: "QA", name: "Al Wakrah" },
+{ code: "QA-LUS", countryCode: "QA", name: "Lusail" },
+{ code: "QA-RAY", countryCode: "QA", name: "Al Rayyan" },
+
+// Saudi Arabia
+{ code: "SA-RUH", countryCode: "SA", name: "Riyadh", featured: true },
+{ code: "SA-JED", countryCode: "SA", name: "Jeddah" },
+{ code: "SA-DMM", countryCode: "SA", name: "Dammam" },
+{ code: "SA-KHO", countryCode: "SA", name: "Khobar" },
+
+// Oman
+{ code: "OM-MCT", countryCode: "OM", name: "Muscat", featured: true },
+{ code: "OM-SLL", countryCode: "OM", name: "Salalah" },
+{ code: "OM-SOH", countryCode: "OM", name: "Sohar" },
+{ code: "OM-NZW", countryCode: "OM", name: "Nizwa" },
 ];
 
 export function citiesForCountry(countryCode: string) {

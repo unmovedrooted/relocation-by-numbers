@@ -628,6 +628,9 @@ export default function EuropeRelocationCalculator() {
     ];
     for (const [key, setter] of fields) { const val = qs.get(key); if (val) setter(val); }
     const vCar = qs.get("car") as YesNo | null; if (vCar === "yes" || vCar === "no") setNeedCar(vCar);
+    // Restore conditional tax answers from URL
+    const vTaxAnswers = qs.get("taxAnswers");
+    if (vTaxAnswers) { try { const parsed = JSON.parse(vTaxAnswers); if (typeof parsed === "object" && parsed !== null) setConditionalAnswers(parsed); } catch {} }
     setQsHydrated(true);
   }, []);
 
@@ -656,15 +659,19 @@ export default function EuropeRelocationCalculator() {
     if (emergencyCashBuffer) qs.set("emergency", emergencyCashBuffer);
     if (currentSavings) qs.set("savings", currentSavings);
     qs.set("car", needCar);
+    // Persist conditional tax answers as a single JSON param
+    const answersJson = JSON.stringify(conditionalAnswers);
+    if (answersJson !== "{}") qs.set("taxAnswers", answersJson);
     setQS(qs);
   }, [
-    mode, filing, fromCountry, toCountry, fromCityCode, toCityCode,
-    salary, retirementIncome, currencyDisplay, salaryType, adults, children,
-    destinationRent, depositRequired, firstMonthRent, lastMonthRent, furnished,
-    utilitiesIncluded, groceries, utilities, transportation, healthcare, visaCost,
-    flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
-    emergencyCashBuffer, currentSavings, needCar,
-  ]);
+  mode, filing, fromCountry, toCountry, fromCityCode, toCityCode,
+  salary, retirementIncome, currencyDisplay, salaryType, adults, children,
+  destinationRent, depositRequired, firstMonthRent, lastMonthRent, furnished,
+  utilitiesIncluded, groceries, utilities, transportation, healthcare, visaCost,
+  flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
+  emergencyCashBuffer, currentSavings, needCar,
+  conditionalAnswers,
+]);
 
   const targetProfile = getCountryByCode(toCountry);
 

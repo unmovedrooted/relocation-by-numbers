@@ -442,7 +442,7 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
     destinationRent, depositRequired, firstMonthRent, lastMonthRent, furnished,
     utilitiesIncluded, groceries, utilities, transportation, healthcare, visaCost,
     flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
-    emergencyCashBuffer, currentSavings, needCar,
+    emergencyCashBuffer, currentSavings, conditionalAnswers, needCar,
   ]);
 
   const targetProfile = getCountryByCode(toCountry);

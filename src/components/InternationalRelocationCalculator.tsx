@@ -21,7 +21,6 @@ import {
 import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
 import { USD_TO_LOCAL } from "@/lib/internationalFx";
 import AdSlot from "./AdSlot";
-import AffiliateCard from "./AffiliateCard";
 
 // FX_FALLBACK is intentionally empty — all supported country codes should be
 // in USD_TO_LOCAL in internationalFx.ts. If a code is missing there, add it
@@ -183,12 +182,6 @@ export default function InternationalRelocationCalculator() {
 
   const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
 
-  const displayCurrency = useMemo(() => {
-    if (currencyDisplay === "CURRENT") return COUNTRY_TO_CURRENCY[fromCountry] ?? "USD";
-    if (currencyDisplay === "DESTINATION") return COUNTRY_TO_CURRENCY[toCountry] ?? "USD";
-    return "USD";
-  }, [currencyDisplay, fromCountry, toCountry]);
-
   const originCurrency = COUNTRY_TO_CURRENCY[fromCountry] ?? "USD";
 
   const displayAmount = (amountUsd: number, digits: number = 0) => {
@@ -284,6 +277,9 @@ export default function InternationalRelocationCalculator() {
     ];
     for (const [key, setter] of fields) { const val = qs.get(key); if (val) setter(val); }
     const vCar = qs.get("car") as YesNo | null; if (vCar === "yes" || vCar === "no") setNeedCar(vCar);
+    // Restore conditional tax answers from URL
+    const vTaxAnswers = qs.get("taxAnswers");
+    if (vTaxAnswers) { try { const parsed = JSON.parse(vTaxAnswers); if (typeof parsed === "object" && parsed !== null) setConditionalAnswers(parsed); } catch {} }
     setQsHydrated(true);
   }, []);
 
@@ -311,6 +307,9 @@ export default function InternationalRelocationCalculator() {
     if (emergencyCashBuffer) qs.set("emergency", emergencyCashBuffer);
     if (currentSavings) qs.set("savings", currentSavings);
     qs.set("car", needCar);
+    // Persist conditional tax answers as a single JSON param
+    const answersJson = JSON.stringify(conditionalAnswers);
+    if (answersJson !== "{}") qs.set("taxAnswers", answersJson);
     setQS(qs);
   }, [
     mode, filing, fromCountry, toCountry, fromCityCode, toCityCode,
@@ -318,7 +317,7 @@ export default function InternationalRelocationCalculator() {
     destinationRent, depositRequired, firstMonthRent, lastMonthRent,
     furnished, utilitiesIncluded, groceries, utilities, transportation, healthcare,
     visaCost, flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
-    emergencyCashBuffer, currentSavings, needCar,
+    emergencyCashBuffer, currentSavings, needCar, conditionalAnswers,
   ]);
 
   const targetProfile = getCountryByCode(toCountry);
@@ -862,7 +861,7 @@ export default function InternationalRelocationCalculator() {
                 </div>
               </div>
               <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
-                {mode === "retired" ? "After housing and essentials" : "After housing"}
+                After housing and essentials
               </div>
             </div>
             <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-amber-100">
@@ -962,6 +961,7 @@ export default function InternationalRelocationCalculator() {
           <AdSlot />
         </div>
       </div>
+
     </div>
   );
 }
