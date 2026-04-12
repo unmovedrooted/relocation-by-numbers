@@ -29,10 +29,6 @@ export default function Page() {
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="py-10 text-center">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-semibold tracking-widest text-amber-700 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
-            🌎 SOUTH AMERICA RELOCATION
-          </div>
-
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
             South America Relocation Calculator
           </h1>
@@ -42,14 +38,12 @@ export default function Page() {
           </p>
 
           <p className="mx-auto mt-3 max-w-4xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-            Compare taxes, rent, living costs, take-home pay, and one-time moving expenses
-            across Medellín, Bogotá, Buenos Aires, Santiago, Lima, and São Paulo.
-          </p>
+  Compare taxes, rent, living costs, take-home pay, and one-time moving expenses across major South American cities.
+</p>
 
-          <p className="mx-auto mt-2 max-w-3xl text-sm text-slate-500 dark:text-slate-400">
-            Use this calculator to pressure-test your budget before relocating to Colombia,
-            Argentina, Chile, Peru, or Brazil.
-          </p>
+<p className="mx-auto mt-2 max-w-3xl text-sm text-slate-500 dark:text-slate-400">
+  Use this calculator to pressure-test your budget before relocating to South America — including Colombia, Argentina, Chile, Peru, Brazil, Ecuador, Uruguay, Paraguay, Bolivia, Guyana, Suriname, and Venezuela.
+</p>
 
           <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-amber-600/80" />
         </div>
@@ -124,16 +118,16 @@ export default function Page() {
                 What this South America relocation calculator includes
               </h2>
               <div className="mt-4 space-y-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
-                <p>
-                  This calculator estimates how a move to South America may affect your monthly
-                  budget — covering income taxes, housing, living costs, and one-time relocation
-                  expenses for Colombia, Brazil, Argentina, Chile, and Peru.
-                </p>
-                <p>
-                  City-level cost defaults are available for Medellín, Bogotá, Buenos Aires,
-                  Santiago, Lima, and São Paulo — with country-specific tax models and detailed
-                  visa context for each destination.
-                </p>
+               <p>
+  This calculator estimates how a move to South America may affect your monthly
+  budget — covering income taxes, housing, living costs, and one-time relocation
+  expenses across major South American countries and cities.
+</p>
+<p>
+  It includes city-level cost defaults, country-specific tax models, visa context,
+  monthly flexibility, savings coverage, and comparable salary estimates to help
+  you compare relocation scenarios more clearly.
+</p>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
@@ -179,7 +173,7 @@ export default function Page() {
           </div>
         </section>
 
-        {/* FAQ */}
+       {/* FAQ */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
           <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
             Frequently asked questions
@@ -190,12 +184,14 @@ export default function Page() {
                 Which South American country is the cheapest to live in?
               </dt>
               <dd className="mt-1">
-                Colombia is generally the most affordable destination in this calculator,
-                particularly Medellín — which combines low rent, low everyday costs, and a
-                large established expat community. Peru (Lima) and Argentina (Buenos Aires)
-                can also be very affordable, especially for those holding USD. Chile (Santiago)
-                and Brazil (São Paulo) are higher-cost but offer stronger infrastructure and
-                economic stability.
+                Paraguay, Bolivia, and Colombia tend to be the most affordable destinations
+                in this calculator. Asunción and Cochabamba sit at the lower end of the cost
+                range, while Medellín combines low everyday costs with a large established
+                expat community. Peru (Lima) and Argentina (Buenos Aires) can also be very
+                affordable, especially for those holding USD. Ecuador (Cuenca in particular)
+                is popular with retirees looking for low costs with a dollarized economy.
+                Chile (Santiago) and Uruguay (Montevideo) are higher-cost but offer stronger
+                infrastructure, stability, and quality of life.
               </dd>
             </div>
             <div>
@@ -206,9 +202,12 @@ export default function Page() {
                 Colombia's Digital Nomad Visa is one of the most accessible in the region —
                 remote workers earning just $800/month qualify for a 2-year renewable stay.
                 Chile also offers a dedicated Digital Nomad Visa requiring $1,500/month.
-                Argentina, Peru, and Brazil have rentista and retirement visa options with
-                varying income requirements. Always verify current requirements with official
-                government sources before applying.
+                Ecuador's pensioner and rentista visa paths are popular with retirees, with
+                relatively accessible income thresholds. Paraguay is frequently cited for
+                straightforward permanent residency pathways at a lower cost base. Argentina,
+                Peru, and Brazil have rentista and retirement visa options with varying income
+                requirements. Always verify current requirements with official government
+                sources before applying.
               </dd>
             </div>
             <div>
@@ -226,6 +225,20 @@ export default function Page() {
             </div>
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white">
+                Is Ecuador a good option for retirees?
+              </dt>
+              <dd className="mt-1">
+                Ecuador is one of the most popular retirement destinations in South America.
+                It is dollarized — so there is no currency conversion complexity — and cities
+                like Cuenca and Manta offer a lower cost of living than most North American
+                or European cities. Pensioner and rentista residency paths are well-established
+                and accessible. Healthcare costs can be materially lower than in the US.
+                The calculator includes Quito, Guayaquil, Cuenca, and Manta as destination
+                cities for Ecuador.
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-900 dark:text-white">
                 Is Medellín, Colombia a good place for remote workers?
               </dt>
               <dd className="mt-1">
@@ -237,14 +250,30 @@ export default function Page() {
             </div>
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white">
+                Why is Paraguay included and what should I know about its tax system?
+              </dt>
+              <dd className="mt-1">
+                Paraguay is included because it is a genuine lower-cost relocation option
+                with accessible residency pathways and one of the simpler tax regimes in the
+                region. Paraguay operates a territorial tax system, which means the tax
+                treatment of foreign-source income may differ from locally-earned income —
+                but the specifics depend on your situation and residency status. The
+                calculator models this conservatively and flags it clearly. Always verify
+                the tax treatment of your specific income type with a local advisor before
+                treating it as a planning assumption.
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-900 dark:text-white">
                 How much money do I need to relocate to South America?
               </dt>
               <dd className="mt-1">
-                One-time relocation costs for most South American destinations in this
-                calculator range from $2,000 to $5,000, covering visa fees, flights, a
-                security deposit, and temporary accommodation. Colombia and Peru tend toward
-                the lower end; Chile and Brazil slightly higher. Use the calculator to estimate
-                both the upfront costs and the ongoing monthly budget difference.
+                One-time relocation costs across the destinations in this calculator typically
+                range from $2,000 to $6,000, covering visa fees, flights, a security deposit,
+                and temporary accommodation. Paraguay, Bolivia, and Colombia tend toward the
+                lower end. Chile, Uruguay, and Brazil are somewhat higher. Use the calculator
+                to estimate both the upfront cash needed and the ongoing monthly budget
+                difference for your specific destination.
               </dd>
             </div>
           </dl>

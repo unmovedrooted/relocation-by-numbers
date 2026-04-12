@@ -416,6 +416,46 @@ export const INTERNATIONAL_CITIES: InternationalCity[] = [
 { code: "OM-SLL", countryCode: "OM", name: "Salalah" },
 { code: "OM-SOH", countryCode: "OM", name: "Sohar" },
 { code: "OM-NZW", countryCode: "OM", name: "Nizwa" },
+
+// Ecuador (4 cities)
+{ code: "EC-UIO", countryCode: "EC", name: "Quito", featured: true },
+{ code: "EC-GYE", countryCode: "EC", name: "Guayaquil" },
+{ code: "EC-CUE", countryCode: "EC", name: "Cuenca" },
+{ code: "EC-MEC", countryCode: "EC", name: "Manta" },
+
+// Uruguay (4 cities)
+{ code: "UY-MVD", countryCode: "UY", name: "Montevideo", featured: true },
+{ code: "UY-PDE", countryCode: "UY", name: "Punta del Este" },
+{ code: "UY-COL", countryCode: "UY", name: "Colonia del Sacramento" },
+{ code: "UY-SLV", countryCode: "UY", name: "Salto" },
+
+// Paraguay (4 cities)
+{ code: "PY-ASU", countryCode: "PY", name: "Asunción", featured: true },
+{ code: "PY-CDE", countryCode: "PY", name: "Ciudad del Este" },
+{ code: "PY-ENR", countryCode: "PY", name: "Encarnación" },
+{ code: "PY-SLO", countryCode: "PY", name: "San Lorenzo" },
+
+// Bolivia (4 cities)
+{ code: "BO-LPB", countryCode: "BO", name: "La Paz", featured: true },
+{ code: "BO-SRZ", countryCode: "BO", name: "Santa Cruz de la Sierra" },
+{ code: "BO-CBB", countryCode: "BO", name: "Cochabamba" },
+{ code: "BO-SUC", countryCode: "BO", name: "Sucre" },
+
+// Guyana (3 cities)
+{ code: "GY-GEO", countryCode: "GY", name: "Georgetown", featured: true },
+{ code: "GY-LIN", countryCode: "GY", name: "Linden" },
+{ code: "GY-NIA", countryCode: "GY", name: "New Amsterdam" },
+
+// Suriname (3 cities)
+{ code: "SR-PBM", countryCode: "SR", name: "Paramaribo", featured: true },
+{ code: "SR-NIC", countryCode: "SR", name: "Nieuw Nickerie" },
+{ code: "SR-STO", countryCode: "SR", name: "Stoelmanseiland" },
+
+// Venezuela (4 cities)
+{ code: "VE-CCS", countryCode: "VE", name: "Caracas", featured: true },
+{ code: "VE-MAR", countryCode: "VE", name: "Maracaibo" },
+{ code: "VE-VLC", countryCode: "VE", name: "Valencia" },
+{ code: "VE-BAR", countryCode: "VE", name: "Barquisimeto" },
 ];
 
 export function citiesForCountry(countryCode: string) {

@@ -20,7 +20,7 @@ import AdSlot from "./AdSlot";
 // ---------------------------------------------------------------------------
 
 const SOUTH_AMERICA_COUNTRY_CODES = new Set([
-  "CO", "BR", "AR", "CL", "PE",
+  "CO", "BR", "AR", "CL", "PE", "EC", "UY", "PY", "BO", "GY","SR", "VE",
 ]);
 
 const SOUTH_AMERICA_VISA_CONTEXT: Record<string, {
@@ -57,7 +57,7 @@ const SOUTH_AMERICA_VISA_CONTEXT: Record<string, {
     icon: "🇨🇱",
     program: "Temporary Residence / Digital Nomad Visa",
     highlight: "Digital Nomad Visa",
-    notes: "Chile's Digital Nomad Visa (Visa Temporaria de Trabajo a Distancia): remote workers with $1,500+/mo income, 1-year renewable. Temporary Residence Visa for those with a job offer or sufficient income leads to permanent residency after 1 year. Chile is the most stable and developed economy in South America — Santiago rivals many European capitals in quality of life, though at a higher cost than other SA destinations.",
+    notes: "Chile is one of the more stable and developed economies in South America. Santiago offers a high quality of life, though at a higher cost than many other regional destinations. Remote-work and temporary residence pathways may be available depending on citizenship, income, and current immigration rules, so verify requirements directly before planning around them.",
     estimatedFee: 180,
   },
   PE: {
@@ -67,6 +67,56 @@ const SOUTH_AMERICA_VISA_CONTEXT: Record<string, {
     notes: "Peru's Rentista Visa is available for those with $1,000+/mo in passive income. Temporary Residence can be obtained with a job offer or business registration. No dedicated digital nomad visa yet — many remote workers use tourist visa extensions (183 days). Lima has a growing expat scene and world-class cuisine. Cusco and Arequipa are popular alternatives with lower costs and high quality of life.",
     estimatedFee: 150,
   },
+  EC: {
+  icon: "🇪🇨",
+  program: "Temporary Residence / Pensioner Visa / Rentista",
+  highlight: "Pensioner visa option",
+  notes: "Ecuador is popular with retirees and remote workers because of its lower living costs and established expat communities in Quito, Cuenca, and Manta. Pensioner and rentista-style residency paths are common planning routes. Ecuador is dollarized — no currency conversion complexity. Healthcare and rent can be materially lower than in many North American cities.",
+  estimatedFee: 150,
+},
+UY: {
+  icon: "🇺🇾",
+  program: "Temporary Residence / Residency by Income",
+  highlight: "Stable residency path",
+  notes: "Uruguay is one of the most stable and institutionally predictable countries in South America. Montevideo is the main expat hub, with Punta del Este attracting retirees and higher-budget movers. Costs are often higher than elsewhere in the region, but governance, infrastructure, and quality of life are major draws.",
+  estimatedFee: 180,
+},
+PY: {
+  icon: "🇵🇾",
+  program: "Temporary Residence / Permanent Residency Path",
+  highlight: "Territorial tax system — low tax burden",
+  notes: "Paraguay is often considered by budget-conscious movers because housing and day-to-day costs can be relatively low. Asunción is the main relocation hub. Paraguay's territorial tax system may mean foreign-source income is treated differently from locally-earned income — but tax treatment depends on your specific situation and residency status. Verify with a local advisor before treating this as a planning assumption.",
+  estimatedFee: 140,
+},
+BO: {
+  icon: "🇧🇴",
+  program: "Temporary Residence / Work or Income-Based Residency",
+  highlight: "Lower-cost destination",
+  notes: "Bolivia can offer some of the lowest living costs in South America, especially outside premium neighborhoods in La Paz and Santa Cruz. Administrative processes can be slower and less standardized than in neighboring countries, so budget extra time and cash buffer for setup.",
+  estimatedFee: 140,
+},
+GY: {
+  icon: "🇬🇾",
+  program: "Temporary Stay / Work Permit / Residency",
+  highlight: "English-speaking destination",
+  notes: "Guyana stands out as the only English-speaking country in South America. Georgetown is the main destination for expats and business relocations. Costs can be less predictable than expected — especially for imported goods and expat-oriented housing — so use a conservative budget buffer.",
+  estimatedFee: 170,
+},
+SR: {
+  icon: "🇸🇷",
+  program: "Temporary Residence / Work or Family-Based Residency",
+  highlight: "Smaller, emerging expat market",
+  notes: "Suriname is a smaller relocation market with more limited mainstream expat data than larger South American countries. Paramaribo is the key planning city. Treat all cost and tax estimates as simplified planning figures and verify locally before committing.",
+  estimatedFee: 160,
+},
+VE: {
+  icon: "🇻🇪",
+  program: "Temporary Residence / Work or Family-Based Residency",
+  highlight: "Use with extra caution — simplified estimates only",
+  warning: "Exchange rate volatility, inflation, and policy changes can make all planning estimates stale very quickly. Verify every assumption independently before making any decisions.",
+  notes: "Venezuela is included for geographic completeness. All cost, tax, and currency figures here are simplified planning estimates and should be treated as directional only. FX controls, rapid inflation, and policy changes mean assumptions can become stale quickly. Verify every figure independently before using this for any planning decision.",
+  estimatedFee: 150,
+},
 };
 
 function convertLocalToUsd(amountLocal: number, countryCode: string): number {
@@ -88,7 +138,8 @@ const COUNTRY_TO_CURRENCY: Record<string, string> = {
   LV: "EUR", LT: "EUR", RO: "RON", BG: "BGN", SI: "EUR", SK: "EUR",
   MT: "EUR", CY: "EUR", PA: "USD", CO: "COP", BR: "BRL", AR: "ARS",
   CL: "CLP", PE: "PEN", TH: "THB", VN: "VND", MY: "MYR", ID: "IDR",
-  ZA: "ZAR", AT: "EUR", BE: "EUR",
+  ZA: "ZAR", AT: "EUR", BE: "EUR", EC: "USD", UY: "UYU", PY: "PYG", 
+  BO: "BOB", GY: "GYD", SR: "SRD", VE: "VES",
 };
 
 type Mode = "working" | "retired";
@@ -404,21 +455,21 @@ export default function SouthAmericaRelocationCalculator() {
 
     const adultCount = Math.max(1, nz(adults));
     const childCount = Math.max(0, nz(children));
-    const familyGroceries = destToUsd(nz(groceries)) * (1 + (adultCount - 1) * 0.55 + childCount * 0.35);
-    const familyTransportation = destToUsd(nz(transportation)) * (1 + (adultCount - 1) * 0.35 + childCount * 0.15);
-    const healthcareAdj = destToUsd(nz(healthcare)) * (1 + (adultCount - 1) * 0.7 + childCount * 0.5);
-    const familyUtilities = destToUsd(nz(utilities)) * (1 + (adultCount - 1) * 0.25 + childCount * 0.15);
+    const familyGroceries = nz(groceries) * (1 + (adultCount - 1) * 0.55 + childCount * 0.35);
+    const familyTransportation = nz(transportation) * (1 + (adultCount - 1) * 0.35 + childCount * 0.15);
+    const healthcareAdj = nz(healthcare) * (1 + (adultCount - 1) * 0.7 + childCount * 0.5);
+    const familyUtilities = nz(utilities) * (1 + (adultCount - 1) * 0.25 + childCount * 0.15);
 
     const groceriesAdj = familyGroceries * toCityMultipliers.groceries;
     const transportationAdj = familyTransportation * toCityMultipliers.transit;
     const utilitiesAdj = familyUtilities * toCityMultipliers.utilities;
-    const rentTo = destToUsd(nz(destinationRent)) * toCityMultipliers.housing;
+    const rentTo = nz(destinationRent) * toCityMultipliers.housing;
 
     const groceriesFrom = familyGroceries * fromCityMultipliers.groceries;
     const transportationFrom = familyTransportation * fromCityMultipliers.transit;
     const utilitiesFrom = familyUtilities * fromCityMultipliers.utilities;
 
-    const carCost = needCar === "yes" ? destToUsd(350) : 0;
+    const carCost = needCar === "yes" ? 350 : 0;
     const housingUtilities = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
     const housingTotal = rentTo + housingUtilities + carCost;
     const livingCosts = groceriesAdj + transportationAdj + healthcareAdj;
@@ -426,14 +477,14 @@ export default function SouthAmericaRelocationCalculator() {
     const housingPctOfNet = netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
     const comfort = getReadinessBand(housingPctOfNet);
 
-    const furnitureAdj = furnished === "furnished" ? 0 : destToUsd(nz(furnitureSetup));
+    const furnitureAdj = furnished === "furnished" ? 0 : nz(furnitureSetup);
     const upfrontCashNeeded =
-      destToUsd(nz(depositRequired)) + destToUsd(nz(firstMonthRent)) + destToUsd(nz(lastMonthRent)) +
-      destToUsd(nz(visaCost)) + destToUsd(nz(flightCost)) + destToUsd(nz(shippingCost)) +
-      destToUsd(nz(temporaryStay)) + destToUsd(nz(adminFees)) + furnitureAdj + destToUsd(nz(emergencyCashBuffer));
+      nz(depositRequired) + nz(firstMonthRent) + nz(lastMonthRent) +
+      nz(visaCost) + nz(flightCost) + nz(shippingCost) +
+      nz(temporaryStay) + nz(adminFees) + furnitureAdj + nz(emergencyCashBuffer);
 
     const totalMonthlyOutflow = housingTotal + livingCosts;
-    const monthsCovered = totalMonthlyOutflow > 0 ? destToUsd(nz(currentSavings)) / totalMonthlyOutflow : 0;
+    const monthsCovered = totalMonthlyOutflow > 0 ? nz(currentSavings) / totalMonthlyOutflow : 0;
 
     const currentProfile = getCountryByCode(fromCountry);
     const fromIndex = currentCityDefaults?.costIndex ?? currentProfile?.monthlyCostIndexSingle ?? 1;

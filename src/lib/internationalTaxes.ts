@@ -170,23 +170,23 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const brackets =
       filing === "married"
         ? [
-            { upTo: 23850,  rate: 0.10 },
-            { upTo: 96950,  rate: 0.12 },
-            { upTo: 206700, rate: 0.22 },
-            { upTo: 394600, rate: 0.24 },
-            { upTo: 501050, rate: 0.32 },
-            { upTo: 751600, rate: 0.35 },
-            { upTo: Infinity, rate: 0.37 },
-          ]
+          { upTo: 23850, rate: 0.10 },
+          { upTo: 96950, rate: 0.12 },
+          { upTo: 206700, rate: 0.22 },
+          { upTo: 394600, rate: 0.24 },
+          { upTo: 501050, rate: 0.32 },
+          { upTo: 751600, rate: 0.35 },
+          { upTo: Infinity, rate: 0.37 },
+        ]
         : [
-            { upTo: 11925,  rate: 0.10 },
-            { upTo: 48475,  rate: 0.12 },
-            { upTo: 103350, rate: 0.22 },
-            { upTo: 197300, rate: 0.24 },
-            { upTo: 250525, rate: 0.32 },
-            { upTo: 626350, rate: 0.35 },
-            { upTo: Infinity, rate: 0.37 },
-          ];
+          { upTo: 11925, rate: 0.10 },
+          { upTo: 48475, rate: 0.12 },
+          { upTo: 103350, rate: 0.22 },
+          { upTo: 197300, rate: 0.24 },
+          { upTo: 250525, rate: 0.32 },
+          { upTo: 626350, rate: 0.35 },
+          { upTo: Infinity, rate: 0.37 },
+        ];
 
     const federalTaxAmount = progressiveTax(taxable, brackets) * taxable;
     const federalEffectiveRate = annualIncome > 0 ? federalTaxAmount / annualIncome : 0;
@@ -239,7 +239,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
     // Income tax using the reduced effective personal allowance
     const incomeTaxAmount = progressiveTax(taxable, [
-      { upTo: 37700,  rate: 0.20 },
+      { upTo: 37700, rate: 0.20 },
       { upTo: 125140, rate: 0.40 },
       { upTo: Infinity, rate: 0.45 },
     ]) * taxable;
@@ -250,7 +250,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     if (!isRetired && annualIncome > 0) {
       const niLower = 12570;
       const niUpper = 50270;
-      const niMain   = Math.max(0, Math.min(annualIncome, niUpper) - niLower) * 0.08;
+      const niMain = Math.max(0, Math.min(annualIncome, niUpper) - niLower) * 0.08;
       const niHigher = Math.max(0, annualIncome - niUpper) * 0.02;
       niRate = (niMain + niHigher) / annualIncome;
     }
@@ -285,14 +285,14 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     }
 
     const rate = progressiveTax(annualIncome, [
-      { upTo: 8059,   rate: 0.1325 },
-      { upTo: 12160,  rate: 0.18   },
-      { upTo: 17233,  rate: 0.23   },
-      { upTo: 22407,  rate: 0.26   },
-      { upTo: 28321,  rate: 0.3288 },
-      { upTo: 41629,  rate: 0.37   },
-      { upTo: 44987,  rate: 0.435  },
-      { upTo: 83696,  rate: 0.45   },
+      { upTo: 8059, rate: 0.1325 },
+      { upTo: 12160, rate: 0.18 },
+      { upTo: 17233, rate: 0.23 },
+      { upTo: 22407, rate: 0.26 },
+      { upTo: 28321, rate: 0.3288 },
+      { upTo: 41629, rate: 0.37 },
+      { upTo: 44987, rate: 0.435 },
+      { upTo: 83696, rate: 0.45 },
       { upTo: Infinity, rate: 0.48 },
     ]);
 
@@ -332,11 +332,11 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const taxable = Math.max(0, annualIncome - jointDeduction);
 
     const nationalRate = progressiveTax(taxable, [
-      { upTo: 12450,  rate: 0.095  },
-      { upTo: 20200,  rate: 0.12   },
-      { upTo: 35200,  rate: 0.15   },
-      { upTo: 60000,  rate: 0.185  },
-      { upTo: 300000, rate: 0.225  },
+      { upTo: 12450, rate: 0.095 },
+      { upTo: 20200, rate: 0.12 },
+      { upTo: 35200, rate: 0.15 },
+      { upTo: 60000, rate: 0.185 },
+      { upTo: 300000, rate: 0.225 },
       { upTo: Infinity, rate: 0.245 },
     ]);
 
@@ -345,100 +345,100 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     // Source: AEAT + regional BOE publications 2024.
     const COMMUNITY_BRACKETS: Record<string, Array<{ upTo: number; rate: number }>> = {
       MD: [ // Madrid — most competitive
-        { upTo: 12450,  rate: 0.09   },{ upTo: 17707,  rate: 0.12   },
-        { upTo: 33007,  rate: 0.14   },{ upTo: 53407,  rate: 0.175  },
+        { upTo: 12450, rate: 0.09 }, { upTo: 17707, rate: 0.12 },
+        { upTo: 33007, rate: 0.14 }, { upTo: 53407, rate: 0.175 },
         { upTo: Infinity, rate: 0.205 },
       ],
       CT: [ // Catalonia — highest overall
-        { upTo: 12450,  rate: 0.105  },{ upTo: 17707,  rate: 0.12   },
-        { upTo: 21000,  rate: 0.14   },{ upTo: 33007,  rate: 0.175  },
-        { upTo: 53407,  rate: 0.2175 },{ upTo: 90000,  rate: 0.2375 },
-        { upTo: 120000, rate: 0.245  },{ upTo: 175000, rate: 0.2575 },
-        { upTo: 500000, rate: 0.2675 },{ upTo: Infinity, rate: 0.2775 },
+        { upTo: 12450, rate: 0.105 }, { upTo: 17707, rate: 0.12 },
+        { upTo: 21000, rate: 0.14 }, { upTo: 33007, rate: 0.175 },
+        { upTo: 53407, rate: 0.2175 }, { upTo: 90000, rate: 0.2375 },
+        { upTo: 120000, rate: 0.245 }, { upTo: 175000, rate: 0.2575 },
+        { upTo: 500000, rate: 0.2675 }, { upTo: Infinity, rate: 0.2775 },
       ],
       AN: [ // Andalusia
-        { upTo: 12450,  rate: 0.095  },{ upTo: 20200,  rate: 0.12   },
-        { upTo: 35200,  rate: 0.14   },{ upTo: 60000,  rate: 0.185  },
-        { upTo: 120000, rate: 0.225  },{ upTo: Infinity, rate: 0.245 },
+        { upTo: 12450, rate: 0.095 }, { upTo: 20200, rate: 0.12 },
+        { upTo: 35200, rate: 0.14 }, { upTo: 60000, rate: 0.185 },
+        { upTo: 120000, rate: 0.225 }, { upTo: Infinity, rate: 0.245 },
       ],
       VC: [ // Valencia
-        { upTo: 12000,  rate: 0.10   },{ upTo: 15000,  rate: 0.13   },
-        { upTo: 17707,  rate: 0.155  },{ upTo: 33007,  rate: 0.175  },
-        { upTo: 53407,  rate: 0.20   },{ upTo: 65000,  rate: 0.225  },
-        { upTo: 80000,  rate: 0.25   },{ upTo: 120000, rate: 0.255  },
-        { upTo: 175000, rate: 0.26   },{ upTo: Infinity, rate: 0.265 },
+        { upTo: 12000, rate: 0.10 }, { upTo: 15000, rate: 0.13 },
+        { upTo: 17707, rate: 0.155 }, { upTo: 33007, rate: 0.175 },
+        { upTo: 53407, rate: 0.20 }, { upTo: 65000, rate: 0.225 },
+        { upTo: 80000, rate: 0.25 }, { upTo: 120000, rate: 0.255 },
+        { upTo: 175000, rate: 0.26 }, { upTo: Infinity, rate: 0.265 },
       ],
       PV: [ // Basque Country (foral — own system, approximated)
-        { upTo: 15450,  rate: 0.07   },{ upTo: 25450,  rate: 0.10   },
-        { upTo: 35450,  rate: 0.15   },{ upTo: 60450,  rate: 0.20   },
-        { upTo: 90450,  rate: 0.22   },{ upTo: 180450, rate: 0.25   },
+        { upTo: 15450, rate: 0.07 }, { upTo: 25450, rate: 0.10 },
+        { upTo: 35450, rate: 0.15 }, { upTo: 60450, rate: 0.20 },
+        { upTo: 90450, rate: 0.22 }, { upTo: 180450, rate: 0.25 },
         { upTo: Infinity, rate: 0.28 },
       ],
       NC: [ // Navarre (foral — own system, approximated)
-        { upTo: 12450,  rate: 0.09   },{ upTo: 19800,  rate: 0.12   },
-        { upTo: 32200,  rate: 0.14   },{ upTo: 48600,  rate: 0.18   },
-        { upTo: 68400,  rate: 0.215  },{ upTo: Infinity, rate: 0.235 },
+        { upTo: 12450, rate: 0.09 }, { upTo: 19800, rate: 0.12 },
+        { upTo: 32200, rate: 0.14 }, { upTo: 48600, rate: 0.18 },
+        { upTo: 68400, rate: 0.215 }, { upTo: Infinity, rate: 0.235 },
       ],
       GA: [ // Galicia
-        { upTo: 12450,  rate: 0.09   },{ upTo: 20200,  rate: 0.12   },
-        { upTo: 35200,  rate: 0.145  },{ upTo: 60000,  rate: 0.185  },
-        { upTo: 80000,  rate: 0.225  },{ upTo: Infinity, rate: 0.245 },
+        { upTo: 12450, rate: 0.09 }, { upTo: 20200, rate: 0.12 },
+        { upTo: 35200, rate: 0.145 }, { upTo: 60000, rate: 0.185 },
+        { upTo: 80000, rate: 0.225 }, { upTo: Infinity, rate: 0.245 },
       ],
       CL: [ // Castilla y León
-        { upTo: 12450,  rate: 0.09   },{ upTo: 20200,  rate: 0.12   },
-        { upTo: 35200,  rate: 0.14   },{ upTo: 60000,  rate: 0.185  },
+        { upTo: 12450, rate: 0.09 }, { upTo: 20200, rate: 0.12 },
+        { upTo: 35200, rate: 0.14 }, { upTo: 60000, rate: 0.185 },
         { upTo: Infinity, rate: 0.215 },
       ],
       CM: [ // Castilla-La Mancha
-        { upTo: 12450,  rate: 0.095  },{ upTo: 20200,  rate: 0.12   },
-        { upTo: 35200,  rate: 0.145  },{ upTo: 60000,  rate: 0.185  },
+        { upTo: 12450, rate: 0.095 }, { upTo: 20200, rate: 0.12 },
+        { upTo: 35200, rate: 0.145 }, { upTo: 60000, rate: 0.185 },
         { upTo: Infinity, rate: 0.225 },
       ],
       AR: [ // Aragón
-        { upTo: 12450,  rate: 0.10   },{ upTo: 15000,  rate: 0.12   },
-        { upTo: 17707,  rate: 0.14   },{ upTo: 33007,  rate: 0.175  },
-        { upTo: 53407,  rate: 0.21   },{ upTo: Infinity, rate: 0.245 },
+        { upTo: 12450, rate: 0.10 }, { upTo: 15000, rate: 0.12 },
+        { upTo: 17707, rate: 0.14 }, { upTo: 33007, rate: 0.175 },
+        { upTo: 53407, rate: 0.21 }, { upTo: Infinity, rate: 0.245 },
       ],
       EX: [ // Extremadura
-        { upTo: 12450,  rate: 0.09   },{ upTo: 20200,  rate: 0.12   },
-        { upTo: 24000,  rate: 0.155  },{ upTo: 35200,  rate: 0.175  },
-        { upTo: 60000,  rate: 0.20   },{ upTo: Infinity, rate: 0.245 },
+        { upTo: 12450, rate: 0.09 }, { upTo: 20200, rate: 0.12 },
+        { upTo: 24000, rate: 0.155 }, { upTo: 35200, rate: 0.175 },
+        { upTo: 60000, rate: 0.20 }, { upTo: Infinity, rate: 0.245 },
       ],
       MC: [ // Murcia
-        { upTo: 12450,  rate: 0.095  },{ upTo: 20200,  rate: 0.12   },
-        { upTo: 35200,  rate: 0.145  },{ upTo: 60000,  rate: 0.185  },
+        { upTo: 12450, rate: 0.095 }, { upTo: 20200, rate: 0.12 },
+        { upTo: 35200, rate: 0.145 }, { upTo: 60000, rate: 0.185 },
         { upTo: Infinity, rate: 0.235 },
       ],
       AS: [ // Asturias
-        { upTo: 12450,  rate: 0.10   },{ upTo: 17707,  rate: 0.12   },
-        { upTo: 33007,  rate: 0.145  },{ upTo: 53407,  rate: 0.185  },
-        { upTo: 70000,  rate: 0.215  },{ upTo: 90000,  rate: 0.235  },
+        { upTo: 12450, rate: 0.10 }, { upTo: 17707, rate: 0.12 },
+        { upTo: 33007, rate: 0.145 }, { upTo: 53407, rate: 0.185 },
+        { upTo: 70000, rate: 0.215 }, { upTo: 90000, rate: 0.235 },
         { upTo: Infinity, rate: 0.255 },
       ],
       CB: [ // Cantabria
-        { upTo: 12450,  rate: 0.095  },{ upTo: 20200,  rate: 0.12   },
-        { upTo: 35200,  rate: 0.145  },{ upTo: 60000,  rate: 0.185  },
+        { upTo: 12450, rate: 0.095 }, { upTo: 20200, rate: 0.12 },
+        { upTo: 35200, rate: 0.145 }, { upTo: 60000, rate: 0.185 },
         { upTo: Infinity, rate: 0.245 },
       ],
       RI: [ // La Rioja
-        { upTo: 12450,  rate: 0.095  },{ upTo: 20200,  rate: 0.12   },
-        { upTo: 35200,  rate: 0.14   },{ upTo: 60000,  rate: 0.185  },
+        { upTo: 12450, rate: 0.095 }, { upTo: 20200, rate: 0.12 },
+        { upTo: 35200, rate: 0.14 }, { upTo: 60000, rate: 0.185 },
         { upTo: Infinity, rate: 0.225 },
       ],
       IB: [ // Balearic Islands
-        { upTo: 10000,  rate: 0.09   },{ upTo: 17707,  rate: 0.115  },
-        { upTo: 33007,  rate: 0.145  },{ upTo: 53407,  rate: 0.185  },
-        { upTo: 70000,  rate: 0.22   },{ upTo: 90000,  rate: 0.235  },
-        { upTo: 120000, rate: 0.2425 },{ upTo: Infinity, rate: 0.25 },
+        { upTo: 10000, rate: 0.09 }, { upTo: 17707, rate: 0.115 },
+        { upTo: 33007, rate: 0.145 }, { upTo: 53407, rate: 0.185 },
+        { upTo: 70000, rate: 0.22 }, { upTo: 90000, rate: 0.235 },
+        { upTo: 120000, rate: 0.2425 }, { upTo: Infinity, rate: 0.25 },
       ],
       CN: [ // Canary Islands (lower rates)
-        { upTo: 12450,  rate: 0.09   },{ upTo: 17707,  rate: 0.115  },
-        { upTo: 33007,  rate: 0.14   },{ upTo: 53407,  rate: 0.175  },
+        { upTo: 12450, rate: 0.09 }, { upTo: 17707, rate: 0.115 },
+        { upTo: 33007, rate: 0.14 }, { upTo: 53407, rate: 0.175 },
         { upTo: Infinity, rate: 0.205 },
       ],
       CE: [ // Ceuta and Melilla (50% general IRPF rebate — modelled as halved community rates)
-        { upTo: 12450,  rate: 0.05   },{ upTo: 20200,  rate: 0.06   },
-        { upTo: 35200,  rate: 0.07   },{ upTo: 60000,  rate: 0.09   },
+        { upTo: 12450, rate: 0.05 }, { upTo: 20200, rate: 0.06 },
+        { upTo: 35200, rate: 0.07 }, { upTo: 60000, rate: 0.09 },
         { upTo: Infinity, rate: 0.11 },
       ],
     };
@@ -490,16 +490,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   MX: ({ annualIncome }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 8952.49,   rate: 0.0192 },
-      { upTo: 75984.55,  rate: 0.064  },
+      { upTo: 8952.49, rate: 0.0192 },
+      { upTo: 75984.55, rate: 0.064 },
       { upTo: 133536.07, rate: 0.1088 },
-      { upTo: 155229.80, rate: 0.16   },
+      { upTo: 155229.80, rate: 0.16 },
       { upTo: 185852.57, rate: 0.1792 },
       { upTo: 374837.88, rate: 0.2136 },
       { upTo: 590795.99, rate: 0.2352 },
-      { upTo: 1127926.45, rate: 0.30  },
-      { upTo: 1503902.46, rate: 0.32  },
-      { upTo: Infinity,   rate: 0.35  },
+      { upTo: 1127926.45, rate: 0.30 },
+      { upTo: 1503902.46, rate: 0.32 },
+      { upTo: Infinity, rate: 0.35 },
     ]);
     return {
       effectiveRate: clampRate(rate),
@@ -523,28 +523,28 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   CA: ({ annualIncome, filing, isRetired, answers }) => {
     // 2025 federal brackets
     const federalRate = progressiveTax(annualIncome, [
-      { upTo: 57375,  rate: 0.15  },
+      { upTo: 57375, rate: 0.15 },
       { upTo: 114750, rate: 0.205 },
-      { upTo: 177882, rate: 0.26  },
-      { upTo: 253414, rate: 0.29  },
+      { upTo: 177882, rate: 0.26 },
+      { upTo: 253414, rate: 0.29 },
       { upTo: Infinity, rate: 0.33 },
     ]);
 
     // Province-specific marginal rate overlays (2024 combined avg effective additions)
     const PROVINCE_OVERLAY: Record<string, number> = {
-      AB:  0.10,   // Alberta — lowest: no surtax
-      BC:  0.145,  // British Columbia
-      MB:  0.175,  // Manitoba
-      NB:  0.195,  // New Brunswick
-      NL:  0.215,  // Newfoundland
-      NS:  0.21,   // Nova Scotia
-      NT:  0.135,  // Northwest Territories
-      NU:  0.115,  // Nunavut
-      ON:  0.1316, // Ontario (incl. surtax effect avg)
-      PE:  0.185,  // Prince Edward Island
-      QC:  0.2575, // Quebec — highest
-      SK:  0.145,  // Saskatchewan
-      YT:  0.15,   // Yukon
+      AB: 0.10,   // Alberta — lowest: no surtax
+      BC: 0.145,  // British Columbia
+      MB: 0.175,  // Manitoba
+      NB: 0.195,  // New Brunswick
+      NL: 0.215,  // Newfoundland
+      NS: 0.21,   // Nova Scotia
+      NT: 0.135,  // Northwest Territories
+      NU: 0.115,  // Nunavut
+      ON: 0.1316, // Ontario (incl. surtax effect avg)
+      PE: 0.185,  // Prince Edward Island
+      QC: 0.2575, // Quebec — highest
+      SK: 0.145,  // Saskatchewan
+      YT: 0.15,   // Yukon
     };
 
     const province = answers?.ca_province ?? "";
@@ -553,7 +553,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
     // Credits modeled as effective rate reductions
     const spousalCredit = filing === "married" && annualIncome > 0 ? 2600 / annualIncome : 0;
-    const ageCredit     = isRetired && annualIncome > 0 ? 1900 / annualIncome : 0;
+    const ageCredit = isRetired && annualIncome > 0 ? 1900 / annualIncome : 0;
 
     return {
       effectiveRate: clampRate(federalRate + provincialOverlay - spousalCredit - ageCredit),
@@ -582,15 +582,15 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
     // 2024 German brackets (basic allowance €11,604)
     const ratePerUnit = progressiveTax(taxablePerUnit, [
-      { upTo: 11604,  rate: 0.00  },
-      { upTo: 17006,  rate: 0.14  },
-      { upTo: 66761,  rate: 0.24  },
-      { upTo: 277826, rate: 0.42  },
+      { upTo: 11604, rate: 0.00 },
+      { upTo: 17006, rate: 0.14 },
+      { upTo: 66761, rate: 0.24 },
+      { upTo: 277826, rate: 0.42 },
       { upTo: Infinity, rate: 0.45 },
     ]);
 
     const taxPerUnit = ratePerUnit * taxablePerUnit;
-    const totalTax   = filing === "married" ? taxPerUnit * 2 : taxPerUnit;
+    const totalTax = filing === "married" ? taxPerUnit * 2 : taxPerUnit;
     const baseTaxRate = annualIncome > 0 ? totalTax / annualIncome : 0;
 
     // Solidarity surcharge applies if income tax > threshold
@@ -633,13 +633,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   NL: ({ annualIncome, isRetired, answers }) => {
     const brackets = isRetired
       ? [
-          { upTo: 38441,  rate: 0.1936 }, // No AOW premium for retirees
-          { upTo: Infinity, rate: 0.495  },
-        ]
+        { upTo: 38441, rate: 0.1936 }, // No AOW premium for retirees
+        { upTo: Infinity, rate: 0.495 },
+      ]
       : [
-          { upTo: 75518,  rate: 0.3697 }, // Income tax + national insurance combined
-          { upTo: Infinity, rate: 0.495  },
-        ];
+        { upTo: 75518, rate: 0.3697 }, // Income tax + national insurance combined
+        { upTo: Infinity, rate: 0.495 },
+      ];
     const ruling30 = answers?.nl_30pct_ruling === "yes";
     let effectiveRate = progressiveTax(annualIncome, brackets);
     if (ruling30 && !isRetired) {
@@ -674,11 +674,11 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   AT: ({ annualIncome, isRetired }) => {
     // 2024 Austrian income tax brackets
     const rate = progressiveTax(annualIncome, [
-      { upTo: 11693,  rate: 0.00  },
-      { upTo: 19134,  rate: 0.20  },
-      { upTo: 32075,  rate: 0.30  },
-      { upTo: 62080,  rate: 0.40  },
-      { upTo: 93120,  rate: 0.48  },
+      { upTo: 11693, rate: 0.00 },
+      { upTo: 19134, rate: 0.20 },
+      { upTo: 32075, rate: 0.30 },
+      { upTo: 62080, rate: 0.40 },
+      { upTo: 93120, rate: 0.48 },
       { upTo: 1000000, rate: 0.50 },
       { upTo: Infinity, rate: 0.55 },
     ]);
@@ -714,9 +714,9 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
     // 2024 Belgian national brackets
     const nationalRate = progressiveTax(taxable, [
-      { upTo: 15820,  rate: 0.25  },
-      { upTo: 27920,  rate: 0.40  },
-      { upTo: 48320,  rate: 0.45  },
+      { upTo: 15820, rate: 0.25 },
+      { upTo: 27920, rate: 0.40 },
+      { upTo: 48320, rate: 0.45 },
       { upTo: Infinity, rate: 0.50 },
     ]);
 
@@ -745,11 +745,11 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   CR: ({ annualIncome, isRetired }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 929000,   rate: 0.00  },
-      { upTo: 1390000,  rate: 0.10  },
-      { upTo: 2435000,  rate: 0.15  },
-      { upTo: 4870000,  rate: 0.20  },
-      { upTo: Infinity, rate: 0.25  },
+      { upTo: 929000, rate: 0.00 },
+      { upTo: 1390000, rate: 0.10 },
+      { upTo: 2435000, rate: 0.15 },
+      { upTo: 4870000, rate: 0.20 },
+      { upTo: Infinity, rate: 0.25 },
     ]);
     return {
       effectiveRate: clampRate(rate),
@@ -772,10 +772,10 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const incomePerPart = annualIncome / parts;
 
     const taxPerPart = progressiveTax(incomePerPart, [
-      { upTo: 11294,  rate: 0.00  },
-      { upTo: 28797,  rate: 0.11  },
-      { upTo: 82341,  rate: 0.30  },
-      { upTo: 177106, rate: 0.41  },
+      { upTo: 11294, rate: 0.00 },
+      { upTo: 28797, rate: 0.11 },
+      { upTo: 82341, rate: 0.30 },
+      { upTo: 177106, rate: 0.41 },
       { upTo: Infinity, rate: 0.45 },
     ]) * incomePerPart;
 
@@ -800,8 +800,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   IT: ({ annualIncome, answers }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 28000,  rate: 0.23  },
-      { upTo: 50000,  rate: 0.35  },
+      { upTo: 28000, rate: 0.23 },
+      { upTo: 50000, rate: 0.35 },
       { upTo: Infinity, rate: 0.43 },
     ]);
     if (answers?.it_flat_tax === "yes") {
@@ -891,24 +891,24 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const standardBand = filing === "married" ? 51000 : 42000;
     const grossTaxAmount = progressiveTax(annualIncome, [
       { upTo: standardBand, rate: 0.20 },
-      { upTo: Infinity,     rate: 0.40 },
+      { upTo: Infinity, rate: 0.40 },
     ]) * annualIncome;
 
     // 2025 tax credits — applied directly against tax liability
-    const personalCredit  = 1875;
-    const payeCredit      = isRetired ? 0    : 1875; // working only
-    const marriedCredit   = filing === "married" ? 1875 : 0;
-    const ageCredit       = isRetired ? 245 : 0;     // 65+ age credit
-    const totalCredits    = personalCredit + payeCredit + marriedCredit + ageCredit;
+    const personalCredit = 1875;
+    const payeCredit = isRetired ? 0 : 1875; // working only
+    const marriedCredit = filing === "married" ? 1875 : 0;
+    const ageCredit = isRetired ? 245 : 0;     // 65+ age credit
+    const totalCredits = personalCredit + payeCredit + marriedCredit + ageCredit;
 
-    const netTaxAmount    = Math.max(0, grossTaxAmount - totalCredits);
-    const payeRate        = annualIncome > 0 ? netTaxAmount / annualIncome : 0;
+    const netTaxAmount = Math.max(0, grossTaxAmount - totalCredits);
+    const payeRate = annualIncome > 0 ? netTaxAmount / annualIncome : 0;
 
     // 2025 USC bands
     const uscRate = isRetired ? 0 : progressiveTax(annualIncome, [
-      { upTo: 13000,  rate: 0.00  },
-      { upTo: 25760,  rate: 0.02  },
-      { upTo: 70044,  rate: 0.04  },
+      { upTo: 13000, rate: 0.00 },
+      { upTo: 25760, rate: 0.02 },
+      { upTo: 70044, rate: 0.04 },
       { upTo: Infinity, rate: 0.08 },
     ]);
 
@@ -933,10 +933,10 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   AU: ({ annualIncome, isRetired }) => {
     // 2024-25 brackets (Stage 3 cuts — new thresholds effective 1 Jul 2024)
     const rate = progressiveTax(annualIncome, [
-      { upTo: 18200,  rate: 0.00  },
-      { upTo: 45000,  rate: 0.19  },
+      { upTo: 18200, rate: 0.00 },
+      { upTo: 45000, rate: 0.19 },
       { upTo: 135000, rate: 0.325 }, // raised from $120k under Stage 3
-      { upTo: 190000, rate: 0.37  },
+      { upTo: 190000, rate: 0.37 },
       { upTo: Infinity, rate: 0.45 },
     ]);
     const medicareLevy = isRetired ? 0.01 : 0.02;
@@ -958,10 +958,10 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   NZ: ({ annualIncome }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 14000,  rate: 0.105 },
-      { upTo: 53500,  rate: 0.175 }, // raised from $48k (Budget 2024)
-      { upTo: 78100,  rate: 0.30  }, // raised from $70k (Budget 2024)
-      { upTo: 180000, rate: 0.33  },
+      { upTo: 14000, rate: 0.105 },
+      { upTo: 53500, rate: 0.175 }, // raised from $48k (Budget 2024)
+      { upTo: 78100, rate: 0.30 }, // raised from $70k (Budget 2024)
+      { upTo: 180000, rate: 0.33 },
       { upTo: Infinity, rate: 0.39 },
     ]);
     return {
@@ -982,13 +982,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   JP: ({ annualIncome, isRetired }) => {
     const nationalRate = progressiveTax(annualIncome, [
-      { upTo: 1950000,   rate: 0.05  },
-      { upTo: 3300000,   rate: 0.10  },
-      { upTo: 6950000,   rate: 0.20  },
-      { upTo: 9000000,   rate: 0.23  },
-      { upTo: 18000000,  rate: 0.33  },
-      { upTo: 40000000,  rate: 0.40  },
-      { upTo: Infinity,  rate: 0.45  },
+      { upTo: 1950000, rate: 0.05 },
+      { upTo: 3300000, rate: 0.10 },
+      { upTo: 6950000, rate: 0.20 },
+      { upTo: 9000000, rate: 0.23 },
+      { upTo: 18000000, rate: 0.33 },
+      { upTo: 40000000, rate: 0.40 },
+      { upTo: Infinity, rate: 0.45 },
     ]);
     const reconstructionSurtax = nationalRate * 0.021;
     const localTax = 0.10;
@@ -1012,14 +1012,14 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   KR: ({ annualIncome, isRetired }) => {
     const nationalRate = progressiveTax(annualIncome, [
-      { upTo: 14000000,    rate: 0.06  },
-      { upTo: 50000000,    rate: 0.15  },
-      { upTo: 88000000,    rate: 0.24  },
-      { upTo: 150000000,   rate: 0.35  },
-      { upTo: 300000000,   rate: 0.38  },
-      { upTo: 500000000,   rate: 0.40  },
-      { upTo: 1000000000,  rate: 0.42  },
-      { upTo: Infinity,    rate: 0.45  },
+      { upTo: 14000000, rate: 0.06 },
+      { upTo: 50000000, rate: 0.15 },
+      { upTo: 88000000, rate: 0.24 },
+      { upTo: 150000000, rate: 0.35 },
+      { upTo: 300000000, rate: 0.38 },
+      { upTo: 500000000, rate: 0.40 },
+      { upTo: 1000000000, rate: 0.42 },
+      { upTo: Infinity, rate: 0.45 },
     ]);
     const localSurtax = nationalRate * 0.10;
     const pensionDeduction = isRetired ? -0.02 : 0;
@@ -1057,18 +1057,18 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const taxable = Math.max(0, annualIncome - earnedIncomeRelief);
 
     const rate = progressiveTax(taxable, [
-      { upTo: 20000,   rate: 0.00  },
-      { upTo: 30000,   rate: 0.02  },
-      { upTo: 40000,   rate: 0.035 },
-      { upTo: 80000,   rate: 0.07  },
-      { upTo: 120000,  rate: 0.115 },
-      { upTo: 160000,  rate: 0.15  },
-      { upTo: 200000,  rate: 0.18  },
-      { upTo: 240000,  rate: 0.19  },
-      { upTo: 280000,  rate: 0.195 },
-      { upTo: 320000,  rate: 0.20  },
-      { upTo: 500000,  rate: 0.22  },
-      { upTo: 1000000, rate: 0.23  },
+      { upTo: 20000, rate: 0.00 },
+      { upTo: 30000, rate: 0.02 },
+      { upTo: 40000, rate: 0.035 },
+      { upTo: 80000, rate: 0.07 },
+      { upTo: 120000, rate: 0.115 },
+      { upTo: 160000, rate: 0.15 },
+      { upTo: 200000, rate: 0.18 },
+      { upTo: 240000, rate: 0.19 },
+      { upTo: 280000, rate: 0.195 },
+      { upTo: 320000, rate: 0.20 },
+      { upTo: 500000, rate: 0.22 },
+      { upTo: 1000000, rate: 0.23 },
       { upTo: Infinity, rate: 0.24 },
     ]);
 
@@ -1091,29 +1091,29 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   CH: ({ annualIncome, filing }) => {
     const singleBrackets = [
-      { upTo: 17800,  rate: 0.00   },
-      { upTo: 31600,  rate: 0.077  },
-      { upTo: 41400,  rate: 0.088  },
-      { upTo: 55200,  rate: 0.11   },
-      { upTo: 72500,  rate: 0.13   },
-      { upTo: 103600, rate: 0.133  },
-      { upTo: 134600, rate: 0.134  },
-      { upTo: 176000, rate: 0.135  },
+      { upTo: 17800, rate: 0.00 },
+      { upTo: 31600, rate: 0.077 },
+      { upTo: 41400, rate: 0.088 },
+      { upTo: 55200, rate: 0.11 },
+      { upTo: 72500, rate: 0.13 },
+      { upTo: 103600, rate: 0.133 },
+      { upTo: 134600, rate: 0.134 },
+      { upTo: 176000, rate: 0.135 },
       { upTo: Infinity, rate: 0.1197 },
     ];
     const marriedBrackets = [
-      { upTo: 28300,  rate: 0.00   },
-      { upTo: 50900,  rate: 0.02   },
-      { upTo: 58400,  rate: 0.03   },
-      { upTo: 75300,  rate: 0.04   },
-      { upTo: 90300,  rate: 0.05   },
-      { upTo: 103400, rate: 0.06   },
-      { upTo: 114700, rate: 0.07   },
-      { upTo: 124000, rate: 0.08   },
-      { upTo: 131700, rate: 0.09   },
-      { upTo: 137300, rate: 0.10   },
-      { upTo: 141200, rate: 0.105  },
-      { upTo: 145000, rate: 0.11   },
+      { upTo: 28300, rate: 0.00 },
+      { upTo: 50900, rate: 0.02 },
+      { upTo: 58400, rate: 0.03 },
+      { upTo: 75300, rate: 0.04 },
+      { upTo: 90300, rate: 0.05 },
+      { upTo: 103400, rate: 0.06 },
+      { upTo: 114700, rate: 0.07 },
+      { upTo: 124000, rate: 0.08 },
+      { upTo: 131700, rate: 0.09 },
+      { upTo: 137300, rate: 0.10 },
+      { upTo: 141200, rate: 0.105 },
+      { upTo: 145000, rate: 0.11 },
       { upTo: Infinity, rate: 0.115 },
     ];
     const federalRate = progressiveTax(annualIncome, filing === "married" ? marriedBrackets : singleBrackets);
@@ -1176,38 +1176,38 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // No joint filing. Social insurance not modeled (employer-side).
   // -------------------------------------------------------------------------
   SE: ({ annualIncome }) => {
-  if (annualIncome <= 0) {
+    if (annualIncome <= 0) {
+      return {
+        effectiveRate: 0,
+        model: "progressive-country",
+        confidence: "simplified",
+        label: "Sweden income tax (2024)",
+        missingFactor: "Jobbskatteavdrag (earned income credit) not modelled.",
+        note: "Enter income to calculate.",
+      };
+    }
+
+    const basicAllowance = 36500;
+    const taxable = Math.max(0, annualIncome - basicAllowance);
+
+    const municipalRate = 0.3237;
+    const municipalTax = taxable * municipalRate;
+
+    const nationalThreshold = 598500;
+    const nationalTax = Math.max(0, taxable - nationalThreshold) * 0.20;
+
+    const totalTax = municipalTax + nationalTax;
+    const effectiveRate = annualIncome > 0 ? totalTax / annualIncome : 0;
+
     return {
-      effectiveRate: 0,
+      effectiveRate: clampRate(effectiveRate),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Sweden income tax (2024)",
-      missingFactor: "Jobbskatteavdrag (earned income credit) not modelled.",
-      note: "Enter income to calculate.",
+      label: "Sweden municipal + national income tax (2024)",
+      missingFactor: "Jobbskatteavdrag (earned income credit) not modelled — may overstate by 3–5 pp.",
+      note: "Municipal average (32.37%) and national threshold (SEK 598,500) are correct for 2024. Key omission: the jobbskatteavdrag (earned income tax credit) reduces income tax for employed residents — it is income-dependent and can be worth SEK 20,000–35,000/yr, meaning this model overstates effective income tax on employment income by roughly 3–5 pp at mid-range incomes. Municipal rates vary: Stockholm 29.83%, Gothenburg 32.35%. Income must be passed in SEK.",
     };
-  }
-
-  const basicAllowance = 36500;
-  const taxable = Math.max(0, annualIncome - basicAllowance);
-
-  const municipalRate = 0.3237;
-  const municipalTax = taxable * municipalRate;
-
-  const nationalThreshold = 598500;
-  const nationalTax = Math.max(0, taxable - nationalThreshold) * 0.20;
-
-  const totalTax = municipalTax + nationalTax;
-  const effectiveRate = annualIncome > 0 ? totalTax / annualIncome : 0;
-
-  return {
-    effectiveRate: clampRate(effectiveRate),
-    model: "progressive-country",
-    confidence: "simplified",
-    label: "Sweden municipal + national income tax (2024)",
-    missingFactor: "Jobbskatteavdrag (earned income credit) not modelled — may overstate by 3–5 pp.",
-    note: "Municipal average (32.37%) and national threshold (SEK 598,500) are correct for 2024. Key omission: the jobbskatteavdrag (earned income tax credit) reduces income tax for employed residents — it is income-dependent and can be worth SEK 20,000–35,000/yr, meaning this model overstates effective income tax on employment income by roughly 3–5 pp at mid-range incomes. Municipal rates vary: Stockholm 29.83%, Gothenburg 32.35%. Income must be passed in SEK.",
-  };
-},
+  },
 
   // -------------------------------------------------------------------------
   // NORWAY — NOK
@@ -1225,10 +1225,10 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
     // Bracket tax (trinnskatt) on gross personal income (not after deduction)
     const bracketTax = progressiveTax(annualIncome, [
-      { upTo: 208050,  rate: 0.00  },
-      { upTo: 292850,  rate: 0.017 },
-      { upTo: 670000,  rate: 0.04  },
-      { upTo: 937900,  rate: 0.136 },
+      { upTo: 208050, rate: 0.00 },
+      { upTo: 292850, rate: 0.017 },
+      { upTo: 670000, rate: 0.04 },
+      { upTo: 937900, rate: 0.136 },
       { upTo: 1350000, rate: 0.166 },
       { upTo: Infinity, rate: 0.176 },
     ]) * annualIncome;
@@ -1255,11 +1255,11 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   FI: ({ annualIncome }) => {
     // 2024 Finnish state (valtionvero) brackets
     const stateRate = progressiveTax(annualIncome, [
-      { upTo: 22900,  rate: 0.00   },
-      { upTo: 33900,  rate: 0.1264 },
-      { upTo: 49500,  rate: 0.19   },
-      { upTo: 91300,  rate: 0.3025 },
-      { upTo: 150000, rate: 0.34   },
+      { upTo: 22900, rate: 0.00 },
+      { upTo: 33900, rate: 0.1264 },
+      { upTo: 49500, rate: 0.19 },
+      { upTo: 91300, rate: 0.3025 },
+      { upTo: 150000, rate: 0.34 },
       { upTo: Infinity, rate: 0.355 },
     ]);
 
@@ -1363,10 +1363,10 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   GR: ({ annualIncome, isRetired }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 10000,  rate: 0.09  },
-      { upTo: 20000,  rate: 0.22  },
-      { upTo: 30000,  rate: 0.28  },
-      { upTo: 40000,  rate: 0.36  },
+      { upTo: 10000, rate: 0.09 },
+      { upTo: 20000, rate: 0.22 },
+      { upTo: 30000, rate: 0.28 },
+      { upTo: 40000, rate: 0.36 },
       { upTo: Infinity, rate: 0.44 },
     ]);
     // Social contributions: ~13.87% employee share (working); ~6% on pensions
@@ -1389,11 +1389,11 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   TR: ({ annualIncome }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 158000,   rate: 0.15  },
-      { upTo: 330000,   rate: 0.20  },
-      { upTo: 800000,   rate: 0.27  },
-      { upTo: 4300000,  rate: 0.35  },
-      { upTo: Infinity, rate: 0.40  },
+      { upTo: 158000, rate: 0.15 },
+      { upTo: 330000, rate: 0.20 },
+      { upTo: 800000, rate: 0.27 },
+      { upTo: 4300000, rate: 0.35 },
+      { upTo: Infinity, rate: 0.40 },
     ]);
     return {
       effectiveRate: clampRate(rate),
@@ -1412,7 +1412,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   HR: ({ annualIncome }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 50400,  rate: 0.20  },
+      { upTo: 50400, rate: 0.20 },
       { upTo: Infinity, rate: 0.30 },
     ]);
     // Surtax abolished from 1 January 2024 — rate now national only
@@ -1454,8 +1454,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   LV: ({ annualIncome, isRetired }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 20004,  rate: 0.20  },
-      { upTo: 78100,  rate: 0.23  },
+      { upTo: 20004, rate: 0.20 },
+      { upTo: 78100, rate: 0.23 },
       { upTo: Infinity, rate: 0.31 },
     ]);
     const socialOverlay = isRetired ? 0 : 0.105;
@@ -1477,7 +1477,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   LT: ({ annualIncome, isRetired }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 101094, rate: 0.20  },
+      { upTo: 101094, rate: 0.20 },
       { upTo: Infinity, rate: 0.32 },
     ]);
     // Employee social insurance ~12.52% (pension) + health 6.98% = ~19.5%
@@ -1538,11 +1538,11 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   SI: ({ annualIncome }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 9135,   rate: 0.16  },
-      { upTo: 27480,  rate: 0.26  },
-      { upTo: 54961,  rate: 0.33  },
-      { upTo: 82441,  rate: 0.39  },
-      { upTo: 105965, rate: 0.43  }, // 2023 bracket
+      { upTo: 9135, rate: 0.16 },
+      { upTo: 27480, rate: 0.26 },
+      { upTo: 54961, rate: 0.33 },
+      { upTo: 82441, rate: 0.39 },
+      { upTo: 105965, rate: 0.43 }, // 2023 bracket
       { upTo: Infinity, rate: 0.50 }, // New top bracket from 2024
     ]);
     return {
@@ -1564,7 +1564,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   SK: ({ annualIncome, isRetired }) => {
     const rate = progressiveTax(annualIncome, [
       { upTo: 47537.98, rate: 0.19 },
-      { upTo: Infinity,  rate: 0.25 },
+      { upTo: Infinity, rate: 0.25 },
     ]);
     // Employee: social 9.4% + health 4% = 13.4%
     const socialOverlay = isRetired ? 0 : 0.134;
@@ -1586,19 +1586,19 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const brackets =
       filing === "married"
         ? [
-            { upTo: 12700,  rate: 0.00  },
-            { upTo: 21200,  rate: 0.15  },
-            { upTo: 28700,  rate: 0.25  },
-            { upTo: 60000,  rate: 0.25  },
-            { upTo: Infinity, rate: 0.35 },
-          ]
+          { upTo: 12700, rate: 0.00 },
+          { upTo: 21200, rate: 0.15 },
+          { upTo: 28700, rate: 0.25 },
+          { upTo: 60000, rate: 0.25 },
+          { upTo: Infinity, rate: 0.35 },
+        ]
         : [
-            { upTo: 9100,   rate: 0.00  },
-            { upTo: 14500,  rate: 0.15  },
-            { upTo: 19500,  rate: 0.25  },
-            { upTo: 60000,  rate: 0.25  },
-            { upTo: Infinity, rate: 0.35 },
-          ];
+          { upTo: 9100, rate: 0.00 },
+          { upTo: 14500, rate: 0.15 },
+          { upTo: 19500, rate: 0.25 },
+          { upTo: 60000, rate: 0.25 },
+          { upTo: Infinity, rate: 0.35 },
+        ];
     return {
       effectiveRate: clampRate(progressiveTax(annualIncome, brackets)),
       model: "progressive-country",
@@ -1616,10 +1616,10 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   CY: ({ annualIncome, isRetired }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 19500,  rate: 0.00  },
-      { upTo: 28000,  rate: 0.20  },
-      { upTo: 36300,  rate: 0.25  },
-      { upTo: 60000,  rate: 0.30  },
+      { upTo: 19500, rate: 0.00 },
+      { upTo: 28000, rate: 0.20 },
+      { upTo: 36300, rate: 0.25 },
+      { upTo: 60000, rate: 0.30 },
       { upTo: Infinity, rate: 0.35 },
     ]);
     // GHS (GESY) contribution: 2.65% working, 1.7% pension
@@ -1641,8 +1641,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   PA: ({ annualIncome }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 11000,  rate: 0.00  },
-      { upTo: 50000,  rate: 0.15  },
+      { upTo: 11000, rate: 0.00 },
+      { upTo: 50000, rate: 0.15 },
       { upTo: Infinity, rate: 0.25 },
     ]);
     return {
@@ -1665,12 +1665,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const incomeUVT = annualIncome / uvtValue;
 
     const taxUVT = progressiveTax(incomeUVT, [
-      { upTo: 1090,   rate: 0.00  },
-      { upTo: 1700,   rate: 0.19  },
-      { upTo: 4100,   rate: 0.28  },
-      { upTo: 8670,   rate: 0.33  },
-      { upTo: 18970,  rate: 0.35  },
-      { upTo: 31000,  rate: 0.37  },
+      { upTo: 1090, rate: 0.00 },
+      { upTo: 1700, rate: 0.19 },
+      { upTo: 4100, rate: 0.28 },
+      { upTo: 8670, rate: 0.33 },
+      { upTo: 18970, rate: 0.35 },
+      { upTo: 31000, rate: 0.37 },
       { upTo: Infinity, rate: 0.39 },
     ]) * incomeUVT;
 
@@ -1697,10 +1697,10 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
     // 2024 IRPF brackets (effective from May 2024)
     const rate = progressiveTax(taxable, [
-      { upTo: 33888,  rate: 0.00   },
-      { upTo: 45012,  rate: 0.075  },
-      { upTo: 55976,  rate: 0.15   },
-      { upTo: 82596,  rate: 0.225  },
+      { upTo: 33888, rate: 0.00 },
+      { upTo: 45012, rate: 0.075 },
+      { upTo: 55976, rate: 0.15 },
+      { upTo: 82596, rate: 0.225 },
       { upTo: Infinity, rate: 0.275 },
     ]);
 
@@ -1726,15 +1726,15 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const taxable = Math.max(0, annualIncome - pensionExemption);
 
     const rate = progressiveTax(taxable, [
-      { upTo: 419253,   rate: 0.05  },
-      { upTo: 838506,   rate: 0.09  },
-      { upTo: 1257759,  rate: 0.12  },
-      { upTo: 1677012,  rate: 0.15  },
-      { upTo: 2514769,  rate: 0.19  },
-      { upTo: 3354259,  rate: 0.23  },
-      { upTo: 5031388,  rate: 0.27  },
-      { upTo: 6708518,  rate: 0.31  },
-      { upTo: Infinity, rate: 0.35  },
+      { upTo: 419253, rate: 0.05 },
+      { upTo: 838506, rate: 0.09 },
+      { upTo: 1257759, rate: 0.12 },
+      { upTo: 1677012, rate: 0.15 },
+      { upTo: 2514769, rate: 0.19 },
+      { upTo: 3354259, rate: 0.23 },
+      { upTo: 5031388, rate: 0.27 },
+      { upTo: 6708518, rate: 0.31 },
+      { upTo: Infinity, rate: 0.35 },
     ]);
 
     const effectiveRate = annualIncome > 0 ? (rate * taxable) / annualIncome : 0;
@@ -1758,13 +1758,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const incomeUTM = annualIncome / utmValue;
 
     const taxUTM = progressiveTax(incomeUTM, [
-      { upTo: 13.5,   rate: 0.00   },
-      { upTo: 30,     rate: 0.04   },
-      { upTo: 50,     rate: 0.08   },
-      { upTo: 70,     rate: 0.135  },
-      { upTo: 90,     rate: 0.23   },
-      { upTo: 120,    rate: 0.304  },
-      { upTo: 150,    rate: 0.355  },
+      { upTo: 13.5, rate: 0.00 },
+      { upTo: 30, rate: 0.04 },
+      { upTo: 50, rate: 0.08 },
+      { upTo: 70, rate: 0.135 },
+      { upTo: 90, rate: 0.23 },
+      { upTo: 120, rate: 0.304 },
+      { upTo: 150, rate: 0.355 },
       { upTo: Infinity, rate: 0.40 },
     ]) * incomeUTM;
 
@@ -1789,10 +1789,10 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const incomeUIT = annualIncome / uitValue;
 
     const taxUIT = progressiveTax(incomeUIT, [
-      { upTo: 5,      rate: 0.08  },
-      { upTo: 20,     rate: 0.14  },
-      { upTo: 35,     rate: 0.17  },
-      { upTo: 45,     rate: 0.20  },
+      { upTo: 5, rate: 0.08 },
+      { upTo: 20, rate: 0.14 },
+      { upTo: 35, rate: 0.17 },
+      { upTo: 45, rate: 0.20 },
       { upTo: Infinity, rate: 0.30 },
     ]) * incomeUIT;
 
@@ -1818,14 +1818,14 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const taxable = Math.max(0, annualIncome - deductions);
 
     const rate = progressiveTax(taxable, [
-      { upTo: 150000,   rate: 0.00  },
-      { upTo: 300000,   rate: 0.05  },
-      { upTo: 500000,   rate: 0.10  },
-      { upTo: 750000,   rate: 0.15  },
-      { upTo: 1000000,  rate: 0.20  },
-      { upTo: 2000000,  rate: 0.25  },
-      { upTo: 5000000,  rate: 0.30  },
-      { upTo: Infinity, rate: 0.35  },
+      { upTo: 150000, rate: 0.00 },
+      { upTo: 300000, rate: 0.05 },
+      { upTo: 500000, rate: 0.10 },
+      { upTo: 750000, rate: 0.15 },
+      { upTo: 1000000, rate: 0.20 },
+      { upTo: 2000000, rate: 0.25 },
+      { upTo: 5000000, rate: 0.30 },
+      { upTo: Infinity, rate: 0.35 },
     ]);
 
     const effectiveRate = annualIncome > 0 ? (rate * taxable) / annualIncome : 0;
@@ -1849,13 +1849,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const taxable = Math.max(0, annualIncome - personalAllowance);
 
     const rate = progressiveTax(taxable, [
-      { upTo: 60000000,   rate: 0.05  },
-      { upTo: 120000000,  rate: 0.10  },
-      { upTo: 216000000,  rate: 0.15  },
-      { upTo: 384000000,  rate: 0.20  },
-      { upTo: 624000000,  rate: 0.25  },
-      { upTo: 960000000,  rate: 0.30  },
-      { upTo: Infinity,   rate: 0.35  },
+      { upTo: 60000000, rate: 0.05 },
+      { upTo: 120000000, rate: 0.10 },
+      { upTo: 216000000, rate: 0.15 },
+      { upTo: 384000000, rate: 0.20 },
+      { upTo: 624000000, rate: 0.25 },
+      { upTo: 960000000, rate: 0.30 },
+      { upTo: Infinity, rate: 0.35 },
     ]);
 
     const effectiveRate = annualIncome > 0 ? (rate * taxable) / annualIncome : 0;
@@ -1876,15 +1876,15 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   MY: ({ annualIncome }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 5000,    rate: 0.00  },
-      { upTo: 20000,   rate: 0.01  },
-      { upTo: 35000,   rate: 0.03  },
-      { upTo: 50000,   rate: 0.06  },
-      { upTo: 70000,   rate: 0.11  },
-      { upTo: 100000,  rate: 0.19  },
-      { upTo: 400000,  rate: 0.25  },
-      { upTo: 600000,  rate: 0.26  },
-      { upTo: 2000000, rate: 0.28  },
+      { upTo: 5000, rate: 0.00 },
+      { upTo: 20000, rate: 0.01 },
+      { upTo: 35000, rate: 0.03 },
+      { upTo: 50000, rate: 0.06 },
+      { upTo: 70000, rate: 0.11 },
+      { upTo: 100000, rate: 0.19 },
+      { upTo: 400000, rate: 0.25 },
+      { upTo: 600000, rate: 0.26 },
+      { upTo: 2000000, rate: 0.28 },
       { upTo: Infinity, rate: 0.30 },
     ]);
     return {
@@ -1904,11 +1904,11 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   ID: ({ annualIncome }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 60000000,    rate: 0.05  },
-      { upTo: 250000000,   rate: 0.15  },
-      { upTo: 500000000,   rate: 0.25  },
-      { upTo: 5000000000,  rate: 0.30  },
-      { upTo: Infinity,    rate: 0.35  },
+      { upTo: 60000000, rate: 0.05 },
+      { upTo: 250000000, rate: 0.15 },
+      { upTo: 500000000, rate: 0.25 },
+      { upTo: 5000000000, rate: 0.30 },
+      { upTo: Infinity, rate: 0.35 },
     ]);
     return {
       effectiveRate: clampRate(rate),
@@ -1927,13 +1927,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   ZA: ({ annualIncome, isRetired }) => {
     const rate = progressiveTax(annualIncome, [
-      { upTo: 237100,   rate: 0.18  },
-      { upTo: 370500,   rate: 0.26  },
-      { upTo: 512800,   rate: 0.31  },
-      { upTo: 673000,   rate: 0.36  },
-      { upTo: 857900,   rate: 0.39  },
-      { upTo: 1817000,  rate: 0.41  },
-      { upTo: Infinity, rate: 0.45  },
+      { upTo: 237100, rate: 0.18 },
+      { upTo: 370500, rate: 0.26 },
+      { upTo: 512800, rate: 0.31 },
+      { upTo: 673000, rate: 0.36 },
+      { upTo: 857900, rate: 0.39 },
+      { upTo: 1817000, rate: 0.41 },
+      { upTo: Infinity, rate: 0.45 },
     ]);
     // 2024-25 rebates: primary ZAR 17,235; secondary (65+) additional ZAR 9,444
     const rebateZAR = isRetired ? (17235 + 9444) : 17235;
@@ -1948,6 +1948,223 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       note: "Brackets and rebates (primary ZAR 17,235; secondary ZAR 9,444 for 65+) are correct 2024-25 SARS figures — the rebates are a real strength of this model. Key omissions: medical scheme tax credits (MTC) reduce tax by ZAR 364/mo for the primary member, which is meaningful at lower incomes. UIF (1% employee, capped at UIF benefit ceiling) is also excluded. The retirement fund deduction (up to 27.5% of taxable income, max ZAR 350,000/yr) can substantially reduce taxable income for contributing residents. Income must be passed in ZAR.",
     };
   },
+EC: ({ annualIncome, isRetired }) => {
+  if (isRetired && annualIncome < 14000) {
+    return {
+      effectiveRate: 0,
+      model: "progressive-country",
+      confidence: "simplified",
+      label: "Ecuador IR — below taxable threshold",
+      missingFactor: "IESS social security for foreign residents not modelled.",
+      note: "Retirement income below Ecuador's basic deduction threshold (~$11,722/yr). Zero income tax modelled. Ecuador is dollarized — no FX complexity. Verify residency-based tax treatment with a local advisor.",
+    };
+  }
+  const brackets = [
+    { upTo: 11722,    rate: 0 },
+    { upTo: 14930,    rate: 0.05 },
+    { upTo: 19670,    rate: 0.10 },
+    { upTo: 26330,    rate: 0.12 },
+    { upTo: 35080,    rate: 0.15 },
+    { upTo: 46750,    rate: 0.20 },
+    { upTo: 62330,    rate: 0.25 },
+    { upTo: 83120,    rate: 0.30 },
+    { upTo: Infinity, rate: 0.35 },
+  ];
+  const rate = progressiveTax(annualIncome, brackets);
+  return {
+    effectiveRate: clampRate(rate),
+    model: "progressive-country",
+    confidence: "simplified",
+    label: "Ecuador IR — progressive (simplified, 2024 brackets)",
+    missingFactor: "IESS social security contributions for foreign residents not modelled.",
+    note: `Effective rate ${(clampRate(rate) * 100).toFixed(1)}%. Ecuador is dollarized — no FX conversion needed. 2024 IR brackets applied with basic personal deduction of ~$11,722/yr. IESS social security contributions for foreign residents vary by residency type and are not modelled. Verify with a local tax advisor.`,
+  };
+},
+
+UY: ({ annualIncome, isRetired }) => {
+  if (isRetired) {
+    return {
+      effectiveRate: 0.06,
+      model: "flat",
+      confidence: "simplified",
+      label: "Uruguay IRPF — retirement income (simplified estimate)",
+      missingFactor: "7-year territorial exemption for new residents not modelled — may reduce rate to 0%.",
+      note: "Simplified flat 6% effective rate applied for retirement income. New tax residents may qualify for a 7-year territorial income exemption on foreign-source income — a major planning consideration. Verify eligibility with a local advisor.",
+    };
+  }
+  const brackets = [
+    { upTo: 9000,     rate: 0 },
+    { upTo: 16000,    rate: 0.10 },
+    { upTo: 28000,    rate: 0.15 },
+    { upTo: 48000,    rate: 0.24 },
+    { upTo: 75000,    rate: 0.25 },
+    { upTo: 110000,   rate: 0.27 },
+    { upTo: Infinity, rate: 0.31 },
+  ];
+  const rate = progressiveTax(annualIncome, brackets);
+  return {
+    effectiveRate: clampRate(rate),
+    model: "progressive-country",
+    confidence: "simplified",
+    label: "Uruguay IRPF — progressive (simplified, USD-equivalent brackets)",
+    missingFactor: "FONASA/BPS social contributions (~15–18%) not included; 7-year territorial exemption may apply.",
+    note: `Effective rate ${(clampRate(rate) * 100).toFixed(1)}%. Brackets converted to approximate USD at 39.5 UYU/USD. FONASA health and BPS social security contributions (~15–18% on employment income) are not modelled. New residents may qualify for a 7-year territorial tax exemption on foreign-source income. Verify with a local advisor.`,
+  };
+},
+
+PY: ({ annualIncome, isRetired }) => {
+  if (isRetired) {
+    return {
+      effectiveRate: 0,
+      model: "flat",
+      confidence: "simplified",
+      label: "Paraguay IRP — retirement income (territorial system)",
+      missingFactor: "Territorial system means foreign pension income generally not taxed in Paraguay.",
+      note: "Paraguay taxes only Paraguay-source income. Foreign pension and retirement income is generally not subject to IRP for resident individuals. Effective rate modelled as 0%. Verify your specific situation with a local advisor.",
+    };
+  }
+  const THRESHOLD = 12000;
+  if (annualIncome <= THRESHOLD) {
+    return {
+      effectiveRate: 0,
+      model: "flat",
+      confidence: "simplified",
+      label: "Paraguay IRP — below threshold",
+      missingFactor: "Territorial system means foreign-source remote salary typically not taxed at all.",
+      note: "Income below Paraguay's IRP personal deduction threshold (~$12,000/yr). Zero tax modelled. Paraguay also taxes only Paraguay-source income — remote workers retaining a foreign salary typically owe zero Paraguayan income tax regardless of income level.",
+    };
+  }
+  const tax = (annualIncome - THRESHOLD) * 0.10;
+  const effectiveRate = clampRate(annualIncome > 0 ? tax / annualIncome : 0);
+  return {
+    effectiveRate,
+    model: "flat",
+    confidence: "simplified",
+    label: "Paraguay IRP — flat 10% above threshold (simplified)",
+    missingFactor: "Territorial system: foreign-source remote salary likely not taxed — this models local-source income only.",
+    note: `Effective rate ${(effectiveRate * 100).toFixed(1)}%. Paraguay's IRP is a flat 10% on income above ~$12,000/yr. Critically: Paraguay taxes only Paraguay-source income. If you retain a foreign remote salary, your effective Paraguayan rate is likely 0% — this model assumes local-source income for conservatism. Verify with a local advisor.`,
+  };
+},
+
+BO: ({ annualIncome, isRetired }) => {
+  if (isRetired) {
+    return {
+      effectiveRate: 0.05,
+      model: "flat",
+      confidence: "placeholder",
+      label: "Bolivia RC-IVA — retirement income (simplified estimate)",
+      missingFactor: "Bolivia's RC-IVA system is non-standard — retirement and foreign income treatment not well-documented.",
+      note: "Simplified 5% effective rate applied for retirement income. Bolivia's tax system is non-standard — RC-IVA applies at 13% on net salary after deductions, but retirement and foreign-source income treatment varies significantly. Verify with a local advisor before planning.",
+    };
+  }
+  if (annualIncome < 10000) {
+    return {
+      effectiveRate: 0.05,
+      model: "flat",
+      confidence: "placeholder",
+      label: "Bolivia RC-IVA — lower income (simplified estimate)",
+      missingFactor: "RC-IVA deductions for minimum wages and VAT receipts not modelled.",
+      note: "Simplified 5% effective rate applied. Bolivia's RC-IVA is nominally 13% but deductions for minimum wages and VAT receipts significantly reduce effective liability at lower incomes. Foreign-source income treatment varies. Verify with a local advisor.",
+    };
+  }
+  return {
+    effectiveRate: 0.10,
+    model: "flat",
+    confidence: "placeholder",
+    label: "Bolivia RC-IVA — simplified planning estimate",
+    missingFactor: "RC-IVA is 13% flat on net salary after deductions — this is a conservative approximation.",
+    note: "Simplified 10% effective rate applied. Bolivia uses RC-IVA (flat 13% on net salary after deductions for minimum wages and VAT receipts) rather than a standard progressive income tax. Foreign-source income, self-employment, and business income are treated differently. Verify with a local advisor.",
+  };
+},
+
+GY: ({ annualIncome, isRetired }) => {
+  const ALLOWANCE = 4593; // ~G$960,000/yr at 209 GYD/USD
+  if (isRetired && annualIncome <= ALLOWANCE) {
+    return {
+      effectiveRate: 0,
+      model: "progressive-country",
+      confidence: "simplified",
+      label: "Guyana income tax — below personal allowance",
+      missingFactor: "NIS social insurance (~5.6%) not modelled.",
+      note: "Income below Guyana's personal allowance threshold (~$4,593 USD). Zero income tax modelled. NIS social insurance contributions not modelled. Guyana is the only English-speaking country in South America. Verify with a local advisor.",
+    };
+  }
+  const taxable = Math.max(0, annualIncome - ALLOWANCE);
+  const BAND1_LIMIT = 11480 - ALLOWANCE; // ~G$2.4M total at 209 GYD/USD
+  const tax = taxable <= BAND1_LIMIT
+    ? taxable * 0.28
+    : BAND1_LIMIT * 0.28 + (taxable - BAND1_LIMIT) * 0.40;
+  const effectiveRate = clampRate(annualIncome > 0 ? tax / annualIncome : 0);
+  return {
+    effectiveRate,
+    model: "progressive-country",
+    confidence: "simplified",
+    label: "Guyana income tax — progressive (simplified, USD-equivalent brackets)",
+    missingFactor: "NIS employee contributions (~5.6%) not included.",
+    note: `Effective rate ${(effectiveRate * 100).toFixed(1)}%. Two-rate system: 28% up to ~$11,480 USD, 40% above, after personal allowance of ~$4,593 USD. Brackets converted at 209 GYD/USD. NIS employee contributions (~5.6%) not modelled. Verify with a local advisor.`,
+  };
+},
+
+SR: ({ annualIncome, isRetired }) => {
+  if (isRetired) {
+    return {
+      effectiveRate: 0.06,
+      model: "flat",
+      confidence: "placeholder",
+      label: "Suriname income tax — retirement income (simplified estimate)",
+      missingFactor: "Suriname expat tax rules are not well-documented — treat as rough estimate.",
+      note: "Simplified 6% effective rate applied for retirement income. Suriname's tax rules for foreign residents and retirees are not well-documented in mainstream expat resources. Treat as a rough planning estimate only. Verify with a local advisor.",
+    };
+  }
+  const brackets = [
+    { upTo: 5000,     rate: 0 },
+    { upTo: 10000,    rate: 0.08 },
+    { upTo: 18000,    rate: 0.18 },
+    { upTo: 30000,    rate: 0.28 },
+    { upTo: Infinity, rate: 0.38 },
+  ];
+  const rate = progressiveTax(annualIncome, brackets);
+  return {
+    effectiveRate: clampRate(rate),
+    model: "progressive-country",
+    confidence: "placeholder",
+    label: "Suriname income tax — simplified progressive estimate",
+    missingFactor: "Limited public expat tax data — brackets are approximate and may be outdated.",
+    note: `Effective rate ${(clampRate(rate) * 100).toFixed(1)}%. Simplified brackets converted to approximate USD at 36.5 SRD/USD. Suriname has limited publicly available expat tax data — this is a planning estimate only. Social security contributions not modelled. Verify with a local advisor before making decisions.`,
+  };
+},
+
+VE: ({ annualIncome, isRetired }) => {
+  if (isRetired) {
+    return {
+      effectiveRate: 0.05,
+      model: "flat",
+      confidence: "placeholder",
+      label: "Venezuela ISLR — simplified planning estimate only",
+      missingFactor: "FX volatility and inflation make all Venezuelan figures unreliable.",
+      note: "Venezuela's tax, FX, and economic environment makes all estimates highly unreliable. Simplified 5% flat rate applied. Exchange rate volatility and inflation can invalidate planning figures quickly. Verify all assumptions with an independent local advisor before making any decisions.",
+    };
+  }
+  if (annualIncome < 15000) {
+    return {
+      effectiveRate: 0.06,
+      model: "flat",
+      confidence: "placeholder",
+      label: "Venezuela ISLR — simplified planning estimate only",
+      missingFactor: "FX volatility and inflation make all Venezuelan figures unreliable.",
+      note: "Venezuela's tax, FX, and economic environment makes all estimates highly unreliable. Simplified flat rate applied. Do not use this for financial planning without independent local verification.",
+    };
+  }
+  return {
+    effectiveRate: 0.12,
+    model: "flat",
+    confidence: "placeholder",
+    label: "Venezuela ISLR — simplified planning estimate only",
+    missingFactor: "FX volatility and inflation make all Venezuelan figures unreliable.",
+    note: "Simplified 12% flat estimate only. Venezuela's ISLR is nominally progressive but the real tax burden, FX situation, and policy environment change rapidly. Exchange rate volatility can make USD purchasing power estimates stale within weeks. Treat all Venezuela figures as illustrative only and verify independently.",
+  };
+},
+  
 };
 
 // ---------------------------------------------------------------------------
@@ -1963,8 +2180,8 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
         "Portugal's IFICI regime offers a 20% flat rate on qualifying Portuguese-source income and broad exemptions on foreign-source income for eligible new residents.",
       when: { incomeScenario: ["remote"] },
       options: [
-        { value: "yes",    label: "Yes — applying for IFICI / NHR" },
-        { value: "no",     label: "No — standard progressive rates apply" },
+        { value: "yes", label: "Yes — applying for IFICI / NHR" },
+        { value: "no", label: "No — standard progressive rates apply" },
         { value: "unsure", label: "Not sure yet" },
       ],
     },
@@ -2004,8 +2221,8 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
         "Spain's Beckham Law applies a 24% flat rate on Spanish-source income up to €600k for qualifying inbound workers who haven't been Spanish residents in the prior 5 years.",
       when: { incomeScenario: ["remote", "local"] },
       options: [
-        { value: "yes",    label: "Yes — eligible for Beckham Law" },
-        { value: "no",     label: "No — standard progressive rates apply" },
+        { value: "yes", label: "Yes — eligible for Beckham Law" },
+        { value: "no", label: "No — standard progressive rates apply" },
         { value: "unsure", label: "Not sure yet" },
       ],
     },
@@ -2018,8 +2235,8 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
         "The 30% ruling allows qualifying expat employees to receive 30% of their salary as a tax-free allowance for up to 5 years. It requires employer sponsorship, a specific expertise requirement, and a minimum salary (€46,107 in 2024).",
       when: { incomeScenario: ["remote", "local"] },
       options: [
-        { value: "yes",    label: "Yes — employer has applied / will apply for the ruling" },
-        { value: "no",     label: "No — standard Box 1 rates apply" },
+        { value: "yes", label: "Yes — employer has applied / will apply for the ruling" },
+        { value: "no", label: "No — standard Box 1 rates apply" },
         { value: "unsure", label: "Not sure yet" },
       ],
     },
@@ -2061,8 +2278,8 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
         "Italy's Flat Tax for New Residents substitutes a fixed €100,000/yr tax for all foreign-source income taxes, regardless of amount. Relevant for high earners with significant foreign income moving to Italy.",
       when: { incomeScenario: ["remote"] },
       options: [
-        { value: "yes",    label: "Yes — modelling the €100k flat tax regime" },
-        { value: "no",     label: "No — standard IRPEF rates apply" },
+        { value: "yes", label: "Yes — modelling the €100k flat tax regime" },
+        { value: "no", label: "No — standard IRPEF rates apply" },
         { value: "unsure", label: "Not sure yet" },
       ],
     },
@@ -2074,8 +2291,8 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
       helpText:
         "Church tax (Kirchensteuer) is ~8–9% of your income tax liability and applies if you are a registered member of the Catholic or Protestant church. It is automatically deducted alongside income tax.",
       options: [
-        { value: "yes",    label: "Yes — church tax applies (~8.5% of income tax)" },
-        { value: "no",     label: "No — not a registered church member" },
+        { value: "yes", label: "Yes — church tax applies (~8.5% of income tax)" },
+        { value: "no", label: "No — not a registered church member" },
         { value: "unsure", label: "Not sure" },
       ],
     },
@@ -2132,14 +2349,14 @@ export function estimateInternationalTax({
 
   if (!estimator) {
 
-     return {
-  effectiveRate: 0,
-  model: "placeholder",
-  confidence: "placeholder",
-  label: "Tax estimate unavailable",
-  missingFactor: "Tax model not configured for this country yet.",
-  note: "Tax model not yet configured for this country.",
-};
+    return {
+      effectiveRate: 0,
+      model: "placeholder",
+      confidence: "placeholder",
+      label: "Tax estimate unavailable",
+      missingFactor: "Tax model not configured for this country yet.",
+      note: "Tax model not yet configured for this country.",
+    };
   }
 
   return estimator({
@@ -2168,9 +2385,9 @@ export function getTaxModelStatus(countryCode: string): {
   }
   const sample = estimator({ annualIncome: 50000, filing: "single", isRetired: false });
   return {
-    model:      sample.model,
+    model: sample.model,
     confidence: sample.confidence,
-    label:      sample.label,
-    note:       sample.note,
+    label: sample.label,
+    note: sample.note,
   };
 }
