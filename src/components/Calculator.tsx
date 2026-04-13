@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { STATES, type StateCode } from "../lib/states";
 import { citiesForState, findCity } from "../lib/cities";
+import { isAllowedCompareRoute } from "../lib/compare";
 import { estimateNetAnnual, type FilingStatus } from "../lib/tax";
 import { monthlyHousingCost } from "../lib/housing";
 import { comfortScore } from "../lib/comfort";
@@ -25,6 +26,7 @@ function money(n: number, digits: number = 0) {
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
+
 
 // Simple PMI model for MVP: annual PMI % of loan amount when down < 20%
 function estimatePMIMonthly(loanAmount: number, downPct: number, pmiAnnualPct: number) {
@@ -110,7 +112,9 @@ export default function Calculator({
   const [mode, setMode] = useState<Mode>("rent");
   const hasMounted = useRef(false);
 
+
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
+
 
   const [salary, setSalary] = useState<string>("150000");
 const [filing, setFiling] = useState<FilingStatus>("single");
@@ -169,6 +173,10 @@ const [parkingMonthly, setParkingMonthly] = useState<string>("150");
 
   const fromCity = useMemo(() => (fromCityId ? findCity(fromCityId) : null), [fromCityId]);
   const toCity = useMemo(() => (toCityId ? findCity(toCityId) : null), [toCityId]);
+
+  const compareRouteAllowed = useMemo(() => {
+  return isAllowedCompareRoute(fromCityId, toCityId);
+}, [fromCityId, toCityId]);
 
   const isFromOther = fromCityId.startsWith("other-");
   const isToOther = toCityId.startsWith("other-");
@@ -840,6 +848,12 @@ const estHealthcare = useMemo(() => {
                   />
                 </label>
               )}
+
+              {fromCityId && toCityId && !compareRouteAllowed ? (
+  <div className="sm:col-span-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+    Compare pages are currently available only when at least one selected city is a major city.
+  </div>
+) : null}
             </div>
           </div>
 

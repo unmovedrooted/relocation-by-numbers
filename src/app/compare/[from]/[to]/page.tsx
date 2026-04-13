@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import Calculator from "@/components/Calculator";
 import AdSlot from "@/components/AdSlot";
-import { findCity, isMajorCity } from "@/lib/cities";
+import { findCity } from "@/lib/cities";
+import { isAllowedCompareRoute, isSameCompare } from "@/lib/compare";
 import { majorCityPairs } from "@/lib/majorCities";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export const dynamicParams = true;
 
-function isSameCompare(a?: string, b?: string) {
-  return !!a && !!b && a.trim().toLowerCase() === b.trim().toLowerCase();
-}
 
 export async function generateStaticParams() {
   return majorCityPairs
@@ -56,23 +54,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ComparePage({ params }: PageProps) {
   const { from, to } = await params;
 
-  if (isSameCompare(from, to)) return notFound();
+if (!isAllowedCompareRoute(from, to)) return notFound();
 
-  const fromCity = findCity(from);
-  const toCity = findCity(to);
+const fromCity = findCity(from)!;
+const toCity = findCity(to)!;
 
-  if (!fromCity || !toCity) return notFound();
-
-  if (!isMajorCity(fromCity) && !isMajorCity(toCity)) return notFound();
-
-  const isValidCompareHref = (href: string) => {
-    const parts = href.split("/compare/")[1]?.split("/");
-    const a = parts?.[0];
-    const b = parts?.[1];
-    if (!a || !b) return false;
-    if (isSameCompare(a, b)) return false;
-    return !!findCity(a) && !!findCity(b);
-  };
+ const isValidCompareHref = (href: string) => {
+  const parts = href.split("/compare/")[1]?.split("/");
+  const a = parts?.[0];
+  const b = parts?.[1];
+  return isAllowedCompareRoute(a, b);
+};
 
   const popular = [
     { href: `/compare/${fromCity.id}/nyc-ny`, label: `${fromCity.name} vs NYC` },
