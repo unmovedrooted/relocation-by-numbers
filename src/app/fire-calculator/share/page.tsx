@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import AdSlot from "@/components/AdSlot";
 import { buildFireShareImageUrl, getFireShareData } from "@/lib/fireShare";
 
 type SharePageProps = {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import AdSlot from "@/components/AdSlot";
 import EuropeRelocationCalculator from "@/components/EuropeRelocationCalculator";
 
 export const metadata: Metadata = {

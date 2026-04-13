@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Calculator from "@/components/Calculator";
 import { findCity } from "@/lib/cities";
+import AdSlot from "@/components/AdSlot";
 import Link from "next/link";
 import { estimateMortgageMonthly } from "@/lib/mortgage";
 import type { Metadata } from "next";

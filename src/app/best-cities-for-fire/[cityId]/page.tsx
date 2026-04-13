@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import AdSlot from "@/components/AdSlot";
 import { notFound } from "next/navigation";
 import { findCity, majorCities } from "@/lib/cities";
 

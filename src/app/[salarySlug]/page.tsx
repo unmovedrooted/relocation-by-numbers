@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import AdSlot from "@/components/AdSlot";
 import FireCalculator from "@/components/FireCalculator";
 import Link from "next/link";
 

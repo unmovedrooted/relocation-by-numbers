@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { STATES, type StateCode } from "@/lib/states";
+import AdSlot from "@/components/AdSlot";
 import { citiesForState } from "@/lib/cities";
 import Link from "next/link";
 

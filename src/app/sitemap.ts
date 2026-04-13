@@ -15,6 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // ── FIRE & retirement calculators ──────────────────────────────────────────
   const calculatorPages = [
+    "/mortgage-calculator",
     "/fire-calculator",
     "/fire-number-calculator",
     "/coast-fire-calculator",
@@ -126,7 +127,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   const costOfLivingPages = cities.map((city) => ({
-    url: `${baseUrl}/cost-of-living/${city.id}`,  // fixed: was /cost-of-living-in/
+    url: `${baseUrl}/cost-of-living/${city.id}`,
     lastModified: now,
     priority: 0.7,
     changeFrequency: "monthly" as const,

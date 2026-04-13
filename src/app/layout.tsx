@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
+// @ts-ignore: allow importing global CSS in Next.js app
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,6 +28,14 @@ export const metadata: Metadata = {
     "google-adsense-account": "ca-pub-5257549146198249",
   },
 };
+
+const NAV_LINKS = [
+  { href: "/explore",               label: "Explore" },
+  { href: "/fire-calculator",       label: "FIRE Calculator" },
+  { href: "/mortgage-calculator",   label: "Mortgage" },
+  { href: "/international-relocation", label: "International" },
+  { href: "/best-cities-for-fire",  label: "Best Cities for FIRE" },
+];
 
 export default function RootLayout({
   children,
@@ -66,23 +75,23 @@ export default function RootLayout({
         <div className="flex min-h-screen flex-col">
           <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-              <Link href="/" className="text-lg font-semibold tracking-tight text-slate-900">
+              <Link
+                href="/"
+                className="text-lg font-semibold tracking-tight text-slate-900"
+              >
                 Relocation by Numbers
               </Link>
 
               <nav className="flex items-center gap-4 text-sm text-slate-600">
-                <Link href="/explore" className="transition hover:text-slate-900">
-                  Explore
-                </Link>
-                <Link href="/fire-calculator" className="transition hover:text-slate-900">
-                  FIRE Calculator
-                </Link>
-                <Link href="/international-relocation" className="transition hover:text-slate-900">
-                  International
-                </Link>
-                <Link href="/best-cities-for-fire" className="transition hover:text-slate-900">
-                  Best Cities for FIRE
-                </Link>
+                {NAV_LINKS.map(({ href, label }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="transition hover:text-slate-900"
+                  >
+                    {label}
+                  </Link>
+                ))}
               </nav>
             </div>
           </header>

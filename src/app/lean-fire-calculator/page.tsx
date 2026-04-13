@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import FireCalculator from "@/components/FireCalculator";
+import AdSlot from "@/components/AdSlot";
 import { SEOFAQItem } from "@/components/SeoFAQ";
 
 export const metadata: Metadata = {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AdSlot from "@/components/AdSlot";
 import { STATES, type StateCode } from "@/lib/states";
 import { citiesForState } from "@/lib/cities";
 

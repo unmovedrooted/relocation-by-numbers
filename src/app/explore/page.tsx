@@ -1,27 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import AdSlot from "@/components/AdSlot";
 import USMapPreview from "@/components/USMapPreview";
 
 export const metadata: Metadata = {
-  title: "Relocation & FIRE Tools Hub | Cost of Living, Salary & Tax Calculators",
+  title: "Relocation & FIRE Tools Hub | Cost of Living, Salary, Tax & Mortgage Calculators",
   description:
-    "Compare cost of living, taxes, and take-home pay across US cities and states. Explore FIRE calculators, relocation comparisons, salary guides, and financial independence tools in one place.",
+    "Compare cost of living, taxes, and take-home pay across US cities and states. Explore FIRE calculators, relocation comparisons, salary guides, a mortgage calculator, and financial independence tools in one place.",
   alternates: {
     canonical: "https://www.relocationbynumbers.com/explore",
   },
   openGraph: {
-    title: "Relocation & FIRE Tools Hub | Cost of Living, Salary & Tax Calculators",
+    title: "Relocation & FIRE Tools Hub | Cost of Living, Salary, Tax & Mortgage Calculators",
     description:
-      "Compare cost of living, taxes, and take-home pay across US cities and states. Explore FIRE calculators, relocation comparisons, salary guides, and financial independence tools.",
+      "Compare cost of living, taxes, and take-home pay across US cities and states. Explore FIRE calculators, relocation comparisons, salary guides, and a mortgage calculator.",
     url: "https://www.relocationbynumbers.com/explore",
     siteName: "Relocation by Numbers",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Relocation & FIRE Tools Hub | Cost of Living, Salary & Tax Calculators",
+    title: "Relocation & FIRE Tools Hub | Cost of Living, Salary, Tax & Mortgage Calculators",
     description:
-      "Compare cost of living, taxes, and take-home pay across US cities and states. Explore FIRE calculators, relocation comparisons, and salary guides.",
+      "Compare cost of living, taxes, and take-home pay across US cities and states. Explore FIRE calculators, relocation comparisons, salary guides, and a mortgage calculator.",
   },
 };
 
@@ -54,6 +55,11 @@ const quickLinks: HubLink[] = [
     href: "/fire-calculator",
     title: "FIRE Calculator",
     description: "Estimate your FIRE age and financial independence number.",
+  },
+  {
+    href: "/mortgage-calculator",
+    title: "Mortgage Calculator",
+    description: "Monthly payments, cash to close, rent vs buy, DTI, and refinance — US & international.",
   },
   {
     href: "/international-relocation",
@@ -106,6 +112,30 @@ const sections: HubSection[] = [
       { href: "/cost-of-living/boston-ma", title: "Boston Cost of Living" },
       { href: "/cost-of-living/miami-fl", title: "Miami Cost of Living" },
     ],
+  },
+  {
+    title: "Mortgage & Home Buying",
+    description:
+      "Plan a home purchase with a full decision toolkit — monthly payments, cash to close, rent vs buy break-even, DTI affordability check, rate sensitivity, and refinance analysis. Covers US and 26 international markets.",
+    links: [
+      {
+        href: "/mortgage-calculator",
+        title: "Mortgage Calculator",
+        description: "Monthly payment, cash to close, DTI, rent vs buy break-even, rate sensitivity, and amortization schedule.",
+      },
+      {
+        href: "/mortgage-calculator#refinance",
+        title: "Refinance Calculator",
+        description: "See your break-even month, monthly savings, and lifetime savings on any refi scenario.",
+      },
+      {
+        href: "/mortgage-calculator#international",
+        title: "International Mortgage Calculator",
+        description: "Foreign buyer notes, indicative rates, and upfront cost estimates for 26 countries.",
+      },
+    ],
+    ctaHref: "/mortgage-calculator",
+    ctaLabel: "Open the mortgage calculator",
   },
   {
     title: "International Relocation Calculators",
@@ -287,9 +317,10 @@ export default function ExplorePage() {
 
               <p className="max-w-3xl text-base leading-7 text-slate-300 sm:text-lg">
                 Explore relocation comparisons, cost of living guides, salary tools,
-                and FIRE calculators to find places where your money goes further.
-                Compare take-home pay and taxes across all 50 states, estimate your
-                FIRE number, and see how moving changes your financial independence timeline.
+                FIRE calculators, and a full mortgage calculator to find places where
+                your money goes further. Compare take-home pay and taxes across all 50
+                states, estimate your FIRE number, and plan a home purchase — at home
+                or abroad.
               </p>
 
               <div className="flex flex-wrap gap-3 pt-2">
@@ -304,6 +335,12 @@ export default function ExplorePage() {
                   className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
                 >
                   Open FIRE Tools
+                </Link>
+                <Link
+                  href="/mortgage-calculator"
+                  className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                >
+                  Mortgage Calculator
                 </Link>
                 <a
                   href="#map"
@@ -323,7 +360,7 @@ export default function ExplorePage() {
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-300">
                 Jump into the most popular tools and pages on the site — relocation
-                comparisons, FIRE calculators, and cost of living guides.
+                comparisons, FIRE calculators, a mortgage calculator, and cost of living guides.
               </p>
             </div>
 
@@ -359,6 +396,45 @@ export default function ExplorePage() {
             ))}
           </div>
 
+          {/* Mortgage callout — standalone banner between sections and trust block */}
+          <section className="rounded-3xl border border-violet-500/20 bg-violet-500/5 p-6">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-2">
+                <div className="text-xs font-semibold uppercase tracking-widest text-violet-400">
+                  Home Buying Tool
+                </div>
+                <h2 className="text-xl font-semibold tracking-tight text-white">
+                  Mortgage Calculator — US &amp; International
+                </h2>
+                <p className="max-w-xl text-sm leading-6 text-slate-300">
+                  Monthly payments, cash to close, DTI check, rent vs buy break-even,
+                  rate sensitivity, refinance analysis, and amortization — all in one place.
+                  Covers US purchases and 26 international markets for post-relocation planning.
+                </p>
+                <div className="flex flex-wrap gap-2 pt-1 text-xs text-slate-400">
+                  {[
+                    "Monthly payment",
+                    "Cash to close",
+                    "Rent vs buy",
+                    "DTI check",
+                    "Refinance",
+                    "26 countries",
+                  ].map((f) => (
+                    <span key={f} className="rounded-full border border-violet-500/20 bg-violet-500/10 px-2.5 py-0.5 text-violet-300">
+                      {f}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <Link
+                href="/mortgage-calculator"
+                className="inline-flex flex-shrink-0 items-center rounded-full border border-violet-400/30 bg-violet-400/10 px-5 py-3 text-sm font-semibold text-violet-200 transition hover:bg-violet-400/20"
+              >
+                Open calculator →
+              </Link>
+            </div>
+          </section>
+
           {/* Trust / transparency */}
           <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
             <div className="max-w-4xl space-y-4">
@@ -367,9 +443,9 @@ export default function ExplorePage() {
               </h2>
               <p className="text-sm leading-7 text-slate-300">
                 Relocation by Numbers is designed to help you compare cost of living,
-                salary needs, taxes, and FIRE timelines across places. Tax estimates
-                use federal brackets, FICA, filing status, and state-specific models.
-                Cost of living figures use city-level defaults updated regularly.
+                salary needs, taxes, FIRE timelines, and home buying costs across places.
+                Tax estimates use federal brackets, FICA, filing status, and state-specific
+                models. Cost of living figures use city-level defaults updated regularly.
                 These are planning tools, not financial, tax, or legal advice.
               </p>
               <div className="pt-1">
@@ -386,6 +462,12 @@ export default function ExplorePage() {
                   className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
                 >
                   Try the FIRE Calculator
+                </Link>
+                <Link
+                  href="/mortgage-calculator"
+                  className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+                >
+                  Try the Mortgage Calculator
                 </Link>
                 <Link
                   href="/best-cities-for-fire"
@@ -409,6 +491,9 @@ export default function ExplorePage() {
               Keep exploring calculators, state guides, and relocation tools across the site.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
+              <Link href="/mortgage-calculator" className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]">
+                Mortgage Calculator
+              </Link>
               <Link href="/international-relocation" className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]">
                 International Relocation Calculator
               </Link>
@@ -443,67 +528,37 @@ export default function ExplorePage() {
             </h2>
 
             <div className="mt-5 space-y-4">
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <h3 className="text-base font-semibold text-white">
-                  What tools does Relocation by Numbers offer?
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-300">
-                  The site includes a state-by-state relocation calculator, city cost of
-                  living guides, salary comparison tools, FIRE calculators (including Lean,
-                  Barista, and Coast FIRE), and international relocation calculators covering
-                  Europe, Asia, the Caribbean, and South America — plus city and state-level
-                  financial independence pages.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <h3 className="text-base font-semibold text-white">
-                  How are cost of living and tax estimates calculated?
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Tax estimates use federal income tax brackets, FICA, filing status, optional
-                  401(k) contributions, and simplified state-specific tax models. Cost of living
-                  figures use city-level rent, utilities, groceries, transportation, and
-                  healthcare defaults updated regularly. These are planning estimates, not
-                  exact figures.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <h3 className="text-base font-semibold text-white">
-                  Which states have no income tax?
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Nine states currently have no state income tax: Alaska, Florida, Nevada,
-                  New Hampshire, South Dakota, Tennessee, Texas, Washington, and Wyoming.
-                  The relocation calculator accounts for each state's tax rules so you can
-                  see the real take-home difference when comparing locations.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <h3 className="text-base font-semibold text-white">
-                  Are these results financial or tax advice?
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-300">
-                  No. All tools on this site are planning estimates intended for educational
-                  and comparison purposes only. They are not financial, tax, or legal advice.
-                  Always verify figures with a qualified professional before making relocation
-                  or retirement decisions.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <h3 className="text-base font-semibold text-white">
-                  How often are the estimates updated?
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Tax brackets, cost of living defaults, and housing assumptions are reviewed
-                  and updated regularly. The most recent update across the site was March 2026.
-                  If you notice a figure that looks outdated, the methodology page has more
-                  detail on sources and assumptions.
-                </p>
-              </div>
+              {[
+                {
+                  q: "What tools does Relocation by Numbers offer?",
+                  a: "The site includes a state-by-state relocation calculator, city cost of living guides, salary comparison tools, FIRE calculators (including Lean, Barista, and Coast FIRE), a mortgage calculator covering US and 26 international markets, and international relocation calculators covering Europe, Asia, the Caribbean, and South America — plus city and state-level financial independence pages.",
+                },
+                {
+                  q: "How are cost of living and tax estimates calculated?",
+                  a: "Tax estimates use federal income tax brackets, FICA, filing status, optional 401(k) contributions, and simplified state-specific tax models. Cost of living figures use city-level rent, utilities, groceries, transportation, and healthcare defaults updated regularly. These are planning estimates, not exact figures.",
+                },
+                {
+                  q: "What does the mortgage calculator include?",
+                  a: "The mortgage calculator covers monthly payment breakdown (P&I, tax, insurance, HOA, PMI), cash to close with closing cost estimate, rent vs buy break-even, front-end and back-end DTI, rate sensitivity, bi-weekly payment savings, amortization schedule and chart, and refinance analysis. There is also an international tab with planning data for 26 countries.",
+                },
+                {
+                  q: "Which states have no income tax?",
+                  a: "Nine states currently have no state income tax: Alaska, Florida, Nevada, New Hampshire, South Dakota, Tennessee, Texas, Washington, and Wyoming. The relocation calculator accounts for each state's tax rules so you can see the real take-home difference when comparing locations.",
+                },
+                {
+                  q: "Are these results financial or tax advice?",
+                  a: "No. All tools on this site are planning estimates intended for educational and comparison purposes only. They are not financial, tax, or legal advice. Always verify figures with a qualified professional before making relocation, home purchase, or retirement decisions.",
+                },
+                {
+                  q: "How often are the estimates updated?",
+                  a: "Tax brackets, cost of living defaults, and housing assumptions are reviewed and updated regularly. The most recent update across the site was March 2026. If you notice a figure that looks outdated, the methodology page has more detail on sources and assumptions.",
+                },
+              ].map(({ q, a }) => (
+                <div key={q} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <h3 className="text-base font-semibold text-white">{q}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-300">{a}</p>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -511,13 +566,13 @@ export default function ExplorePage() {
           <div className="flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
             <div>Assumptions updated: March 2026</div>
             <div className="flex flex-wrap items-center gap-2">
-              <Link href="/about" className="transition hover:text-white">About</Link>
+              <Link href="/about"       className="transition hover:text-white">About</Link>
               <span>•</span>
-              <Link href="/disclaimer" className="transition hover:text-white">Disclaimer</Link>
+              <Link href="/disclaimer"  className="transition hover:text-white">Disclaimer</Link>
               <span>•</span>
-              <Link href="/privacy" className="transition hover:text-white">Privacy</Link>
+              <Link href="/privacy"     className="transition hover:text-white">Privacy</Link>
               <span>•</span>
-              <Link href="/terms" className="transition hover:text-white">Terms</Link>
+              <Link href="/terms"       className="transition hover:text-white">Terms</Link>
             </div>
           </div>
 

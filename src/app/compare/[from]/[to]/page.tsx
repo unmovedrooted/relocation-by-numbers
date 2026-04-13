@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Calculator from "@/components/Calculator";
+import AdSlot from "@/components/AdSlot";
 import { findCity, isMajorCity } from "@/lib/cities";
 import { majorCityPairs } from "@/lib/majorCities";
 import Link from "next/link";

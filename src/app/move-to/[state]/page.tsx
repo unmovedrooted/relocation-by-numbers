@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Calculator from "@/components/Calculator";
 import { notFound } from "next/navigation";
+import AdSlot from "@/components/AdSlot";
 import { STATES } from "@/lib/states";
 import Link from "next/link";
 
