@@ -1202,33 +1202,33 @@ const estHealthcare = useMemo(() => {
 </div>
 
           {comparable && (
-            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-              <div className="text-xs font-semibold tracking-widest text-slate-500">COMPARABLE SALARY</div>
-              <div className="mt-2 text-3xl font-bold">{money(comparable.comparableSalary)}</div>
-              <p className="mt-2 text-sm text-slate-600">
-                {comparable.toCityName} is roughly{" "}
-                <span className="font-semibold">{Math.abs(comparable.pctLessMore).toFixed(0)}%</span>{" "}
-                {comparable.pctLessMore >= 0 ? "less" : "more"} expensive than {comparable.fromCityName}.
-              </p>
-              <div className="mt-1 text-xs text-slate-500">
-                Based on housing, transportation, and essential cost weighting.
-              </div>
+  <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+    <div className="text-xs font-semibold tracking-widest text-slate-500">COMPARABLE SALARY</div>
+    <div className="mt-2 text-3xl font-bold">{money(comparable.comparableSalary)}</div>
+    <p className="mt-2 text-sm text-slate-600">
+      {comparable.toCityName} is roughly{" "}
+      <span className="font-semibold">{Math.abs(comparable.pctLessMore).toFixed(0)}%</span>{" "}
+      {comparable.pctLessMore >= 0 ? "less" : "more"} expensive than {comparable.fromCityName}.
+    </p>
+    <div className="mt-1 text-xs text-slate-500">
+      Based on housing, transportation, and essential cost weighting.
+    </div>
 
-              <button
-                type="button"
-                className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-800"
-                onClick={() =>
-                  window.open(
-                    "https://www.nerdwallet.com/mortgages/mortgage-rates",
-                    "_blank",
-                    "noopener,noreferrer"
-                  )
-                }
-              >
-                See current mortgage rates →
-              </button>
-            </div>
-          )}
+    <button
+      type="button"
+      className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-800"
+      onClick={() =>
+        window.open(
+          "http://relocationbynumbers.com/mortgage-calculator",
+          "_blank",
+          "noopener,noreferrer"
+        )
+      }
+    >
+        See if you can afford a mortgage →
+    </button>
+  </div>
+)}
 <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
   <div className="flex items-start justify-between gap-3">
     <div>
