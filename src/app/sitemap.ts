@@ -16,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // ── FIRE & retirement calculators ──────────────────────────────────────────
   const calculatorPages = [
     "/mortgage-calculator",
+    "/one-income-relocation-calculator",
     "/fire-calculator",
     "/fire-number-calculator",
     "/coast-fire-calculator",

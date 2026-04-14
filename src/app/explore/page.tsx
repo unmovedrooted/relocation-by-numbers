@@ -51,6 +51,12 @@ const quickLinks: HubLink[] = [
     title: "NYC → Austin",
     description: "See how a move could change your FIRE path.",
   },
+  // ✅ NEW
+  {
+    href: "/one-income-relocation-calculator",
+    title: "One Income Relocation Calculator",
+    description: "Can you afford to move there on one income? Compare housing burden, taxes, and monthly flexibility.",
+  },
   {
     href: "/fire-calculator",
     title: "FIRE Calculator",
@@ -84,6 +90,31 @@ const quickLinks: HubLink[] = [
 ];
 
 const sections: HubSection[] = [
+  // ✅ NEW SECTION — placed first so it surfaces prominently
+  {
+    title: "Relocation Budget Calculators",
+    description:
+      "Plan your move with calculators that go beyond basic cost of living — covering one-income vs two-income affordability, minimum second income needed, housing pressure, and city-by-city tax impact.",
+    links: [
+      {
+        href: "/one-income-relocation-calculator",
+        title: "One Income vs Two Income Relocation Calculator",
+        description: "Find out if you can afford to move on one income. Compare housing burden, monthly flexibility, taxes, and the minimum second income needed — for any US city.",
+      },
+      {
+        href: "/compare/nyc-ny/charlotte-nc",
+        title: "Compare NYC vs Charlotte",
+        description: "Side-by-side take-home pay, housing costs, and monthly budget breakdown.",
+      },
+      {
+        href: "/compare/nyc-ny/austin-tx",
+        title: "Compare NYC vs Austin",
+        description: "See how taxes and cost of living shift when moving from New York to Texas.",
+      },
+    ],
+    ctaHref: "/one-income-relocation-calculator",
+    ctaLabel: "Open the one income calculator",
+  },
   {
     title: "Featured Relocation Comparisons",
     description:
@@ -331,6 +362,12 @@ export default function ExplorePage() {
                   Explore Comparisons
                 </Link>
                 <Link
+                  href="/one-income-relocation-calculator"
+                  className="inline-flex items-center rounded-full border border-violet-400/30 bg-violet-400/10 px-5 py-3 text-sm font-semibold text-violet-200 transition hover:bg-violet-400/20"
+                >
+                  One Income Calculator
+                </Link>
+                <Link
                   href="/fire-calculator"
                   className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
                 >
@@ -396,6 +433,45 @@ export default function ExplorePage() {
             ))}
           </div>
 
+          {/* One Income callout — standalone banner */}
+          <section className="rounded-3xl border border-violet-500/20 bg-violet-500/5 p-6">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-2">
+                <div className="text-xs font-semibold uppercase tracking-widest text-violet-400">
+                  Relocation Planning Tool
+                </div>
+                <h2 className="text-xl font-semibold tracking-tight text-white">
+                  One Income vs Two Income Relocation Calculator
+                </h2>
+                <p className="max-w-xl text-sm leading-6 text-slate-300">
+                  Find out if you can afford to move there on one income. Compare housing
+                  burden, monthly flexibility, taxes, and the minimum second income needed
+                  for any US city — with rent and buy modes.
+                </p>
+                <div className="flex flex-wrap gap-2 pt-1 text-xs text-slate-400">
+                  {[
+                    "One income verdict",
+                    "Two income comparison",
+                    "Housing burden %",
+                    "Min. second income",
+                    "All 50 states",
+                    "Rent & buy",
+                  ].map((f) => (
+                    <span key={f} className="rounded-full border border-violet-500/20 bg-violet-500/10 px-2.5 py-0.5 text-violet-300">
+                      {f}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <Link
+                href="/one-income-relocation-calculator"
+                className="inline-flex flex-shrink-0 items-center rounded-full border border-violet-400/30 bg-violet-400/10 px-5 py-3 text-sm font-semibold text-violet-200 transition hover:bg-violet-400/20"
+              >
+                Open calculator →
+              </Link>
+            </div>
+          </section>
+
           {/* Mortgage callout — standalone banner between sections and trust block */}
           <section className="rounded-3xl border border-violet-500/20 bg-violet-500/5 p-6">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -458,6 +534,12 @@ export default function ExplorePage() {
               </div>
               <div className="flex flex-wrap gap-3">
                 <Link
+                  href="/one-income-relocation-calculator"
+                  className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+                >
+                  One Income Calculator
+                </Link>
+                <Link
                   href="/fire-calculator"
                   className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
                 >
@@ -491,6 +573,10 @@ export default function ExplorePage() {
               Keep exploring calculators, state guides, and relocation tools across the site.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
+              {/* ✅ NEW */}
+              <Link href="/one-income-relocation-calculator" className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]">
+                One Income Relocation Calculator
+              </Link>
               <Link href="/mortgage-calculator" className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]">
                 Mortgage Calculator
               </Link>
@@ -531,11 +617,15 @@ export default function ExplorePage() {
               {[
                 {
                   q: "What tools does Relocation by Numbers offer?",
-                  a: "The site includes a state-by-state relocation calculator, city cost of living guides, salary comparison tools, FIRE calculators (including Lean, Barista, and Coast FIRE), a mortgage calculator covering US and 26 international markets, and international relocation calculators covering Europe, Asia, the Caribbean, and South America — plus city and state-level financial independence pages.",
+                  a: "The site includes a one income vs two income relocation calculator, a state-by-state relocation calculator, city cost of living guides, salary comparison tools, FIRE calculators (including Lean, Barista, and Coast FIRE), a mortgage calculator covering US and 26 international markets, and international relocation calculators covering Europe, Asia, the Caribbean, and South America — plus city and state-level financial independence pages.",
                 },
                 {
                   q: "How are cost of living and tax estimates calculated?",
                   a: "Tax estimates use federal income tax brackets, FICA, filing status, optional 401(k) contributions, and simplified state-specific tax models. Cost of living figures use city-level rent, utilities, groceries, transportation, and healthcare defaults updated regularly. These are planning estimates, not exact figures.",
+                },
+                {
+                  q: "What does the one income relocation calculator do?",
+                  a: "It shows whether you can afford to move on one income by calculating housing burden, monthly flexibility, and a Safe/Tight/Stretch verdict — for both one-income and two-income scenarios. It also calculates the minimum second income needed to break even and stay under the 30% housing guideline. It covers all 50 states and supports rent and buy modes.",
                 },
                 {
                   q: "What does the mortgage calculator include?",
