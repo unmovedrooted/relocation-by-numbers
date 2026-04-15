@@ -144,8 +144,13 @@ const ROUTE_CONTENT: Record<
   },
 };
 
-export async function generateStaticParams() {
-  return ALLOWED_COMPARE_ROUTES;
+export async function generateStaticParams(): Promise<
+  { from: string; to: string }[]
+> {
+  return ALLOWED_COMPARE_ROUTES.map((route) => ({
+    from: route.from,
+    to: route.to,
+  }));
 }
 
 type PageProps = {
