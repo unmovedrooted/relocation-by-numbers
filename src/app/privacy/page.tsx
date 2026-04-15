@@ -1,32 +1,179 @@
+import Link from "next/link";
+
 export default function PrivacyPage() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
+    <main className="mx-auto max-w-4xl px-6 py-12">
+      <header className="max-w-3xl">
+        <h1 className="mb-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          Privacy Policy
+        </h1>
 
-      <p className="text-slate-700 mb-4">
-        RelocationByNumbers.com respects your privacy.
-      </p>
+        <p className="text-base leading-7 text-slate-700">
+          Relocation By Numbers respects your privacy. This page explains what
+          information may be collected when you use the site, what is not stored,
+          and how calculator inputs are generally handled.
+        </p>
+      </header>
 
-      <p className="text-slate-700 mb-4">
-        The calculators on this site do not store, save, or share any personal
-        information you enter. All calculations are performed locally in your
-        browser.
-      </p>
+      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+          Calculator inputs
+        </h2>
 
-      <p className="text-slate-700 mb-4">
-        We do not collect personally identifiable financial information through the
-        calculator tools.
-      </p>
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+          <p>
+            The calculator tools on Relocation By Numbers are designed primarily
+            to run in your browser. In general, calculator inputs are used to
+            generate planning estimates on the page and are not stored as personal
+            financial records on our servers.
+          </p>
 
-      <p className="text-slate-700 mb-4">
-        Like most websites, anonymous analytics or cookies may be used to
-        understand general website traffic and improve the user experience.
-      </p>
+          <p>
+            This means information you enter into calculators such as income,
+            expenses, housing costs, savings assumptions, and relocation scenarios
+            is typically processed locally in your browser session for calculation
+            and display purposes.
+          </p>
 
-      <p className="text-slate-700">
-        No personal financial data entered into the calculators is stored on our
-        servers.
-      </p>
+          <p>
+            Relocation By Numbers does not intentionally collect or store sensitive
+            personal financial profiles through normal calculator use.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+          Analytics and usage data
+        </h2>
+
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+          <p>
+            Like most websites, Relocation By Numbers may use analytics tools to
+            understand general site traffic and improve the user experience. This
+            can include information such as page views, device type, browser type,
+            approximate location, referring pages, and general on-site behavior.
+          </p>
+
+          <p>
+            This type of data is generally used in aggregate to understand how the
+            site is performing and which tools or pages are most useful. It is not
+            intended to build detailed personal financial profiles from calculator use.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+          Cookies and similar technologies
+        </h2>
+
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+          <p>
+            The site may use cookies or similar technologies for analytics,
+            site functionality, performance measurement, and advertising support.
+          </p>
+
+          <p>
+            Cookies may help remember settings, understand traffic patterns,
+            measure page performance, and support third-party services used on
+            the site.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+          Advertising and third-party services
+        </h2>
+
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+          <p>
+            Relocation By Numbers may display advertisements and may use third-party
+            services for analytics, advertising, or site functionality. These third
+            parties may use cookies or similar technologies subject to their own
+            privacy policies and data practices.
+          </p>
+
+          <p>
+            If ads are shown on the site, advertising providers may collect limited
+            technical or usage data needed to deliver, measure, or personalize ads
+            in accordance with their own policies and applicable platform settings.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+          Shared links and URLs
+        </h2>
+
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+          <p>
+            Some tools on the site may support shareable links or URL-based scenarios.
+            When that happens, values used to recreate a scenario may appear in the URL.
+          </p>
+
+          <p>
+            You should avoid sharing links that contain private financial assumptions
+            unless you are comfortable with that information being visible to whoever
+            receives the link.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+          Data security and limitations
+        </h2>
+
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+          <p>
+            Reasonable efforts are made to keep the site secure, but no website or
+            online service can guarantee absolute security.
+          </p>
+
+          <p>
+            Because calculators are intended for planning use, you should avoid entering
+            highly sensitive personal information that is not necessary for scenario testing.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+          Changes to this policy
+        </h2>
+
+        <p className="mt-4 text-base leading-7 text-slate-700">
+          This privacy policy may be updated from time to time as the site, tools,
+          analytics, or advertising setup evolves.
+        </p>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-6">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+          Related pages
+        </h2>
+
+        <p className="mt-4 text-base leading-7 text-slate-700">
+          You may also want to review the{" "}
+          <Link
+            href="/disclaimer"
+            className="font-medium text-slate-900 underline underline-offset-4 hover:no-underline"
+          >
+            disclaimer
+          </Link>{" "}
+          and{" "}
+          <Link
+            href="/methodology"
+            className="font-medium text-slate-900 underline underline-offset-4 hover:no-underline"
+          >
+            methodology
+          </Link>{" "}
+          pages.
+        </p>
+      </section>
     </main>
   );
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import AdSlot from "@/components/AdSlot";
 import CaribbeanRelocationCalculator from "@/components/CaribbeanRelocationCalculator";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Caribbean Relocation Calculator | Cost, Taxes, Rent & Budget by Country",
@@ -30,7 +30,6 @@ export default function Page() {
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="py-10 text-center">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
-
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
             Caribbean Relocation Calculator
           </h1>
@@ -45,6 +44,19 @@ export default function Page() {
             Puerto Rico, Saint Lucia, Trinidad and Tobago, and Turks and Caicos.
           </p>
 
+          <div className="mx-auto mt-4 flex max-w-3xl flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
+            <span>Planning estimates only.</span>
+            <span className="hidden sm:inline">•</span>
+            <span>Results depend on salary, residency path, and housing assumptions.</span>
+            <span className="hidden sm:inline">•</span>
+            <Link
+              href="/methodology"
+              className="font-medium text-slate-700 underline underline-offset-4 hover:no-underline dark:text-slate-300"
+            >
+              See methodology
+            </Link>
+          </div>
+
           <p className="mx-auto mt-2 max-w-3xl text-sm text-slate-500 dark:text-slate-400">
             Use this calculator to pressure-test your budget before relocating to the Caribbean.
           </p>
@@ -56,65 +68,87 @@ export default function Page() {
       <section className="mx-auto max-w-5xl space-y-10 px-4 pb-12 sm:px-6">
         <CaribbeanRelocationCalculator />
 
-        {/* FIRE cross-sell */}
-        <section className="rounded-2xl border border-emerald-200/60 bg-emerald-50 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            <div>
-              <div className="text-sm font-semibold text-slate-900">
-                Thinking Bigger Than Just Moving?
-              </div>
-              <p className="mt-1 text-sm text-slate-700">
-                See how this Caribbean relocation impacts your FIRE timeline.
+        <div className="text-center text-xs text-slate-500 dark:text-slate-400">
+          Assumptions updated: March 2026
+        </div>
+
+        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
+          <div className="max-w-3xl">
+            <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white sm:text-xl">
+              How this Caribbean relocation calculator works
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
+              This calculator is designed to help you test whether a Caribbean move looks
+              financially realistic before you commit. It compares destination-country taxes,
+              rent, living costs, and one-time relocation expenses so you can estimate how a
+              move may change your monthly budget and cash readiness.
+            </p>
+            <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
+              Instead of relying on broad lifestyle assumptions alone, the tool focuses on the
+              parts of a Caribbean move that usually matter most: take-home pay, housing pressure,
+              recurring living costs, visa or permit friction, and whether your savings create
+              enough room to make the move comfortably.
+            </p>
+          </div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Taxes and take-home pay</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Compares country-level tax treatment so you can see what reaches your budget after local tax assumptions are applied.
               </p>
-              <div className="mt-3 flex flex-wrap items-center gap-4">
-                <a
-                  href="/fire-calculator"
-                  className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-                >
-                  🔥 Calculate My FIRE Timeline
-                </a>
-                <div className="hidden h-5 w-px bg-emerald-200 sm:block" />
-                <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
-                  <a href="/coast-fire-calculator" className="hover:text-slate-900">Coast FIRE</a>
-                  <a href="/barista-fire-calculator" className="hover:text-slate-900">Barista FIRE</a>
-                  <a href="/lean-fire-calculator" className="hover:text-slate-900">Lean FIRE</a>
-                </div>
-              </div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Housing and essentials</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Estimates rent, utilities, groceries, transport, and healthcare-related costs for supported destinations.
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Relocation readiness</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Looks at setup costs, monthly flexibility, and savings coverage so you can judge whether the move looks realistic.
+              </p>
             </div>
           </div>
         </section>
 
-        {/* Explore tools */}
-        <section className="rounded-2xl border border-emerald-200/60 bg-emerald-50 p-5">
-          <h2 className="text-lg font-semibold tracking-tight text-slate-900">
-            Explore more relocation planning tools
+        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
+          <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white sm:text-xl">
+            What makes Caribbean relocation financially different
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-700">
-            Keep comparing your options with more relocation, budgeting, and FIRE tools from Relocation by Numbers.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <a href="/explore" className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-              Explore all tools
-            </a>
-            <a href="/international-relocation" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-              International Calculator
-            </a>
-            <a href="/europe-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-              Europe Calculator
-            </a>
-            <a href="/asia-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-              Asia Calculator
-            </a>
-             <a href="/south-america-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-              South America Calculator
-            </a>
-            <a href="/fire-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-              FIRE Calculator
-            </a>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Tax-free does not mean low-cost</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Some Caribbean jurisdictions have no personal income tax, but that does not automatically make them cheap once rent, imported goods, and setup costs are included.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Island costs vary sharply</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                The Caribbean is not one cost profile. Cayman and Bahamas can feel very different from Dominican Republic, Jamaica, or Trinidad and Tobago.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Import-heavy living can raise costs</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Everyday goods, vehicles, and household setup can cost more than expected on some islands because imported items are a major part of local consumption.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Residency path matters</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Budgeting for the move is only part of the decision. Permit rules, residency programs, and eligibility requirements can determine whether a move is practical at all.
+              </p>
+            </div>
           </div>
         </section>
 
-        {/* What this calculator includes */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
           <div className="grid gap-6 lg:grid-cols-2">
             <div>
@@ -128,7 +162,7 @@ export default function Page() {
                   expenses for each supported destination.
                 </p>
                 <p>
-                  Tax models are verified for Antigua and Barbuda, Bahamas, Barbados, Cayman
+                  Tax models are included for Antigua and Barbuda, Bahamas, Barbados, Cayman
                   Islands, Dominican Republic, Jamaica, Puerto Rico, Saint Lucia, Trinidad and
                   Tobago, and Turks and Caicos Islands.
                 </p>
@@ -136,48 +170,53 @@ export default function Page() {
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
                   <div className="text-sm font-semibold text-slate-900 dark:text-white">Income and taxes</div>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Estimated take-home pay based on your salary, filing status, and country-specific tax rules.</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                    Estimated take-home pay based on salary and destination-country tax rules.
+                  </p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
                   <div className="text-sm font-semibold text-slate-900 dark:text-white">Housing and essentials</div>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Rent, utilities, groceries, transportation, and healthcare costs for each Caribbean destination.</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                    Rent, utilities, groceries, transportation, and healthcare-related cost assumptions.
+                  </p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
                   <div className="text-sm font-semibold text-slate-900 dark:text-white">Visa and permit costs</div>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Estimated visa and permit fees included in your one-time moving budget by country.</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                    Estimated visa and permit fees in the one-time moving budget where relevant.
+                  </p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
                   <div className="text-sm font-semibold text-slate-900 dark:text-white">Planning signals</div>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Monthly flexibility, comparable salary, savings coverage, and a comfort score to judge whether the move looks realistic.</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                    Monthly flexibility, comparable salary, savings coverage, and comfort signals.
+                  </p>
                 </div>
               </div>
             </div>
 
             <div className="rounded-2xl border border-teal-200/70 bg-teal-50 p-5 dark:border-teal-900/60 dark:bg-teal-950/30">
-              <div className="text-sm font-semibold text-slate-900 dark:text-white">Good to know before you use it</div>
+              <div className="text-sm font-semibold text-slate-900 dark:text-white">
+                What this tool does not fully model
+              </div>
               <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
                 <p>
                   Results are estimates only. Real taxes, rent, healthcare, immigration rules,
-                  and household costs vary by residency status, visa path, and local market
-                  conditions.
+                  and household costs vary by residency status, visa path, island, and local market conditions.
                 </p>
                 <p>
-                  Several Caribbean destinations offer accessible residency programs for retirees
-                  and remote workers. The Bahamas Extended Access Travel Stay, Barbados Welcome
-                  Stamp, and Cayman Islands Global Citizen Concierge Program are popular options
-                  worth researching alongside your budget.
+                  This tool does not fully model neighborhood-level housing differences, employer-provided housing,
+                  detailed healthcare arrangements, family-specific schooling decisions, or every edge case in local tax and residency law.
                 </p>
                 <p>
-                  This tool is most useful for testing scenarios, comparing destinations, and
-                  seeing whether your income and savings create enough room to make the move
-                  comfortably.
+                  It is most useful for testing scenarios, comparing destinations, and seeing whether your income
+                  and savings create enough room to make the move comfortably.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* FAQ — helps with long-tail search and structured data */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
           <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
             Frequently asked questions
@@ -188,9 +227,7 @@ export default function Page() {
                 Which Caribbean countries have no income tax?
               </dt>
               <dd className="mt-1">
-                Antigua and Barbuda, the Bahamas, the Cayman Islands, and Turks and Caicos
-                Islands currently have no personal income tax. This calculator models all four
-                as zero-tax destinations for planning purposes.
+                Antigua and Barbuda, the Bahamas, the Cayman Islands, and Turks and Caicos Islands currently have no personal income tax. That can improve take-home pay, but it does not automatically make those destinations low-cost overall.
               </dd>
             </div>
             <div>
@@ -198,10 +235,7 @@ export default function Page() {
                 How accurate are the tax estimates?
               </dt>
               <dd className="mt-1">
-                Tax figures are based on published resident personal income tax rules for each
-                country as of early 2026. They cover regular income tax only — social
-                insurance, payroll contributions, and special incentive regimes are not
-                included. Always verify with a local tax advisor before making decisions.
+                Tax figures are based on published resident personal income tax rules for each supported destination as of early 2026. They are planning estimates and should be verified locally before major decisions.
               </dd>
             </div>
             <div>
@@ -209,10 +243,7 @@ export default function Page() {
                 What is the cost of living in the Caribbean compared to the US?
               </dt>
               <dd className="mt-1">
-                It varies significantly by island. The Cayman Islands and Bahamas are
-                comparable to or more expensive than major US cities. Dominican Republic,
-                Jamaica, and Trinidad and Tobago are generally 20–40% less expensive than
-                the US average, depending on lifestyle and location.
+                It varies significantly by island. Some destinations can be cheaper than many US cities, while others can match or exceed major US cost levels once housing and imported goods are factored in.
               </dd>
             </div>
             <div>
@@ -220,13 +251,77 @@ export default function Page() {
                 Can I use this calculator for retirement planning?
               </dt>
               <dd className="mt-1">
-                Yes. Enter your expected retirement income, select a destination, and the
-                calculator will estimate your monthly budget, tax liability, and how long your
-                savings might last. For a full retirement timeline, use the FIRE Calculator.
+                Yes. You can use it to estimate destination-country budget pressure and moving costs. For long-term retirement timeline planning, pair it with the FIRE calculator.
               </dd>
             </div>
           </dl>
         </section>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <section className="rounded-2xl border border-emerald-200/60 bg-emerald-50 p-5">
+            <div className="text-sm font-semibold text-slate-900">
+              Thinking bigger than just moving?
+            </div>
+            <p className="mt-1 text-sm text-slate-700">
+              See how relocating to the Caribbean may change your FIRE timeline after taxes, spending, and housing costs.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <a
+                href="/fire-calculator"
+                className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                🔥 Calculate My FIRE Timeline
+              </a>
+              <Link
+                href="/best-cities-for-fire"
+                className="text-sm font-semibold text-slate-700 underline underline-offset-4 hover:no-underline"
+              >
+                Best cities for FIRE
+              </Link>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 className="text-lg font-semibold tracking-tight text-slate-900">
+              Explore more relocation planning tools
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Keep comparing your options with more relocation, budgeting, and FIRE tools from Relocation by Numbers.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <a
+                href="/explore"
+                className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                Explore all tools
+              </a>
+              <a
+                href="/international-relocation"
+                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                International Calculator
+              </a>
+              <a
+                href="/europe-relocation-calculator"
+                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Europe Calculator
+              </a>
+              <a
+                href="/asia-relocation-calculator"
+                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Asia Calculator
+              </a>
+              <a
+                href="/south-america-relocation-calculator"
+                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                South America Calculator
+              </a>
+            </div>
+          </section>
+        </div>
       </section>
 
       <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
@@ -239,6 +334,8 @@ export default function Page() {
             <a href="/privacy" className="transition hover:text-slate-900 dark:hover:text-white">Privacy</a>
             <span>•</span>
             <a href="/terms" className="transition hover:text-slate-900 dark:hover:text-white">Terms</a>
+            <span>•</span>
+            <a href="/methodology" className="transition hover:text-slate-900 dark:hover:text-white">Methodology</a>
           </div>
         </div>
       </footer>

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import AdSlot from "@/components/AdSlot";
 import FireCalculator from "@/components/FireCalculator";
 import { SEOFAQItem } from "@/components/SeoFAQ";
 
@@ -31,51 +30,142 @@ export default function Page() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-10">
-
-        <header className="space-y-3">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+        <header className="space-y-4">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Coast FIRE Calculator
           </h1>
 
-          <p className="mt-2 text-lg font-semibold text-slate-200">
+          <p className="text-lg font-semibold text-slate-200">
             How Much Do You Need Invested Today to Stop Contributing and Still Retire?
           </p>
 
           <p className="leading-relaxed text-slate-300">
             <span className="font-semibold text-white">Coast FIRE</span> is the point where
-            your current investments are large enough that compound growth alone — with no
-            additional contributions — will carry your portfolio to your retirement target by
-            your chosen age. Once you hit your Coast FIRE number, you only need to earn enough
-            to cover your living expenses. Your portfolio does the rest.
+            your current investments are large enough that compound growth alone can carry
+            your portfolio to your full retirement target by your chosen age — even if you
+            stop making new contributions.
           </p>
 
           <p className="leading-relaxed text-slate-300">
-            To model Coast FIRE with this calculator, enter your current portfolio, return
-            assumptions, and retirement target. Then reduce annual contributions to zero and
-            adjust your projection length to see whether your portfolio reaches your FIRE
-            number by your target retirement age on growth alone.
+            In plain terms, Coast FIRE means your portfolio has reached escape velocity.
+            You still need enough income to cover your current lifestyle, but you no longer
+            need to keep aggressively investing for traditional retirement if your assumptions hold.
           </p>
 
-          <div className="text-xs text-slate-400">Assumptions updated: March 2026</div>
-
-          <Link
-            href="/explore"
-            className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-          >
-            Explore All Tools
-          </Link>
-
-          <div className="flex flex-wrap gap-2 pt-2">
-            <Link href="/fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">FIRE calculator →</Link>
-            <Link href="/barista-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Barista FIRE →</Link>
-            <Link href="/lean-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Lean FIRE →</Link>
-            <Link href="/" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Compare cities →</Link>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-400">
+            <span>Assumptions updated: March 2026</span>
+            <span className="hidden sm:inline">•</span>
+            <Link href="/methodology" className="underline underline-offset-4 hover:no-underline">
+              See methodology
+            </Link>
           </div>
         </header>
 
         <section aria-label="Coast FIRE calculator">
-          {/* hideFAQ removes the component's built-in FAQ so only the page-level FAQ below renders */}
           <FireCalculator hideFAQ />
+        </section>
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-xl font-semibold">
+            How Coast FIRE actually works
+          </h2>
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-300">
+            <p>
+              Coast FIRE is based on present value. Instead of asking how much you need
+              at retirement, it asks how much you need invested today so that compounding
+              alone grows your portfolio to that future target.
+            </p>
+            <p>
+              The basic idea is: full future FIRE target ÷ expected compounded growth over
+              the years remaining until retirement = Coast FIRE number today. Once your portfolio
+              reaches that number, additional contributions become optional rather than required
+              under the model.
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-xl font-semibold">
+            What changes your Coast FIRE number most
+          </h2>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <h3 className="font-semibold text-white">Years until retirement</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                The more time compounding has to work, the smaller the Coast FIRE number you need today.
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <h3 className="font-semibold text-white">Investment return assumption</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Small changes in expected return can shift the Coast FIRE number materially because the model depends heavily on long-term compounding.
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <h3 className="font-semibold text-white">Full FIRE target</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Your Coast FIRE number depends on the full retirement number you eventually need, so higher expected retirement spending raises the target.
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <h3 className="font-semibold text-white">Living costs today</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Once you hit Coast FIRE, you still need enough earned income to cover your current life until retirement actually begins.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-xl font-semibold">
+            Who Coast FIRE is usually best for
+          </h2>
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-300">
+            <p>
+              Coast FIRE is often attractive for people who want to reduce work pressure
+              before reaching full traditional FIRE. It can be a strong fit for someone who
+              wants flexibility, career optionality, or the ability to shift into lower-stress work
+              while still letting investments compound in the background.
+            </p>
+            <p>
+              It is usually most useful for people who already have a meaningful investment base
+              and enough time left before retirement for compounding to matter.
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-xl font-semibold">
+            What this calculator includes — and what it does not
+          </h2>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4">
+              <h3 className="font-semibold text-white">Included</h3>
+              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300">
+                <li>Coast FIRE milestone logic</li>
+                <li>Portfolio growth projection</li>
+                <li>Return-based target modeling</li>
+                <li>Comparison against a future FIRE target</li>
+              </ul>
+            </div>
+
+            <div className="rounded-xl border border-amber-400/20 bg-amber-400/10 p-4">
+              <h3 className="font-semibold text-white">Not fully modeled</h3>
+              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300">
+                <li>Sequence-of-returns risk in detail</li>
+                <li>Changing tax treatment over decades</li>
+                <li>Every market-cycle scenario</li>
+                <li>Your future spending changes with perfect precision</li>
+              </ul>
+            </div>
+          </div>
+
+          <p className="mt-4 text-sm leading-7 text-slate-300">
+            This tool is built for planning direction, not certainty. Coast FIRE is highly sensitive
+            to long-term assumptions, so the output is most useful as a scenario-planning estimate.
+          </p>
         </section>
 
         <section className="space-y-4">
@@ -86,28 +176,41 @@ export default function Page() {
           <div className="grid gap-3">
             <SEOFAQItem
               q="What is Coast FIRE?"
-              a="Coast FIRE is the point where your invested portfolio is large enough that compound growth alone — with no additional contributions — will grow to your full retirement target by a specific age. Once you reach your Coast FIRE number, you only need income to cover current expenses. You no longer need to save or invest anything additional."
+              a="Coast FIRE is the point where your invested portfolio is large enough that compound growth alone can grow to your full retirement target by a chosen age, even without additional contributions."
             />
             <SEOFAQItem
               q="How do I calculate my Coast FIRE number?"
-              a="Your Coast FIRE number is the present value of your full FIRE target, discounted back from your retirement age using your expected investment return. For example: if you want $1.5 million at age 65 and expect 7% annual returns, and you are currently 35, your Coast FIRE number is approximately $1,500,000 ÷ (1.07^30) ≈ $197,000. Reaching that amount today means compounding does the rest."
+              a="Your Coast FIRE number is the present value of your future FIRE target, discounted back from your retirement age using your expected annual return."
             />
             <SEOFAQItem
               q="How is Coast FIRE different from regular FIRE?"
-              a="Regular FIRE means accumulating a portfolio large enough to cover 100% of your expenses forever using the 4% rule. Coast FIRE is an earlier milestone — the point where you can stop contributing and still reach a traditional retirement number by a target age, though you still need earned income to cover current living expenses in the interim."
+              a="Regular FIRE means you already have enough to fund retirement fully. Coast FIRE is an earlier milestone where compounding can do the rest, but you still need earned income for current living costs."
             />
             <SEOFAQItem
               q="How do I use this calculator to model Coast FIRE?"
-              a="Enter your current portfolio balance, expected annual return, and your full FIRE number as the target. Then set your annual contributions to zero. Adjust the projection length until it matches the years remaining to your target retirement age. If the portfolio line reaches your FIRE target by then, you have already hit Coast FIRE."
+              a="Enter your current portfolio, expected return, and full retirement target. Then reduce annual contributions to zero and check whether growth alone reaches the target by your chosen retirement age."
             />
             <SEOFAQItem
               q="What investment return should I use for Coast FIRE?"
-              a="A commonly used planning assumption is 6–7% nominal annual return for a diversified stock and bond portfolio. More conservative estimates use 5–6% to account for sequence-of-returns risk and longer time horizons. For Coast FIRE specifically, the return assumption matters a lot because your entire thesis depends on compounding over a long period — a 1% difference in assumed return can shift your Coast FIRE number by tens of thousands of dollars."
+              a="Many people use 5% to 7% as a planning range, but even small changes in the return assumption can materially change the result because Coast FIRE depends heavily on long compounding periods."
             />
             <SEOFAQItem
               q="Can moving to a cheaper city help me reach Coast FIRE sooner?"
-              a="Yes. Lower living costs mean you need less income to cover current expenses once you hit your Coast FIRE number, making the strategy more practically achievable. Lower expenses also reduce your full FIRE number, which lowers the Coast FIRE target in turn. Use the Move Impact tab in the calculator to see how relocating changes your overall timeline."
+              a="Yes. Lower living costs can reduce your full future FIRE number, which lowers the Coast FIRE number as well. Lower expenses can also make it easier to cover current life once you stop contributing aggressively."
             />
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-lg font-semibold">
+            Explore related FIRE and relocation tools
+          </h2>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link href="/fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">FIRE calculator →</Link>
+            <Link href="/barista-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Barista FIRE →</Link>
+            <Link href="/lean-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Lean FIRE →</Link>
+            <Link href="/" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Compare cities →</Link>
+            <Link href="/explore" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Explore all tools →</Link>
           </div>
         </section>
 
@@ -121,9 +224,10 @@ export default function Page() {
             <Link href="/privacy" className="transition hover:text-white">Privacy</Link>
             <span>•</span>
             <Link href="/terms" className="transition hover:text-white">Terms</Link>
+            <span>•</span>
+            <Link href="/methodology" className="transition hover:text-white">Methodology</Link>
           </div>
         </footer>
-
       </div>
     </main>
   );

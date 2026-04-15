@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import Calculator from "@/components/Calculator";
 import { findCity } from "@/lib/cities";
-import AdSlot from "@/components/AdSlot";
 import Link from "next/link";
 import { estimateMortgageMonthly } from "@/lib/mortgage";
 import type { Metadata } from "next";
@@ -10,35 +9,116 @@ type PageProps = {
   params: Promise<{ cityId: string }>;
 };
 
-const MORE_COMPARE_IDS = [
+const ALLOWED_CITY_IDS = [
   "nyc-ny",
+  "charlotte-nc",
+  "austin-tx",
   "la-ca",
   "seattle-wa",
-  "austin-tx",
   "boston-ma",
   "miami-fl",
-  "sf-ca",
-  "chicago-il",
-  "denver-co",
-  "atlanta-ga",
-  "dallas-tx",
-  "houston-tx",
-  "phoenix-az",
-  "philadelphia-pa",
-  "sd-ca",
-  "portland-or",
-];
+] as const;
+
+const CITY_CONTENT: Record<
+  string,
+  {
+    primary: string;
+    secondary: string;
+    caution: string;
+    salaryNote: string;
+  }
+> = {
+  "nyc-ny": {
+    primary:
+      "New York City is one of the hardest places in the country to make the cost-of-living math work comfortably unless income is very strong. Housing pressure alone can consume a large share of take-home pay.",
+    secondary:
+      "The city works financially for some households because income potential can be unusually high, but that only helps if salary growth is strong enough to offset housing and tax drag.",
+    caution:
+      "A high gross salary in New York can still feel tight once rent, state tax, and daily living costs are layered in.",
+    salaryNote:
+      "For New York City, the main question is not whether the city is expensive. It is how high your income must be before the cost structure stops crowding out savings and flexibility.",
+  },
+  "charlotte-nc": {
+    primary:
+      "Charlotte is often easier to manage than higher-cost coastal cities because housing pressure is usually much lower while still offering access to a large metro economy.",
+    secondary:
+      "For many households, Charlotte’s financial appeal comes from the balance between manageable housing costs and decent income potential rather than from ultra-low living costs alone.",
+    caution:
+      "Charlotte only creates a real affordability win if the move improves your income-to-cost ratio, not just your headline rent number.",
+    salaryNote:
+      "In Charlotte, the salary target is usually more about creating breathing room and savings capacity than merely surviving the rent payment.",
+  },
+  "austin-tx": {
+    primary:
+      "Austin often looks attractive because Texas has no state income tax, but the city is no longer a low-cost market in the way many people still assume.",
+    secondary:
+      "For some households, Austin works because take-home pay can improve relative to higher-tax states. But the result still depends heavily on rent, home prices, and insurance costs.",
+    caution:
+      "The tax advantage is real, but the housing side can narrow the gap more than people expect.",
+    salaryNote:
+      "For Austin, the salary question is less about tax headlines and more about whether your pay is strong enough to keep the city feeling flexible rather than merely acceptable.",
+  },
+  "la-ca": {
+    primary:
+      "Los Angeles is expensive primarily because of housing pressure. Rent, ownership costs, and overall recurring expenses can make even solid incomes feel stretched.",
+    secondary:
+      "The city can still work for high earners, but the cost-of-living burden usually means a larger salary is required before meaningful savings and flexibility show up.",
+    caution:
+      "Los Angeles often looks manageable on paper until housing and taxes are measured against real take-home pay.",
+    salaryNote:
+      "For Los Angeles, the main issue is how much income is needed not just to pay rent, but to still save, invest, and maintain a useful buffer afterward.",
+  },
+  "seattle-wa": {
+    primary:
+      "Seattle benefits from no state income tax, which helps take-home pay, but housing costs can still make the monthly budget feel tight.",
+    secondary:
+      "The city often works best for households with strong salaries that are high enough to capture the tax advantage without being overwhelmed by rent or ownership costs.",
+    caution:
+      "No state income tax helps, but it does not make Seattle cheap.",
+    salaryNote:
+      "In Seattle, the salary target matters because the city often sits in the uncomfortable middle ground between strong income potential and still-heavy housing costs.",
+  },
+  "boston-ma": {
+    primary:
+      "Boston can support a high-income lifestyle, but it is not an easy city from a cost-of-living perspective because housing remains expensive and tax drag still matters.",
+    secondary:
+      "The city tends to work better for people with strong earnings power than for households trying to optimize around low recurring expenses.",
+    caution:
+      "Boston often feels tighter than its salaries suggest once housing and taxes are measured together.",
+    salaryNote:
+      "For Boston, the salary you need is less about clearing rent and more about whether there is enough room left for savings and long-term financial progress.",
+  },
+  "miami-fl": {
+    primary:
+      "Miami attracts attention because Florida has no state income tax, but the city is not a low-cost market overall. Housing costs can still put real pressure on the budget.",
+    secondary:
+      "For some households, Miami works because the tax side improves take-home pay. For others, housing and ownership costs absorb too much of that advantage.",
+    caution:
+      "It is easy to overestimate Miami’s affordability if you focus only on the tax benefit.",
+    salaryNote:
+      "For Miami, the salary target should be thought of as a buffer against housing pressure, not just a number that clears the minimum monthly bills.",
+  },
+};
+
+const POPULAR_COMPARE_LINKS: Record<string, { href: string; label: string }[]> = {
+  "nyc-ny": [
+    { href: "/compare/nyc-ny/charlotte-nc", label: "NYC vs Charlotte" },
+    { href: "/compare/nyc-ny/austin-tx", label: "NYC vs Austin" },
+    { href: "/compare/nyc-ny/miami-fl", label: "NYC vs Miami" },
+  ],
+  "charlotte-nc": [{ href: "/compare/nyc-ny/charlotte-nc", label: "NYC vs Charlotte" }],
+  "austin-tx": [{ href: "/compare/la-ca/austin-tx", label: "LA vs Austin" }],
+  "la-ca": [{ href: "/compare/la-ca/austin-tx", label: "LA vs Austin" }],
+  "seattle-wa": [{ href: "/compare/seattle-wa/miami-fl", label: "Seattle vs Miami" }],
+  "boston-ma": [{ href: "/compare/boston-ma/miami-fl", label: "Boston vs Miami" }],
+  "miami-fl": [
+    { href: "/compare/nyc-ny/miami-fl", label: "NYC vs Miami" },
+    { href: "/compare/boston-ma/miami-fl", label: "Boston vs Miami" },
+  ],
+};
 
 export async function generateStaticParams() {
-  return [
-    { cityId: "nyc-ny" },
-    { cityId: "charlotte-nc" },
-    { cityId: "austin-tx" },
-    { cityId: "la-ca" },
-    { cityId: "seattle-wa" },
-    { cityId: "boston-ma" },
-    { cityId: "miami-fl" },
-  ];
+  return ALLOWED_CITY_IDS.map((cityId) => ({ cityId }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -72,21 +152,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CostOfLivingPage({ params }: PageProps) {
   const { cityId } = await params;
-  const city = findCity(cityId);
 
+  if (!ALLOWED_CITY_IDS.includes(cityId as (typeof ALLOWED_CITY_IDS)[number])) {
+    return notFound();
+  }
+
+  const city = findCity(cityId);
   if (!city) return notFound();
 
-  const moreCompare = MORE_COMPARE_IDS.filter((id) => id !== city.id)
-    .map((id) => findCity(id))
-    .filter(Boolean)
-    .slice(0, 15) as { id: string; name: string; state: string }[];
+  const cityContent = CITY_CONTENT[city.id];
+  if (!cityContent) return notFound();
 
-  const popular = [
-    { href: "/compare/nyc-ny/charlotte-nc", label: "NYC vs Charlotte" },
-    { href: "/compare/la-ca/austin-tx", label: "LA vs Austin" },
-    { href: "/compare/seattle-wa/dallas-tx", label: "Seattle vs Dallas" },
-    { href: "/compare/boston-ma/miami-fl", label: "Boston vs Miami" },
-  ];
+  const popular = POPULAR_COMPARE_LINKS[city.id] ?? [];
 
   const rent = city.defaultRent ?? 0;
   const tighter = rent ? Math.round((rent * 12) / 0.35) : null;
@@ -94,19 +171,16 @@ export default async function CostOfLivingPage({ params }: PageProps) {
   const comfort = rent ? Math.round((rent * 12) / 0.28) : null;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 py-10">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 space-y-10">
-
+    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-10 text-slate-900">
+      <div className="mx-auto max-w-5xl space-y-10 px-4 sm:px-6">
         <header className="py-2 text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             Cost of Living in {city.name}, {city.state.toUpperCase()}
           </h1>
 
-          <p className="mx-auto mt-3 max-w-3xl text-sm sm:text-base leading-7 text-slate-600">
-            How much does it cost to live in {city.name}? This page covers rent,
-            median home prices, property taxes, income taxes, and the salary you
-            need to live comfortably — with a calculator to compare{" "}
-            {city.name} against other cities.
+          <p className="mx-auto mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+            This page looks at rent, median home prices, property taxes, income taxes, and the
+            salary you may need to live with breathing room in {city.name}.
           </p>
 
           <div className="mt-3 text-xs text-slate-500">
@@ -115,42 +189,43 @@ export default async function CostOfLivingPage({ params }: PageProps) {
 
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Link
-              href="/explore"
-              className="inline-flex items-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
-            >
-              Explore All Tools
-            </Link>
-            <Link
               href={`/compare/nyc-ny/${city.id}`}
               className="inline-flex items-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
             >
               Compare {city.name} with NYC
             </Link>
+            <Link
+              href="/methodology"
+              className="inline-flex items-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
+            >
+              See methodology
+            </Link>
           </div>
 
           <div className="mx-auto mt-5 h-1 w-16 rounded-full bg-blue-600/80" />
 
-          <div className="mx-auto mt-5 flex flex-wrap justify-center gap-2">
-            {popular.map((x) => (
-              <Link
-                key={x.href}
-                href={x.href}
-                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"
-              >
-                {x.label}
-              </Link>
-            ))}
-          </div>
+          {popular.length > 0 ? (
+            <div className="mx-auto mt-5 flex flex-wrap justify-center gap-2">
+              {popular.map((x) => (
+                <Link
+                  key={x.href}
+                  href={x.href}
+                  className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"
+                >
+                  {x.label}
+                </Link>
+              ))}
+            </div>
+          ) : null}
         </header>
 
-        {/* Snapshot */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
           <h2 className="text-sm font-semibold">
             {city.name} cost of living snapshot
           </h2>
           <div className="mt-4 h-px w-full bg-slate-100" />
 
-          <div className="mt-4 mb-4 grid grid-cols-1 gap-2 sm:grid-cols-4">
+          <div className="mb-4 mt-4 grid grid-cols-1 gap-2 sm:grid-cols-4">
             {[
               {
                 label: "State",
@@ -158,15 +233,11 @@ export default async function CostOfLivingPage({ params }: PageProps) {
               },
               {
                 label: "Average Rent",
-                value: city.defaultRent
-                  ? `$${city.defaultRent.toLocaleString()} / month`
-                  : "—",
+                value: city.defaultRent ? `$${city.defaultRent.toLocaleString()} / month` : "—",
               },
               {
                 label: "Median Home Price",
-                value: city.medianHomePrice
-                  ? `$${city.medianHomePrice.toLocaleString()}`
-                  : "—",
+                value: city.medianHomePrice ? `$${city.medianHomePrice.toLocaleString()}` : "—",
                 extra: city.medianHomePrice
                   ? (() => {
                       const pmt = estimateMortgageMonthly(city.medianHomePrice, {
@@ -174,9 +245,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
                         rate: 0.07,
                         years: 30,
                       });
-                      return pmt
-                        ? `Est. mortgage: $${pmt.toLocaleString()}/mo`
-                        : null;
+                      return pmt ? `Est. mortgage: $${pmt.toLocaleString()}/mo` : null;
                     })()
                   : null,
               },
@@ -190,23 +259,19 @@ export default async function CostOfLivingPage({ params }: PageProps) {
                 className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-slate-600">
-                    {item.label}
-                  </span>
-                  <span className="text-sm font-semibold text-slate-900">
-                    {item.value}
-                  </span>
+                  <span className="text-xs font-medium text-slate-600">{item.label}</span>
+                  <span className="text-sm font-semibold text-slate-900">{item.value}</span>
                 </div>
-                {item.extra && (
+                {item.extra ? (
                   <div className="mt-1 text-xs text-slate-500">{item.extra}</div>
-                )}
+                ) : null}
               </div>
             ))}
           </div>
 
           {rent ? (
             <>
-              <div className="mt-4 mb-2 text-sm font-semibold text-slate-900">
+              <div className="mb-2 mt-4 text-sm font-semibold text-slate-900">
                 Salary needed in {city.name} (rent ≈ ${rent.toLocaleString()}/mo)
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -219,9 +284,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
                     key={x.label}
                     className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
                   >
-                    <span className="text-xs font-medium text-slate-600">
-                      {x.label}
-                    </span>
+                    <span className="text-xs font-medium text-slate-600">{x.label}</span>
                     <span className="text-sm font-semibold text-slate-900">
                       ${x.value?.toLocaleString()}
                     </span>
@@ -233,38 +296,47 @@ export default async function CostOfLivingPage({ params }: PageProps) {
               </div>
             </>
           ) : (
-            <div className="text-xs text-slate-500">
-              No rent estimate found for this city yet.
-            </div>
+            <div className="text-xs text-slate-500">No rent estimate found for this city yet.</div>
           )}
         </section>
 
-        {/* What makes this city expensive */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
             Is {city.name} expensive to live in?
           </h2>
           <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
-            <p>
-              In most cities, housing drives the biggest part of the cost of living.
-              Rent, mortgage size, insurance, and property taxes all affect how much
-              flexibility you have left after monthly essentials.
-            </p>
-            <p>
-              In {city.name}, the real question is not just what homes or apartments
-              cost on paper, but how those costs compare with local salary levels and
-              your take-home pay after state and federal income taxes. A city can feel
-              manageable at one income level and extremely tight at another.
-            </p>
-            <p>
-              Use the calculator below to compare {city.name} against other major
-              cities and see whether your income would stretch further somewhere else,
-              or whether staying put still makes financial sense.
-            </p>
+            <p>{cityContent.primary}</p>
+            <p>{cityContent.secondary}</p>
+            <p>{cityContent.caution}</p>
           </div>
         </section>
 
-        {/* Calculator */}
+        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+            What this page measures
+          </h2>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <h3 className="font-semibold text-slate-900">Housing pressure</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Rent, home prices, and property taxes usually have the biggest effect on whether a city feels affordable.
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <h3 className="font-semibold text-slate-900">Salary fit</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                A city is only workable if your income is high enough relative to its housing and tax burden.
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <h3 className="font-semibold text-slate-900">Take-home pay</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                State and federal taxes shape how much of your paycheck is actually available for rent, savings, and flexibility.
+              </p>
+            </div>
+          </div>
+        </section>
+
         <section>
           <Calculator
             monetization="state"
@@ -273,110 +345,29 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           />
         </section>
 
-        {/* Salary section */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
             What salary do you need to live in {city.name}?
           </h2>
           <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
+            <p>{cityContent.salaryNote}</p>
             <p>
-              Salary targets matter because "affordable" means different things at
-              different income levels. Someone renting conservatively may manage on a
-              tighter budget, while someone trying to save, invest, or buy later may
-              need a much larger buffer.
-            </p>
-            <p>
-              That is why the guidance above shows a tighter, target, and comfort
-              range — giving you a simple way to think about what salary may feel
-              barely workable versus what creates real breathing room month to month.
+              The tighter, target, and comfort ranges are not exact promises. They are planning
+              ranges meant to show the difference between barely workable, more sustainable, and
+              more comfortable salary levels.
             </p>
             {target ? (
               <p>
                 Based on the current rent estimate for {city.name}, a salary around{" "}
-                <span className="font-semibold text-slate-900">
-                  ${target.toLocaleString()}
-                </span>{" "}
-                is a reasonable starting point for most renters, while a salary closer
-                to{" "}
-                <span className="font-semibold text-slate-900">
-                  ${comfort?.toLocaleString()}
-                </span>{" "}
+                <span className="font-semibold text-slate-900">${target.toLocaleString()}</span>{" "}
+                is a reasonable starting point for many renters, while a salary closer to{" "}
+                <span className="font-semibold text-slate-900">${comfort?.toLocaleString()}</span>{" "}
                 may leave more room for savings and unexpected costs.
               </p>
             ) : null}
           </div>
         </section>
 
-        {/* Rent comparison */}
-        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
-          <h2 className="text-sm font-semibold">
-            How {city.name} rent compares to other cities
-          </h2>
-          <div className="mt-4 grid gap-3 text-sm">
-            {[
-              { id: "nyc-ny", label: "New York City" },
-              { id: "austin-tx", label: "Austin" },
-              { id: "miami-fl", label: "Miami" },
-              { id: "boston-ma", label: "Boston" },
-            ]
-              .filter((x) => x.id !== city.id)
-              .map((x) => {
-                const other = findCity(x.id);
-                if (!other) return null;
-
-                const a = city.defaultRent ?? 0;
-                const b = other.defaultRent ?? 0;
-                const diff =
-                  a > 0 && b > 0 ? Math.round((1 - a / b) * 100) : null;
-
-                const badge =
-                  diff === null
-                    ? "—"
-                    : diff >= 0
-                    ? `~${diff}% cheaper rent`
-                    : `~${Math.abs(diff)}% higher rent`;
-
-                return (
-                  <Link
-                    key={x.id}
-                    href={`/compare/${x.id}/${city.id}`}
-                    className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200 transition hover:bg-slate-100"
-                  >
-                    <span className="font-medium text-slate-900">
-                      {x.label} vs {city.name}
-                    </span>
-                    <span className="text-slate-600">{badge} →</span>
-                  </Link>
-                );
-              })}
-          </div>
-          <div className="mt-3 text-xs text-slate-500">
-            Based on average rent estimates. Real listings vary by neighborhood,
-            housing type, and timing.
-          </div>
-
-          {moreCompare.length > 0 ? (
-            <div className="mt-6 border-t border-slate-200 pt-5">
-              <div className="mb-3 text-xs font-semibold text-slate-700">
-                More {city.name} comparisons
-              </div>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3 lg:grid-cols-5">
-                {moreCompare.map((c) => (
-                  <Link
-                    key={c.id}
-                    href={`/compare/${c.id}/${city.id}`}
-                    className="whitespace-nowrap truncate text-slate-700 hover:underline"
-                    title={`${c.name} vs ${city.name}`}
-                  >
-                    {c.name} vs {city.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ) : null}
-        </section>
-
-        {/* FAQ */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
             Frequently asked questions about {city.name}
@@ -387,11 +378,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
                 What is the cost of living in {city.name}?
               </dt>
               <dd className="mt-1">
-                The cost of living in {city.name} is driven primarily by housing,
-                state income taxes, and transportation. The average rent estimate is
-                {rent ? ` $${rent.toLocaleString()} per month` : " available in the snapshot above"}.
-                Use the calculator on this page to see a full monthly budget breakdown
-                based on your income.
+                The biggest drivers are usually housing, taxes, and transportation. This page uses planning estimates for rent, home prices, and tax context to help you compare {city.name} with other cities.
               </dd>
             </div>
             <div>
@@ -401,16 +388,11 @@ export default async function CostOfLivingPage({ params }: PageProps) {
               <dd className="mt-1">
                 {target && comfort ? (
                   <>
-                    Based on current rent estimates, a salary of around $
-                    {target.toLocaleString()} is a reasonable target for most renters
-                    in {city.name}. A salary closer to ${comfort.toLocaleString()} provides
-                    more room for savings, emergencies, and discretionary spending.
+                    Based on current rent estimates, a salary of around ${target.toLocaleString()} is a reasonable target for many renters in {city.name}. A salary closer to ${comfort.toLocaleString()} usually leaves more room for savings and flexibility.
                   </>
                 ) : (
                   <>
-                    The salary you need depends on your rent, lifestyle, and savings
-                    goals. Use the calculator above to estimate based on your specific
-                    income.
+                    It depends on your rent, lifestyle, and savings goals. Use the calculator on this page to estimate based on your own income assumptions.
                   </>
                 )}
               </dd>
@@ -420,10 +402,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
                 Is {city.name} a good place to move for affordability?
               </dt>
               <dd className="mt-1">
-                It depends on where you are moving from and what your income is.
-                Use the comparison links above to see how {city.name} stacks up
-                against other major cities on rent, taxes, and take-home pay side
-                by side.
+                It depends on where you are moving from and whether the city improves your income-to-cost ratio. The comparison tool is the best way to pressure-test that.
               </dd>
             </div>
             <div>
@@ -431,16 +410,12 @@ export default async function CostOfLivingPage({ params }: PageProps) {
                 How does {city.state.toUpperCase()} state income tax affect take-home pay in {city.name}?
               </dt>
               <dd className="mt-1">
-                State income tax is one of the biggest factors in how far your salary
-                goes. The calculator on this page applies {city.state.toUpperCase()} state
-                tax rules to your income so you can see your actual take-home pay, not
-                just your gross salary.
+                State income tax is one of the biggest variables in how far your salary goes. The calculator applies {city.state.toUpperCase()} state tax rules so you can compare take-home pay, not just gross salary.
               </dd>
             </div>
           </dl>
         </section>
 
-        {/* Related pages */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
             Related pages for {city.name}
@@ -464,12 +439,6 @@ export default async function CostOfLivingPage({ params }: PageProps) {
             >
               Explore Compare Pages
             </Link>
-            <Link
-              href="/explore"
-              className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-            >
-              Explore All Tools
-            </Link>
           </div>
         </section>
 
@@ -485,9 +454,10 @@ export default async function CostOfLivingPage({ params }: PageProps) {
             <Link href="/privacy" className="transition hover:text-slate-900">Privacy</Link>
             <span>•</span>
             <Link href="/terms" className="transition hover:text-slate-900">Terms</Link>
+            <span>•</span>
+            <Link href="/methodology" className="transition hover:text-slate-900">Methodology</Link>
           </div>
         </div>
-
       </div>
     </main>
   );

@@ -30,10 +30,9 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
-
-        <header className="space-y-3">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+      <div className="mx-auto max-w-5xl px-4 py-10 space-y-10">
+        <header className="space-y-4">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             How Much Do I Need to Retire?
           </h1>
 
@@ -41,44 +40,168 @@ export default function Page() {
             Calculate Your Retirement Number Based on Spending, Returns &amp; Withdrawal Rate
           </p>
 
-          <p className="text-slate-300 max-w-2xl">
-            The amount you need to retire depends on your yearly spending,
-            investment returns, and withdrawal rate. A common starting point is
-            the <span className="font-semibold text-white">4% rule</span>, which
-            suggests you need roughly{" "}
+          <p className="max-w-3xl text-slate-300 leading-7">
+            The amount you need to retire depends mostly on your yearly spending,
+            your withdrawal rate, and how long your money needs to last. A common
+            starting point is the <span className="font-semibold text-white">4% rule</span>,
+            which suggests you need about{" "}
             <span className="font-semibold text-white">25× your annual expenses</span>.
-            At $50,000 per year in spending, that's a $1.25 million retirement
-            number. At $80,000 per year, it's $2 million.
           </p>
 
-          <p className="text-sm text-slate-400 max-w-2xl">
-            But your retirement number also depends on where you live. Lower
-            taxes and a lower cost of living reduce your annual spending, which
-            directly shrinks the portfolio you need and can shorten your timeline
-            by years.
+          <p className="max-w-3xl text-sm leading-6 text-slate-400">
+            But your retirement number also depends on where you live. Lower taxes and
+            a lower cost of living can reduce annual spending, shrink the portfolio you
+            need, and shorten your timeline by years.
           </p>
 
           <div className="text-xs text-slate-400">Assumptions updated: March 2026</div>
 
-          <div className="flex flex-wrap gap-2 pt-1">
+          <div className="pt-1">
             <Link
-              href="/explore"
-              className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              href="/methodology"
+              className="text-sm font-medium text-emerald-200 underline decoration-emerald-300/40 underline-offset-4 transition hover:text-emerald-100"
             >
-              Explore All Tools
+              See methodology and data sources
             </Link>
           </div>
 
-          <div className="flex flex-wrap gap-2 pt-1">
-            <Link href="/fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">FIRE calculator →</Link>
-            <Link href="/fire-number-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">FIRE number calculator →</Link>
-            <Link href="/lean-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Lean FIRE →</Link>
-            <Link href="/barista-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Barista FIRE →</Link>
-            <Link href="/" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Compare cities →</Link>
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Link href="/fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">FIRE calculator</Link>
+            <Link href="/fire-number-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">FIRE number calculator</Link>
+            <Link href="/lean-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Lean FIRE</Link>
+            <Link href="/barista-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Barista FIRE</Link>
+            <Link href="/" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Compare cities</Link>
           </div>
         </header>
 
+        {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (
+          <section className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <AdSlot
+              slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP}
+              className="min-h-[100px]"
+            />
+          </section>
+        ) : null}
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-xl font-semibold">
+            How retirement numbers are usually calculated
+          </h2>
+
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-300">
+            <p>
+              The simplest version is:
+              annual spending ÷ withdrawal rate = retirement number.
+            </p>
+            <p>
+              If you expect to spend $50,000 a year and use a 4% withdrawal rate,
+              your target is about $1.25 million. If you expect to spend $80,000,
+              the same rule gives you a target of $2 million.
+            </p>
+            <p>
+              That is why spending matters so much. A lower annual spending target
+              does not just reduce your monthly needs — it directly lowers the size
+              of portfolio required to retire.
+            </p>
+          </div>
+        </section>
+
         <FireCalculator hideFAQ />
+
+        {process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID ? (
+          <section className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <AdSlot
+              slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID}
+              className="min-h-[100px]"
+            />
+          </section>
+        ) : null}
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-xl font-semibold">
+            What changes your retirement number most
+          </h2>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <h3 className="font-semibold text-white">Annual spending</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Spending is the biggest driver. Lower annual expenses mean a lower retirement target.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <h3 className="font-semibold text-white">Withdrawal rate</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                A lower withdrawal rate means you need a larger portfolio. A higher rate lowers the target, but with more risk.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <h3 className="font-semibold text-white">Location</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Where you live changes taxes, housing costs, and everyday spending, which can materially change your number.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <h3 className="font-semibold text-white">Retirement age</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Earlier retirement usually requires more caution because the portfolio needs to last longer.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-xl font-semibold">
+            Why location matters more than people think
+          </h2>
+
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-300">
+            <p>
+              Your retirement number is based on annual spending, not just investment returns.
+              That means moving to a lower-cost city or lower-tax state can reduce the amount
+              your portfolio needs to support every year.
+            </p>
+            <p>
+              In practice, a relocation decision can sometimes improve the math more than a small
+              raise or a slightly higher investment return assumption.
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-xl font-semibold">
+            What this calculator includes — and what it does not
+          </h2>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4">
+              <h3 className="font-semibold text-white">Included</h3>
+              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300">
+                <li>Retirement number estimate</li>
+                <li>4% rule and withdrawal-rate planning</li>
+                <li>Location-aware spending and tax comparison</li>
+                <li>Timeline testing through the FIRE calculator</li>
+              </ul>
+            </div>
+
+            <div className="rounded-xl border border-amber-400/20 bg-amber-400/10 p-4">
+              <h3 className="font-semibold text-white">Not fully modeled</h3>
+              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300">
+                <li>Every tax edge case or deduction</li>
+                <li>Sequence-of-returns risk in full detail</li>
+                <li>Healthcare and long-term care with precision</li>
+                <li>Guaranteed future returns</li>
+              </ul>
+            </div>
+          </div>
+
+          <p className="mt-4 text-sm leading-7 text-slate-300">
+            This is a planning tool, not a guaranteed retirement forecast.
+          </p>
+        </section>
 
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">
@@ -88,27 +211,27 @@ export default function Page() {
           <div className="grid gap-3">
             <SEOFAQItem
               q="How much money do I need to retire?"
-              a="The most common guideline is 25 times your annual expenses, based on the 4% rule. If you spend $50,000 per year, you need $1.25 million. If you spend $80,000, you need $2 million. The exact amount depends on your withdrawal rate, expected investment returns, inflation, and how long your retirement will last."
+              a="A common starting point is 25 times your annual expenses, based on the 4% rule. The exact number depends on your withdrawal rate, timeline, taxes, and expected spending."
             />
             <SEOFAQItem
               q="What is the 4% rule for retirement?"
-              a="The 4% rule is a guideline suggesting you can withdraw 4% of your portfolio each year in retirement without running out of money over a 30-year period, based on historical market returns. It means your retirement number is roughly 25 times your annual spending. More conservative planners use 3–3.5%, especially for early retirees with longer time horizons."
+              a="The 4% rule is a planning guideline suggesting a portfolio can support withdrawals of roughly 4% per year over a traditional retirement horizon. That implies a retirement number of about 25 times annual spending."
             />
             <SEOFAQItem
               q="How does where I live affect how much I need to retire?"
-              a="Significantly. Your retirement number is based on your annual spending. If you move to a lower cost-of-living state or city, your expenses drop — which means a smaller portfolio target and potentially years shaved off your timeline. Moving from a high-tax state to a no-income-tax state also increases how much of your withdrawals you keep."
+              a="Significantly. Lower spending and lower taxes reduce the size of portfolio your retirement must support."
             />
             <SEOFAQItem
               q="How much do I need to retire at 50?"
-              a="Retiring at 50 means your portfolio needs to last 40+ years, which is longer than the 30-year window the 4% rule was designed for. Most financial planners recommend using a 3–3.5% withdrawal rate for early retirement, which means multiplying your annual expenses by 28.6–33 instead of 25. At $60,000 per year in expenses, that's a target of roughly $1.7M–$2M."
+              a="Retiring at 50 usually requires a more conservative plan than retiring later because the portfolio may need to last 40 years or more. Many early retirees use a withdrawal rate lower than 4%."
             />
             <SEOFAQItem
               q="Does Social Security reduce how much I need to save?"
-              a="Yes. If you plan to receive Social Security, that income reduces how much your portfolio needs to cover each year. For example, if you expect $18,000 per year in Social Security and spend $55,000 annually, your portfolio only needs to cover $37,000 — a retirement number of $925,000 at 4% instead of $1.375 million."
+              a="Yes. Any reliable outside income reduces the amount your portfolio needs to cover each year."
             />
             <SEOFAQItem
               q="What investment return should I assume for retirement planning?"
-              a="A common planning assumption is 6–7% nominal annual return for a diversified stock and bond portfolio, which translates to roughly 4–5% after inflation. More conservative plans use 5–6% to account for sequence-of-returns risk in early retirement years. This calculator defaults to 7% in Phase 1, which you can adjust under the advanced settings."
+              a="Many people use 5% to 7% nominal return assumptions for planning, but the right number depends on how conservative you want to be."
             />
           </div>
         </section>
@@ -123,9 +246,10 @@ export default function Page() {
             <Link href="/privacy" className="transition hover:text-white">Privacy</Link>
             <span>•</span>
             <Link href="/terms" className="transition hover:text-white">Terms</Link>
+            <span>•</span>
+            <Link href="/methodology" className="transition hover:text-white">Methodology</Link>
           </div>
         </footer>
-
       </div>
     </main>
   );

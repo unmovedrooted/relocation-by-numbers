@@ -2,15 +2,101 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import AdSlot from "@/components/AdSlot";
 import Link from "next/link";
-import { findCity, majorCities } from "@/lib/cities";
+import { findCity } from "@/lib/cities";
 
 type Props = {
   params: Promise<{ cityId: string }>;
 };
 
+const ALLOWED_CITY_IDS = [
+  "charlotte-nc",
+  "austin-tx",
+  "miami-fl",
+  "la-ca",
+  "seattle-wa",
+  "boston-ma",
+  "nyc-ny",
+] as const;
+
+const CITY_CONTENT: Record<
+  string,
+  {
+    primary: string;
+    secondary: string;
+    caution: string;
+  }
+> = {
+  "charlotte-nc": {
+    primary:
+      "Charlotte often requires a lower salary than many major coastal cities because housing pressure is usually much lower.",
+    secondary:
+      "Its appeal is not just lower rent. It is that the city can leave more breathing room in the monthly budget if your income remains competitive.",
+    caution:
+      "The real question is whether your actual rent and neighborhood choice still support that advantage after the move.",
+  },
+  "austin-tx": {
+    primary:
+      "Austin is no longer a low-cost city in the way many people still assume, so the salary you need is often higher than people expect.",
+    secondary:
+      "Texas has no state income tax, which helps take-home pay, but housing and ownership costs can narrow that benefit quickly.",
+    caution:
+      "Do not treat Austin as a cheap-market salary target just because it is in Texas.",
+  },
+  "miami-fl": {
+    primary:
+      "Miami can require a higher salary than people expect because housing costs can stay high even though Florida has no state income tax.",
+    secondary:
+      "The tax advantage helps, but the affordability question usually comes down to how much rent or ownership costs absorb each paycheck.",
+    caution:
+      "It is easy to overstate Miami affordability if you focus only on taxes and ignore housing pressure.",
+  },
+  "la-ca": {
+    primary:
+      "Los Angeles usually requires a high salary because rent, home prices, and state tax drag all push against affordability.",
+    secondary:
+      "Even good incomes can feel stretched once housing is layered on top of taxes and other recurring costs.",
+    caution:
+      "A salary that looks strong on paper may still leave less flexibility than expected in Los Angeles.",
+  },
+  "seattle-wa": {
+    primary:
+      "Seattle benefits from no state income tax, but housing costs can still require a meaningfully higher salary than lower-cost metros.",
+    secondary:
+      "The city often works best when income is strong enough to preserve the tax benefit instead of letting housing consume it.",
+    caution:
+      "No state income tax does not automatically mean a low salary requirement.",
+  },
+  "boston-ma": {
+    primary:
+      "Boston often requires a strong salary because housing costs remain high and the city is not a low-cost market.",
+    secondary:
+      "The salary needed is usually less about bare survival and more about whether you still have room for savings after rent and taxes.",
+    caution:
+      "Boston can feel tighter than expected even for relatively high earners.",
+  },
+  "nyc-ny": {
+    primary:
+      "New York City usually demands one of the highest salary targets because both rent and tax drag can be substantial.",
+    secondary:
+      "The right number is not just about clearing rent. It is about how much income is left after housing and taxes to support the rest of your life.",
+    caution:
+      "A high gross salary in NYC can still leave surprisingly little room for savings or flexibility.",
+  },
+};
+
+const RELATED_CITY_MAP: Record<string, string[]> = {
+  "charlotte-nc": ["austin-tx", "miami-fl", "boston-ma", "nyc-ny"],
+  "austin-tx": ["charlotte-nc", "miami-fl", "seattle-wa", "la-ca"],
+  "miami-fl": ["charlotte-nc", "austin-tx", "boston-ma", "nyc-ny"],
+  "la-ca": ["austin-tx", "seattle-wa", "miami-fl", "nyc-ny"],
+  "seattle-wa": ["austin-tx", "la-ca", "boston-ma", "nyc-ny"],
+  "boston-ma": ["charlotte-nc", "miami-fl", "seattle-wa", "nyc-ny"],
+  "nyc-ny": ["charlotte-nc", "austin-tx", "miami-fl", "boston-ma"],
+};
+
 export async function generateStaticParams() {
-  return majorCities().map((c) => ({
-    cityId: c.id,
+  return ALLOWED_CITY_IDS.map((cityId) => ({
+    cityId,
   }));
 }
 
@@ -46,24 +132,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const { cityId } = await params;
-  const city = findCity(cityId);
 
+  if (!ALLOWED_CITY_IDS.includes(cityId as (typeof ALLOWED_CITY_IDS)[number])) {
+    return notFound();
+  }
+
+  const city = findCity(cityId);
   if (!city) return notFound();
 
   const rent = city.defaultRent ?? 0;
+  const cityContent = CITY_CONTENT[city.id];
+  if (!cityContent) return notFound();
 
-  const comfortableSalary = Math.round((rent * 3 * 12) / 0.30);
-  const basicSalary = Math.round((rent * 3 * 12) / 0.40);
+  const comfortableSalary = rent ? Math.round((rent * 12) / 0.3) : 0;
+  const basicSalary = rent ? Math.round((rent * 12) / 0.4) : 0;
 
-  const relatedCities = majorCities()
-    .filter((c) => c.id !== city.id)
-    .slice(0, 6);
+  const relatedCities = (RELATED_CITY_MAP[city.id] ?? [])
+    .map((id) => findCity(id))
+    .filter(Boolean);
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
-
-        <header className="space-y-3">
+      <div className="mx-auto max-w-5xl px-4 py-10 space-y-10">
+        <header className="space-y-4">
           <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
             Salary Needed to Live in {city.name}, {city.state.toUpperCase()}
           </h1>
@@ -72,40 +163,55 @@ export default async function Page({ params }: Props) {
             How Much Do You Need to Earn to Live Comfortably in {city.name}?
           </p>
 
-          <p className="max-w-2xl text-sm text-slate-300 sm:text-base">
-            Housing costs are the biggest driver of the salary you need in{" "}
-            {city.name}. These estimates use the 30% income rule — the common
-            guideline that housing should not exceed 30% of your gross income —
-            alongside a tighter 40% threshold for a minimum baseline.
+          <p className="max-w-3xl text-sm text-slate-300 sm:text-base leading-7">
+            This page uses housing-based planning estimates to show what salary may be needed
+            to rent in {city.name}. The comfortable estimate uses the 30% income rule, while the
+            tighter estimate uses a 40% housing-share threshold.
           </p>
 
           <div className="text-xs text-slate-500">Assumptions updated: March 2026</div>
+
+          <div className="pt-1">
+            <Link
+              href="/methodology"
+              className="text-sm font-medium text-emerald-200 underline decoration-emerald-300/40 underline-offset-4 transition hover:text-emerald-100"
+            >
+              See methodology and data sources
+            </Link>
+          </div>
         </header>
 
-        {/* Salary estimates */}
+        {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (
+          <section className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <AdSlot
+              slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP}
+              className="min-h-[100px]"
+            />
+          </section>
+        ) : null}
+
         <section className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-xl border border-white/10 bg-white/5 p-5">
             <div className="text-sm text-slate-400">Comfortable salary in {city.name}</div>
-            <div className="text-2xl font-semibold mt-2">
-              ${comfortableSalary.toLocaleString()}
+            <div className="mt-2 text-2xl font-semibold">
+              {comfortableSalary ? `$${comfortableSalary.toLocaleString()}` : "N/A"}
             </div>
-            <div className="text-xs text-slate-400 mt-1">
+            <div className="mt-1 text-xs text-slate-400">
               Based on housing at 30% of gross income
             </div>
           </div>
 
           <div className="rounded-xl border border-white/10 bg-white/5 p-5">
             <div className="text-sm text-slate-400">Minimum salary estimate</div>
-            <div className="text-2xl font-semibold mt-2">
-              ${basicSalary.toLocaleString()}
+            <div className="mt-2 text-2xl font-semibold">
+              {basicSalary ? `$${basicSalary.toLocaleString()}` : "N/A"}
             </div>
-            <div className="text-xs text-slate-400 mt-1">
-              Based on housing at 40% of gross income — tighter budget
+            <div className="mt-1 text-xs text-slate-400">
+              Based on housing at 40% of gross income
             </div>
           </div>
         </section>
 
-        {/* Housing snapshot */}
         <section className="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-3">
           <h2 className="text-sm font-semibold text-slate-200">
             {city.name} housing snapshot
@@ -114,49 +220,54 @@ export default async function Page({ params }: Props) {
             <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
               <div className="text-xs text-slate-400">Average rent</div>
               <div className="mt-1 font-semibold text-white">
-                ${city.defaultRent?.toLocaleString()} / mo
+                {city.defaultRent ? `$${city.defaultRent.toLocaleString()} / mo` : "N/A"}
               </div>
             </div>
             <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
               <div className="text-xs text-slate-400">Median home price</div>
               <div className="mt-1 font-semibold text-white">
-                ${city.medianHomePrice?.toLocaleString()}
+                {city.medianHomePrice ? `$${city.medianHomePrice.toLocaleString()}` : "N/A"}
               </div>
             </div>
             <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
               <div className="text-xs text-slate-400">Property tax rate</div>
               <div className="mt-1 font-semibold text-white">
-                {city.propertyTaxPct}%
+                {typeof city.propertyTaxPct === "number" ? `${city.propertyTaxPct}%` : "N/A"}
               </div>
             </div>
           </div>
           <p className="text-xs text-slate-500">
-            Rent and home price figures are estimates for planning purposes.
-            Real costs vary by neighborhood, unit type, and market conditions.
+            Rent and home price figures are planning estimates. Real costs vary by neighborhood and market conditions.
           </p>
         </section>
 
-        {/* Explanation */}
-        <section className="space-y-3 text-sm leading-7 text-slate-300 max-w-2xl">
+        {process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID ? (
+          <section className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <AdSlot
+              slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID}
+              className="min-h-[100px]"
+            />
+          </section>
+        ) : null}
+
+        <section className="space-y-4 text-sm leading-7 text-slate-300 max-w-3xl">
           <h2 className="text-lg font-semibold text-white">
             How the salary estimate works
           </h2>
           <p>
-            These figures use the average rent in {city.name} as the basis.
-            The comfortable salary assumes housing costs 30% of your gross
-            income — a widely used guideline for financial stability. The
-            minimum estimate uses 40%, which leaves less room for savings,
-            emergencies, or debt repayment.
+            These numbers use rent as the starting point, not your full household budget.
+            That means they are best treated as housing-based salary guidelines rather than
+            complete lifestyle affordability numbers.
           </p>
+          <p>{cityContent.primary}</p>
+          <p>{cityContent.secondary}</p>
+          <p>{cityContent.caution}</p>
           <p>
-            Neither figure accounts for state income taxes, which reduce your
-            take-home pay and effectively raise the gross salary you need. Use
-            the relocation calculator to see how {city.state.toUpperCase()} taxes
-            affect your real take-home pay.
+            State tax also matters. Gross salary is not the same as take-home pay, which is why
+            city comparison and tax-aware planning tools are useful alongside this page.
           </p>
         </section>
 
-        {/* CTA links */}
         <div className="flex gap-3 flex-wrap">
           <Link
             href="/"
@@ -178,7 +289,6 @@ export default async function Page({ params }: Props) {
           </Link>
         </div>
 
-        {/* FAQ */}
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">
             Frequently asked questions about living in {city.name}
@@ -189,13 +299,11 @@ export default async function Page({ params }: Props) {
                 What salary do you need to live comfortably in {city.name}?
               </div>
               <p className="mt-1">
-                Based on current rent estimates, a salary of around{" "}
+                Based on the current rent estimate, a salary around{" "}
                 <span className="font-semibold text-white">
                   ${comfortableSalary.toLocaleString()}
                 </span>{" "}
-                is a comfortable starting point for most renters in {city.name},
-                assuming housing costs around 30% of gross income. At a tighter
-                40% ratio, the minimum estimate is{" "}
+                is a useful housing-based planning target. A tighter minimum estimate is{" "}
                 <span className="font-semibold text-white">
                   ${basicSalary.toLocaleString()}
                 </span>.
@@ -206,12 +314,11 @@ export default async function Page({ params }: Props) {
                 How much is rent in {city.name}?
               </div>
               <p className="mt-1">
-                The average rent estimate used in this calculation is{" "}
+                This page uses an estimated average rent of{" "}
                 <span className="font-semibold text-white">
-                  ${city.defaultRent?.toLocaleString()} per month
+                  {city.defaultRent ? `$${city.defaultRent.toLocaleString()} per month` : "N/A"}
                 </span>
-                . Actual rents vary by neighborhood, apartment size, and market
-                conditions. This is a planning estimate, not a current market rate.
+                . Actual rent varies by neighborhood, unit type, and timing.
               </p>
             </div>
             <div>
@@ -219,9 +326,9 @@ export default async function Page({ params }: Props) {
                 Is {city.name} expensive to live in?
               </div>
               <p className="mt-1">
-                It depends on where you are coming from. Use the city comparison
-                tool to see how {city.name} stacks up against other major cities
-                on rent, taxes, and take-home pay side by side.
+                That depends on where you are coming from and how your income compares with local housing costs.
+                A city can look expensive on rent alone but still work if your income is strong enough, or look manageable
+                on rent while still feeling tight after taxes and other costs.
               </p>
             </div>
             <div>
@@ -229,48 +336,48 @@ export default async function Page({ params }: Props) {
                 Does state income tax affect the salary I need in {city.name}?
               </div>
               <p className="mt-1">
-                Yes. {city.state.toUpperCase()} state income tax reduces your
-                take-home pay, which means your gross salary needs to be higher
-                to cover the same expenses. The relocation calculator applies
-                state-specific tax estimates so you can see your real net income.
+                Yes. State income tax affects take-home pay, which means your gross salary may need to be higher
+                than the housing-only estimate suggests.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Related cities */}
-        <section className="space-y-3">
-          <h2 className="text-xl font-semibold">
-            Salary needed in other cities
-          </h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {relatedCities.map((c) => (
-              <Link
-                key={c.id}
-                href={`/salary-needed-in/${c.id}`}
-                className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm font-medium text-slate-200 hover:bg-white/10"
-              >
-                Salary needed in {c.name} →
-              </Link>
-            ))}
-          </div>
-        </section>
+        {relatedCities.length > 0 ? (
+          <section className="space-y-3">
+            <h2 className="text-xl font-semibold">
+              Salary needed in other cities
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {relatedCities.map((c) => (
+                <Link
+                  key={c!.id}
+                  href={`/salary-needed-in/${c!.id}`}
+                  className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm font-medium text-slate-200 hover:bg-white/10"
+                >
+                  Salary needed in {c!.name} →
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <footer className="pt-2">
           <div className="mb-3 text-xs text-slate-500">
-            Assumptions updated: March 2026
+            Planning estimate only. Salary targets are housing-based guidelines, not a full personal budget.
           </div>
           <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
-            <a href="/about" className="transition hover:text-white">About</a>
+            <Link href="/about" className="transition hover:text-white">About</Link>
             <span>•</span>
-            <a href="/disclaimer" className="transition hover:text-white">Disclaimer</a>
+            <Link href="/disclaimer" className="transition hover:text-white">Disclaimer</Link>
             <span>•</span>
-            <a href="/privacy" className="transition hover:text-white">Privacy</a>
+            <Link href="/privacy" className="transition hover:text-white">Privacy</Link>
             <span>•</span>
-            <a href="/terms" className="transition hover:text-white">Terms</a>
+            <Link href="/terms" className="transition hover:text-white">Terms</Link>
+            <span>•</span>
+            <Link href="/methodology" className="transition hover:text-white">Methodology</Link>
           </div>
         </footer>
-
       </div>
     </main>
   );

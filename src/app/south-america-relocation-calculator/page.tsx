@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import AdSlot from "@/components/AdSlot";
 import SouthAmericaRelocationCalculator from "@/components/SouthAmericaRelocationCalculator";
 
@@ -39,79 +40,133 @@ export default function Page() {
           </p>
 
           <p className="mx-auto mt-3 max-w-4xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-  Compare taxes, rent, living costs, take-home pay, and one-time moving expenses across major South American cities.
-</p>
+            Compare taxes, rent, living costs, take-home pay, and one-time moving expenses
+            across major South American cities.
+          </p>
 
-<p className="mx-auto mt-2 max-w-3xl text-sm text-slate-500 dark:text-slate-400">
-  Use this calculator to pressure-test your budget before relocating to South America — including Colombia, Argentina, Chile, Peru, Brazil, Ecuador, Uruguay, Paraguay, Bolivia, Guyana, Suriname, and Venezuela.
-</p>
+          <div className="mx-auto mt-4 flex max-w-3xl flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
+            <span>Planning estimates only.</span>
+            <span className="hidden sm:inline">•</span>
+            <span>Results depend on salary, residency path, exchange-rate assumptions, and housing choices.</span>
+            <span className="hidden sm:inline">•</span>
+            <Link
+              href="/methodology"
+              className="font-medium text-slate-700 underline underline-offset-4 hover:no-underline dark:text-slate-300"
+            >
+              See methodology
+            </Link>
+          </div>
+
+          <p className="mx-auto mt-2 max-w-3xl text-sm text-slate-500 dark:text-slate-400">
+            Use this calculator to pressure-test your budget before relocating to South America.
+          </p>
 
           <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-amber-600/80" />
         </div>
       </header>
 
       <section className="mx-auto max-w-5xl space-y-10 px-4 pb-12 sm:px-6">
+        {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <AdSlot
+              slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP}
+              className="min-h-[100px]"
+            />
+          </section>
+        ) : null}
+
         <SouthAmericaRelocationCalculator />
 
-        {/* FIRE cross-sell */}
-        <section className="rounded-2xl border border-emerald-200/60 bg-emerald-50 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            <div>
-              <div className="text-sm font-semibold text-slate-900">
-                Thinking Bigger Than Just Moving?
-              </div>
-              <p className="mt-1 text-sm text-slate-700">
-                See how relocating to South America impacts your FIRE timeline.
+        {process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID ? (
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <AdSlot
+              slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID}
+              className="min-h-[100px]"
+            />
+          </section>
+        ) : null}
+
+        <div className="text-center text-xs text-slate-500 dark:text-slate-400">
+          Assumptions updated: March 2026
+        </div>
+
+        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
+          <div className="max-w-3xl">
+            <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white sm:text-xl">
+              How this South America relocation calculator works
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
+              This calculator is designed to help you test whether a move to South America looks
+              financially realistic before you commit. It compares destination-country taxes, rent,
+              living costs, and one-time relocation expenses so you can estimate how the move may
+              change your monthly budget and cash readiness.
+            </p>
+            <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
+              Instead of relying on broad “South America is cheap” assumptions, the tool focuses
+              on what usually matters most in a real move: take-home pay, housing pressure, recurring
+              living costs, residency friction, exchange-rate effects, and whether your savings leave
+              enough room to make the move comfortably.
+            </p>
+          </div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Taxes and take-home pay</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Compares country-level tax treatment so you can estimate what actually reaches your budget after local rules are applied.
               </p>
-              <div className="mt-3 flex flex-wrap items-center gap-4">
-                <a
-                  href="/fire-calculator"
-                  className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-                >
-                  🔥 Calculate My FIRE Timeline
-                </a>
-                <div className="hidden h-5 w-px bg-emerald-200 sm:block" />
-                <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
-                  <a href="/coast-fire-calculator" className="hover:text-slate-900">Coast FIRE</a>
-                  <a href="/barista-fire-calculator" className="hover:text-slate-900">Barista FIRE</a>
-                  <a href="/lean-fire-calculator" className="hover:text-slate-900">Lean FIRE</a>
-                </div>
-              </div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Housing and essentials</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Estimates rent, utilities, groceries, transportation, and healthcare-related costs for each destination city.
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Relocation readiness</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Looks at deposits, visa fees, setup costs, and monthly flexibility so you can judge whether the move looks realistic.
+              </p>
             </div>
           </div>
         </section>
 
-        {/* Explore tools */}
-        <section className="rounded-2xl border border-emerald-200/60 bg-emerald-50 p-5">
-          <h2 className="text-lg font-semibold tracking-tight text-slate-900">
-            Explore more relocation planning tools
+        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
+          <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white sm:text-xl">
+            What makes South America relocation financially different
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-700">
-            Keep comparing your options with more relocation, budgeting, and FIRE tools from Relocation by Numbers.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <a href="/explore" className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-              Explore all tools
-            </a>
-            <a href="/international-relocation" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-              International Calculator
-            </a>
-            <a href="/caribbean-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-              Caribbean Calculator
-            </a>
-            <a href="/europe-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-              Europe Calculator
-            </a>
-            <a href="/asia-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-              Asia Calculator
-            </a>
-            <a href="/fire-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-              FIRE Calculator
-            </a>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Low cost does not mean simple</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Some South American destinations look highly affordable on everyday costs, but tax treatment, residency rules, and local infrastructure can change the real picture quickly.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Exchange rates can distort the comparison</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                South America can be harder to model cleanly than some other regions because exchange-rate reality may not match official-rate assumptions in every country.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Dollarized Ecuador changes budgeting</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Ecuador often feels simpler to budget for than some neighboring countries because there is no separate local-currency conversion layer for many expats thinking in USD.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Country-to-country differences are large</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Medellín, Buenos Aires, Santiago, Lima, Montevideo, and São Paulo should not be treated as one cost profile. Housing pressure, tax treatment, and residency paths differ substantially.
+              </p>
+            </div>
           </div>
         </section>
 
-        {/* What this calculator includes */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
           <div className="grid gap-6 lg:grid-cols-2">
             <div>
@@ -119,62 +174,68 @@ export default function Page() {
                 What this South America relocation calculator includes
               </h2>
               <div className="mt-4 space-y-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
-               <p>
-  This calculator estimates how a move to South America may affect your monthly
-  budget — covering income taxes, housing, living costs, and one-time relocation
-  expenses across major South American countries and cities.
-</p>
-<p>
-  It includes city-level cost defaults, country-specific tax models, visa context,
-  monthly flexibility, savings coverage, and comparable salary estimates to help
-  you compare relocation scenarios more clearly.
-</p>
+                <p>
+                  This calculator estimates how a move to South America may affect your monthly
+                  budget — covering income taxes, housing, living costs, and one-time relocation
+                  expenses across major South American countries and cities.
+                </p>
+                <p>
+                  It includes city-level cost defaults, country-specific tax models, residency context,
+                  monthly flexibility, savings coverage, and comparable salary estimates to help you compare
+                  relocation scenarios more clearly.
+                </p>
               </div>
+
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
                   <div className="text-sm font-semibold text-slate-900 dark:text-white">Income and taxes</div>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Estimated take-home pay based on your salary, filing status, and country-specific tax rules.</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                    Estimated take-home pay based on salary, filing assumptions, and country-specific tax rules.
+                  </p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
                   <div className="text-sm font-semibold text-slate-900 dark:text-white">Housing and essentials</div>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Rent, utilities, groceries, transportation, and healthcare costs for each South American city.</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                    Rent, utilities, groceries, transportation, and healthcare-related cost assumptions.
+                  </p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
                   <div className="text-sm font-semibold text-slate-900 dark:text-white">Visa and permit context</div>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Digital nomad visas, pensionado programs, rentista options, and estimated permit fees — with income requirements and key notes per country.</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                    Residency-path notes, planning assumptions, and one-time permit-related costs where relevant.
+                  </p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
                   <div className="text-sm font-semibold text-slate-900 dark:text-white">Planning signals</div>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Monthly flexibility, comparable salary, savings coverage, and a comfort score to judge whether the move looks realistic.</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                    Monthly flexibility, comparable salary, savings coverage, and comfort signals.
+                  </p>
                 </div>
               </div>
             </div>
 
             <div className="rounded-2xl border border-amber-200/70 bg-amber-50 p-5 dark:border-amber-900/60 dark:bg-amber-950/30">
-              <div className="text-sm font-semibold text-slate-900 dark:text-white">Good to know before you use it</div>
+              <div className="text-sm font-semibold text-slate-900 dark:text-white">
+                What this tool does not fully model
+              </div>
               <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
                 <p>
                   Results are estimates only. Real taxes, rent, healthcare, immigration rules,
-                  and household costs vary by residency status, visa path, and local market
-                  conditions.
+                  and household costs vary by residency status, visa path, city, and local market conditions.
                 </p>
                 <p>
-                  South America offers some of the lowest costs of living available to North
-                  American and European expats. Colombia and Peru have become major digital
-                  nomad hubs. Argentina's parallel exchange rate market means real purchasing
-                  power often differs significantly from official-rate estimates.
+                  This tool does not fully model neighborhood-level housing variation, every exchange-rate reality,
+                  employer-provided benefits, all tax edge cases, or every local immigration pathway.
                 </p>
                 <p>
-                  This tool is most useful for testing scenarios, comparing South American
-                  destinations, and seeing whether your income and savings create enough room
-                  to make the move comfortably.
+                  It is most useful for testing scenarios, comparing destinations, and seeing whether your income
+                  and savings create enough room to make the move comfortably.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-       {/* FAQ */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
           <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
             Frequently asked questions
@@ -185,14 +246,7 @@ export default function Page() {
                 Which South American country is the cheapest to live in?
               </dt>
               <dd className="mt-1">
-                Paraguay, Bolivia, and Colombia tend to be the most affordable destinations
-                in this calculator. Asunción and Cochabamba sit at the lower end of the cost
-                range, while Medellín combines low everyday costs with a large established
-                expat community. Peru (Lima) and Argentina (Buenos Aires) can also be very
-                affordable, especially for those holding USD. Ecuador (Cuenca in particular)
-                is popular with retirees looking for low costs with a dollarized economy.
-                Chile (Santiago) and Uruguay (Montevideo) are higher-cost but offer stronger
-                infrastructure, stability, and quality of life.
+                Lower-cost destinations in the calculator often include parts of Colombia, Paraguay, Bolivia, Peru, and Ecuador, but the right answer depends on exchange-rate conditions, housing choices, and what you are comparing against.
               </dd>
             </div>
             <div>
@@ -200,15 +254,7 @@ export default function Page() {
                 What is the easiest South American country to get a visa for?
               </dt>
               <dd className="mt-1">
-                Colombia's Digital Nomad Visa is one of the most accessible in the region —
-                remote workers earning just $800/month qualify for a 2-year renewable stay.
-                Chile also offers a dedicated Digital Nomad Visa requiring $1,500/month.
-                Ecuador's pensioner and rentista visa paths are popular with retirees, with
-                relatively accessible income thresholds. Paraguay is frequently cited for
-                straightforward permanent residency pathways at a lower cost base. Argentina,
-                Peru, and Brazil have rentista and retirement visa options with varying income
-                requirements. Always verify current requirements with official government
-                sources before applying.
+                That changes over time and depends on your situation. Some countries are commonly seen as more accessible for remote workers or retirees, but you should verify current requirements with official government sources before treating any route as reliable.
               </dd>
             </div>
             <div>
@@ -216,12 +262,7 @@ export default function Page() {
                 How does this calculator handle Argentina's currency situation?
               </dt>
               <dd className="mt-1">
-                The calculator uses official exchange rates for its estimates. In practice,
-                many expats in Argentina access a significantly higher rate through legal
-                parallel exchange mechanisms, which can make the real cost of living
-                substantially lower than official-rate estimates suggest. The calculator
-                includes a warning note for Argentina and recommends verifying current rates
-                independently.
+                It uses a standardized planning approach. In practice, currency conditions may shift the real cost picture materially, so Argentina should be treated as a destination where extra verification matters.
               </dd>
             </div>
             <div>
@@ -229,39 +270,7 @@ export default function Page() {
                 Is Ecuador a good option for retirees?
               </dt>
               <dd className="mt-1">
-                Ecuador is one of the most popular retirement destinations in South America.
-                It is dollarized — so there is no currency conversion complexity — and cities
-                like Cuenca and Manta offer a lower cost of living than most North American
-                or European cities. Pensioner and rentista residency paths are well-established
-                and accessible. Healthcare costs can be materially lower than in the US.
-                The calculator includes Quito, Guayaquil, Cuenca, and Manta as destination
-                cities for Ecuador.
-              </dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-900 dark:text-white">
-                Is Medellín, Colombia a good place for remote workers?
-              </dt>
-              <dd className="mt-1">
-                Yes — Medellín is one of the most popular remote work destinations in the
-                Americas. It combines low rent, fast internet, a large English-speaking expat
-                community, spring-like weather year-round, and Colombia's accessible Digital
-                Nomad Visa. The calculator defaults to Medellín when Colombia is selected.
-              </dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-900 dark:text-white">
-                Why is Paraguay included and what should I know about its tax system?
-              </dt>
-              <dd className="mt-1">
-                Paraguay is included because it is a genuine lower-cost relocation option
-                with accessible residency pathways and one of the simpler tax regimes in the
-                region. Paraguay operates a territorial tax system, which means the tax
-                treatment of foreign-source income may differ from locally-earned income —
-                but the specifics depend on your situation and residency status. The
-                calculator models this conservatively and flags it clearly. Always verify
-                the tax treatment of your specific income type with a local advisor before
-                treating it as a planning assumption.
+                It can be attractive for some retirees because dollarization simplifies budgeting and some cities offer lower costs than many North American markets, but the right fit still depends on healthcare needs, residency path, and local living preferences.
               </dd>
             </div>
             <div>
@@ -269,16 +278,77 @@ export default function Page() {
                 How much money do I need to relocate to South America?
               </dt>
               <dd className="mt-1">
-                One-time relocation costs across the destinations in this calculator typically
-                range from $2,000 to $6,000, covering visa fees, flights, a security deposit,
-                and temporary accommodation. Paraguay, Bolivia, and Colombia tend toward the
-                lower end. Chile, Uruguay, and Brazil are somewhat higher. Use the calculator
-                to estimate both the upfront cash needed and the ongoing monthly budget
-                difference for your specific destination.
+                A common planning approach is to hold several months of destination expenses plus one-time move costs such as flights, deposits, visa fees, and setup costs. The calculator is designed to estimate that combined picture for the destination you choose.
               </dd>
             </div>
           </dl>
         </section>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <section className="rounded-2xl border border-emerald-200/60 bg-emerald-50 p-5">
+            <div className="text-sm font-semibold text-slate-900">
+              Thinking bigger than just moving?
+            </div>
+            <p className="mt-1 text-sm text-slate-700">
+              See how relocating to South America may change your FIRE timeline after taxes, spending, and housing costs.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <a
+                href="/fire-calculator"
+                className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                🔥 Calculate My FIRE Timeline
+              </a>
+              <Link
+                href="/best-cities-for-fire"
+                className="text-sm font-semibold text-slate-700 underline underline-offset-4 hover:no-underline"
+              >
+                Best cities for FIRE
+              </Link>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 className="text-lg font-semibold tracking-tight text-slate-900">
+              Explore more relocation planning tools
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Keep comparing your options with more relocation, budgeting, and FIRE tools from Relocation by Numbers.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <a
+                href="/explore"
+                className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                Explore all tools
+              </a>
+              <a
+                href="/international-relocation"
+                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                International Calculator
+              </a>
+              <a
+                href="/caribbean-relocation-calculator"
+                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Caribbean Calculator
+              </a>
+              <a
+                href="/europe-relocation-calculator"
+                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Europe Calculator
+              </a>
+              <a
+                href="/asia-relocation-calculator"
+                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Asia Calculator
+              </a>
+            </div>
+          </section>
+        </div>
       </section>
 
       <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
@@ -291,6 +361,8 @@ export default function Page() {
             <a href="/privacy" className="transition hover:text-slate-900 dark:hover:text-white">Privacy</a>
             <span>•</span>
             <a href="/terms" className="transition hover:text-slate-900 dark:hover:text-white">Terms</a>
+            <span>•</span>
+            <a href="/methodology" className="transition hover:text-slate-900 dark:hover:text-white">Methodology</a>
           </div>
         </div>
       </footer>

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { STATES, type StateCode } from "@/lib/states";
-import AdSlot from "@/components/AdSlot";
 import { citiesForState } from "@/lib/cities";
 import Link from "next/link";
 
@@ -50,29 +49,37 @@ export default function Page() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-4xl px-4 py-10 space-y-8">
-
-        <header className="space-y-3">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+      <div className="mx-auto max-w-4xl space-y-8 px-4 py-10">
+        <header className="space-y-4">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Best States for FIRE
           </h1>
 
-          <p className="mt-2 text-lg font-semibold text-slate-200">
-            Lowest Cost of Living &amp; Taxes for Financial Independence &amp; Early Retirement
+          <p className="text-lg font-semibold text-slate-200">
+            Lower Housing Costs &amp; Lower Tax Drag Can Make FIRE Easier
           </p>
 
-          <p className="text-slate-300 max-w-2xl">
-            Lower housing costs and state income taxes can dramatically shorten your path
-            to financial independence. States with low average rent reduce your FIRE number
-            directly — and states with no income tax increase how much of each paycheck you
-            keep along the way.
+          <p className="max-w-3xl text-slate-300 leading-7">
+            State choice can materially change the math behind financial independence.
+            Lower housing costs reduce the spending your portfolio needs to support,
+            and lower state income tax can improve how much of each paycheck you keep
+            while you are still building toward FIRE.
           </p>
 
-          <p className="text-sm text-slate-400 max-w-2xl">
-            This ranking is based on average rent across major cities in each state.
-            Lower rent means a lower monthly spending target, a smaller FIRE number, and
-            a faster timeline to financial independence.
+          <p className="max-w-3xl text-sm leading-6 text-slate-400">
+            This page is a starting-point ranking based primarily on average rent across
+            major cities in each state, with no-income-tax states clearly marked. It is
+            designed to help you spot promising FIRE-friendly states — not to replace
+            a personalized comparison based on your own salary, taxes, and lifestyle.
           </p>
+
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-400">
+            <span>Assumptions updated: March 2026</span>
+            <span className="hidden sm:inline">•</span>
+            <Link href="/methodology" className="underline underline-offset-4 hover:no-underline">
+              See methodology
+            </Link>
+          </div>
 
           <div className="flex flex-wrap gap-2 pt-1">
             <Link
@@ -96,7 +103,34 @@ export default function Page() {
           </div>
         </header>
 
-        {/* Rankings */}
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
+          <h2 className="text-xl font-semibold">
+            How this ranking is built
+          </h2>
+
+          <div className="space-y-3 text-sm leading-7 text-slate-300">
+            <p>
+              This ranking uses a simple housing-cost-first approach. For each state,
+              Relocation by Numbers looks at average rent across the major cities tracked
+              in the model, then ranks lower-rent states higher because lower recurring
+              housing costs usually reduce the FIRE number directly.
+            </p>
+
+            <p>
+              States with no personal income tax are also flagged because lower tax drag
+              can improve take-home pay during the accumulation phase. That matters, but
+              it is shown as an additional signal — not the only ranking factor.
+            </p>
+
+            <p>
+              This means the page is most useful as a directional starting point. It is
+              not a definitive ranking of every FIRE variable, and it should not be read
+              as a guarantee that a state is better for your personal plan without checking
+              your own budget, income, and housing assumptions.
+            </p>
+          </div>
+        </section>
+
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">
             Top 10 states for FIRE by average housing cost
@@ -106,10 +140,10 @@ export default function Page() {
             {ranked.map((state, i) => (
               <div
                 key={state.code}
-                className="rounded-xl border border-white/10 bg-white/5 p-4 flex items-center justify-between gap-4"
+                className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 p-4"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold text-slate-400 w-6">
+                  <span className="w-6 text-sm font-semibold text-slate-400">
                     #{i + 1}
                   </span>
                   <div>
@@ -137,13 +171,13 @@ export default function Page() {
             ))}
           </div>
 
-          <p className="text-xs text-slate-500 pt-1">
-            Ranked by average rent across major cities in each state. Lower rent = lower FIRE
-            number. Income tax status is based on current state tax law.
+          <p className="pt-1 text-xs text-slate-500">
+            Ranked primarily by average rent across major cities in each state. Lower rent
+            generally means a lower spending base and a smaller FIRE target. No-income-tax
+            status is shown as an additional planning signal.
           </p>
         </section>
 
-        {/* Why it matters */}
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
           <h2 className="text-xl font-semibold">
             Why your state matters for financial independence
@@ -151,25 +185,55 @@ export default function Page() {
           <div className="space-y-3 text-sm leading-7 text-slate-300">
             <p>
               Your FIRE number is based on annual spending. If you live in a lower-cost
-              state, your annual expenses are lower — which means a smaller portfolio target
-              and potentially years shaved off your timeline. At a 4% withdrawal rate, every
-              $1,000 reduction in annual spending reduces your FIRE number by $25,000.
+              state, your annual expenses may fall — which means a smaller portfolio target
+              and potentially a shorter timeline to financial independence.
             </p>
             <p>
-              State income tax adds a second dimension. Moving from a high-tax state like
-              California or New York to a no-income-tax state like Texas, Florida, or Nevada
-              can add thousands to your annual savings rate — directly accelerating both
-              accumulation and lowering the income you need in retirement.
+              State income tax adds a second layer. Moving from a high-tax state to a no-income-tax
+              state can increase after-tax income and improve how much you are able to save each year.
+              That can accelerate the path to FIRE even before retirement begins.
             </p>
             <p>
-              The most FIRE-friendly states tend to combine relatively low housing costs with
-              low or no state income tax. Use the FIRE calculator to model how a specific
-              state move could change your personal timeline.
+              The most FIRE-friendly states often combine manageable housing costs with lower tax drag.
+              But no state is automatically “best” without context. The right state for FIRE still depends
+              on your income, housing choice, and lifestyle fit.
             </p>
           </div>
         </section>
 
-        {/* FAQ */}
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
+          <h2 className="text-xl font-semibold">
+            What to look for beyond the ranking
+          </h2>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+              <div className="font-semibold text-white">Housing cost relative to your income</div>
+              <p className="mt-1 text-sm leading-6 text-slate-400">
+                A lower-rent state only helps if the move improves your actual income-to-cost ratio.
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+              <div className="font-semibold text-white">State income tax</div>
+              <p className="mt-1 text-sm leading-6 text-slate-400">
+                Lower tax drag can help, especially during accumulation, but it is only one part of the picture.
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+              <div className="font-semibold text-white">Remote income portability</div>
+              <p className="mt-1 text-sm leading-6 text-slate-400">
+                The biggest FIRE gains often come when you keep a stronger salary while reducing housing costs.
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+              <div className="font-semibold text-white">Lifestyle fit</div>
+              <p className="mt-1 text-sm leading-6 text-slate-400">
+                A lower-cost state is only useful if it supports the kind of life you actually want to live.
+              </p>
+            </div>
+          </div>
+        </section>
+
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-5">
           <h2 className="text-xl font-semibold">
             Frequently asked questions about the best states for FIRE
@@ -180,10 +244,8 @@ export default function Page() {
                 What makes a state good for FIRE?
               </dt>
               <dd className="mt-1">
-                The two biggest factors are housing costs and state income tax. Low average
-                rent reduces your FIRE number directly, since your number is 25x your annual
-                spending. No state income tax increases how much you save during accumulation
-                and how much you keep during retirement withdrawals.
+                The biggest factors are usually housing costs, tax drag, and how well the state supports
+                a strong income-to-expense ratio. Lower costs reduce the spending your portfolio must support.
               </dd>
             </div>
             <div>
@@ -191,10 +253,8 @@ export default function Page() {
                 Which states have no income tax?
               </dt>
               <dd className="mt-1">
-                Nine states currently have no personal state income tax: Alaska, Florida,
-                Nevada, New Hampshire, South Dakota, Tennessee, Texas, Washington, and
-                Wyoming. Several of these also appear in the low-cost rankings above,
-                making them strong FIRE candidates.
+                Nine states currently have no personal state income tax: Alaska, Florida, Nevada,
+                New Hampshire, South Dakota, Tennessee, Texas, Washington, and Wyoming.
               </dd>
             </div>
             <div>
@@ -202,11 +262,8 @@ export default function Page() {
                 How much does state income tax affect a FIRE timeline?
               </dt>
               <dd className="mt-1">
-                Significantly. On a $100,000 salary, moving from California (up to 13.3%
-                state rate) to Texas or Florida can increase annual after-tax income by
-                $6,000–$10,000+. At a 50% savings rate, that could shave 2–3 years off
-                a FIRE timeline while also reducing the portfolio needed if you retire in
-                a no-tax state.
+                It can matter a lot during accumulation because lower tax drag may improve how much you save each year.
+                But it should still be evaluated alongside housing and full cost-of-living assumptions.
               </dd>
             </div>
             <div>
@@ -214,17 +271,13 @@ export default function Page() {
                 Is it worth moving states to reach FIRE faster?
               </dt>
               <dd className="mt-1">
-                It depends on your income, current rent, and the destination state. For
-                remote workers or people with portable income, moving from a high-cost,
-                high-tax state to a lower-cost alternative can be one of the highest-impact
-                decisions in a FIRE plan. Use the relocation calculator to see the numbers
-                for your specific situation.
+                Sometimes, yes. For people with portable income, moving from a higher-cost, higher-tax state to a
+                lower-cost alternative can be one of the highest-impact decisions in a FIRE plan.
               </dd>
             </div>
           </dl>
         </section>
 
-        {/* Related tools */}
         <section className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-3">
           <h2 className="text-lg font-semibold">Related tools</h2>
           <div className="flex flex-wrap gap-3">
@@ -271,9 +324,10 @@ export default function Page() {
             <Link href="/privacy" className="transition hover:text-white">Privacy</Link>
             <span>•</span>
             <Link href="/terms" className="transition hover:text-white">Terms</Link>
+            <span>•</span>
+            <Link href="/methodology" className="transition hover:text-white">Methodology</Link>
           </div>
         </footer>
-
       </div>
     </main>
   );

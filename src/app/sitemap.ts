@@ -11,9 +11,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: baseUrl, priority: 1.0, changeFrequency: "weekly" as const },
     { url: `${baseUrl}/explore`, priority: 0.9, changeFrequency: "weekly" as const },
     { url: `${baseUrl}/compare`, priority: 0.8, changeFrequency: "weekly" as const },
-  ];
+    { url: `${baseUrl}/about`, priority: 0.5, changeFrequency: "monthly" as const },
+    { url: `${baseUrl}/disclaimer`, priority: 0.4, changeFrequency: "yearly" as const },
+    { url: `${baseUrl}/privacy`, priority: 0.4, changeFrequency: "yearly" as const },
+    { url: `${baseUrl}/terms`, priority: 0.4, changeFrequency: "yearly" as const },
+  ].map((page) => ({
+    ...page,
+    lastModified: now,
+  }));
 
-  // ── FIRE & retirement calculators ──────────────────────────────────────────
+  // ── FIRE & mortgage calculators ────────────────────────────────────────────
   const calculatorPages = [
     "/mortgage-calculator",
     "/one-income-relocation-calculator",
@@ -127,6 +134,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
   }));
 
+  // Keep ONLY /cost-of-living/[cityId]
+  // Do NOT include the old duplicate /cost-of-living-in/[cityId]
   const costOfLivingPages = cities.map((city) => ({
     url: `${baseUrl}/cost-of-living/${city.id}`,
     lastModified: now,
@@ -142,22 +151,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // ── State-level pages ──────────────────────────────────────────────────────
-  const bestStatesFirePages = STATES.map((s) => ({
-    url: `${baseUrl}/best-states-for-fire/${s.name.toLowerCase().replace(/\s+/g, "-")}`,
+  const bestStatesFirePages = STATES.map((state) => ({
+    url: `${baseUrl}/best-states-for-fire/${state.name.toLowerCase().replace(/\s+/g, "-")}`,
     lastModified: now,
     priority: 0.6,
     changeFrequency: "monthly" as const,
   }));
 
-  const moveToStatePages = STATES.map((s) => ({
-    url: `${baseUrl}/move-to/${s.code}`,
+  const moveToStatePages = STATES.map((state) => ({
+    url: `${baseUrl}/move-to/${state.code}`,
     lastModified: now,
     priority: 0.5,
     changeFrequency: "monthly" as const,
   }));
 
   return [
-    ...corePages.map((p) => ({ ...p, lastModified: now })),
+    ...corePages,
     ...calculatorPages,
     ...internationalCalculatorPages,
     ...salaryPages,

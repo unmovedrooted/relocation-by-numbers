@@ -46,6 +46,68 @@ function fireNumber(income: number, savingsRatePct: number, expensesPct: number)
   return { annualExpenses, fireTarget };
 }
 
+function salaryBand(income: number) {
+  if (income <= 80000) return "lower";
+  if (income <= 150000) return "middle";
+  return "higher";
+}
+
+function getSalaryPageCopy(label: string, income: number) {
+  const band = salaryBand(income);
+
+  if (band === "lower") {
+    return {
+      subheading: `FIRE Number, Timeline & Strategy for a ${label} Income`,
+      intro: `Reaching financial independence on a ${label} salary is possible, but this income leaves less room for error than higher salaries do. Housing, taxes, and everyday fixed costs can take up a large share of take-home pay, which means your path to FIRE depends heavily on keeping expenses low and protecting your savings rate. On a ${label} income, location is not a small optimization — it can completely change whether early financial independence feels realistic or distant.`,
+      realisticTitle: `Is FIRE realistic on a ${label} salary?`,
+      realisticParagraphs: [
+        `Yes — FIRE can be realistic on a ${label} salary, but usually only if your spending stays disciplined. At this income level, there is not much slack in the math. A rent payment that is a few hundred dollars too high, a high-tax location, or inconsistent saving can delay FIRE by many years.`,
+        `That is why the answer at ${label} is less about earning more and more about avoiding cost traps. Someone earning ${label} in an expensive city may struggle to save enough for meaningful momentum, while someone with the same income in a cheaper area may be able to build a solid savings rate and make steady progress.`,
+        `In other words, FIRE on ${label} is usually not about perfection. It is about keeping core expenses under control, staying consistent, and being realistic about where your income can stretch the furthest.`,
+      ],
+      locationTitle: `Why location changes the FIRE answer on a ${label} salary`,
+      locationParagraphs: [
+        `On a ${label} salary, location is often the deciding factor. In a high-cost city, too much of your income can disappear into rent, transportation, and taxes before you ever get a real chance to save. In a lower-cost city or lower-tax state, that same salary can leave enough breathing room to invest consistently and lower the amount you need for FIRE.`,
+        `That does not mean the cheapest place is always the best move. Job stability, quality of life, and long-term fit still matter. But at ${label}, geography has a bigger impact than most people think, and it is often one of the few levers that can materially improve the timeline.`,
+      ],
+    };
+  }
+
+  if (band === "middle") {
+    return {
+      subheading: `FIRE Number, Timeline & Strategy for a ${label} Income`,
+      intro: `A ${label} salary can put FIRE within reach for many people, but it is not high enough to ignore the basics. Housing costs, state taxes, and lifestyle inflation still have the power to slow progress if too much income gets absorbed before it is invested. At this level, the opportunity is real: done well, a ${label} income can build strong momentum toward financial independence, but bad cost decisions can still push the timeline out much further than expected.`,
+      realisticTitle: `Is FIRE realistic on a ${label} salary?`,
+      realisticParagraphs: [
+        `Yes — FIRE is realistic on a ${label} salary for many households, especially if saving is intentional. This income usually provides enough room to make steady progress, but not enough to fully absorb expensive housing, rising lifestyle expectations, or weak saving habits.`,
+        `That makes ${label} a middle ground income for FIRE. In a lower-cost area, it can support a strong savings rate and a meaningful long-term investing plan. In a more expensive market, the same salary can feel surprisingly average once rent, taxes, and everyday spending start stacking up.`,
+        `At this level, success usually comes from directing income efficiently rather than chasing tiny optimizations. A solid savings rate, controlled lifestyle inflation, and a location that does not consume too much of your paycheck can make FIRE much more achievable.`,
+      ],
+      locationTitle: `Why location changes the FIRE answer on a ${label} salary`,
+      locationParagraphs: [
+        `Location still matters a lot on a ${label} salary because this is the range where housing and taxes can either preserve your momentum or quietly drain it. In a lower-cost city, more of your income can go toward investing. In a high-cost area, the same salary may look strong on paper but leave less room to save than expected.`,
+        `That is why geography is not just a side variable at ${label}. It affects how much of your raise you actually keep, how aggressive your savings rate can be, and how quickly your FIRE timeline starts to move.`,
+      ],
+    };
+  }
+
+  return {
+    subheading: `FIRE Number, Timeline & Strategy for a ${label} Income`,
+    intro: `A ${label} salary gives you real power to accelerate FIRE, but high income alone does not guarantee a fast timeline. At this level, the biggest threats are usually taxes, housing choices, and lifestyle inflation rather than simple affordability. A strong income can create major investing capacity, but only if enough of it is preserved. On a ${label} salary, FIRE becomes less about whether it is possible and more about how efficiently you convert income into long-term wealth.`,
+    realisticTitle: `Is FIRE realistic on a ${label} salary?`,
+    realisticParagraphs: [
+      `Yes — FIRE is highly realistic on a ${label} salary in many scenarios, but the timeline still depends on execution. The main risk at this income level is usually not earning too little. It is allowing fixed costs, tax drag, and lifestyle creep to absorb income that could have been compounding instead.`,
+      `Someone earning ${label} while keeping housing and recurring spending controlled can often build wealth much faster than lower income households. Someone earning the same amount while scaling up every part of their lifestyle may still make progress, but far more slowly than the salary suggests.`,
+      `At this level, FIRE is often a question of discipline, tax awareness, and intentional spending. The upside is large — but so is the ability to waste it.`,
+    ],
+    locationTitle: `Why location changes the FIRE answer on a ${label} salary`,
+    locationParagraphs: [
+      `Location still matters on a ${label} salary because high earners are often exposed to expensive housing markets and heavier state tax drag. Moving to a lower-cost or lower-tax area can preserve far more income for investing without reducing earnings by the same amount.`,
+      `That does not mean every move is worth making. Career upside, business opportunity, and quality of life still matter. But on ${label}, geography can be the difference between simply earning well and actually converting that income into faster financial independence.`,
+    ],
+  };
+}
+
 export async function generateStaticParams() {
   return ALLOWED_SLUGS.map((salarySlug) => ({ salarySlug }));
 }
@@ -111,24 +173,22 @@ export default async function FireWithSalaryPage({
   const moderate = fireNumber(income, 0.4, 0.6);
   const aggressive = fireNumber(income, 0.5, 0.5);
 
+  const pageCopy = getSalaryPageCopy(label, income);
+
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
-
         <header className="space-y-3">
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Can You Reach FIRE on a {label} Salary?
           </h1>
 
           <p className="mt-2 text-lg font-semibold text-slate-200">
-            FIRE Number, Timeline &amp; Strategy for a {label} Income
+            {pageCopy.subheading}
           </p>
 
           <p className="max-w-2xl text-sm leading-relaxed text-slate-300">
-            Reaching financial independence on a {label} salary depends on your
-            spending, savings rate, taxes, investment returns, and where you live.
-            A lower-cost city or lower-tax state can shorten the timeline significantly,
-            while high housing costs can push FIRE much further out even at this income level.
+            {pageCopy.intro}
           </p>
 
           <p className="text-xs text-slate-400">Assumptions updated: March 2026</p>
@@ -161,7 +221,8 @@ export default async function FireWithSalaryPage({
           </div>
         </header>
 
-        {/* FIRE number estimates */}
+        <AdSlot />
+
         <section className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4">
           <h2 className="text-xl font-semibold">
             Your estimated FIRE number on a {label} salary
@@ -197,36 +258,21 @@ export default async function FireWithSalaryPage({
           </p>
         </section>
 
-        {/* Is FIRE realistic */}
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
           <h2 className="text-2xl font-semibold tracking-tight text-white">
-            Is FIRE realistic on a {label} salary?
+            {pageCopy.realisticTitle}
           </h2>
           <div className="space-y-4 text-sm leading-7 text-slate-300">
-            <p>
-              Yes — FIRE is achievable on a {label} salary, but the answer depends far
-              more on spending than income alone. At this pay level, housing costs, taxes,
-              and savings consistency matter more than trying to optimize minor details.
-            </p>
-            <p>
-              Someone living in a high-cost city where rent consumes a large share of
-              take-home pay may find the path to FIRE very slow even at {label}. Someone
-              earning the same amount in a lower-cost location with lower state taxes can
-              often save a much larger percentage and reach financial independence years sooner.
-            </p>
-            <p>
-              This page is less about a single yes-or-no answer and more about helping you
-              test the real tradeoffs. If your expenses stay under control and your savings
-              rate remains strong over time, a {label} salary can support a realistic path
-              to FIRE.
-            </p>
+            {pageCopy.realisticParagraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
           </div>
         </section>
 
-        {/* Calculator */}
         <FireCalculator initialIncome={income} hideFAQ />
 
-        {/* What matters most */}
+        <AdSlot />
+
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
           <h2 className="text-2xl font-semibold tracking-tight text-white">
             What matters most on a {label} salary for FIRE
@@ -264,7 +310,6 @@ export default async function FireWithSalaryPage({
           </div>
         </section>
 
-        {/* FAQ */}
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-5">
           <h2 className="text-2xl font-semibold tracking-tight text-white">
             Frequently asked questions about FIRE on a {label} salary
@@ -276,12 +321,11 @@ export default async function FireWithSalaryPage({
               </dt>
               <dd className="mt-1">
                 It depends on your spending. At a 30% savings rate, annual expenses would be
-                roughly ${conservative?.annualExpenses?.toLocaleString() ?? "—"}, giving a FIRE
-number of ~${conservative?.fireTarget?.toLocaleString() ?? "—"}. At a 50%
-savings rate, annual expenses drop to ~${
-  aggressive?.annualExpenses?.toLocaleString() ?? "—"
-}, with a FIRE number of ~${aggressive?.fireTarget?.toLocaleString() ?? "—"}.. These are pre-tax estimates
-                — the calculator above applies state-specific tax adjustments.
+                roughly ${conservative.annualExpenses.toLocaleString()}, giving a FIRE number
+                of about ${conservative.fireTarget.toLocaleString()}. At a 50% savings rate,
+                annual expenses drop to about ${aggressive.annualExpenses.toLocaleString()},
+                with a FIRE number of about ${aggressive.fireTarget.toLocaleString()}. These
+                are pre-tax estimates — the calculator above applies state-specific tax adjustments.
               </dd>
             </div>
             <div>
@@ -321,24 +365,16 @@ savings rate, annual expenses drop to ~${
           </dl>
         </section>
 
-        {/* Why location matters */}
+        <AdSlot />
+
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
           <h2 className="text-2xl font-semibold tracking-tight text-white">
-            Why location changes the FIRE answer on a {label} salary
+            {pageCopy.locationTitle}
           </h2>
           <div className="space-y-4 text-sm leading-7 text-slate-300">
-            <p>
-              Location can be one of the most powerful levers for FIRE on a {label} salary.
-              Moving to a lower-cost city or lower-tax state simultaneously reduces your FIRE
-              number and increases how much you can save each month — a compounding effect that
-              can shift your timeline by years.
-            </p>
-            <p>
-              That does not mean every lower-cost city is automatically better. Salary
-              opportunities, lifestyle fit, and housing quality still matter. But if your goal
-              is to make a {label} salary stretch further toward financial independence, geography
-              is worth modeling explicitly.
-            </p>
+            {pageCopy.locationParagraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -368,31 +404,67 @@ savings rate, annual expenses drop to ~${
           </div>
         </section>
 
-        {/* Related tools */}
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
           <h2 className="text-2xl font-semibold tracking-tight text-white">
             Related FIRE tools
           </h2>
           <div className="flex flex-wrap gap-3">
-            <Link href="/fire-calculator" className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30">FIRE Calculator</Link>
-            <Link href="/lean-fire-calculator" className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30">Lean FIRE Calculator</Link>
-            <Link href="/barista-fire-calculator" className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30">Barista FIRE Calculator</Link>
-            <Link href="/coast-fire-calculator" className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30">Coast FIRE Calculator</Link>
-            <Link href="/savings-rate-for-fire" className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30">Savings Rate for FIRE</Link>
-            <Link href="/best-states-for-fire" className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30">Best States for FIRE</Link>
+            <Link
+              href="/fire-calculator"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              FIRE Calculator
+            </Link>
+            <Link
+              href="/lean-fire-calculator"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              Lean FIRE Calculator
+            </Link>
+            <Link
+              href="/barista-fire-calculator"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              Barista FIRE Calculator
+            </Link>
+            <Link
+              href="/coast-fire-calculator"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              Coast FIRE Calculator
+            </Link>
+            <Link
+              href="/savings-rate-for-fire"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              Savings Rate for FIRE
+            </Link>
+            <Link
+              href="/best-states-for-fire"
+              className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
+            >
+              Best States for FIRE
+            </Link>
           </div>
         </section>
 
-        <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400 pt-2">
-          <Link href="/about" className="transition hover:text-white">About</Link>
+        <div className="flex flex-wrap items-center gap-2 pt-2 text-sm text-slate-400">
+          <Link href="/about" className="transition hover:text-white">
+            About
+          </Link>
           <span>•</span>
-          <Link href="/disclaimer" className="transition hover:text-white">Disclaimer</Link>
+          <Link href="/disclaimer" className="transition hover:text-white">
+            Disclaimer
+          </Link>
           <span>•</span>
-          <Link href="/privacy" className="transition hover:text-white">Privacy</Link>
+          <Link href="/privacy" className="transition hover:text-white">
+            Privacy
+          </Link>
           <span>•</span>
-          <Link href="/terms" className="transition hover:text-white">Terms</Link>
+          <Link href="/terms" className="transition hover:text-white">
+            Terms
+          </Link>
         </div>
-
       </div>
     </main>
   );
