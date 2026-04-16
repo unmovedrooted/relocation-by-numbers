@@ -6,7 +6,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://www.relocationbynumbers.com";
   const now = new Date();
 
-  // ── Core pages ─────────────────────────────────────────────────────────────
   const corePages = [
     { url: baseUrl, priority: 1.0, changeFrequency: "weekly" as const },
     { url: `${baseUrl}/explore`, priority: 0.9, changeFrequency: "weekly" as const },
@@ -20,7 +19,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: now,
   }));
 
-  // ── FIRE & mortgage calculators ────────────────────────────────────────────
   const calculatorPages = [
     "/mortgage-calculator",
     "/one-income-relocation-calculator",
@@ -38,7 +36,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
   }));
 
-  // ── International relocation calculators ───────────────────────────────────
   const internationalCalculatorPages = [
     "/international-relocation",
     "/europe-relocation-calculator",
@@ -52,7 +49,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
   }));
 
-  // ── FIRE by salary ─────────────────────────────────────────────────────────
   const salaryPages = [
     "/fire-with-50k-salary",
     "/fire-with-60k-salary",
@@ -79,7 +75,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
   }));
 
-  // ── Ranking hub pages ──────────────────────────────────────────────────────
   const rankingHubPages = [
     "/best-cities-for-fire",
     "/best-states-for-fire",
@@ -90,7 +85,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
   }));
 
-  // ── Compare routes ─────────────────────────────────────────────────────────
   const compareRoutes = [
     "/compare/nyc-ny/charlotte-nc",
     "/compare/nyc-ny/austin-tx",
@@ -117,7 +111,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
   }));
 
-  // ── City-level pages ───────────────────────────────────────────────────────
   const cities = majorCities();
 
   const fireInPages = cities.map((city) => ({
@@ -127,15 +120,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
   }));
 
-  const salaryNeededPages = cities.map((city) => ({
-    url: `${baseUrl}/salary-needed-in/${city.id}`,
-    lastModified: now,
-    priority: 0.6,
-    changeFrequency: "monthly" as const,
-  }));
-
-  // Keep ONLY /cost-of-living/[cityId]
-  // Do NOT include the old duplicate /cost-of-living-in/[cityId]
   const costOfLivingPages = cities.map((city) => ({
     url: `${baseUrl}/cost-of-living/${city.id}`,
     lastModified: now,
@@ -150,7 +134,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
   }));
 
-  // ── State-level pages ──────────────────────────────────────────────────────
   const bestStatesFirePages = STATES.map((state) => ({
     url: `${baseUrl}/best-states-for-fire/${state.name.toLowerCase().replace(/\s+/g, "-")}`,
     lastModified: now,
@@ -173,7 +156,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...rankingHubPages,
     ...compareRoutes,
     ...fireInPages,
-    ...salaryNeededPages,
     ...costOfLivingPages,
     ...bestCitiesFirePages,
     ...bestStatesFirePages,
