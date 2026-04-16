@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { STATES, type StateCode } from "@/lib/states";
 import { citiesForState } from "@/lib/cities";
+import { ALLOWED_STATE_CODES } from "@/lib/seo-allowlists";
 
 type PageProps = {
   params: Promise<{ state: string }>;
@@ -16,21 +17,6 @@ const NO_INCOME_TAX_STATES: StateCode[] = [
   "ak", "fl", "nv", "nh", "sd", "tn", "tx", "wa", "wy",
 ];
 
-const ALLOWED_STATE_CODES: StateCode[] = [
-  "tx", // Texas
-  "fl", // Florida
-  "tn", // Tennessee
-  "nc", // North Carolina
-  "ga", // Georgia
-  "nv", // Nevada
-  "wa", // Washington
-  "az", // Arizona
-  "co", // Colorado
-  "ny", // New York
-  "ca", // California
-  "ma", // Massachusetts
-
-];
 
 const STATE_PAGES = STATES
   .filter((s) => ALLOWED_STATE_CODES.includes(s.code as StateCode))

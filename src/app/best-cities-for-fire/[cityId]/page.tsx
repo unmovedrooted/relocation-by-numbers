@@ -2,23 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findCity } from "@/lib/cities";
+import { ALLOWED_FIRE_CITY_PAGES } from "@/lib/seo-allowlists";
 
 type PageProps = {
   params: Promise<{ cityId: string }>;
 };
-
-const ALLOWED_FIRE_CITY_PAGES = [
-  "charlotte-nc",
-  "austin-tx",
-  "miami-fl",
-  "atlanta-ga",
-  "denver-co",
-  "seattle-wa",
-  "nyc-ny",
-  "dallas-tx",
-  "raleigh-nc",
-  "boston-ma",
-] as const;
 
 const isAllowedFireCityPage = (cityId: string) =>
   ALLOWED_FIRE_CITY_PAGES.includes(cityId as (typeof ALLOWED_FIRE_CITY_PAGES)[number]);
