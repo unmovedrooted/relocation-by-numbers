@@ -149,12 +149,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
     }));
 
-  const moveToStatePages = STATES.map((state) => ({
-    url: `${baseUrl}/move-to/${state.code}`,
-    lastModified: now,
-    priority: 0.5,
-    changeFrequency: "monthly" as const,
-  }));
 
   return [
     ...corePages,
@@ -167,6 +161,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...costOfLivingPages,
     ...bestCitiesFirePages,
     ...bestStatesFirePages,
-    ...moveToStatePages,
+  
   ];
 }

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import AdSlot from "@/components/AdSlot";
 import { STATES, type StateCode } from "@/lib/states";
 import Link from "next/link";
+import { ALLOWED_STATE_CODES } from "@/lib/seo-allowlists";
 
 type Props = {
   params: Promise<{ state: string }>;
@@ -21,20 +22,6 @@ const NO_INCOME_TAX_STATES: StateCode[] = [
   "wy",
 ];
 
-const ALLOWED_STATE_CODES: StateCode[] = [
-  "tx",
-  "fl",
-  "tn",
-  "nc",
-  "ga",
-  "nv",
-  "wa",
-  "az",
-  "co",
-  "ny",
-  "ca",
-  "ma",
-];
 
 const STATE_CONTENT: Record<
   string,
