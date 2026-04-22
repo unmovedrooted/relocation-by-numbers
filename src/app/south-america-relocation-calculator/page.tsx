@@ -67,11 +67,9 @@ export default function Page() {
 
       <section className="mx-auto max-w-5xl space-y-10 px-4 pb-12 sm:px-6">
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (
-          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <AdSlot
-              slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP}
-              className="min-h-[100px]"
-            />
+          <section className="">
+            
+          
           </section>
         ) : null}
 

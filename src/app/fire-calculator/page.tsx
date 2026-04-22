@@ -87,11 +87,8 @@ export default function FireCalculatorPage() {
         </header>
 
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (
-          <section className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <AdSlot
-              slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP}
-              className="min-h-[100px]"
-            />
+          <section className="">
+            
           </section>
         ) : null}
 
