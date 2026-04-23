@@ -108,6 +108,42 @@ type ChartPoint = {
 type Affiliate = { name: string; blurb: string; href: string; tag: string };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// DECISION ENGINE TYPES
+// ─────────────────────────────────────────────────────────────────────────────
+
+type DecisionScenarioKey =
+  | "baseline"
+  | "lower_spending"
+  | "higher_savings"
+  | "move"
+  | "later_coast_age"
+  | "boost_contributions";
+
+type DecisionProjectionOutput = {
+  yearsToGoal: number | null;  // yearsToCoast for coast, yearsToFI for others
+  goalAge: number | null;      // coastAge for coast, fiAge for others
+  fullFireAge: number | null;
+};
+
+type DecisionScenarioResult = {
+  key: DecisionScenarioKey;
+  label: string;
+  yearsToGoal: number | null;
+  goalAge: number | null;
+  fullFireAge: number | null;
+  yearsSavedVsBaseline: number | null;
+  explanation: string;
+  shortCopy: string;
+};
+
+type DecisionEngineResult = {
+  baseline: DecisionScenarioResult;
+  ranked: DecisionScenarioResult[];
+  winner: DecisionScenarioResult | null;
+  mode: FireMode;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -577,6 +613,216 @@ function getUnderinvestedNudge(i: Inputs, mode: FireMode): string | null {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// DECISION ENGINE LOGIC
+// ─────────────────────────────────────────────────────────────────────────────
+
+function getDecisionScenarioCopy(
+  key: DecisionScenarioKey,
+  mode: FireMode
+): { explanation: string; shortCopy: string } {
+  switch (key) {
+    case "lower_spending":
+      return {
+        explanation:
+          mode === "coast"
+            ? "Reducing spending lowers your required FIRE target and can improve how much you can invest before coasting."
+            : "Lower spending shrinks your FIRE number and increases what you can put away each month.",
+        shortCopy: "A smaller target means compounding has less ground to cover.",
+      };
+    case "higher_savings":
+      return {
+        explanation:
+          "A higher savings rate means more capital compounding every year — the most direct lever on any FIRE timeline.",
+        shortCopy: "More of your income working for you sooner.",
+      };
+    case "move":
+      return {
+        explanation:
+          "Moving to a lower-cost location reduces your living costs and the retirement target your portfolio needs to support.",
+        shortCopy: "Lower geographic costs can shorten the path materially.",
+      };
+    case "later_coast_age":
+      return {
+        explanation:
+          "Contributing for a few more years gives your portfolio more principal before compounding takes over alone.",
+        shortCopy: "A few extra contribution years create a meaningful jump.",
+      };
+    case "boost_contributions":
+      return {
+        explanation:
+          "Adding $5,000/year to investments accelerates portfolio growth and shortens the gap to financial independence.",
+        shortCopy: "More capital compounding each year builds a meaningful head start.",
+      };
+    case "baseline":
+    default:
+      return {
+        explanation: "This is your current path using the assumptions you entered.",
+        shortCopy: "Your current assumptions with no changes.",
+      };
+  }
+}
+
+
+function makeDecisionRunner(
+  mode: FireMode,
+  netAnnual: number
+): (overrideInputs: Inputs) => DecisionProjectionOutput {
+  return (overrideInputs: Inputs): DecisionProjectionOutput => {
+    
+    if (mode === "coast") {
+      const yearsToGoal = simulateYearsToCoast(overrideInputs, netAnnual);
+      const goalAge =
+        yearsToGoal !== null ? overrideInputs.age + yearsToGoal : null;
+      const fiResult = simulateYearsToFI(overrideInputs, netAnnual, mode);
+      const fullFireAge =
+        fiResult.yearsToFI !== null
+          ? overrideInputs.age + fiResult.yearsToFI
+          : null;
+      return { yearsToGoal, goalAge, fullFireAge };
+    }
+    const fiResult = simulateYearsToFI(overrideInputs, netAnnual, mode);
+    const goalAge =
+      fiResult.yearsToFI !== null
+        ? overrideInputs.age + fiResult.yearsToFI
+        : null;
+    return { yearsToGoal: fiResult.yearsToFI, goalAge, fullFireAge: goalAge };
+  };
+}
+
+function buildDecisionEngine(
+  inputs: Inputs,
+  mode: FireMode,
+  netAnnual: number
+): DecisionEngineResult {
+  const runProjection = makeDecisionRunner(mode, netAnnual);
+  const baselineOutput = runProjection(inputs);
+
+  const baseline: DecisionScenarioResult = {
+    key: "baseline",
+    label: "Current path",
+    yearsToGoal: baselineOutput.yearsToGoal,
+    goalAge: baselineOutput.goalAge,
+    fullFireAge: baselineOutput.fullFireAge,
+    yearsSavedVsBaseline: 0,
+    ...getDecisionScenarioCopy("baseline", mode),
+  };
+
+  const scenarios: Array<{
+    key: DecisionScenarioKey;
+    label: string;
+    nextInputs: Inputs;
+  }> = [];
+
+  // ── Scenario 1: Lower spending -10% ──────────────────────────────────────
+  scenarios.push({
+    key: "lower_spending",
+    label: "Lower spending by 10%",
+    nextInputs: {
+      ...inputs,
+      expensesMonthly: Math.max(0, inputs.expensesMonthly * 0.9),
+      movedExpensesMonthly: Math.max(0, inputs.movedExpensesMonthly * 0.9),
+    },
+  });
+
+  // ── Scenario 2: Higher savings — honest 10-point rate increase ────────────
+  const currentSavingsRate =
+    netAnnual > 0
+      ? clamp((netAnnual - annualExpensesFromMonthly(inputs.expensesMonthly)) / netAnnual, 0, 1)
+      : 0;
+  const targetSavingsRate = clamp(currentSavingsRate + 0.1, 0, 0.8);
+  const impliedMonthly = Math.max(0, (netAnnual * (1 - targetSavingsRate)) / 12);
+  scenarios.push({
+    key: "higher_savings",
+    label: `Raise savings rate to ${Math.round(targetSavingsRate * 100)}%`,
+    nextInputs: {
+      ...inputs,
+      expensesMonthly: impliedMonthly,
+      yearlyInvestment: 0,
+    },
+  });
+
+  // ── Scenario 3: Move to lower-cost scenario (only if it's genuinely lower) ─
+  if (
+    inputs.moveCompareOn &&
+    inputs.movedExpensesMonthly > 0 &&
+    inputs.movedExpensesMonthly < inputs.expensesMonthly
+  ) {
+    scenarios.push({
+      key: "move",
+      label: "Move to the lower-cost location",
+      nextInputs: {
+        ...inputs,
+        expensesMonthly: inputs.movedExpensesMonthly,
+      },
+    });
+  }
+
+  // ── Scenario 4: Mode-specific ─────────────────────────────────────────────
+  const currentAutoContrib =
+    inputs.yearlyInvestment > 0
+      ? inputs.yearlyInvestment
+      : Math.max(0, netAnnual - annualExpenses(inputs));
+
+  if (mode === "coast") {
+    scenarios.push({
+      key: "later_coast_age",
+      label: "Contribute 5 more years before coasting",
+      nextInputs: {
+        ...inputs,
+        coastAge: Math.min(inputs.coastAge + 5, inputs.targetRetirementAge - 1),
+      },
+    });
+  } else {
+    scenarios.push({
+      key: "boost_contributions",
+      label: "Add $5,000/year to investments",
+      nextInputs: {
+        ...inputs,
+        yearlyInvestment: Math.max(inputs.yearlyInvestment, currentAutoContrib) + 5000,
+      },
+    });
+  }
+
+  // ── Run & rank ────────────────────────────────────────────────────────────
+  const ranked = scenarios
+    .map(({ key, label, nextInputs }) => {
+      const output = runProjection(nextInputs);
+      const baseYears = baselineOutput.yearsToGoal;
+      const nextYears = output.yearsToGoal;
+
+      let yearsSavedVsBaseline: number | null = null;
+      if (
+        typeof baseYears === "number" &&
+        typeof nextYears === "number" &&
+        Number.isFinite(baseYears) &&
+        Number.isFinite(nextYears)
+      ) {
+        yearsSavedVsBaseline = Math.max(0, baseYears - nextYears);
+      }
+
+      return {
+        key,
+        label,
+        yearsToGoal: output.yearsToGoal,
+        goalAge: output.goalAge,
+        fullFireAge: output.fullFireAge,
+        yearsSavedVsBaseline,
+        ...getDecisionScenarioCopy(key, mode),
+      } satisfies DecisionScenarioResult;
+    })
+    .filter((s) => (s.yearsSavedVsBaseline ?? 0) > 0)
+    .sort(
+      (a, b) =>
+        (b.yearsSavedVsBaseline ?? -Infinity) -
+        (a.yearsSavedVsBaseline ?? -Infinity)
+    );
+
+  const winner = ranked.length > 0 ? ranked[0] : null;
+
+  return { baseline, ranked, winner, mode };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SUB-COMPONENTS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -696,6 +942,175 @@ function ProgressBar({ pct: p, label, sublabel }: { pct: number; label: string; 
         <div className="h-2 rounded-full bg-emerald-300 transition-all" style={{ width: `${Math.round(p * 100)}%` }} />
       </div>
       {sublabel ? <div className="mt-2 text-[12px] leading-5 text-slate-400">{sublabel}</div> : null}
+    </div>
+  );
+}
+
+// ── Decision Engine Card ──────────────────────────────────────────────────────
+
+function formatDecisionYears(value: number | null): string {
+  if (value === null || !Number.isFinite(value)) return "—";
+  if (value === 0) return "Now";
+  return `${Math.round(value)} yrs`;
+}
+
+const DECISION_MODE_LABELS: Record<FireMode, { goal: string; goalAge: string; intro: string }> = {
+  standard: {
+    goal:    "Years to FIRE",
+    goalAge: "FIRE age",
+    intro:   "Here are the changes that would get you to financial independence fastest.",
+  },
+  lean: {
+    goal:    "Years to Lean FIRE",
+    goalAge: "Lean FIRE age",
+    intro:   "Here are the changes that would shrink your lean timeline the most.",
+  },
+  coast: {
+    goal:    "Years to Coast FIRE",
+    goalAge: "Coast age",
+    intro:   "Here are the changes that would reduce your coast timeline the most.",
+  },
+  barista: {
+    goal:    "Years to Barista FIRE",
+    goalAge: "Barista FIRE age",
+    intro:   "Here are the changes that would get you to your part-time life fastest.",
+  },
+};
+
+function DecisionEngineCard({ result }: { result: DecisionEngineResult }) {
+  const topThree = result.ranked.slice(0, 3);
+  const modeLabels = DECISION_MODE_LABELS[result.mode];
+  const alreadyReached = (result.baseline.yearsToGoal ?? 1) <= 0;
+
+  return (
+    <div className="rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 to-slate-950/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-300">
+        Decision engine
+      </div>
+      <h3 className="mt-2 text-xl font-bold tracking-tight text-white">
+        Your fastest path to{" "}
+        {result.mode === "coast"
+          ? "Coast FIRE"
+          : result.mode === "lean"
+          ? "Lean FIRE"
+          : result.mode === "barista"
+          ? "Barista FIRE"
+          : "financial independence"}
+      </h3>
+      <p className="mt-2 text-sm leading-6 text-slate-300">
+        {alreadyReached ? (
+          <>
+            You've already reached your goal under current assumptions. These
+            scenarios show what would{" "}
+            <strong className="text-white">strengthen your full FIRE position</strong>{" "}
+            from here.
+          </>
+        ) : (
+          <>
+            You're currently projected to reach your goal in{" "}
+            <strong className="text-white">
+              {formatDecisionYears(result.baseline.yearsToGoal)}
+            </strong>
+            . {modeLabels.intro}
+          </>
+        )}
+      </p>
+
+      {/* ── Winner card ────────────────────────────────────────────────── */}
+      <div className="mt-5">
+        {result.winner ? (
+          <div className="rounded-2xl border border-emerald-300/25 bg-emerald-300/10 p-4">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-300">
+              Biggest lever
+            </div>
+            <div className="mt-2 text-base font-semibold text-white">
+              {result.winner.label}
+            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              {result.winner.explanation}
+            </p>
+            <div className="mt-3 inline-flex items-center gap-2 rounded-xl border border-emerald-300/20 bg-black/20 px-3 py-2">
+              <span className="text-xs text-slate-400">Estimated improvement</span>
+              <span className="text-sm font-bold text-emerald-200">
+                {Math.round(result.winner.yearsSavedVsBaseline ?? 0)} years sooner
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="text-base font-semibold text-white">
+              Your current path is already close to optimal
+            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              None of the tested changes materially improved your timeline. That
+              usually means your plan is efficient, or the limiting factor is
+              long-term market growth rather than a simple input change.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* ── Ranked list ────────────────────────────────────────────────── */}
+      {topThree.length > 0 && (
+        <div className="mt-6">
+          <div className="text-sm font-semibold text-white">
+            What would move the needle most
+          </div>
+          <div className="mt-3 space-y-3">
+            {topThree.map((item, index) => (
+              <div
+                key={item.key}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+              >
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <p className="text-sm font-semibold text-white">
+                    {index + 1}. {item.label}
+                  </p>
+                  <span className="shrink-0 rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                    {Math.round(item.yearsSavedVsBaseline ?? 0)} yrs sooner
+                  </span>
+                </div>
+                <p className="mt-2 text-xs leading-5 text-slate-400">
+                  {item.shortCopy}
+                </p>
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                      {modeLabels.goalAge}
+                    </div>
+                    <div className="mt-1 text-sm font-semibold text-white">
+                      {item.goalAge ?? "—"}
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                      Full FIRE age
+                    </div>
+                    <div className="mt-1 text-sm font-semibold text-white">
+                      {item.fullFireAge ?? "—"}
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                      {modeLabels.goal}
+                    </div>
+                    <div className="mt-1 text-sm font-semibold text-white">
+                      {formatDecisionYears(item.yearsToGoal)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Disclaimer ─────────────────────────────────────────────────── */}
+      <p className="mt-5 text-xs leading-5 text-slate-500">
+        These are planning estimates, not guarantees. Small changes in return
+        assumptions, taxes, and future spending can materially change the result.
+      </p>
     </div>
   );
 }
@@ -907,24 +1322,12 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   const baselineCity  = useMemo(() => findCity(getBaselineCityIdForState(inputs.state)), [inputs.state]);
   const hasCoreInputs = inputs.age > 0 && inputs.income > 0 && inputs.expensesMonthly > 0;
 
-  // ── Fastest path (standard + lean modes) ─────────────────────────────────
-  const fastestPath = useMemo(() => {
-    const lowerMonthly     = Math.max(0, inputs.expensesMonthly - 500);
-    const lowerSim         = simulateYearsToFI(inputs, netAnnual, mode, { expensesAnnualBase: annualExpensesFromMonthly(lowerMonthly) });
-    const lowerSaved       = result.yearsToFI !== null && lowerSim.yearsToFI !== null ? Math.max(0, result.yearsToFI - lowerSim.yearsToFI) : null;
-    const autoBase         = inputs.yearlyInvestment > 0 ? inputs.yearlyInvestment : Math.max(0, netAnnual - annualExpenses(inputs));
-    const higherContribAmt = autoBase + 5000;
-    const higherSim        = simulateYearsToFI({ ...inputs, yearlyInvestment: higherContribAmt }, netAnnual, mode);
-    const higherSaved      = result.yearsToFI !== null && higherSim.yearsToFI !== null ? Math.max(0, result.yearsToFI - higherSim.yearsToFI) : null;
-    return {
-      lowerSpendingMonthly: lowerMonthly,
-      lowerSpendingYearsSaved: lowerSaved,
-      higherContributionAnnual: higherContribAmt,
-      higherContributionYearsSaved: higherSaved,
-      bestMoveCity: bestMoveRow ? `${bestMoveRow.cityName}, ${bestMoveRow.state}` : null,
-      bestMoveYearsSaved: bestMoveRow?.deltaYears ?? null,
-    };
-  }, [inputs, netAnnual, mode, result.yearsToFI, bestMoveRow]);
+
+  // ── Decision engine (all modes) ───────────────────────────────────────────
+const decisionEngine = useMemo(
+  () => buildDecisionEngine(inputs, mode, netAnnual),
+  [inputs, mode, netAnnual]
+);
 
   // ─────────────────────────────────────────────────────────────────────────
   // SHARE HANDLER
@@ -1305,22 +1708,7 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
                 </div>
                 <ProgressBar pct={progress.pct} label="Progress to FIRE"
                   sublabel={<>{money(progress.current, 0)} {inputs.advanced ? "spendable toward FIRE" : "invested"} · {fiAge ? <>On track for FIRE at <span className="font-semibold text-slate-200">{fiAge}</span></> : "Keep building your foundation"}</>} />
-                {/* Fastest path */}
-                <div className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4">
-                  <div className="text-sm font-semibold text-emerald-100">Fastest path based on your inputs</div>
-                  <div className="mt-3 space-y-2 text-sm">
-                    {[
-                      [`Lower spending to ${money(fastestPath.lowerSpendingMonthly, 0)}/mo`, fastestPath.lowerSpendingYearsSaved],
-                      [`Increase contributions to ${money(fastestPath.higherContributionAnnual, 0)}/yr`, fastestPath.higherContributionYearsSaved],
-                      [fastestPath.bestMoveCity ? `Move to ${fastestPath.bestMoveCity}` : "Test a lower-cost move", fastestPath.bestMoveYearsSaved],
-                    ].map(([label, saved]) => (
-                      <div key={String(label)} className="flex items-start justify-between gap-4 rounded-xl border border-emerald-300/15 bg-black/20 px-3 py-3">
-                        <span className="text-emerald-100/80">{label}</span>
-                        <span className="font-semibold text-emerald-200 shrink-0">{impactLabel(saved as number | null)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                
                 {/* Account breakdown (advanced) */}
                 {inputs.advanced && (inputs.bal401k > 0 || inputs.balIra > 0) && (
                   <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -1611,6 +1999,9 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
               </div>
             </div>
           </section>
+
+          {/* ── Decision engine ──────────────────────────────────────────────── */}
+<DecisionEngineCard result={decisionEngine} />
 
           {/* ── Under-invested nudge (advanced mode only) ─────────────────── */}
           {nudge && (
