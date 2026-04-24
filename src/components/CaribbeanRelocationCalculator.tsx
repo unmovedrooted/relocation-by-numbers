@@ -122,10 +122,10 @@ const COUNTRY_TO_CURRENCY: Record<string, string> = {
   ZA: "ZAR", AT: "EUR", BE: "EUR",
   AG: "XCD", AW: "AWG", BB: "BBD", BL: "EUR",
   "BQ-BO": "USD", "BQ-SA": "USD", "BQ-SE": "USD",
-  BS: "BSD", CU: "CUP", CW: "ANG", DM: "XCD", DO: "DOP",
+  BS: "BSD", CU: "CUP", CW: "XCG", DM: "XCD", DO: "DOP",
   GD: "XCD", GP: "EUR", HT: "HTG", JM: "JMD", KN: "XCD",
   KY: "KYD", LC: "XCD", MF: "EUR", MQ: "EUR", MS: "XCD",
-  PR: "USD", SX: "ANG", TC: "USD", TT: "TTD", VC: "XCD",
+  PR: "USD", SX: "XCG", TC: "USD", TT: "TTD", VC: "XCD",
   VG: "USD", VI: "USD",
 };
 

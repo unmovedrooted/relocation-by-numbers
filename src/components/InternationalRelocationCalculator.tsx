@@ -27,13 +27,24 @@ import AdSlot from "./AdSlot";
 // at the source rather than patching it here.
 const FX_FALLBACK: Record<string, number> = {};
 
+function getFxRate(countryCode: string): number {
+  const rate = USD_TO_LOCAL[countryCode] ?? FX_FALLBACK[countryCode];
+
+  if (!rate || rate <= 0) {
+    console.warn(`Missing FX rate for ${countryCode}. Falling back to 1.`);
+    return 1;
+  }
+
+  return rate;
+}
+
 function convertLocalToUsd(amountLocal: number, countryCode: string): number {
-  const rate = (USD_TO_LOCAL[countryCode] ?? FX_FALLBACK[countryCode]) ?? 1;
-  return rate > 0 ? amountLocal / rate : amountLocal;
+  const rate = getFxRate(countryCode);
+  return amountLocal / rate;
 }
 
 function convertUsdToLocal(amountUsd: number, countryCode: string): number {
-  const rate = (USD_TO_LOCAL[countryCode] ?? FX_FALLBACK[countryCode]) ?? 1;
+  const rate = getFxRate(countryCode);
   return amountUsd * rate;
 }
 
@@ -46,7 +57,7 @@ const COUNTRY_TO_CURRENCY: Record<string, string> = {
   LV: "EUR", LT: "EUR", RO: "RON", BG: "BGN", SI: "EUR", SK: "EUR",
   MT: "EUR", CY: "EUR", PA: "USD", CO: "COP", BR: "BRL", AR: "ARS",
   CL: "CLP", PE: "PEN", TH: "THB", VN: "VND", MY: "MYR", ID: "IDR",
-  ZA: "ZAR", AT: "EUR", BE: "EUR",
+  ZA: "ZAR", AT: "EUR", BE: "EUR", PH: "PHP", TW: "TWD",
 };
 
 type Mode = "working" | "retired";
