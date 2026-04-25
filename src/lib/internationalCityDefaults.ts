@@ -5,13 +5,14 @@ export type InternationalCityDefaults = {
   currency: string;
   costIndex: number;
 
-  monthlyDefaults: {
-    rent: number;
-    groceries: number;
-    utilities: number;
-    transport: number;
-    healthcare: number;
-  };
+ monthlyDefaults: {
+  rent: number;
+  groceries: number;
+  utilities: number;
+  transport: number;
+  car?: number;
+  healthcare: number;
+}
 
   housing: {
     depositMonths: number;

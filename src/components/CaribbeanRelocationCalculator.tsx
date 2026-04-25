@@ -18,6 +18,7 @@ import {
   isCaribbeanCountryCode,
   getCaribbeanCountryByCode,
 } from "@/lib/caribbeanCountries";
+import { getVisaContext } from "@/lib/visaContext";
 import {
   hasTaxConfig,
   getCountryTaxConfig,
@@ -25,10 +26,11 @@ import {
 } from "@/lib/caribbeanTax/index";
 import { estimateScenarioTax } from "@/lib/caribbeanTax/engine";
 import type { IncomeScenario, Confidence } from "@/lib/caribbeanTax/types";
+import { COST_SCALING, CAR_COST_FALLBACK_USD } from "@/lib/relocationConstants";
 import AdSlot from "./AdSlot";
 
 // ---------------------------------------------------------------------------
-// CARIBBEAN COST DEFAULTS
+// CARIBBEAN COST DEFAULTS (country-level fallback only)
 // ---------------------------------------------------------------------------
 const CARIBBEAN_COST_DEFAULTS: Record<string, {
   groceries: number; utilities: number; transport: number; healthcare: number;
@@ -58,58 +60,8 @@ const CARIBBEAN_COST_DEFAULTS: Record<string, {
 };
 
 // ---------------------------------------------------------------------------
-// VISA CONTEXT
+// CURRENCY MAP
 // ---------------------------------------------------------------------------
-const CARIBBEAN_VISA_CONTEXT: Record<string, {
-  program: string;
-  notes: string;
-  estimatedFee: number;
-  icon: string;
-  highlight?: string;
-}> = {
-  PA: {
-    icon: "🇵🇦",
-    program: "Pensionado Visa / Friendly Nations Visa",
-    highlight: "Pensionado Visa",
-    notes: "Panama's Pensionado Visa is one of the world's best retirement programs — requires $1,000/mo pension income and comes with significant discounts on healthcare, entertainment, and utilities. The Friendly Nations Visa grants permanent residency to citizens of 50+ designated countries with proof of economic ties. No minimum stay required to maintain residency. Panama uses USD, eliminating currency risk.",
-    estimatedFee: 180,
-  },
-  CR: {
-    icon: "🇨🇷",
-    program: "Rentista / Pensionado / Digital Nomad Visa",
-    highlight: "Rentista Visa",
-    notes: "Costa Rica's Rentista Visa requires $2,500/mo in guaranteed income for 2 years. Pensionado Visa needs $1,000/mo from a pension. Digital Nomad Visa (launched 2022): $3,000/mo income, 1-year renewable. All visa categories lead to a path toward permanent residency after 3 years. Costa Rica is known for its stability, healthcare, and natural beauty.",
-    estimatedFee: 200,
-  },
-  CO: {
-    icon: "🇨🇴",
-    program: "Digital Nomad Visa / Pensionado / Migrant Visa",
-    highlight: "Digital Nomad Visa",
-    notes: "Colombia's Digital Nomad Visa (V): remote workers with $800+/mo income, 2-year renewable. Pensionado Visa for retirees with $700+/mo pension. Migrant Visa (M) for long-term stays leads to permanent residency after 5 years. Medellín and Bogotá are major expat hubs. Colombia's infrastructure and culture have improved dramatically — very popular with North American remote workers.",
-    estimatedFee: 160,
-  },
-  MX: {
-    icon: "🇲🇽",
-    program: "Temporary Resident Visa / Permanent Resident Visa",
-    highlight: "Temporary Resident Visa",
-    notes: "Mexico's Temporary Resident Visa (1–4 years) requires ~$2,600/mo income or ~$43,000 in savings. After 4 years you can apply for Permanent Residency. No official digital nomad visa — many remote workers enter on tourist status (180 days) and renew. Mexico has no capital gains tax on primary residence sales. Popular destinations: Mexico City, Guadalajara, Oaxaca, and the Riviera Maya.",
-    estimatedFee: 150,
-  },
-};
-
-// ---------------------------------------------------------------------------
-// HELPERS
-// ---------------------------------------------------------------------------
-function convertLocalToUsd(amountLocal: number, countryCode: string): number {
-  const rate = USD_TO_LOCAL[countryCode] ?? 1;
-  return rate > 0 ? amountLocal / rate : amountLocal;
-}
-
-function convertUsdToLocal(amountUsd: number, countryCode: string): number {
-  const rate = USD_TO_LOCAL[countryCode] ?? 1;
-  return amountUsd * rate;
-}
-
 const COUNTRY_TO_CURRENCY: Record<string, string> = {
   US: "USD", GB: "GBP", PT: "EUR", ES: "EUR", MX: "MXN", CA: "CAD",
   DE: "EUR", NL: "EUR", CR: "CRC", FR: "EUR", IT: "EUR", IE: "EUR",
@@ -132,17 +84,32 @@ const COUNTRY_TO_CURRENCY: Record<string, string> = {
 // ---------------------------------------------------------------------------
 // TYPES
 // ---------------------------------------------------------------------------
-type Mode = "working" | "retired";
-type FilingStatus = "single" | "married";
-type SalaryType = "local" | "remote";
-type FurnishedType = "furnished" | "unfurnished";
-type YesNo = "yes" | "no";
+type Mode            = "working" | "retired";
+type FilingStatus    = "single" | "married";
+type SalaryType      = "local" | "remote";
+type FurnishedType   = "furnished" | "unfurnished";
+type YesNo           = "yes" | "no";
 type CurrencyDisplay = "USD" | "CURRENT" | "DESTINATION";
+
+// ---------------------------------------------------------------------------
+// FX HELPERS
+// NOTE: Static FX rates — for estimation only, not real-time.
+// Volatile currencies (JPY, ARS, TRY, etc.) can move 10–30%+ between updates.
+// ---------------------------------------------------------------------------
+function convertLocalToUsd(amount: number, countryCode: string): number {
+  const rate = USD_TO_LOCAL[countryCode] ?? 1;
+  return rate > 0 ? amount / rate : amount;
+}
+
+function convertUsdToLocal(amount: number, countryCode: string): number {
+  const rate = USD_TO_LOCAL[countryCode] ?? 1;
+  return amount * rate;
+}
 
 // ---------------------------------------------------------------------------
 // UTILITIES
 // ---------------------------------------------------------------------------
-function money(n: number, digits: number = 0, currency: string = "USD") {
+function money(n: number, digits = 0, currency = "USD") {
   if (!Number.isFinite(n)) return "—";
   return n.toLocaleString(undefined, {
     style: "currency",
@@ -159,39 +126,42 @@ function getQS() {
 
 function setQS(params: URLSearchParams) {
   if (typeof window === "undefined") return;
-  const qs = params.toString();
+  const qs  = params.toString();
   const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
   window.history.replaceState(null, "", url);
 }
 
 function getReadinessBand(ratio: number) {
   if (ratio <= 0.25) return { band: "A", label: "Comfortable", note: "This looks healthy relative to your estimated target net income." };
-  if (ratio <= 0.35) return { band: "B", label: "Manageable", note: "Doable, but keep an eye on recurring costs and setup cash." };
-  if (ratio <= 0.45) return { band: "C", label: "Tight", note: "Possible, but the margin for error is thinner." };
-  return { band: "D", label: "Stretched", note: "Housing is taking up a large share of the budget." };
+  if (ratio <= 0.35) return { band: "B", label: "Manageable",  note: "Doable, but keep an eye on recurring costs and setup cash." };
+  if (ratio <= 0.45) return { band: "C", label: "Tight",       note: "Possible, but the margin for error is thinner." };
+  return               { band: "D", label: "Stretched",        note: "Housing is taking up a large share of the budget." };
 }
 
 function confidenceBadge(confidence: Confidence) {
   switch (confidence) {
-    case "high":       return { label: "● High confidence",    cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" };
-    case "moderate":   return { label: "● Moderate",           cls: "bg-amber-50 text-amber-700 ring-amber-200" };
+    case "high":       return { label: "● High confidence",     cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" };
+    case "moderate":   return { label: "● Moderate",            cls: "bg-amber-50 text-amber-700 ring-amber-200" };
     case "simplified": return { label: "● Simplified estimate", cls: "bg-orange-50 text-orange-700 ring-orange-200" };
-    default:           return { label: "⚠ Pending",            cls: "bg-slate-50 text-slate-500 ring-slate-200" };
+    default:           return { label: "⚠ Pending",             cls: "bg-slate-50 text-slate-500 ring-slate-200" };
   }
 }
 
-const inputCls  = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-teal-500/15";
-const selectCls = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-teal-500/15";
+const inputCls     = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-teal-500/15";
+const selectCls    = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-teal-500/15";
 const labelHeadCls = "mb-1 text-xs font-medium leading-4 text-slate-600";
 
 // ---------------------------------------------------------------------------
 // INFO TIP
 // ---------------------------------------------------------------------------
 function InfoTip({ text, align = "left" }: { text: string; align?: "left" | "right" | "center" }) {
-  const positionClass = align === "right" ? "right-0" : align === "center" ? "left-1/2 -translate-x-1/2" : "left-0";
+  const positionClass =
+    align === "right"  ? "right-0" :
+    align === "center" ? "left-1/2 -translate-x-1/2" : "left-0";
   return (
     <span className="group relative ml-1 inline-flex align-middle">
-      <button type="button" aria-label="More info" className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 bg-white text-[10px] font-bold text-slate-700 shadow-sm transition hover:bg-slate-50">
+      <button type="button" aria-label="More info"
+        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 bg-white text-[10px] font-bold text-slate-700 shadow-sm transition hover:bg-slate-50">
         i
       </button>
       <span className={`pointer-events-none absolute top-full z-50 mt-2 hidden max-w-[calc(100vw-2rem)] w-72 rounded-xl bg-slate-900 px-3 py-2 text-xs leading-5 text-white shadow-xl group-hover:block group-focus-within:block ${positionClass}`}>
@@ -202,34 +172,116 @@ function InfoTip({ text, align = "left" }: { text: string; align?: "left" | "rig
 }
 
 // ---------------------------------------------------------------------------
-// VISA CONTEXT CARD
+// VISA CONTEXT CARD — three variants
 // ---------------------------------------------------------------------------
 function VisaContextCard({ countryCode }: { countryCode: string }) {
-  const ctx = CARIBBEAN_VISA_CONTEXT[countryCode];
+  const ctx = getVisaContext(countryCode);
   if (!ctx) return null;
-  return (
-    <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-      <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex-shrink-0 text-xl">{ctx.icon}</div>
-        <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700">Visa &amp; Permit Context</div>
-          <div className="mt-1 text-sm font-semibold text-slate-900">{ctx.program}</div>
-          <p className="mt-2 text-sm leading-6 text-slate-700">{ctx.notes}</p>
-          <div className="mt-3 flex flex-wrap gap-3">
-            {ctx.highlight && (
-              <span className="inline-flex items-center rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-700 ring-1 ring-teal-200">
-                {ctx.highlight}
-              </span>
-            )}
-            <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
-              Est. permit fee: {money(ctx.estimatedFee, 0, "USD")}
-            </span>
-          </div>
-          <p className="mt-3 text-xs text-slate-500">
-            Visa requirements vary by citizenship and change frequently. Always verify with official government sources and an immigration attorney.
-          </p>
+
+  if (ctx.restricted) {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+        <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-800">
+          <span>{ctx.icon}</span>
+          <span>⚠ Travel Advisory</span>
         </div>
+        <div className="mb-1 text-xs font-medium text-amber-700">{ctx.program}</div>
+        <p className="text-sm leading-6 text-amber-900">{ctx.notes}</p>
       </div>
+    );
+  }
+
+  const headerLabel = ctx.territoryOf ? `${ctx.territoryOf} Territory` : "Visa / Residency Context";
+
+  return (
+    <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+      <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
+        <span>{ctx.icon}</span>
+        <span>{headerLabel}</span>
+      </div>
+      <div className="mb-1 text-xs font-medium text-teal-700">{ctx.program}</div>
+      <p className="text-sm leading-6 text-slate-700">{ctx.notes}</p>
+      <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+        <span>
+          {ctx.feeNote}:{" "}
+          <span className="font-semibold text-slate-700">${ctx.estimatedFee.toLocaleString()}</span>
+        </span>
+        {ctx.highlight && (
+          <span className="rounded-full bg-teal-50 px-2.5 py-1 font-medium text-teal-700 ring-1 ring-teal-200">
+            {ctx.highlight}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// RELOCATION VERDICT
+// ---------------------------------------------------------------------------
+interface VerdictResults {
+  comfort:            { band: string; label: string; note: string };
+  monthlyFlexibility: number;
+  upfrontCashNeeded:  number;
+  monthsCovered:      number;
+  pct:                number;
+  salaryReady:        boolean;
+  targetIsDisclaimer: boolean;
+  targetTaxRate:      number;
+  currentTaxRate:     number;
+}
+
+function RelocationVerdict({ results, toCityLabel, displayAmount }: {
+  results: VerdictResults;
+  toCityLabel: string;
+  displayAmount: (n: number, d?: number) => string;
+}) {
+  const { comfort, monthlyFlexibility, upfrontCashNeeded, monthsCovered,
+          pct, salaryReady, targetIsDisclaimer, targetTaxRate, currentTaxRate } = results;
+
+  if (!salaryReady) return null;
+
+  const savingsReadiness =
+    monthsCovered >= 6 ? "strong" : monthsCovered >= 3 ? "adequate" : "thin";
+
+  const taxSentence = targetIsDisclaimer
+    ? "Tax impact for this scenario is not yet modeled — consult a local advisor."
+    : targetTaxRate < currentTaxRate
+      ? `Your estimated tax rate drops from ${(currentTaxRate * 100).toFixed(0)}% to ${(targetTaxRate * 100).toFixed(0)}%, improving monthly take-home.`
+      : targetTaxRate > currentTaxRate
+        ? `Your estimated tax rate increases from ${(currentTaxRate * 100).toFixed(0)}% to ${(targetTaxRate * 100).toFixed(0)}% in this scenario.`
+        : "Your estimated tax rate is similar in both locations.";
+
+  const verdictColor =
+    comfort.band === "A" && savingsReadiness !== "thin" ? "emerald"
+    : comfort.band === "D" || savingsReadiness === "thin" ? "rose"
+    : "amber";
+
+  const colorMap = {
+    emerald: "border-emerald-200 bg-emerald-50/70 text-emerald-800",
+    rose:    "border-rose-200 bg-rose-50/70 text-rose-800",
+    amber:   "border-amber-200 bg-amber-50/70 text-amber-800",
+  };
+
+  return (
+    <div className={`rounded-2xl border p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ${colorMap[verdictColor]}`}>
+      <div className="text-xs font-semibold uppercase tracking-[0.14em] mb-2">Decision Summary</div>
+      <p className="text-sm leading-6">
+        Moving to <strong>{toCityLabel}</strong>, housing takes up{" "}
+        <strong>{pct.toFixed(0)}%</strong> of estimated net income — rated{" "}
+        <strong>{comfort.label}</strong>. {taxSentence} You have{" "}
+        <strong>{displayAmount(monthlyFlexibility, 0)}</strong>/mo left after core expenses.
+        Your savings cover roughly <strong>{monthsCovered.toFixed(1)} months</strong> of
+        expenses (upfront costs: <strong>{displayAmount(upfrontCashNeeded, 0)}</strong>) —
+        savings runway is <strong>{savingsReadiness}</strong>.
+      </p>
+      {savingsReadiness === "thin" && (
+        <p className="mt-2 text-sm font-semibold">⚠ Consider building more savings before committing to this move.</p>
+      )}
+      {comfort.band === "D" && (
+        <p className="mt-2 text-sm font-semibold">⚠ Housing is consuming a high share of estimated income. Try a lower rent or higher income scenario.</p>
+      )}
+      <p className="mt-3 text-xs opacity-70">Planning estimates only. Not financial or tax advice.</p>
     </div>
   );
 }
@@ -242,76 +294,76 @@ export default function CaribbeanRelocationCalculator() {
   const [qsHydrated, setQsHydrated] = useState(false);
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
 
-  const [mode, setMode] = useState<Mode>("working");
-  const [salary, setSalary] = useState<string>("150000");
+  const [mode,             setMode]             = useState<Mode>("working");
+  const [salary,           setSalary]           = useState<string>("150000");
   const [retirementIncome, setRetirementIncome] = useState<string>("70000");
-  const [filing, setFiling] = useState<FilingStatus>("single");
+  const [filing,           setFiling]           = useState<FilingStatus>("single");
 
-  const [fromCountry, setFromCountry] = useState<string>("US");
-  const [toCountry, setToCountry] = useState<string>("DO");
+  const [fromCountry,  setFromCountry]  = useState<string>("US");
+  const [toCountry,    setToCountry]    = useState<string>("DO");
   const [fromCityCode, setFromCityCode] = useState<string>("US-NYC");
-  const [toCityCode, setToCityCode] = useState<string>("");
+  const [toCityCode,   setToCityCode]   = useState<string>("");
 
   const [currencyDisplay, setCurrencyDisplay] = useState<CurrencyDisplay>("USD");
-  const [salaryType, setSalaryType] = useState<SalaryType>("remote");
-  const [adults, setAdults] = useState<string>("1");
-  const [children, setChildren] = useState<string>("0");
+  const [salaryType,      setSalaryType]      = useState<SalaryType>("remote");
+  const [adults,          setAdults]          = useState<string>("1");
+  const [children,        setChildren]        = useState<string>("0");
 
-  // Conditional answers for scenario-specific questions (e.g. DO residency)
   const [conditionalAnswers, setConditionalAnswers] = useState<Record<string, string>>({});
 
-  const [destinationRent, setDestinationRent] = useState<string>("1300");
-  const [depositRequired, setDepositRequired] = useState<string>("1300");
-  const [firstMonthRent, setFirstMonthRent] = useState<string>("1300");
-  const [lastMonthRent, setLastMonthRent] = useState<string>("0");
-  const [furnished, setFurnished] = useState<FurnishedType>("unfurnished");
+  const [destinationRent,   setDestinationRent]   = useState<string>("1300");
+  const [depositRequired,   setDepositRequired]   = useState<string>("1300");
+  const [firstMonthRent,    setFirstMonthRent]    = useState<string>("1300");
+  const [lastMonthRent,     setLastMonthRent]     = useState<string>("0");
+  const [furnished,         setFurnished]         = useState<FurnishedType>("unfurnished");
   const [utilitiesIncluded, setUtilitiesIncluded] = useState<YesNo>("no");
+  // FIX 5: renamed from "car" to "needCar" for URL key clarity
+  const [needCar,           setNeedCar]           = useState<YesNo>("no");
 
-  const [groceries, setGroceries] = useState<string>("550");
-  const [utilities, setUtilities] = useState<string>("180");
+  const [groceries,      setGroceries]      = useState<string>("550");
+  const [utilities,      setUtilities]      = useState<string>("180");
   const [transportation, setTransportation] = useState<string>("150");
-  const [healthcare, setHealthcare] = useState<string>("200");
+  const [healthcare,     setHealthcare]     = useState<string>("200");
+  const [carCost,        setCarCost]        = useState<string>(String(CAR_COST_FALLBACK_USD));
 
-  const [visaCost, setVisaCost] = useState<string>("180");
-  const [flightCost, setFlightCost] = useState<string>("450");
-  const [shippingCost, setShippingCost] = useState<string>("400");
-  const [temporaryStay, setTemporaryStay] = useState<string>("1300");
-  const [adminFees, setAdminFees] = useState<string>("220");
-  const [furnitureSetup, setFurnitureSetup] = useState<string>("1000");
+  const [visaCost,            setVisaCost]            = useState<string>("180");
+  const [flightCost,          setFlightCost]          = useState<string>("450");
+  const [shippingCost,        setShippingCost]        = useState<string>("400");
+  const [temporaryStay,       setTemporaryStay]       = useState<string>("1300");
+  const [adminFees,           setAdminFees]           = useState<string>("220");
+  const [furnitureSetup,      setFurnitureSetup]      = useState<string>("1000");
   const [emergencyCashBuffer, setEmergencyCashBuffer] = useState<string>("4000");
-  const [currentSavings, setCurrentSavings] = useState<string>("25000");
-  const [needCar, setNeedCar] = useState<YesNo>("no");
+  const [currentSavings,      setCurrentSavings]      = useState<string>("25000");
 
   const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
 
-  // Derive the income scenario from mode + salaryType
-  const incomeScenario: IncomeScenario = mode === "retired" ? "retired" : salaryType === "remote" ? "remote" : "local";
+  const incomeScenario: IncomeScenario =
+    mode === "retired" ? "retired" : salaryType === "remote" ? "remote" : "local";
 
-  const allCountriesSorted = useMemo(() =>
-    [...INTERNATIONAL_COUNTRIES].sort((a, b) => a.name.localeCompare(b.name)), []
+  const allCountriesSorted = useMemo(
+    () => [...INTERNATIONAL_COUNTRIES].sort((a, b) => a.name.localeCompare(b.name)), []
   );
-
   const caribbeanCountriesSorted = useMemo(
     () => [...CARIBBEAN_COUNTRIES].sort((a, b) => a.name.localeCompare(b.name)), []
   );
-
-  const fromCities = useMemo(() =>
-    [...citiesForCountry(fromCountry)].sort((a, b) =>
-      a.name.trim().localeCompare(b.name.trim(), undefined, { sensitivity: "base" })
-    ), [fromCountry]
+  const fromCities = useMemo(
+    () => [...citiesForCountry(fromCountry)].sort((a, b) =>
+      a.name.trim().localeCompare(b.name.trim(), undefined, { sensitivity: "base" })),
+    [fromCountry]
   );
-
-  const toCities = useMemo(() =>
-    [...citiesForCountry(toCountry)].sort((a, b) =>
-      a.name.trim().localeCompare(b.name.trim(), undefined, { sensitivity: "base" })
-    ), [toCountry]
+  const toCities = useMemo(
+    () => [...citiesForCountry(toCountry)].sort((a, b) =>
+      a.name.trim().localeCompare(b.name.trim(), undefined, { sensitivity: "base" })),
+    [toCountry]
   );
 
   const originCurrency = COUNTRY_TO_CURRENCY[fromCountry] ?? "USD";
 
-  const displayAmount = (amountUsd: number, digits: number = 0) => {
-    if (currencyDisplay === "CURRENT") return money(convertUsdToLocal(amountUsd, fromCountry), digits, COUNTRY_TO_CURRENCY[fromCountry] ?? "USD");
-    if (currencyDisplay === "DESTINATION") return money(convertUsdToLocal(amountUsd, toCountry), digits, COUNTRY_TO_CURRENCY[toCountry] ?? "USD");
+  const displayAmount = (amountUsd: number, digits = 0) => {
+    if (currencyDisplay === "CURRENT")
+      return money(convertUsdToLocal(amountUsd, fromCountry), digits, COUNTRY_TO_CURRENCY[fromCountry] ?? "USD");
+    if (currencyDisplay === "DESTINATION")
+      return money(convertUsdToLocal(amountUsd, toCountry), digits, COUNTRY_TO_CURRENCY[toCountry] ?? "USD");
     return money(amountUsd, digits, "USD");
   };
 
@@ -321,13 +373,20 @@ export default function CaribbeanRelocationCalculator() {
   const selectedCityDefaults = useMemo(() => getCityDefaultsByCode(toCityCode), [toCityCode]);
   const currentCityDefaults  = useMemo(() => getCityDefaultsByCode(fromCityCode), [fromCityCode]);
   const targetCityDefaults   = useMemo(() => getCityDefaultsByCode(toCityCode), [toCityCode]);
-  const fromCityMultipliers  = useMemo(() => getCityCostMultipliers(fromCityCode), [fromCityCode]);
-  const toCityMultipliers    = useMemo(() => getCityCostMultipliers(toCityCode), [toCityCode]);
 
-  // Reset conditional answers when country or scenario changes
-  useEffect(() => {
-    setConditionalAnswers({});
-  }, [toCountry, incomeScenario]);
+  // Only apply city multipliers when falling back from country-level defaults.
+  // City-specific defaults are already calibrated — multiplying again inflates costs.
+  const hasCityDefaults   = !!selectedCityDefaults;
+  const toCityMultipliers = useMemo(
+    () => hasCityDefaults ? null : getCityCostMultipliers(toCityCode),
+    [toCityCode, hasCityDefaults]
+  );
+  const fromCityMultipliers = useMemo(
+    () => currentCityDefaults ? null : getCityCostMultipliers(fromCityCode),
+    [fromCityCode, currentCityDefaults]
+  );
+
+  useEffect(() => { setConditionalAnswers({}); }, [toCountry, incomeScenario]);
 
   useEffect(() => {
     const valid = fromCities.some(c => c.code === fromCityCode);
@@ -350,6 +409,7 @@ export default function CaribbeanRelocationCalculator() {
     setGroceries(String(d.monthlyDefaults.groceries));
     setUtilities(String(d.monthlyDefaults.utilities));
     setTransportation(String(d.monthlyDefaults.transport));
+    setCarCost(String(d.monthlyDefaults.car ?? CAR_COST_FALLBACK_USD));
     setHealthcare(String(d.monthlyDefaults.healthcare));
     setVisaCost(String(d.startupCosts.visa));
     setFlightCost(String(d.startupCosts.flight));
@@ -361,8 +421,7 @@ export default function CaribbeanRelocationCalculator() {
   }, [selectedCityDefaults, qsHydrated]);
 
   useEffect(() => {
-    if (selectedCityDefaults) return;
-    if (!qsHydrated) return;
+    if (selectedCityDefaults || !qsHydrated) return;
     const d = CARIBBEAN_COST_DEFAULTS[toCountry];
     if (!d) return;
     setGroceries(String(d.groceries));
@@ -371,108 +430,140 @@ export default function CaribbeanRelocationCalculator() {
     setHealthcare(String(d.healthcare));
   }, [toCountry, selectedCityDefaults, qsHydrated]);
 
-  // QS hydration
+  // ---------------------------------------------------------------------------
+  // QS HYDRATION
+  // ---------------------------------------------------------------------------
   useEffect(() => {
     const qs = getQS();
-    const vMode = qs.get("mode"); if (vMode === "working" || vMode === "retired") setMode(vMode);
-  const vToCountry = qs.get("toCountry");
-if (vToCountry && isCaribbeanCountryCode(vToCountry)) {
-  setToCountry(vToCountry);
-}
-    const vFromCity = qs.get("fromCityCode"); if (vFromCity) setFromCityCode(vFromCity);
-    const vToCity = qs.get("toCityCode"); if (vToCity) setToCityCode(vToCity);
-    const vSalary = qs.get("salary"); if (vSalary) setSalary(vSalary);
-    const vRetirement = qs.get("retirement"); if (vRetirement) setRetirementIncome(vRetirement);
+
+    const vMode = qs.get("mode");
+    if (vMode === "working" || vMode === "retired") setMode(vMode);
+
+    const vFromCountry = qs.get("fromCountry");
+    if (vFromCountry && getCountryByCode(vFromCountry)) setFromCountry(vFromCountry);
+
+    const vToCountry = qs.get("toCountry");
+    if (vToCountry && isCaribbeanCountryCode(vToCountry)) setToCountry(vToCountry);
+
+    const vFromCity   = qs.get("fromCityCode"); if (vFromCity)   setFromCityCode(vFromCity);
+    const vToCity     = qs.get("toCityCode");   if (vToCity)     setToCityCode(vToCity);
+    const vSalary     = qs.get("salary");        if (vSalary)     setSalary(vSalary);
+    const vRetirement = qs.get("retirement");    if (vRetirement) setRetirementIncome(vRetirement);
+
     const vCurrency = qs.get("currency") as CurrencyDisplay | null;
     if (vCurrency === "USD" || vCurrency === "CURRENT" || vCurrency === "DESTINATION") setCurrencyDisplay(vCurrency);
-   const vSalaryType = qs.get("salaryType") as SalaryType | null;
-if (vSalaryType === "remote" || vSalaryType === "local") {
-  setSalaryType(vSalaryType);
-}
-    const vAdults = qs.get("adults"); if (vAdults) setAdults(vAdults);
+
+    const vSalaryType = qs.get("salaryType") as SalaryType | null;
+    if (vSalaryType === "remote" || vSalaryType === "local") setSalaryType(vSalaryType);
+
+    const vFiling = qs.get("filing") as FilingStatus | null;
+    if (vFiling === "single" || vFiling === "married") setFiling(vFiling);
+
+    const vAdults   = qs.get("adults");   if (vAdults)   setAdults(vAdults);
     const vChildren = qs.get("children"); if (vChildren) setChildren(vChildren);
-    const vRent = qs.get("rent"); if (vRent) setDestinationRent(vRent);
-    const vDeposit = qs.get("deposit"); if (vDeposit) setDepositRequired(vDeposit);
-    const vFirst = qs.get("firstRent"); if (vFirst) setFirstMonthRent(vFirst);
-    const vLast = qs.get("lastRent"); if (vLast) setLastMonthRent(vLast);
+    const vRent     = qs.get("rent");     if (vRent)     setDestinationRent(vRent);
+    const vDeposit  = qs.get("deposit");  if (vDeposit)  setDepositRequired(vDeposit);
+    const vFirst    = qs.get("firstRent"); if (vFirst)   setFirstMonthRent(vFirst);
+    const vLast     = qs.get("lastRent");  if (vLast)    setLastMonthRent(vLast);
+
     const vFurnished = qs.get("furnished") as FurnishedType | null;
     if (vFurnished === "furnished" || vFurnished === "unfurnished") setFurnished(vFurnished);
+
     const vUtilIncl = qs.get("utilIncl") as YesNo | null;
     if (vUtilIncl === "yes" || vUtilIncl === "no") setUtilitiesIncluded(vUtilIncl);
+
+    // FIX 5: read from "needCar" key (was "car")
+    const vNeedCar = qs.get("needCar") as YesNo | null;
+    if (vNeedCar === "yes" || vNeedCar === "no") setNeedCar(vNeedCar);
+
     const fields: [string, (v: string) => void][] = [
-      ["groceries", setGroceries], ["utilities", setUtilities], ["transport", setTransportation],
-      ["healthcare", setHealthcare], ["visa", setVisaCost], ["flight", setFlightCost],
-      ["shipping", setShippingCost], ["tempStay", setTemporaryStay], ["admin", setAdminFees],
-      ["furniture", setFurnitureSetup], ["emergency", setEmergencyCashBuffer], ["savings", setCurrentSavings],
+      ["groceries", setGroceries], ["utilities", setUtilities],
+      ["transport", setTransportation], ["healthcare", setHealthcare],
+      ["visa", setVisaCost], ["flight", setFlightCost], ["carCost", setCarCost],
+      ["shipping", setShippingCost], ["tempStay", setTemporaryStay],
+      ["admin", setAdminFees], ["furniture", setFurnitureSetup],
+      ["emergency", setEmergencyCashBuffer], ["savings", setCurrentSavings],
     ];
     for (const [key, setter] of fields) { const val = qs.get(key); if (val) setter(val); }
-    const vCar = qs.get("car") as YesNo | null; if (vCar === "yes" || vCar === "no") setNeedCar(vCar);
+
+    const vAnswers = qs.get("answers");
+    if (vAnswers) { try { setConditionalAnswers(JSON.parse(vAnswers)); } catch {} }
+
     setQsHydrated(true);
   }, []);
 
-  // QS sync
+  // ---------------------------------------------------------------------------
+  // QS SYNC
+  // ---------------------------------------------------------------------------
   useEffect(() => {
     if (!hasMounted.current) { hasMounted.current = true; return; }
     const qs = new URLSearchParams();
     qs.set("mode", mode); qs.set("filing", filing);
     qs.set("fromCountry", fromCountry); qs.set("toCountry", toCountry);
     if (fromCityCode) qs.set("fromCityCode", fromCityCode);
-    if (toCityCode) qs.set("toCityCode", toCityCode);
-    if (salary) qs.set("salary", salary);
+    if (toCityCode)   qs.set("toCityCode",   toCityCode);
+    if (salary)           qs.set("salary",     salary);
     if (retirementIncome) qs.set("retirement", retirementIncome);
     qs.set("currency", currencyDisplay); qs.set("salaryType", salaryType);
-    if (adults) qs.set("adults", adults); if (children) qs.set("children", children);
-    if (destinationRent) qs.set("rent", destinationRent);
-    if (depositRequired) qs.set("deposit", depositRequired);
-    if (firstMonthRent) qs.set("firstRent", firstMonthRent);
-    if (lastMonthRent) qs.set("lastRent", lastMonthRent);
+    if (adults)   qs.set("adults",   adults);
+    if (children) qs.set("children", children);
+    if (carCost)  qs.set("carCost",  carCost);
+    if (destinationRent)  qs.set("rent",      destinationRent);
+    if (depositRequired)  qs.set("deposit",   depositRequired);
+    if (firstMonthRent)   qs.set("firstRent", firstMonthRent);
+    if (lastMonthRent)    qs.set("lastRent",  lastMonthRent);
     qs.set("furnished", furnished); qs.set("utilIncl", utilitiesIncluded);
-    if (groceries) qs.set("groceries", groceries); if (utilities) qs.set("utilities", utilities);
-    if (transportation) qs.set("transport", transportation); if (healthcare) qs.set("healthcare", healthcare);
-    if (visaCost) qs.set("visa", visaCost); if (flightCost) qs.set("flight", flightCost);
-    if (shippingCost) qs.set("shipping", shippingCost); if (temporaryStay) qs.set("tempStay", temporaryStay);
-    if (adminFees) qs.set("admin", adminFees); if (furnitureSetup) qs.set("furniture", furnitureSetup);
+    // FIX 5: use "needCar" key (was "car")
+    qs.set("needCar", needCar);
+    if (groceries)      qs.set("groceries", groceries);
+    if (utilities)      qs.set("utilities", utilities);
+    if (transportation) qs.set("transport", transportation);
+    if (healthcare)     qs.set("healthcare", healthcare);
+    if (visaCost)       qs.set("visa",      visaCost);
+    if (flightCost)     qs.set("flight",    flightCost);
+    if (shippingCost)   qs.set("shipping",  shippingCost);
+    if (temporaryStay)  qs.set("tempStay",  temporaryStay);
+    if (adminFees)      qs.set("admin",     adminFees);
+    if (furnitureSetup) qs.set("furniture", furnitureSetup);
     if (emergencyCashBuffer) qs.set("emergency", emergencyCashBuffer);
-    if (currentSavings) qs.set("savings", currentSavings);
-    qs.set("car", needCar);
+    if (currentSavings)      qs.set("savings",   currentSavings);
+    if (Object.keys(conditionalAnswers).length > 0) {
+      qs.set("answers", JSON.stringify(conditionalAnswers));
+    }
     setQS(qs);
   }, [
     mode, filing, fromCountry, toCountry, fromCityCode, toCityCode,
     salary, retirementIncome, currencyDisplay, salaryType, adults, children,
     destinationRent, depositRequired, firstMonthRent, lastMonthRent, furnished,
-    utilitiesIncluded, groceries, utilities, transportation, healthcare, visaCost,
+    // FIX 1: carCost added to dependency array
+    utilitiesIncluded, groceries, utilities, transportation, carCost, healthcare, visaCost,
     flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
     emergencyCashBuffer, currentSavings, conditionalAnswers, needCar,
   ]);
 
-  const targetProfile = getCountryByCode(toCountry);
-
   // ---------------------------------------------------------------------------
-  // RESULTS MEMO
+  // RESULTS
   // ---------------------------------------------------------------------------
   const results = useMemo(() => {
     const baseAnnualIncome = mode === "retired" ? nz(retirementIncome) : nz(salary);
-    const salaryReady = baseAnnualIncome > 0;
+    const salaryReady      = baseAnnualIncome > 0;
 
-    // No salary multiplier — scenario drives tax treatment, not a gross reduction
-    const annualIncome = convertLocalToUsd(baseAnnualIncome, fromCountry);
-    const destToUsd = (v: number) => convertLocalToUsd(v, toCountry);
-
-    const grossMonthly = annualIncome / 12;
+    const annualIncome           = convertLocalToUsd(baseAnnualIncome, fromCountry);
+    const destToUsd              = (v: number) => convertLocalToUsd(v, toCountry);
+    const grossMonthly           = annualIncome / 12;
     const annualIncomeForFromTax = convertUsdToLocal(annualIncome, fromCountry);
 
+    // Tax: origin
     const currentTaxEstimate = estimateInternationalTax({
       countryCode: fromCountry,
       annualIncome: annualIncomeForFromTax,
       filing,
       isRetired: mode === "retired",
     });
-
     const currentTaxRate = currentTaxEstimate.effectiveRate;
 
-    // --- New engine call ---
+    // Tax: destination
     let targetTaxEstimate: ReturnType<typeof estimateScenarioTax> | null = null;
-
     if (hasTaxConfig(toCountry)) {
       const config = getCountryTaxConfig(toCountry);
       if (config) {
@@ -487,110 +578,115 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
     }
 
     const targetIsDisclaimer = targetTaxEstimate?.isDisclaimer ?? true;
-    const targetConfidence = targetTaxEstimate?.confidence ?? "pending";
-    const targetTaxNotes = targetTaxEstimate?.notes ?? [];
+    const targetConfidence   = targetTaxEstimate?.confidence   ?? ("pending" as Confidence);
+    const targetTaxNotes     = targetTaxEstimate?.notes        ?? [];
 
     const targetAnnualTaxUsd =
       targetTaxEstimate && !targetIsDisclaimer
         ? convertLocalToUsd(targetTaxEstimate.tax, toCountry)
         : 0;
 
-    const targetTaxRate = annualIncome > 0 ? targetAnnualTaxUsd / annualIncome : 0;
-
-    const currentAnnualNetUsd  = annualIncome * (1 - currentTaxRate);
-    const currentAnnualTaxUsd  = annualIncome * currentTaxRate;
-    const targetAnnualNetUsd   = annualIncome - targetAnnualTaxUsd;
+    const targetTaxRate       = annualIncome > 0 ? targetAnnualTaxUsd / annualIncome : 0;
+    const currentAnnualTaxUsd = annualIncome * currentTaxRate;
+    const currentAnnualNetUsd = annualIncome * (1 - currentTaxRate);
+    const targetAnnualNetUsd  = annualIncome - targetAnnualTaxUsd;
 
     const currentMonthlyTaxUsd = currentAnnualTaxUsd / 12;
-    const targetMonthlyTaxUsd  = targetAnnualTaxUsd / 12;
-    const netMonthlyFrom = currentAnnualNetUsd / 12;
-    const netMonthlyTo   = targetAnnualNetUsd / 12;
-    const monthlyIncomeDiff = netMonthlyTo - netMonthlyFrom;
+    const targetMonthlyTaxUsd  = targetAnnualTaxUsd  / 12;
+    const netMonthlyFrom       = currentAnnualNetUsd  / 12;
+    const netMonthlyTo         = targetAnnualNetUsd   / 12;
+    const monthlyIncomeDiff    = netMonthlyTo - netMonthlyFrom;
 
-    const adultCount = Math.max(1, nz(adults));
-    const childCount = Math.max(0, nz(children));
-    const familyGroceries      = destToUsd(nz(groceries))      * (1 + (adultCount - 1) * 0.55 + childCount * 0.35);
-    const familyTransportation = destToUsd(nz(transportation)) * (1 + (adultCount - 1) * 0.35 + childCount * 0.15);
-    const healthcareAdj        = destToUsd(nz(healthcare))     * (1 + (adultCount - 1) * 0.7  + childCount * 0.5);
-    const familyUtilities      = destToUsd(nz(utilities))      * (1 + (adultCount - 1) * 0.25 + childCount * 0.15);
+    // Family scaling
+    const adultCount  = Math.max(1, nz(adults));
+    const childCount  = Math.max(0, nz(children));
+    const extraAdults = adultCount - 1;
 
-    const groceriesAdj      = familyGroceries      * toCityMultipliers.groceries;
-    const transportationAdj = familyTransportation * toCityMultipliers.transit;
-    const utilitiesAdj      = familyUtilities      * toCityMultipliers.utilities;
-    const rentTo            = destToUsd(nz(destinationRent)) * toCityMultipliers.housing;
+    function scaleFamily(baseUsd: number, category: keyof typeof COST_SCALING): number {
+      const { adult, child } = COST_SCALING[category];
+      return baseUsd * (1 + extraAdults * adult + childCount * child);
+    }
 
-    const groceriesFrom      = familyGroceries      * fromCityMultipliers.groceries;
-    const transportationFrom = familyTransportation * fromCityMultipliers.transit;
-    const utilitiesFrom      = familyUtilities      * fromCityMultipliers.utilities;
+    const familyGroceries      = scaleFamily(destToUsd(nz(groceries)),      "groceries");
+    const familyTransportation = scaleFamily(destToUsd(nz(transportation)), "transportation");
+    const familyHealthcare     = scaleFamily(destToUsd(nz(healthcare)),     "healthcare");
+    const familyUtilities      = scaleFamily(destToUsd(nz(utilities)),      "utilities");
 
-    const carCost          = needCar === "yes" ? destToUsd(350) : 0;
-    const housingUtilities = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
-    const housingTotal     = rentTo + housingUtilities + carCost;
-    const livingCosts      = groceriesAdj + transportationAdj + healthcareAdj;
+    // Apply multipliers only when no city-specific defaults exist
+    const applyMult = (val: number, mult: number | undefined) => mult != null ? val * mult : val;
+
+const groceriesAdj      = applyMult(familyGroceries, toCityMultipliers?.groceries);
+const transportationAdj = applyMult(familyTransportation, toCityMultipliers?.transit);
+const healthcareAdj     = familyHealthcare;
+const utilitiesAdj      = applyMult(familyUtilities, toCityMultipliers?.utilities);
+const rentTo            = applyMult(destToUsd(nz(destinationRent)), toCityMultipliers?.housing);
+
+    // Origin comparators: re-derive from the same base inputs rather than reusing
+    // destination-scaled family values. Note: groceries/transport/utilities inputs are
+    // destination-entered, so these are an approximation until origin inputs are split out.
+    // FIX: was fromCityMultipliers?.transit — correct key is transport
+    const groceriesFrom      = applyMult(scaleFamily(destToUsd(nz(groceries)),      "groceries"),      fromCityMultipliers?.groceries);
+    const transportationFrom = applyMult(scaleFamily(destToUsd(nz(transportation)), "transportation"), fromCityMultipliers?.transit);
+    const utilitiesFrom      = applyMult(scaleFamily(destToUsd(nz(utilities)),      "utilities"),      fromCityMultipliers?.utilities);
+
+    // FIX 2: clean car cost logic — user-entered carCost state takes priority,
+    // falls back to city default, then global fallback constant.
+    const monthlyCarCost = needCar === "yes"
+      ? destToUsd(nz(carCost) || targetCityDefaults?.monthlyDefaults.car || CAR_COST_FALLBACK_USD)
+      : 0;
+
+    const housingUtilities   = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
+    const housingTotal       = rentTo + housingUtilities + monthlyCarCost;
+    const livingCosts        = groceriesAdj + transportationAdj + healthcareAdj;
     const monthlyFlexibility = netMonthlyTo - housingTotal - livingCosts;
-    const totalPctOfNet  = netMonthlyTo > 0 ? (housingTotal + livingCosts) / netMonthlyTo : 0;
+    const totalPctOfNet      = netMonthlyTo > 0 ? (housingTotal + livingCosts) / netMonthlyTo : 0;
     const housingPctOfNet    = netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
     const comfort            = getReadinessBand(totalPctOfNet);
 
-    const furnitureAdj = furnished === "furnished" ? 0 : destToUsd(nz(furnitureSetup));
+    const furnitureAdj      = furnished === "furnished" ? 0 : destToUsd(nz(furnitureSetup));
     const upfrontCashNeeded =
       destToUsd(nz(depositRequired)) + destToUsd(nz(firstMonthRent)) + destToUsd(nz(lastMonthRent)) +
       destToUsd(nz(visaCost)) + destToUsd(nz(flightCost)) + destToUsd(nz(shippingCost)) +
-      destToUsd(nz(temporaryStay)) + destToUsd(nz(adminFees)) + furnitureAdj + destToUsd(nz(emergencyCashBuffer));
+      destToUsd(nz(temporaryStay)) + destToUsd(nz(adminFees)) + furnitureAdj +
+      destToUsd(nz(emergencyCashBuffer));
 
-    const totalMonthlyOutflow = housingTotal + livingCosts;
-    const monthsCovered = totalMonthlyOutflow > 0 ? destToUsd(nz(currentSavings)) / totalMonthlyOutflow : 0;
+    // Savings in origin currency → convert to USD before dividing
+    const savingsUsd    = convertLocalToUsd(nz(currentSavings), fromCountry);
+    const totalOutflow  = housingTotal + livingCosts;
+    const monthsCovered = totalOutflow > 0 ? savingsUsd / totalOutflow : 0;
 
-    const currentProfile = getCountryByCode(fromCountry);
-    const fromIndex = currentCityDefaults?.costIndex ?? currentProfile?.monthlyCostIndexSingle ?? 1;
-    const toIndex   = targetCityDefaults?.costIndex  ?? targetProfile?.monthlyCostIndexSingle  ?? 1;
+    // Comparable salary
+    const currentProfile     = getCountryByCode(fromCountry);
+    const targetProfile      = getCountryByCode(toCountry);
+    const fromIndex          = currentCityDefaults?.costIndex ?? currentProfile?.monthlyCostIndexSingle ?? 1;
+    const toIndex            = targetCityDefaults?.costIndex  ?? targetProfile?.monthlyCostIndexSingle  ?? 1;
     const comparableSalary   = fromIndex > 0 ? annualIncome * (toIndex / fromIndex) : annualIncome;
     const relativeDifference = fromIndex > 0 ? (toIndex - fromIndex) / fromIndex : 0;
 
     return {
-      salaryReady,
-      annualIncome,
-      grossMonthly,
-      currentTaxRate,
-      targetTaxRate,
-      currentMonthlyTaxUsd,
-      targetMonthlyTaxUsd,
-      currentAnnualTaxUsd,
-      targetAnnualTaxUsd,
-      targetTaxNotes,
-      targetIsDisclaimer,
-      targetConfidence,
-      netMonthlyFrom,
-      netMonthlyTo,
-      monthlyIncomeDiff,
-      groceriesFrom,
-      transportationFrom,
-      utilitiesFrom,
-      groceriesAdj,
-      transportationAdj,
-      healthcareAdj,
-      utilitiesAdj,
-      housingTotal,
-      rentTo,
-      housingUtilities,
-      carCost,
-      livingCosts,
-      monthlyFlexibility,
+      salaryReady, annualIncome, grossMonthly,
+      currentTaxRate, targetTaxRate,
+      currentMonthlyTaxUsd, targetMonthlyTaxUsd,
+      currentAnnualTaxUsd, targetAnnualTaxUsd,
+      targetTaxNotes, targetIsDisclaimer, targetConfidence,
+      netMonthlyFrom, netMonthlyTo, monthlyIncomeDiff,
+      groceriesFrom, transportationFrom, utilitiesFrom,
+      groceriesAdj, transportationAdj, healthcareAdj, utilitiesAdj,
+      housingTotal, rentTo, housingUtilities, carCost: monthlyCarCost,
+      livingCosts, monthlyFlexibility,
       pct: housingPctOfNet * 100,
-      comfort,
-      upfrontCashNeeded,
-      monthsCovered,
-      comparableSalary,
-      relativeDifference,
+      comfort, upfrontCashNeeded, monthsCovered,
+      comparableSalary, relativeDifference,
     };
   }, [
-    mode, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
-    incomeScenario, conditionalAnswers,
-    fromCityMultipliers, toCityMultipliers, currentCityDefaults, targetCityDefaults,
-    adults, children, needCar, furnished, utilitiesIncluded, utilities, destinationRent,
-    groceries, transportation, healthcare, depositRequired, firstMonthRent, lastMonthRent,
-    visaCost, flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
-    emergencyCashBuffer, currentSavings, targetProfile,
+    mode, salary, retirementIncome, filing, incomeScenario,
+    fromCountry, toCountry, conditionalAnswers,
+    toCityMultipliers, fromCityMultipliers, currentCityDefaults, targetCityDefaults,
+    adults, children, needCar, furnished, utilitiesIncluded,
+    utilities, destinationRent, groceries, transportation, carCost, healthcare,
+    depositRequired, firstMonthRent, lastMonthRent,
+    visaCost, flightCost, shippingCost, temporaryStay, adminFees,
+    furnitureSetup, emergencyCashBuffer, currentSavings,
   ]);
 
   const adultsNum   = Math.max(1, Number(adults)   || 1);
@@ -610,6 +706,7 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
       setGroceries(String(d.monthlyDefaults.groceries));
       setUtilities(String(d.monthlyDefaults.utilities));
       setTransportation(String(d.monthlyDefaults.transport));
+      setCarCost(String(d.monthlyDefaults.car ?? CAR_COST_FALLBACK_USD));
       setHealthcare(String(d.monthlyDefaults.healthcare));
       setVisaCost(String(d.startupCosts.visa));
       setFlightCost(String(d.startupCosts.flight));
@@ -619,26 +716,33 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
       setFurnitureSetup(String(d.housing.furnishedSetupCost));
       setEmergencyCashBuffer(String(d.startupCosts.emergencyBuffer));
     } else if (countryDefaults) {
-      const fallbackRent = adultsNum >= 2 || childrenNum > 0 ? countryDefaults.defaultRentFamily : countryDefaults.defaultRentSingle;
+      const fallbackRent = adultsNum >= 2 || childrenNum > 0
+        ? countryDefaults.defaultRentFamily
+        : countryDefaults.defaultRentSingle;
       setDestinationRent(String(fallbackRent));
       setDepositRequired(String(fallbackRent * (countryDefaults.startupCosts.depositMonths ?? 1)));
       setFirstMonthRent(String(fallbackRent));
       setLastMonthRent("0"); setUtilitiesIncluded("no");
       setGroceries(""); setUtilities(""); setTransportation("");
-      setHealthcare(String(adultsNum >= 2 || childrenNum > 0 ? countryDefaults.healthcareMonthlyFamily : countryDefaults.healthcareMonthlySingle));
+      setHealthcare(String(adultsNum >= 2 || childrenNum > 0
+        ? countryDefaults.healthcareMonthlyFamily
+        : countryDefaults.healthcareMonthlySingle));
       setVisaCost(String(countryDefaults.startupCosts.visa));
       setFlightCost(String(countryDefaults.startupCosts.flight));
       setShippingCost(""); setTemporaryStay(String(countryDefaults.startupCosts.temporaryHousing));
       setAdminFees(""); setFurnitureSetup(String(countryDefaults.startupCosts.setup));
       setEmergencyCashBuffer("");
+      // FIX 4: set carCost in country fallback reset
+      setCarCost(String(CAR_COST_FALLBACK_USD));
     } else {
       setDestinationRent(""); setDepositRequired(""); setFirstMonthRent(""); setLastMonthRent("");
       setGroceries(""); setUtilities(""); setTransportation(""); setHealthcare("");
       setVisaCost(""); setFlightCost(""); setShippingCost(""); setTemporaryStay("");
       setAdminFees(""); setFurnitureSetup(""); setEmergencyCashBuffer("");
+      // FIX 4: clear carCost in empty reset
+      setCarCost("");
     }
-    setCurrentSavings("");
-    setConditionalAnswers({});
+    setCurrentSavings(""); setConditionalAnswers({});
   }
 
   const badge = confidenceBadge(results.targetConfidence);
@@ -652,10 +756,20 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
         <div className="text-sm font-semibold" />
         <div className="flex items-center gap-2">
           <div className="inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200/70">
-            <button type="button" onClick={() => setMode("working")} className={`rounded-lg px-3 py-1 text-sm ${mode === "working" ? "bg-slate-900 text-white" : "text-slate-700"}`}>Working</button>
-            <button type="button" onClick={() => setMode("retired")} className={`rounded-lg px-3 py-1 text-sm ${mode === "retired" ? "bg-slate-900 text-white" : "text-slate-700"}`}>Retired</button>
+            <button type="button" onClick={() => setMode("working")}
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "working" ? "bg-slate-900 text-white" : "text-slate-700"}`}>
+              Working
+            </button>
+            <button type="button" onClick={() => setMode("retired")}
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "retired" ? "bg-slate-900 text-white" : "text-slate-700"}`}>
+              Retired
+            </button>
           </div>
-          <button type="button" onClick={resetInputsKeepContext} className="rounded-lg px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-100" title="Clear all fields">Reset</button>
+          <button type="button" onClick={resetInputsKeepContext}
+            className="rounded-lg px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+            title="Clear all fields">
+            Reset
+          </button>
         </div>
       </div>
 
@@ -676,17 +790,15 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
                   {mode === "retired" ? "Gross annual retirement income" : "Gross annual salary"}{" "}
                   <span className="text-slate-400">({originCurrency})</span>
                 </div>
-                <input
-                  className={inputCls} type="number"
+                <input className={inputCls} type="number"
                   value={mode === "retired" ? retirementIncome : salary}
-                  onChange={(e) => mode === "retired" ? setRetirementIncome(e.target.value) : setSalary(e.target.value)}
-                  placeholder=" "
-                />
+                  onChange={e => mode === "retired" ? setRetirementIncome(e.target.value) : setSalary(e.target.value)}
+                  placeholder=" " />
               </label>
 
               <label className="text-sm">
                 <div className={labelHeadCls}>Filing status</div>
-                <select className={selectCls} value={filing} onChange={(e) => setFiling(e.target.value as FilingStatus)}>
+                <select className={selectCls} value={filing} onChange={e => setFiling(e.target.value as FilingStatus)}>
                   <option value="single">Single</option>
                   <option value="married">Married (joint)</option>
                 </select>
@@ -694,7 +806,7 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
 
               <label className="text-sm">
                 <div className={labelHeadCls}>Current country</div>
-                <select className={selectCls} value={fromCountry} onChange={(e) => { setFromCountry(e.target.value); setFromCityCode(""); }}>
+                <select className={selectCls} value={fromCountry} onChange={e => { setFromCountry(e.target.value); setFromCityCode(""); }}>
                   {allCountriesSorted.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
                 </select>
               </label>
@@ -704,7 +816,7 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
                   Target country
                   <InfoTip align="right" text="Filtered to Caribbean destinations. Use the International or South America calculator for other regions." />
                 </div>
-                <select className={selectCls} value={toCountry} onChange={(e) => { setToCountry(e.target.value); setToCityCode(""); }}>
+                <select className={selectCls} value={toCountry} onChange={e => { setToCountry(e.target.value); setToCityCode(""); }}>
                   {caribbeanCountriesSorted.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
                 </select>
               </label>
@@ -714,7 +826,7 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
                   Currency display
                   <InfoTip align="right" text="Choose how amounts appear. View in USD, your current country's currency, or your destination currency." />
                 </div>
-                <select className={selectCls} value={currencyDisplay} onChange={(e) => setCurrencyDisplay(e.target.value as CurrencyDisplay)}>
+                <select className={selectCls} value={currencyDisplay} onChange={e => setCurrencyDisplay(e.target.value as CurrencyDisplay)}>
                   <option value="USD">US Dollar (USD)</option>
                   <option value="CURRENT">Current currency ({COUNTRY_TO_CURRENCY[fromCountry] ?? "USD"})</option>
                   <option value="DESTINATION">Destination currency ({COUNTRY_TO_CURRENCY[toCountry] ?? "USD"})</option>
@@ -740,14 +852,13 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
                 </div>
               </div>
 
-              {/* Updated salary type dropdown — tax-based wording */}
               {mode === "working" && (
                 <label className="text-sm sm:col-span-2">
                   <div className={labelHeadCls}>
                     Income type
                     <InfoTip align="right" text="Select how you earn income. This determines which tax scenario is used for the destination country." />
                   </div>
-                  <select className={selectCls} value={salaryType} onChange={(e) => setSalaryType(e.target.value as SalaryType)}>
+                  <select className={selectCls} value={salaryType} onChange={e => setSalaryType(e.target.value as SalaryType)}>
                     <option value="local">I earn locally in the destination country</option>
                     <option value="remote">I earn remotely / foreign-source income</option>
                   </select>
@@ -755,51 +866,45 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
               )}
 
               <label className="text-sm">
-                <div className={labelHeadCls}>Current savings available</div>
-                <input className={inputCls} type="number" value={currentSavings} onChange={(e) => setCurrentSavings(e.target.value)} placeholder=" " />
+                <div className={labelHeadCls}>Current savings available ({originCurrency})</div>
+                <input className={inputCls} type="number" value={currentSavings}
+                  onChange={e => setCurrentSavings(e.target.value)} placeholder=" " />
               </label>
 
               <label className="text-sm">
                 <div className={labelHeadCls}>Number of adults</div>
-                <input className={inputCls} type="number" value={adults} onChange={(e) => setAdults(e.target.value)} placeholder=" " />
+                <input className={inputCls} type="number" value={adults}
+                  onChange={e => setAdults(e.target.value)} placeholder=" " />
               </label>
 
               <label className="text-sm">
                 <div className={labelHeadCls}>Number of children</div>
-                <input className={inputCls} type="number" value={children} onChange={(e) => setChildren(e.target.value)} placeholder=" " />
+                <input className={inputCls} type="number" value={children}
+                  onChange={e => setChildren(e.target.value)} placeholder=" " />
               </label>
 
             </div>
           </div>
 
-          {/* Dominican Republic residency question — shown when relevant */}
+          {/* Dominican Republic residency question */}
           {toCountry === "DO" && incomeScenario === "remote" && (
-  <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-    <div className="mb-3 text-sm font-semibold">Dominican Republic — Residency</div>
-    <label className="text-sm">
-      <div className={labelHeadCls}>
-        How long have you been a tax resident in the Dominican Republic?
-        <InfoTip text="The Dominican Republic generally exempts foreign-source income for new residents during the first three years of residency." />
-      </div>
-      <select
-        className={selectCls}
-        value={conditionalAnswers["do_residency_years"] ?? ""}
-        onChange={(e) =>
-          setConditionalAnswers((prev) => ({
-            ...prev,
-            do_residency_years: e.target.value,
-          }))
-        }
-      >
-        <option value="">Select...</option>
-        <option value="under_3">Less than 3 years (foreign-source income generally exempt)</option>
-        <option value="3_or_more">3 years or more (foreign-source income may become taxable)</option>
-      </select>
-    </label>
-  </div>
-)}
-          {/* Visa Context */}
-          <VisaContextCard countryCode={toCountry} />
+            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+              <div className="mb-3 text-sm font-semibold">Dominican Republic — Residency</div>
+              <label className="text-sm">
+                <div className={labelHeadCls}>
+                  How long have you been a tax resident in the Dominican Republic?
+                  <InfoTip text="The Dominican Republic generally exempts foreign-source income for new residents during the first three years of residency." />
+                </div>
+                <select className={selectCls}
+                  value={conditionalAnswers["do_residency_years"] ?? ""}
+                  onChange={e => setConditionalAnswers(prev => ({ ...prev, do_residency_years: e.target.value }))}>
+                  <option value="">Select...</option>
+                  <option value="under_3">Less than 3 years (foreign-source income generally exempt)</option>
+                  <option value="3_or_more">3 years or more (foreign-source income may become taxable)</option>
+                </select>
+              </label>
+            </div>
+          )}
 
           {/* Housing */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
@@ -807,60 +912,70 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm sm:col-span-2">
                 <div className={labelHeadCls}>Rent in destination (monthly)</div>
-                <input className={inputCls} type="number" value={destinationRent} onChange={(e) => setDestinationRent(e.target.value)} placeholder=" " />
+                <input className={inputCls} type="number" value={destinationRent}
+                  onChange={e => setDestinationRent(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
                 <div className={labelHeadCls}>Deposit required</div>
-                <input className={inputCls} type="number" value={depositRequired} onChange={(e) => setDepositRequired(e.target.value)} placeholder=" " />
+                <input className={inputCls} type="number" value={depositRequired}
+                  onChange={e => setDepositRequired(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
                 <div className={labelHeadCls}>First month rent</div>
-                <input className={inputCls} type="number" value={firstMonthRent} onChange={(e) => setFirstMonthRent(e.target.value)} placeholder=" " />
+                <input className={inputCls} type="number" value={firstMonthRent}
+                  onChange={e => setFirstMonthRent(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
                 <div className={labelHeadCls}>Last month rent (if applicable)</div>
-                <input className={inputCls} type="number" value={lastMonthRent} onChange={(e) => setLastMonthRent(e.target.value)} placeholder=" " />
+                <input className={inputCls} type="number" value={lastMonthRent}
+                  onChange={e => setLastMonthRent(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
                 <div className={labelHeadCls}>Furnished or unfurnished</div>
-                <select className={selectCls} value={furnished} onChange={(e) => setFurnished(e.target.value as FurnishedType)}>
+                <select className={selectCls} value={furnished} onChange={e => setFurnished(e.target.value as FurnishedType)}>
                   <option value="unfurnished">Unfurnished</option>
                   <option value="furnished">Furnished</option>
                 </select>
               </label>
               <label className="text-sm sm:col-span-2">
                 <div className={labelHeadCls}>Utilities included?</div>
-                <select className={selectCls} value={utilitiesIncluded} onChange={(e) => setUtilitiesIncluded(e.target.value as YesNo)}>
+                <select className={selectCls} value={utilitiesIncluded} onChange={e => setUtilitiesIncluded(e.target.value as YesNo)}>
                   <option value="no">No</option>
                   <option value="yes">Yes</option>
                 </select>
               </label>
             </div>
-               <label className="text-sm sm:col-span-2">
-  <div className={labelHeadCls}>Will you need a car?</div>
-  <select
-    className={selectCls}
-    value={needCar}
-    onChange={(e) => setNeedCar(e.target.value as YesNo)}
-  >
-    <option value="no">No</option>
-    <option value="yes">Yes — add ~$350/mo estimate</option>
-  </select>
-</label>
+            <div className="mt-3 space-y-3">
+              <label className="block text-sm">
+                <div className={labelHeadCls}>Will you need a car?</div>
+                <select className={selectCls} value={needCar} onChange={e => setNeedCar(e.target.value as YesNo)}>
+                  <option value="no">No</option>
+                  <option value="yes">Yes — add monthly car estimate</option>
+                </select>
+              </label>
+              {/* FIX 3: visible editable input for car cost */}
+              {needCar === "yes" && (
+                <label className="block text-sm">
+                  <div className={labelHeadCls}>Monthly car estimate</div>
+                  <input className={inputCls} type="number" value={carCost}
+                    onChange={e => setCarCost(e.target.value)} placeholder=" " />
+                </label>
+              )}
+            </div>
           </div>
 
           {/* Estimated Living Costs */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
             <div className="mb-3 text-sm font-semibold">
               Estimated Living Costs
-              <InfoTip text="Adjusted using city-level cost multipliers for the selected destination. This is a normalized planning estimate." />
+              <InfoTip text="Adjusted for family size. City multipliers are only applied when no city-specific data exists." />
             </div>
             <div className="mt-3 space-y-3 text-[15px] text-slate-700">
-              <div>Groceries: <span className="font-semibold text-slate-900">{displayAmount(results.groceriesAdj, 0)}</span></div>
-              <div>Utilities: <span className="font-semibold text-slate-900">{displayAmount(results.utilitiesAdj, 0)}</span></div>
+              <div>Groceries:      <span className="font-semibold text-slate-900">{displayAmount(results.groceriesAdj, 0)}</span></div>
+              <div>Utilities:      <span className="font-semibold text-slate-900">{displayAmount(results.utilitiesAdj, 0)}</span></div>
               <div>Transportation: <span className="font-semibold text-slate-900">{displayAmount(results.transportationAdj, 0)}</span></div>
-              <div>Car estimate: <span className="font-semibold text-slate-900">{needCar === "yes" ? displayAmount(results.carCost, 0) : displayAmount(0, 0)}</span></div>
-              <div>Healthcare: <span className="font-semibold text-slate-900">{displayAmount(results.healthcareAdj, 0)}</span></div>
+              <div>Car estimate:   <span className="font-semibold text-slate-900">{needCar === "yes" ? displayAmount(results.carCost, 0) : displayAmount(0, 0)}</span></div>
+              <div>Healthcare:     <span className="font-semibold text-slate-900">{displayAmount(results.healthcareAdj, 0)}</span></div>
             </div>
             <div className="mt-2 text-xs text-slate-500">Estimated costs adjust automatically based on the selected city.</div>
           </div>
@@ -869,13 +984,13 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
             <div className="mb-3 text-sm font-semibold">One-Time Moving Costs</div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm"><div className={labelHeadCls}>Visa / permit estimate</div><input className={inputCls} type="number" value={visaCost} onChange={(e) => setVisaCost(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>One-way flight estimate</div><input className={inputCls} type="number" value={flightCost} onChange={(e) => setFlightCost(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Shipping / baggage estimate</div><input className={inputCls} type="number" value={shippingCost} onChange={(e) => setShippingCost(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Temporary housing estimate</div><input className={inputCls} type="number" value={temporaryStay} onChange={(e) => setTemporaryStay(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Setup / admin estimate</div><input className={inputCls} type="number" value={adminFees} onChange={(e) => setAdminFees(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Furniture / setup estimate</div><input className={inputCls} type="number" value={furnitureSetup} onChange={(e) => setFurnitureSetup(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Recommended cash buffer</div><input className={inputCls} type="number" value={emergencyCashBuffer} onChange={(e) => setEmergencyCashBuffer(e.target.value)} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Visa / permit estimate</div><input className={inputCls} type="number" value={visaCost} onChange={e => setVisaCost(e.target.value)} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>One-way flight estimate</div><input className={inputCls} type="number" value={flightCost} onChange={e => setFlightCost(e.target.value)} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Shipping / baggage estimate</div><input className={inputCls} type="number" value={shippingCost} onChange={e => setShippingCost(e.target.value)} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Temporary housing estimate</div><input className={inputCls} type="number" value={temporaryStay} onChange={e => setTemporaryStay(e.target.value)} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Setup / admin estimate</div><input className={inputCls} type="number" value={adminFees} onChange={e => setAdminFees(e.target.value)} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Furniture / setup estimate</div><input className={inputCls} type="number" value={furnitureSetup} onChange={e => setFurnitureSetup(e.target.value)} placeholder=" " /></label>
+              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Recommended cash buffer</div><input className={inputCls} type="number" value={emergencyCashBuffer} onChange={e => setEmergencyCashBuffer(e.target.value)} placeholder=" " /></label>
             </div>
             <div className="mt-4 w-full text-xs text-slate-500">Planning estimates only.</div>
           </div>
@@ -886,6 +1001,9 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
         ================================================================ */}
         <div className="space-y-3">
 
+          <RelocationVerdict results={results} toCityLabel={toCityLabel} displayAmount={displayAmount} />
+          <VisaContextCard countryCode={toCountry} />
+
           {/* Main results */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
             <div className="mb-2 text-sm font-semibold">Results</div>
@@ -894,41 +1012,37 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
             </div>
             <div className="mb-2 space-y-1 text-sm text-slate-600">
               <div>Current country: <span className="font-semibold">{getCountryByCode(fromCountry)?.name ?? fromCountry}</span></div>
-              <div>Target country: <span className="font-semibold">{getCaribbeanCountryByCode(toCountry)?.name ?? toCountry}</span></div>
+              <div>Target country:  <span className="font-semibold">{getCaribbeanCountryByCode(toCountry)?.name ?? toCountry}</span></div>
               <div>Income scenario: <span className="font-semibold capitalize">{incomeScenario}</span></div>
             </div>
 
             <div className="grid gap-2 text-sm">
               <div>Net monthly (current): <span className="font-semibold">{displayAmount(results.netMonthlyFrom)}</span></div>
-              <div>Net monthly (target): <span className="font-semibold">{displayAmount(results.netMonthlyTo)}</span></div>
+              <div>Net monthly (target):  <span className="font-semibold">{displayAmount(results.netMonthlyTo)}</span></div>
 
               {results.salaryReady && (
                 <>
                   <div className="mt-2">Gross monthly: <span className="font-semibold">{displayAmount(results.grossMonthly, 2)}</span></div>
-                  <div>Est. taxes (current): <span className="font-semibold">{displayAmount(results.currentMonthlyTaxUsd, 2)}</span> <span className="text-xs text-slate-500">({(results.currentTaxRate * 100).toFixed(1)}%)</span></div>
-
+                  <div>Est. taxes (current): <span className="font-semibold">{displayAmount(results.currentMonthlyTaxUsd, 2)}</span>{" "}
+                    <span className="text-xs text-slate-500">({(results.currentTaxRate * 100).toFixed(1)}%)</span>
+                  </div>
                   {results.targetIsDisclaimer ? (
                     <div className="text-slate-500 text-sm">Est. taxes (target): <span className="italic">See notes below</span></div>
                   ) : (
-                    <div>Est. taxes (target): <span className="font-semibold">{displayAmount(results.targetMonthlyTaxUsd, 2)}</span> <span className="text-xs text-slate-500">({(results.targetTaxRate * 100).toFixed(1)}%)</span></div>
+                    <div>Est. taxes (target): <span className="font-semibold">{displayAmount(results.targetMonthlyTaxUsd, 2)}</span>{" "}
+                      <span className="text-xs text-slate-500">({(results.targetTaxRate * 100).toFixed(1)}%)</span>
+                    </div>
                   )}
 
-                  {/* Tax model status box */}
                   <div className="mt-3 rounded-2xl border border-teal-200 bg-teal-50/80 px-4 py-3 shadow-sm">
                     <div className="flex flex-wrap items-center gap-2 text-xs">
-                      <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 font-semibold tracking-wide text-teal-700 ring-1 ring-teal-200">
-                        Tax model status
-                      </span>
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${badge.cls}`}>
-                        {badge.label}
-                      </span>
+                      <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 font-semibold tracking-wide text-teal-700 ring-1 ring-teal-200">Tax model status</span>
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${badge.cls}`}>{badge.label}</span>
                       <InfoTip text="Describes how complete and verified the tax estimate is for this destination and scenario." />
                     </div>
-                    {results.targetIsDisclaimer ? (
-                      <div className="mt-2 text-sm text-slate-500 italic">
-                        A tax estimate is not available for this scenario. See notes below.
-                      </div>
-                    ) : null}
+                    {results.targetIsDisclaimer && (
+                      <div className="mt-2 text-sm text-slate-500 italic">A tax estimate is not available for this scenario. See notes below.</div>
+                    )}
                     {results.targetTaxNotes.length > 0 && (
                       <div className="mt-2 space-y-1">
                         {results.targetTaxNotes.map((note, i) => (
@@ -966,20 +1080,22 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700">Monthly Flexibility</div>
-                <div className="mt-2 text-3xl font-bold text-slate-900">{results.salaryReady ? displayAmount(results.monthlyFlexibility, 2) : "—"}</div>
+                <div className="mt-2 text-3xl font-bold text-slate-900">
+                  {results.salaryReady ? displayAmount(results.monthlyFlexibility, 2) : "—"}
+                </div>
               </div>
               <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-teal-700 ring-1 ring-teal-200">
-                {mode === "retired" ? "After housing and essentials" : "After housing"}
+                After housing and essentials
               </div>
             </div>
             <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-teal-100">
               <div className={`h-full rounded-full ${
-                !results.salaryReady         ? "w-[0%] bg-slate-300"
-                : results.monthlyFlexibility >= 3000 ? "w-[92%] bg-emerald-500"
-                : results.monthlyFlexibility >= 2000 ? "w-[76%] bg-emerald-400"
-                : results.monthlyFlexibility >= 1000 ? "w-[58%] bg-amber-400"
-                : results.monthlyFlexibility >= 500  ? "w-[40%] bg-orange-400"
-                : "w-[24%] bg-rose-400"
+                !results.salaryReady                         ? "w-[0%]  bg-slate-300"
+                : results.monthlyFlexibility >= 3000        ? "w-[92%] bg-emerald-500"
+                : results.monthlyFlexibility >= 2000        ? "w-[76%] bg-emerald-400"
+                : results.monthlyFlexibility >= 1000        ? "w-[58%] bg-amber-400"
+                : results.monthlyFlexibility >= 500         ? "w-[40%] bg-orange-400"
+                :                                             "w-[24%] bg-rose-400"
               }`} />
             </div>
             <div className="mt-3 text-sm text-slate-700">
@@ -995,7 +1111,8 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
             <div className="text-xs font-semibold tracking-widest text-slate-500">COMPARABLE SALARY</div>
             <div className="mt-2 text-3xl font-bold">{displayAmount(results.comparableSalary)}</div>
             <p className="mt-2 text-sm text-slate-600">
-              {toCityLabel} is roughly <span className="font-semibold">{Math.abs(Math.round(results.relativeDifference * 100))}%</span>{" "}
+              {toCityLabel} is roughly{" "}
+              <span className="font-semibold">{Math.abs(Math.round(results.relativeDifference * 100))}%</span>{" "}
               {results.relativeDifference >= 0 ? "more" : "less"} expensive than {fromCityLabel}.
             </p>
             <div className="mt-1 text-xs text-slate-500">Based on housing, transportation, healthcare, and essential cost weighting.</div>
@@ -1008,20 +1125,26 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700">
                   {mode === "retired" ? "Retirement Readiness Score" : "Comfort Score™"}
                 </div>
-                <div className="mt-2 text-2xl font-bold text-slate-900">{results.comfort.band} · {results.comfort.label}</div>
+                <div className="mt-2 text-2xl font-bold text-slate-900">
+                  {results.comfort.band} · {results.comfort.label}
+                </div>
               </div>
-              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-teal-700 ring-1 ring-teal-200">Target housing</div>
+              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-teal-700 ring-1 ring-teal-200">
+                Housing &amp; living costs
+              </div>
             </div>
             <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-teal-100">
               <div className={`h-full rounded-full ${
                 results.comfort.band === "A" ? "w-[92%] bg-emerald-500"
                 : results.comfort.band === "B" ? "w-[78%] bg-emerald-400"
                 : results.comfort.band === "C" ? "w-[60%] bg-amber-400"
-                : "w-[42%] bg-orange-400"
+                :                               "w-[42%] bg-orange-400"
               }`} />
             </div>
             <div className="mt-3 text-sm text-slate-700">{results.comfort.note}</div>
-            <div className="mt-2 text-xs text-slate-500">Based on how much of your target net monthly income goes toward housing.</div>
+            <div className="mt-2 text-xs text-slate-500">
+              Based on how much of your target net monthly income goes toward housing and core living costs.
+            </div>
           </div>
 
           {/* Share */}
@@ -1031,15 +1154,14 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700">Share this scenario</div>
                 <div className="mt-1 text-sm text-slate-700">Copy your current comparison link and send it to a partner, friend, or future self.</div>
               </div>
-              <button
-                type="button"
+              <button type="button"
                 onClick={async () => {
                   try {
-                    const shareUrl = new URL(window.location.href);
+                    const shareUrl  = new URL(window.location.href);
                     const shareText = `My Caribbean relocation scenario: ${fromCityLabel} → ${toCityLabel}. Monthly flexibility ${displayAmount(results.monthlyFlexibility, 0)} after housing.`;
                     const canNativeShare = typeof navigator !== "undefined" && "share" in navigator;
                     if (canNativeShare) {
-                      await (navigator as Navigator & { share: (data: { title?: string; text?: string; url?: string }) => Promise<void> }).share({ title: "My Caribbean Relocation Scenario", text: shareText, url: shareUrl.toString() });
+                      await (navigator as any).share({ title: "My Caribbean Relocation Scenario", text: shareText, url: shareUrl.toString() });
                       setShareStatus("shared");
                     } else {
                       await navigator.clipboard.writeText(shareUrl.toString());
@@ -1052,8 +1174,7 @@ if (vSalaryType === "remote" || vSalaryType === "local") {
                     window.setTimeout(() => setShareStatus("idle"), 2500);
                   }
                 }}
-                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-              >
+                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">
                 {shareStatus === "copied" ? "Link copied!" : shareStatus === "shared" ? "Shared!" : shareStatus === "error" ? "Share failed" : "Share scenario"}
               </button>
             </div>
