@@ -171,11 +171,12 @@ function setQS(params: URLSearchParams) {
   window.history.replaceState(null, "", url);
 }
 
+// FIX 3: Updated thresholds for housing + living costs combined
 function getReadinessBand(ratio: number) {
-  if (ratio <= 0.25) return { band: "A", label: "Comfortable", note: "This looks healthy relative to your estimated target net income." };
-  if (ratio <= 0.35) return { band: "B", label: "Manageable", note: "Doable, but keep an eye on recurring costs and setup cash." };
-  if (ratio <= 0.45) return { band: "C", label: "Tight", note: "Possible, but the margin for error is thinner." };
-  return { band: "D", label: "Stretched", note: "Housing is taking up a large share of the budget." };
+  if (ratio <= 0.60) return { band: "A", label: "Comfortable", note: "Total essential costs look healthy relative to your estimated net income." };
+  if (ratio <= 0.75) return { band: "B", label: "Manageable", note: "Doable, but keep an eye on recurring costs and setup cash." };
+  if (ratio <= 0.90) return { band: "C", label: "Tight", note: "Possible, but the margin for error is thinner." };
+  return { band: "D", label: "Stretched", note: "Essential costs are taking up a very large share of the budget." };
 }
 
 function getSalaryTypeMultiplier(salaryType: SalaryType) {
@@ -251,6 +252,8 @@ function VisaContextCard({ countryCode }: { countryCode: string }) {
 // ---------------------------------------------------------------------------
 export default function SouthAmericaRelocationCalculator() {
   const hasMounted = useRef(false);
+  // FIX 4: Prevent city defaults from overwriting QS-restored custom values
+  const hasAppliedCityDefaults = useRef(false);
   const [qsHydrated, setQsHydrated] = useState(false);
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
 
@@ -344,8 +347,10 @@ export default function SouthAmericaRelocationCalculator() {
     if (!valid) setToCityCode(toCities[0]?.code ?? "");
   }, [toCountry, toCities, toCityCode]);
 
+  // FIX 4: Only apply city defaults on first load, not on every city change
   useEffect(() => {
-    if (!selectedCityDefaults || !qsHydrated) return;
+    if (!selectedCityDefaults || !qsHydrated || hasAppliedCityDefaults.current) return;
+    hasAppliedCityDefaults.current = true;
     const d = selectedCityDefaults;
     setDestinationRent(String(d.monthlyDefaults.rent));
     setDepositRequired(String(d.monthlyDefaults.rent * d.housing.depositMonths));
@@ -438,7 +443,7 @@ export default function SouthAmericaRelocationCalculator() {
     const salaryTypeMultiplier = mode === "retired" ? 1 : getSalaryTypeMultiplier(salaryType);
     const annualIncomeLocalOrigin = baseAnnualIncome * salaryTypeMultiplier;
     const annualIncome = convertLocalToUsd(annualIncomeLocalOrigin, fromCountry);
-    const destToUsd = (v: number) => convertLocalToUsd(v, toCountry);
+    // FIX 6: Removed unused destToUsd helper
     const grossMonthly = annualIncome / 12;
 
     const annualIncomeForFromTax = convertUsdToLocal(annualIncome, fromCountry);
@@ -474,8 +479,13 @@ export default function SouthAmericaRelocationCalculator() {
     const housingTotal = rentTo + housingUtilities + carCost;
     const livingCosts = groceriesAdj + transportationAdj + healthcareAdj;
     const monthlyFlexibility = netMonthlyTo - housingTotal - livingCosts;
-    const housingPctOfNet = netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
-    const comfort = getReadinessBand(housingPctOfNet);
+
+    // FIX 2: Use housing + living costs combined for readiness score
+    const totalPctOfNet = netMonthlyTo > 0
+      ? (housingTotal + livingCosts) / netMonthlyTo
+      : 0;
+    // FIX 3: getReadinessBand now uses the updated combined-cost thresholds
+    const comfort = getReadinessBand(totalPctOfNet);
 
     const furnitureAdj = furnished === "furnished" ? 0 : nz(furnitureSetup);
     const upfrontCashNeeded =
@@ -484,13 +494,27 @@ export default function SouthAmericaRelocationCalculator() {
       nz(temporaryStay) + nz(adminFees) + furnitureAdj + nz(emergencyCashBuffer);
 
     const totalMonthlyOutflow = housingTotal + livingCosts;
-    const monthsCovered = totalMonthlyOutflow > 0 ? nz(currentSavings) / totalMonthlyOutflow : 0;
+    // FIX 5: Convert savings from origin currency to USD before dividing
+    const monthsCovered = totalMonthlyOutflow > 0
+      ? convertLocalToUsd(nz(currentSavings), fromCountry) / totalMonthlyOutflow
+      : 0;
 
     const currentProfile = getCountryByCode(fromCountry);
     const fromIndex = currentCityDefaults?.costIndex ?? currentProfile?.monthlyCostIndexSingle ?? 1;
     const toIndex = targetCityDefaults?.costIndex ?? targetProfile?.monthlyCostIndexSingle ?? 1;
     const comparableSalary = fromIndex > 0 ? annualIncome * (toIndex / fromIndex) : annualIncome;
     const relativeDifference = fromIndex > 0 ? (toIndex - fromIndex) / fromIndex : 0;
+
+    const recommendation =
+  !salaryReady
+    ? "Add income to see your move recommendation."
+    : monthlyFlexibility >= 1500
+      ? "Financially strong move based on your current inputs."
+      : monthlyFlexibility >= 500
+        ? "Viable move, but keep a close eye on recurring costs."
+        : monthlyFlexibility >= 0
+          ? "Tight move — small surprises could create pressure."
+          : "High-risk move — estimated expenses exceed income.";
 
     return {
       salaryReady, annualIncome, grossMonthly, currentTaxRate, targetTaxRate,
@@ -500,8 +524,15 @@ export default function SouthAmericaRelocationCalculator() {
       groceriesFrom, transportationFrom, utilitiesFrom,
       groceriesAdj, transportationAdj, healthcareAdj, utilitiesAdj,
       housingTotal, rentTo, housingUtilities, carCost, livingCosts,
-      monthlyFlexibility, pct: housingPctOfNet * 100, comfort,
-      upfrontCashNeeded, monthsCovered, comparableSalary, relativeDifference,
+      monthlyFlexibility,
+      // FIX 2: Return totalPctOfNet instead of housing-only pct
+      pct: totalPctOfNet * 100,
+      comfort,
+      upfrontCashNeeded,
+monthsCovered,
+comparableSalary,
+relativeDifference,
+recommendation,
     };
   }, [
     mode, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
@@ -710,20 +741,56 @@ export default function SouthAmericaRelocationCalculator() {
             </div>
           </div>
 
-          {/* Estimated Living Costs */}
+          {/* FIX 1: Living costs are now editable inputs */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
             <div className="mb-3 text-sm font-semibold">
               Estimated Living Costs
-              <InfoTip text="Adjusted using city-level cost multipliers for the selected South American destination. This is a normalized planning estimate." />
+              <InfoTip text="Base estimates for a single adult in the destination city. Adjusted automatically for family size and city-level cost multipliers. Edit to match your actual expectations." />
             </div>
-            <div className="mt-3 space-y-3 text-[15px] text-slate-700">
-              <div>Groceries: <span className="font-semibold text-slate-900">{displayAmount(results.groceriesAdj, 0)}</span></div>
-              <div>Utilities: <span className="font-semibold text-slate-900">{displayAmount(results.utilitiesAdj, 0)}</span></div>
-              <div>Transportation: <span className="font-semibold text-slate-900">{displayAmount(results.transportationAdj, 0)}</span></div>
-              <div>Car estimate: <span className="font-semibold text-slate-900">{needCar === "yes" ? displayAmount(results.carCost, 0) : displayAmount(0, 0)}</span></div>
-              <div>Healthcare: <span className="font-semibold text-slate-900">{displayAmount(results.healthcareAdj, 0)}</span></div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="text-sm">
+                <div className={labelHeadCls}>
+                  Groceries (base, single adult)
+                  <InfoTip text="Adjusted for family size and destination city cost index." />
+                </div>
+                <input className={inputCls} type="number" value={groceries} onChange={(e) => setGroceries(e.target.value)} placeholder=" " />
+                <div className="mt-1 text-xs text-slate-500">Adjusted: {displayAmount(results.groceriesAdj, 0)}</div>
+              </label>
+              <label className="text-sm">
+                <div className={labelHeadCls}>
+                  Utilities (base, single adult)
+                  <InfoTip text="Only counted if utilities are not included in your rent." />
+                </div>
+                <input className={inputCls} type="number" value={utilities} onChange={(e) => setUtilities(e.target.value)} placeholder=" " />
+                <div className="mt-1 text-xs text-slate-500">Adjusted: {displayAmount(results.utilitiesAdj, 0)}</div>
+              </label>
+              <label className="text-sm">
+                <div className={labelHeadCls}>
+                  Transportation (base, single adult)
+                  <InfoTip text="Adjusted for family size and destination city transit costs." />
+                </div>
+                <input className={inputCls} type="number" value={transportation} onChange={(e) => setTransportation(e.target.value)} placeholder=" " />
+                <div className="mt-1 text-xs text-slate-500">Adjusted: {displayAmount(results.transportationAdj, 0)}</div>
+              </label>
+              <label className="text-sm">
+                <div className={labelHeadCls}>
+                  Healthcare (base, single adult)
+                  <InfoTip text="Adjusted for family size. Covers insurance and out-of-pocket estimates." />
+                </div>
+                <input className={inputCls} type="number" value={healthcare} onChange={(e) => setHealthcare(e.target.value)} placeholder=" " />
+                <div className="mt-1 text-xs text-slate-500">Adjusted: {displayAmount(results.healthcareAdj, 0)}</div>
+              </label>
             </div>
-            <div className="mt-2 text-xs text-slate-500">Estimated costs adjust automatically based on the selected city.</div>
+            <div className="mt-3">
+              <label className="text-sm">
+                <div className={labelHeadCls}>Need a car?</div>
+                <select className={selectCls} value={needCar} onChange={(e) => setNeedCar(e.target.value as YesNo)}>
+                  <option value="no">No</option>
+                  <option value="yes">Yes (~$350/mo estimate)</option>
+                </select>
+              </label>
+            </div>
+            <div className="mt-2 text-xs text-slate-500">Base values auto-populate from city defaults. Adjusted totals reflect family size and city cost multipliers.</div>
           </div>
 
           {/* One-Time Moving Costs */}
@@ -784,7 +851,7 @@ export default function SouthAmericaRelocationCalculator() {
               <div>Total: <span className="font-bold">{displayAmount(results.livingCosts, 2)}</span></div>
               <div className="mt-2">Upfront cash needed: <span className="font-semibold">{displayAmount(results.upfrontCashNeeded)}</span></div>
               <div>Months covered by savings: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
-              <div className="mt-2">Housing % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
+              <div className="mt-2">Essential costs % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
             </div>
             <div className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500 space-y-1">
               <div>Results are estimates only. No information entered is stored or shared.</div>
@@ -801,7 +868,7 @@ export default function SouthAmericaRelocationCalculator() {
                 <div className="mt-2 text-3xl font-bold text-slate-900">{results.salaryReady ? displayAmount(results.monthlyFlexibility, 2) : "—"}</div>
               </div>
               <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
-                {mode === "retired" ? "After housing and essentials" : "After housing"}
+                After housing + core living costs
               </div>
             </div>
             <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-amber-100">
@@ -814,12 +881,20 @@ export default function SouthAmericaRelocationCalculator() {
                 : "w-[24%] bg-rose-400"
               }`} />
             </div>
-            <div className="mt-3 text-sm text-slate-700">
-              {!results.salaryReady ? "Add salary and housing inputs to estimate how much room you have left each month." : `This is what you may have left each month in ${toCityLabel} after housing costs and core living expenses.`}
-            </div>
-            <div className="mt-2 text-xs text-slate-500">Higher flexibility gives you more room for saving, investing, travel, and unexpected expenses.</div>
-          </div>
+       <div className="mt-3 text-sm text-slate-700">
+  {!results.salaryReady ? "Add salary and housing inputs to estimate how much room you have left each month." : `This is what you may have left each month in ${toCityLabel} after housing costs and core living expenses.`}
+</div>
 
+{results.salaryReady && (
+  <div className="mt-3 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-800 ring-1 ring-amber-200">
+    {results.recommendation}
+  </div>
+)}
+
+<div className="mt-2 text-xs text-slate-500">
+  Higher flexibility gives you more room for saving, investing, travel, and unexpected expenses.
+</div>
+</div>
           {/* Comparable Salary */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
             <div className="text-xs font-semibold tracking-widest text-slate-500">COMPARABLE SALARY</div>
@@ -840,7 +915,7 @@ export default function SouthAmericaRelocationCalculator() {
                 </div>
                 <div className="mt-2 text-2xl font-bold text-slate-900">{results.comfort.band} · {results.comfort.label}</div>
               </div>
-              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">Target housing</div>
+              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">Housing + essentials</div>
             </div>
             <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-amber-100">
               <div className={`h-full rounded-full ${
@@ -851,7 +926,7 @@ export default function SouthAmericaRelocationCalculator() {
               }`} />
             </div>
             <div className="mt-3 text-sm text-slate-700">{results.comfort.note}</div>
-            <div className="mt-2 text-xs text-slate-500">Based on how much of your target net monthly income goes toward housing.</div>
+            <div className="mt-2 text-xs text-slate-500">Based on housing + essential living costs as a share of your estimated net monthly income.</div>
           </div>
 
           {/* Share */}
@@ -866,7 +941,7 @@ export default function SouthAmericaRelocationCalculator() {
                 onClick={async () => {
                   try {
                     const shareUrl = new URL(window.location.href);
-                    const shareText = `My South America relocation scenario: ${fromCityLabel} → ${toCityLabel}. Monthly flexibility ${displayAmount(results.monthlyFlexibility, 0)} after housing.`;
+                    const shareText = `My South America relocation scenario: ${fromCityLabel} → ${toCityLabel}. Monthly flexibility ${displayAmount(results.monthlyFlexibility, 0)} after housing and core living costs.`;
                     const canNativeShare = typeof navigator !== "undefined" && "share" in navigator;
                     if (canNativeShare) {
                       await (navigator as Navigator & { share: (data: { title?: string; text?: string; url?: string }) => Promise<void> }).share({ title: "My South America Relocation Scenario", text: shareText, url: shareUrl.toString() });
@@ -890,8 +965,9 @@ export default function SouthAmericaRelocationCalculator() {
           </div>
 
           <AdSlot />
-        </div>
+      </div>
       </div>
     </div>
+  
   );
 }
