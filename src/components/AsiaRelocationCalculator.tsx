@@ -242,7 +242,8 @@ function confidenceBadge(confidence: TaxConfidence) {
   }
 }
 
-const ASIA_TAX_LABEL = "Tax model updated March 2026 · figures are 2024, 2024–25, or 2025 by jurisdiction";
+const ASIA_TAX_LABEL =
+  "Tax model updated April 2026 · figures are 2024, 2024–25, or 2025 by jurisdiction";
 
 const inputCls  = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-rose-500/15";
 const selectCls = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-rose-500/15";
@@ -291,6 +292,7 @@ function VisaContextCard({ countryCode }: { countryCode: string }) {
 // ---------------------------------------------------------------------------
 export default function AsiaRelocationCalculator() {
   const hasMounted = useRef(false);
+  const hasAppliedCityDefaults = useRef(false);
   const [qsHydrated, setQsHydrated] = useState(false);
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
   const [taxNotesExpanded, setTaxNotesExpanded] = useState(false);
@@ -382,7 +384,8 @@ export default function AsiaRelocationCalculator() {
   }, [toCountry, toCities, toCityCode]);
 
   useEffect(() => {
-    if (!selectedCityDefaults || !qsHydrated) return;
+  if (!selectedCityDefaults || !qsHydrated || hasAppliedCityDefaults.current) return;
+  hasAppliedCityDefaults.current = true;
     const d = selectedCityDefaults;
     setDestinationRent(String(d.monthlyDefaults.rent));
     setDepositRequired(String(d.monthlyDefaults.rent * d.housing.depositMonths));
@@ -580,7 +583,10 @@ export default function AsiaRelocationCalculator() {
       groceriesFrom, transportationFrom, utilitiesFrom,
       groceriesAdj, transportationAdj, healthcareAdj, utilitiesAdj,
       housingTotal, rentTo, housingUtilities, carCost, livingCosts,
-      monthlyFlexibility, pct: housingPctOfNet * 100, comfort,
+      monthlyFlexibility,
+pct: housingPctOfNet * 100,
+totalPctOfNet: totalPctOfNet * 100,
+comfort,
       upfrontCashNeeded, monthsCovered, comparableSalary, relativeDifference,
     };
   }, [
@@ -718,7 +724,13 @@ export default function AsiaRelocationCalculator() {
               </div>
               {mode === "working" && (
                 <label className="text-sm">
-                  <div className={labelHeadCls}>Income type</div>
+                  <div className={labelHeadCls}>
+  Income type{" "}
+  <InfoTip
+    align="right"
+    text="Remote keeps 100% of your entered income. Local salary estimates 90%. Freelance estimates 82% to reflect income instability, unpaid gaps, and self-employment friction."
+  />
+</div>
                   <select className={selectCls} value={salaryType} onChange={(e) => setSalaryType(e.target.value as SalaryType)}>
                     <option value="remote">Keeping current remote salary</option>
                     <option value="local">Local salary in destination</option>
@@ -782,18 +794,86 @@ export default function AsiaRelocationCalculator() {
             </div>
           </div>
 
-          {/* Living Costs */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-3 text-sm font-semibold">Estimated Living Costs <InfoTip text="Adjusted using city-level cost multipliers for the selected destination. This is a normalized planning estimate." /></div>
-            <div className="mt-3 space-y-3 text-[15px] text-slate-700">
-              <div>Groceries: <span className="font-semibold text-slate-900">{displayAmount(results.groceriesAdj, 0)}</span></div>
-              <div>Utilities: <span className="font-semibold text-slate-900">{displayAmount(results.utilitiesAdj, 0)}</span></div>
-              <div>Transportation: <span className="font-semibold text-slate-900">{displayAmount(results.transportationAdj, 0)}</span></div>
-              <div>Car estimate: <span className="font-semibold text-slate-900">{needCar === "yes" ? displayAmount(results.carCost, 0) : displayAmount(0, 0)}</span></div>
-              <div>Healthcare: <span className="font-semibold text-slate-900">{displayAmount(results.healthcareAdj, 0)}</span></div>
-            </div>
-            <div className="mt-2 text-xs text-slate-500">Estimated costs adjust automatically based on the selected city.</div>
-          </div>
+        {/* Living Costs */}
+<div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+  <div className="mb-3 text-sm font-semibold">
+    Living Costs{" "}
+    <InfoTip text="These start with city averages, but you can edit them. The calculator then adjusts them using destination city multipliers and household size." />
+  </div>
+
+  <div className="grid gap-3 sm:grid-cols-2">
+    <label className="text-sm">
+      <div className={labelHeadCls}>
+        Groceries <span className="text-slate-400">(average, editable)</span>
+      </div>
+      <input
+        className={inputCls}
+        type="number"
+        value={groceries}
+        onChange={(e) => setGroceries(e.target.value)}
+        placeholder=" "
+      />
+    </label>
+
+    <label className="text-sm">
+      <div className={labelHeadCls}>
+        Utilities <span className="text-slate-400">(average, editable)</span>
+      </div>
+      <input
+        className={inputCls}
+        type="number"
+        value={utilities}
+        onChange={(e) => setUtilities(e.target.value)}
+        placeholder=" "
+      />
+    </label>
+
+    <label className="text-sm">
+      <div className={labelHeadCls}>
+        Transportation <span className="text-slate-400">(average, editable)</span>
+      </div>
+      <input
+        className={inputCls}
+        type="number"
+        value={transportation}
+        onChange={(e) => setTransportation(e.target.value)}
+        placeholder=" "
+      />
+    </label>
+
+    <label className="text-sm">
+      <div className={labelHeadCls}>
+        Healthcare <span className="text-slate-400">(average, editable)</span>
+      </div>
+      <input
+        className={inputCls}
+        type="number"
+        value={healthcare}
+        onChange={(e) => setHealthcare(e.target.value)}
+        placeholder=" "
+      />
+    </label>
+
+    <label className="text-sm sm:col-span-2">
+      <div className={labelHeadCls}>
+        Need a car?{" "}
+        <InfoTip text="Adds a simple $350/month USD estimate for car-related costs. Useful for places where transit may not cover your lifestyle." />
+      </div>
+      <select
+        className={selectCls}
+        value={needCar}
+        onChange={(e) => setNeedCar(e.target.value as YesNo)}
+      >
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+    </label>
+  </div>
+
+  <div className="mt-2 text-xs text-slate-500">
+    Inputs start with city averages and stay editable so you can model your actual lifestyle.
+  </div>
+</div>
 
           {/* One-Time Moving Costs */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
@@ -836,8 +916,25 @@ export default function AsiaRelocationCalculator() {
               {results.salaryReady && (
                 <>
                   <div className="mt-2">Gross monthly: <span className="font-semibold">{displayAmount(results.grossMonthly, 2)}</span></div>
-                  <div>Est. taxes (current): <span className="font-semibold">{displayAmount(results.grossMonthly * results.currentTaxRate, 2)}</span> <span className="text-xs text-slate-500">({(results.currentTaxRate * 100).toFixed(1)}%)</span></div>
-                  <div>Est. taxes (target): <span className="font-semibold">{displayAmount(results.grossMonthly * results.targetTaxRate, 2)}</span> <span className="text-xs text-slate-500">({(results.targetTaxRate * 100).toFixed(1)}%)</span></div>
+                  <div>
+  Est. tax + contributions (current):{" "}
+  <span className="font-semibold">
+    {displayAmount(results.grossMonthly * results.currentTaxRate, 2)}
+  </span>{" "}
+  <span className="text-xs text-slate-500">
+    ({(results.currentTaxRate * 100).toFixed(1)}%)
+  </span>
+</div>
+
+<div>
+  Est. tax + contributions (target):{" "}
+  <span className="font-semibold">
+    {displayAmount(results.grossMonthly * results.targetTaxRate, 2)}
+  </span>{" "}
+  <span className="text-xs text-slate-500">
+    ({(results.targetTaxRate * 100).toFixed(1)}%)
+  </span>
+</div>
 
                   {/* ── Confidence banner — matches Europe/International pattern ── */}
                   <div className={`mt-3 rounded-xl ring-1 overflow-hidden ${
@@ -897,6 +994,14 @@ export default function AsiaRelocationCalculator() {
               <div className="mt-2">Upfront cash needed: <span className="font-semibold">{displayAmount(results.upfrontCashNeeded)}</span></div>
               <div>Months covered by savings: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
               <div className="mt-2">Housing % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
+              <div>
+  Essential costs % of net:{" "}
+  <span className="font-semibold">
+    {Number.isFinite(results.totalPctOfNet)
+      ? `${results.totalPctOfNet.toFixed(1)}%`
+      : "—"}
+  </span>
+</div>
             </div>
 
             <div className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500 space-y-1">
@@ -933,6 +1038,68 @@ export default function AsiaRelocationCalculator() {
             </div>
             <div className="mt-2 text-xs text-slate-500">Higher flexibility gives you more room for saving, investing, travel, and unexpected expenses.</div>
           </div>
+
+          {/* Readiness Summary */}
+<div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+    Move Readiness
+  </div>
+
+  <div className="mt-2 text-2xl font-bold text-slate-900">
+    {results.salaryReady ? `${results.comfort.band} · ${results.comfort.label}` : "—"}
+  </div>
+
+  <p className="mt-2 text-sm leading-6 text-slate-700">
+    {!results.salaryReady
+      ? "Add your income to see whether this move looks comfortable, manageable, tight, or stretched."
+      : results.comfort.note}
+  </p>
+
+  {results.salaryReady && (
+    <div className="mt-4 grid gap-2 text-sm text-slate-700">
+      <div className="flex justify-between gap-3">
+        <span>Monthly flexibility</span>
+        <span className="font-semibold text-slate-900">
+          {displayAmount(results.monthlyFlexibility, 0)}
+        </span>
+      </div>
+
+      <div className="flex justify-between gap-3">
+        <span>Upfront cash needed</span>
+        <span className="font-semibold text-slate-900">
+          {displayAmount(results.upfrontCashNeeded, 0)}
+        </span>
+      </div>
+
+      <div className="flex justify-between gap-3">
+        <span>Months covered by savings</span>
+        <span className="font-semibold text-slate-900">
+          {Number.isFinite(results.monthsCovered)
+            ? results.monthsCovered.toFixed(1)
+            : "—"}
+        </span>
+      </div>
+    </div>
+  )}
+
+  {results.salaryReady && (
+  <div className="mt-2 text-xs text-slate-500">
+    {results.monthlyFlexibility < 0
+      ? "Your monthly budget breaks — expenses exceed income."
+      : results.totalPctOfNet > 80
+      ? "Your risk is tight cash flow — small changes could break your budget."
+      : results.upfrontCashNeeded > convertLocalToUsd(nz(currentSavings), fromCountry)
+      ? "Your risk is upfront cash — you don’t have enough saved for the move."
+      : "You have breathing room — this move looks financially stable based on your inputs."}
+  </div>
+)}
+
+  <div className="mt-3 text-xs text-slate-500">
+    This combines income, taxes, housing, living costs, savings, and one-time move costs.
+  </div>
+</div>
+
+
 
           {/* Comparable Salary — gated on salaryReady */}
           {results.salaryReady && (

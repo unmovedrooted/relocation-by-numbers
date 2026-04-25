@@ -6,14 +6,14 @@
 //   country. The caller is responsible for FX conversion before calling
 //   estimateInternationalTax(). No internal FX conversion is performed here.
 //
-// Local currencies by country:
+//  Local currencies by country:
 //   US=USD, GB=GBP, PT=EUR, ES=EUR, MX=MXN, CA=CAD, DE=EUR, NL=EUR,
 //   CR=CRC, FR=EUR, IT=EUR, IE=EUR, AU=AUD, NZ=NZD, JP=JPY, KR=KRW,
 //   AE=AED, SG=SGD, CH=CHF, DK=DKK, SE=SEK, NO=NOK, FI=EUR, PL=PLN,
 //   CZ=CZK, HU=HUF, GR=EUR, TR=TRY, HR=EUR, EE=EUR, LV=EUR, LT=EUR,
 //   RO=RON, BG=BGN, SI=EUR, SK=EUR, MT=EUR, CY=EUR, PA=USD, CO=COP,
 //   BR=BRL, AR=ARS, CL=CLP, PE=PEN, TH=THB, VN=VND, MY=MYR, ID=IDR,
-//   ZA=ZAR
+//   ZA=ZAR, AT=EUR, BE=EUR, PH=PHP, TW=TWD
 //
 // Last updated: 2025 tax year figures. Sources: IRS Rev. Proc. 2024-40 &
 // OBBB amendments, HMRC 2024-25 tables, OECD Taxing Wages 2025, PwC
@@ -2373,21 +2373,33 @@ export function getTaxModelStatus(countryCode: string): {
   confidence: TaxConfidence;
   label: string;
   note: string;
+  missingFactor: string;
 } {
   const estimator = TAX_ESTIMATORS[countryCode];
+
   if (!estimator) {
     return {
       model: "placeholder",
       confidence: "placeholder",
-      label: "Simplified",
-      note: "No tax model configured for this country.",
+      label: "Tax estimate unavailable",
+      note: "No tax model is configured for this country yet.",
+      missingFactor: "Tax model not configured for this country yet.",
     };
   }
-  const sample = estimator({ annualIncome: 50000, filing: "single", isRetired: false });
+
+  const sample = estimator({
+    annualIncome: 50000,
+    filing: "single",
+    isRetired: false,
+    incomeScenario: "local",
+    answers: {},
+  });
+
   return {
     model: sample.model,
     confidence: sample.confidence,
     label: sample.label,
     note: sample.note,
+    missingFactor: sample.missingFactor,
   };
 }

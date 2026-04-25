@@ -29,12 +29,10 @@ const FX_FALLBACK: Record<string, number> = {};
 
 function getFxRate(countryCode: string): number {
   const rate = USD_TO_LOCAL[countryCode] ?? FX_FALLBACK[countryCode];
-
   if (!rate || rate <= 0) {
     console.warn(`Missing FX rate for ${countryCode}. Falling back to 1.`);
     return 1;
   }
-
   return rate;
 }
 
@@ -89,9 +87,10 @@ function setQS(params: URLSearchParams) {
   window.history.replaceState(null, "", url);
 }
 
-// Thresholds are for total essential outflow (housing + living costs) as a share of net income.
-// Comparable to the old housing-only thresholds shifted up ~20 pp since living costs typically
-// add another 20–35% of net income on top of housing.
+// Fix #5: Non-negative helper and integer clamp helpers
+const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
+const nonNegative = (v: string) => Math.max(0, nz(v));
+
 function getReadinessBand(ratio: number) {
   if (ratio <= 0.60) return { band: "A", label: "Comfortable", note: "Total essential costs look healthy relative to your estimated net income." };
   if (ratio <= 0.75) return { band: "B", label: "Manageable", note: "Doable, but keep an eye on recurring costs and setup cash." };
@@ -105,7 +104,6 @@ function getSalaryTypeMultiplier(salaryType: SalaryType) {
   return 1;
 }
 
-// Maps TaxConfidence to badge style — matches Europe/Caribbean calculators exactly
 function confidenceBadge(confidence: TaxConfidence) {
   switch (confidence) {
     case "verified":    return { label: "● Verified",            cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" };
@@ -145,11 +143,28 @@ function InfoTip({ text, align = "left" }: { text: string; align?: "left" | "rig
   );
 }
 
+// Fix #7: Cost data confidence badge (separate from tax confidence)
+function CostConfidenceBadge({ hasCityDefaults }: { hasCityDefaults: boolean }) {
+  if (hasCityDefaults) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">
+        ● City-level estimate
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+      ● Country-level estimate
+    </span>
+  );
+}
+
 export default function InternationalRelocationCalculator() {
   const hasMounted = useRef(false);
   const [qsHydrated, setQsHydrated] = useState(false);
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
   const [taxNotesExpanded, setTaxNotesExpanded] = useState(false);
+  const [howCalcExpanded, setHowCalcExpanded] = useState(false);
 
   const [mode, setMode] = useState<Mode>("working");
   const [salary, setSalary] = useState<string>("150000");
@@ -166,7 +181,6 @@ export default function InternationalRelocationCalculator() {
   const [adults, setAdults] = useState<string>("1");
   const [children, setChildren] = useState<string>("0");
 
-  // Conditional answers for country-specific follow-up questions
   const [conditionalAnswers, setConditionalAnswers] = useState<Record<string, string>>({});
 
   const [destinationRent, setDestinationRent] = useState<string>("2200");
@@ -176,6 +190,7 @@ export default function InternationalRelocationCalculator() {
   const [furnished, setFurnished] = useState<FurnishedType>("unfurnished");
   const [utilitiesIncluded, setUtilitiesIncluded] = useState<YesNo>("no");
 
+  // Fix #2: These are now editable inputs shown in the living costs section
   const [groceries, setGroceries] = useState<string>("556");
   const [utilities, setUtilities] = useState<string>("238");
   const [transportation, setTransportation] = useState<string>("260");
@@ -190,10 +205,11 @@ export default function InternationalRelocationCalculator() {
   const [emergencyCashBuffer, setEmergencyCashBuffer] = useState<string>("5000");
   const [currentSavings, setCurrentSavings] = useState<string>("25000");
   const [needCar, setNeedCar] = useState<YesNo>("no");
-
-  const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
+  // Fix #6: Editable car cost
+  const [carCostMonthly, setCarCostMonthly] = useState<string>("350");
 
   const originCurrency = COUNTRY_TO_CURRENCY[fromCountry] ?? "USD";
+  const destCurrency   = COUNTRY_TO_CURRENCY[toCountry]   ?? "USD";
 
   const displayAmount = (amountUsd: number, digits: number = 0) => {
     if (currencyDisplay === "CURRENT") return money(convertUsdToLocal(amountUsd, fromCountry), digits, COUNTRY_TO_CURRENCY[fromCountry] ?? "USD");
@@ -222,8 +238,11 @@ export default function InternationalRelocationCalculator() {
   const fromCityMultipliers  = useMemo(() => getCityCostMultipliers(fromCityCode), [fromCityCode]);
   const toCityMultipliers    = useMemo(() => getCityCostMultipliers(toCityCode), [toCityCode]);
 
-  // Income scenario for conditional questions
   const incomeScenario = mode === "retired" ? "retired" : salaryType === "remote" ? "remote" : "local";
+
+  // Fix #5: Integer-clamped adult/child counts used consistently
+  const adultCount  = Math.max(1, Math.floor(nz(adults)));
+  const childCount  = Math.max(0, Math.floor(nz(children)));
 
   useEffect(() => {
     const validFrom = fromCities.some((city) => city.code === fromCityCode);
@@ -285,10 +304,10 @@ export default function InternationalRelocationCalculator() {
       ["healthcare", setHealthcare], ["visa", setVisaCost], ["flight", setFlightCost],
       ["shipping", setShippingCost], ["tempStay", setTemporaryStay], ["admin", setAdminFees],
       ["furniture", setFurnitureSetup], ["emergency", setEmergencyCashBuffer], ["savings", setCurrentSavings],
+      ["carCost", setCarCostMonthly],
     ];
     for (const [key, setter] of fields) { const val = qs.get(key); if (val) setter(val); }
     const vCar = qs.get("car") as YesNo | null; if (vCar === "yes" || vCar === "no") setNeedCar(vCar);
-    // Restore conditional tax answers from URL
     const vTaxAnswers = qs.get("taxAnswers");
     if (vTaxAnswers) { try { const parsed = JSON.parse(vTaxAnswers); if (typeof parsed === "object" && parsed !== null) setConditionalAnswers(parsed); } catch {} }
     setQsHydrated(true);
@@ -317,8 +336,8 @@ export default function InternationalRelocationCalculator() {
     if (adminFees) qs.set("admin", adminFees); if (furnitureSetup) qs.set("furniture", furnitureSetup);
     if (emergencyCashBuffer) qs.set("emergency", emergencyCashBuffer);
     if (currentSavings) qs.set("savings", currentSavings);
+    if (carCostMonthly) qs.set("carCost", carCostMonthly);
     qs.set("car", needCar);
-    // Persist conditional tax answers as a single JSON param
     const answersJson = JSON.stringify(conditionalAnswers);
     if (answersJson !== "{}") qs.set("taxAnswers", answersJson);
     setQS(qs);
@@ -328,7 +347,7 @@ export default function InternationalRelocationCalculator() {
     destinationRent, depositRequired, firstMonthRent, lastMonthRent,
     furnished, utilitiesIncluded, groceries, utilities, transportation, healthcare,
     visaCost, flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
-    emergencyCashBuffer, currentSavings, needCar, conditionalAnswers,
+    emergencyCashBuffer, currentSavings, needCar, carCostMonthly, conditionalAnswers,
   ]);
 
   const targetProfile = getCountryByCode(toCountry);
@@ -351,7 +370,7 @@ export default function InternationalRelocationCalculator() {
       filing,
       isRetired: mode === "retired",
       incomeScenario,
-      answers: {}, // conditional answers are destination-only
+      answers: {},
     });
 
     const targetTaxEstimate = estimateInternationalTax({
@@ -366,14 +385,12 @@ export default function InternationalRelocationCalculator() {
     const currentTaxRate = currentTaxEstimate.effectiveRate;
     const targetTaxRate  = targetTaxEstimate.effectiveRate;
 
-    // Pull all display fields from the tax engine
     const targetConfidence: TaxConfidence = targetTaxEstimate.confidence;
     const targetMissingFactor: string = targetTaxEstimate.missingFactor ?? "";
     const targetTaxLabel: string = targetTaxEstimate.label;
     const targetTaxNotes: string[] = [];
     if (targetTaxEstimate.note) targetTaxNotes.push(targetTaxEstimate.note);
 
-    // Prompt to answer unanswered conditional questions
     const unansweredQuestions = getConditionalQuestionsForCountry(toCountry, incomeScenario)
       .filter(q => !conditionalAnswers[q.key]);
     if (unansweredQuestions.length > 0) {
@@ -386,48 +403,132 @@ export default function InternationalRelocationCalculator() {
     const netMonthlyTo   = grossMonthly * (1 - targetTaxRate);
     const monthlyIncomeDiff = netMonthlyTo - netMonthlyFrom;
 
-    const adultCount = Math.max(1, nz(adults));
-    const childCount = Math.max(0, nz(children));
-    const familyGroceries      = destToUsd(nz(groceries))      * (1 + (adultCount - 1) * 0.55 + childCount * 0.35);
-    const familyTransportation = destToUsd(nz(transportation)) * (1 + (adultCount - 1) * 0.35 + childCount * 0.15);
-    const healthcareAdj        = destToUsd(nz(healthcare))     * (1 + (adultCount - 1) * 0.7  + childCount * 0.5);
-    const familyUtilities      = destToUsd(nz(utilities))      * (1 + (adultCount - 1) * 0.25 + childCount * 0.15);
+    // Fix #3: Use actual currentCityDefaults for from-city baseline costs
+    // Destination inputs (groceries, utilities, etc.) are in destination local currency
+    // From-city costs are derived from currentCityDefaults when available,
+    // falling back to destination inputs scaled by city multipliers.
 
-    const groceriesFrom     = familyGroceries      * fromCityMultipliers.groceries;
-    const transportationFrom = familyTransportation * fromCityMultipliers.transit;
-    const utilitiesFrom     = familyUtilities       * fromCityMultipliers.utilities;
-    const rentFrom          = destToUsd(nz(destinationRent)) * fromCityMultipliers.housing;
-    const groceriesAdj      = familyGroceries      * toCityMultipliers.groceries;
-    const transportationAdj = familyTransportation * toCityMultipliers.transit;
-    const utilitiesAdj      = familyUtilities       * toCityMultipliers.utilities;
-    const rentTo            = destToUsd(nz(destinationRent)) * toCityMultipliers.housing;
-    const carCost           = needCar === "yes" ? destToUsd(350) : 0;
+    const familySizeMultGroceries     = 1 + (adultCount - 1) * 0.55 + childCount * 0.35;
+    const familySizeMultTransport     = 1 + (adultCount - 1) * 0.35 + childCount * 0.15;
+    const familySizeMultHealthcare    = 1 + (adultCount - 1) * 0.7  + childCount * 0.5;
+    const familySizeMultUtilities     = 1 + (adultCount - 1) * 0.25 + childCount * 0.15;
+
+    // ── Destination (to) side ──
+    // Inputs are already entered as destination-city estimates, so city multipliers
+    // are NOT applied here — that would double-adjust values that are already city-specific.
+    // Family-size scaling is the only adjustment applied on top of the raw input.
+    const groceriesAdj       = destToUsd(nonNegative(groceries))      * familySizeMultGroceries;
+    const transportationAdj  = destToUsd(nonNegative(transportation)) * familySizeMultTransport;
+    const healthcareAdj      = destToUsd(nonNegative(healthcare))     * familySizeMultHealthcare;
+    const utilitiesTo        = destToUsd(nonNegative(utilities))      * familySizeMultUtilities;
+    const rentTo             = destToUsd(nonNegative(destinationRent));
+
+    // Car cost applies only to the destination side — we don't know (or assume) the
+    // user has the same car expense in their current city, so we zero it on the from side.
+    const carCostTo   = needCar === "yes" ? destToUsd(nonNegative(carCostMonthly)) : 0;
+    const carCostFrom = 0;
+
+    // ── Origin (from) side — use currentCityDefaults when available ──
+    let groceriesFrom: number;
+    let transportationFrom: number;
+    let utilitiesFrom: number;
+    let rentFrom: number;
+    let healthcareFrom: number;
+
+    if (currentCityDefaults) {
+      // Use actual city defaults for origin, converted from origin currency to USD
+      const fromToUsd = (v: number) => convertLocalToUsd(v, fromCountry);
+      groceriesFrom     = fromToUsd(currentCityDefaults.monthlyDefaults.groceries)   * familySizeMultGroceries;
+      transportationFrom = fromToUsd(currentCityDefaults.monthlyDefaults.transport)  * familySizeMultTransport;
+      utilitiesFrom     = fromToUsd(currentCityDefaults.monthlyDefaults.utilities)   * familySizeMultUtilities;
+      rentFrom          = fromToUsd(currentCityDefaults.monthlyDefaults.rent);
+      healthcareFrom    = fromToUsd(currentCityDefaults.monthlyDefaults.healthcare)  * familySizeMultHealthcare;
+    } else {
+      // Fallback: scale destination inputs by ratio of city multipliers
+      // Scale by the ratio of from/to multipliers — destination inputs already embed
+      // the to-city cost level, so applying from-city multipliers directly would double-count.
+      const groceryRatio   = toCityMultipliers.groceries > 0 ? fromCityMultipliers.groceries / toCityMultipliers.groceries : 1;
+      const transitRatio   = toCityMultipliers.transit   > 0 ? fromCityMultipliers.transit   / toCityMultipliers.transit   : 1;
+      const utilitiesRatio = toCityMultipliers.utilities > 0 ? fromCityMultipliers.utilities / toCityMultipliers.utilities : 1;
+      const housingRatio   = toCityMultipliers.housing   > 0 ? fromCityMultipliers.housing   / toCityMultipliers.housing   : 1;
+      groceriesFrom      = destToUsd(nonNegative(groceries))       * familySizeMultGroceries * groceryRatio;
+      transportationFrom = destToUsd(nonNegative(transportation))  * familySizeMultTransport * transitRatio;
+      utilitiesFrom      = destToUsd(nonNegative(utilities))       * familySizeMultUtilities * utilitiesRatio;
+      rentFrom           = destToUsd(nonNegative(destinationRent)) * housingRatio;
+      healthcareFrom     = destToUsd(nonNegative(healthcare))      * familySizeMultHealthcare;
+    }
 
     const housingUtilitiesFrom = utilitiesIncluded === "yes" ? 0 : utilitiesFrom;
-    const housingUtilities     = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
-    const housingTotalFrom     = rentFrom + housingUtilitiesFrom + carCost;
-    const housingTotal         = rentTo + housingUtilities + carCost;
-    const livingCostsFrom      = groceriesFrom + transportationFrom + healthcareAdj;
-    const livingCosts          = groceriesAdj + transportationAdj + healthcareAdj;
+    const housingUtilities     = utilitiesIncluded === "yes" ? 0 : utilitiesTo;
+    const housingTotalFrom     = rentFrom + housingUtilitiesFrom + carCostFrom;
+    const housingTotal         = rentTo   + housingUtilities    + carCostTo;
+    const livingCostsFrom      = groceriesFrom + transportationFrom + healthcareFrom;
+    const livingCosts          = groceriesAdj  + transportationAdj  + healthcareAdj;
 
     const monthlyFlexibility = netMonthlyTo - housingTotal - livingCosts;
-    // Comfort score based on total essential outflow (housing + living), not housing alone.
-    // This keeps the score consistent with the flexibility card — if flexibility is negative,
-    // comfort is always "Stretched" regardless of how housing breaks down internally.
-    const totalPctOfNet = netMonthlyTo > 0 ? (housingTotal + livingCosts) / netMonthlyTo : 0;
+
+    // "What income do I need to live here comfortably?" — targets 70% essential cost ratio (Band B)
+    const targetComfortRatio = 0.70;
+    const requiredNetMonthly = housingTotal + livingCosts > 0
+      ? (housingTotal + livingCosts) / targetComfortRatio
+      : 0;
+    const requiredGrossMonthly = targetTaxRate < 1
+      ? requiredNetMonthly / (1 - targetTaxRate)
+      : 0;
+    const requiredAnnualIncome = requiredGrossMonthly * 12;
+
+    // Decision layer — income gap and move readiness verdict
+    const incomeGap = requiredAnnualIncome - annualIncome;
+
+    const currentMonthlyFlexibility = netMonthlyFrom - housingTotalFrom - livingCostsFrom;
+    const marginChangePct =
+      netMonthlyFrom > 0
+        ? ((monthlyFlexibility - currentMonthlyFlexibility) / netMonthlyFrom) * 100
+        : 0;
+
+   const flexibilityRatio =
+  netMonthlyTo > 0 ? monthlyFlexibility / netMonthlyTo : 0;
+
+const readinessRecommendation =
+  !salaryReady
+    ? {
+        label: "Add income",
+        tone: "neutral" as const,
+        note: "Enter your income to see whether this move looks financially realistic.",
+      }
+    : flexibilityRatio >= 0.25 && incomeGap <= 0
+      ? {
+          label: "Financially ready",
+          tone: "good" as const,
+          note: "Your estimated income appears strong enough for this move with healthy monthly room left over.",
+        }
+      : flexibilityRatio >= 0.10
+        ? {
+            label: "Possible, but watch the margin",
+            tone: "caution" as const,
+            note: "This move may work, but your cushion is thinner. Lower rent or setup costs would make it safer.",
+          }
+        : {
+            label: "Not ready yet",
+            tone: "risk" as const,
+            note: "Based on these inputs, the move leaves too little monthly room. Improve income, reduce rent, or build more cash first.",
+          };
+    const totalPctOfNet   = netMonthlyTo > 0 ? (housingTotal + livingCosts) / netMonthlyTo : 0;
     const housingPctOfNet = netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
     const pct             = housingPctOfNet * 100;
     const comfort         = getReadinessBand(totalPctOfNet);
-    const furnitureAdj       = furnished === "furnished" ? 0 : destToUsd(nz(furnitureSetup));
+    const furnitureAdj    = furnished === "furnished" ? 0 : destToUsd(nonNegative(furnitureSetup));
 
+    // Fix #5: nonNegative applied to all upfront cost inputs
     const upfrontCashNeeded =
-      destToUsd(nz(depositRequired)) + destToUsd(nz(firstMonthRent)) + destToUsd(nz(lastMonthRent)) +
-      destToUsd(nz(visaCost)) + destToUsd(nz(flightCost)) + destToUsd(nz(shippingCost)) +
-      destToUsd(nz(temporaryStay)) + destToUsd(nz(adminFees)) + furnitureAdj +
-      destToUsd(nz(emergencyCashBuffer));
+      destToUsd(nonNegative(depositRequired))   + destToUsd(nonNegative(firstMonthRent)) +
+      destToUsd(nonNegative(lastMonthRent))     + destToUsd(nonNegative(visaCost))       +
+      destToUsd(nonNegative(flightCost))        + destToUsd(nonNegative(shippingCost))   +
+      destToUsd(nonNegative(temporaryStay))     + destToUsd(nonNegative(adminFees))      +
+      furnitureAdj + destToUsd(nonNegative(emergencyCashBuffer));
 
     const totalMonthlyOutflow = housingTotal + livingCosts;
-    const monthsCovered = totalMonthlyOutflow > 0 ? destToUsd(nz(currentSavings)) / totalMonthlyOutflow : 0;
+    const monthsCovered = totalMonthlyOutflow > 0 ? convertLocalToUsd(nonNegative(currentSavings), fromCountry) / totalMonthlyOutflow : 0;
 
     const currentProfile = getCountryByCode(fromCountry);
     const fromIndex = currentCityDefaults?.costIndex ?? currentProfile?.monthlyCostIndexSingle ?? 1;
@@ -440,24 +541,25 @@ export default function InternationalRelocationCalculator() {
       currentTaxRate, targetTaxRate,
       targetConfidence, targetMissingFactor, targetTaxLabel, targetTaxNotes,
       netMonthlyFrom, netMonthlyTo, monthlyIncomeDiff,
-      groceriesFrom, transportationFrom, utilitiesFrom, housingTotalFrom, livingCostsFrom,
-      groceriesAdj, transportationAdj, healthcareAdj, utilitiesAdj,
-      housingTotal, rentTo, housingUtilities, carCost, livingCosts,
-      monthlyFlexibility, pct, comfort,
+      groceriesFrom, transportationFrom, utilitiesFrom, rentFrom, healthcareFrom, housingTotalFrom, livingCostsFrom,
+      groceriesAdj, transportationAdj, healthcareAdj, utilitiesTo,
+      housingTotal, rentTo, housingUtilities, carCostTo, carCostFrom, livingCosts,
+      monthlyFlexibility,
+      requiredNetMonthly, requiredGrossMonthly, requiredAnnualIncome,
+      incomeGap, marginChangePct, flexibilityRatio, readinessRecommendation,
+      pct, comfort,
       upfrontCashNeeded, monthsCovered, comparableSalary, relativeDifference,
     };
   }, [
     mode, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
     incomeScenario, conditionalAnswers,
     fromCityMultipliers, toCityMultipliers, currentCityDefaults, targetCityDefaults,
-    adults, children, needCar, furnished, utilitiesIncluded, utilities, destinationRent,
-    groceries, transportation, healthcare, depositRequired, firstMonthRent, lastMonthRent,
+    adultCount, childCount, needCar, carCostMonthly, furnished, utilitiesIncluded,
+    utilities, destinationRent, groceries, transportation, healthcare,
+    depositRequired, firstMonthRent, lastMonthRent,
     visaCost, flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
     emergencyCashBuffer, currentSavings, targetProfile,
   ]);
-
-  const adultsNum   = Math.max(1, Number(adults)   || 1);
-  const childrenNum = Math.max(0, Number(children) || 0);
 
   const badge = confidenceBadge(results.targetConfidence);
 
@@ -465,7 +567,7 @@ export default function InternationalRelocationCalculator() {
     const cityDefaults    = getCityDefaultsByCode(toCityCode);
     const countryDefaults = getCountryByCode(toCountry);
     setSalary(""); setRetirementIncome("");
-    setConditionalAnswers({}); // clear destination tax question answers
+    setConditionalAnswers({});
     if (cityDefaults) {
       setDestinationRent(String(cityDefaults.monthlyDefaults.rent));
       setDepositRequired(String(cityDefaults.monthlyDefaults.rent * cityDefaults.housing.depositMonths));
@@ -484,8 +586,8 @@ export default function InternationalRelocationCalculator() {
       setFurnitureSetup(String(cityDefaults.housing.furnishedSetupCost));
       setEmergencyCashBuffer(String(cityDefaults.startupCosts.emergencyBuffer));
     } else if (countryDefaults) {
-      const fallbackRent = adultsNum >= 2 || childrenNum > 0 ? countryDefaults.defaultRentFamily : countryDefaults.defaultRentSingle;
-      const fallbackHealthcare = adultsNum >= 2 || childrenNum > 0 ? countryDefaults.healthcareMonthlyFamily : countryDefaults.healthcareMonthlySingle;
+      const fallbackRent = adultCount >= 2 || childCount > 0 ? countryDefaults.defaultRentFamily : countryDefaults.defaultRentSingle;
+      const fallbackHealthcare = adultCount >= 2 || childCount > 0 ? countryDefaults.healthcareMonthlyFamily : countryDefaults.healthcareMonthlySingle;
       setDestinationRent(String(fallbackRent));
       setDepositRequired(String(fallbackRent * (countryDefaults.startupCosts.depositMonths ?? 1)));
       setFirstMonthRent(String(fallbackRent)); setLastMonthRent("0");
@@ -504,6 +606,10 @@ export default function InternationalRelocationCalculator() {
     }
     setCurrentSavings("");
   }
+
+  // Fix #1: Helper to build a label suffix with destination currency
+  const destCurrLabel = `(${destCurrency})`;
+  const originCurrLabel = `(${originCurrency})`;
 
   return (
     <div className="text-slate-900">
@@ -534,12 +640,13 @@ export default function InternationalRelocationCalculator() {
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
             <div className="mb-3 text-sm font-semibold">Income &amp; Location</div>
             <div className="grid gap-3 sm:grid-cols-2">
+              {/* Fix #1: salary label shows origin currency */}
               <label className="text-sm">
                 <div className={labelHeadCls}>
                   {mode === "retired" ? "Gross annual retirement income" : "Gross annual salary"}{" "}
-                  <span className="text-slate-400">({originCurrency})</span>
+                  <span className="text-slate-400">{originCurrLabel}</span>
                 </div>
-                <input className={inputCls} type="number"
+                <input className={inputCls} type="number" min="0"
                   value={mode === "retired" ? retirementIncome : salary}
                   onChange={(e) => mode === "retired" ? setRetirementIncome(e.target.value) : setSalary(e.target.value)}
                   placeholder=" " />
@@ -615,18 +722,19 @@ export default function InternationalRelocationCalculator() {
                 </label>
               )}
               <label className="text-sm">
-                <div className={labelHeadCls}>Current savings available</div>
-                <input className={inputCls} type="number" value={currentSavings}
+                <div className={labelHeadCls}>Current savings available <span className="text-slate-400">{originCurrLabel}</span></div>
+                <input className={inputCls} type="number" min="0" value={currentSavings}
                   onChange={(e) => setCurrentSavings(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
                 <div className={labelHeadCls}>Number of adults</div>
-                <input className={inputCls} type="number" value={adults}
+                {/* Fix #5: min=1 enforced via state clamp, but also as attribute hint */}
+                <input className={inputCls} type="number" min="1" step="1" value={adults}
                   onChange={(e) => setAdults(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
                 <div className={labelHeadCls}>Number of children</div>
-                <input className={inputCls} type="number" value={children}
+                <input className={inputCls} type="number" min="0" step="1" value={children}
                   onChange={(e) => setChildren(e.target.value)} placeholder=" " />
               </label>
             </div>
@@ -655,27 +763,31 @@ export default function InternationalRelocationCalculator() {
             </div>
           ))}
 
+          {/* Housing */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
             <div className="mb-3 text-sm font-semibold">Housing</div>
             <div className="grid gap-3 sm:grid-cols-2">
+              {/* Fix #1: All housing inputs now show destination currency */}
               <label className="text-sm sm:col-span-2">
-                <div className={labelHeadCls}>Rent in destination (monthly)</div>
-                <input className={inputCls} type="number" value={destinationRent}
+                <div className={labelHeadCls}>
+                  Rent in destination (monthly) <span className="text-slate-400">{destCurrLabel}</span>
+                </div>
+                <input className={inputCls} type="number" min="0" value={destinationRent}
                   onChange={(e) => setDestinationRent(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
-                <div className={labelHeadCls}>Deposit required</div>
-                <input className={inputCls} type="number" value={depositRequired}
+                <div className={labelHeadCls}>Deposit required <span className="text-slate-400">{destCurrLabel}</span></div>
+                <input className={inputCls} type="number" min="0" value={depositRequired}
                   onChange={(e) => setDepositRequired(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
-                <div className={labelHeadCls}>First month rent</div>
-                <input className={inputCls} type="number" value={firstMonthRent}
+                <div className={labelHeadCls}>First month rent <span className="text-slate-400">{destCurrLabel}</span></div>
+                <input className={inputCls} type="number" min="0" value={firstMonthRent}
                   onChange={(e) => setFirstMonthRent(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
-                <div className={labelHeadCls}>Last month rent (if applicable)</div>
-                <input className={inputCls} type="number" value={lastMonthRent}
+                <div className={labelHeadCls}>Last month rent <span className="text-slate-400">{destCurrLabel}</span></div>
+                <input className={inputCls} type="number" min="0" value={lastMonthRent}
                   onChange={(e) => setLastMonthRent(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
@@ -695,43 +807,93 @@ export default function InternationalRelocationCalculator() {
             </div>
           </div>
 
+          {/* Fix #2: Estimated Living Costs — now fully editable inputs */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-3 text-sm font-semibold">
-              Estimated Living Costs
-              <InfoTip text="These costs are treated as your destination-budget scenario and adjusted across cities using local cost multipliers." />
-            </div>
-            <div className="mt-3 space-y-1 text-sm text-slate-500">
-              <div className="space-y-3 text-[15px] text-slate-700">
-                <div>Groceries: <span className="font-semibold text-slate-900">{displayAmount(results.groceriesAdj, 0)}</span></div>
-                <div>Utilities: <span className="font-semibold text-slate-900">{displayAmount(results.utilitiesAdj, 0)}</span></div>
-                <div>Transportation: <span className="font-semibold text-slate-900">{displayAmount(results.transportationAdj, 0)}</span></div>
-                <div>Car estimate: <span className="font-semibold text-slate-900">{needCar === "yes" ? displayAmount(results.carCost, 0) : displayAmount(0, 0)}</span></div>
-                <div>Healthcare: <span className="font-semibold text-slate-900">{displayAmount(results.healthcareAdj, 0)}</span></div>
+            <div className="mb-1 flex items-center justify-between">
+              <div className="text-sm font-semibold">
+                Estimated Living Costs
+                <InfoTip text="Enter your estimated monthly costs in your destination currency. Family-size adjustments are applied automatically." />
               </div>
-              <div className="mt-2 text-xs text-slate-500">Estimated costs adjust automatically based on the selected city.</div>
+              {/* Fix #7: Cost data confidence badge */}
+              <CostConfidenceBadge hasCityDefaults={!!selectedCityDefaults} />
+            </div>
+            <div className="mb-3 text-xs text-slate-500">
+              All amounts are entered in destination currency <span className="font-medium">{destCurrLabel}</span>. Family-size adjustments are applied automatically.
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {/* Fix #1 + #2: Editable inputs with destination currency label */}
+              <label className="text-sm">
+                <div className={labelHeadCls}>Groceries (monthly) <span className="text-slate-400">{destCurrLabel}</span></div>
+                <input className={inputCls} type="number" min="0" value={groceries}
+                  onChange={(e) => setGroceries(e.target.value)} placeholder=" " />
+              </label>
+              <label className="text-sm">
+                <div className={labelHeadCls}>Utilities (monthly) <span className="text-slate-400">{destCurrLabel}</span></div>
+                <input className={inputCls} type="number" min="0" value={utilities}
+                  onChange={(e) => setUtilities(e.target.value)} placeholder=" " />
+              </label>
+              <label className="text-sm">
+                <div className={labelHeadCls}>Transportation (monthly) <span className="text-slate-400">{destCurrLabel}</span></div>
+                <input className={inputCls} type="number" min="0" value={transportation}
+                  onChange={(e) => setTransportation(e.target.value)} placeholder=" " />
+              </label>
+              <label className="text-sm">
+                <div className={labelHeadCls}>Healthcare (monthly) <span className="text-slate-400">{destCurrLabel}</span></div>
+                <input className={inputCls} type="number" min="0" value={healthcare}
+                  onChange={(e) => setHealthcare(e.target.value)} placeholder=" " />
+              </label>
+              {/* Fix #6: Do you need a car + editable cost */}
+              <label className="text-sm sm:col-span-2">
+                <div className={labelHeadCls}>Will you need a car?</div>
+                <select className={selectCls} value={needCar} onChange={(e) => setNeedCar(e.target.value as YesNo)}>
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </label>
+              {needCar === "yes" && (
+                <label className="text-sm sm:col-span-2">
+                  <div className={labelHeadCls}>
+                    Est. monthly car cost <span className="text-slate-400">{destCurrLabel}</span>
+                    <InfoTip text="Include loan/lease, insurance, fuel, and parking. Vary this by country — $350 may be too high or too low depending on the market." />
+                  </div>
+                  <input className={inputCls} type="number" min="0" value={carCostMonthly}
+                    onChange={(e) => setCarCostMonthly(e.target.value)} placeholder=" " />
+                </label>
+              )}
+            </div>
+            <div className="mt-3 text-xs text-slate-500">
+              {!!selectedCityDefaults
+                ? "Pre-filled from city-level data. Adjust freely — these are starting points."
+                : "Pre-filled from country-level data. City-level data not available for this city — your own research may be more accurate."}
             </div>
           </div>
 
+          {/* One-Time Moving Costs */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
             <div className="mb-3 text-sm font-semibold">One-Time Moving Costs</div>
             <div className="grid gap-3 sm:grid-cols-2">
-              {[
-                ["Visa / permit estimate", visaCost, setVisaCost],
-                ["One-way flight estimate", flightCost, setFlightCost],
-                ["Shipping / baggage estimate", shippingCost, setShippingCost],
-                ["Temporary housing estimate", temporaryStay, setTemporaryStay],
-                ["Setup / admin estimate", adminFees, setAdminFees],
-                ["Furniture / setup estimate", furnitureSetup, setFurnitureSetup],
-              ].map(([label, value, setter]) => (
-                <label key={label as string} className="text-sm">
-                  <div className={labelHeadCls}>{label as string}</div>
-                  <input className={inputCls} type="number" value={value as string}
-                    onChange={(e) => (setter as (v: string) => void)(e.target.value)} placeholder=" " />
+              {/* Fix #1: All moving cost inputs now show destination currency */}
+              {([
+                ["Visa / permit estimate", visaCost, setVisaCost, true],
+                ["One-way flight estimate", flightCost, setFlightCost, false],
+                ["Shipping / baggage estimate", shippingCost, setShippingCost, true],
+                ["Temporary housing estimate", temporaryStay, setTemporaryStay, true],
+                ["Setup / admin estimate", adminFees, setAdminFees, true],
+                ["Furniture / setup estimate", furnitureSetup, setFurnitureSetup, true],
+              ] as [string, string, (v: string) => void, boolean][]).map(([label, value, setter, isDestCurr]) => (
+                <label key={label} className="text-sm">
+                  <div className={labelHeadCls}>
+                    {label} <span className="text-slate-400">{isDestCurr ? destCurrLabel : "(USD)"}</span>
+                  </div>
+                  <input className={inputCls} type="number" min="0" value={value}
+                    onChange={(e) => setter(e.target.value)} placeholder=" " />
                 </label>
               ))}
               <label className="text-sm sm:col-span-2">
-                <div className={labelHeadCls}>Recommended cash buffer</div>
-                <input className={inputCls} type="number" value={emergencyCashBuffer}
+                <div className={labelHeadCls}>
+                  Recommended cash buffer <span className="text-slate-400">{destCurrLabel}</span>
+                </div>
+                <input className={inputCls} type="number" min="0" value={emergencyCashBuffer}
                   onChange={(e) => setEmergencyCashBuffer(e.target.value)} placeholder=" " />
               </label>
             </div>
@@ -789,14 +951,13 @@ export default function InternationalRelocationCalculator() {
                     <span className="text-xs text-slate-500">({(results.targetTaxRate * 100).toFixed(1)}%)</span>
                   </div>
 
-                  {/* ── Confidence banner ── matches Europe/Caribbean pattern exactly ── */}
+                  {/* Confidence banner */}
                   <div className={`mt-3 rounded-xl ring-1 overflow-hidden ${
                     results.targetConfidence === "verified"     ? "bg-emerald-50 ring-emerald-200"
                     : results.targetConfidence === "partial"   ? "bg-blue-50 ring-blue-200"
                     : results.targetConfidence === "placeholder" ? "bg-rose-50 ring-rose-200"
                     : "bg-amber-50 ring-amber-200"
                   }`}>
-                    {/* Badge row */}
                     <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-3 pb-2">
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${badge.cls}`}>
                         {badge.label}
@@ -808,13 +969,11 @@ export default function InternationalRelocationCalculator() {
                         {results.targetConfidence === "placeholder" && "Directional only · verify before planning"}
                       </span>
                     </div>
-                    {/* Key gap — always visible */}
                     {results.targetMissingFactor && (
                       <div className="px-4 pb-2 text-xs text-slate-600">
                         <span className="font-medium">Key gap: </span>{results.targetMissingFactor}
                       </div>
                     )}
-                    {/* Expandable full detail */}
                     {results.targetTaxNotes.length > 0 && (
                       <>
                         <button
@@ -844,12 +1003,17 @@ export default function InternationalRelocationCalculator() {
               <div className="mt-2 font-semibold">Monthly housing</div>
               <div className="grid gap-1 text-sm">
                 <div>Rent: <span className="font-semibold">{displayAmount(results.rentTo, 2)}</span></div>
-                {results.housingUtilities > 0 && <div>Utilities gap: <span className="font-semibold">{displayAmount(results.housingUtilities, 2)}</span></div>}
-                {results.carCost > 0 && <div>Car: <span className="font-semibold">{displayAmount(results.carCost, 2)}</span></div>}
+                {results.housingUtilities > 0 && <div>Utilities: <span className="font-semibold">{displayAmount(results.housingUtilities, 2)}</span></div>}
+                {results.carCostTo > 0 && <div>Car: <span className="font-semibold">{displayAmount(results.carCostTo, 2)}</span></div>}
                 <div className="pt-1">Total housing: <span className="font-bold">{displayAmount(results.housingTotal, 2)}</span></div>
               </div>
               <div className="mt-2 font-semibold">Monthly living costs</div>
-              <div>Total: <span className="font-bold">{displayAmount(results.livingCosts, 2)}</span></div>
+              <div className="grid gap-1 text-sm">
+                <div>Groceries: <span className="font-semibold">{displayAmount(results.groceriesAdj, 2)}</span></div>
+                <div>Transportation: <span className="font-semibold">{displayAmount(results.transportationAdj, 2)}</span></div>
+                <div>Healthcare: <span className="font-semibold">{displayAmount(results.healthcareAdj, 2)}</span></div>
+                <div className="pt-1">Total: <span className="font-bold">{displayAmount(results.livingCosts, 2)}</span></div>
+              </div>
               <div className="mt-2">Upfront cash needed: <span className="font-semibold">{displayAmount(results.upfrontCashNeeded)}</span></div>
               <div>Months covered by savings: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
               <div className="mt-2">Housing % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
@@ -861,6 +1025,67 @@ export default function InternationalRelocationCalculator() {
             </div>
             <div className="text-xs text-slate-500">Tip: Your URL updates as you type — copy the page link to share this scenario.</div>
           </div>
+
+          {/* Move Readiness — top-level decision verdict */}
+          {results.salaryReady && (
+            <div className={`rounded-2xl p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ${
+              results.readinessRecommendation.tone === "good"
+                ? "bg-emerald-50/80 ring-emerald-200"
+                : results.readinessRecommendation.tone === "caution"
+                  ? "bg-amber-50/80 ring-amber-200"
+                  : "bg-rose-50/80 ring-rose-200"
+            }`}>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className={`text-xs font-semibold uppercase tracking-[0.14em] ${
+                    results.readinessRecommendation.tone === "good"
+                      ? "text-emerald-700"
+                      : results.readinessRecommendation.tone === "caution"
+                        ? "text-amber-700"
+                        : "text-rose-700"
+                  }`}>
+                    Move Readiness
+                  </div>
+                  <div className="mt-2 text-2xl font-bold text-slate-900">
+                    {results.readinessRecommendation.label}
+                  </div>
+                </div>
+                <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-black/10">
+                  Decision check
+                </div>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-slate-700">
+                {results.readinessRecommendation.note}
+              </p>
+              <div className="mt-4 grid gap-2 text-xs sm:grid-cols-2">
+                <div className="rounded-xl bg-white/75 p-3 ring-1 ring-black/5">
+                  <div className="font-semibold text-slate-700">Income target gap</div>
+                  <div className={`mt-1 font-semibold ${
+                    results.incomeGap > 0 ? "text-rose-700" : "text-emerald-700"
+                  }`}>
+                    {results.incomeGap > 0
+                      ? `${displayAmount(results.incomeGap, 0)} below target`
+                      : `${displayAmount(Math.abs(results.incomeGap), 0)} above target`}
+                  </div>
+                </div>
+                <div className="rounded-xl bg-white/75 p-3 ring-1 ring-black/5">
+                  <div className="font-semibold text-slate-700">Monthly room</div>
+                  <div className={`mt-1 font-semibold ${
+                    results.monthlyFlexibility >= 500 ? "text-emerald-700" : "text-rose-700"
+                  }`}>
+                    {displayAmount(results.monthlyFlexibility, 0)}
+                  </div>
+                </div>
+              </div>
+              <div className="text-xs text-slate-600 mt-2">
+  Your monthly margin {results.marginChangePct >= 0 ? "improves" : "drops"} by{" "}
+  <span className="font-semibold">
+    {Math.abs(results.marginChangePct).toFixed(1)}%
+  </span>{" "}
+  compared to your current location.
+</div>
+            </div>
+          )}
 
           {/* Monthly Flexibility */}
           <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
@@ -893,7 +1118,52 @@ export default function InternationalRelocationCalculator() {
             <div className="mt-2 text-xs text-slate-500">Higher flexibility gives you more room for saving, investing, travel, and unexpected expenses.</div>
           </div>
 
-          {/* Comparable Salary — only shown when salary is entered */}
+          {/* Comfortable Income Target — the "decision layer" card */}
+          {results.salaryReady && (
+            <div className="rounded-2xl border border-blue-200 bg-blue-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-700">
+                    Comfortable Income Target
+                  </div>
+                  <div className="mt-2 text-3xl font-bold text-slate-900">
+                    {displayAmount(results.requiredAnnualIncome, 0)}
+                  </div>
+                </div>
+                <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">
+                  Annual gross
+                </div>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-slate-700">
+                Based on your inputs, this is the estimated gross annual income needed to keep housing
+                and essential living costs around 70% of take-home pay in {toCityLabel}.
+              </p>
+              <div className="mt-3 grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
+                <div className="rounded-xl bg-white/70 p-3 ring-1 ring-blue-100">
+                  <div className="font-semibold text-slate-700">Required net monthly</div>
+                  <div className="mt-1">{displayAmount(results.requiredNetMonthly, 0)}</div>
+                </div>
+                <div className="rounded-xl bg-white/70 p-3 ring-1 ring-blue-100">
+                  <div className="font-semibold text-slate-700">Current target net monthly</div>
+                  <div className="mt-1">{displayAmount(results.netMonthlyTo, 0)}</div>
+                </div>
+              </div>
+              <div className="mt-3 text-xs text-slate-500">
+                This is a planning target, not a guarantee. Lower housing, lower taxes, or lower monthly costs reduce the income needed.
+              </div>
+              {results.incomeGap > 0 ? (
+                <div className="mt-2 text-sm font-medium text-rose-600">
+                  You're about {displayAmount(results.incomeGap, 0)} below this target.
+                </div>
+              ) : (
+                <div className="mt-2 text-sm font-medium text-emerald-600">
+                  You exceed this target by {displayAmount(Math.abs(results.incomeGap), 0)}.
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Comparable Salary */}
           {results.salaryReady && (
             <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
               <div className="text-xs font-semibold tracking-widest text-slate-500">COMPARABLE SALARY</div>
@@ -930,6 +1200,63 @@ export default function InternationalRelocationCalculator() {
             </div>
             <div className="mt-3 text-sm text-slate-700">{results.comfort.note}</div>
             <div className="mt-2 text-xs text-slate-500">Based on how much of your net monthly income goes toward housing and essential living costs.</div>
+          </div>
+
+          {/* Fix #4: How we calculate this — transparent methodology block */}
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+            <button
+              type="button"
+              onClick={() => setHowCalcExpanded(v => !v)}
+              className="flex w-full items-center justify-between text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
+            >
+              <span>How we calculate this</span>
+              <span className="text-slate-400">{howCalcExpanded ? "▲" : "▼"}</span>
+            </button>
+            {howCalcExpanded && (
+              <div className="mt-4 space-y-4 text-xs leading-5 text-slate-600">
+                <p>
+                  This calculator estimates monthly take-home pay, housing and essential living costs, upfront moving cash,
+                  and savings runway. Tax estimates come from country-specific models and may be verified, partial,
+                  simplified, or directional depending on jurisdiction.
+                </p>
+                <div className="space-y-2">
+                  <div className="font-semibold text-slate-700">Key formulas</div>
+                  <div className="rounded-xl bg-slate-50 px-4 py-3 space-y-1.5 font-mono text-[11px] text-slate-700">
+                    <div>Net monthly = gross monthly × (1 − effective tax rate)</div>
+                    <div>Monthly flexibility = net monthly − housing − essential living costs</div>
+                    <div className="pt-1">Upfront cash = deposit + first month + last month</div>
+                    <div className="pl-4">+ visa + flight + shipping + temporary housing</div>
+                    <div className="pl-4">+ admin fees + furniture + emergency buffer</div>
+                    <div className="pt-1">Months covered = savings ÷ (housing + living costs)</div>
+                    <div className="pt-1">Comfortable income target = (housing + living costs) ÷ 70% ÷ (1 − target tax rate) × 12</div>
+                    <div className="pt-1">Comparable salary = your salary × (destination cost index ÷ origin cost index)</div>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="font-semibold text-slate-700">Cost data</div>
+                  <p>
+                    Living costs (groceries, transport, utilities, healthcare) are pre-filled from city-level data where
+                    available, or country-level data as a fallback. A <span className="font-medium">City-level estimate</span> badge
+                    means the defaults are city-specific; <span className="font-medium">Country-level estimate</span> means
+                    the data is broader and less precise. You can edit all values freely.
+                  </p>
+                  <p className="mt-1">
+                    Current-city baseline costs are drawn directly from city defaults (not back-calculated from destination
+                    inputs), so the comparison reflects actual local data rather than scaled estimates.
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <div className="font-semibold text-slate-700">Tax estimates</div>
+                  <p>
+                    Tax confidence levels range from <span className="font-medium text-emerald-700">Verified</span> (exact
+                    or near-exact) to <span className="font-medium text-rose-700">Directional only</span> (high-level
+                    estimate; verify before planning). US citizens abroad may owe US taxes regardless of residency —
+                    consult a cross-border tax adviser.
+                  </p>
+                </div>
+                <p className="text-slate-400">All figures are planning estimates. No data is stored or shared.</p>
+              </div>
+            )}
           </div>
 
           {/* Share */}
@@ -972,7 +1299,6 @@ export default function InternationalRelocationCalculator() {
           <AdSlot />
         </div>
       </div>
-
     </div>
   );
 }

@@ -5,11 +5,33 @@ export type CityCostMultipliers = {
   utilities: number;
 };
 
+export type CostConfidence = "city-level" | "country-level" | "fallback";
+
 export type InternationalCityCostConfig = {
   countryCode: string;
   city: string;
   defaultRent: number;
   multipliers: CityCostMultipliers;
+  confidence?: CostConfidence;
+  note?: string;
+};
+
+export const INTERNATIONAL_CITY_COSTS_LAST_UPDATED = "March 2026";
+
+export const DEFAULT_CITY_COST_MULTIPLIERS: CityCostMultipliers = {
+  housing: 1,
+  transit: 1,
+  groceries: 1,
+  utilities: 1,
+};
+
+export const DEFAULT_CITY_COST_CONFIG: InternationalCityCostConfig = {
+  countryCode: "US",
+  city: "Fallback city estimate",
+  defaultRent: 1200,
+  multipliers: DEFAULT_CITY_COST_MULTIPLIERS,
+  confidence: "fallback",
+  note: "Fallback estimate used because city-level cost data is unavailable.",
 };
 
 export const INTERNATIONAL_CITY_COSTS: Record<string, InternationalCityCostConfig> = {
@@ -295,21 +317,34 @@ export const INTERNATIONAL_CITY_COSTS: Record<string, InternationalCityCostConfi
   "ZA-PLZ": { countryCode: "ZA", city: "Port Elizabeth", defaultRent: 560, multipliers: { housing: 0.80, transit: 0.85, groceries: 0.95, utilities: 0.96 } },
 };
 
-export const DEFAULT_CITY_COST_MULTIPLIERS: CityCostMultipliers = {
-  housing: 1, transit: 1, groceries: 1, utilities: 1,
-};
+export function getCityCostConfig(
+  cityCode?: string | null
+): InternationalCityCostConfig {
+  if (!cityCode) return DEFAULT_CITY_COST_CONFIG;
 
-export function getCityCostMultipliers(cityCode?: string | null): CityCostMultipliers {
-  if (!cityCode) return DEFAULT_CITY_COST_MULTIPLIERS;
-  return INTERNATIONAL_CITY_COSTS[cityCode]?.multipliers ?? DEFAULT_CITY_COST_MULTIPLIERS;
+  const config = INTERNATIONAL_CITY_COSTS[cityCode];
+
+  if (!config) return DEFAULT_CITY_COST_CONFIG;
+
+  return {
+    ...config,
+    confidence: config.confidence ?? "city-level",
+    note:
+      config.note ??
+      "City-level planning estimate. Actual costs vary by neighborhood, lifestyle, lease type, and exchange rates.",
+  };
 }
 
-export function getCityDefaultRent(cityCode?: string | null): number | undefined {
-  if (!cityCode) return undefined;
-  return INTERNATIONAL_CITY_COSTS[cityCode]?.defaultRent;
+export function getCityCostMultipliers(
+  cityCode?: string | null
+): CityCostMultipliers {
+  return getCityCostConfig(cityCode).multipliers;
 }
 
-export function getCityCostConfig(cityCode?: string | null): InternationalCityCostConfig | undefined {
-  if (!cityCode) return undefined;
-  return INTERNATIONAL_CITY_COSTS[cityCode];
+export function getCityDefaultRent(cityCode?: string | null): number {
+  return getCityCostConfig(cityCode).defaultRent;
+}
+
+export function hasCityCostConfig(cityCode?: string | null): boolean {
+  return !!cityCode && !!INTERNATIONAL_CITY_COSTS[cityCode];
 }
