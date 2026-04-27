@@ -541,6 +541,8 @@ export default function CaribbeanRelocationCalculator() {
     emergencyCashBuffer, currentSavings, conditionalAnswers, needCar,
   ]);
 
+  const fallbackCosts = selectedCityDefaults?.monthlyDefaults ?? CARIBBEAN_COST_DEFAULTS[toCountry];
+
   // ---------------------------------------------------------------------------
   // RESULTS
   // ---------------------------------------------------------------------------
@@ -607,11 +609,24 @@ export default function CaribbeanRelocationCalculator() {
       return baseUsd * (1 + extraAdults * adult + childCount * child);
     }
 
-    const familyGroceries      = scaleFamily(destToUsd(nz(groceries)),      "groceries");
-    const familyTransportation = scaleFamily(destToUsd(nz(transportation)), "transportation");
-    const familyHealthcare     = scaleFamily(destToUsd(nz(healthcare)),     "healthcare");
-    const familyUtilities      = scaleFamily(destToUsd(nz(utilities)),      "utilities");
+    const fallbackCosts = selectedCityDefaults?.monthlyDefaults ?? CARIBBEAN_COST_DEFAULTS[toCountry];
 
+const effectiveGroceries =
+  groceries.trim() === "" ? fallbackCosts?.groceries ?? 0 : nz(groceries);
+
+const effectiveUtilities =
+  utilities.trim() === "" ? fallbackCosts?.utilities ?? 0 : nz(utilities);
+
+const effectiveTransportation =
+  transportation.trim() === "" ? fallbackCosts?.transport ?? 0 : nz(transportation);
+
+const effectiveHealthcare =
+  healthcare.trim() === "" ? fallbackCosts?.healthcare ?? 0 : nz(healthcare);
+
+const familyGroceries      = scaleFamily(effectiveGroceries,      "groceries");
+const familyTransportation = scaleFamily(effectiveTransportation, "transportation");
+const familyHealthcare     = scaleFamily(effectiveHealthcare,     "healthcare");
+const familyUtilities      = scaleFamily(effectiveUtilities,      "utilities");
     // Apply multipliers only when no city-specific defaults exist
     const applyMult = (val: number, mult: number | undefined) => mult != null ? val * mult : val;
 
@@ -619,21 +634,21 @@ const groceriesAdj      = applyMult(familyGroceries, toCityMultipliers?.grocerie
 const transportationAdj = applyMult(familyTransportation, toCityMultipliers?.transit);
 const healthcareAdj     = familyHealthcare;
 const utilitiesAdj      = applyMult(familyUtilities, toCityMultipliers?.utilities);
-const rentTo            = applyMult(destToUsd(nz(destinationRent)), toCityMultipliers?.housing);
+const rentTo = applyMult(nz(destinationRent), toCityMultipliers?.housing);
 
     // Origin comparators: re-derive from the same base inputs rather than reusing
     // destination-scaled family values. Note: groceries/transport/utilities inputs are
     // destination-entered, so these are an approximation until origin inputs are split out.
     // FIX: was fromCityMultipliers?.transit — correct key is transport
-    const groceriesFrom      = applyMult(scaleFamily(destToUsd(nz(groceries)),      "groceries"),      fromCityMultipliers?.groceries);
-    const transportationFrom = applyMult(scaleFamily(destToUsd(nz(transportation)), "transportation"), fromCityMultipliers?.transit);
-    const utilitiesFrom      = applyMult(scaleFamily(destToUsd(nz(utilities)),      "utilities"),      fromCityMultipliers?.utilities);
+    const groceriesFrom      = applyMult(scaleFamily(nz(groceries),      "groceries"),      fromCityMultipliers?.groceries);
+const transportationFrom = applyMult(scaleFamily(nz(transportation), "transportation"), fromCityMultipliers?.transit);
+const utilitiesFrom      = applyMult(scaleFamily(nz(utilities),      "utilities"),      fromCityMultipliers?.utilities);
 
     // FIX 2: clean car cost logic — user-entered carCost state takes priority,
     // falls back to city default, then global fallback constant.
     const monthlyCarCost = needCar === "yes"
-      ? destToUsd(nz(carCost) || targetCityDefaults?.monthlyDefaults.car || CAR_COST_FALLBACK_USD)
-      : 0;
+  ? (nz(carCost) || targetCityDefaults?.monthlyDefaults.car || CAR_COST_FALLBACK_USD)
+  : 0;
 
     const housingUtilities   = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
     const housingTotal       = rentTo + housingUtilities + monthlyCarCost;
@@ -643,12 +658,12 @@ const rentTo            = applyMult(destToUsd(nz(destinationRent)), toCityMultip
     const housingPctOfNet    = netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
     const comfort            = getReadinessBand(totalPctOfNet);
 
-    const furnitureAdj      = furnished === "furnished" ? 0 : destToUsd(nz(furnitureSetup));
+    const furnitureAdj = furnished === "furnished" ? 0 : nz(furnitureSetup);
     const upfrontCashNeeded =
-      destToUsd(nz(depositRequired)) + destToUsd(nz(firstMonthRent)) + destToUsd(nz(lastMonthRent)) +
-      destToUsd(nz(visaCost)) + destToUsd(nz(flightCost)) + destToUsd(nz(shippingCost)) +
-      destToUsd(nz(temporaryStay)) + destToUsd(nz(adminFees)) + furnitureAdj +
-      destToUsd(nz(emergencyCashBuffer));
+  nz(depositRequired) + nz(firstMonthRent) + nz(lastMonthRent) +
+  nz(visaCost) + nz(flightCost) + nz(shippingCost) +
+  nz(temporaryStay) + nz(adminFees) + furnitureAdj +
+  nz(emergencyCashBuffer);
 
     // Savings in origin currency → convert to USD before dividing
     const savingsUsd    = convertLocalToUsd(nz(currentSavings), fromCountry);
@@ -971,11 +986,49 @@ const rentTo            = applyMult(destToUsd(nz(destinationRent)), toCityMultip
               <InfoTip text="Adjusted for family size. City multipliers are only applied when no city-specific data exists." />
             </div>
             <div className="mt-3 space-y-3 text-[15px] text-slate-700">
-              <div>Groceries:      <span className="font-semibold text-slate-900">{displayAmount(results.groceriesAdj, 0)}</span></div>
-              <div>Utilities:      <span className="font-semibold text-slate-900">{displayAmount(results.utilitiesAdj, 0)}</span></div>
-              <div>Transportation: <span className="font-semibold text-slate-900">{displayAmount(results.transportationAdj, 0)}</span></div>
-              <div>Car estimate:   <span className="font-semibold text-slate-900">{needCar === "yes" ? displayAmount(results.carCost, 0) : displayAmount(0, 0)}</span></div>
-              <div>Healthcare:     <span className="font-semibold text-slate-900">{displayAmount(results.healthcareAdj, 0)}</span></div>
+              <label className="block text-sm">
+  <div className={labelHeadCls}>Groceries</div>
+  <input
+    className={inputCls}
+    type="number"
+    value={groceries}
+    onChange={e => setGroceries(e.target.value)}
+    placeholder={`Average: ${displayAmount(fallbackCosts?.groceries ?? 0, 0)}`}
+  />
+</label>
+
+<label className="block text-sm">
+  <div className={labelHeadCls}>Utilities</div>
+  <input
+    className={inputCls}
+    type="number"
+    value={utilities}
+    onChange={e => setUtilities(e.target.value)}
+    placeholder={`Average: ${displayAmount(fallbackCosts?.utilities ?? 0, 0)}`}
+  />
+</label>
+
+<label className="block text-sm">
+  <div className={labelHeadCls}>Transportation</div>
+  <input
+    className={inputCls}
+    type="number"
+    value={transportation}
+    onChange={e => setTransportation(e.target.value)}
+    placeholder={`Average: ${displayAmount(fallbackCosts?.transport ?? 0, 0)}`}
+  />
+</label>
+
+<label className="block text-sm">
+  <div className={labelHeadCls}>Healthcare</div>
+  <input
+    className={inputCls}
+    type="number"
+    value={healthcare}
+    onChange={e => setHealthcare(e.target.value)}
+    placeholder={`Average: ${displayAmount(fallbackCosts?.healthcare ?? 0, 0)}`}
+  />
+</label>
             </div>
             <div className="mt-2 text-xs text-slate-500">Estimated costs adjust automatically based on the selected city.</div>
           </div>
@@ -995,7 +1048,7 @@ const rentTo            = applyMult(destToUsd(nz(destinationRent)), toCityMultip
             <div className="mt-4 w-full text-xs text-slate-500">Planning estimates only.</div>
           </div>
         </div>
-
+          
         {/* ================================================================
             RIGHT — RESULTS
         ================================================================ */}

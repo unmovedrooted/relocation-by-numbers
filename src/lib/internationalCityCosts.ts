@@ -23,6 +23,7 @@ export const DEFAULT_CITY_COST_MULTIPLIERS: CityCostMultipliers = {
   transit: 1,
   groceries: 1,
   utilities: 1,
+
 };
 
 export const DEFAULT_CITY_COST_CONFIG: InternationalCityCostConfig = {

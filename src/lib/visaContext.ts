@@ -1,275 +1,912 @@
 import { FEE_NOTE } from "@/lib/relocationConstants";
 
+export type VisaRegion =
+  | "Caribbean"
+  | "Central America"
+  | "South America"
+  | "North America"
+  | "Europe"
+  | "Asia";
+
+export type VisaRiskLevel = "low" | "medium" | "high" | "restricted";
+
+export type VisaFeeType =
+  | "processing"
+  | "minimumContribution"
+  | "minimumInvestment"
+  | "legalOrServiceEstimate"
+  | "unknown";
+
 export type VisaContext = {
-  icon:         string;
-  program:      string;
-  highlight?:   string;
-  notes:        string;
-  estimatedFee: number;
-  feeNote:      string;
-  region:       "Caribbean" | "Central America" | "South America" | "Europe" | "Asia";
-  restricted?:  boolean;
+  icon: string;
+  countryName: string;
+  region: VisaRegion;
+  program: string;
+  highlight?: string;
+  summary: string;
+  requirements?: string[];
+  benefits?: string[];
+  cautions?: string[];
+  estimatedFeeUsd?: number;
+  feeType: VisaFeeType;
+  feeNote: string;
+  riskLevel: VisaRiskLevel;
+  restricted?: boolean;
   territoryOf?: string;
+  lastVerified: string;
+  sourceUrls?: string[];
 };
 
-export const VISA_CONTEXT: Record<string, VisaContext> = {
+export type VisaCountryCode =
+  | "PA"
+  | "CR"
+  | "MX"
+  | "CO"
+  | "DO"
+  | "JM"
+  | "BB"
+  | "TT"
+  | "PR"
+  | "LC"
+  | "GD"
+  | "KY"
+  | "BS"
+  | "TC"
+  | "AG"
+  | "KN"
+  | "VC"
+  | "DM"
+  | "MS"
+  | "VG"
+  | "VI"
+  | "AW"
+  | "CW"
+  | "SX"
+  | "HT"
+  | "CU";
 
-  // ---------------------------------------------------------------------------
-  // CENTRAL AMERICA
-  // ---------------------------------------------------------------------------
+export const VISA_CONTEXT: Record<VisaCountryCode, VisaContext> = {
   PA: {
+    countryName: "Panama",
     region: "Central America",
     icon: "🇵🇦",
     program: "Pensionado Visa / Friendly Nations Visa",
     highlight: "Pensionado Visa",
-    notes: "Panama's Pensionado Visa is one of the world's best retirement programs — requires $1,000/mo pension income and comes with significant discounts on healthcare, entertainment, and utilities. The Friendly Nations Visa grants permanent residency to citizens of 50+ designated countries with proof of economic ties. No minimum stay required to maintain residency. Panama uses USD, eliminating currency risk.",
-    estimatedFee: 180,
+    summary:
+      "Panama is popular with retirees and long-term expats because of its Pensionado Visa, dollarized economy, and established expat infrastructure.",
+    requirements: [
+      "Pensionado Visa generally requires proof of pension income.",
+      "Friendly Nations residency is available to citizens of qualifying countries with economic ties to Panama.",
+      "Requirements can vary based on nationality and application route.",
+    ],
+    benefits: [
+      "Uses the US dollar.",
+      "Established expat infrastructure.",
+      "Popular retirement visa program.",
+      "Potential discounts for qualifying Pensionado residents.",
+    ],
+    cautions: [
+      "Income thresholds and documentation rules can change.",
+      "Verify current requirements before making relocation decisions.",
+    ],
+    estimatedFeeUsd: 180,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "low",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   CR: {
+    countryName: "Costa Rica",
     region: "Central America",
     icon: "🇨🇷",
     program: "Rentista / Pensionado / Digital Nomad Visa",
     highlight: "Rentista Visa",
-    notes: "Costa Rica's Rentista Visa requires $2,500/mo in guaranteed income for 2 years. Pensionado Visa needs $1,000/mo from a pension. Digital Nomad Visa (launched 2022): $3,000/mo income, 1-year renewable. All visa categories lead to a path toward permanent residency after 3 years. Costa Rica is known for its stability, healthcare, and natural beauty.",
-    estimatedFee: 200,
+    summary:
+      "Costa Rica is a stable and popular relocation destination with retirement, income-based, and remote-worker visa options.",
+    requirements: [
+      "Rentista applicants generally need proof of guaranteed recurring income.",
+      "Pensionado applicants generally need proof of pension income.",
+      "Digital nomad applicants generally need proof of remote income.",
+    ],
+    benefits: [
+      "Known for political stability.",
+      "Popular with retirees and remote workers.",
+      "Strong healthcare reputation in the region.",
+      "Clear long-term residency pathways.",
+    ],
+    cautions: [
+      "Income requirements can change.",
+      "Processing timelines and documentation requirements should be verified before applying.",
+    ],
+    estimatedFeeUsd: 200,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "low",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   MX: {
-    region: "Central America",
+    countryName: "Mexico",
+    region: "North America",
     icon: "🇲🇽",
     program: "Temporary Resident Visa / Permanent Resident Visa",
     highlight: "Temporary Resident Visa",
-    notes: "Mexico's Temporary Resident Visa (1–4 years) requires ~$2,600/mo income or ~$43,000 in savings. After 4 years you can apply for Permanent Residency. No official digital nomad visa — many remote workers enter on tourist status (180 days) and renew. Mexico has no capital gains tax on primary residence sales. Popular destinations: Mexico City, Guadalajara, Oaxaca, and the Riviera Maya.",
-    estimatedFee: 150,
+    summary:
+      "Mexico is one of the most accessible relocation options for North Americans, with temporary and permanent residency routes based on income or savings.",
+    requirements: [
+      "Temporary residency usually requires proof of monthly income or savings.",
+      "Permanent residency may require higher income, higher savings, or qualifying retirement status.",
+      "Requirements vary by consulate.",
+    ],
+    benefits: [
+      "Large expat communities.",
+      "Many major cities and beach towns to choose from.",
+      "Strong food, culture, and travel access.",
+      "Temporary residency can often lead to permanent residency.",
+    ],
+    cautions: [
+      "Financial thresholds vary by consulate and exchange rate.",
+      "There is no single official digital nomad visa category.",
+      "Tourist stays should not be treated as a replacement for proper residency.",
+    ],
+    estimatedFeeUsd: 150,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "low",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
 
-  // ---------------------------------------------------------------------------
-  // SOUTH AMERICA
-  // ---------------------------------------------------------------------------
   CO: {
+    countryName: "Colombia",
     region: "South America",
     icon: "🇨🇴",
     program: "Digital Nomad Visa / Pensionado / Migrant Visa",
     highlight: "Digital Nomad Visa",
-    notes: "Colombia's Digital Nomad Visa (V): remote workers with $800+/mo income, 2-year renewable. Pensionado Visa for retirees with $700+/mo pension. Migrant Visa (M) for long-term stays leads to permanent residency after 5 years. Medellín and Bogotá are major expat hubs. Colombia's infrastructure and culture have improved dramatically — very popular with North American remote workers.",
-    estimatedFee: 160,
+    summary:
+      "Colombia offers several relocation paths, including digital nomad, pensionado, and migrant visa options for longer-term residents.",
+    requirements: [
+      "Digital nomad applicants generally need proof of remote income.",
+      "Pensionado applicants generally need proof of pension income.",
+      "Longer-term migrant visas may require additional qualifying ties.",
+    ],
+    benefits: [
+      "Popular with North American remote workers.",
+      "Medellín and Bogotá are major expat hubs.",
+      "Lower cost of living than many US cities.",
+      "Multiple visa categories are available.",
+    ],
+    cautions: [
+      "Safety and neighborhood quality vary significantly by city and area.",
+      "Visa requirements and income thresholds should be verified before applying.",
+    ],
+    estimatedFeeUsd: 160,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
 
-  // ---------------------------------------------------------------------------
-  // CARIBBEAN
-  // ---------------------------------------------------------------------------
   DO: {
+    countryName: "Dominican Republic",
     region: "Caribbean",
     icon: "🇩🇴",
     program: "Pensionado / Rentista / Investor Residency",
     highlight: "Rentista Visa",
-    notes: "The Dominican Republic offers several residency paths. The Rentista Visa requires $1,500/mo in verifiable passive income. The Pensionado Visa requires $1,500/mo from a pension or retirement fund. Investor Residency requires a $200,000+ investment in property or a local business. Foreign-source income is generally exempt from Dominican tax for the first three years of residency. Santo Domingo and Las Terrenas are popular expat bases. Processing typically takes 3–6 months.",
-    estimatedFee: 1000,
+    summary:
+      "The Dominican Republic offers several residency routes for retirees, passive-income applicants, and investors.",
+    requirements: [
+      "Rentista applicants generally need proof of passive income.",
+      "Pensionado applicants generally need proof of pension or retirement income.",
+      "Investor residency usually requires a significant qualifying investment.",
+    ],
+    benefits: [
+      "Popular Caribbean relocation destination.",
+      "Santo Domingo and Las Terrenas are common expat bases.",
+      "Multiple residency routes are available.",
+    ],
+    cautions: [
+      "Legal help is usually recommended for residency applications.",
+      "Tax treatment should be verified with a qualified tax professional.",
+    ],
+    estimatedFeeUsd: 1000,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   JM: {
+    countryName: "Jamaica",
     region: "Caribbean",
     icon: "🇯🇲",
     program: "Temporary Residence Permit / CARICOM Free Movement",
     highlight: "Temporary Residence Permit",
-    notes: "Jamaica does not have a dedicated digital nomad or retirement visa. Non-CARICOM nationals typically apply for a Temporary Residence Permit through the Ministry of National Security, granted on a case-by-case basis — employment, family ties, or substantial investment are the most common grounds. CARICOM nationals have free movement rights. Jamaica uses a territorial tax system; foreign-source income is generally not taxed for non-residents. Montego Bay and Kingston are the main expat hubs.",
-    estimatedFee: 500,
+    summary:
+      "Jamaica does not have a dedicated digital nomad or retirement visa, so long-term stays usually depend on temporary residence, employment, family ties, investment, or CARICOM eligibility.",
+    requirements: [
+      "Non-CARICOM nationals usually need a temporary residence permit for long-term stays.",
+      "Common qualifying grounds include employment, family ties, or investment.",
+      "CARICOM nationals may have additional movement rights.",
+    ],
+    benefits: [
+      "English-speaking environment.",
+      "Strong cultural identity.",
+      "Kingston and Montego Bay are the main expat hubs.",
+    ],
+    cautions: [
+      "Residence permits are case-specific.",
+      "Applicants should verify current Ministry of National Security requirements.",
+    ],
+    estimatedFeeUsd: 500,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   BB: {
+    countryName: "Barbados",
     region: "Caribbean",
     icon: "🇧🇧",
-    program: "Welcome Stamp (Digital Nomad) / Barbados Retirement Visa",
+    program: "Welcome Stamp / Barbados Retirement Visa",
     highlight: "Welcome Stamp",
-    notes: "Barbados launched the Welcome Stamp in 2020 — one of the earliest digital nomad visas globally. It allows remote workers to live in Barbados for 12 months (renewable) with a minimum income of $50,000/year. A Retirement Visa is also available for those 60+ with sufficient pension income. Barbados has a high cost of living for the Caribbean but strong infrastructure and an English-speaking environment. Note: US citizens remain liable for US taxes regardless of residency.",
-    estimatedFee: 2000,
+    summary:
+      "Barbados is a polished Caribbean relocation option with a well-known remote work program and retirement pathways.",
+    requirements: [
+      "Welcome Stamp applicants generally need proof of remote income.",
+      "Retirement visa applicants generally need sufficient retirement income or assets.",
+    ],
+    benefits: [
+      "English-speaking environment.",
+      "Strong infrastructure by Caribbean standards.",
+      "Formal remote work program.",
+      "Attractive lifestyle destination.",
+    ],
+    cautions: [
+      "Cost of living is high.",
+      "US citizens remain subject to US tax obligations.",
+      "Income and renewal rules should be verified before applying.",
+    ],
+    estimatedFeeUsd: 2000,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "low",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   TT: {
+    countryName: "Trinidad and Tobago",
     region: "Caribbean",
     icon: "🇹🇹",
     program: "Temporary Work Permit / Investor Residency",
     highlight: "Investor Residency",
-    notes: "Trinidad and Tobago does not offer a dedicated expat retirement or digital nomad visa. Long-term stays are typically facilitated through work permits (employer-sponsored), investor residency (significant capital investment required), or spousal/family connections. Tobago is more popular with lifestyle-focused expats due to its quieter pace and natural beauty. T&T has a territorial tax system — foreign-source income is generally not taxed for non-residents. Processing timelines can be lengthy; a local immigration attorney is recommended.",
-    estimatedFee: 1500,
+    summary:
+      "Trinidad and Tobago does not offer a simple retirement or digital nomad route, so long-term relocation is usually tied to work, investment, or family connections.",
+    requirements: [
+      "Work permits are usually employer-sponsored.",
+      "Investor residency generally requires significant capital investment.",
+      "Family or spousal connections may provide another route.",
+    ],
+    benefits: [
+      "Tobago may appeal to lifestyle-focused expats.",
+      "Foreign-source income treatment may be favorable in some cases.",
+      "English-speaking environment.",
+    ],
+    cautions: [
+      "Processing can be lengthy.",
+      "A local immigration attorney is recommended.",
+      "No dedicated digital nomad visa is available.",
+    ],
+    estimatedFeeUsd: 1500,
+    feeType: "legalOrServiceEstimate",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   PR: {
+    countryName: "Puerto Rico",
     region: "Caribbean",
     icon: "🇵🇷",
-    program: "No visa required (US Territory) / Act 60 Tax Incentives",
+    program: "No Visa Required for US Citizens / Act 60 Tax Incentives",
     highlight: "Act 60 Incentives",
     territoryOf: "United States",
-    notes: "Puerto Rico is a US territory — US citizens require no visa and can move freely. The major draw is Act 60 (formerly Acts 20/22): 0% capital gains tax on appreciation accrued after becoming a bona fide resident, and 4% corporate tax for qualifying export services businesses. To qualify, you must spend at least 183 days/year in Puerto Rico and sever significant ties to the mainland. You remain subject to US federal taxes on all earned income. San Juan is the primary expat hub.",
-    estimatedFee: 5000,
+    summary:
+      "Puerto Rico is a US territory, so US citizens can move there without a visa. Its major relocation appeal is lifestyle access plus potential Act 60 tax incentives for qualifying residents and businesses.",
+    requirements: [
+      "US citizens do not need a visa.",
+      "Act 60 benefits require bona fide Puerto Rico residency.",
+      "Tax incentive eligibility depends on meeting presence, business, and tie-breaking rules.",
+    ],
+    benefits: [
+      "No visa needed for US citizens.",
+      "Uses the US dollar.",
+      "Potential tax incentives for qualifying residents and businesses.",
+      "San Juan is the primary expat and business hub.",
+    ],
+    cautions: [
+      "Act 60 is complex and should not be handled without tax guidance.",
+      "US federal tax obligations may still apply depending on income type and residency facts.",
+    ],
+    estimatedFeeUsd: 5000,
+    feeType: "legalOrServiceEstimate",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   LC: {
+    countryName: "Saint Lucia",
     region: "Caribbean",
     icon: "🇱🇨",
     program: "Citizenship by Investment / Residency by Investment",
     highlight: "Citizenship by Investment",
-    notes: "Saint Lucia's CBI program grants full citizenship via a $100,000+ National Economic Fund contribution, a $200,000+ real estate investment, or other approved options. Citizenship includes a passport with visa-free access to 140+ countries. No capital gains tax, no inheritance tax, no wealth tax. Residency without citizenship is also available through property investment. Rodney Bay and Cap Estate are popular expat areas.",
-    estimatedFee: 100000,
+    summary:
+      "Saint Lucia offers citizenship by investment and residency options for applicants seeking a Caribbean second citizenship or investment-based relocation path.",
+    requirements: [
+      "Citizenship by investment generally requires a qualifying contribution, real estate investment, or other approved investment.",
+      "Applicants must pass due diligence checks.",
+      "Residency options may require property or investment ties.",
+    ],
+    benefits: [
+      "Potential second citizenship.",
+      "No capital gains tax, inheritance tax, or wealth tax in many cases.",
+      "Rodney Bay and Cap Estate are popular expat areas.",
+    ],
+    cautions: [
+      "CBI programs require careful legal review.",
+      "Government fees, due diligence fees, and professional fees can materially increase total cost.",
+    ],
+    estimatedFeeUsd: 100000,
+    feeType: "minimumContribution",
     feeNote: FEE_NOTE.minimumContribution,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   GD: {
+    countryName: "Grenada",
     region: "Caribbean",
     icon: "🇬🇩",
     program: "Citizenship by Investment / Residency by Investment",
     highlight: "Citizenship by Investment",
-    notes: "Grenada's CBI program is the only Caribbean program that includes E-2 Treaty Investor Visa eligibility with the United States — a significant advantage for US-bound business investors. Minimum investment is $150,000 (National Transformation Fund) or $220,000 (approved real estate). Citizens enjoy visa-free or visa-on-arrival access to 140+ countries including the UK, EU Schengen area, and China. No capital gains tax, no inheritance tax, no foreign income tax.",
-    estimatedFee: 150000,
+    summary:
+      "Grenada offers a citizenship by investment program that is notable for investors because Grenadian citizenship may support eligibility for the US E-2 Treaty Investor Visa route.",
+    requirements: [
+      "Applicants generally need a qualifying government contribution or approved real estate investment.",
+      "Applicants must pass due diligence checks.",
+      "Real estate investments usually have holding-period rules.",
+    ],
+    benefits: [
+      "Potential second citizenship.",
+      "Possible US E-2 Treaty Investor Visa eligibility route.",
+      "Visa-free or visa-on-arrival access to many countries.",
+      "No capital gains tax or inheritance tax in many cases.",
+    ],
+    cautions: [
+      "E-2 eligibility is not automatic and requires a separate US visa process.",
+      "CBI costs often exceed the headline minimum contribution.",
+    ],
+    estimatedFeeUsd: 150000,
+    feeType: "minimumContribution",
     feeNote: FEE_NOTE.minimumContribution,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   KY: {
+    countryName: "Cayman Islands",
     region: "Caribbean",
     icon: "🇰🇾",
     program: "Global Citizen Concierge Program / Permanent Residency by Investment",
     highlight: "Global Citizen Concierge",
     territoryOf: "United Kingdom",
-    notes: "The Cayman Islands launched the Global Citizen Concierge Program in 2020, allowing remote workers to live there for up to 24 months. Permanent Residency by Investment requires a $1,000,000+ investment in real estate or a local business. Zero income tax, zero capital gains tax, zero inheritance tax — one of the most favorable tax environments in the world. Cost of living is very high. The Caymans use the Cayman Islands Dollar, pegged to USD. British Overseas Territory — no path to British citizenship.",
-    estimatedFee: 1500,
+    summary:
+      "The Cayman Islands is a high-cost, tax-favorable British Overseas Territory with remote-worker and investment-based residency routes.",
+    requirements: [
+      "Remote-worker programs usually require proof of high income.",
+      "Permanent residency by investment generally requires significant investment in real estate or business.",
+      "Applicants may need health insurance and clean background checks.",
+    ],
+    benefits: [
+      "No income tax, capital gains tax, or inheritance tax.",
+      "Strong financial infrastructure.",
+      "Cayman Islands Dollar is pegged to the US dollar.",
+    ],
+    cautions: [
+      "Cost of living is very high.",
+      "British Overseas Territory status does not automatically create a path to British citizenship.",
+      "Program availability and requirements should be verified.",
+    ],
+    estimatedFeeUsd: 1500,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "low",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   BS: {
+    countryName: "Bahamas",
     region: "Caribbean",
     icon: "🇧🇸",
     program: "Extended Access Permit / Permanent Residency by Investment",
     highlight: "Extended Access Permit",
-    notes: "The Bahamas introduced the Extended Access Permit in 2020, allowing remote workers and retirees to live there for up to 1 year (renewable). Permanent Residency is available through a $750,000+ real estate investment (expedited at $1.5M+). No income tax, no capital gains tax, no inheritance tax. Nassau and Exuma are popular with expats. Cost of living is high — similar to or exceeding South Florida. The Bahamian Dollar is pegged 1:1 with USD.",
-    estimatedFee: 1000,
+    summary:
+      "The Bahamas offers remote-worker access and investment-based permanent residency in a tax-favorable Caribbean environment.",
+    requirements: [
+      "Remote workers generally need proof of employment or self-employment outside the Bahamas.",
+      "Permanent residency by investment usually requires a qualifying real estate investment.",
+      "Applicants may need background checks and proof of financial self-sufficiency.",
+    ],
+    benefits: [
+      "No income tax, capital gains tax, or inheritance tax.",
+      "Bahamian dollar is pegged to the US dollar.",
+      "Nassau and Exuma are popular with expats.",
+    ],
+    cautions: [
+      "Cost of living is high.",
+      "Hurricane exposure and insurance costs should be considered.",
+      "Investment thresholds should be verified before planning.",
+    ],
+    estimatedFeeUsd: 1000,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "low",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   TC: {
+    countryName: "Turks and Caicos",
     region: "Caribbean",
     icon: "🇹🇨",
     program: "Permanent Residency by Investment / Temporary Residency",
     highlight: "Residency by Investment",
     territoryOf: "United Kingdom",
-    notes: "Turks and Caicos is a British Overseas Territory with no income tax, capital gains tax, or inheritance tax. Permanent Residency is available through a $300,000+ real estate investment. A Temporary Residency Permit can be obtained with proof of sufficient income and a clean background. The US Dollar is the official currency. Providenciales (Provo) is the main hub and home to Grace Bay, consistently rated one of the world's best beaches.",
-    estimatedFee: 25000,
+    summary:
+      "Turks and Caicos is a high-cost British Overseas Territory with temporary residence and investment-based permanent residency options.",
+    requirements: [
+      "Temporary residency usually requires proof of sufficient income and a clean background.",
+      "Permanent residency may require a qualifying real estate investment.",
+      "Requirements vary based on island and investment category.",
+    ],
+    benefits: [
+      "No income tax, capital gains tax, or inheritance tax.",
+      "Uses the US dollar.",
+      "Providenciales is the main expat hub.",
+      "Grace Bay is a globally known beach destination.",
+    ],
+    cautions: [
+      "Cost of living is high.",
+      "Investment thresholds and permit categories should be verified.",
+      "British Overseas Territory status does not automatically create UK citizenship rights.",
+    ],
+    estimatedFeeUsd: 25000,
+    feeType: "minimumInvestment",
     feeNote: FEE_NOTE.minimumInvestment,
+    riskLevel: "low",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   AG: {
+    countryName: "Antigua and Barbuda",
     region: "Caribbean",
     icon: "🇦🇬",
     program: "Citizenship by Investment / Digital Nomad Visa",
     highlight: "Citizenship by Investment",
-    notes: "Antigua and Barbuda's CBI program requires a $100,000+ National Development Fund contribution (single applicant, up to 4 family members) or $200,000+ in approved real estate. A Digital Nomad Visa (Nomad Digital Residence) launched in 2021 allows remote workers to live there for up to 2 years with proof of $50,000/year income. No capital gains tax, no inheritance tax, no foreign income tax. Citizenship requires just 5 days spent in Antigua within the first 5 years. Passport grants visa-free access to 150+ countries.",
-    estimatedFee: 100000,
+    summary:
+      "Antigua and Barbuda offers both citizenship by investment and a remote-worker residency option for people seeking Caribbean access.",
+    requirements: [
+      "CBI applicants generally need a qualifying contribution, real estate purchase, or approved investment.",
+      "Digital nomad applicants generally need proof of remote income.",
+      "CBI applicants must pass due diligence checks.",
+    ],
+    benefits: [
+      "Potential second citizenship.",
+      "Remote work option available.",
+      "No capital gains tax or inheritance tax in many cases.",
+      "Low physical presence requirement for CBI.",
+    ],
+    cautions: [
+      "CBI costs can exceed headline minimums after government and professional fees.",
+      "Remote-worker visa rules should be verified before applying.",
+    ],
+    estimatedFeeUsd: 100000,
+    feeType: "minimumContribution",
     feeNote: FEE_NOTE.minimumContribution,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   KN: {
+    countryName: "Saint Kitts and Nevis",
     region: "Caribbean",
     icon: "🇰🇳",
-    program: "Citizenship by Investment (oldest CBI program globally)",
+    program: "Citizenship by Investment",
     highlight: "Citizenship by Investment",
-    notes: "Saint Kitts and Nevis launched the world's first Citizenship by Investment program in 1984. Current minimum is $250,000 (Sustainable Island State Contribution) or $400,000+ in approved real estate. No physical presence required to maintain citizenship. No income tax, no capital gains tax, no inheritance tax. Kittitian/Nevisian passport grants visa-free or visa-on-arrival access to 150+ countries including the UK and EU Schengen area.",
-    estimatedFee: 250000,
+    summary:
+      "Saint Kitts and Nevis has one of the oldest citizenship by investment programs in the world and is aimed at applicants seeking second citizenship through contribution or investment.",
+    requirements: [
+      "Applicants generally need a qualifying government contribution or approved real estate investment.",
+      "Applicants must pass due diligence checks.",
+      "Real estate investment routes may have holding-period rules.",
+    ],
+    benefits: [
+      "Potential second citizenship.",
+      "No physical presence requirement in many cases.",
+      "No income tax, capital gains tax, or inheritance tax in many cases.",
+      "Visa-free or visa-on-arrival access to many countries.",
+    ],
+    cautions: [
+      "CBI rules and minimums change over time.",
+      "Total cost can be much higher than the headline minimum.",
+    ],
+    estimatedFeeUsd: 250000,
+    feeType: "minimumContribution",
     feeNote: FEE_NOTE.minimumContribution,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   VC: {
+    countryName: "Saint Vincent and the Grenadines",
     region: "Caribbean",
     icon: "🇻🇨",
     program: "Residency Permit / Citizenship by Investment",
     highlight: "Residency Permit",
-    notes: "Saint Vincent and the Grenadines offers residency permits for those with sufficient income or investment ties to the country. A CBI program exists but is less developed than neighboring islands — minimum $110,000 (government fund) or $220,000 (real estate). No income tax on foreign-source income, no capital gains tax, no inheritance tax. The Grenadines (Bequia, Mustique, Canouan) attract a quieter, sailing-oriented expat crowd. Infrastructure is more limited than larger Caribbean islands.",
-    estimatedFee: 2000,
+    summary:
+      "Saint Vincent and the Grenadines may appeal to quieter, sailing-focused expats, but its residency and citizenship routes are less mainstream than larger Caribbean programs.",
+    requirements: [
+      "Residency permits generally require proof of sufficient income or local ties.",
+      "Investment-based routes may require qualifying contributions or real estate investment.",
+      "Applicants may need background checks and proof of financial self-sufficiency.",
+    ],
+    benefits: [
+      "Quiet lifestyle appeal.",
+      "The Grenadines attract sailing-oriented expats.",
+      "No capital gains tax or inheritance tax in many cases.",
+    ],
+    cautions: [
+      "Infrastructure is more limited than larger Caribbean islands.",
+      "CBI information should be verified carefully because the program is less established.",
+    ],
+    estimatedFeeUsd: 2000,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   DM: {
+    countryName: "Dominica",
     region: "Caribbean",
     icon: "🇩🇲",
     program: "Citizenship by Investment / Dominica Retirement Scheme",
     highlight: "Citizenship by Investment",
-    notes: "Dominica has one of the most affordable CBI programs in the Caribbean — $100,000 minimum (single applicant) or $175,000 for a family of 4 via the Economic Diversification Fund. Known as the 'Nature Isle,' Dominica is less commercially developed than many Caribbean islands but offers dramatic natural beauty. No income tax on foreign-source income, no capital gains tax. A Retirement Scheme allows those 55+ to reside with proof of $2,000/month income.",
-    estimatedFee: 100000,
+    summary:
+      "Dominica offers one of the more affordable Caribbean citizenship by investment programs, along with retirement-oriented residence options.",
+    requirements: [
+      "CBI applicants generally need a qualifying government contribution or approved real estate investment.",
+      "Applicants must pass due diligence checks.",
+      "Retirement routes generally require proof of recurring income.",
+    ],
+    benefits: [
+      "Relatively affordable CBI option compared with some Caribbean peers.",
+      "Known for natural beauty.",
+      "No capital gains tax in many cases.",
+    ],
+    cautions: [
+      "Dominica is less commercially developed than many Caribbean islands.",
+      "CBI total costs can exceed headline minimums.",
+      "Program rules should be verified before planning.",
+    ],
+    estimatedFeeUsd: 100000,
+    feeType: "minimumContribution",
     feeNote: FEE_NOTE.minimumContribution,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   MS: {
+    countryName: "Montserrat",
     region: "Caribbean",
     icon: "🇲🇸",
     program: "British Overseas Territory Residency",
     highlight: "Residency Permit",
     territoryOf: "United Kingdom",
-    notes: "Montserrat is a British Overseas Territory with a small population (~5,000). Long-term residency is available through work permits, spousal connections, or retirement with demonstrated financial self-sufficiency. No income tax on foreign-source income for non-residents. The island is rebuilding after the Soufrière Hills volcano devastated the south in the 1990s — the northern half is safe and inhabited. Infrastructure is limited. The Eastern Caribbean Dollar (XCD) is the currency.",
-    estimatedFee: 1500,
+    summary:
+      "Montserrat is a small British Overseas Territory where long-term residence is usually tied to work, family, retirement, or demonstrated financial self-sufficiency.",
+    requirements: [
+      "Long-term residency may require a work permit, family connection, or financial self-sufficiency.",
+      "Applicants may need health, police, and financial documentation.",
+    ],
+    benefits: [
+      "Small, quiet island environment.",
+      "Eastern Caribbean Dollar is the local currency.",
+      "May appeal to people seeking a slower pace.",
+    ],
+    cautions: [
+      "Infrastructure is limited.",
+      "The island is still shaped by the Soufrière Hills volcano impact.",
+      "Residency rules should be verified directly before planning.",
+    ],
+    estimatedFeeUsd: 1500,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   VG: {
+    countryName: "British Virgin Islands",
     region: "Caribbean",
     icon: "🇻🇬",
     program: "Residence Certificate / Belonger Status",
     highlight: "Residency Permit",
     territoryOf: "United Kingdom",
-    notes: "The British Virgin Islands is a British Overseas Territory and major offshore financial center. Long-term residency requires a work permit or residence certificate — typically tied to employment or property ownership. Belonger Status (permanent residency equivalent) requires 20 years of continuous residency. No income tax, no capital gains tax, no inheritance tax. The US Dollar is the official currency. Road Town on Tortola is the capital; the BVI is a sailing mecca.",
-    estimatedFee: 3000,
+    summary:
+      "The British Virgin Islands is a high-cost British Overseas Territory where long-term residence is usually tied to employment, property, business, or long-term local ties.",
+    requirements: [
+      "Long-term residency generally requires a work permit or residence certificate.",
+      "Belonger Status usually requires a long period of continuous residence.",
+      "Applicants may need employment, property, or business ties.",
+    ],
+    benefits: [
+      "No income tax, capital gains tax, or inheritance tax in many cases.",
+      "Uses the US dollar.",
+      "Strong offshore financial services sector.",
+      "Major sailing destination.",
+    ],
+    cautions: [
+      "Cost of living is high.",
+      "Permanent status is difficult and slow.",
+      "British Overseas Territory status does not automatically create UK citizenship rights.",
+    ],
+    estimatedFeeUsd: 3000,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   VI: {
+    countryName: "US Virgin Islands",
     region: "Caribbean",
     icon: "🇻🇮",
-    program: "No visa required (US Territory) / USVI Economic Development Program",
+    program: "No Visa Required for US Citizens / Economic Development Program",
     highlight: "Economic Development Program",
     territoryOf: "United States",
-    notes: "The US Virgin Islands is a US territory — US citizens require no visa. The USVI Economic Development Program (EDA) offers up to 90% reduction in income tax, exemption from gross receipts tax, and excise tax exemptions for qualifying businesses. To qualify, you must establish a genuine business in the USVI and meet presence and employment requirements. Saint Thomas and Saint John attract lifestyle-focused expats; Saint Croix is quieter and more affordable. US citizens remain subject to federal tax obligations.",
-    estimatedFee: 2500,
+    summary:
+      "The US Virgin Islands is a US territory, so US citizens can move there without a visa. Its Economic Development Program may offer tax incentives for qualifying businesses.",
+    requirements: [
+      "US citizens do not need a visa.",
+      "Economic Development Program applicants must establish a qualifying business.",
+      "Applicants must meet presence, employment, and local business requirements.",
+    ],
+    benefits: [
+      "No visa needed for US citizens.",
+      "Uses the US dollar.",
+      "Potential tax incentives for qualifying businesses.",
+      "Saint Thomas, Saint John, and Saint Croix offer different lifestyle options.",
+    ],
+    cautions: [
+      "Tax incentives are complex and require professional guidance.",
+      "US tax obligations may still apply depending on facts and income type.",
+    ],
+    estimatedFeeUsd: 2500,
+    feeType: "legalOrServiceEstimate",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   AW: {
+    countryName: "Aruba",
     region: "Caribbean",
     icon: "🇦🇼",
     program: "ONE Happy Workcation / Aruba Residence Permit",
     highlight: "ONE Happy Workcation",
     territoryOf: "Netherlands",
-    notes: "Aruba, a constituent country of the Netherlands, launched the ONE Happy Workcation program for remote workers — up to 90 days, extendable. Long-term residency requires a permit via immigration, typically tied to employment, investment, or spousal connections. Aruba has a stable, dollarized economy (the Aruban Florin is pegged to USD) and is outside the hurricane belt — a significant advantage. Dutch nationals can relocate freely. Healthcare is good by Caribbean standards.",
-    estimatedFee: 800,
+    summary:
+      "Aruba offers a short-term remote work option and longer-term residence permits through employment, investment, or family connections.",
+    requirements: [
+      "Short-term remote workers may qualify under Aruba's workcation-style program.",
+      "Longer-term residents usually need a residence permit.",
+      "Employment, investment, or family ties are common grounds for residence.",
+    ],
+    benefits: [
+      "Outside the main hurricane belt.",
+      "Aruban Florin is pegged to the US dollar.",
+      "Stable tourism economy.",
+      "Dutch nationals may have easier relocation rights.",
+    ],
+    cautions: [
+      "Short-term workcation programs are not the same as permanent residency.",
+      "Long-term permit requirements should be verified before planning.",
+    ],
+    estimatedFeeUsd: 800,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "low",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   CW: {
+    countryName: "Curaçao",
     region: "Caribbean",
     icon: "🇨🇼",
     program: "Remote Work Permit / Curaçao Residence Permit",
     highlight: "Remote Work Permit",
     territoryOf: "Netherlands",
-    notes: "Curaçao is a Dutch constituent country with a formal Remote Work Permit introduced in 2021, allowing remote workers to live there for 6 months. Long-term residency is available through investment, employment, or family connections under the Dutch Kingdom framework. Dutch nationals have free movement rights. Curaçao has a territorial tax system — income earned outside the island is generally not taxed locally. Willemstad is a UNESCO World Heritage city. Outside the main hurricane belt.",
-    estimatedFee: 700,
+    summary:
+      "Curaçao offers remote work and longer-term residence routes under the Dutch Kingdom framework.",
+    requirements: [
+      "Remote work applicants generally need proof of foreign employment or self-employment.",
+      "Long-term residency may be based on investment, employment, or family connections.",
+      "Dutch nationals may have easier movement rights.",
+    ],
+    benefits: [
+      "Outside the main hurricane belt.",
+      "Willemstad is a UNESCO World Heritage city.",
+      "Territorial tax treatment may be favorable in some cases.",
+      "Formal remote work route available.",
+    ],
+    cautions: [
+      "Remote permits are usually temporary.",
+      "Local tax treatment should be verified with a professional.",
+    ],
+    estimatedFeeUsd: 700,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "low",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   SX: {
+    countryName: "Sint Maarten",
     region: "Caribbean",
     icon: "🇸🇽",
     program: "Sint Maarten Residence Permit",
     highlight: "Residence Permit",
     territoryOf: "Netherlands",
-    notes: "Sint Maarten (Dutch side) is a constituent country of the Netherlands sharing the island of Saint Martin with France. Dutch nationals have free movement rights. Others must apply for a residence permit through Immigration, typically on grounds of employment, investment, or family. No dedicated digital nomad visa exists. US Dollars are widely accepted. The island was severely impacted by Hurricane Irma in 2017 and has largely rebuilt. Philipsburg is the capital.",
-    estimatedFee: 1000,
+    summary:
+      "Sint Maarten does not have a dedicated digital nomad visa, so long-term residence is usually based on employment, investment, or family connections.",
+    requirements: [
+      "Non-Dutch nationals generally need a residence permit.",
+      "Common grounds include employment, investment, or family ties.",
+      "Dutch nationals may have easier movement rights.",
+    ],
+    benefits: [
+      "US dollars are widely accepted.",
+      "Philipsburg is the capital and main commercial hub.",
+      "Shared-island access with the French side of Saint Martin.",
+    ],
+    cautions: [
+      "No dedicated digital nomad visa exists.",
+      "Hurricane risk should be considered.",
+      "Permit rules should be verified before applying.",
+    ],
+    estimatedFeeUsd: 1000,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "medium",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   HT: {
+    countryName: "Haiti",
     region: "Caribbean",
     icon: "🇭🇹",
     program: "Haitian Residency Permit",
+    highlight: "Residency Permit",
     restricted: true,
-    notes: "Haiti has a residency permit process through the Direction de l'Immigration et de l'Émigration, but the current political and security environment makes long-term expat relocation extremely difficult. Most international advisories currently recommend against travel to Haiti. Administrative processes are inconsistently enforced. Consult your government's travel advisory and a local legal expert before making any plans.",
-    estimatedFee: 500,
+    summary:
+      "Haiti has a residency process, but the current security and political environment makes long-term expat relocation extremely difficult.",
+    requirements: [
+      "Residency typically requires immigration documentation through Haitian authorities.",
+      "Applicants may need local legal support due to administrative complexity.",
+    ],
+    benefits: [
+      "Potential long-term residence route exists in theory.",
+    ],
+    cautions: [
+      "Most relocation planning should be paused unless there is a serious reason to move.",
+      "Security conditions are a major concern.",
+      "Government travel advisories should be checked before any travel or relocation planning.",
+    ],
+    estimatedFeeUsd: 500,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "restricted",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
+
   CU: {
+    countryName: "Cuba",
     region: "Caribbean",
     icon: "🇨🇺",
-    program: "Cuban Long-Stay Visa / Prorroga",
+    program: "Cuban Long-Stay Visa / Prórroga",
+    highlight: "Long-Stay Visa",
     restricted: true,
-    notes: "Cuba has strict entry and residency rules. US citizens face additional legal restrictions under US Treasury OFAC regulations — most travel to Cuba remains prohibited for US nationals except under specific licensed categories. Non-US nationals can obtain a long-stay visa (prorroga) extendable in-country, or pursue residency through marriage to a Cuban national. Internet access, banking, and financial infrastructure are severely limited. US citizens must consult OFAC guidance before making any plans.",
-    estimatedFee: 300,
+    summary:
+      "Cuba has strict entry and residency rules, and US citizens face additional restrictions under US law.",
+    requirements: [
+      "Longer stays may require extensions or specific visa categories.",
+      "Residency may be possible through family or marriage routes.",
+      "US nationals must comply with applicable US travel and financial restrictions.",
+    ],
+    benefits: [
+      "Long-stay options may exist for qualifying applicants.",
+    ],
+    cautions: [
+      "US citizens face additional legal restrictions.",
+      "Banking, internet, and financial infrastructure can be difficult.",
+      "Applicants should verify both Cuban requirements and their home-country restrictions before planning.",
+    ],
+    estimatedFeeUsd: 300,
+    feeType: "processing",
     feeNote: FEE_NOTE.processing,
+    riskLevel: "restricted",
+    lastVerified: "2026-04-26",
+    sourceUrls: [],
   },
 };
 
+export const VISA_DISCLAIMER =
+  "Visa, tax, residency, and immigration rules change frequently. This information is for general planning only and is not legal, tax, or immigration advice. Always verify details with official government sources or a qualified professional before making relocation decisions.";
+
+export function isVisaCountryCode(code: string): code is VisaCountryCode {
+  return code.toUpperCase() in VISA_CONTEXT;
+}
+
 export function getVisaContext(code: string): VisaContext | undefined {
-  return VISA_CONTEXT[code];
+  const normalizedCode = code.toUpperCase();
+
+  if (!isVisaCountryCode(normalizedCode)) {
+    return undefined;
+  }
+
+  return VISA_CONTEXT[normalizedCode];
+}
+
+export function getVisaContextsByRegion(region: VisaRegion): VisaContext[] {
+  return Object.values(VISA_CONTEXT).filter(
+    (context) => context.region === region
+  );
+}
+
+export function getRestrictedVisaContexts(): VisaContext[] {
+  return Object.values(VISA_CONTEXT).filter((context) => context.restricted);
+}
+
+export function getAffordableVisaContexts(maxFeeUsd: number): VisaContext[] {
+  return Object.values(VISA_CONTEXT).filter((context) => {
+    if (!context.estimatedFeeUsd) return false;
+    return context.estimatedFeeUsd <= maxFeeUsd;
+  });
 }

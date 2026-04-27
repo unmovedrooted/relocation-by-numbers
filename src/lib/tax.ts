@@ -4,11 +4,17 @@ export type FilingStatus = "single" | "married";
 
 /** Full annual tax breakdown. Use estimateNetBreakdown() to get this. */
 export type TaxBreakdown = {
-  net: number;
+  gross: number;
+  k401: number;
+  after401k: number;
+  taxableFederal: number;
+  taxableState: number;
   federal: number;
   fica: number;
   state: number;
   local: number;
+  totalTax: number;
+  net: number;
 };
 
 type Bracket = { upTo: number; rate: number };
@@ -67,8 +73,8 @@ function federalBrackets(filing: FilingStatus): Bracket[] {
 }
 
 // ─── FICA ─────────────────────────────────────────────────────────────────────
-function ficaTax(wagesAfter401k: number, filing: FilingStatus): number {
-  const wages = Math.max(0, wagesAfter401k);
+function ficaTax(grossWages: number, filing: FilingStatus): number {
+  const wages = Math.max(0, grossWages);
   const ssWageBase = 176_100; // 2025 SS wage base
   const ss       = Math.min(wages, ssWageBase) * 0.062;
   const medicare = wages * 0.0145;
@@ -144,7 +150,17 @@ function stateDeductForFiling(
 // ─── State brackets ───────────────────────────────────────────────────────────
 type StateBracketSet = { single: Bracket[]; married: Bracket[] };
 
-const STATE_NONE = new Set<StateCode>(["fl", "tx", "wa"]);
+const STATE_NONE = new Set<StateCode>([
+  "ak",
+  "fl",
+  "nh",
+  "nv",
+  "sd",
+  "tn",
+  "tx",
+  "wa",
+  "wy",
+]);
 
 // Flat-rate states (rate applied to state taxable income after state deduction)
 const STATE_FLAT: Partial<Record<StateCode, number>> = {
@@ -288,13 +304,7 @@ const STATE_BRACKETS: Partial<Record<StateCode, StateBracketSet>> = {
 type RateBands = Array<{ upTo: number; rate: number }>; // rate is in percent
 
 const STATE_EFFECTIVE_FALLBACK: Partial<Record<StateCode, RateBands>> = {
-  // No income tax
-  tn: [{ upTo: Infinity, rate: 0.0  }], // Hall Tax fully repealed
-  nh: [{ upTo: Infinity, rate: 0.0  }], // no earned income tax
-  sd: [{ upTo: Infinity, rate: 0.0  }],
-  wy: [{ upTo: Infinity, rate: 0.0  }],
-  nv: [{ upTo: Infinity, rate: 0.0  }],
-  ak: [{ upTo: Infinity, rate: 0.0  }],
+  
 
   // Approximate effective rates for remaining states
   mn: [{ upTo: 75_000, rate: 5.5 }, { upTo: Infinity, rate: 7.8  }],
@@ -422,15 +432,19 @@ export type TaxOpts = {
  * Both public exports delegate here so the math only lives in one place.
  */
 function compute(opts: TaxOpts): {
-  after401k:      number;
+  gross: number;
+  k401: number;
+  after401k: number;
   taxableFederal: number;
-  taxableState:   number;
-  federal:        number;
-  fica:           number;
-  state:          number;
-  local:          number;
-  net:            number;
+  taxableState: number;
+  federal: number;
+  fica: number;
+  state: number;
+  local: number;
+  totalTax: number;
+  net: number;
 } {
+
   const gross    = Math.max(0, Number(opts.grossAnnual) || 0);
   const k401Pct  = clamp(Number(opts.k401Pct) || 0, 0, 60);
   const k401     = Math.min(gross * (k401Pct / 100), EMPLOYEE_401K_LIMIT);
@@ -454,9 +468,22 @@ function compute(opts: TaxOpts): {
   const state          = estimateStateTax(opts.state, taxableState, opts.filing);
   const local          = estimateLocalIncomeTax(opts.cityId, taxableState, opts.filing);
 
-  const net = Math.max(0, after401k - federal - fica - state - local);
+const totalTax = federal + fica + state + local;
+const net = Math.max(0, after401k - totalTax);
 
-  return { after401k, taxableFederal, taxableState, federal, fica, state, local, net };
+return {
+  gross,
+  k401,
+  after401k,
+  taxableFederal,
+  taxableState,
+  federal,
+  fica,
+  state,
+  local,
+  totalTax,
+  net,
+};
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -474,8 +501,33 @@ export function estimateNetAnnual(opts: TaxOpts): number {
  * Use this when displaying individual tax components in the UI.
  */
 export function estimateNetBreakdown(opts: TaxOpts): TaxBreakdown {
-  const { net, federal, fica, state, local } = compute(opts);
-  return { net, federal, fica, state, local };
+  const {
+    gross,
+    k401,
+    after401k,
+    taxableFederal,
+    taxableState,
+    federal,
+    fica,
+    state,
+    local,
+    totalTax,
+    net,
+  } = compute(opts);
+
+  return {
+    gross,
+    k401,
+    after401k,
+    taxableFederal,
+    taxableState,
+    federal,
+    fica,
+    state,
+    local,
+    totalTax,
+    net,
+  };
 }
 
 export function effectiveTaxRatePct(netAnnual: number, grossAnnual: number) {

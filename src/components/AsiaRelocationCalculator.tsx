@@ -292,7 +292,7 @@ function VisaContextCard({ countryCode }: { countryCode: string }) {
 // ---------------------------------------------------------------------------
 export default function AsiaRelocationCalculator() {
   const hasMounted = useRef(false);
-  const hasAppliedCityDefaults = useRef(false);
+  const lastDefaultedCityCode = useRef<string | null>(null);
   const [qsHydrated, setQsHydrated] = useState(false);
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
   const [taxNotesExpanded, setTaxNotesExpanded] = useState(false);
@@ -384,26 +384,34 @@ export default function AsiaRelocationCalculator() {
   }, [toCountry, toCities, toCityCode]);
 
   useEffect(() => {
-  if (!selectedCityDefaults || !qsHydrated || hasAppliedCityDefaults.current) return;
-  hasAppliedCityDefaults.current = true;
-    const d = selectedCityDefaults;
-    setDestinationRent(String(d.monthlyDefaults.rent));
-    setDepositRequired(String(d.monthlyDefaults.rent * d.housing.depositMonths));
-    setFirstMonthRent(String(d.monthlyDefaults.rent));
-    setLastMonthRent(String(d.housing.lastMonthRentDefault));
-    setUtilitiesIncluded(d.housing.utilitiesIncludedDefault);
-    setGroceries(String(d.monthlyDefaults.groceries));
-    setUtilities(String(d.monthlyDefaults.utilities));
-    setTransportation(String(d.monthlyDefaults.transport));
-    setHealthcare(String(d.monthlyDefaults.healthcare));
-    setVisaCost(String(d.startupCosts.visa));
-    setFlightCost(String(d.startupCosts.flight));
-    setShippingCost(String(d.startupCosts.shipping));
-    setTemporaryStay(String(d.startupCosts.temporaryStay));
-    setAdminFees(String(d.startupCosts.adminFees));
-    setFurnitureSetup(String(d.housing.furnishedSetupCost));
-    setEmergencyCashBuffer(String(d.startupCosts.emergencyBuffer));
-  }, [selectedCityDefaults, qsHydrated]);
+  if (!selectedCityDefaults || !qsHydrated) return;
+
+  // Only auto-apply defaults when the destination city actually changes.
+  // This fixes the launch bug where Bangkok defaults could stay when switching to Tokyo, Singapore, etc.
+  if (lastDefaultedCityCode.current === toCityCode) return;
+  lastDefaultedCityCode.current = toCityCode;
+
+  const d = selectedCityDefaults;
+
+  setDestinationRent(String(d.monthlyDefaults.rent));
+  setDepositRequired(String(d.monthlyDefaults.rent * d.housing.depositMonths));
+  setFirstMonthRent(String(d.monthlyDefaults.rent));
+  setLastMonthRent(String(d.housing.lastMonthRentDefault));
+  setUtilitiesIncluded(d.housing.utilitiesIncludedDefault);
+
+  setGroceries(String(d.monthlyDefaults.groceries));
+  setUtilities(String(d.monthlyDefaults.utilities));
+  setTransportation(String(d.monthlyDefaults.transport));
+  setHealthcare(String(d.monthlyDefaults.healthcare));
+
+  setVisaCost(String(d.startupCosts.visa));
+  setFlightCost(String(d.startupCosts.flight));
+  setShippingCost(String(d.startupCosts.shipping));
+  setTemporaryStay(String(d.startupCosts.temporaryStay));
+  setAdminFees(String(d.startupCosts.adminFees));
+  setFurnitureSetup(String(d.housing.furnishedSetupCost));
+  setEmergencyCashBuffer(String(d.startupCosts.emergencyBuffer));
+}, [selectedCityDefaults, qsHydrated, toCityCode]);
 
   useEffect(() => {
     const qs = getQS();
@@ -535,7 +543,9 @@ export default function AsiaRelocationCalculator() {
     // by the destination exchange rate, producing a tiny and wrong number.
     const familyGroceries      = nz(groceries)      * (1 + (adultCount - 1) * 0.55 + childCount * 0.35);
     const familyTransportation = nz(transportation) * (1 + (adultCount - 1) * 0.35 + childCount * 0.15);
-    const healthcareAdj        = nz(healthcare)     * (1 + (adultCount - 1) * 0.7  + childCount * 0.5);
+    const familyHealthcare = nz(healthcare) * (1 + (adultCount - 1) * 0.7 + childCount * 0.5);
+
+const healthcareAdj = familyHealthcare 
     const familyUtilities      = nz(utilities)      * (1 + (adultCount - 1) * 0.25 + childCount * 0.15);
 
     const groceriesAdj      = familyGroceries      * toCityMultipliers.groceries;
@@ -710,7 +720,7 @@ comfort,
                 </select>
               </label>
               <div className="text-sm">
-                <div className={labelHeadCls}>Income impact <InfoTip align="right" text="Shows how your estimated monthly take-home pay changes between your current location and destination after taxes." /></div>
+                <div className={labelHeadCls}>Tax impact only <InfoTip align="right" text="Shows how your estimated monthly take-home pay changes between your current location and destination after taxes." /></div>
                 <div className="flex h-11 w-full items-center justify-between rounded-xl border border-slate-300 px-3">
                   {results.salaryReady ? (
                     <>

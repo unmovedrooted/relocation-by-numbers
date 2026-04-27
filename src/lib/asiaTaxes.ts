@@ -326,13 +326,13 @@ return {
         label:
           residency === "non_resident"
             ? "Thailand — non-resident (foreign-source income not taxed)"
-            : "Thailand — resident, foreign income not remitted (not taxable in 2024)",
+            : "Thailand — resident, foreign income kept outside Thailand",
         missingFactor:
           "Assumes foreign income earned and kept abroad; remittance to Thailand triggers tax.",
         note:
           residency === "non_resident"
             ? "Non-residents are only taxed on Thailand-source income. Foreign-source income from a foreign employer is generally not subject to Thai PIT if the work is not performed in Thailand."
-            : "Under Thailand's 2024 rule, foreign income earned in a given tax year and not remitted to Thailand in that same year is generally not taxable. Verify with a Thai tax advisor before relying on this.",
+            : "This assumes foreign-source income is kept outside Thailand. Thailand's foreign-income remittance rules changed in 2024, so remitted foreign income may become taxable for Thai tax residents. Verify before relying on this estimate.",
       };
     }
 
@@ -470,14 +470,13 @@ return {
 const rates = combineRates(incomeTaxRate, socialContributionRate);
 
     return {
-      ...rates,
-      model: "progressive-country",
-      confidence: "simplified",
-      label: "Malaysia income tax (2024 — local employment)",
-      missingFactor:
-        "Personal relief system not modelled.",
-      note: "Brackets are 2024 figures. EPF employee contribution is estimated at 11%. Personal reliefs are not modelled. Income must be passed in MYR.",
-    };
+  ...rates,
+  model: "progressive-country",
+  confidence: "simplified",
+  label: "Malaysia income tax (2024 — local employment)",
+  missingFactor: "Personal relief system not modelled.",
+  note: "Brackets are 2024 figures. EPF employee contribution is estimated at 11%. Personal reliefs are not modelled. Income must be passed in MYR.",
+};
   },
 
   // -------------------------------------------------------------------------
@@ -946,13 +945,13 @@ const socialContributionRate = effectiveRateFromTax(accLevyAmount, annualIncome)
 const rates = combineRates(incomeTaxRate, socialContributionRate);
 
     return {
-      ...rates,
-      model: "progressive-country",
-      confidence: "partial",
-      label: "New Zealand PAYE (2024-25)",
-      missingFactor: "Low-income tax credits and other individual adjustments not included.",
-      note: "2024-25 brackets included. ACC earner levy is estimated at 1.6% up to the income cap. Income must be passed in NZD.",
-    };
+  ...rates,
+  model: "progressive-country",
+  confidence: "partial",
+  label: "New Zealand PAYE (2024-25)",
+  missingFactor: "Low-income tax credits and other individual adjustments not included.",
+  note: "2024-25 brackets included. ACC earner levy is estimated at 1.6% up to the income cap. Income must be passed in NZD.",
+};
   },
 
 };
@@ -974,19 +973,28 @@ const ASIA_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
       ],
     },
   ],
-  TH: [
-    {
-      key: "th_residency",
-      label: "What is your Thailand tax and remittance situation?",
-      helpText:
-        "From 1 January 2024, Thailand taxes residents (≥180 days/year) on foreign income remitted to Thailand in the same year it was earned. Non-residents or residents who keep foreign income abroad are not taxed on it.",
-      options: [
-        { value: "resident_remits",    label: "Resident (≥180 days) — I remit foreign income to Thailand in the same year" },
-        { value: "resident_no_remit",  label: "Resident (≥180 days) — I keep foreign income abroad (not remitted same year)" },
-        { value: "non_resident",       label: "Non-resident — fewer than 180 days in Thailand" },
-      ],
-    },
-  ],
+ TH: [
+  {
+    key: "th_residency",
+    label: "Will you live in Thailand most of the year and bring your income into Thailand?",
+    helpText:
+      "Thailand tax residents are generally people who spend 180+ days in Thailand in a calendar year. Since 2024, foreign-source income earned from Jan 1, 2024 onward may be taxable when remitted into Thailand. Non-residents are generally taxed only on Thailand-source income.",
+    options: [
+      {
+        value: "resident_remits",
+        label: "Resident — 180+ days and I remit foreign income to Thailand",
+      },
+      {
+        value: "resident_no_remit",
+        label: "Resident — 180+ days but I keep foreign income outside Thailand",
+      },
+      {
+        value: "non_resident",
+        label: "Non-resident — fewer than 180 days in Thailand",
+      },
+    ],
+  },
+],
   VN: [
     {
       key: "vn_residency",

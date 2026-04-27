@@ -3,42 +3,48 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { STATES, type StateCode } from '@/lib/states'
 import { citiesForState, findCity, type City } from '@/lib/cities'
-import { estimateNetAnnual, type FilingStatus } from '@/lib/tax'
+import {
+  estimateNetAnnual,
+  estimateNetBreakdown,
+  EMPLOYEE_401K_LIMIT,
+  type FilingStatus,
+} from '@/lib/tax'
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-type HousingMode = 'rent' | 'buy'
-type HouseholdType = 'solo' | 'couple' | 'family'
-type Verdict = 'Safe' | 'Tight' | 'Stretch'
+type HousingMode    = 'rent' | 'buy'
+type HouseholdType  = 'solo' | 'couple' | 'family'
+type Verdict        = 'Safe' | 'Tight' | 'Stretch'
 
 interface LivingCosts {
-  groceries: number
-  utilities: number
+  groceries:      number
+  utilities:      number
   transportation: number
-  healthcare: number
-  childcare: number
-  miscellaneous: number
+  healthcare:     number
+  childcare:      number
+  miscellaneous:  number
 }
 
 interface Results {
-  netMonthlyOne: number
-  netMonthlyTwo: number
-  housingCost: number
-  totalLiving: number
-  flexibilityOne: number
-  flexibilityTwo: number
-  housingBurdenOne: number
-  housingBurdenTwo: number
-  verdictOne: Verdict
-  verdictTwo: Verdict
+  netMonthlyOne:        number
+  netMonthlyTwo:        number
+  housingCost:          number
+  totalLiving:          number
+  flexibilityOne:       number
+  flexibilityTwo:       number
+  housingBurdenOne:     number
+  housingBurdenTwo:     number
+  verdictOne:           Verdict
+  verdictTwo:           Verdict
   minIncomeForCashflow: number
-  minIncomeFor30Pct: number
-  taxesOne: number
-  taxesTwo: number
-  insightMessage: string
-  targetCityName: string
-  currentCityName: string
-  hasTwoIncomes: boolean
+  minIncomeFor30Pct:    number
+  taxesOne:             number
+  taxesTwo:             number
+  insightMessage:       string
+  targetCityName:       string
+  targetCitySlug:       string   // e.g. "raleigh-nc" — used for dynamic /cost-of-living links
+  currentCityName:      string
+  hasTwoIncomes:        boolean
 }
 
 // ─── Base COL (national monthly averages) ────────────────────────────────────
@@ -49,13 +55,32 @@ const BASE_COL = {
   family: { groceries: 800, utilities: 185, transportation: 520, healthcare: 420, childcare: 1000, miscellaneous: 480 },
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── URL param keys (single source of truth) ─────────────────────────────────
+
+const PARAM_KEYS = [
+  'household', 'adults', 'children',
+  'income1', 'income2', 'filing', 'k401Pct1', 'k401Pct2',
+  'currentState', 'currentCityId', 'targetState', 'targetCityId',
+  'housingMode', 'monthlyRent', 'rentersInsurance',
+  'homePrice', 'downPct', 'mortgageRate', 'termYears', 'hoa',
+] as const
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
 const fmtK = (n: number) =>
   n >= 1000 ? `$${Math.round(n / 1000)}k` : fmt(n)
+
+/**
+ * Strips all non-numeric characters except the decimal point.
+ * Handles "$95,000", "95k" (k suffix ignored), "100 000", locale variations.
+ * Returns 0 for empty / non-numeric strings instead of NaN.
+ */
+function parseMoney(val: string): number {
+  return Number(val.replace(/[^\d.]/g, '')) || 0
+}
 
 function calcMortgagePI(homePrice: number, downPct: number, ratePct: number, termYears: number): number {
   const principal = homePrice * (1 - downPct / 100)
@@ -80,44 +105,42 @@ function verdictStyles(v: Verdict): string {
 }
 
 function verdictBorderColor(v: Verdict): string {
-  if (v === 'Safe') return 'border-emerald-400 dark:border-emerald-700'
-  if (v === 'Tight') return 'border-amber-400 dark:border-amber-700'
+  if (v === 'Safe')   return 'border-emerald-400 dark:border-emerald-700'
+  if (v === 'Tight')  return 'border-amber-400 dark:border-amber-700'
   return 'border-red-400 dark:border-red-700'
 }
 
 function estimateCombinedNet(
-  income1: number,
-  income2: number,
-  state: StateCode,
-  filing: FilingStatus,
-  k401Pct1: number,
-  k401Pct2: number,
-  cityId: string,
+  income1:   number,
+  income2:   number,
+  state:     StateCode,
+  filing:    FilingStatus,
+  k401Pct1:  number,
+  k401Pct2:  number,
+  cityId:    string,
 ): number {
   if (income2 === 0) {
     return estimateNetAnnual({ grossAnnual: income1, state, filing, k401Pct: k401Pct1, cityId })
   }
   if (filing === 'married') {
-    // Combine for MFJ; handle dual 401k caps per person
-    const k401_1 = Math.min(income1 * (k401Pct1 / 100), 23_000)
-    const k401_2 = Math.min(income2 * (k401Pct2 / 100), 23_000)
+    const k401_1 = Math.min(income1 * (k401Pct1 / 100), EMPLOYEE_401K_LIMIT)
+    const k401_2 = Math.min(income2 * (k401Pct2 / 100), EMPLOYEE_401K_LIMIT)
     const combined = income1 + income2
     const effectiveK401Pct = combined > 0 ? ((k401_1 + k401_2) / combined) * 100 : 0
     return estimateNetAnnual({ grossAnnual: combined, state, filing: 'married', k401Pct: effectiveK401Pct, cityId })
   }
-  // Non-married: sum separately
   const net1 = estimateNetAnnual({ grossAnnual: income1, state, filing: 'single', k401Pct: k401Pct1, cityId })
   const net2 = estimateNetAnnual({ grossAnnual: income2, state, filing: 'single', k401Pct: k401Pct2, cityId })
   return net1 + net2
 }
 
 function findMinIncome2(
-  income1: number,
-  state: StateCode,
-  filing: FilingStatus,
-  k401Pct1: number,
-  k401Pct2: number,
-  cityId: string,
+  income1:         number,
+  state:           StateCode,
+  filing:          FilingStatus,
+  k401Pct1:        number,
+  k401Pct2:        number,
+  cityId:          string,
   targetNetMonthly: number,
 ): number {
   const alreadyMet = estimateCombinedNet(income1, 0, state, filing, k401Pct1, k401Pct2, cityId) / 12
@@ -135,7 +158,7 @@ function findMinIncome2(
 
 function getPrefillCosts(city: City | undefined, householdType: HouseholdType, children: number): LivingCosts {
   const base = BASE_COL[householdType]
-  const col = city?.col
+  const col  = city?.col
   const extraKids = Math.max(0, children - 1) * 850
   return {
     groceries:      Math.round(base.groceries      * (col?.groceries  ?? 1)),
@@ -155,7 +178,59 @@ function cityLabel(c: City): string {
   return c.tier ? `${c.name} — ${c.tier}` : c.name
 }
 
-// ─── Label + Input primitives ─────────────────────────────────────────────────
+// ─── URL serialise / restore ──────────────────────────────────────────────────
+
+/**
+ * Builds a URL with all scenario state embedded as query params.
+ * Call this right before copying the link so nothing is stale.
+ */
+function buildScenarioUrl(state: {
+  householdType:    HouseholdType
+  adults:           number
+  children:         number
+  income1:          string
+  income2:          string
+  filing:           FilingStatus
+  k401Pct1:         string
+  k401Pct2:         string
+  currentState:     StateCode
+  currentCityId:    string
+  targetState:      StateCode
+  targetCityId:     string
+  housingMode:      HousingMode
+  monthlyRent:      string
+  rentersInsurance: string
+  homePrice:        string
+  downPct:          string
+  mortgageRate:     string
+  termYears:        string
+  hoa:              string
+}): string {
+  const url = new URL(window.location.href)
+  url.searchParams.set('household',        state.householdType)
+  url.searchParams.set('adults',           String(state.adults))
+  url.searchParams.set('children',         String(state.children))
+  url.searchParams.set('income1',          state.income1)
+  url.searchParams.set('income2',          state.income2)
+  url.searchParams.set('filing',           state.filing)
+  url.searchParams.set('k401Pct1',         state.k401Pct1)
+  url.searchParams.set('k401Pct2',         state.k401Pct2)
+  url.searchParams.set('currentState',     state.currentState)
+  url.searchParams.set('currentCityId',    state.currentCityId)
+  url.searchParams.set('targetState',      state.targetState)
+  url.searchParams.set('targetCityId',     state.targetCityId)
+  url.searchParams.set('housingMode',      state.housingMode)
+  url.searchParams.set('monthlyRent',      state.monthlyRent)
+  url.searchParams.set('rentersInsurance', state.rentersInsurance)
+  url.searchParams.set('homePrice',        state.homePrice)
+  url.searchParams.set('downPct',          state.downPct)
+  url.searchParams.set('mortgageRate',     state.mortgageRate)
+  url.searchParams.set('termYears',        state.termYears)
+  url.searchParams.set('hoa',              state.hoa)
+  return url.toString()
+}
+
+// ─── Primitive UI pieces ──────────────────────────────────────────────────────
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -171,8 +246,6 @@ const inputCls =
 const selectCls =
   'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:ring-violet-500/20 cursor-pointer'
 
-// ─── Result stat card ─────────────────────────────────────────────────────────
-
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-4">
@@ -186,19 +259,20 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function RelocationIncomeCalculator() {
-  const resultsRef = useRef<HTMLDivElement>(null)
+  const resultsRef  = useRef<HTMLDivElement>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // — Household
   const [householdType, setHouseholdType] = useState<HouseholdType>('couple')
-  const [adults,   setAdults]   = useState(2)
-  const [children, setChildren] = useState(0)
+  const [adults,        setAdults]        = useState(2)
+  const [children,      setChildren]      = useState(0)
 
   // — Income
-  const [income1,   setIncome1]   = useState('')
-  const [income2,   setIncome2]   = useState('')
-  const [filing,    setFiling]    = useState<FilingStatus>('married')
-  const [k401Pct1,  setK401Pct1]  = useState('6')
-  const [k401Pct2,  setK401Pct2]  = useState('6')
+  const [income1,  setIncome1]  = useState('')
+  const [income2,  setIncome2]  = useState('')
+  const [filing,   setFiling]   = useState<FilingStatus>('married')
+  const [k401Pct1, setK401Pct1] = useState('6')
+  const [k401Pct2, setK401Pct2] = useState('6')
 
   // — Locations
   const [currentState,  setCurrentState]  = useState<StateCode>('ny')
@@ -212,9 +286,9 @@ export default function RelocationIncomeCalculator() {
   const [rentersInsurance, setRentersInsurance] = useState('20')
   const [homePrice,        setHomePrice]        = useState('')
   const [downPct,          setDownPct]          = useState('10')
-  const [mortgageRate,     setMortgageRate]      = useState('6.75')
-  const [termYears,        setTermYears]         = useState('30')
-  const [hoa,              setHoa]               = useState('0')
+  const [mortgageRate,     setMortgageRate]     = useState('6.75')
+  const [termYears,        setTermYears]        = useState('30')
+  const [hoa,              setHoa]              = useState('0')
 
   // — Living costs
   const [costs, setCosts] = useState<LivingCosts>(() =>
@@ -222,32 +296,70 @@ export default function RelocationIncomeCalculator() {
   )
   const [costsManuallyEdited, setCostsManuallyEdited] = useState(false)
 
-  // — Results
-  const [results, setResults] = useState<Results | null>(null)
-  const [error,   setError]   = useState('')
-  const [saveStatus, setSaveStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
+  // — Results / UI state
+  const [results,    setResults]    = useState<Results | null>(null)
+  const [error,      setError]      = useState('')
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'copied' | 'shared' | 'error'>('idle')
 
-  // — FAQ open state
-  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  // ─── Restore from URL params on first mount ────────────────────────────────
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const p = new URLSearchParams(window.location.search)
 
-  // Auto-update rent + home price when target city changes
+    const household = p.get('household') as HouseholdType | null
+    if (household && ['solo', 'couple', 'family'].includes(household)) {
+      setHouseholdType(household)
+    }
+    if (p.get('adults'))           setAdults(Number(p.get('adults')))
+    if (p.get('children'))         setChildren(Number(p.get('children')))
+    if (p.get('income1'))          setIncome1(p.get('income1')!)
+    if (p.get('income2'))          setIncome2(p.get('income2')!)
+
+    const filing = p.get('filing') as FilingStatus | null
+    if (filing && ['married', 'single'].includes(filing)) setFiling(filing)
+
+    if (p.get('k401Pct1'))         setK401Pct1(p.get('k401Pct1')!)
+    if (p.get('k401Pct2'))         setK401Pct2(p.get('k401Pct2')!)
+
+    const cState = p.get('currentState') as StateCode | null
+    if (cState) setCurrentState(cState)
+    if (p.get('currentCityId'))    setCurrentCityId(p.get('currentCityId')!)
+
+    const tState = p.get('targetState') as StateCode | null
+    if (tState) setTargetState(tState)
+    if (p.get('targetCityId'))     setTargetCityId(p.get('targetCityId')!)
+
+    const mode = p.get('housingMode') as HousingMode | null
+    if (mode && ['rent', 'buy'].includes(mode)) setHousingMode(mode)
+
+    if (p.get('monthlyRent'))      setMonthlyRent(p.get('monthlyRent')!)
+    if (p.get('rentersInsurance')) setRentersInsurance(p.get('rentersInsurance')!)
+    if (p.get('homePrice'))        setHomePrice(p.get('homePrice')!)
+    if (p.get('downPct'))          setDownPct(p.get('downPct')!)
+    if (p.get('mortgageRate'))     setMortgageRate(p.get('mortgageRate')!)
+    if (p.get('termYears'))        setTermYears(p.get('termYears')!)
+    if (p.get('hoa'))              setHoa(p.get('hoa')!)
+  }, []) // empty dep array — runs once on mount only
+
+  // — Auto-fill rent + home price when target city changes
   useEffect(() => {
     const city = findCity(targetCityId)
     if (city?.defaultRent)     setMonthlyRent(String(city.defaultRent))
     if (city?.medianHomePrice) setHomePrice(String(city.medianHomePrice))
   }, [targetCityId])
 
-  // Auto-prefill living costs when city / household changes (unless manually edited)
+  // — Auto-prefill living costs unless user has manually edited them
   useEffect(() => {
     if (costsManuallyEdited) return
     const city = findCity(targetCityId)
     setCosts(getPrefillCosts(city, householdType, children))
   }, [targetCityId, householdType, children, costsManuallyEdited])
 
-  // Reset manual-edit flag when city changes
+  // — Reset manual-edit flag when city changes
   useEffect(() => { setCostsManuallyEdited(false) }, [targetCityId])
 
-  // — State change → reset city to first in state
+  // ─── Location helpers ──────────────────────────────────────────────────────
+
   const handleCurrentStateChange = (s: StateCode) => {
     setCurrentState(s)
     const cities = citiesForState(s)
@@ -265,13 +377,13 @@ export default function RelocationIncomeCalculator() {
     setCosts(prev => ({ ...prev, [key]: parseFloat(val) || 0 }))
   }
 
-  // ─── Calculate ──────────────────────────────────────────────────────────────
+  // ─── Calculate ─────────────────────────────────────────────────────────────
 
   const calculate = useCallback(() => {
     setError('')
 
-    const i1 = parseFloat(income1.replace(/,/g, '')) || 0
-    const i2 = parseFloat(income2.replace(/,/g, '')) || 0
+    const i1 = parseMoney(income1)
+    const i2 = parseMoney(income2)
     const k1 = parseFloat(k401Pct1) || 0
     const k2 = parseFloat(k401Pct2) || 0
 
@@ -280,32 +392,33 @@ export default function RelocationIncomeCalculator() {
     const targetCity  = findCity(targetCityId)
     const currentCity = findCity(currentCityId)
 
-    // Housing cost/month
+    // Housing cost / month
     let housingCost = 0
     if (housingMode === 'rent') {
       housingCost = (parseFloat(monthlyRent) || 0) + (parseFloat(rentersInsurance) || 0)
     } else {
-      const hp   = parseFloat(homePrice) || 0
-      const dp   = parseFloat(downPct)   || 10
+      const hp   = parseFloat(homePrice)   || 0
+      const dp   = parseFloat(downPct)     || 10
       const rate = parseFloat(mortgageRate) || 6.75
-      const term = parseInt(termYears)   || 30
-      const ptax = ((targetCity?.propertyTaxPct ?? 1) / 100) * hp / 12
-      const ins  = (hp * 0.006) / 12
+      const term = parseInt(termYears)     || 30
+      const ptax    = ((targetCity?.propertyTaxPct ?? 1) / 100) * hp / 12
+      const ins     = (hp * 0.006) / 12
       const loanAmt = hp * (1 - dp / 100)
-      const pmi     = (loanAmt / hp) > 0.8 ? (loanAmt * 0.008) / 12 : 0
+      const pmi     = hp > 0 && (loanAmt / hp) > 0.8 ? (loanAmt * 0.008) / 12 : 0
       housingCost   = calcMortgagePI(hp, dp, rate, term) + ptax + ins + pmi + (parseFloat(hoa) || 0)
     }
 
     const totalLiving = Object.values(costs).reduce((a, b) => a + b, 0)
 
-    // Net monthly
-    const annualNetOne = estimateNetAnnual({ grossAnnual: i1, state: targetState, filing, k401Pct: k1, cityId: targetCityId })
+    // Net monthly — single income
+    const annualNetOne  = estimateNetAnnual({ grossAnnual: i1, state: targetState, filing, k401Pct: k1, cityId: targetCityId })
     const netMonthlyOne = annualNetOne / 12
 
-    const annualNetTwo = estimateCombinedNet(i1, i2, targetState, filing, k1, k2, targetCityId)
+    // Net monthly — combined
+    const annualNetTwo  = estimateCombinedNet(i1, i2, targetState, filing, k1, k2, targetCityId)
     const netMonthlyTwo = annualNetTwo / 12
 
-    // Flexibility
+    // Flexibility (what's left after housing + living)
     const flexOne = netMonthlyOne - housingCost - totalLiving
     const flexTwo = netMonthlyTwo - housingCost - totalLiving
 
@@ -316,20 +429,35 @@ export default function RelocationIncomeCalculator() {
     const verdictOne = getVerdict(burdenOne, flexOne)
     const verdictTwo = getVerdict(burdenTwo, flexTwo)
 
-    // Taxes (approx)
-    const k401_1 = Math.min(i1 * (k1 / 100), 23_000)
-    const k401_2 = Math.min(i2 * (k2 / 100), 23_000)
-    const taxesOne = Math.max(0, i1 - k401_1 - annualNetOne)
-    const taxesTwo = Math.max(0, (i1 + i2) - k401_1 - k401_2 - annualNetTwo)
+    // FIX 3: Use estimateNetBreakdown for accurate tax figures instead of back-calculating
+    const breakdownOne = estimateNetBreakdown({ grossAnnual: i1, state: targetState, filing, k401Pct: k1, cityId: targetCityId })
+    const taxesOne = breakdownOne.totalTax
 
-    // Min second income needed
+    // For two-income taxes, sum breakdowns separately (or use combined if married)
+    let taxesTwo: number
+    if (i2 > 0 && filing === 'married') {
+      const k401_1 = Math.min(i1 * (k1 / 100), EMPLOYEE_401K_LIMIT)
+      const k401_2 = Math.min(i2 * (k2 / 100), EMPLOYEE_401K_LIMIT)
+      const combined = i1 + i2
+      const effectiveK401Pct = combined > 0 ? ((k401_1 + k401_2) / combined) * 100 : 0
+      const breakdownTwo = estimateNetBreakdown({ grossAnnual: combined, state: targetState, filing: 'married', k401Pct: effectiveK401Pct, cityId: targetCityId })
+      taxesTwo = breakdownTwo.totalTax
+    } else if (i2 > 0) {
+      const bd1 = estimateNetBreakdown({ grossAnnual: i1, state: targetState, filing: 'single', k401Pct: k1, cityId: targetCityId })
+      const bd2 = estimateNetBreakdown({ grossAnnual: i2, state: targetState, filing: 'single', k401Pct: k2, cityId: targetCityId })
+      taxesTwo = bd1.totalTax + bd2.totalTax
+    } else {
+      taxesTwo = taxesOne
+    }
+
+    // Min second income thresholds
     const breakEvenNet = housingCost + totalLiving
     const target30Net  = housingCost / 0.30
 
     const minForCashflow = findMinIncome2(i1, targetState, filing, k1, k2, targetCityId, breakEvenNet)
     const minFor30Pct    = findMinIncome2(i1, targetState, filing, k1, k2, targetCityId, target30Net)
 
-    // Insight message
+    // Contextual insight
     let insightMessage = ''
     if (verdictOne === 'Safe') {
       insightMessage = `${targetCity?.name ?? 'This city'} is manageable on one income. Your household has breathing room even if the second income disappears.`
@@ -352,6 +480,7 @@ export default function RelocationIncomeCalculator() {
       taxesOne, taxesTwo,
       insightMessage,
       targetCityName:  targetCity?.name  ?? targetState.toUpperCase(),
+      targetCitySlug:  targetCityId,
       currentCityName: currentCity?.name ?? currentState.toUpperCase(),
       hasTwoIncomes: i2 > 0,
     })
@@ -365,13 +494,105 @@ export default function RelocationIncomeCalculator() {
     costs,
   ])
 
-  // ─── Derived lists ───────────────────────────────────────────────────────────
+  // ─── Debounced auto-recalculate ───────────────────────────────────────────
+  // Declared after `calculate` so the reference is already in scope.
+  // Fires 450ms after any input changes — only when income1 has a value.
+  // If you later add sliders, remove the explicit button and let this carry it.
+  useEffect(() => {
+    if (!parseMoney(income1)) return
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => { calculate() }, 450)
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [
+    income1, income2, filing, k401Pct1, k401Pct2,
+    currentState, currentCityId, targetState, targetCityId,
+    housingMode, monthlyRent, rentersInsurance,
+    homePrice, downPct, mortgageRate, termYears, hoa,
+    costs,
+    calculate,
+  ])
+
+  // ─── Reset ─────────────────────────────────────────────────────────────────
+
+  const handleReset = () => {
+    setHouseholdType('couple')
+    setAdults(2)
+    setChildren(0)
+    setIncome1('')
+    setIncome2('')
+    setFiling('married')
+    setK401Pct1('6')
+    setK401Pct2('6')
+    setCurrentState('ny')
+    setCurrentCityId('nyc-ny')
+    setTargetState('nc')
+    setTargetCityId('raleigh-nc')
+    setHousingMode('rent')
+    setMonthlyRent('')
+    setRentersInsurance('20')
+    setHomePrice('')
+    setDownPct('10')
+    setMortgageRate('6.75')
+    setTermYears('30')
+    setHoa('0')
+    setCosts(getPrefillCosts(findCity('raleigh-nc'), 'couple', 0))
+    setCostsManuallyEdited(false)
+    setResults(null)
+    setError('')
+    // Also clear URL params so the reset is fully clean
+    if (typeof window !== 'undefined') {
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }
+
+  // ─── Save scenario ─────────────────────────────────────────────────────────
+
+  const handleSave = async () => {
+    const scenarioUrl = buildScenarioUrl({
+      householdType, adults, children,
+      income1, income2, filing, k401Pct1, k401Pct2,
+      currentState, currentCityId, targetState, targetCityId,
+      housingMode, monthlyRent, rentersInsurance,
+      homePrice, downPct, mortgageRate, termYears, hoa,
+    })
+
+    const shareText = results
+      ? `My relocation scenario: ${results.currentCityName} → ${results.targetCityName}.`
+      : 'My relocation scenario from Relocation by Numbers.'
+
+    const nav = typeof navigator !== 'undefined' ? navigator : null
+    try {
+      if (nav && 'share' in nav) {
+        await (nav as Navigator & { share: (data: ShareData) => Promise<void> }).share({
+          title: 'My Relocation Scenario',
+          text: shareText,
+          url: scenarioUrl,
+        })
+        setSaveStatus('shared')
+      } else if (nav?.clipboard) {
+        await nav.clipboard.writeText(scenarioUrl)
+        setSaveStatus('copied')
+      } else {
+        setSaveStatus('error')
+      }
+    } catch {
+      try {
+        await nav?.clipboard.writeText(scenarioUrl)
+        setSaveStatus('copied')
+      } catch {
+        setSaveStatus('error')
+      }
+    }
+    setTimeout(() => setSaveStatus('idle'), 2500)
+  }
+
+  // ─── Derived values ────────────────────────────────────────────────────────
 
   const currentCities = citiesForState(currentState)
   const targetCities  = citiesForState(targetState)
   const showIncome2   = householdType !== 'solo'
 
-  // ─── Section header ──────────────────────────────────────────────────────────
+  // ─── Sub-components (inline for single-file delivery) ──────────────────────
 
   const SectionLabel = ({ children }: { children: React.ReactNode }) => (
     <p className="text-[11px] font-semibold tracking-widest text-slate-400 uppercase dark:text-slate-500 mb-3">
@@ -381,59 +602,27 @@ export default function RelocationIncomeCalculator() {
 
   const Divider = () => <div className="border-t border-slate-100 dark:border-slate-800 my-5" />
 
-  // ─── Render ──────────────────────────────────────────────────────────────────
+  // ─── Render ────────────────────────────────────────────────────────────────
 
- return (
-  <div className="space-y-6">
-    <div className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
-      <div className="flex items-center justify-between mb-4">
-        
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
 
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-4">
+          <SectionLabel>Household</SectionLabel>
+          <button
+            type="button"
+            onClick={handleReset}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+          >
+            Reset
+          </button>
+        </div>
 
-      {/* ── CALCULATOR CARD ── */}
-
-  <SectionLabel>Household</SectionLabel>
-  <button
-    type="button"
-    onClick={() => {
-      setHouseholdType('couple')
-      setAdults(2)
-      setChildren(0)
-
-      setIncome1('')
-      setIncome2('')
-      setFiling('married')
-      setK401Pct1('6')
-      setK401Pct2('6')
-
-      setCurrentState('ny')
-      setCurrentCityId('nyc-ny')
-      setTargetState('nc')
-      setTargetCityId('raleigh-nc')
-
-      setHousingMode('rent')
-      setMonthlyRent('')
-      setRentersInsurance('20')
-      setHomePrice('')
-      setDownPct('10')
-      setMortgageRate('6.75')
-      setTermYears('30')
-      setHoa('0')
-
-      setCosts(getPrefillCosts(findCity('raleigh-nc'), 'couple', 0))
-      setCostsManuallyEdited(false)
-
-      setResults(null)
-      setError('')
-    }}
-    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    Reset
-  </button>
-</div>
-        {/* HOUSEHOLD */}
-      
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
+        {/* ── HOUSEHOLD ── */}
+        {/* FIX 5: mobile-first grid — 1 col on small screens */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
             <FieldLabel>Household type</FieldLabel>
             <select
@@ -441,7 +630,7 @@ export default function RelocationIncomeCalculator() {
               onChange={e => {
                 const v = e.target.value as HouseholdType
                 setHouseholdType(v)
-                if (v === 'solo') { setAdults(1); setChildren(0); setFiling('single') }
+                if (v === 'solo')   { setAdults(1); setChildren(0); setFiling('single') }
                 if (v === 'couple') { setAdults(2); setChildren(0) }
                 if (v === 'family') { setAdults(2); setChildren(1) }
               }}
@@ -468,7 +657,7 @@ export default function RelocationIncomeCalculator() {
 
         <Divider />
 
-        {/* INCOME */}
+        {/* ── INCOME ── */}
         <SectionLabel>Income</SectionLabel>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
@@ -480,6 +669,7 @@ export default function RelocationIncomeCalculator() {
                 className={`${inputCls} pl-6`} />
             </div>
           </div>
+
           {showIncome2 && (
             <div>
               <FieldLabel>Income 2 (annual, optional)</FieldLabel>
@@ -491,6 +681,7 @@ export default function RelocationIncomeCalculator() {
               </div>
             </div>
           )}
+
           <div>
             <FieldLabel>Filing status</FieldLabel>
             <select value={filing} onChange={e => setFiling(e.target.value as FilingStatus)} className={selectCls}>
@@ -498,6 +689,7 @@ export default function RelocationIncomeCalculator() {
               <option value="single">Single</option>
             </select>
           </div>
+
           <div>
             <FieldLabel>401(k) contribution — Income 1</FieldLabel>
             <div className="relative">
@@ -507,6 +699,7 @@ export default function RelocationIncomeCalculator() {
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">%</span>
             </div>
           </div>
+
           {showIncome2 && income2 && (
             <div>
               <FieldLabel>401(k) contribution — Income 2</FieldLabel>
@@ -522,7 +715,7 @@ export default function RelocationIncomeCalculator() {
 
         <Divider />
 
-        {/* LOCATIONS */}
+        {/* ── LOCATIONS ── */}
         <SectionLabel>Locations</SectionLabel>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {/* Current */}
@@ -547,6 +740,7 @@ export default function RelocationIncomeCalculator() {
               </select>
             </div>
           </div>
+
           {/* Target */}
           <div className="space-y-3">
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
@@ -573,28 +767,28 @@ export default function RelocationIncomeCalculator() {
 
         <Divider />
 
-        {/* HOUSING */}
+        {/* ── HOUSING ── */}
         <SectionLabel>Housing in target city</SectionLabel>
 
-        {/* Toggle */}
-<div className="flex rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden w-fit mb-4 bg-white dark:bg-slate-900">
-  {(['rent', 'buy'] as HousingMode[]).map(mode => (
-    <button
-      key={mode}
-      onClick={() => setHousingMode(mode)}
-      className={`px-5 py-2 text-sm font-medium capitalize transition ${
-        housingMode === mode
-  ? 'bg-violet-600 text-white shadow-[0_6px_18px_rgba(124,58,237,0.28)] ring-1 ring-violet-500/40'
-  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
-      }`}
-    >
-      {mode}
-    </button>
-  ))}
-</div>
+        <div className="flex rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden w-fit mb-4 bg-white dark:bg-slate-900">
+          {(['rent', 'buy'] as HousingMode[]).map(mode => (
+            <button
+              key={mode}
+              onClick={() => setHousingMode(mode)}
+              className={`px-5 py-2 text-sm font-medium capitalize transition ${
+                housingMode === mode
+                  ? 'bg-violet-600 text-white shadow-[0_6px_18px_rgba(124,58,237,0.28)] ring-1 ring-violet-500/40'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              {mode}
+            </button>
+          ))}
+        </div>
 
         {housingMode === 'rent' ? (
-          <div className="grid grid-cols-2 gap-3">
+          /* FIX 5: was grid-cols-2, now mobile-first */
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <FieldLabel>Monthly rent</FieldLabel>
               <div className="relative">
@@ -613,7 +807,7 @@ export default function RelocationIncomeCalculator() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <FieldLabel>Home price</FieldLabel>
               <div className="relative">
@@ -665,14 +859,15 @@ export default function RelocationIncomeCalculator() {
 
         <Divider />
 
-        {/* LIVING COSTS */}
+        {/* ── LIVING COSTS ── */}
         <div className="flex items-center justify-between mb-3">
           <SectionLabel>Monthly living costs</SectionLabel>
           <span className="text-[11px] text-slate-400 dark:text-slate-500 italic -mt-3">
             Pre-filled from city averages — edit as needed
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {/* FIX 5: was grid-cols-2, now mobile-first */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {(
             [
               { key: 'groceries',      label: 'Groceries' },
@@ -703,267 +898,240 @@ export default function RelocationIncomeCalculator() {
         )}
 
         {/* CTA */}
-       <div className="mt-6">
-  <button
-    onClick={calculate}
-    className="w-full rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-violet-700 active:scale-[0.99]"
-  >
-    Calculate affordability →
-  </button>
-
-  <p className="mt-2 text-center text-xs text-slate-400 dark:text-slate-500">
-    Assumptions updated: March 2026 · Planning estimates only
-  </p>
-</div>
-
-      {/* ── RESULTS ── */}
-      {results && (
-        <div ref={resultsRef} className="space-y-4 scroll-mt-6">
-
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            Results — {results.currentCityName} → {results.targetCityName}
-          </p>
-
-          {/* Card 1: Verdict */}
-          <div className={`rounded-2xl bg-white ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 shadow-[0_6px_24px_rgba(15,23,42,0.08)] overflow-hidden border-t-4 ${verdictBorderColor(results.verdictOne)}`}>
-            <div className="p-6">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full bg-violet-500" />
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Can you afford this move?</h2>
-              </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-  Based on your income, housing, and living costs in {results.targetCityName}
-</p>
-<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-  Verdicts consider both leftover cash and housing burden, so a move can still be rated Tight or Stretch even with some money left over.
-</p>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {/* One income */}
-                <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">On one income</p>
-                  <span className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${verdictStyles(results.verdictOne)}`}>
-                    {results.verdictOne}
-                  </span>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                    Housing is {Math.round(results.housingBurdenOne)}% of take-home
-                  </p>
-                </div>
-                {/* Two incomes */}
-                {results.hasTwoIncomes ? (
-                  <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">On two incomes</p>
-                    <span className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${verdictStyles(results.verdictTwo)}`}>
-                      {results.verdictTwo}
-                    </span>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                      Housing is {Math.round(results.housingBurdenTwo)}% of take-home
-                    </p>
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-700 p-4 flex items-center justify-center">
-                    <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
-                      Enter a second income above<br />to see the two-income scenario
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-4 rounded-xl bg-violet-50 dark:bg-violet-950/30 border border-violet-100 dark:border-violet-900/50 px-4 py-3 text-sm text-violet-800 dark:text-violet-300 leading-relaxed">
-                {results.insightMessage}
-              </div>
-            </div>
-          </div>
-
-          {/* Cards 2 + 3: Flexibility & Housing Pressure */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-
-            {/* Monthly Flexibility */}
-            <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 shadow-[0_6px_24px_rgba(15,23,42,0.08)]">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-2 h-2 rounded-full bg-violet-500" />
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Monthly flexibility</h3>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">One income</p>
-                  <p className={`text-2xl font-semibold ${results.flexibilityOne < 0 ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                    {fmt(results.flexibilityOne)}
-                    <span className="text-sm font-normal text-slate-400 dark:text-slate-500"> left/mo</span>
-                  </p>
-                </div>
-                {results.hasTwoIncomes && (
-                  <div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Two incomes</p>
-                    <p className="text-2xl font-semibold text-slate-900 dark:text-white">
-                      {fmt(results.flexibilityTwo)}
-                      <span className="text-sm font-normal text-slate-400 dark:text-slate-500"> left/mo</span>
-                    </p>
-                    {results.flexibilityTwo > results.flexibilityOne && (
-                      <span className="inline-block mt-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-medium px-2.5 py-0.5">
-                        +{fmt(results.flexibilityTwo - results.flexibilityOne)}/month with second income
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Housing Pressure */}
-            <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 shadow-[0_6px_24px_rgba(15,23,42,0.08)]">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-2 h-2 rounded-full bg-violet-500" />
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Housing pressure</h3>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">% of take-home pay going to housing</p>
-              <div className="space-y-3">
-                {[
-                  { label: 'One income', pct: results.housingBurdenOne, color: results.housingBurdenOne > 40 ? 'bg-red-500' : results.housingBurdenOne > 30 ? 'bg-amber-500' : 'bg-emerald-500' },
-                  ...(results.hasTwoIncomes ? [{ label: 'Two incomes', pct: results.housingBurdenTwo, color: results.housingBurdenTwo > 40 ? 'bg-red-500' : results.housingBurdenTwo > 30 ? 'bg-amber-500' : 'bg-violet-600' }] : []),
-                ].map(({ label, pct, color }) => (
-                  <div key={label} className="flex items-center gap-2 text-sm">
-                    <span className="min-w-[88px] text-xs text-slate-500 dark:text-slate-400">{label}</span>
-                    <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                      <div className={`h-full rounded-full ${color} transition-all`} style={{ width: `${Math.min(pct, 100)}%` }} />
-                    </div>
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 min-w-[32px] text-right">
-                      {Math.round(pct)}%
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
-                {[['Safe', '< 30%'], ['Tight', '30–40%'], ['Stretch', '> 40%']].map(([label, range]) => (
-                  <div key={label} className="flex gap-2 text-[11px] text-slate-400 dark:text-slate-500">
-                    <span className="min-w-[44px] font-medium">{label}</span>
-                    <span>{range} of take-home</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Card 4: Minimum second income needed */}
-          <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 shadow-[0_6px_24px_rgba(15,23,42,0.08)] border-l-4 border-violet-500">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 rounded-full bg-violet-500" />
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                Minimum second income needed — {results.targetCityName}
-              </h3>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-              To make this move financially workable on a combined income
-            </p>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <StatCard
-                label="To cover all monthly expenses"
-                value={results.minIncomeForCashflow === 0 ? 'Already covered' : `${fmtK(results.minIncomeForCashflow)} / yr`}
-                sub={results.minIncomeForCashflow === 0 ? 'One income is enough' : 'breaks even on monthly cash flow'}
-              />
-              <StatCard
-                label="To stay under 30% housing burden"
-                value={results.minIncomeFor30Pct === 0 ? 'Already met' : `${fmtK(results.minIncomeFor30Pct)} / yr`}
-                sub={results.minIncomeFor30Pct === 0 ? 'Housing is already under 30%' : 'comfortable affordability threshold'}
-              />
-            </div>
-          </div>
-
-          {/* Card 5: Net income breakdown */}
-          <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 shadow-[0_6px_24px_rgba(15,23,42,0.08)]">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-2 h-2 rounded-full bg-violet-500" />
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                Net income breakdown — {results.targetCityName}
-              </h3>
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <StatCard label="Net monthly — one income"  value={fmt(results.netMonthlyOne)}  sub="after tax & 401(k)" />
-              {results.hasTwoIncomes && (
-                <StatCard label="Net monthly — two incomes" value={fmt(results.netMonthlyTwo)} sub="after tax & 401(k)" />
-              )}
-              <StatCard label="Est. taxes — one income" value={fmt(results.taxesOne / 12)} sub="federal + state / mo" />
-              <StatCard label="Housing cost / mo" value={fmt(results.housingCost)} sub={housingMode === 'rent' ? 'rent + insurance' : 'mortgage + tax + ins'} />
-              <StatCard label="Total living costs" value={fmt(results.totalLiving)} sub="groceries, transport, etc." />
-              <StatCard label="Total monthly expenses" value={fmt(results.housingCost + results.totalLiving)} sub="housing + living costs" />
-            </div>
-          </div>
-          <div className="mt-4 rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-sky-900/40 dark:bg-sky-950/20">
-  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-    <div>
-      <div className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-300">
-        Save your scenario
-      </div>
-      <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">
-        Copy this calculator link and reopen the exact same setup later.
-      </div>
-    </div>
-
-    <button
-      type="button"
-      onClick={async () => {
-        try {
-          const saveUrl = new URL(window.location.href)
-
-          const saveText =
-            results
-              ? `My relocation scenario: ${results.currentCityName} → ${results.targetCityName}.`
-              : "My relocation scenario from Relocation by Numbers."
-
-          const canNativeShare =
-            typeof navigator !== "undefined" && "share" in navigator
-
-          if (canNativeShare) {
-            await (navigator as Navigator & {
-              share: (data: {
-                title?: string
-                text?: string
-                url?: string
-              }) => Promise<void>
-            }).share({
-              title: "My Relocation Scenario",
-              text: saveText,
-              url: saveUrl.toString(),
-            })
-            setSaveStatus("shared")
-          } else {
-            await navigator.clipboard.writeText(saveUrl.toString())
-            setSaveStatus("copied")
-          }
-
-          window.setTimeout(() => setSaveStatus("idle"), 2500)
-        } catch (err) {
-          console.error("Save/share failed", err)
-
-          try {
-            await navigator.clipboard.writeText(window.location.href)
-            setSaveStatus("copied")
-            window.setTimeout(() => setSaveStatus("idle"), 2500)
-          } catch (clipboardErr) {
-            console.error("Clipboard failed", clipboardErr)
-            setSaveStatus("error")
-            window.setTimeout(() => setSaveStatus("idle"), 2500)
-          }
-        }
-      }}
-      className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
-    >
-      {saveStatus === "copied"
-        ? "Link copied!"
-        : saveStatus === "shared"
-          ? "Shared!"
-          : saveStatus === "error"
-            ? "Save failed"
-            : "Save scenario"}
-    </button>
-  </div>
-</div>
-
-          <p className="text-center text-xs text-slate-400 dark:text-slate-600">
-            Planning estimates only · Tax figures based on 2025 brackets · Not financial advice
+        <div className="mt-6">
+          <button
+            onClick={calculate}
+            className="w-full rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-violet-700 active:scale-[0.99]"
+          >
+            See if this move works →
+          </button>
+          <p className="mt-2 text-center text-xs text-slate-400 dark:text-slate-500">
+            Assumptions updated: March 2026 · Planning estimates only
           </p>
         </div>
-      )}
+
+        {/* ── RESULTS ── */}
+        {results && (
+          <div ref={resultsRef} className="space-y-4 scroll-mt-6 mt-6">
+
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              Results — {results.currentCityName} → {results.targetCityName}
+            </p>
+
+            {/* Card 1: Verdict */}
+            <div className={`rounded-2xl bg-white ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 shadow-[0_6px_24px_rgba(15,23,42,0.08)] overflow-hidden border-t-4 ${verdictBorderColor(results.verdictOne)}`}>
+              <div className="p-6">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2 h-2 rounded-full bg-violet-500" />
+                  <h2 className="text-base font-semibold text-slate-900 dark:text-white">Can you afford this move?</h2>
+                </div>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                  Based on your income, housing, and living costs in {results.targetCityName}
+                </p>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 mb-4">
+                  Verdicts consider both leftover cash and housing burden, so a move can still be rated Tight or Stretch even with some money left over.
+                </p>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">On one income</p>
+                    <span className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${verdictStyles(results.verdictOne)}`}>
+                      {results.verdictOne}
+                    </span>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                      Housing is {Math.round(results.housingBurdenOne)}% of take-home
+                    </p>
+                  </div>
+
+                  {results.hasTwoIncomes ? (
+                    <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">On two incomes</p>
+                      <span className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${verdictStyles(results.verdictTwo)}`}>
+                        {results.verdictTwo}
+                      </span>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                        Housing is {Math.round(results.housingBurdenTwo)}% of take-home
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-700 p-4 flex items-center justify-center">
+                      <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
+                        Enter a second income above<br />to see the two-income scenario
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-4 rounded-xl bg-violet-50 dark:bg-violet-950/30 border border-violet-100 dark:border-violet-900/50 px-4 py-3 text-sm text-violet-800 dark:text-violet-300 leading-relaxed">
+                  {results.insightMessage}
+                </div>
+
+                {/* Trust anchor — reduces "is this accurate?" doubt right where it hits */}
+                <p className="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
+                  Based on estimated taxes and average costs — adjust inputs above for your exact situation.
+                </p>
+              </div>
+            </div>
+
+            {/* Cards 2 + 3: Flexibility & Housing Pressure */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+              {/* Monthly Flexibility */}
+              <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 shadow-[0_6px_24px_rgba(15,23,42,0.08)]">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-2 h-2 rounded-full bg-violet-500" />
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Monthly flexibility</h3>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">One income</p>
+                    <p className={`text-2xl font-semibold ${results.flexibilityOne < 0 ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                      {fmt(results.flexibilityOne)}
+                      <span className="text-sm font-normal text-slate-400 dark:text-slate-500"> left/mo</span>
+                    </p>
+                  </div>
+                  {results.hasTwoIncomes && (
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Two incomes</p>
+                      <p className="text-2xl font-semibold text-slate-900 dark:text-white">
+                        {fmt(results.flexibilityTwo)}
+                        <span className="text-sm font-normal text-slate-400 dark:text-slate-500"> left/mo</span>
+                      </p>
+                      {results.flexibilityTwo > results.flexibilityOne && (
+                        <span className="inline-block mt-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-medium px-2.5 py-0.5">
+                          +{fmt(results.flexibilityTwo - results.flexibilityOne)}/month with second income
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Housing Pressure */}
+              <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 shadow-[0_6px_24px_rgba(15,23,42,0.08)]">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-2 h-2 rounded-full bg-violet-500" />
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Housing pressure</h3>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">% of take-home pay going to housing</p>
+                <div className="space-y-3">
+                  {[
+                    { label: 'One income',  pct: results.housingBurdenOne, color: results.housingBurdenOne  > 40 ? 'bg-red-500' : results.housingBurdenOne  > 30 ? 'bg-amber-500' : 'bg-emerald-500' },
+                    ...(results.hasTwoIncomes ? [{ label: 'Two incomes', pct: results.housingBurdenTwo, color: results.housingBurdenTwo > 40 ? 'bg-red-500' : results.housingBurdenTwo > 30 ? 'bg-amber-500' : 'bg-violet-600' }] : []),
+                  ].map(({ label, pct, color }) => (
+                    <div key={label} className="flex items-center gap-2 text-sm">
+                      <span className="min-w-[88px] text-xs text-slate-500 dark:text-slate-400">{label}</span>
+                      <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                        <div className={`h-full rounded-full ${color} transition-all`} style={{ width: `${Math.min(pct, 100)}%` }} />
+                      </div>
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 min-w-[32px] text-right">
+                        {Math.round(pct)}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
+                  {[['Safe', '< 30%'], ['Tight', '30–40%'], ['Stretch', '> 40%']].map(([label, range]) => (
+                    <div key={label} className="flex gap-2 text-[11px] text-slate-400 dark:text-slate-500">
+                      <span className="min-w-[44px] font-medium">{label}</span>
+                      <span>{range} of take-home</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Card 4: Minimum second income */}
+            <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 shadow-[0_6px_24px_rgba(15,23,42,0.08)] border-l-4 border-violet-500">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-2 h-2 rounded-full bg-violet-500" />
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                  Minimum second income needed — {results.targetCityName}
+                </h3>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                To make this move financially workable on a combined income
+              </p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <StatCard
+                  label="To cover all monthly expenses"
+                  value={results.minIncomeForCashflow === 0 ? 'Already covered' : `${fmtK(results.minIncomeForCashflow)} / yr`}
+                  sub={results.minIncomeForCashflow === 0 ? 'One income is enough' : 'breaks even on monthly cash flow'}
+                />
+                <StatCard
+                  label="To stay under 30% housing burden"
+                  value={results.minIncomeFor30Pct === 0 ? 'Already met' : `${fmtK(results.minIncomeFor30Pct)} / yr`}
+                  sub={results.minIncomeFor30Pct === 0 ? 'Housing is already under 30%' : 'comfortable affordability threshold'}
+                />
+              </div>
+            </div>
+
+            {/* Card 5: Net income breakdown */}
+            <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 shadow-[0_6px_24px_rgba(15,23,42,0.08)]">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-2 h-2 rounded-full bg-violet-500" />
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                  Net income breakdown — {results.targetCityName}
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <StatCard label="Net monthly — one income"  value={fmt(results.netMonthlyOne)}  sub="after tax & 401(k)" />
+                {results.hasTwoIncomes && (
+                  <StatCard label="Net monthly — two incomes" value={fmt(results.netMonthlyTwo)} sub="after tax & 401(k)" />
+                )}
+                <StatCard label="Est. taxes — one income" value={fmt(results.taxesOne / 12)} sub="federal + state / mo" />
+                <StatCard label="Housing cost / mo" value={fmt(results.housingCost)} sub={housingMode === 'rent' ? 'rent + insurance' : 'mortgage + tax + ins'} />
+                <StatCard label="Total living costs" value={fmt(results.totalLiving)} sub="groceries, transport, etc." />
+                <StatCard label="Total monthly expenses" value={fmt(results.housingCost + results.totalLiving)} sub="housing + living costs" />
+              </div>
+            </div>
+
+            {/* Save scenario */}
+            <div className="mt-4 rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-sky-900/40 dark:bg-sky-950/20">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-300">
+                    Save your scenario
+                  </div>
+                  <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                    Copy this link to reopen the exact same setup later.
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+                >
+                  {saveStatus === 'copied' ? 'Link copied!' :
+                   saveStatus === 'shared' ? 'Shared!' :
+                   saveStatus === 'error'  ? 'Save failed' :
+                   'Save scenario'}
+                </button>
+              </div>
+            </div>
+
+            {/* Dynamic city link — SEO juice from every calculator interaction */}
+            <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-800/40">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Want the full picture?{' '}
+                <a
+                  href={`/cost-of-living/${results.targetCitySlug}`}
+                  className="font-medium text-violet-600 underline underline-offset-2 hover:no-underline dark:text-violet-400"
+                >
+                  See full cost of living data for {results.targetCityName} →
+                </a>
+              </p>
+            </div>
+
+            <p className="text-center text-xs text-slate-400 dark:text-slate-600">
+              Planning estimates only · Tax figures based on 2025 brackets · Not financial advice
+            </p>
+
+          </div>
+        )}
+
+      </div>
     </div>
-</div>
   )
 }
