@@ -186,7 +186,7 @@ function VisaContextCard({ countryCode }: { countryCode: string }) {
           <span>⚠ Travel Advisory</span>
         </div>
         <div className="mb-1 text-xs font-medium text-amber-700">{ctx.program}</div>
-        <p className="text-sm leading-6 text-amber-900">{ctx.notes}</p>
+        <p className="text-sm leading-6 text-amber-900">{ctx.summary}</p>
       </div>
     );
   }
@@ -200,11 +200,11 @@ function VisaContextCard({ countryCode }: { countryCode: string }) {
         <span>{headerLabel}</span>
       </div>
       <div className="mb-1 text-xs font-medium text-teal-700">{ctx.program}</div>
-      <p className="text-sm leading-6 text-slate-700">{ctx.notes}</p>
+      <p className="text-sm leading-6 text-slate-700">{ctx.summary}</p>
       <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
         <span>
           {ctx.feeNote}:{" "}
-          <span className="font-semibold text-slate-700">${ctx.estimatedFee.toLocaleString()}</span>
+          <span className="font-semibold text-slate-700">${ctx.estimatedFeeUsd.toLocaleString()}</span>
         </span>
         {ctx.highlight && (
           <span className="rounded-full bg-teal-50 px-2.5 py-1 font-medium text-teal-700 ring-1 ring-teal-200">
