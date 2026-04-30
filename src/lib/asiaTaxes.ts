@@ -153,7 +153,16 @@ const ASIA_TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // residents if they live in Japan ≥183 days. No separate remote regime.
   // -------------------------------------------------------------------------
  JP: ({ annualIncome, isRetired }) => {
-  const nationalTaxAmount = progressiveTaxAmount(annualIncome, [
+
+    const basicDeduction = 420000; // conservative baseline
+  const employmentDeduction = Math.min(annualIncome * 0.3, 1950000);
+
+  const taxable = Math.max(
+    0,
+    annualIncome - basicDeduction - employmentDeduction
+  );
+
+   const nationalTaxAmount = progressiveTaxAmount(taxable, [
     { upTo: 1950000,  rate: 0.05 },
     { upTo: 3300000,  rate: 0.10 },
     { upTo: 6950000,  rate: 0.20 },
@@ -659,7 +668,10 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
         { upTo: Infinity, rate: 0.17 },
       ]);
 
-      const standardAmount = income * 0.15;
+      const standardAmount =
+  income <= 5000000
+    ? income * 0.15
+    : 5000000 * 0.15 + (income - 5000000) * 0.16;
       const taxAmount = Math.min(progressiveAmount, standardAmount);
 
       return isRetired ? taxAmount * 0.85 : taxAmount;
@@ -771,12 +783,13 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
     const taxable = Math.max(0, annualIncome - standardDeduction);
 
     const baseTaxAmount = progressiveTaxAmount(taxable, [
-      { upTo: 300000, rate: 0.0 },
-      { upTo: 700000, rate: 0.05 },
-      { upTo: 1000000, rate: 0.1 },
-      { upTo: 1200000, rate: 0.15 },
-      { upTo: 1500000, rate: 0.2 },
-      { upTo: Infinity, rate: 0.3 },
+      { upTo: 400000, rate: 0.0 },
+{ upTo: 800000, rate: 0.05 },
+{ upTo: 1200000, rate: 0.10 },
+{ upTo: 1600000, rate: 0.15 },
+{ upTo: 2000000, rate: 0.20 },
+{ upTo: 2400000, rate: 0.25 },
+{ upTo: Infinity, rate: 0.30 },
     ]);
 
     const cess = baseTaxAmount * 0.04;

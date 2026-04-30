@@ -582,7 +582,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
     // 2024 German brackets (basic allowance €11,604)
     const ratePerUnit = progressiveTax(taxablePerUnit, [
-      { upTo: 11604, rate: 0.00 },
+      { upTo: 12096, rate: 0.00 },
       { upTo: 17006, rate: 0.14 },
       { upTo: 66761, rate: 0.24 },
       { upTo: 277826, rate: 0.42 },

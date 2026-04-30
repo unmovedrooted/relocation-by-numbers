@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 272" width="680" height="272">
+  <defs>
+    <linearGradient id="g" x1="120" y1="0" x2="508" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0B3D2E"/>
+      <stop offset="100%" stop-color="#2ECC71"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Bar 1: shortest (60%) -->
+  <rect x="120" y="38" width="209" height="18" rx="9" fill="url(#g)"/>
+
+  <!-- Bar 2: medium (80%) -->
+  <rect x="120" y="72" width="278" height="18" rx="9" fill="url(#g)"/>
+
+  <!-- Bar 3 + arrow: one continuous path — rounded left cap, tapers to point on right -->
+  <path d="M129,106 A9,9 0 0,0 129,124 L468,124 L508,115 L468,106 Z" fill="url(#g)"/>
+
+  <!-- "Relocation" — solid, left-anchored -->
+  <text x="120" y="202"
+    font-family="'Helvetica Neue',Helvetica,Arial,sans-serif"
+    font-size="70" font-weight="700" fill="#0B3D2E">Relocation</text>
+
+  <!-- "BY NUMBERS" — starts under the "l", intentionally right-shifted -->
+  <text x="208" y="234"
+    font-family="'Helvetica Neue',Helvetica,Arial,sans-serif"
+    font-size="18" font-weight="500" fill="#1E7040" letter-spacing="10">BY NUMBERS</text>
+</svg>

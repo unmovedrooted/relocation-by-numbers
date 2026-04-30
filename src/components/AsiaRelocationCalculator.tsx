@@ -198,9 +198,10 @@ type FurnishedType = "furnished" | "unfurnished";
 type YesNo = "yes" | "no";
 type CurrencyDisplay = "USD" | "CURRENT" | "DESTINATION";
 
+// FIX 3: floating point precision — run toFixed(10) before toLocaleString
 function money(n: number, digits: number = 0, currency: string = "USD") {
   if (!Number.isFinite(n)) return "—";
-  return n.toLocaleString(undefined, {
+  return parseFloat(n.toFixed(10)).toLocaleString(undefined, {
     style: "currency", currency,
     maximumFractionDigits: digits, minimumFractionDigits: digits,
   });
@@ -217,7 +218,6 @@ function setQS(params: URLSearchParams) {
   window.history.replaceState(null, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
 }
 
-// Thresholds for total essential outflow (housing + living) as share of net income
 function getReadinessBand(ratio: number) {
   if (ratio <= 0.60) return { band: "A", label: "Comfortable", note: "Total essential costs look healthy relative to your estimated net income." };
   if (ratio <= 0.75) return { band: "B", label: "Manageable", note: "Doable, but keep an eye on recurring costs and setup cash." };
@@ -231,7 +231,6 @@ function getSalaryTypeMultiplier(salaryType: SalaryType) {
   return 1;
 }
 
-// Maps TaxConfidence to badge style
 function confidenceBadge(confidence: TaxConfidence) {
   switch (confidence) {
     case "verified":    return { label: "● Verified",            cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" };
@@ -249,11 +248,12 @@ const inputCls  = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-90
 const selectCls = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-rose-500/15";
 const labelHeadCls = "mb-1 text-xs font-medium leading-4 text-slate-600";
 
+// FIX 4: aria-label now uses the actual tooltip text so screen readers read it out
 function InfoTip({ text, align = "left" }: { text: string; align?: "left" | "right" | "center" }) {
   const positionClass = align === "right" ? "right-0" : align === "center" ? "left-1/2 -translate-x-1/2" : "left-0";
   return (
     <span className="group relative ml-1 inline-flex align-middle">
-      <button type="button" aria-label="More info" className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 bg-white text-[10px] font-bold text-slate-700 shadow-sm transition hover:bg-slate-50">i</button>
+      <button type="button" aria-label={text} className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 bg-white text-[10px] font-bold text-slate-700 shadow-sm transition hover:bg-slate-50">i</button>
       <span className={`pointer-events-none absolute top-full z-50 mt-2 hidden max-w-[calc(100vw-2rem)] w-72 rounded-xl bg-slate-900 px-3 py-2 text-xs leading-5 text-white shadow-xl group-hover:block group-focus-within:block ${positionClass}`}>
         {text}
       </span>
@@ -337,7 +337,9 @@ export default function AsiaRelocationCalculator() {
 
   const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
 
-  // incomeScenario drives which conditional tax questions appear
+  // FIX 2: strip non-numeric characters from all number inputs
+  const sanitizeNumeric = (val: string) => val.replace(/[^0-9.]/g, "");
+
   const incomeScenario = mode === "retired" ? "retired" : salaryType === "remote" ? "remote" : "local";
 
   const allCountriesSorted = useMemo(() =>
@@ -384,34 +386,31 @@ export default function AsiaRelocationCalculator() {
   }, [toCountry, toCities, toCityCode]);
 
   useEffect(() => {
-  if (!selectedCityDefaults || !qsHydrated) return;
+    if (!selectedCityDefaults || !qsHydrated) return;
+    if (lastDefaultedCityCode.current === toCityCode) return;
+    lastDefaultedCityCode.current = toCityCode;
 
-  // Only auto-apply defaults when the destination city actually changes.
-  // This fixes the launch bug where Bangkok defaults could stay when switching to Tokyo, Singapore, etc.
-  if (lastDefaultedCityCode.current === toCityCode) return;
-  lastDefaultedCityCode.current = toCityCode;
+    const d = selectedCityDefaults;
 
-  const d = selectedCityDefaults;
+    setDestinationRent(String(d.monthlyDefaults.rent));
+    setDepositRequired(String(d.monthlyDefaults.rent * d.housing.depositMonths));
+    setFirstMonthRent(String(d.monthlyDefaults.rent));
+    setLastMonthRent(String(d.housing.lastMonthRentDefault));
+    setUtilitiesIncluded(d.housing.utilitiesIncludedDefault);
 
-  setDestinationRent(String(d.monthlyDefaults.rent));
-  setDepositRequired(String(d.monthlyDefaults.rent * d.housing.depositMonths));
-  setFirstMonthRent(String(d.monthlyDefaults.rent));
-  setLastMonthRent(String(d.housing.lastMonthRentDefault));
-  setUtilitiesIncluded(d.housing.utilitiesIncludedDefault);
+    setGroceries(String(d.monthlyDefaults.groceries));
+    setUtilities(String(d.monthlyDefaults.utilities));
+    setTransportation(String(d.monthlyDefaults.transport));
+    setHealthcare(String(d.monthlyDefaults.healthcare));
 
-  setGroceries(String(d.monthlyDefaults.groceries));
-  setUtilities(String(d.monthlyDefaults.utilities));
-  setTransportation(String(d.monthlyDefaults.transport));
-  setHealthcare(String(d.monthlyDefaults.healthcare));
-
-  setVisaCost(String(d.startupCosts.visa));
-  setFlightCost(String(d.startupCosts.flight));
-  setShippingCost(String(d.startupCosts.shipping));
-  setTemporaryStay(String(d.startupCosts.temporaryStay));
-  setAdminFees(String(d.startupCosts.adminFees));
-  setFurnitureSetup(String(d.housing.furnishedSetupCost));
-  setEmergencyCashBuffer(String(d.startupCosts.emergencyBuffer));
-}, [selectedCityDefaults, qsHydrated, toCityCode]);
+    setVisaCost(String(d.startupCosts.visa));
+    setFlightCost(String(d.startupCosts.flight));
+    setShippingCost(String(d.startupCosts.shipping));
+    setTemporaryStay(String(d.startupCosts.temporaryStay));
+    setAdminFees(String(d.startupCosts.adminFees));
+    setFurnitureSetup(String(d.housing.furnishedSetupCost));
+    setEmergencyCashBuffer(String(d.startupCosts.emergencyBuffer));
+  }, [selectedCityDefaults, qsHydrated, toCityCode]);
 
   useEffect(() => {
     const qs = getQS();
@@ -441,7 +440,6 @@ export default function AsiaRelocationCalculator() {
     ];
     for (const [key, setter] of fields) { const val = qs.get(key); if (val) setter(val); }
     const vCar = qs.get("car") as YesNo | null; if (vCar === "yes" || vCar === "no") setNeedCar(vCar);
-    // Restore conditional tax answers from URL
     const vTaxAnswers = qs.get("taxAnswers");
     if (vTaxAnswers) { try { const parsed = JSON.parse(vTaxAnswers); if (typeof parsed === "object" && parsed !== null) setConditionalAnswers(parsed); } catch {} }
     setQsHydrated(true);
@@ -471,7 +469,6 @@ export default function AsiaRelocationCalculator() {
     if (emergencyCashBuffer) qs.set("emergency", emergencyCashBuffer);
     if (currentSavings) qs.set("savings", currentSavings);
     qs.set("car", needCar);
-    // Persist conditional tax answers as a single JSON param
     const answersJson = JSON.stringify(conditionalAnswers);
     if (answersJson !== "{}") qs.set("taxAnswers", answersJson);
     setQS(qs);
@@ -496,13 +493,11 @@ export default function AsiaRelocationCalculator() {
     const annualIncomeForFromTax = convertUsdToLocal(annualIncome, fromCountry);
     const annualIncomeForToTax   = convertUsdToLocal(annualIncome, toCountry);
 
-    // Origin tax: use the international engine for non-Asia origins (US, GB, PT, etc.)
-    // and the Asia engine only when the origin is also an Asia/Gulf country.
     const currentTaxEstimate = ASIA_COUNTRY_CODES.has(fromCountry)
       ? estimateAsiaTax({
           countryCode: fromCountry, annualIncome: annualIncomeForFromTax,
           filing, isRetired: mode === "retired", incomeScenario,
-          answers: {}, // conditional answers are destination-only
+          answers: {},
         })
       : estimateInternationalTax({
           countryCode: fromCountry, annualIncome: annualIncomeForFromTax,
@@ -518,14 +513,12 @@ export default function AsiaRelocationCalculator() {
     const currentTaxRate = currentTaxEstimate.effectiveRate;
     const targetTaxRate  = targetTaxEstimate.effectiveRate;
 
-    // Pull all display fields from the tax engine
     const targetConfidence: TaxConfidence = targetTaxEstimate.confidence;
     const targetMissingFactor: string = targetTaxEstimate.missingFactor ?? "";
     const targetTaxLabel: string = targetTaxEstimate.label;
     const targetTaxNotes: string[] = [];
     if (targetTaxEstimate.note) targetTaxNotes.push(targetTaxEstimate.note);
 
-    // Prompt for unanswered conditional questions
     const unansweredQuestions = getAsiaTaxQuestionsForCountry(toCountry, incomeScenario)
       .filter(q => !conditionalAnswers[q.key]);
     if (unansweredQuestions.length > 0) {
@@ -538,36 +531,36 @@ export default function AsiaRelocationCalculator() {
 
     const adultCount = Math.max(1, nz(adults));
     const childCount = Math.max(0, nz(children));
-    // All city-default cost inputs are stored and entered in USD.
-    // Do NOT apply destToUsd() here — that would divide an already-USD value
-    // by the destination exchange rate, producing a tiny and wrong number.
+
     const familyGroceries      = nz(groceries)      * (1 + (adultCount - 1) * 0.55 + childCount * 0.35);
     const familyTransportation = nz(transportation) * (1 + (adultCount - 1) * 0.35 + childCount * 0.15);
-    const familyHealthcare = nz(healthcare) * (1 + (adultCount - 1) * 0.7 + childCount * 0.5);
-
-const healthcareAdj = familyHealthcare 
+    const familyHealthcare     = nz(healthcare)     * (1 + (adultCount - 1) * 0.7  + childCount * 0.5);
     const familyUtilities      = nz(utilities)      * (1 + (adultCount - 1) * 0.25 + childCount * 0.15);
 
-    const groceriesAdj      = familyGroceries      * toCityMultipliers.groceries;
-    const transportationAdj = familyTransportation * toCityMultipliers.transit;
-    const utilitiesAdj      = familyUtilities       * toCityMultipliers.utilities;
-    const rentTo            = nz(destinationRent)  * toCityMultipliers.housing;
-    const groceriesFrom     = familyGroceries      * fromCityMultipliers.groceries;
-    const transportationFrom = familyTransportation * fromCityMultipliers.transit;
-    const utilitiesFrom     = familyUtilities       * fromCityMultipliers.utilities;
+    // FIX 1: state values are already city-specific defaults — do NOT re-multiply
+    // by toCityMultipliers (that would double-apply the city cost-of-living).
+    // fromCityMultipliers below are still correct — they scale the same lifestyle
+    // to what it costs in the origin city for comparison purposes.
+    const groceriesAdj      = familyGroceries;
+    const transportationAdj = familyTransportation;
+    const healthcareAdj     = familyHealthcare;
+    const utilitiesAdj      = familyUtilities;
+    const rentTo            = nz(destinationRent);
 
-    const carCost          = needCar === "yes" ? 350 : 0; // $350 USD estimate
+    const groceriesFrom      = familyGroceries      * fromCityMultipliers.groceries;
+    const transportationFrom = familyTransportation * fromCityMultipliers.transit;
+    const utilitiesFrom      = familyUtilities       * fromCityMultipliers.utilities;
+
+    const carCost          = needCar === "yes" ? 350 : 0;
     const housingUtilities = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
     const housingTotal     = rentTo + housingUtilities + carCost;
     const livingCosts      = groceriesAdj + transportationAdj + healthcareAdj;
     const monthlyFlexibility = netMonthlyTo - housingTotal - livingCosts;
 
-    // Comfort based on total essential outflow, not housing alone
     const totalPctOfNet   = netMonthlyTo > 0 ? (housingTotal + livingCosts) / netMonthlyTo : 0;
     const housingPctOfNet = netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
     const comfort         = getReadinessBand(totalPctOfNet);
 
-    // All startup cost inputs are also in USD — use directly
     const furnitureAdj = furnished === "furnished" ? 0 : nz(furnitureSetup);
     const upfrontCashNeeded =
       nz(depositRequired) + nz(firstMonthRent) + nz(lastMonthRent) +
@@ -575,7 +568,6 @@ const healthcareAdj = familyHealthcare
       nz(temporaryStay) + nz(adminFees) + furnitureAdj + nz(emergencyCashBuffer);
 
     const totalMonthlyOutflow = housingTotal + livingCosts;
-    // currentSavings is entered in the user's ORIGIN currency — convert to USD
     const monthsCovered = totalMonthlyOutflow > 0
       ? convertLocalToUsd(nz(currentSavings), fromCountry) / totalMonthlyOutflow
       : 0;
@@ -594,9 +586,9 @@ const healthcareAdj = familyHealthcare
       groceriesAdj, transportationAdj, healthcareAdj, utilitiesAdj,
       housingTotal, rentTo, housingUtilities, carCost, livingCosts,
       monthlyFlexibility,
-pct: housingPctOfNet * 100,
-totalPctOfNet: totalPctOfNet * 100,
-comfort,
+      pct: housingPctOfNet * 100,
+      totalPctOfNet: totalPctOfNet * 100,
+      comfort,
       upfrontCashNeeded, monthsCovered, comparableSalary, relativeDifference,
     };
   }, [
@@ -617,7 +609,7 @@ comfort,
     const cityDefaults    = getCityDefaultsByCode(toCityCode);
     const countryDefaults = getCountryByCode(toCountry);
     setSalary(""); setRetirementIncome("");
-    setConditionalAnswers({}); // clear destination tax question answers
+    setConditionalAnswers({});
     if (cityDefaults) {
       const d = cityDefaults;
       setDestinationRent(String(d.monthlyDefaults.rent));
@@ -678,7 +670,7 @@ comfort,
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm">
                 <div className={labelHeadCls}>{mode === "retired" ? "Gross annual retirement income" : "Gross annual salary"} <span className="text-slate-400">({originCurrency})</span></div>
-                <input className={inputCls} type="number" value={mode === "retired" ? retirementIncome : salary} onChange={(e) => mode === "retired" ? setRetirementIncome(e.target.value) : setSalary(e.target.value)} placeholder=" " />
+                <input className={inputCls} type="number" value={mode === "retired" ? retirementIncome : salary} onChange={(e) => mode === "retired" ? setRetirementIncome(sanitizeNumeric(e.target.value)) : setSalary(sanitizeNumeric(e.target.value))} placeholder=" " />
               </label>
               <label className="text-sm">
                 <div className={labelHeadCls}>Filing status</div>
@@ -735,12 +727,12 @@ comfort,
               {mode === "working" && (
                 <label className="text-sm">
                   <div className={labelHeadCls}>
-  Income type{" "}
-  <InfoTip
-    align="right"
-    text="Remote keeps 100% of your entered income. Local salary estimates 90%. Freelance estimates 82% to reflect income instability, unpaid gaps, and self-employment friction."
-  />
-</div>
+                    Income type{" "}
+                    <InfoTip
+                      align="right"
+                      text="Remote keeps 100% of your entered income. Local salary estimates 90%. Freelance estimates 82% to reflect income instability, unpaid gaps, and self-employment friction."
+                    />
+                  </div>
                   <select className={selectCls} value={salaryType} onChange={(e) => setSalaryType(e.target.value as SalaryType)}>
                     <option value="remote">Keeping current remote salary</option>
                     <option value="local">Local salary in destination</option>
@@ -750,15 +742,15 @@ comfort,
               )}
               <label className="text-sm">
                 <div className={labelHeadCls}>Current savings available</div>
-                <input className={inputCls} type="number" value={currentSavings} onChange={(e) => setCurrentSavings(e.target.value)} placeholder=" " />
+                <input className={inputCls} type="number" value={currentSavings} onChange={(e) => setCurrentSavings(sanitizeNumeric(e.target.value))} placeholder=" " />
               </label>
               <label className="text-sm">
                 <div className={labelHeadCls}>Number of adults</div>
-                <input className={inputCls} type="number" value={adults} onChange={(e) => setAdults(e.target.value)} placeholder=" " />
+                <input className={inputCls} type="number" value={adults} onChange={(e) => setAdults(sanitizeNumeric(e.target.value))} placeholder=" " />
               </label>
               <label className="text-sm">
                 <div className={labelHeadCls}>Number of children</div>
-                <input className={inputCls} type="number" value={children} onChange={(e) => setChildren(e.target.value)} placeholder=" " />
+                <input className={inputCls} type="number" value={children} onChange={(e) => setChildren(sanitizeNumeric(e.target.value))} placeholder=" " />
               </label>
             </div>
           </div>
@@ -785,10 +777,10 @@ comfort,
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
             <div className="mb-3 text-sm font-semibold">Housing</div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Rent in destination (monthly)</div><input className={inputCls} type="number" value={destinationRent} onChange={(e) => setDestinationRent(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Deposit required</div><input className={inputCls} type="number" value={depositRequired} onChange={(e) => setDepositRequired(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>First month rent</div><input className={inputCls} type="number" value={firstMonthRent} onChange={(e) => setFirstMonthRent(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Last month rent (if applicable)</div><input className={inputCls} type="number" value={lastMonthRent} onChange={(e) => setLastMonthRent(e.target.value)} placeholder=" " /></label>
+              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Rent in destination (monthly)</div><input className={inputCls} type="number" value={destinationRent} onChange={(e) => setDestinationRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Deposit required</div><input className={inputCls} type="number" value={depositRequired} onChange={(e) => setDepositRequired(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>First month rent</div><input className={inputCls} type="number" value={firstMonthRent} onChange={(e) => setFirstMonthRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Last month rent (if applicable)</div><input className={inputCls} type="number" value={lastMonthRent} onChange={(e) => setLastMonthRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
               <label className="text-sm"><div className={labelHeadCls}>Furnished or unfurnished</div>
                 <select className={selectCls} value={furnished} onChange={(e) => setFurnished(e.target.value as FurnishedType)}>
                   <option value="unfurnished">Unfurnished</option>
@@ -804,98 +796,51 @@ comfort,
             </div>
           </div>
 
-        {/* Living Costs */}
-<div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-  <div className="mb-3 text-sm font-semibold">
-    Living Costs{" "}
-    <InfoTip text="These start with city averages, but you can edit them. The calculator then adjusts them using destination city multipliers and household size." />
-  </div>
-
-  <div className="grid gap-3 sm:grid-cols-2">
-    <label className="text-sm">
-      <div className={labelHeadCls}>
-        Groceries <span className="text-slate-400">(average, editable)</span>
-      </div>
-      <input
-        className={inputCls}
-        type="number"
-        value={groceries}
-        onChange={(e) => setGroceries(e.target.value)}
-        placeholder=" "
-      />
-    </label>
-
-    <label className="text-sm">
-      <div className={labelHeadCls}>
-        Utilities <span className="text-slate-400">(average, editable)</span>
-      </div>
-      <input
-        className={inputCls}
-        type="number"
-        value={utilities}
-        onChange={(e) => setUtilities(e.target.value)}
-        placeholder=" "
-      />
-    </label>
-
-    <label className="text-sm">
-      <div className={labelHeadCls}>
-        Transportation <span className="text-slate-400">(average, editable)</span>
-      </div>
-      <input
-        className={inputCls}
-        type="number"
-        value={transportation}
-        onChange={(e) => setTransportation(e.target.value)}
-        placeholder=" "
-      />
-    </label>
-
-    <label className="text-sm">
-      <div className={labelHeadCls}>
-        Healthcare <span className="text-slate-400">(average, editable)</span>
-      </div>
-      <input
-        className={inputCls}
-        type="number"
-        value={healthcare}
-        onChange={(e) => setHealthcare(e.target.value)}
-        placeholder=" "
-      />
-    </label>
-
-    <label className="text-sm sm:col-span-2">
-      <div className={labelHeadCls}>
-        Need a car?{" "}
-        <InfoTip text="Adds a simple $350/month USD estimate for car-related costs. Useful for places where transit may not cover your lifestyle." />
-      </div>
-      <select
-        className={selectCls}
-        value={needCar}
-        onChange={(e) => setNeedCar(e.target.value as YesNo)}
-      >
-        <option value="no">No</option>
-        <option value="yes">Yes</option>
-      </select>
-    </label>
-  </div>
-
-  <div className="mt-2 text-xs text-slate-500">
-    Inputs start with city averages and stay editable so you can model your actual lifestyle.
-  </div>
-</div>
+          {/* Living Costs */}
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+            <div className="mb-3 text-sm font-semibold">
+              Living Costs{" "}
+              <InfoTip text="These start with city averages, but you can edit them. The calculator then adjusts them using destination city multipliers and household size." />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="text-sm">
+                <div className={labelHeadCls}>Groceries <span className="text-slate-400">(average, editable)</span></div>
+                <input className={inputCls} type="number" value={groceries} onChange={(e) => setGroceries(sanitizeNumeric(e.target.value))} placeholder=" " />
+              </label>
+              <label className="text-sm">
+                <div className={labelHeadCls}>Utilities <span className="text-slate-400">(average, editable)</span></div>
+                <input className={inputCls} type="number" value={utilities} onChange={(e) => setUtilities(sanitizeNumeric(e.target.value))} placeholder=" " />
+              </label>
+              <label className="text-sm">
+                <div className={labelHeadCls}>Transportation <span className="text-slate-400">(average, editable)</span></div>
+                <input className={inputCls} type="number" value={transportation} onChange={(e) => setTransportation(sanitizeNumeric(e.target.value))} placeholder=" " />
+              </label>
+              <label className="text-sm">
+                <div className={labelHeadCls}>Healthcare <span className="text-slate-400">(average, editable)</span></div>
+                <input className={inputCls} type="number" value={healthcare} onChange={(e) => setHealthcare(sanitizeNumeric(e.target.value))} placeholder=" " />
+              </label>
+              <label className="text-sm sm:col-span-2">
+                <div className={labelHeadCls}>Need a car?{" "}<InfoTip text="Adds a simple $350/month USD estimate for car-related costs. Useful for places where transit may not cover your lifestyle." /></div>
+                <select className={selectCls} value={needCar} onChange={(e) => setNeedCar(e.target.value as YesNo)}>
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </label>
+            </div>
+            <div className="mt-2 text-xs text-slate-500">Inputs start with city averages and stay editable so you can model your actual lifestyle.</div>
+          </div>
 
           {/* One-Time Moving Costs */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
             <div className="mb-3 text-sm font-semibold">One-Time Moving Costs</div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm"><div className={labelHeadCls}>Visa / permit estimate</div><input className={inputCls} type="number" value={visaCost} onChange={(e) => setVisaCost(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>One-way flight estimate</div><input className={inputCls} type="number" value={flightCost} onChange={(e) => setFlightCost(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Shipping / baggage estimate</div><input className={inputCls} type="number" value={shippingCost} onChange={(e) => setShippingCost(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Temporary housing estimate</div><input className={inputCls} type="number" value={temporaryStay} onChange={(e) => setTemporaryStay(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Setup / admin estimate</div><input className={inputCls} type="number" value={adminFees} onChange={(e) => setAdminFees(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Furniture / setup estimate</div><input className={inputCls} type="number" value={furnitureSetup} onChange={(e) => setFurnitureSetup(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Recommended cash buffer</div><input className={inputCls} type="number" value={emergencyCashBuffer} onChange={(e) => setEmergencyCashBuffer(e.target.value)} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Visa / permit estimate</div><input className={inputCls} type="number" value={visaCost} onChange={(e) => setVisaCost(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>One-way flight estimate</div><input className={inputCls} type="number" value={flightCost} onChange={(e) => setFlightCost(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Shipping / baggage estimate</div><input className={inputCls} type="number" value={shippingCost} onChange={(e) => setShippingCost(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Temporary housing estimate</div><input className={inputCls} type="number" value={temporaryStay} onChange={(e) => setTemporaryStay(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Setup / admin estimate</div><input className={inputCls} type="number" value={adminFees} onChange={(e) => setAdminFees(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Furniture / setup estimate</div><input className={inputCls} type="number" value={furnitureSetup} onChange={(e) => setFurnitureSetup(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Recommended cash buffer</div><input className={inputCls} type="number" value={emergencyCashBuffer} onChange={(e) => setEmergencyCashBuffer(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
             </div>
             <div className="mt-4 w-full text-xs text-slate-500">Planning estimates only.</div>
           </div>
@@ -927,26 +872,17 @@ comfort,
                 <>
                   <div className="mt-2">Gross monthly: <span className="font-semibold">{displayAmount(results.grossMonthly, 2)}</span></div>
                   <div>
-  Est. tax + contributions (current):{" "}
-  <span className="font-semibold">
-    {displayAmount(results.grossMonthly * results.currentTaxRate, 2)}
-  </span>{" "}
-  <span className="text-xs text-slate-500">
-    ({(results.currentTaxRate * 100).toFixed(1)}%)
-  </span>
-</div>
+                    Est. tax + contributions (current):{" "}
+                    <span className="font-semibold">{displayAmount(results.grossMonthly * results.currentTaxRate, 2)}</span>{" "}
+                    <span className="text-xs text-slate-500">({(results.currentTaxRate * 100).toFixed(1)}%)</span>
+                  </div>
+                  <div>
+                    Est. tax + contributions (target):{" "}
+                    <span className="font-semibold">{displayAmount(results.grossMonthly * results.targetTaxRate, 2)}</span>{" "}
+                    <span className="text-xs text-slate-500">({(results.targetTaxRate * 100).toFixed(1)}%)</span>
+                  </div>
 
-<div>
-  Est. tax + contributions (target):{" "}
-  <span className="font-semibold">
-    {displayAmount(results.grossMonthly * results.targetTaxRate, 2)}
-  </span>{" "}
-  <span className="text-xs text-slate-500">
-    ({(results.targetTaxRate * 100).toFixed(1)}%)
-  </span>
-</div>
-
-                  {/* ── Confidence banner — matches Europe/International pattern ── */}
+                  {/* Confidence banner */}
                   <div className={`mt-3 rounded-xl ring-1 overflow-hidden ${
                     results.targetConfidence === "verified"     ? "bg-emerald-50 ring-emerald-200"
                     : results.targetConfidence === "partial"   ? "bg-blue-50 ring-blue-200"
@@ -1004,14 +940,7 @@ comfort,
               <div className="mt-2">Upfront cash needed: <span className="font-semibold">{displayAmount(results.upfrontCashNeeded)}</span></div>
               <div>Months covered by savings: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
               <div className="mt-2">Housing % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
-              <div>
-  Essential costs % of net:{" "}
-  <span className="font-semibold">
-    {Number.isFinite(results.totalPctOfNet)
-      ? `${results.totalPctOfNet.toFixed(1)}%`
-      : "—"}
-  </span>
-</div>
+              <div>Essential costs % of net:{" "}<span className="font-semibold">{Number.isFinite(results.totalPctOfNet) ? `${results.totalPctOfNet.toFixed(1)}%` : "—"}</span></div>
             </div>
 
             <div className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500 space-y-1">
@@ -1028,9 +957,7 @@ comfort,
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-rose-700">Monthly Flexibility</div>
                 <div className="mt-2 text-3xl font-bold text-slate-900">{results.salaryReady ? displayAmount(results.monthlyFlexibility, 2) : "—"}</div>
               </div>
-              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">
-                After housing and essentials
-              </div>
+              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">After housing and essentials</div>
             </div>
             <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-rose-100">
               <div className={`h-full rounded-full ${
@@ -1043,75 +970,55 @@ comfort,
               }`} />
             </div>
             <div className="mt-3 text-sm text-slate-700">
-              {!results.salaryReady ? "Add salary and housing inputs to estimate how much room you have left each month."
+              {!results.salaryReady
+                ? "Add salary and housing inputs to estimate how much room you have left each month."
                 : `This is what you may have left each month in ${toCityLabel} after housing costs and core living expenses.`}
             </div>
             <div className="mt-2 text-xs text-slate-500">Higher flexibility gives you more room for saving, investing, travel, and unexpected expenses.</div>
           </div>
 
           {/* Readiness Summary */}
-<div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-    Move Readiness
-  </div>
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Move Readiness</div>
+            <div className="mt-2 text-2xl font-bold text-slate-900">
+              {results.salaryReady ? `${results.comfort.band} · ${results.comfort.label}` : "—"}
+            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
+              {!results.salaryReady
+                ? "Add your income to see whether this move looks comfortable, manageable, tight, or stretched."
+                : results.comfort.note}
+            </p>
+            {results.salaryReady && (
+              <div className="mt-4 grid gap-2 text-sm text-slate-700">
+                <div className="flex justify-between gap-3">
+                  <span>Monthly flexibility</span>
+                  <span className="font-semibold text-slate-900">{displayAmount(results.monthlyFlexibility, 0)}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span>Upfront cash needed</span>
+                  <span className="font-semibold text-slate-900">{displayAmount(results.upfrontCashNeeded, 0)}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span>Months covered by savings</span>
+                  <span className="font-semibold text-slate-900">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span>
+                </div>
+              </div>
+            )}
+            {results.salaryReady && (
+              <div className="mt-2 text-xs text-slate-500">
+                {results.monthlyFlexibility < 0
+                  ? "Your monthly budget breaks — expenses exceed income."
+                  : results.totalPctOfNet > 80
+                  ? "Your risk is tight cash flow — small changes could break your budget."
+                  : results.upfrontCashNeeded > convertLocalToUsd(nz(currentSavings), fromCountry)
+                  ? "Your risk is upfront cash — you don't have enough saved for the move."
+                  : "You have breathing room — this move looks financially stable based on your inputs."}
+              </div>
+            )}
+            <div className="mt-3 text-xs text-slate-500">This combines income, taxes, housing, living costs, savings, and one-time move costs.</div>
+          </div>
 
-  <div className="mt-2 text-2xl font-bold text-slate-900">
-    {results.salaryReady ? `${results.comfort.band} · ${results.comfort.label}` : "—"}
-  </div>
-
-  <p className="mt-2 text-sm leading-6 text-slate-700">
-    {!results.salaryReady
-      ? "Add your income to see whether this move looks comfortable, manageable, tight, or stretched."
-      : results.comfort.note}
-  </p>
-
-  {results.salaryReady && (
-    <div className="mt-4 grid gap-2 text-sm text-slate-700">
-      <div className="flex justify-between gap-3">
-        <span>Monthly flexibility</span>
-        <span className="font-semibold text-slate-900">
-          {displayAmount(results.monthlyFlexibility, 0)}
-        </span>
-      </div>
-
-      <div className="flex justify-between gap-3">
-        <span>Upfront cash needed</span>
-        <span className="font-semibold text-slate-900">
-          {displayAmount(results.upfrontCashNeeded, 0)}
-        </span>
-      </div>
-
-      <div className="flex justify-between gap-3">
-        <span>Months covered by savings</span>
-        <span className="font-semibold text-slate-900">
-          {Number.isFinite(results.monthsCovered)
-            ? results.monthsCovered.toFixed(1)
-            : "—"}
-        </span>
-      </div>
-    </div>
-  )}
-
-  {results.salaryReady && (
-  <div className="mt-2 text-xs text-slate-500">
-    {results.monthlyFlexibility < 0
-      ? "Your monthly budget breaks — expenses exceed income."
-      : results.totalPctOfNet > 80
-      ? "Your risk is tight cash flow — small changes could break your budget."
-      : results.upfrontCashNeeded > convertLocalToUsd(nz(currentSavings), fromCountry)
-      ? "Your risk is upfront cash — you don’t have enough saved for the move."
-      : "You have breathing room — this move looks financially stable based on your inputs."}
-  </div>
-)}
-
-  <div className="mt-3 text-xs text-slate-500">
-    This combines income, taxes, housing, living costs, savings, and one-time move costs.
-  </div>
-</div>
-
-
-
-          {/* Comparable Salary — gated on salaryReady */}
+          {/* Comparable Salary */}
           {results.salaryReady && (
             <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
               <div className="text-xs font-semibold tracking-widest text-slate-500">COMPARABLE SALARY</div>

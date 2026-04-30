@@ -44,6 +44,84 @@ const COUNTRIES = [
   { code:"CL", name:"Chile",          rate:5.5,  downMin:20, notes:"Most stable South American mortgage market. Foreigners can access local financing with RUT and proof of income." },
 ];
 
+// ─── FIX 1: Per-country foreign buyer rules ───────────────────────────────
+// These override the default rate/downMin when residencyStatus === "non-resident"
+type ForeignBuyerRule = {
+  mortgageAvailable: boolean;
+  nonResidentRate?: number;
+  nonResidentDownMin?: number;
+  warning?: string;
+};
+
+const FOREIGN_BUYER_RULES: Record<string, ForeignBuyerRule> = {
+  JP: {
+    mortgageAvailable: false,
+    warning: "Japanese banks require legal residency (e.g. work or spouse visa) to issue mortgages. Non-residents must pay cash or arrange foreign bank financing.",
+  },
+  TH: {
+    mortgageAvailable: false,
+    warning: "Thai bank mortgages are not available to foreigners. Developer financing or cash purchase is required.",
+  },
+  VN: {
+    mortgageAvailable: false,
+    warning: "Foreign buyers cannot obtain local mortgages in Vietnam. Ownership is via 50-year renewable leases only.",
+  },
+  ID: {
+    mortgageAvailable: false,
+    warning: "Local mortgages are not available to foreigners in Indonesia. Leasehold purchases require cash.",
+  },
+  NZ: {
+    mortgageAvailable: false,
+    warning: "Most overseas buyers are banned from purchasing existing homes since 2018. Non-residents can only buy newly built homes.",
+  },
+  AR: {
+    mortgageAvailable: false,
+    warning: "Argentina's mortgage market is highly unstable. Most transactions are done in USD cash. Extreme FX and legal risk.",
+  },
+  CO: {
+    mortgageAvailable: false,
+    warning: "Local rates are very high (~12%). Most foreign buyers use home-country financing or pay cash.",
+  },
+  BR: {
+    mortgageAvailable: false,
+    warning: "Brazil's local mortgage rates are high (~10.5%). Most foreign buyers use savings or foreign financing.",
+  },
+  SG: {
+    mortgageAvailable: true,
+    nonResidentRate: 4.0,
+    nonResidentDownMin: 25,
+    warning: "Additional Buyer's Stamp Duty (ABSD) of 60% applies to all foreign buyers — a major upfront cost on top of the purchase price.",
+  },
+  AU: {
+    mortgageAvailable: true,
+    nonResidentRate: 6.8,
+    nonResidentDownMin: 30,
+    warning: "FIRB approval is required. Foreign buyers are generally limited to new builds. Stamp duty surcharges of 7–8% apply in most states.",
+  },
+  MX: {
+    mortgageAvailable: true,
+    nonResidentRate: 11.0,
+    nonResidentDownMin: 40,
+    warning: "Foreigners must purchase via a fideicomiso (bank trust) in restricted coastal/border zones. Rates for non-residents skew higher.",
+  },
+  MY: {
+    mortgageAvailable: true,
+    nonResidentRate: 5.0,
+    nonResidentDownMin: 40,
+    warning: "Minimum purchase price for foreigners is RM 1M+ in most states. MM2H visa holders may access better terms.",
+  },
+  AE: {
+    mortgageAvailable: true,
+    nonResidentRate: 5.5,
+    nonResidentDownMin: 25,
+    warning: "Non-resident mortgages are available in Dubai's freehold zones but at higher rates than residents receive.",
+  },
+};
+
+// ─── FIX 3: FX volatility risk tiers ─────────────────────────────────────
+const HIGH_FX_RISK   = new Set(["AR", "TR", "VN", "ID", "BR"]);
+const MEDIUM_FX_RISK = new Set(["MX", "CO", "CR", "CL", "MY"]);
+
 const TERMS = [10, 15, 20, 25, 30];
 
 const US_STATES_LIST = Object.entries(US_STATE_DEFAULTS)
@@ -55,6 +133,11 @@ const US_STATES_LIST = Object.entries(US_STATE_DEFAULTS)
 // ═══════════════════════════════════════════════════════════════════════
 
 type VerdictType = "buy" | "wait" | "longterm" | "rent";
+
+type BreakEvenResult =
+  | { type: "ok"; months: number }
+  | { type: "never" }
+  | { type: "invalid" };
 
 type VerdictResult = {
   type:        VerdictType;
@@ -93,7 +176,6 @@ function getBuyWaitRentVerdict({
     ? ((totalMonthly - monthlyRent) / monthlyRent) * 100
     : 0;
 
-  // ── Rent is financially stronger ──
   if (
     backDTI > 50 ||
     (breakEvenYears !== null && breakEvenYears > 10 && housingPremium > 40) ||
@@ -114,7 +196,6 @@ function getBuyWaitRentVerdict({
     };
   }
 
-  // ── Wait 12–18 months ──
   const cashDanger = cashAfterClose < 0;
   const cashTight  = cashAfterClose < emergencyFundTarget && downPct < 10;
   const dtiStretched = frontDTI > 36;
@@ -135,7 +216,6 @@ function getBuyWaitRentVerdict({
     };
   }
 
-  // ── Buy only if staying 7+ years ──
   const longBreakEven = breakEvenYears !== null && breakEvenYears > 7;
   const elevatedDTI   = frontDTI > 28;
 
@@ -155,7 +235,6 @@ function getBuyWaitRentVerdict({
     };
   }
 
-  // ── Buy looks reasonable ──
   return {
     type: "buy",
     title: "Buy looks reasonable",
@@ -223,19 +302,38 @@ function calcAutoPMI(loan: number, homePrice: number, downPct: number) {
   return (loan * rate) / 12;
 }
 
-function calcPMIDropOff(loan: number, homePrice: number, annualRate: number, monthlyPayment: number) {
+// ─── FIX 2: Algebraic PMI drop-off — O(1) instead of O(360) loop ─────────
+// Uses the closed-form loan balance formula:
+//   B(m) = L·(1+r)^m − PMT·((1+r)^m − 1)/r
+// Solving B(m) = 0.8·homePrice algebraically:
+//   m = log((target − PMT/r) / (L − PMT/r)) / log(1+r)
+function calcPMIDropOff(loan: number, homePrice: number, annualRate: number, monthlyPayment: number): number | null {
   if (!loan || !homePrice || !annualRate || !monthlyPayment) return null;
   const target = homePrice * 0.80;
+  if (loan <= target) return 0; // already below 80% LTV
+
   const r = annualRate / 100 / 12;
-  let bal = loan;
-  for (let m = 1; m <= 360; m++) {
-    const int  = bal * r;
-    const prin = monthlyPayment - int;
-    if (prin <= 0) return null;
-    bal = Math.max(0, bal - prin);
-    if (bal <= target) return m;
+
+  // If interest rate is zero, fall back to simple linear paydown
+  if (r === 0) {
+    const months = Math.ceil((loan - target) / monthlyPayment);
+    return months > 0 && months <= 360 ? months : null;
   }
-  return null;
+
+  // Guard: payment must exceed monthly interest (otherwise negative amortization)
+  if (monthlyPayment <= loan * r) return null;
+
+  const pmtOverR   = monthlyPayment / r;
+  const numerator  = target - pmtOverR;
+  const denominator = loan  - pmtOverR;
+
+  // denominator should always be negative for a valid amortizing loan
+  if (denominator >= 0) return null;
+
+  const m = Math.log(numerator / denominator) / Math.log(1 + r);
+  if (!Number.isFinite(m) || m < 0) return null;
+  const rounded = Math.ceil(m);
+  return rounded <= 360 ? rounded : null;
 }
 
 function buildSchedule(principal: number, annualRate: number, termYears: number, extraMonthly = 0) {
@@ -270,40 +368,84 @@ function calcBiweeklySavings(principal: number, annualRate: number, termYears: n
 }
 
 function calcBreakEven({
-  downPayment, closingCosts = 0, annualRate, monthlyPI,
-  rent, tax, ins, hoa, homePrice,
-  appreciation, rentGrowth, investReturn, maintenanceRate, taxDeductRate,
+  downPayment,
+  closingCosts = 0,
+  annualRate,
+  monthlyPI,
+  rent,
+  tax,
+  ins,
+  hoa,
+  homePrice,
+  appreciation,
+  rentGrowth,
+  investReturn,
+  maintenanceRate,
+  taxDeductRate,
 }: {
-  downPayment:number; closingCosts?:number; annualRate:number; monthlyPI:number;
-  rent:number; tax:number; ins:number; hoa:number; homePrice:number;
-  appreciation:number; rentGrowth:number; investReturn:number;
-  maintenanceRate:number; taxDeductRate:number;
-}) {
-  if (!homePrice || !rent || !monthlyPI) return -1;
-  const upfront   = downPayment + closingCosts;
-  const r         = annualRate / 100 / 12;
-  let buyCum = 0, rentCum = 0;
-  let homeVal = homePrice, invested = upfront;
-  let balance = homePrice - downPayment, monthlyRent = rent;
+  downPayment: number;
+  closingCosts?: number;
+  annualRate: number;
+  monthlyPI: number;
+  rent: number;
+  tax: number;
+  ins: number;
+  hoa: number;
+  homePrice: number;
+  appreciation: number;
+  rentGrowth: number;
+  investReturn: number;
+  maintenanceRate: number;
+  taxDeductRate: number;
+}): BreakEvenResult {
+  if (
+    homePrice <= 0 ||
+    rent <= 0 ||
+    monthlyPI <= 0 ||
+    downPayment < 0 ||
+    annualRate <= 0
+  ) {
+    return { type: "invalid" };
+  }
+
+  const upfrontCash = downPayment + closingCosts;
+  const monthlyRate = annualRate / 100 / 12;
+
+  let buyCashFlowCost = upfrontCash;
+  let rentCashFlowCost = 0;
+
+  let homeValue = homePrice;
+  let loanBalance = homePrice - downPayment;
+  let monthlyRent = rent;
+
+  let renterInvestedCash = upfrontCash;
 
   for (let m = 1; m <= 360; m++) {
-    const int     = balance * r;
-    const prin    = Math.max(0, monthlyPI - int);
-    const taxSave = int * (taxDeductRate / 100);
-    const maint   = (homeVal * (maintenanceRate / 100)) / 12;
+    const interest = loanBalance * monthlyRate;
+    const principal = Math.max(0, monthlyPI - interest);
+    const taxSavings = interest * (taxDeductRate / 100);
+    const maintenance = (homeValue * (maintenanceRate / 100)) / 12;
 
-    buyCum  += monthlyPI + tax + ins + hoa + maint - taxSave;
-    rentCum += monthlyRent;
-    invested *= 1 + investReturn / 100 / 12;
-    homeVal  *= 1 + appreciation / 100 / 12;
+    buyCashFlowCost += monthlyPI + tax + ins + hoa + maintenance - taxSavings;
+    rentCashFlowCost += monthlyRent;
+
+    renterInvestedCash *= 1 + investReturn / 100 / 12;
+    homeValue *= 1 + appreciation / 100 / 12;
     monthlyRent *= 1 + rentGrowth / 100 / 12;
-    balance  = Math.max(0, balance - prin);
+    loanBalance = Math.max(0, loanBalance - principal);
 
-    const equityGain = (homeVal - homePrice) + ((homePrice - downPayment) - balance);
-    const opCost     = invested - upfront;
-    if (buyCum - equityGain + closingCosts + opCost <= rentCum) return m;
+    const homeownerNetWorth = homeValue - loanBalance;
+    const renterNetWorth = renterInvestedCash;
+
+    const buyNetCost = buyCashFlowCost - homeownerNetWorth;
+    const rentNetCost = rentCashFlowCost - renterNetWorth;
+
+    if (buyNetCost <= rentNetCost) {
+      return { type: "ok", months: m };
+    }
   }
-  return -1;
+
+  return { type: "never" };
 }
 
 function calcRefi(
@@ -361,7 +503,7 @@ function Tip({ text, side = "left" }: { text: string; side?: string }) {
   const pos = side === "right" ? "right-0" : side === "center" ? "left-1/2 -translate-x-1/2" : "left-0";
   return (
     <span className="group relative ml-1.5 inline-flex align-middle">
-      <button type="button" aria-label="More info"
+      <button type="button" aria-label={text}
         className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 bg-white text-[9px] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-400">i</button>
       <span role="tooltip"
         className={`pointer-events-none absolute top-full z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-xl bg-slate-900 px-3 py-2.5 text-xs leading-relaxed text-slate-100 opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 ${pos}`}>
@@ -628,7 +770,7 @@ function MobileSummaryBar({ monthly }: { monthly: number }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// REFINANCE TAB  (unchanged from original)
+// REFINANCE TAB
 // ═══════════════════════════════════════════════════════════════════════
 
 function RefinanceTab() {
@@ -779,7 +921,6 @@ function RefinanceTab() {
 // ═══════════════════════════════════════════════════════════════════════
 
 function USTab() {
-  // ── Core inputs ────────────────────────────────────────────────────
   const [propertyState,   setPropertyState]   = useState("");
   const [homePrice,       setHomePrice]        = useState("500000");
   const [downPct,         setDownPct]          = useState("20");
@@ -799,17 +940,11 @@ function USTab() {
   const [rentGrowth,      setRentGrowth]       = useState("3.0");
   const [investReturn,    setInvestReturn]     = useState("7.0");
   const [taxDeductRate,   setTaxDeductRate]    = useState("22");
-
-  // ── New: cash-after-close inputs ───────────────────────────────────
   const [currentSavings,      setCurrentSavings]      = useState("80000");
   const [emergencyFundMonths, setEmergencyFundMonths]  = useState("6");
   const [movingBudget,        setMovingBudget]         = useState("5000");
-
-  // ── New: stress test + PMI appreciation toggle ─────────────────────
   const [stressLevel,      setStressLevel]      = useState<StressLevel>("none");
   const [appreciationPMI,  setAppreciationPMI]  = useState(false);
-
-  // ── New: editable scenario names ──────────────────────────────────
   const [scenarioNames, setScenarioNames] = useState([
     "Buy Now",
     "Rent 2 Yrs, Buy",
@@ -817,7 +952,6 @@ function USTab() {
     "Higher Down",
   ]);
 
-  // ── Auto-fill defaults when state changes ─────────────────────────
   useEffect(() => {
     if (!propertyState) return;
     const defaults = US_STATE_DEFAULTS[propertyState];
@@ -827,7 +961,6 @@ function USTab() {
     setClosingCostPct(String(defaults.closingCostPct));
   }, [propertyState]);
 
-  // ── Derived core values ───────────────────────────────────────────
   const hp   = nz(homePrice);
   const dpPc = nz(downPct);
   const dp   = hp * (dpPc / 100);
@@ -846,7 +979,6 @@ function USTab() {
   const totalMonthly = monthlyPI + monthlyTax + monthlyIns + monthlyHOA + monthlyPMI;
   const totalInterest = calcTotalInterest(loan, r, term);
 
-  // ── PMI drop-off (standard + appreciation-adjusted) ───────────────
   const pmiDropMonth = useMemo(
     () => calcPMIDropOff(loan, hp, r, monthlyPI),
     [loan, hp, r, monthlyPI]
@@ -857,7 +989,6 @@ function USTab() {
   );
   const activePMIDropMonth = appreciationPMI ? pmiDropMonthAppreciated : pmiDropMonth;
 
-  // ── Amortization ──────────────────────────────────────────────────
   const amortRows = useMemo(
     () => buildSchedule(loan, r, term, nz(extraMonthly)),
     [loan, rate, term, extraMonthly]
@@ -871,25 +1002,15 @@ function USTab() {
     [biweekly, loan, rate, term]
   );
 
-  // ── Affordability ─────────────────────────────────────────────────
   const grossMonthly = nz(grossIncome) / 12;
   const frontDTI = grossMonthly > 0 ? (totalMonthly / grossMonthly) * 100 : 0;
   const backDTI  = grossMonthly > 0 ? ((totalMonthly + nz(otherDebts)) / grossMonthly) * 100 : 0;
 
-  // ── Cash to close ─────────────────────────────────────────────────
- const estimatedClosing = loan * (nz(closingCostPct) / 100);
+  const estimatedClosing = loan * (nz(closingCostPct) / 100);
+  const lenderCashToClose = dp + estimatedClosing;
+  const recommendedReserve = totalMonthly * 3;
+  const totalCashNeeded = lenderCashToClose + recommendedReserve + nz(movingBudget);
 
-// What you likely pay at closing
-const lenderCashToClose = dp + estimatedClosing;
-
-// Planning reserve, not literally paid to the lender
-const recommendedReserve = totalMonthly * 3;
-
-// Full cash needed to feel safe buying
-const totalCashNeeded =
-  lenderCashToClose + recommendedReserve + nz(movingBudget);
-
-  // ── Cash after close (NEW) ────────────────────────────────────────
   const cashAfterClose = nz(currentSavings) - lenderCashToClose - nz(movingBudget);
   const emergencyFundTarget = totalMonthly * nz(emergencyFundMonths);
   const cashStatus: "healthy" | "tight" | "danger" =
@@ -897,7 +1018,6 @@ const totalCashNeeded =
     : cashAfterClose >= 0                 ? "tight"
     : "danger";
 
-  // ── Break-even ────────────────────────────────────────────────────
   const breakEvenMonth = useMemo(() => calcBreakEven({
     downPayment: dp, closingCosts: estimatedClosing,
     annualRate: r, monthlyPI,
@@ -906,9 +1026,11 @@ const totalCashNeeded =
     maintenanceRate: nz(maintenanceRate), taxDeductRate: nz(taxDeductRate),
   }), [dp, estimatedClosing, r, monthlyPI, monthlyRent, monthlyTax, monthlyIns, monthlyHOA, hp, appreciation, rentGrowth, investReturn, maintenanceRate, taxDeductRate]);
 
-  const beYears = breakEvenMonth > 0 ? parseFloat((breakEvenMonth / 12).toFixed(1)) : null;
+  const beYears =
+  breakEvenMonth.type === "ok"
+    ? parseFloat((breakEvenMonth.months / 12).toFixed(1))
+    : null;
 
-  // ── First year & 5-year costs (NEW) ──────────────────────────────
   const firstYearCost = useMemo(() => {
     const maintenanceAnnual = hp * (nz(maintenanceRate) / 100);
     return totalMonthly * 12 + maintenanceAnnual;
@@ -925,13 +1047,11 @@ const totalCashNeeded =
     return [ownCost, rentCost];
   }, [totalMonthly, hp, maintenanceRate, monthlyRent, rentGrowth]);
 
-  // 5-year equity: principal paid down + appreciation
   const fiveYearBalance  = amortRows[59]?.balance ?? loan;
   const fiveYearHomeVal  = hp * Math.pow(1 + nz(appreciation) / 100, 5);
   const fiveYearEquity   = fiveYearHomeVal - fiveYearBalance;
-  const fiveYearNetOwn   = fiveYearOwnCost - fiveYearEquity; // net cost after equity
+  const fiveYearNetOwn   = fiveYearOwnCost - fiveYearEquity;
 
-  // ── Stress test (NEW) ─────────────────────────────────────────────
   const stressCfg        = STRESS_CONFIG[stressLevel];
   const stressedRate     = r + stressCfg.rateDelta;
   const stressedPI       = calcMonthlyPI(loan, stressedRate, term);
@@ -951,7 +1071,6 @@ const totalCashNeeded =
     : stressedFrontDTI <= 36 ? "text-amber-700 bg-amber-50"
     : "text-rose-700 bg-rose-50";
 
-  // ── Buy/Wait/Rent verdict (NEW) ───────────────────────────────────
   const verdict = useMemo(() => getBuyWaitRentVerdict({
     frontDTI, backDTI, cashAfterClose, emergencyFundTarget,
     breakEvenYears: beYears, totalMonthly,
@@ -959,7 +1078,6 @@ const totalCashNeeded =
     salaryReady: grossMonthly > 0 && hp > 0,
   }), [frontDTI, backDTI, cashAfterClose, emergencyFundTarget, beYears, totalMonthly, monthlyRent, dpPc, grossMonthly, hp]);
 
-  // ── Max home price solver (NEW) ───────────────────────────────────
   const maxHomePriceSolved = useMemo(() => solveMaxHomePrice({
     grossMonthly,
     downPct:          dpPc,
@@ -972,10 +1090,8 @@ const totalCashNeeded =
     baseHomePrice:    hp || 400_000,
   }), [grossMonthly, dpPc, r, term, propertyTaxRate, monthlyIns, monthlyHOA, hp]);
 
-  // ── Recommended income ────────────────────────────────────────────
   const recommendedIncome = totalMonthly > 0 ? (totalMonthly / 0.28) * 12 : 0;
 
-  // ── Rate sensitivity ──────────────────────────────────────────────
   const sensitivityRows = useMemo(() => {
     return [-1, -0.5, -0.25, 0, 0.25, 0.5, 1].map(delta => {
       const testRate    = Math.max(0.1, r + delta);
@@ -990,14 +1106,12 @@ const totalCashNeeded =
     });
   }, [loan, r, term, monthlyPI]);
 
-  // ── Scenario comparison (NEW) ─────────────────────────────────────
-  // 4 pre-set transforms: current / rent+save / cheaper / higher-down
   const scenarioData = useMemo(() => {
     const transforms = [
       { hp: hp,        dpPc: dpPc,                               r },
-      { hp: hp,        dpPc: Math.min(40, dpPc + 10),            r }, // bigger down
-      { hp: hp * 0.8,  dpPc: dpPc,                               r }, // 20% cheaper
-      { hp: hp,        dpPc: Math.min(40, Math.max(dpPc + 10, 30)), r }, // 30%+ down
+      { hp: hp,        dpPc: Math.min(40, dpPc + 10),            r },
+      { hp: hp * 0.8,  dpPc: dpPc,                               r },
+      { hp: hp,        dpPc: Math.min(40, Math.max(dpPc + 10, 30)), r },
     ];
 
     return transforms.map((t, i) => {
@@ -1005,7 +1119,9 @@ const totalCashNeeded =
       const l    = t.hp - d;
       const pi   = calcMonthlyPI(l, t.r, term);
       const tax  = (t.hp * nz(propertyTaxRate) / 100) / 12;
-      const ins  = hp > 0 ? monthlyIns * (t.hp / hp) : monthlyIns;
+      const ins = hp > 0
+  ? monthlyIns * Math.pow(t.hp / hp, 0.6)
+  : monthlyIns;
       const pmi  = calcAutoPMI(l, t.hp, t.dpPc);
       const total = pi + tax + ins + monthlyHOA + pmi;
       const closing   = l * (nz(closingCostPct) / 100);
@@ -1033,7 +1149,7 @@ const totalCashNeeded =
         totalMonthly:   total,
         cashToClose:    cashNeeded,
         fiveYearOwnCost: fiveYrOwn,
-        breakEvenYears: be > 0 ? be / 12 : null,
+        breakEvenYears: be.type === "ok" ? be.months / 12 : null,
         frontDTI:       sDTI,
         isCurrent:      i === 0,
       };
@@ -1042,12 +1158,10 @@ const totalCashNeeded =
       maintenanceRate, monthlyRent, appreciation, rentGrowth, investReturn,
       taxDeductRate, grossMonthly, hoa, scenarioNames]);
 
-  // Best scenario by key metric
   const bestMonthly   = Math.min(...scenarioData.map(s => s.totalMonthly));
   const bestFiveYear  = Math.min(...scenarioData.map(s => s.fiveYearOwnCost));
   const bestBreakEven = Math.min(...scenarioData.map(s => s.breakEvenYears ?? 999));
 
-  // ── Share state ───────────────────────────────────────────────────
   const shareState = {
     tab: "us", propertyState, homePrice, downPct, rate, term: String(term),
     closingCostPct, propertyTaxRate, insurance, hoa, maintenanceRate, extraMonthly,
@@ -1056,7 +1170,6 @@ const totalCashNeeded =
     scenarioNames,
   };
 
-  // ── Reset ─────────────────────────────────────────────────────────
   function handleReset() {
     setPropertyState("");
     setHomePrice("500000"); setDownPct("20"); setRate("6.75"); setTerm(30);
@@ -1069,87 +1182,65 @@ const totalCashNeeded =
     setScenarioNames(["Buy Now", "Rent 2 Yrs, Buy", "Cheaper Home", "Higher Down"]);
   }
 
-  // ═════════════════════════════════════════════════════════════════
-  // RENDER
-  // ═════════════════════════════════════════════════════════════════
-
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      {/* ══════ INPUTS ══════ */}
       <div className="space-y-3">
-
-        {/* Home & Loan */}
         <Card>
           <H2 action={<ResetButton onReset={handleReset} />}>Home &amp; Loan Details</H2>
           <div className="grid gap-3 sm:grid-cols-2">
-
-            {/* State auto-fill */}
             <F label="Property state" tip="Select your state to auto-fill typical property tax, insurance, and closing cost estimates. You can override any of these." span2>
               <select className={selectCls} value={propertyState} onChange={e => setPropertyState(e.target.value)}>
                 <option value="">— Select state (optional) —</option>
                 {US_STATES_LIST.map(s => <option key={s.code} value={s.code}>{s.name}</option>)}
               </select>
             </F>
-
             <F label="Home price" err={homePriceErr} span2>
               <input className={inputCls(homePriceErr)} type="number" value={homePrice} onChange={e => setHomePrice(e.target.value)} placeholder="500000" />
             </F>
-
             <F label="Down payment (%)" err={downPctErr}
-               tip="Percentage of home price paid upfront. Below 20% triggers automatic PMI. DTI uses gross income because lenders use gross income.">
+               tip="Percentage of home price paid upfront. Below 20% triggers automatic PMI.">
               <input className={inputCls(downPctErr)} type="number" value={downPct} onChange={e => setDownPct(e.target.value)} />
               <Slider val={downPct} set={setDownPct} min={0} max={50} step={0.5} />
             </F>
-
             <F label="Down payment ($)"><RO value={money(dp)} /></F>
-
             <F label="Interest rate (%)" err={rateErr}>
               <input className={inputCls(rateErr)} type="number" step="0.05" value={rate} onChange={e => setRate(e.target.value)} />
             </F>
-
             <F label="Loan term">
               <select className={selectCls} value={term} onChange={e => setTerm(Number(e.target.value))}>
                 {TERMS.map(t => <option key={t} value={t}>{t} years</option>)}
               </select>
             </F>
-
             <F label="Est. closing costs (%)" tipSide="right"
-               tip="US closing costs typically run 2–5% of the loan. Auto-filled when you select a state. Cash due at closing includes your down payment plus estimated closing costs. The 3-month reserve is shown separately as a planning buffe.">
+               tip="US closing costs typically run 2–5% of the loan. Auto-filled when you select a state.">
               <input className={inputCls()} type="number" step="0.25" value={closingCostPct} onChange={e => setClosingCostPct(e.target.value)} />
             </F>
-
             <F label="Closing costs ($)"><RO value={money(estimatedClosing)} /></F>
           </div>
         </Card>
 
-        {/* Monthly costs */}
         <Card>
           <H2>Monthly Costs</H2>
           <div className="grid gap-3 sm:grid-cols-2">
             <F label="Property tax (%/yr)"
-               tip="US average is ~1.1%. Auto-filled when you select a state. Check your county assessor's website for the exact rate.">
+               tip="US average is ~1.1%. Auto-filled when you select a state.">
               <input className={inputCls()} type="number" step="0.1" value={propertyTaxRate} onChange={e => setPropertyTaxRate(e.target.value)} />
             </F>
-
             <F label="Homeowners insurance ($/mo)"
-               tip="Auto-filled with a state average calibrated to a ~$400k home. PMI is estimated separately — lender pricing varies.">
+               tip="Auto-filled with a state average calibrated to a ~$400k home.">
               <input className={inputCls()} type="number" value={insurance} onChange={e => setInsurance(e.target.value)} />
             </F>
-
             <F label="HOA fees ($/mo)">
               <input className={inputCls()} type="number" value={hoa} onChange={e => setHoa(e.target.value)} />
             </F>
-
             <F label="Maintenance reserve (%/yr)"
-               tip="Recommended: 1–2% of home value annually. Affects break-even and 5-year cost calculations.">
+               tip="Recommended: 1–2% of home value annually.">
               <input className={inputCls()} type="number" step="0.1" value={maintenanceRate} onChange={e => setMaintenanceRate(e.target.value)} />
             </F>
-
             <F label="Extra monthly payment" tipSide="right"
                tip="Additional principal per month. Reduces total interest and shortens loan." span2>
               <input className={inputCls()} type="number" value={extraMonthly} onChange={e => setExtraMonthly(e.target.value)} placeholder="0" />
             </F>
-
             <div className="sm:col-span-2 flex items-center gap-2">
               <input type="checkbox" id="biweekly" checked={biweekly} onChange={e => setBiweekly(e.target.checked)}
                 className="h-4 w-4 rounded border-slate-300 accent-violet-600" />
@@ -1158,19 +1249,17 @@ const totalCashNeeded =
                 <Tip text="26 half-payments per year equals 13 full monthly payments — equivalent to one extra payment annually." />
               </label>
             </div>
-
             <div className="sm:col-span-2 flex items-center gap-2">
               <input type="checkbox" id="appreciationPMI" checked={appreciationPMI} onChange={e => setAppreciationPMI(e.target.checked)}
                 className="h-4 w-4 rounded border-slate-300 accent-violet-600" />
               <label htmlFor="appreciationPMI" className="text-sm text-slate-700 cursor-pointer">
                 Appreciation-adjusted PMI cancellation
-                <Tip text="When checked, PMI cancellation is estimated using the appreciated home value (not original price). This shows an earlier cancellation date. Requires formal appraisal in practice." side="right" />
+                <Tip text="When checked, PMI cancellation is estimated using the appreciated home value. Requires a formal appraisal in practice." side="right" />
               </label>
             </div>
           </div>
         </Card>
 
-        {/* Affordability & Rent vs Buy */}
         <Card>
           <H2>Affordability &amp; Rent vs Buy</H2>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -1178,7 +1267,7 @@ const totalCashNeeded =
               <input className={inputCls()} type="number" value={grossIncome} onChange={e => setGrossIncome(e.target.value)} />
             </F>
             <F label="Other monthly debts" tipSide="right"
-               tip="Car loans, student loans, credit cards — used to calculate back-end DTI. DTI uses gross income because lenders use gross income.">
+               tip="Car loans, student loans, credit cards — used to calculate back-end DTI.">
               <input className={inputCls()} type="number" value={otherDebts} onChange={e => setOtherDebts(e.target.value)} />
             </F>
             <F label="Current monthly rent">
@@ -1191,7 +1280,7 @@ const totalCashNeeded =
               <input className={inputCls()} type="number" step="0.1" value={rentGrowth} onChange={e => setRentGrowth(e.target.value)} />
             </F>
             <F label="Investment return (%/yr)" tipSide="right"
-               tip="What the down payment could earn if invested instead. Used in opportunity-cost calculation. Break-even is sensitive to this assumption.">
+               tip="What the down payment could earn if invested instead. Used in opportunity-cost calculation.">
               <input className={inputCls()} type="number" step="0.1" value={investReturn} onChange={e => setInvestReturn(e.target.value)} />
             </F>
             <F label="Marginal tax rate (%)" tipSide="right"
@@ -1201,15 +1290,14 @@ const totalCashNeeded =
           </div>
         </Card>
 
-        {/* Cash after close inputs */}
         <Card>
           <H2>Cash Position</H2>
           <div className="grid gap-3 sm:grid-cols-2">
-            <F label="Total savings / liquid cash" tip="All accessible cash — savings, checking, investment accounts you'd tap. Used to calculate what you have left after closing." span2>
+            <F label="Total savings / liquid cash" tip="All accessible cash — savings, checking, investment accounts you'd tap." span2>
               <input className={inputCls()} type="number" value={currentSavings} onChange={e => setCurrentSavings(e.target.value)} />
             </F>
             <F label="Emergency fund target (months)"
-               tip="How many months of housing costs you want to hold as an emergency fund after closing. 3–6 months is the common target.">
+               tip="How many months of housing costs you want to hold as an emergency fund after closing.">
               <input className={inputCls()} type="number" value={emergencyFundMonths} onChange={e => setEmergencyFundMonths(e.target.value)} />
             </F>
             <F label="Moving / furnishing budget" tipSide="right"
@@ -1224,30 +1312,21 @@ const totalCashNeeded =
         </div>
       </div>
 
-      {/* ══════ RESULTS ══════ */}
       <div className="space-y-3">
         <MobileSummaryBar monthly={totalMonthly} />
 
-        {/* 1. BUY / WAIT / RENT VERDICT */}
         <div className={`rounded-2xl border p-5 shadow-[0_6px_20px_rgba(15,23,42,0.07)] ${verdict.border} ${verdict.bg}`}>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className={`text-xs font-semibold uppercase tracking-[0.14em] ${verdict.labelColor}`}>
-                Buy · Wait · Rent
-              </div>
+              <div className={`text-xs font-semibold uppercase tracking-[0.14em] ${verdict.labelColor}`}>Buy · Wait · Rent</div>
               <div className="mt-1.5 text-2xl font-bold text-slate-900">{verdict.title}</div>
             </div>
-            <div className={`rounded-full bg-white px-3 py-1 text-xs font-semibold ring-1 ${verdict.tag}`}>
-              Decision
-            </div>
+            <div className={`rounded-full bg-white px-3 py-1 text-xs font-semibold ring-1 ${verdict.tag}`}>Decision</div>
           </div>
-
           <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/70 ring-1 ring-slate-200/40">
             <div className={`h-full rounded-full transition-all ${verdict.barColor} ${verdict.barWidth}`} />
           </div>
-
           <p className="mt-3 text-sm text-slate-700">{verdict.description}</p>
-
           {verdict.reasons.length > 0 && (
             <ul className="mt-2 space-y-1">
               {verdict.reasons.map((r, i) => (
@@ -1260,7 +1339,6 @@ const totalCashNeeded =
           )}
         </div>
 
-        {/* 2. HERO — monthly payment */}
         <div className="rounded-2xl bg-slate-900 p-5 text-white shadow-[0_8px_24px_rgba(15,23,42,0.18)]">
           <div className="text-xs font-semibold uppercase tracking-widest text-slate-400">Your Bottom Line</div>
           <div className="mt-3 mb-4">
@@ -1285,7 +1363,6 @@ const totalCashNeeded =
           <AffordabilityVerdict frontDTI={frontDTI} backDTI={backDTI} />
         </div>
 
-        {/* 3. MONTHLY PAYMENT BREAKDOWN */}
         <Card>
           <H2>Monthly Payment Breakdown</H2>
           <div className="space-y-2 text-sm">
@@ -1309,28 +1386,17 @@ const totalCashNeeded =
 
           {monthlyPMI > 0 && activePMIDropMonth && (
             <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-slate-700">
-              <span className="font-semibold text-amber-700">
-                PMI auto-estimated at {money(monthlyPMI, 0)}/mo.
-              </span>{" "}
+              <span className="font-semibold text-amber-700">PMI auto-estimated at {money(monthlyPMI, 0)}/mo.</span>{" "}
               PMI can be cancelled around{" "}
-              <strong>
-                month {activePMIDropMonth} ({(activePMIDropMonth / 12).toFixed(1)} yrs)
-              </strong>{" "}
+              <strong>month {activePMIDropMonth} ({(activePMIDropMonth / 12).toFixed(1)} yrs)</strong>{" "}
               when LTV reaches 80%{appreciationPMI ? " of the appreciated value" : ""}.
               It is not removed automatically — you must request cancellation.
-              {appreciationPMI && (
-                <span className="ml-1 text-violet-700">
-                  Appreciation-adjusted estimate requires a formal appraisal.
-                </span>
-              )}
-              <div className="mt-1 text-slate-500">
-                PMI is estimated using LTV tiers; lender pricing varies.
-              </div>
+              {appreciationPMI && <span className="ml-1 text-violet-700">Appreciation-adjusted estimate requires a formal appraisal.</span>}
+              <div className="mt-1 text-slate-500">PMI is estimated using LTV tiers; lender pricing varies.</div>
             </div>
           )}
         </Card>
 
-        {/* 4. FIRST YEAR & 5-YEAR COST */}
         <Card>
           <H2>First Year &amp; 5-Year Cost</H2>
           <div className="grid grid-cols-2 gap-4 text-sm">
@@ -1355,7 +1421,6 @@ const totalCashNeeded =
               <div className="mt-0.5 text-xs text-slate-400">with {fmtPct(nz(rentGrowth))}/yr growth</div>
             </div>
           </div>
-
           <div className="mt-3 grid grid-cols-2 gap-4 border-t border-slate-200 pt-3 text-sm">
             <div>
               <div className="text-xs text-slate-500">5-yr equity built</div>
@@ -1370,7 +1435,6 @@ const totalCashNeeded =
               <div className="mt-0.5 text-xs text-slate-400">after equity deducted</div>
             </div>
           </div>
-
           <div className={`mt-3 rounded-xl px-3 py-2 text-xs font-semibold ${
             fiveYearNetOwn < fiveYearRentCost ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-800"
           }`}>
@@ -1378,13 +1442,9 @@ const totalCashNeeded =
               ? `Over 5 years, buying is ~${money(fiveYearRentCost - fiveYearNetOwn)} cheaper than renting (net of equity).`
               : `Over 5 years, renting is ~${money(fiveYearNetOwn - fiveYearRentCost)} cheaper than buying (net of equity).`}
           </div>
-
-          <div className="mt-2 text-xs text-slate-400">
-            Break-even is sensitive to appreciation and rent growth assumptions. Small changes can shift the result by years.
-          </div>
+          <div className="mt-2 text-xs text-slate-400">Break-even is sensitive to appreciation and rent growth assumptions.</div>
         </Card>
 
-        {/* 5. CASH TO CLOSE */}
         <Card>
           <H2>Cash Needed to Close</H2>
           <div className="space-y-2 text-sm">
@@ -1404,11 +1464,10 @@ const totalCashNeeded =
             </div>
           </div>
           <p className="mt-3 text-xs text-slate-400">
-            The 3-month buffer is a planning target, not a universal lender requirement. Closing costs are an estimate; your official Loan Estimate will show the exact figure.
+            The 3-month buffer is a planning target, not a universal lender requirement.
           </p>
         </Card>
 
-        {/* 6. CASH AFTER CLOSE (NEW) */}
         <div className={`rounded-2xl border p-5 shadow-[0_6px_20px_rgba(15,23,42,0.07)] ${
           cashStatus === "healthy" ? "border-emerald-200 bg-emerald-50/70"
           : cashStatus === "tight" ? "border-amber-200 bg-amber-50/70"
@@ -1417,13 +1476,9 @@ const totalCashNeeded =
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className={`text-xs font-semibold uppercase tracking-[0.14em] ${
-                cashStatus === "healthy" ? "text-emerald-700"
-                : cashStatus === "tight" ? "text-amber-700"
-                : "text-rose-700"
+                cashStatus === "healthy" ? "text-emerald-700" : cashStatus === "tight" ? "text-amber-700" : "text-rose-700"
               }`}>Cash After Close</div>
-              <div className="mt-2 text-3xl font-bold text-slate-900">
-                {money(cashAfterClose)}
-              </div>
+              <div className="mt-2 text-3xl font-bold text-slate-900">{money(cashAfterClose)}</div>
             </div>
             <div className={`rounded-full bg-white px-3 py-1 text-xs font-semibold ring-1 ${
               cashStatus === "healthy" ? "text-emerald-700 ring-emerald-200"
@@ -1433,20 +1488,10 @@ const totalCashNeeded =
               {cashStatus === "healthy" ? "Healthy" : cashStatus === "tight" ? "Tight" : "Danger"}
             </div>
           </div>
-
           <div className="mt-3 grid gap-1.5 text-xs text-slate-600">
-            <div className="flex justify-between">
-              <span>Total savings</span>
-              <span className="font-semibold text-slate-900">{money(nz(currentSavings))}</span>
-            </div>
-            <div className="flex justify-between text-slate-500">
-              <span>Cash to close</span>
-              <span>− {money(totalCashNeeded)}</span>
-            </div>
-            <div className="flex justify-between text-slate-500">
-              <span>Moving / furnishing</span>
-              <span>− {money(nz(movingBudget))}</span>
-            </div>
+            <div className="flex justify-between"><span>Total savings</span><span className="font-semibold text-slate-900">{money(nz(currentSavings))}</span></div>
+            <div className="flex justify-between text-slate-500"><span>Cash to close</span><span>− {money(totalCashNeeded)}</span></div>
+            <div className="flex justify-between text-slate-500"><span>Moving / furnishing</span><span>− {money(nz(movingBudget))}</span></div>
             <div className="mt-1 flex justify-between border-t border-slate-200/60 pt-1.5 font-semibold text-slate-900">
               <span>Cash remaining</span>
               <span className={cashAfterClose < 0 ? "text-rose-600" : ""}>{money(cashAfterClose)}</span>
@@ -1456,7 +1501,6 @@ const totalCashNeeded =
               <span>{money(emergencyFundTarget)}</span>
             </div>
           </div>
-
           <div className={`mt-3 rounded-xl px-3 py-2 text-xs font-semibold ${
             cashStatus === "healthy" ? "bg-emerald-100/80 text-emerald-800"
             : cashStatus === "tight"  ? "bg-amber-100/80 text-amber-800"
@@ -1470,14 +1514,13 @@ const totalCashNeeded =
           </div>
         </div>
 
-        {/* 7. AFFORDABILITY CHECK */}
         <Card>
           <H2>Affordability Check</H2>
           <div className="space-y-3">
             <DTIRow label="Front-end DTI" value={frontDTI} guide="≤28% guideline"
-              tip="Housing costs as % of gross monthly income. DTI uses gross income because lenders use gross income — not take-home pay." />
+              tip="Housing costs as % of gross monthly income." />
             <DTIRow label="Back-end DTI" value={backDTI} guide="≤36–43% guideline"
-              tip="All monthly debts as % of gross income. Conventional lenders want ≤36–43%." />
+              tip="All monthly debts as % of gross income." />
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-600">
               Max home price at 28% front-end DTI:{" "}
               <span className="font-semibold text-slate-900">
@@ -1488,20 +1531,12 @@ const totalCashNeeded =
           </div>
         </Card>
 
-        {/* 8. STRESS TEST */}
         <Card>
           <H2>Stress Test</H2>
-          <p className="mb-3 text-xs text-slate-500">
-            Drag the slider to see how your budget holds up if conditions worsen.
-          </p>
-
-          {/* Slider */}
+          <p className="mb-3 text-xs text-slate-500">Drag the slider to see how your budget holds up if conditions worsen.</p>
           <div className="mb-4">
             <div className="flex justify-between text-xs font-medium text-slate-600 mb-1">
-              <span>None</span>
-              <span>Low</span>
-              <span>Moderate</span>
-              <span>Severe</span>
+              <span>None</span><span>Low</span><span>Moderate</span><span>Severe</span>
             </div>
             <input type="range" min={0} max={3} step={1}
               value={["none","low","moderate","severe"].indexOf(stressLevel)}
@@ -1509,7 +1544,6 @@ const totalCashNeeded =
               className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-violet-600" />
             <div className="mt-1.5 text-xs text-slate-500">{stressCfg.description}</div>
           </div>
-
           {stressLevel !== "none" ? (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -1523,18 +1557,14 @@ const totalCashNeeded =
                 <div>
                   <div className="text-xs text-slate-500">Stressed income</div>
                   <div className="text-xl font-bold text-slate-900">{money(stressedIncome * 12)}/yr</div>
-                  {stressCfg.incomeMult < 1 && (
-                    <div className="text-xs text-slate-400">{((1 - stressCfg.incomeMult) * 100).toFixed(0)}% income drop modelled</div>
-                  )}
+                  {stressCfg.incomeMult < 1 && <div className="text-xs text-slate-400">{((1 - stressCfg.incomeMult) * 100).toFixed(0)}% income drop modelled</div>}
                 </div>
               </div>
               <div className="space-y-2">
                 <DTIRow label="Stressed front-end DTI" value={stressedFrontDTI} guide="≤28% target" />
                 <DTIRow label="Stressed back-end DTI"  value={stressedBackDTI}  guide="≤36–43% guideline" />
               </div>
-              <div className={`rounded-xl px-3 py-2 text-xs font-semibold ${stressVerdictColor}`}>
-                {stressVerdict}
-              </div>
+              <div className={`rounded-xl px-3 py-2 text-xs font-semibold ${stressVerdictColor}`}>{stressVerdict}</div>
             </div>
           ) : (
             <div className="rounded-xl bg-slate-50 px-3 py-3 text-xs text-slate-500 text-center ring-1 ring-slate-200">
@@ -1543,12 +1573,9 @@ const totalCashNeeded =
           )}
         </Card>
 
-        {/* 9. RATE SENSITIVITY */}
         <Card>
           <H2>Rate Sensitivity</H2>
-          <p className="mb-3 text-xs text-slate-500">
-            How monthly P&amp;I shifts if rates move from your current {fmtPct(r)}.
-          </p>
+          <p className="mb-3 text-xs text-slate-500">How monthly P&amp;I shifts if rates move from your current {fmtPct(r)}.</p>
           <div className="overflow-x-auto rounded-xl ring-1 ring-slate-200">
             <table className="w-full text-sm">
               <thead>
@@ -1574,7 +1601,6 @@ const totalCashNeeded =
           </div>
         </Card>
 
-        {/* 10. LONG-TERM COST */}
         <VCard>
           <div className="text-xs font-semibold uppercase tracking-widest text-violet-700">Long-Term Cost</div>
           <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
@@ -1606,12 +1632,9 @@ const totalCashNeeded =
           )}
         </VCard>
 
-        {/* 11. RENT VS BUY */}
         <VCard>
           <div className="text-xs font-semibold uppercase tracking-widest text-violet-700">Rent vs Buy Break-Even</div>
-          <div className="mt-2 text-3xl font-bold text-slate-900">
-            {beYears ? `${beYears} years` : "30+ years"}
-          </div>
+          <div className="mt-2 text-3xl font-bold text-slate-900">{beYears ? `${beYears} years` : "30+ years"}</div>
           <p className="mt-2 text-sm text-slate-700">
             {beYears
               ? `Buying becomes cheaper than renting after ~${beYears} years at current assumptions.`
@@ -1627,23 +1650,19 @@ const totalCashNeeded =
           </div>
           <HowThisWorks items={[
             `Each month, cumulative ownership cost (P&I + tax + insurance + HOA + ${fmtPct(nz(maintenanceRate))}/yr maintenance) is compared to cumulative rent.`,
-            `Rent grows at ${fmtPct(nz(rentGrowth))}/yr compounding. Even a small rent-growth rate significantly shifts the break-even.`,
+            `Rent grows at ${fmtPct(nz(rentGrowth))}/yr compounding.`,
             `Your ${money(dp)} down payment is modelled as an investment earning ${fmtPct(nz(investReturn))}/yr — this is the opportunity cost of buying.`,
-            `Equity paydown (principal repaid + appreciation) is credited back to the buyer each month.`,
+            "Equity paydown (principal repaid + appreciation) is credited back to the buyer each month.",
             nz(taxDeductRate) > 0
-              ? `A ${fmtPct(nz(taxDeductRate))} marginal tax deduction on mortgage interest is applied. Remove this if you take the standard deduction.`
+              ? `A ${fmtPct(nz(taxDeductRate))} marginal tax deduction on mortgage interest is applied.`
               : "No mortgage interest tax deduction is applied (standard deduction assumed).",
             "Break-even is sensitive to appreciation and rent growth assumptions — small changes can shift the result by years.",
           ]} />
         </VCard>
 
-        {/* 12. SCENARIO COMPARISON */}
         <Card>
           <H2>Scenario Comparison</H2>
-          <p className="mb-3 text-xs text-slate-500">
-            Four pre-set scenarios based on your current inputs. Click a name to rename it.
-          </p>
-
+          <p className="mb-3 text-xs text-slate-500">Four pre-set scenarios based on your current inputs. Click a name to rename it.</p>
           <div className="overflow-x-auto rounded-xl ring-1 ring-slate-200">
             <table className="w-full text-sm">
               <thead>
@@ -1668,9 +1687,7 @@ const totalCashNeeded =
                           setScenarioNames(names);
                         }}
                       />
-                      <div className="text-[10px] text-slate-400">
-                        {money(s.homePrice, 0)} · {s.downPct.toFixed(0)}% down
-                      </div>
+                      <div className="text-[10px] text-slate-400">{money(s.homePrice, 0)} · {s.downPct.toFixed(0)}% down</div>
                     </td>
                     <td className="px-3 py-2 text-right">
                       <span className={`font-semibold ${s.totalMonthly === bestMonthly ? "text-emerald-700" : "text-slate-900"}`}>
@@ -1688,34 +1705,24 @@ const totalCashNeeded =
                       {s.fiveYearOwnCost === bestFiveYear && <div className="text-[10px] text-emerald-600">lowest</div>}
                     </td>
                     <td className="px-3 py-2 text-right">
-                      <span className={`font-semibold ${
-                        s.breakEvenYears !== null && s.breakEvenYears === bestBreakEven
-                          ? "text-emerald-700" : "text-slate-900"
-                      }`}>
+                      <span className={`font-semibold ${s.breakEvenYears !== null && s.breakEvenYears === bestBreakEven ? "text-emerald-700" : "text-slate-900"}`}>
                         {s.breakEvenYears ? `${s.breakEvenYears.toFixed(1)} yr` : "30+"}
                       </span>
-                      {s.breakEvenYears !== null && s.breakEvenYears === bestBreakEven && (
-                        <div className="text-[10px] text-emerald-600">fastest</div>
-                      )}
+                      {s.breakEvenYears !== null && s.breakEvenYears === bestBreakEven && <div className="text-[10px] text-emerald-600">fastest</div>}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-
-          <div className="mt-2 text-xs text-slate-400">
-            Scenario names are editable. Metrics are computed from your current inputs — change home price, rate, or term to update all scenarios instantly.
-          </div>
+          <div className="mt-2 text-xs text-slate-400">Scenario names are editable. Metrics update instantly as you change inputs.</div>
         </Card>
 
-        {/* 13. CHART */}
         <Card>
           <H2>Principal vs Interest Over Time</H2>
           <AmortizationChart rows={amortRows} />
         </Card>
 
-        {/* 14. TABLE */}
         <Card>
           <H2>Amortization Schedule</H2>
           <AmortizationTable rows={amortRows} />
@@ -1726,11 +1733,14 @@ const totalCashNeeded =
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// INTERNATIONAL TAB  (unchanged from original)
+// INTERNATIONAL TAB — with residency fix + FX risk
 // ═══════════════════════════════════════════════════════════════════════
+
+type ResidencyStatus = "resident" | "non-resident";
 
 function InternationalTab() {
   const [countryCode,     setCountryCode]     = useState("PT");
+  const [residencyStatus, setResidencyStatus] = useState<ResidencyStatus>("non-resident");
   const [homePrice,       setHomePrice]       = useState("350000");
   const [downPct,         setDownPct]         = useState("30");
   const [useCustomRate,   setUseCustomRate]   = useState(false);
@@ -1748,8 +1758,20 @@ function InternationalTab() {
   const [investReturn,    setInvestReturn]    = useState("7.0");
   const [maintenanceRate, setMaintenanceRate] = useState("1.0");
 
-  const country       = COUNTRIES.find(c => c.code === countryCode) ?? COUNTRIES[0];
-  const effectiveRate = (useCustomRate && nz(customRate) > 0) ? nz(customRate) : country.rate;
+  const country    = COUNTRIES.find(c => c.code === countryCode) ?? COUNTRIES[0];
+  const fxRisk     = HIGH_FX_RISK.has(countryCode) ? "high" : MEDIUM_FX_RISK.has(countryCode) ? "medium" : "low";
+  const buyerRules = FOREIGN_BUYER_RULES[countryCode];
+
+  // ─── FIX 1: apply foreign buyer overrides when non-resident ──────────
+  const isNonResident    = residencyStatus === "non-resident";
+  const effectiveDownMin = isNonResident && buyerRules?.nonResidentDownMin
+    ? buyerRules.nonResidentDownMin
+    : country.downMin;
+  const baseRate         = isNonResident && buyerRules?.nonResidentRate
+    ? buyerRules.nonResidentRate
+    : country.rate;
+  const mortgageBlocked  = isNonResident && buyerRules && !buyerRules.mortgageAvailable;
+  const effectiveRate    = (useCustomRate && nz(customRate) > 0) ? nz(customRate) : baseRate;
 
   const hp           = nz(homePrice);
   const dpPc         = nz(downPct);
@@ -1758,45 +1780,75 @@ function InternationalTab() {
   const closingCosts = hp * (nz(closingCostPct) / 100);
   const totalUpfront = dp + closingCosts;
 
-  const monthlyPI    = calcMonthlyPI(loan, effectiveRate, term);
+  const monthlyPI    = mortgageBlocked ? 0 : calcMonthlyPI(loan, effectiveRate, term);
   const monthlyTax   = nz(annualTaxAmt) / 12;
   const monthlyIns   = nz(insurance);
   const totalMonthly = monthlyPI + monthlyTax + monthlyIns;
-  const totalInterest = calcTotalInterest(loan, effectiveRate, term);
+  const totalInterest = mortgageBlocked ? 0 : calcTotalInterest(loan, effectiveRate, term);
 
   const grossMonthly = nz(grossIncome) / 12;
   const frontDTI = grossMonthly > 0 ? (totalMonthly / grossMonthly) * 100 : 0;
   const backDTI  = grossMonthly > 0 ? ((totalMonthly + nz(otherDebts)) / grossMonthly) * 100 : 0;
 
   const amortRows = useMemo(
-    () => buildSchedule(loan, effectiveRate, term, nz(extraMonthly)),
-    [loan, effectiveRate, term, extraMonthly]
+    () => mortgageBlocked ? [] : buildSchedule(loan, effectiveRate, term, nz(extraMonthly)),
+    [loan, effectiveRate, term, extraMonthly, mortgageBlocked]
   );
 
-  const breakEvenMonth = useMemo(() => calcBreakEven({
-    downPayment: dp, closingCosts,
-    annualRate: effectiveRate, monthlyPI,
-    rent: nz(monthlyRent), tax: monthlyTax, ins: monthlyIns, hoa: 0, homePrice: hp,
-    appreciation: nz(appreciation), rentGrowth: nz(rentGrowth), investReturn: nz(investReturn),
-    maintenanceRate: nz(maintenanceRate), taxDeductRate: 0,
-  }), [dp, closingCosts, effectiveRate, monthlyPI, monthlyRent, monthlyTax, monthlyIns, hp, appreciation, rentGrowth, investReturn, maintenanceRate]);
+  const breakEvenMonth = useMemo<BreakEvenResult>(() => {
+  if (mortgageBlocked) return { type: "invalid" };
 
-  const beYears = breakEvenMonth > 0 ? (breakEvenMonth / 12).toFixed(1) : null;
+  return calcBreakEven({
+    downPayment: dp,
+    closingCosts,
+    annualRate: effectiveRate,
+    monthlyPI,
+    rent: nz(monthlyRent),
+    tax: monthlyTax,
+    ins: monthlyIns,
+    hoa: 0,
+    homePrice: hp,
+    appreciation: nz(appreciation),
+    rentGrowth: nz(rentGrowth),
+    investReturn: nz(investReturn),
+    maintenanceRate: nz(maintenanceRate),
+    taxDeductRate: 0,
+  });
+}, [
+  dp,
+  closingCosts,
+  effectiveRate,
+  monthlyPI,
+  monthlyRent,
+  monthlyTax,
+  monthlyIns,
+  hp,
+  appreciation,
+  rentGrowth,
+  investReturn,
+  maintenanceRate,
+  mortgageBlocked,
+]);
 
+const beYears =
+  breakEvenMonth.type === "ok"
+    ? parseFloat((breakEvenMonth.months / 12).toFixed(1))
+    : null;
   useEffect(() => {
-    setDownPct(String(country.downMin));
+    setDownPct(String(effectiveDownMin));
     setUseCustomRate(false);
     setCustomRate("");
-  }, [countryCode]);
+  }, [countryCode, residencyStatus]);
 
   const shareState = {
-    tab:"international", countryCode, homePrice, downPct, useCustomRate: String(useCustomRate),
-    customRate, term: String(term), closingCostPct, annualTaxAmt, insurance, extraMonthly,
+    tab:"international", countryCode, residencyStatus, homePrice, downPct,
+    useCustomRate: String(useCustomRate), customRate, term: String(term),
+    closingCostPct, annualTaxAmt, insurance, extraMonthly,
     grossIncome, otherDebts, monthlyRent, appreciation, rentGrowth, investReturn, maintenanceRate,
   };
 
   function handleReset() {
-    setCountryCode("PT"); setHomePrice("350000"); setDownPct("30");
+    setCountryCode("PT"); setResidencyStatus("non-resident"); setHomePrice("350000"); setDownPct("30");
     setUseCustomRate(false); setCustomRate(""); setTerm(20);
     setClosingCostPct("7"); setAnnualTaxAmt("1200"); setInsurance("100");
     setExtraMonthly("0"); setGrossIncome("120000"); setOtherDebts("500");
@@ -1825,12 +1877,60 @@ function InternationalTab() {
             <p className="text-sm leading-6 text-slate-700">{country.notes}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
-                Min. down (est.): {country.downMin}%
+                Min. down (est.): {effectiveDownMin}%
+                {isNonResident && buyerRules?.nonResidentDownMin && buyerRules.nonResidentDownMin !== country.downMin && (
+                  <span className="ml-1 text-amber-600">↑ non-resident</span>
+                )}
               </span>
               <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
-                Indicative rate: ~{country.rate}%
+                Indicative rate: ~{baseRate}%
+                {isNonResident && buyerRules?.nonResidentRate && buyerRules.nonResidentRate !== country.rate && (
+                  <span className="ml-1 text-amber-600">↑ non-resident</span>
+                )}
               </span>
+              {/* FX Risk badge */}
+              {fxRisk !== "low" && (
+                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${
+                  fxRisk === "high"
+                    ? "bg-rose-50 text-rose-700 ring-rose-200"
+                    : "bg-amber-50 text-amber-700 ring-amber-200"
+                }`}>
+                  {fxRisk === "high" ? "⚠ High FX risk" : "~ Medium FX risk"}
+                </span>
+              )}
             </div>
+
+            {/* FX Risk explanation */}
+            {fxRisk !== "low" && (
+              <div className={`mt-3 rounded-xl px-3 py-2.5 text-xs leading-5 ${
+                fxRisk === "high"
+                  ? "bg-rose-50 text-rose-900 ring-1 ring-rose-200"
+                  : "bg-amber-50 text-amber-900 ring-1 ring-amber-200"
+              }`}>
+                <span className="font-semibold">
+                  {fxRisk === "high" ? "High currency volatility:" : "Moderate currency risk:"}
+                </span>{" "}
+                {fxRisk === "high"
+                  ? "This country's currency has historically shown significant volatility against USD/EUR. Property values in USD terms can swing dramatically even if local prices are stable. Consider hedging or using USD-denominated pricing where available."
+                  : "This currency carries moderate volatility. Factor potential FX swings into your budget — a 10–20% move in exchange rates can meaningfully affect your purchasing power and property value in home-currency terms."}
+              </div>
+            )}
+
+            {/* Non-resident mortgage block warning */}
+            {mortgageBlocked && buyerRules?.warning && (
+              <div className="mt-3 rounded-xl border border-rose-300 bg-rose-50 px-3 py-2.5 text-xs leading-5 text-rose-900">
+                <span className="font-semibold">🚫 Mortgage not available for non-residents:</span>{" "}
+                {buyerRules.warning}
+              </div>
+            )}
+
+            {/* Non-resident warning (mortgage available but with caveats) */}
+            {!mortgageBlocked && isNonResident && buyerRules?.warning && (
+              <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5 text-xs leading-5 text-amber-900">
+                <span className="font-semibold">Non-resident note:</span>{" "}
+                {buyerRules.warning}
+              </div>
+            )}
           </ACard>
 
           <Card>
@@ -1841,16 +1941,36 @@ function InternationalTab() {
                   {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
                 </select>
               </F>
+
+              {/* FIX 1: Residency status toggle */}
+              <F label="Your residency status" tipSide="right"
+                 tip="Non-residents often face higher down payments, higher rates, or no mortgage access at all. Selecting 'Resident' uses standard country defaults."
+                 span2>
+                <div className="inline-flex rounded-xl bg-slate-100 p-1">
+                  {(["non-resident", "resident"] as ResidencyStatus[]).map(s => (
+                    <button key={s} type="button"
+                      onClick={() => setResidencyStatus(s)}
+                      className={`rounded-lg px-4 py-1.5 text-xs font-semibold capitalize transition ${
+                        residencyStatus === s ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      }`}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </F>
+
               <F label="Home price (USD equivalent)" span2>
                 <input className={inputCls()} type="number" value={homePrice} onChange={e => setHomePrice(e.target.value)} />
               </F>
-              <F label="Down payment (%)" tip={`Minimum for foreign buyers in ${country.name}: ${country.downMin}%`}>
+              <F label="Down payment (%)" tip={`Minimum for ${residencyStatus === "non-resident" ? "non-resident" : ""} buyers in ${country.name}: ${effectiveDownMin}%`}>
                 <input className={inputCls()} type="number" value={downPct} onChange={e => setDownPct(e.target.value)} />
                 <Slider val={downPct} set={setDownPct} min={0} max={60} step={1} />
               </F>
               <F label="Down payment ($)"><RO value={money(dp)} /></F>
+
               <div className="sm:col-span-2 grid grid-cols-2 gap-3 items-start">
-                <F label="Interest rate (%)" tipSide="right" tip={`${country.name} typical rate: ~${country.rate}%.`}>
+                <F label="Interest rate (%)" tipSide="right"
+                   tip={`${country.name} ${residencyStatus === "non-resident" && buyerRules?.nonResidentRate ? "non-resident" : "typical"} rate: ~${baseRate}%.`}>
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2 text-xs text-slate-600">
                       <input type="checkbox" id="customRate" checked={useCustomRate} onChange={e => setUseCustomRate(e.target.checked)}
@@ -1858,17 +1978,18 @@ function InternationalTab() {
                       <label htmlFor="customRate" className="cursor-pointer">Use custom rate</label>
                     </div>
                     {useCustomRate
-                      ? <input className={inputCls()} type="number" step="0.1" value={customRate} onChange={e => setCustomRate(e.target.value)} placeholder={String(country.rate)} />
-                      : <RO value={`${country.rate}% (country default)`} />}
+                      ? <input className={inputCls()} type="number" step="0.1" value={customRate} onChange={e => setCustomRate(e.target.value)} placeholder={String(baseRate)} />
+                      : <RO value={`${baseRate}% (${residencyStatus === "non-resident" && buyerRules?.nonResidentRate ? "non-resident" : "country"} default)`} />}
                   </div>
                 </F>
                 <div className="pt-5">
                   <span className={lbl}>Loan term</span>
-                  <select className={selectCls} value={term} onChange={e => setTerm(Number(e.target.value))}>
+                  <select className={selectCls} value={term} onChange={e => setTerm(Number(e.target.value))} disabled={mortgageBlocked}>
                     {TERMS.map(t => <option key={t} value={t}>{t} years</option>)}
                   </select>
                 </div>
               </div>
+
               <F label="Closing costs (%)" tipSide="right" tip="Transfer taxes, notary, agent fees. Portugal ~7%, France ~8%, Spain ~10–12%.">
                 <input className={inputCls()} type="number" step="0.5" value={closingCostPct} onChange={e => setClosingCostPct(e.target.value)} />
               </F>
@@ -1889,7 +2010,7 @@ function InternationalTab() {
                 <input className={inputCls()} type="number" step="0.1" value={maintenanceRate} onChange={e => setMaintenanceRate(e.target.value)} />
               </F>
               <F label="Extra monthly payment">
-                <input className={inputCls()} type="number" value={extraMonthly} onChange={e => setExtraMonthly(e.target.value)} placeholder="0" />
+                <input className={inputCls()} type="number" value={extraMonthly} onChange={e => setExtraMonthly(e.target.value)} placeholder="0" disabled={mortgageBlocked} />
               </F>
             </div>
           </Card>
@@ -1924,6 +2045,18 @@ function InternationalTab() {
         <div className="space-y-3">
           <MobileSummaryBar monthly={totalMonthly} />
 
+          {/* Mortgage blocked callout */}
+          {mortgageBlocked && (
+            <div className="rounded-2xl border border-rose-300 bg-rose-50 p-5">
+              <div className="text-sm font-bold text-rose-800">🚫 Mortgage figures unavailable</div>
+              <p className="mt-2 text-xs text-rose-700 leading-5">
+                Local mortgages are generally not accessible to non-residents in {country.name}.
+                The monthly payment and amortization figures below reflect cash purchase or tax/insurance costs only.
+                Switch to <strong>Resident</strong> to model a mortgage scenario.
+              </p>
+            </div>
+          )}
+
           <VCard>
             <div className="text-xs font-semibold uppercase tracking-widest text-violet-700">Total Upfront Cash Needed</div>
             <div className="mt-2 text-3xl font-bold text-slate-900">{money(totalUpfront)}</div>
@@ -1936,42 +2069,46 @@ function InternationalTab() {
             </div>
           </VCard>
 
-          <Card>
-            <H2>Monthly Payment Breakdown</H2>
-            <div className="space-y-2 text-sm">
-              {[
-                { label:"Principal & Interest", value: monthlyPI },
-                { label:"Property Tax",         value: monthlyTax },
-                { label:"Insurance",            value: monthlyIns },
-              ].map(row => (
-                <div key={row.label} className="flex justify-between">
-                  <span className="text-slate-600">{row.label}</span>
-                  <span className="font-semibold text-slate-900">{money(row.value, 2)}</span>
+          {!mortgageBlocked && (
+            <Card>
+              <H2>Monthly Payment Breakdown</H2>
+              <div className="space-y-2 text-sm">
+                {[
+                  { label:"Principal & Interest", value: monthlyPI },
+                  { label:"Property Tax",         value: monthlyTax },
+                  { label:"Insurance",            value: monthlyIns },
+                ].map(row => (
+                  <div key={row.label} className="flex justify-between">
+                    <span className="text-slate-600">{row.label}</span>
+                    <span className="font-semibold text-slate-900">{money(row.value, 2)}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between border-t border-slate-200 pt-2 mt-2">
+                  <span className="font-semibold text-slate-900">Total monthly</span>
+                  <span className="text-xl font-bold text-violet-700">{money(totalMonthly, 2)}</span>
                 </div>
-              ))}
-              <div className="flex justify-between border-t border-slate-200 pt-2 mt-2">
-                <span className="font-semibold text-slate-900">Total monthly</span>
-                <span className="text-xl font-bold text-violet-700">{money(totalMonthly, 2)}</span>
               </div>
-            </div>
-          </Card>
+            </Card>
+          )}
 
-          <Card>
-            <H2>Loan Summary</H2>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              {[
-                { label:"Loan amount",    value: money(loan) },
-                { label:"Total interest", value: money(totalInterest) },
-                { label:"Total cost",     value: money(loan + totalInterest) },
-                { label:"Effective rate", value: fmtPct(effectiveRate) },
-              ].map(s => (
-                <div key={s.label}>
-                  <div className="text-xs text-slate-500">{s.label}</div>
-                  <div className="text-lg font-bold text-slate-900">{s.value}</div>
-                </div>
-              ))}
-            </div>
-          </Card>
+          {!mortgageBlocked && (
+            <Card>
+              <H2>Loan Summary</H2>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {[
+                  { label:"Loan amount",    value: money(loan) },
+                  { label:"Total interest", value: money(totalInterest) },
+                  { label:"Total cost",     value: money(loan + totalInterest) },
+                  { label:"Effective rate", value: fmtPct(effectiveRate) },
+                ].map(s => (
+                  <div key={s.label}>
+                    <div className="text-xs text-slate-500">{s.label}</div>
+                    <div className="text-lg font-bold text-slate-900">{s.value}</div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
 
           <Card>
             <H2>Affordability Check</H2>
@@ -1984,32 +2121,39 @@ function InternationalTab() {
           <VCard>
             <div className="text-xs font-semibold uppercase tracking-widest text-violet-700">Rent vs Buy Break-Even</div>
             <div className="mt-2 text-3xl font-bold text-slate-900">
-              {beYears ? `${beYears} years` : "30+ years"}
+              {mortgageBlocked ? "N/A" : beYears ? `${beYears} years` : "30+ years"}
             </div>
             <p className="mt-2 text-sm text-slate-700">
-              {beYears
+              {mortgageBlocked
+                ? "Break-even analysis requires a mortgage — not available for non-residents in this country."
+                : beYears
                 ? `Buying in ${country.name} becomes cheaper than renting after ~${beYears} years.`
                 : `Buying in ${country.name} doesn't break even within 30 years.`}
             </p>
-            <HowThisWorks items={[
-              `Upfront opportunity cost: ${money(totalUpfront)} modelled as an investment earning ${fmtPct(nz(investReturn))}/yr.`,
-              `Equity credited monthly from principal repayment and ${fmtPct(nz(appreciation))}/yr appreciation.`,
-              `Maintenance cost of ${fmtPct(nz(maintenanceRate))}/yr charged monthly.`,
-              `Rent grows at ${fmtPct(nz(rentGrowth))}/yr. Higher rent growth = sooner break-even.`,
-              "No mortgage interest deduction modelled — tax treatment varies widely internationally.",
-              "All rates and country data are estimates for planning only.",
-            ]} />
+            {!mortgageBlocked && (
+              <HowThisWorks items={[
+                `Upfront opportunity cost: ${money(totalUpfront)} modelled as an investment earning ${fmtPct(nz(investReturn))}/yr.`,
+                `Equity credited monthly from principal repayment and ${fmtPct(nz(appreciation))}/yr appreciation.`,
+                `Maintenance cost of ${fmtPct(nz(maintenanceRate))}/yr charged monthly.`,
+                `Rent grows at ${fmtPct(nz(rentGrowth))}/yr. Higher rent growth = sooner break-even.`,
+                "No mortgage interest deduction modelled — tax treatment varies widely internationally.",
+                "All rates and country data are estimates for planning only.",
+              ]} />
+            )}
           </VCard>
 
-          <Card>
-            <H2>Principal vs Interest Over Time</H2>
-            <AmortizationChart rows={amortRows} />
-          </Card>
-
-          <Card>
-            <H2>Amortization Schedule</H2>
-            <AmortizationTable rows={amortRows} />
-          </Card>
+          {!mortgageBlocked && (
+            <>
+              <Card>
+                <H2>Principal vs Interest Over Time</H2>
+                <AmortizationChart rows={amortRows} />
+              </Card>
+              <Card>
+                <H2>Amortization Schedule</H2>
+                <AmortizationTable rows={amortRows} />
+              </Card>
+            </>
+          )}
         </div>
       </div>
     </div>

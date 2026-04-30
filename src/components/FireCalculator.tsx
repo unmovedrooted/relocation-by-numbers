@@ -433,7 +433,12 @@ function calcCoastFireNumber(i: Inputs): number {
   const r    = VOLATILITY_PRESETS[i.volatility].phase1 / 100;
   const infl = (Number(i.inflationPct) || 0) / 100;
   const yrs  = Math.max(0, i.targetRetirementAge - i.coastAge);
-  const futureFireNumber = swr > 0 ? annualExpenses(i) / swr : Infinity;
+  const currentAnnualExpenses = annualExpenses(i);
+const retirementAnnualExpenses =
+  currentAnnualExpenses * Math.pow(1 + infl, yrs);
+
+const futureFireNumber =
+  swr > 0 ? retirementAnnualExpenses / swr : Infinity;
   // Correct real return: ((1 + nominal) / (1 + inflation)) - 1
   const realReturn = ((1 + r) / (1 + infl)) - 1;
   return futureFireNumber / Math.pow(1 + realReturn, yrs);

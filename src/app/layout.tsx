@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Script from "next/script";
+import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
 // @ts-ignore: allow importing global CSS in Next.js app
 import "./globals.css";
@@ -75,12 +76,15 @@ export default function RootLayout({
         <div className="flex min-h-screen flex-col">
           <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-              <Link
-                href="/"
-                className="text-lg font-semibold tracking-tight text-slate-900"
-              >
-                Relocation by Numbers
-              </Link>
+              <Link href="/" className="flex items-center">
+  <Image
+    src="/logo.svg"
+    alt="Relocation by Numbers"
+    width={160}
+    height={48}
+    priority
+  />
+</Link>
 
               <nav className="flex items-center gap-4 text-sm text-slate-600">
                 {NAV_LINKS.map(({ href, label }) => (

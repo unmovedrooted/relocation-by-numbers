@@ -253,7 +253,8 @@ function VisaContextCard({ countryCode }: { countryCode: string }) {
 export default function SouthAmericaRelocationCalculator() {
   const hasMounted = useRef(false);
   // FIX 4: Prevent city defaults from overwriting QS-restored custom values
-  const hasAppliedCityDefaults = useRef(false);
+  const restoredFromUrl = useRef(false);
+const lastDefaultsCityCode = useRef<string | null>(null);
   const [qsHydrated, setQsHydrated] = useState(false);
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
 
@@ -294,6 +295,7 @@ export default function SouthAmericaRelocationCalculator() {
   const [emergencyCashBuffer, setEmergencyCashBuffer] = useState<string>("3500");
   const [currentSavings, setCurrentSavings] = useState<string>("25000");
   const [needCar, setNeedCar] = useState<YesNo>("no");
+  const [carCostMonthly, setCarCostMonthly] = useState<string>("350");
 
   const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
 
@@ -349,30 +351,46 @@ export default function SouthAmericaRelocationCalculator() {
 
   // FIX 4: Only apply city defaults on first load, not on every city change
   useEffect(() => {
-    if (!selectedCityDefaults || !qsHydrated || hasAppliedCityDefaults.current) return;
-    hasAppliedCityDefaults.current = true;
-    const d = selectedCityDefaults;
-    setDestinationRent(String(d.monthlyDefaults.rent));
-    setDepositRequired(String(d.monthlyDefaults.rent * d.housing.depositMonths));
-    setFirstMonthRent(String(d.monthlyDefaults.rent));
-    setLastMonthRent(String(d.housing.lastMonthRentDefault));
-    setUtilitiesIncluded(d.housing.utilitiesIncludedDefault);
-    setGroceries(String(d.monthlyDefaults.groceries));
-    setUtilities(String(d.monthlyDefaults.utilities));
-    setTransportation(String(d.monthlyDefaults.transport));
-    setHealthcare(String(d.monthlyDefaults.healthcare));
-    setVisaCost(String(d.startupCosts.visa));
-    setFlightCost(String(d.startupCosts.flight));
-    setShippingCost(String(d.startupCosts.shipping));
-    setTemporaryStay(String(d.startupCosts.temporaryStay));
-    setAdminFees(String(d.startupCosts.adminFees));
-    setFurnitureSetup(String(d.housing.furnishedSetupCost));
-    setEmergencyCashBuffer(String(d.startupCosts.emergencyBuffer));
-  }, [selectedCityDefaults, qsHydrated]);
+  if (!selectedCityDefaults || !qsHydrated) return;
+
+  const cityChanged = lastDefaultsCityCode.current !== toCityCode;
+  if (!cityChanged) return;
+
+  lastDefaultsCityCode.current = toCityCode;
+
+  // If user loaded a shared URL, do not overwrite restored values on first hydration.
+  if (restoredFromUrl.current) {
+    restoredFromUrl.current = false;
+    return;
+  }
+
+  const d = selectedCityDefaults;
+
+  setDestinationRent(String(d.monthlyDefaults.rent));
+  setDepositRequired(String(d.monthlyDefaults.rent * d.housing.depositMonths));
+  setFirstMonthRent(String(d.monthlyDefaults.rent));
+  setLastMonthRent(String(d.housing.lastMonthRentDefault));
+  setUtilitiesIncluded(d.housing.utilitiesIncludedDefault);
+  setGroceries(String(d.monthlyDefaults.groceries));
+  setUtilities(String(d.monthlyDefaults.utilities));
+  setTransportation(String(d.monthlyDefaults.transport));
+  setHealthcare(String(d.monthlyDefaults.healthcare));
+  setVisaCost(String(d.startupCosts.visa));
+  setFlightCost(String(d.startupCosts.flight));
+  setShippingCost(String(d.startupCosts.shipping));
+  setTemporaryStay(String(d.startupCosts.temporaryStay));
+  setAdminFees(String(d.startupCosts.adminFees));
+  setFurnitureSetup(String(d.housing.furnishedSetupCost));
+  setEmergencyCashBuffer(String(d.startupCosts.emergencyBuffer));
+}, [selectedCityDefaults, qsHydrated, toCityCode]);
 
   useEffect(() => {
-    const qs = getQS();
-    const vMode = qs.get("mode"); if (vMode === "working" || vMode === "retired") setMode(vMode);
+  const qs = getQS();
+  restoredFromUrl.current = qs.toString().length > 0;
+
+  const vMode = qs.get("mode");
+  if (vMode === "working" || vMode === "retired") setMode(vMode);
+
     const vFiling = qs.get("filing") as FilingStatus | null; if (vFiling === "single" || vFiling === "married") setFiling(vFiling);
     const vFromCountry = qs.get("fromCountry"); if (vFromCountry) setFromCountry(vFromCountry);
     const vToCountry = qs.get("toCountry"); if (vToCountry && SOUTH_AMERICA_COUNTRY_CODES.has(vToCountry)) setToCountry(vToCountry);
@@ -442,9 +460,12 @@ export default function SouthAmericaRelocationCalculator() {
     const salaryReady = baseAnnualIncome > 0;
     const salaryTypeMultiplier = mode === "retired" ? 1 : getSalaryTypeMultiplier(salaryType);
     const annualIncomeLocalOrigin = baseAnnualIncome * salaryTypeMultiplier;
-    const annualIncome = convertLocalToUsd(annualIncomeLocalOrigin, fromCountry);
-    // FIX 6: Removed unused destToUsd helper
-    const grossMonthly = annualIncome / 12;
+   const annualIncome = convertLocalToUsd(annualIncomeLocalOrigin, fromCountry);
+
+const destToUsd = (v: number) => convertLocalToUsd(v, toCountry);
+const originToUsd = (v: number) => convertLocalToUsd(v, fromCountry);
+
+const grossMonthly = annualIncome / 12;
 
     const annualIncomeForFromTax = convertUsdToLocal(annualIncome, fromCountry);
     const annualIncomeForToTax = convertUsdToLocal(annualIncome, toCountry);
@@ -460,21 +481,32 @@ export default function SouthAmericaRelocationCalculator() {
 
     const adultCount = Math.max(1, nz(adults));
     const childCount = Math.max(0, nz(children));
-    const familyGroceries = nz(groceries) * (1 + (adultCount - 1) * 0.55 + childCount * 0.35);
-    const familyTransportation = nz(transportation) * (1 + (adultCount - 1) * 0.35 + childCount * 0.15);
-    const healthcareAdj = nz(healthcare) * (1 + (adultCount - 1) * 0.7 + childCount * 0.5);
-    const familyUtilities = nz(utilities) * (1 + (adultCount - 1) * 0.25 + childCount * 0.15);
+  const familyGroceries =
+  destToUsd(nz(groceries)) *
+  (1 + (adultCount - 1) * 0.55 + childCount * 0.35);
 
-    const groceriesAdj = familyGroceries * toCityMultipliers.groceries;
-    const transportationAdj = familyTransportation * toCityMultipliers.transit;
-    const utilitiesAdj = familyUtilities * toCityMultipliers.utilities;
-    const rentTo = nz(destinationRent) * toCityMultipliers.housing;
+const familyTransportation =
+  destToUsd(nz(transportation)) *
+  (1 + (adultCount - 1) * 0.35 + childCount * 0.15);
 
-    const groceriesFrom = familyGroceries * fromCityMultipliers.groceries;
-    const transportationFrom = familyTransportation * fromCityMultipliers.transit;
-    const utilitiesFrom = familyUtilities * fromCityMultipliers.utilities;
+const healthcareAdj =
+  destToUsd(nz(healthcare)) *
+  (1 + (adultCount - 1) * 0.7 + childCount * 0.5);
 
-    const carCost = needCar === "yes" ? 350 : 0;
+const familyUtilities =
+  destToUsd(nz(utilities)) *
+  (1 + (adultCount - 1) * 0.25 + childCount * 0.15);
+
+const groceriesAdj = familyGroceries * toCityMultipliers.groceries;
+const transportationAdj = familyTransportation * toCityMultipliers.transit;
+const utilitiesAdj = familyUtilities * toCityMultipliers.utilities;
+const rentTo = destToUsd(nz(destinationRent)) * toCityMultipliers.housing;
+
+const groceriesFrom = familyGroceries * fromCityMultipliers.groceries;
+const transportationFrom = familyTransportation * fromCityMultipliers.transit;
+const utilitiesFrom = familyUtilities * fromCityMultipliers.utilities;
+
+    const carCost = needCar === "yes" ? destToUsd(nz(carCostMonthly)) : 0;
     const housingUtilities = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
     const housingTotal = rentTo + housingUtilities + carCost;
     const livingCosts = groceriesAdj + transportationAdj + healthcareAdj;
@@ -489,15 +521,22 @@ export default function SouthAmericaRelocationCalculator() {
 
     const furnitureAdj = furnished === "furnished" ? 0 : nz(furnitureSetup);
     const upfrontCashNeeded =
-      nz(depositRequired) + nz(firstMonthRent) + nz(lastMonthRent) +
-      nz(visaCost) + nz(flightCost) + nz(shippingCost) +
-      nz(temporaryStay) + nz(adminFees) + furnitureAdj + nz(emergencyCashBuffer);
+  destToUsd(nz(depositRequired)) +
+  destToUsd(nz(firstMonthRent)) +
+  destToUsd(nz(lastMonthRent)) +
+  destToUsd(nz(visaCost)) +
+  nz(flightCost) +
+  destToUsd(nz(shippingCost)) +
+  destToUsd(nz(temporaryStay)) +
+  destToUsd(nz(adminFees)) +
+  destToUsd(furnitureAdj) +
+  destToUsd(nz(emergencyCashBuffer));
 
     const totalMonthlyOutflow = housingTotal + livingCosts;
     // FIX 5: Convert savings from origin currency to USD before dividing
     const monthsCovered = totalMonthlyOutflow > 0
-      ? convertLocalToUsd(nz(currentSavings), fromCountry) / totalMonthlyOutflow
-      : 0;
+  ? originToUsd(nz(currentSavings)) / totalMonthlyOutflow
+  : 0;
 
     const currentProfile = getCountryByCode(fromCountry);
     const fromIndex = currentCityDefaults?.costIndex ?? currentProfile?.monthlyCostIndexSingle ?? 1;

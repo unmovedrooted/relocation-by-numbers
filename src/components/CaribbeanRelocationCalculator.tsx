@@ -630,69 +630,220 @@ const familyUtilities      = scaleFamily(effectiveUtilities,      "utilities");
     // Apply multipliers only when no city-specific defaults exist
     const applyMult = (val: number, mult: number | undefined) => mult != null ? val * mult : val;
 
-const groceriesAdj      = applyMult(familyGroceries, toCityMultipliers?.groceries);
-const transportationAdj = applyMult(familyTransportation, toCityMultipliers?.transit);
-const healthcareAdj     = familyHealthcare;
-const utilitiesAdj      = applyMult(familyUtilities, toCityMultipliers?.utilities);
-const rentTo = applyMult(nz(destinationRent), toCityMultipliers?.housing);
+const groceriesAdj = applyMult(
+  familyGroceries,
+  toCityMultipliers?.groceries
+);
 
-    // Origin comparators: re-derive from the same base inputs rather than reusing
-    // destination-scaled family values. Note: groceries/transport/utilities inputs are
-    // destination-entered, so these are an approximation until origin inputs are split out.
-    // FIX: was fromCityMultipliers?.transit — correct key is transport
-    const groceriesFrom      = applyMult(scaleFamily(nz(groceries),      "groceries"),      fromCityMultipliers?.groceries);
-const transportationFrom = applyMult(scaleFamily(nz(transportation), "transportation"), fromCityMultipliers?.transit);
-const utilitiesFrom      = applyMult(scaleFamily(nz(utilities),      "utilities"),      fromCityMultipliers?.utilities);
+const transportationAdj = applyMult(
+  familyTransportation,
+  toCityMultipliers?.transit
+);
+
+const healthcareAdj = familyHealthcare;
+
+const utilitiesAdj = applyMult(
+  familyUtilities,
+  toCityMultipliers?.utilities
+);
+
+const rentTo = applyMult(
+  nz(destinationRent),
+  toCityMultipliers?.housing
+);
+
+// Origin comparators
+// Best case: use current-city defaults.
+// Fallback: reverse-scale destination-entered values using cost indexes.
+// This avoids assuming "$300 groceries in DR" also means "$300 groceries in NYC/Ohio/etc."
+
+const currentProfile = getCountryByCode(fromCountry);
+const targetProfile = getCountryByCode(toCountry);
+
+const fromIndex =
+  currentCityDefaults?.costIndex ??
+  currentProfile?.monthlyCostIndexSingle ??
+  1;
+
+const toIndex =
+  targetCityDefaults?.costIndex ??
+  targetProfile?.monthlyCostIndexSingle ??
+  1;
+
+const reverseScaleToOrigin = (destinationValue: number) => {
+  if (toIndex <= 0) return destinationValue;
+  return destinationValue * (fromIndex / toIndex);
+};
+
+const originGroceriesBase =
+  currentCityDefaults?.monthlyDefaults.groceries ??
+  reverseScaleToOrigin(effectiveGroceries);
+
+const originTransportationBase =
+  currentCityDefaults?.monthlyDefaults.transport ??
+  reverseScaleToOrigin(effectiveTransportation);
+
+const originUtilitiesBase =
+  currentCityDefaults?.monthlyDefaults.utilities ??
+  reverseScaleToOrigin(effectiveUtilities);
+
+const groceriesFrom = applyMult(
+  scaleFamily(originGroceriesBase, "groceries"),
+  fromCityMultipliers?.groceries
+);
+
+const transportationFrom = applyMult(
+  scaleFamily(originTransportationBase, "transportation"),
+  fromCityMultipliers?.transit
+);
+
+const utilitiesFrom = applyMult(
+  scaleFamily(originUtilitiesBase, "utilities"),
+  fromCityMultipliers?.utilities
+);
 
     // FIX 2: clean car cost logic — user-entered carCost state takes priority,
     // falls back to city default, then global fallback constant.
-    const monthlyCarCost = needCar === "yes"
-  ? (nz(carCost) || targetCityDefaults?.monthlyDefaults.car || CAR_COST_FALLBACK_USD)
-  : 0;
+    const monthlyCarCost =
+  needCar === "yes"
+    ? nz(carCost) || targetCityDefaults?.monthlyDefaults.car || CAR_COST_FALLBACK_USD
+    : 0;
 
-    const housingUtilities   = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
-    const housingTotal       = rentTo + housingUtilities + monthlyCarCost;
-    const livingCosts        = groceriesAdj + transportationAdj + healthcareAdj;
-    const monthlyFlexibility = netMonthlyTo - housingTotal - livingCosts;
-    const totalPctOfNet      = netMonthlyTo > 0 ? (housingTotal + livingCosts) / netMonthlyTo : 0;
-    const housingPctOfNet    = netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
-    const comfort            = getReadinessBand(totalPctOfNet);
+const housingUtilities = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
 
-    const furnitureAdj = furnished === "furnished" ? 0 : nz(furnitureSetup);
-    const upfrontCashNeeded =
-  nz(depositRequired) + nz(firstMonthRent) + nz(lastMonthRent) +
-  nz(visaCost) + nz(flightCost) + nz(shippingCost) +
-  nz(temporaryStay) + nz(adminFees) + furnitureAdj +
+const housingTotal =
+  rentTo + housingUtilities + monthlyCarCost;
+
+const livingCosts =
+  groceriesAdj + transportationAdj + healthcareAdj;
+
+const totalMonthlyExpensesTo =
+  housingTotal + livingCosts;
+
+const monthlyFlexibility =
+  netMonthlyTo - totalMonthlyExpensesTo;
+
+const totalPctOfNet =
+  netMonthlyTo > 0 ? totalMonthlyExpensesTo / netMonthlyTo : 0;
+
+const housingPctOfNet =
+  netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
+
+const comfort =
+  getReadinessBand(totalPctOfNet);
+
+// Origin monthly comparison
+const rentFrom =
+  currentCityDefaults?.monthlyDefaults.rent ??
+  reverseScaleToOrigin(nz(destinationRent));
+
+const healthcareFrom =
+  currentCityDefaults?.monthlyDefaults.healthcare ??
+  reverseScaleToOrigin(effectiveHealthcare);
+
+const totalMonthlyExpensesFrom =
+  rentFrom +
+  groceriesFrom +
+  transportationFrom +
+  utilitiesFrom +
+  healthcareFrom;
+
+const currentFlexibility =
+  netMonthlyFrom - totalMonthlyExpensesFrom;
+
+// One-time startup costs
+const furnitureAdj =
+  furnished === "furnished" ? 0 : nz(furnitureSetup);
+
+const startupCosts =
+  nz(depositRequired) +
+  nz(firstMonthRent) +
+  nz(lastMonthRent) +
+  nz(visaCost) +
+  nz(flightCost) +
+  nz(shippingCost) +
+  nz(temporaryStay) +
+  nz(adminFees) +
+  furnitureAdj;
+
+const safetyNet =
   nz(emergencyCashBuffer);
 
-    // Savings in origin currency → convert to USD before dividing
-    const savingsUsd    = convertLocalToUsd(nz(currentSavings), fromCountry);
-    const totalOutflow  = housingTotal + livingCosts;
-    const monthsCovered = totalOutflow > 0 ? savingsUsd / totalOutflow : 0;
+const upfrontCashNeeded =
+  startupCosts + safetyNet;
 
-    // Comparable salary
-    const currentProfile     = getCountryByCode(fromCountry);
-    const targetProfile      = getCountryByCode(toCountry);
-    const fromIndex          = currentCityDefaults?.costIndex ?? currentProfile?.monthlyCostIndexSingle ?? 1;
-    const toIndex            = targetCityDefaults?.costIndex  ?? targetProfile?.monthlyCostIndexSingle  ?? 1;
-    const comparableSalary   = fromIndex > 0 ? annualIncome * (toIndex / fromIndex) : annualIncome;
-    const relativeDifference = fromIndex > 0 ? (toIndex - fromIndex) / fromIndex : 0;
+// Current savings are entered in origin currency, so convert to USD
+const savingsUsd =
+  convertLocalToUsd(nz(currentSavings), fromCountry);
 
-    return {
-      salaryReady, annualIncome, grossMonthly,
-      currentTaxRate, targetTaxRate,
-      currentMonthlyTaxUsd, targetMonthlyTaxUsd,
-      currentAnnualTaxUsd, targetAnnualTaxUsd,
-      targetTaxNotes, targetIsDisclaimer, targetConfidence,
-      netMonthlyFrom, netMonthlyTo, monthlyIncomeDiff,
-      groceriesFrom, transportationFrom, utilitiesFrom,
-      groceriesAdj, transportationAdj, healthcareAdj, utilitiesAdj,
-      housingTotal, rentTo, housingUtilities, carCost: monthlyCarCost,
-      livingCosts, monthlyFlexibility,
-      pct: housingPctOfNet * 100,
-      comfort, upfrontCashNeeded, monthsCovered,
-      comparableSalary, relativeDifference,
-    };
+const remainingSavingsAfterMove =
+  savingsUsd - startupCosts;
+
+const monthsCovered =
+  totalMonthlyExpensesTo > 0 && remainingSavingsAfterMove > 0
+    ? remainingSavingsAfterMove / totalMonthlyExpensesTo
+    : 0;
+
+// Comparable salary
+const comparableSalary =
+  fromIndex > 0 ? annualIncome * (toIndex / fromIndex) : annualIncome;
+
+const relativeDifference =
+  fromIndex > 0 ? (toIndex - fromIndex) / fromIndex : 0;
+
+   return {
+  salaryReady,
+  annualIncome,
+  grossMonthly,
+
+  currentTaxRate,
+  targetTaxRate,
+  currentMonthlyTaxUsd,
+  targetMonthlyTaxUsd,
+  currentAnnualTaxUsd,
+  targetAnnualTaxUsd,
+  targetTaxNotes,
+  targetIsDisclaimer,
+  targetConfidence,
+
+  netMonthlyFrom,
+  netMonthlyTo,
+  monthlyIncomeDiff,
+
+  groceriesFrom,
+  transportationFrom,
+  utilitiesFrom,
+  rentFrom,
+  healthcareFrom,
+  totalMonthlyExpensesFrom,
+  currentFlexibility,
+
+  groceriesAdj,
+  transportationAdj,
+  healthcareAdj,
+  utilitiesAdj,
+
+  housingTotal,
+  rentTo,
+  housingUtilities,
+  carCost: monthlyCarCost,
+
+  livingCosts,
+  totalMonthlyExpensesTo,
+  monthlyFlexibility,
+
+  pct: housingPctOfNet * 100,
+  totalPctOfNet: totalPctOfNet * 100,
+
+  comfort,
+  upfrontCashNeeded,
+  startupCosts,
+  safetyNet,
+  monthsCovered,
+
+  comparableSalary,
+  relativeDifference,
+};
   }, [
     mode, salary, retirementIncome, filing, incomeScenario,
     fromCountry, toCountry, conditionalAnswers,
