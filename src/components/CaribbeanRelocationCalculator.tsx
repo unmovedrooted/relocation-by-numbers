@@ -551,7 +551,6 @@ export default function CaribbeanRelocationCalculator() {
     const salaryReady      = baseAnnualIncome > 0;
 
     const annualIncome           = convertLocalToUsd(baseAnnualIncome, fromCountry);
-    const destToUsd              = (v: number) => convertLocalToUsd(v, toCountry);
 
     const grossMonthly           = annualIncome / 12;
     const annualIncomeForFromTax = convertUsdToLocal(annualIncome, fromCountry);
