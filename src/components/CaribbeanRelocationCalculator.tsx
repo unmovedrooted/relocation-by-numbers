@@ -552,6 +552,7 @@ export default function CaribbeanRelocationCalculator() {
 
     const annualIncome           = convertLocalToUsd(baseAnnualIncome, fromCountry);
     const destToUsd              = (v: number) => convertLocalToUsd(v, toCountry);
+
     const grossMonthly           = annualIncome / 12;
     const annualIncomeForFromTax = convertUsdToLocal(annualIncome, fromCountry);
 
@@ -613,6 +614,7 @@ export default function CaribbeanRelocationCalculator() {
 
 const effectiveGroceries =
   groceries.trim() === "" ? fallbackCosts?.groceries ?? 0 : nz(groceries);
+
 
 const effectiveUtilities =
   utilities.trim() === "" ? fallbackCosts?.utilities ?? 0 : nz(utilities);
@@ -822,7 +824,6 @@ const relativeDifference =
   transportationAdj,
   healthcareAdj,
   utilitiesAdj,
-
   housingTotal,
   rentTo,
   housingUtilities,
