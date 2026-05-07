@@ -62,13 +62,14 @@ function getVerdict(
   if (netWorthN > 0 && homePriceN > 0) {
     const nwRatio = netWorthN / homePriceN;
     const currentIdx = LEVELS.indexOf(baseLevel);
-    if (nwRatio >= 5 && baseLevel !== "Comfortable") {
-      level = LEVELS[Math.min(currentIdx + 2, 3)];
-      netWorthNote = "Your strong net worth significantly cushions this move.";
-    } else if (nwRatio >= 2 && baseLevel !== "Comfortable") {
-      level = LEVELS[Math.min(currentIdx + 1, 3)];
-      netWorthNote = "Your net worth provides meaningful financial cushion.";
-    } else if (nwRatio >= 1 && baseLevel === "Tight") {
+    // Adjusted — more realistic thresholds
+  if (nwRatio >= 3 && baseLevel !== "Comfortable") {
+    level = LEVELS[Math.min(currentIdx + 2, 3)];
+    netWorthNote = "Your strong net worth significantly cushions this move.";
+  } else if (nwRatio >= 1.5 && baseLevel !== "Comfortable") {
+    level = LEVELS[Math.min(currentIdx + 1, 3)];
+    netWorthNote = "Your net worth provides meaningful financial cushion.";
+  } else if (nwRatio >= 0.75 && baseLevel === "Tight") {
       level = "Manageable";
       netWorthNote = "Your net worth adds a buffer to a tight monthly cash flow.";
     }
