@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import FireEmailCapture from "@/components/FireEmailCapture";
+import FireUpsellCard from "@/components/FireUpsellCard";
 import Link from "next/link";
 import {
   ResponsiveContainer,
@@ -1713,7 +1715,25 @@ const decisionEngine = useMemo(
                 </div>
                 <ProgressBar pct={progress.pct} label="Progress to FIRE"
                   sublabel={<>{money(progress.current, 0)} {inputs.advanced ? "spendable toward FIRE" : "invested"} · {fiAge ? <>On track for FIRE at <span className="font-semibold text-slate-200">{fiAge}</span></> : "Keep building your foundation"}</>} />
-                
+                {hasCoreInputs && result.yearsToFI !== null && (
+  <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+    <p className="text-xs text-slate-400">
+      {result.yearsToFI === 0
+        ? "You've hit your FIRE number — share the milestone."
+        : `FIRE at ${fiAge ?? "—"} · ${result.yearsToFI} years away`}
+    </p>
+    <button
+      onClick={handleShare}
+      className="shrink-0 rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-xs font-medium text-emerald-200 transition hover:bg-emerald-400/20"
+    >
+      {shareStatus === "copied"
+        ? "Copied!"
+        : shareStatus === "shared"
+        ? "Shared!"
+        : "Share result"}
+    </button>
+  </div>
+)}
                 {/* Account breakdown (advanced) */}
                 {inputs.advanced && (inputs.bal401k > 0 || inputs.balIra > 0) && (
                   <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -2031,15 +2051,9 @@ const decisionEngine = useMemo(
           )}
 
           {/* ── UPSELL PLACEHOLDER ───────────────────────────────────────── */}
-          {/*
-            TODO: "Optimize your plan" upsell card
-            Show a card here linking to a future premium feature / paid plan.
-            Suggested trigger: always visible, below affiliates.
-            Example copy: "Want a personalized FIRE roadmap? Optimize your plan →"
-            Replace this comment block with the card component when ready.
-          */}
+         <FireEmailCapture fireAge={fiAge} location={baselineCity?.name} />
 
-          {ADSENSE_SLOT_BOTTOM && <AdSenseBlock slot={ADSENSE_SLOT_BOTTOM} className="rounded-2xl border border-white/10 bg-black/20 p-4" />}
+<FireUpsellCard fireAge={fiAge} yearsToFI={result.yearsToFI} />
 
           {/* ── Share button ──────────────────────────────────────────────── */}
           <button onClick={handleShare}
