@@ -51,32 +51,28 @@ export default function FireEmailCapture({ fireAge, location }: Props) {
 
   return (
     <div className="rounded-2xl border border-white/10 bg-black/20 px-5 py-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="shrink-0">
-          <p className="text-sm font-semibold text-white">Save your FIRE plan</p>
-          <p className="mt-0.5 text-xs text-slate-400">
-            Get a check-in in 6 months with updated projections.
-          </p>
-        </div>
+      <p className="text-sm font-semibold text-white">Save your FIRE plan</p>
+      <p className="mt-0.5 text-xs text-slate-400">
+        Get a check-in in 6 months with updated projections.
+      </p>
 
-        <div className="flex gap-2">
-          <input
-            type="email"
-            placeholder="your@email.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleSubmit()}
-            disabled={status === "loading"}
-            className="h-9 flex-1 rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10 disabled:opacity-50 sm:w-48 sm:flex-none"
-          />
-          <button
-            onClick={handleSubmit}
-            disabled={status === "loading" || !email.includes("@")}
-            className="h-9 shrink-0 rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 text-sm font-medium text-emerald-100 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {status === "loading" ? "Saving…" : "Save plan"}
-          </button>
-        </div>
+      <div className="mt-3 flex gap-2">
+        <input
+          type="email"
+          placeholder="your@email.com"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && handleSubmit()}
+          disabled={status === "loading"}
+          className="h-9 min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10 disabled:opacity-50"
+        />
+        <button
+          onClick={handleSubmit}
+          disabled={status === "loading" || !email.includes("@")}
+          className="h-9 shrink-0 rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 text-sm font-medium text-emerald-100 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {status === "loading" ? "Saving…" : "Save plan"}
+        </button>
       </div>
 
       {status === "error" && (

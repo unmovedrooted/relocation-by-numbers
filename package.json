@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.0",
     "@vnedyalk0v/react19-simple-maps": "^2.0.2",
     "next": "16.1.6",
     "react": "19.2.3",

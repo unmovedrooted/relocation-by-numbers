@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import FireEmailCapture from "@/components/FireEmailCapture";
+import FireReport, { type FireReportInputs } from "@/components/FireReport";
 import FireUpsellCard from "@/components/FireUpsellCard";
 import Link from "next/link";
 import {
@@ -445,6 +446,8 @@ const futureFireNumber =
   const realReturn = ((1 + r) / (1 + infl)) - 1;
   return futureFireNumber / Math.pow(1 + realReturn, yrs);
 }
+
+
 
 // ── Core simulation — all 4 modes ────────────────────────────────────────────
 function simulateYearsToFI(
@@ -1336,6 +1339,27 @@ const decisionEngine = useMemo(
   [inputs, mode, netAnnual]
 );
 
+const reportInputs = useMemo<FireReportInputs>(() => ({
+  age:                  inputs.age,
+  state:                inputs.state,
+  filingStatus:         inputs.filingStatus,
+  fireAge:              fiAge,
+  yearsToFI:            result.yearsToFI,
+  expensesMonthly:      inputs.expensesMonthly,
+  withdrawalRatePct:    inputs.withdrawalRatePct,
+  withdrawalTaxRatePct: inputs.withdrawalTaxRatePct,
+  bal401k:              inputs.advanced ? inputs.bal401k       : 0,
+  balIra:               inputs.advanced ? inputs.balIra        : 0,
+  balBrokerage:         inputs.advanced ? applyBrokerageAutofill(inputs).balBrokerage : inputs.currentPortfolio,
+  taxTreatment401k:     inputs.taxTreatment401k,
+  taxTreatmentIra:      inputs.taxTreatmentIra,
+  netAnnual,
+  currentPortfolio:     inputs.currentPortfolio,
+  savingsRatePct:       Math.round(savingsRate * 100),
+  income:               inputs.income,
+  targetRetirementAge:  inputs.targetRetirementAge,
+}), [inputs, fiAge, result.yearsToFI, netAnnual, savingsRate]);
+
   // ─────────────────────────────────────────────────────────────────────────
   // SHARE HANDLER
   // ─────────────────────────────────────────────────────────────────────────
@@ -2051,7 +2075,7 @@ const decisionEngine = useMemo(
           )}
 
           {/* ── UPSELL PLACEHOLDER ───────────────────────────────────────── */}
-         <FireEmailCapture fireAge={fiAge} location={baselineCity?.name} />
+         <FireReport inputs={reportInputs} />
 
 <FireUpsellCard fireAge={fiAge} yearsToFI={result.yearsToFI} />
 
