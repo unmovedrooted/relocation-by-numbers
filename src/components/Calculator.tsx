@@ -63,7 +63,7 @@ function getVerdict(
     const nwRatio = netWorthN / homePriceN;
     const currentIdx = LEVELS.indexOf(baseLevel);
     // Adjusted — more realistic thresholds
-  if (nwRatio >= 3 && baseLevel !== "Comfortable") {
+  if (nwRatio >= 2.5 && baseLevel !== "Comfortable") {
     level = LEVELS[Math.min(currentIdx + 2, 3)];
     netWorthNote = "Your strong net worth significantly cushions this move.";
   } else if (nwRatio >= 1.5 && baseLevel !== "Comfortable") {
