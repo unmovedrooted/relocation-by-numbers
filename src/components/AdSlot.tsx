@@ -2,11 +2,9 @@
 
 import { useEffect } from "react";
 
-type Props = {
-  slot?: string;
+type AdSlotProps = {
+  slot: string;
   className?: string;
-  format?: "auto" | "fluid" | "rectangle" | "horizontal" | "vertical";
-  responsive?: boolean;
 };
 
 declare global {
@@ -15,35 +13,26 @@ declare global {
   }
 }
 
-export default function AdSlot({
-  slot,
-  className = "",
-  format = "auto",
-  responsive = true,
-}: Props) {
+export default function AdSlot({ slot, className = "" }: AdSlotProps) {
   useEffect(() => {
-    if (!slot) return;
-
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch {
-      // ignore dev / duplicate push errors
+      // AdSense can throw during dev or duplicate renders. Safe to ignore.
     }
-  }, [slot]);
+  }, []);
 
-  if (!slot || !process.env.NEXT_PUBLIC_ADSENSE_CLIENT) {
-    return null;
-  }
+  if (!slot) return null;
 
   return (
     <div className={className}>
       <ins
         className="adsbygoogle"
         style={{ display: "block" }}
-        data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_CLIENT}
+        data-ad-client="ca-pub-5257549146198249"
         data-ad-slot={slot}
-        data-ad-format={format}
-        data-full-width-responsive={responsive ? "true" : "false"}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
       />
     </div>
   );

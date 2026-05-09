@@ -35,7 +35,8 @@ const NAV_LINKS = [
   { href: "/fire-calculator",       label: "FIRE Calculator" },
   { href: "/mortgage-calculator",   label: "Mortgage" },
   { href: "/international-relocation", label: "International" },
-  { href: "/best-cities-for-fire",  label: "Best Cities for FIRE" },
+  { href: "/one-income-relocation-calculator",  label: "Income Calculator" },
+   { href: "/blog", label: "blog" },
 ];
 
 export default function RootLayout({
@@ -70,7 +71,7 @@ export default function RootLayout({
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5257549146198249"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
         />
 
         <div className="flex min-h-screen flex-col">
