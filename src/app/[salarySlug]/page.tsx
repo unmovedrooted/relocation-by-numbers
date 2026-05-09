@@ -221,7 +221,12 @@ export default async function FireWithSalaryPage({
           </div>
         </header>
 
-        <AdSlot />
+        {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (
+  <AdSlot
+    slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP}
+    className="my-8"
+  />
+) : null}
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4">
           <h2 className="text-xl font-semibold">
@@ -271,7 +276,12 @@ export default async function FireWithSalaryPage({
 
         <FireCalculator initialIncome={income} hideFAQ />
 
-        <AdSlot />
+        {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (
+  <AdSlot
+    slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP}
+    className="my-8"
+  />
+) : null}
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
           <h2 className="text-2xl font-semibold tracking-tight text-white">
@@ -365,7 +375,12 @@ export default async function FireWithSalaryPage({
           </dl>
         </section>
 
-        <AdSlot />
+      {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (
+  <AdSlot
+    slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP}
+    className="my-8"
+  />
+) : null}
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
           <h2 className="text-2xl font-semibold tracking-tight text-white">
