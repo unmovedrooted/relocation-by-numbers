@@ -1003,7 +1003,12 @@ recommendation,
             </div>
           </div>
 
-          <AdSlot />
+          {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (
+  <AdSlot
+    slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP}
+    className="my-8"
+  />
+) : null}
       </div>
       </div>
     </div>

@@ -2109,8 +2109,10 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             })}
           </div>
         </section>
+        
       )}
     </section>
+  
   );
 
 }
