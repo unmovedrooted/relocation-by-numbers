@@ -36,7 +36,7 @@ const NAV_LINKS = [
   { href: "/mortgage-calculator",   label: "Mortgage" },
   { href: "/international-relocation", label: "International" },
   { href: "/one-income-relocation-calculator",  label: "Income Calculator" },
-   { href: "/blog", label: "blog" },
+  { href: "/blog", label: "Blogs" },
 ];
 
 export default function RootLayout({
