@@ -179,7 +179,7 @@ export default async function MoveToStatePage({ params }: Props) {
   if (!stateContent) notFound();
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:from-slate-950 dark:to-slate-900 dark:text-slate-100">
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-10 sm:px-6">
         <header className="space-y-4">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">

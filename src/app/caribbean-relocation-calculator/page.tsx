@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:from-slate-950 dark:to-slate-900 dark:text-slate-100">
       <header className="py-10 text-center">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
@@ -258,64 +258,64 @@ export default function Page() {
         </section>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <section className="rounded-2xl border border-emerald-200/60 bg-emerald-50 p-5">
-            <div className="text-sm font-semibold text-slate-900">
+          <section className="rounded-2xl border border-emerald-200/60 bg-emerald-50 p-5 dark:border-emerald-900/60 dark:bg-emerald-950/30">
+            <div className="text-sm font-semibold text-slate-900 dark:text-white">
               Thinking bigger than just moving?
             </div>
-            <p className="mt-1 text-sm text-slate-700">
+            <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
               See how relocating to the Caribbean may change your FIRE timeline after taxes, spending, and housing costs.
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <a
                 href="/fire-calculator"
-                className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
               >
                 🔥 Calculate My FIRE Timeline
               </a>
               <Link
                 href="/best-cities-for-fire"
-                className="text-sm font-semibold text-slate-700 underline underline-offset-4 hover:no-underline"
+                className="text-sm font-semibold text-slate-700 underline underline-offset-4 hover:no-underline dark:text-slate-300"
               >
                 Best cities for FIRE
               </Link>
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold tracking-tight text-slate-900">
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">
               Explore more relocation planning tools
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
               Keep comparing your options with more relocation, budgeting, and FIRE tools from Relocation by Numbers.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <a
                 href="/explore"
-                className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
               >
                 Explore all tools
               </a>
               <a
                 href="/international-relocation"
-                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 International Calculator
               </a>
               <a
                 href="/europe-relocation-calculator"
-                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 Europe Calculator
               </a>
               <a
                 href="/asia-relocation-calculator"
-                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 Asia Calculator
               </a>
               <a
                 href="/south-america-relocation-calculator"
-                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 South America Calculator
               </a>

@@ -171,7 +171,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
   const comfort = rent ? Math.round((rent * 12) / 0.28) : null;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-10 text-slate-900">
+    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-10 text-slate-900 dark:from-slate-950 dark:to-slate-900 dark:text-slate-100">
       <div className="mx-auto max-w-5xl space-y-10 px-4 sm:px-6">
         <header className="py-2 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">

@@ -369,11 +369,11 @@ function getReadinessBand(ratio: number) {
 // "placeholder" → red    (directional only, thresholds unstable)
 function confidenceBadge(confidence: TaxConfidence) {
   switch (confidence) {
-    case "verified":    return { label: "● Verified",           cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" };
-    case "partial":     return { label: "● Planning estimate",  cls: "bg-blue-50 text-blue-700 ring-blue-200" };
-    case "simplified":  return { label: "● Simplified estimate",cls: "bg-amber-50 text-amber-700 ring-amber-200" };
-    case "placeholder": return { label: "⚠ Directional only",  cls: "bg-rose-50 text-rose-700 ring-rose-200" };
-    default:            return { label: "⚠ Unknown",            cls: "bg-slate-50 text-slate-500 ring-slate-200" };
+    case "verified":    return { label: "● Verified",           cls: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 ring-emerald-200 dark:ring-emerald-800" };
+    case "partial":     return { label: "● Planning estimate",  cls: "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 ring-blue-200 dark:ring-blue-800" };
+    case "simplified":  return { label: "● Simplified estimate",cls: "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 ring-amber-200 dark:ring-amber-800" };
+    case "placeholder": return { label: "⚠ Directional only",  cls: "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 ring-rose-200 dark:ring-rose-800" };
+    default:            return { label: "⚠ Unknown",            cls: "bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 ring-slate-200 dark:ring-slate-800" };
   }
 }
 
@@ -382,9 +382,9 @@ function confidenceBadge(confidence: TaxConfidence) {
 // ---------------------------------------------------------------------------
 const EUROPE_TAX_ASSUMPTIONS_LABEL = "Tax model updated March 2026 · figures are 2024, 2024–25, or 2025 by jurisdiction";
 
-const inputCls  = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-indigo-500/15";
-const selectCls = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-indigo-500/15";
-const labelHeadCls = "mb-1 text-xs font-medium leading-4 text-slate-600";
+const inputCls  = "h-11 w-full rounded-xl bg-slate-50 dark:bg-slate-950 px-3 text-sm text-slate-900 dark:text-slate-100 ring-1 ring-slate-200 dark:ring-slate-800 shadow-inner outline-none transition focus:bg-white focus:dark:bg-slate-900 focus:ring-4 focus:ring-indigo-500/15 focus:dark:ring-indigo-500/15";
+const selectCls = "h-11 w-full rounded-xl bg-slate-50 dark:bg-slate-950 px-3 text-sm text-slate-900 dark:text-slate-100 shadow-inner ring-1 ring-slate-200 dark:ring-slate-800 outline-none transition focus:bg-white focus:dark:bg-slate-900 focus:ring-4 focus:ring-indigo-500/15 focus:dark:ring-indigo-500/15";
+const labelHeadCls = "mb-1 text-xs font-medium leading-4 text-slate-600 dark:text-slate-400";
 
 // ---------------------------------------------------------------------------
 // INFO TIP
@@ -396,7 +396,7 @@ function InfoTip({ text, align = "left" }: { text: string; align?: "left" | "rig
       <button
         type="button"
         aria-label="More info"
-        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 bg-white text-[10px] font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[10px] font-bold text-slate-700 dark:text-slate-300 shadow-sm transition hover:bg-slate-50 hover:dark:bg-slate-950"
       >
         i
       </button>
@@ -414,33 +414,33 @@ function VisaContextCard({ countryCode }: { countryCode: string }) {
   const ctx = EUROPE_VISA_CONTEXT[countryCode];
   if (!ctx) return null;
   return (
-    <div className="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+    <div className="rounded-2xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-950/30 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
       <div className="flex items-start gap-3">
         <div className="mt-0.5 flex-shrink-0 text-xl">
           {ctx.euFreeMovement ? "🇪🇺" : "🌐"}
         </div>
         <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700 dark:text-indigo-300">
             Visa &amp; Permit Context
           </div>
-          <div className="mt-1 text-sm font-semibold text-slate-900">{ctx.program}</div>
-          <p className="mt-2 text-sm leading-6 text-slate-700">{ctx.notes}</p>
+          <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">{ctx.program}</div>
+          <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">{ctx.notes}</p>
           <div className="mt-3 flex flex-wrap gap-3">
             {ctx.highlight && (
-              <span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-200">
+              <span className="inline-flex items-center rounded-full bg-indigo-100 dark:bg-indigo-900/40 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-800">
                 {ctx.highlight}
               </span>
             )}
             {ctx.euFreeMovement && (
-              <span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-200">
+              <span className="inline-flex items-center rounded-full bg-indigo-100 dark:bg-indigo-900/40 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-800">
                 EU Freedom of Movement
               </span>
             )}
-            <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+            <span className="inline-flex items-center rounded-full bg-white dark:bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800">
               Est. permit fee: {money(ctx.estimatedFee, 0, "USD")}
             </span>
           </div>
-          <p className="mt-3 text-xs text-slate-500">
+          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
             Visa requirements vary by citizenship and change frequently. Always verify with official government sources and an immigration attorney.
           </p>
         </div>
@@ -1039,23 +1039,23 @@ readinessRecommendation,
   // RENDER
   // ---------------------------------------------------------------------------
   return (
-    <div className="text-slate-900">
+    <div className="text-slate-900 dark:text-slate-100">
       {/* Mode toggle + reset */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="text-sm font-semibold" />
         <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200/70">
+          <div className="inline-flex rounded-xl bg-white dark:bg-slate-900 p-1 shadow-sm ring-1 ring-slate-200/70 dark:ring-slate-800/70">
             <button
               type="button"
               onClick={() => setMode("working")}
-              className={`rounded-lg px-3 py-1 text-sm ${mode === "working" ? "bg-slate-900 text-white" : "text-slate-700"}`}
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "working" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300"}`}
             >
               Working
             </button>
             <button
               type="button"
               onClick={() => setMode("retired")}
-              className={`rounded-lg px-3 py-1 text-sm ${mode === "retired" ? "bg-slate-900 text-white" : "text-slate-700"}`}
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "retired" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300"}`}
             >
               Retired
             </button>
@@ -1063,7 +1063,7 @@ readinessRecommendation,
           <button
             type="button"
             onClick={resetInputsKeepContext}
-            className="rounded-lg px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+            className="rounded-lg px-3 py-1 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 hover:dark:bg-slate-900/40"
             title="Clear all fields (keeps countries + scenario)"
           >
             Reset
@@ -1079,14 +1079,14 @@ readinessRecommendation,
         <div className="space-y-3">
 
           {/* Income & Location */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">Income &amp; Location</div>
             <div className="grid gap-3 sm:grid-cols-2">
 
               <label className="text-sm">
                 <div className={labelHeadCls}>
                   {mode === "retired" ? "Gross annual retirement income" : "Gross annual salary"}{" "}
-                  <span className="text-slate-400">({originCurrency})</span>
+                  <span className="text-slate-400 dark:text-slate-500">({originCurrency})</span>
                 </div>
                 <input
                   className={inputCls}
@@ -1153,19 +1153,19 @@ readinessRecommendation,
                   Income impact
                   <InfoTip align="right" text="Shows how your estimated monthly take-home pay changes between your current location and your European destination after taxes." />
                 </div>
-                <div className="flex h-11 w-full items-center justify-between rounded-xl border border-slate-300 px-3">
+                <div className="flex h-11 w-full items-center justify-between rounded-xl border border-slate-300 dark:border-slate-700 px-3">
                   {results.salaryReady ? (
                     <>
-                      <span className={`font-semibold ${results.monthlyIncomeDiff > 0 ? "text-emerald-600" : results.monthlyIncomeDiff < 0 ? "text-rose-600" : "text-slate-900"}`}>
+                      <span className={`font-semibold ${results.monthlyIncomeDiff > 0 ? "text-emerald-600 dark:text-emerald-400" : results.monthlyIncomeDiff < 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-slate-100"}`}>
                         {results.monthlyIncomeDiff > 0 ? "+" : ""}
                         {displayAmount(results.monthlyIncomeDiff, 0)}
                       </span>
-                      <span className="whitespace-nowrap text-xs text-slate-500">
+                      <span className="whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">
                         {results.monthlyIncomeDiff > 0 ? "Higher" : results.monthlyIncomeDiff < 0 ? "Lower" : "Same"}
                       </span>
                     </>
                   ) : (
-                    <span className="text-slate-400">—</span>
+                    <span className="text-slate-400 dark:text-slate-500">—</span>
                   )}
                 </div>
               </div>
@@ -1203,7 +1203,7 @@ readinessRecommendation,
 
           {/* Dynamic conditional tax questions — driven by getConditionalQuestionsForCountry */}
           {getConditionalQuestionsForCountry(toCountry, incomeScenario).map((q: ConditionalQuestion) => (
-            <div key={q.key} className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+            <div key={q.key} className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
               <div className="mb-3 text-sm font-semibold">{getCountryByCode(toCountry)?.name ?? toCountry} — Tax Question</div>
               <label className="text-sm">
                 <div className={labelHeadCls}>
@@ -1242,7 +1242,7 @@ readinessRecommendation,
           <VisaContextCard countryCode={toCountry} />
 
           {/* Housing */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">Housing</div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm sm:col-span-2">
@@ -1308,13 +1308,13 @@ readinessRecommendation,
 
 
           {/* Estimated Living Costs */}
-<div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+<div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
   <div className="mb-1 text-sm font-semibold">
     Estimated Living Costs
     <InfoTip text="These are average monthly estimates for the selected destination. You can edit them to match your lifestyle." />
   </div>
 
-  <div className="mb-3 text-xs text-slate-500">
+  <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
     Pre-filled with average estimates. Editable. Enter amounts in destination currency ({COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"}).
   </div>
 
@@ -1331,10 +1331,10 @@ readinessRecommendation,
         onChange={(e) => setGroceries(e.target.value)}
         placeholder=" "
       />
-      <div className="mt-1 text-xs text-slate-500">
+      <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
         Adjusted estimate: {displayAmount(results.groceriesAdj, 0)}
       </div>
-        <div className="mt-1 text-xs text-slate-400">
+        <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">
   Current location estimate: {displayAmount(results.groceriesFrom, 0)}
 </div>
     </label>
@@ -1353,10 +1353,10 @@ readinessRecommendation,
         onChange={(e) => setUtilities(e.target.value)}
         placeholder=" "
       />
-      <div className="mt-1 text-xs text-slate-500">
+      <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
         Adjusted estimate: {displayAmount(results.utilitiesAdj, 0)}
       </div>
-         <div className="mt-1 text-xs text-slate-400">
+         <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">
   Current location estimate: {displayAmount(results.utilitiesFrom, 0)}
 </div>
 
@@ -1375,10 +1375,10 @@ readinessRecommendation,
         onChange={(e) => setTransportation(e.target.value)}
         placeholder=" "
       />
-      <div className="mt-1 text-xs text-slate-500">
+      <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
         Adjusted estimate: {displayAmount(results.transportationAdj, 0)}
       </div>
-      <div className="mt-1 text-xs text-slate-400">
+      <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">
   Current location estimate: {displayAmount(results.transportationFrom, 0)}
 </div>
     </label>
@@ -1396,10 +1396,10 @@ readinessRecommendation,
         onChange={(e) => setHealthcare(e.target.value)}
         placeholder=" "
       />
-      <div className="mt-1 text-xs text-slate-500">
+      <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
         Adjusted estimate: {displayAmount(results.healthcareAdj, 0)}
       </div>
-         <div className="mt-1 text-xs text-slate-400">
+         <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">
   Current location estimate: {displayAmount(results.healthcareFrom, 0)}
 </div>
     </label>
@@ -1407,18 +1407,18 @@ readinessRecommendation,
   </div>
 
   {needCar === "yes" && (
-    <div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-700 ring-1 ring-slate-200">
-      Car estimate: <span className="font-semibold text-slate-900">{displayAmount(results.carCost, 0)}</span>
+    <div className="mt-3 rounded-xl bg-slate-50 dark:bg-slate-950 p-3 text-sm text-slate-700 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800">
+      Car estimate: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.carCost, 0)}</span>
     </div>
   )}
 
-  <div className="mt-3 text-xs text-slate-500">
+  <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
   Family-size adjustments are applied automatically. Estimates are based on city averages and may vary by neighborhood, lifestyle, and exchange rates.
 </div>
 </div>
 
           {/* One-Time Moving Costs */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">One-Time Moving Costs</div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm"><div className={labelHeadCls}>Visa / permit estimate</div><input className={inputCls} type="number" value={visaCost} onChange={(e) => setVisaCost(e.target.value)} placeholder=" " /></label>
@@ -1429,7 +1429,7 @@ readinessRecommendation,
               <label className="text-sm"><div className={labelHeadCls}>Furniture / setup estimate</div><input className={inputCls} type="number" value={furnitureSetup} onChange={(e) => setFurnitureSetup(e.target.value)} placeholder=" " /></label>
               <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Recommended cash buffer</div><input className={inputCls} type="number" value={emergencyCashBuffer} onChange={(e) => setEmergencyCashBuffer(e.target.value)} placeholder=" " /></label>
             </div>
-            <div className="mt-4 w-full text-xs text-slate-500">Planning estimates only.</div>
+            <div className="mt-4 w-full text-xs text-slate-500 dark:text-slate-400">Planning estimates only.</div>
           </div>
         </div>
 
@@ -1439,13 +1439,13 @@ readinessRecommendation,
         <div className="space-y-3">
 
           {/* Main results card */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-2 text-sm font-semibold">Results</div>
-            <div className="mb-3 text-xs text-slate-500">
+            <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
               {EUROPE_TAX_ASSUMPTIONS_LABEL} · Planning estimates only
             </div>
 
-            <div className="mb-2 space-y-1 text-sm text-slate-600">
+            <div className="mb-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
               <div>Current country: <span className="font-semibold">{getCountryByCode(fromCountry)?.name ?? fromCountry}</span></div>
               <div>Target country: <span className="font-semibold">{getCountryByCode(toCountry)?.name ?? toCountry}</span></div>
               <div>Income scenario: <span className="font-semibold capitalize">{incomeScenario}</span></div>
@@ -1458,22 +1458,22 @@ readinessRecommendation,
               {results.salaryReady && (
                 <>
                   <div className="mt-2">Gross monthly: <span className="font-semibold">{displayAmount(results.grossMonthly, 2)}</span></div>
-                  <div>Est. taxes (current): <span className="font-semibold">{displayAmount(results.currentMonthlyTaxUsd, 2)}</span>{" "}<span className="text-xs text-slate-500">({(results.currentTaxRate * 100).toFixed(1)}%)</span></div>
-                  <div>Est. taxes (target): <span className="font-semibold">{displayAmount(results.targetMonthlyTaxUsd, 2)}</span>{" "}<span className="text-xs text-slate-500">({(results.targetTaxRate * 100).toFixed(1)}%)</span></div>
+                  <div>Est. taxes (current): <span className="font-semibold">{displayAmount(results.currentMonthlyTaxUsd, 2)}</span>{" "}<span className="text-xs text-slate-500 dark:text-slate-400">({(results.currentTaxRate * 100).toFixed(1)}%)</span></div>
+                  <div>Est. taxes (target): <span className="font-semibold">{displayAmount(results.targetMonthlyTaxUsd, 2)}</span>{" "}<span className="text-xs text-slate-500 dark:text-slate-400">({(results.targetTaxRate * 100).toFixed(1)}%)</span></div>
 
                   {/* ── Confidence banner with inline missingFactor and expandable detail ── */}
                   <div className={`mt-3 rounded-xl ring-1 overflow-hidden ${
-                    results.targetConfidence === "verified"    ? "bg-emerald-50 ring-emerald-200"
-                    : results.targetConfidence === "partial"  ? "bg-blue-50 ring-blue-200"
-                    : results.targetConfidence === "placeholder" ? "bg-rose-50 ring-rose-200"
-                    : "bg-amber-50 ring-amber-200"
+                    results.targetConfidence === "verified"    ? "bg-emerald-50 dark:bg-emerald-950/30 ring-emerald-200 dark:ring-emerald-800"
+                    : results.targetConfidence === "partial"  ? "bg-blue-50 dark:bg-blue-950/30 ring-blue-200 dark:ring-blue-800"
+                    : results.targetConfidence === "placeholder" ? "bg-rose-50 dark:bg-rose-950/30 ring-rose-200 dark:ring-rose-800"
+                    : "bg-amber-50 dark:bg-amber-950/30 ring-amber-200 dark:ring-amber-800"
                   }`}>
                     {/* Top row: badge + plain-English meaning */}
                     <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-3 pb-2">
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${badge.cls}`}>
                         {badge.label}
                       </span>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
                         {results.targetConfidence === "verified"    && "Exact or near-exact for most incomes"}
                         {results.targetConfidence === "partial"     && "Sound structure · named gap ≤ ~4 pp"}
                         {results.targetConfidence === "simplified"  && "Reasonable ballpark · gap may be 5–10 pp"}
@@ -1482,7 +1482,7 @@ readinessRecommendation,
                     </div>
                     {/* Largest missing factor — always visible */}
                     {results.targetMissingFactor && (
-                      <div className="px-4 pb-2 text-xs text-slate-600">
+                      <div className="px-4 pb-2 text-xs text-slate-600 dark:text-slate-400">
                         <span className="font-medium">Key gap: </span>{results.targetMissingFactor}
                       </div>
                     )}
@@ -1498,9 +1498,9 @@ readinessRecommendation,
                           <span className="opacity-50">{taxNotesExpanded ? "▲" : "▼"}</span>
                         </button>
                         {taxNotesExpanded && (
-                          <div className="space-y-1.5 border-t border-black/5 px-4 py-3">
+                          <div className="space-y-1.5 border-t border-black/5 dark:border-white/5 px-4 py-3">
                             {results.targetTaxNotes.map((note, i) => (
-                              <div key={i} className="flex gap-2 text-xs leading-5 text-slate-700">
+                              <div key={i} className="flex gap-2 text-xs leading-5 text-slate-700 dark:text-slate-300">
                                 <span className="mt-px shrink-0 opacity-40">•</span>
                                 <span>{note}</span>
                               </div>
@@ -1529,93 +1529,93 @@ readinessRecommendation,
               <div className="mt-2">Housing % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
             </div>
 
-            <div className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500 space-y-1">
+            <div className="mt-4 border-t border-slate-200 dark:border-slate-800 pt-3 text-xs text-slate-500 dark:text-slate-400 space-y-1">
               <div>Results are estimates only. No information entered is stored or shared.</div>
               <div>Tax estimates, rent, immigration costs, and retirement treatment vary by destination and personal circumstances.</div>
             </div>
-            <div className="text-xs text-slate-500">Tip: Your URL updates as you type — copy the page link to share this scenario.</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Tip: Your URL updates as you type — copy the page link to share this scenario.</div>
           </div>
 
           {/* Monthly Flexibility */}
-          <div className="rounded-2xl border border-indigo-200 bg-indigo-50/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="rounded-2xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/80 dark:bg-indigo-950/30 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">Monthly Flexibility</div>
-                <div className="mt-2 text-3xl font-bold text-slate-900">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700 dark:text-indigo-300">Monthly Flexibility</div>
+                <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">
                   {results.salaryReady ? displayAmount(results.monthlyFlexibility, 2) : "—"}
                 </div>
               </div>
-              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-200">
+              <div className="rounded-full bg-white dark:bg-slate-900 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-800">
                 {mode === "retired" ? "After housing and essentials" : "After housing"}
               </div>
             </div>
 
-            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-indigo-100">
+            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 dark:bg-slate-900 ring-1 ring-indigo-100 dark:ring-indigo-800">
               <div className={`h-full rounded-full ${
-                !results.salaryReady ? "w-[0%] bg-slate-300"
-                : results.monthlyFlexibility >= 3000 ? "w-[92%] bg-emerald-500"
-                : results.monthlyFlexibility >= 2000 ? "w-[76%] bg-emerald-400"
-                : results.monthlyFlexibility >= 1000 ? "w-[58%] bg-amber-400"
-                : results.monthlyFlexibility >= 500  ? "w-[40%] bg-orange-400"
-                : "w-[24%] bg-rose-400"
+                !results.salaryReady ? "w-[0%] bg-slate-300 dark:bg-slate-800"
+                : results.monthlyFlexibility >= 3000 ? "w-[92%] bg-emerald-500 dark:bg-emerald-600"
+                : results.monthlyFlexibility >= 2000 ? "w-[76%] bg-emerald-400 dark:bg-emerald-700"
+                : results.monthlyFlexibility >= 1000 ? "w-[58%] bg-amber-400 dark:bg-amber-700"
+                : results.monthlyFlexibility >= 500  ? "w-[40%] bg-orange-400 dark:bg-orange-700"
+                : "w-[24%] bg-rose-400 dark:bg-rose-700"
               }`} />
             </div>
 
-            <div className="mt-3 text-sm text-slate-700">
+            <div className="mt-3 text-sm text-slate-700 dark:text-slate-300">
               {!results.salaryReady
                 ? "Add salary and housing inputs to estimate how much room you have left each month."
                 : `This is what you may have left each month in ${toCityLabel} after housing costs and core living expenses.`}
             </div>
-            <div className="mt-2 text-xs text-slate-500">Higher flexibility gives you more room for saving, investing, travel, and unexpected expenses.</div>
+            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Higher flexibility gives you more room for saving, investing, travel, and unexpected expenses.</div>
           </div>
 
           {/* Comparable Salary */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="text-xs font-semibold tracking-widest text-slate-500">COMPARABLE SALARY</div>
+          <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
+            <div className="text-xs font-semibold tracking-widest text-slate-500 dark:text-slate-400">COMPARABLE SALARY</div>
             <div className="mt-2 text-3xl font-bold">{displayAmount(results.comparableSalary)}</div>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
               {toCityLabel} is roughly{" "}
               <span className="font-semibold">{Math.abs(Math.round(results.relativeDifference * 100))}%</span>{" "}
               {results.relativeDifference >= 0 ? "more" : "less"} expensive than {fromCityLabel}.
             </p>
-            <div className="mt-1 text-xs text-slate-500">Based on housing, transportation, healthcare, and essential cost weighting.</div>
+            <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Based on housing, transportation, healthcare, and essential cost weighting.</div>
           </div>
 
           {/* Comfort Score */}
-          <div className="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="rounded-2xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-950/30 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700 dark:text-indigo-300">
                   {mode === "retired" ? "Retirement Readiness Score" : "Comfort Score™"}
                 </div>
-                <div className="mt-2 text-2xl font-bold text-slate-900">
+                <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
                   {results.comfort.band} · {results.comfort.label}
                 </div>
               </div>
-              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-200">
+              <div className="rounded-full bg-white dark:bg-slate-900 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-800">
                 Essential costs
               </div>
             </div>
 
-            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-indigo-100">
+            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 dark:bg-slate-900 ring-1 ring-indigo-100 dark:ring-indigo-800">
               <div className={`h-full rounded-full ${
-                results.comfort.band === "A" ? "w-[92%] bg-emerald-500"
-                : results.comfort.band === "B" ? "w-[78%] bg-emerald-400"
-                : results.comfort.band === "C" ? "w-[60%] bg-amber-400"
-                : "w-[42%] bg-orange-400"
+                results.comfort.band === "A" ? "w-[92%] bg-emerald-500 dark:bg-emerald-600"
+                : results.comfort.band === "B" ? "w-[78%] bg-emerald-400 dark:bg-emerald-700"
+                : results.comfort.band === "C" ? "w-[60%] bg-amber-400 dark:bg-amber-700"
+                : "w-[42%] bg-orange-400 dark:bg-orange-700"
               }`} />
             </div>
 
-            <div className="mt-3 text-sm text-slate-700">{results.comfort.note}</div>
-            <div className="mt-2 text-xs text-slate-500">Based on how much of your net monthly income goes toward housing and essential living costs.</div>
+            <div className="mt-3 text-sm text-slate-700 dark:text-slate-300">{results.comfort.note}</div>
+            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Based on how much of your net monthly income goes toward housing and essential living costs.</div>
           </div>
 
           {/* Share */}
-          <div className="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="rounded-2xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-950/30 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">Share this scenario</div>
-                <div className="mt-1 text-sm text-slate-700">Copy your current comparison link and send it to a partner, friend, or future self.</div>
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700 dark:text-indigo-300">Share this scenario</div>
+                <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">Copy your current comparison link and send it to a partner, friend, or future self.</div>
               </div>
               <button
                 type="button"
@@ -1643,7 +1643,7 @@ readinessRecommendation,
                     }
                   }
                 }}
-                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
               >
                 {shareStatus === "copied" ? "Link copied!" : shareStatus === "shared" ? "Shared!" : shareStatus === "error" ? "Share failed" : "Share scenario"}
               </button>

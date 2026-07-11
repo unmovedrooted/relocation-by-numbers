@@ -91,36 +91,36 @@ export const metadata: Metadata = {
 
 export default function CompareHubPage() {
   return (
-    <main className="min-h-screen bg-slate-50 py-10">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10">
       <div className="mx-auto max-w-6xl space-y-10 px-4">
         <header className="space-y-4 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
             City-to-City Relocation Comparisons
           </h1>
 
-          <p className="mt-2 text-lg font-semibold text-slate-700">
+          <p className="mt-2 text-lg font-semibold text-slate-700 dark:text-slate-300">
             Compare Take-Home Pay, Housing Costs &amp; Taxes Across Flagship US Moves
           </p>
 
-          <p className="mx-auto max-w-3xl text-slate-600 leading-7">
+          <p className="mx-auto max-w-3xl text-slate-600 dark:text-slate-400 leading-7">
             See how cost of living, take-home pay, housing costs, and monthly affordability
             change when you relocate from one city to another. This hub focuses on a smaller
             set of high-value comparisons instead of spreading across dozens of weak routes.
           </p>
 
-          <p className="mx-auto max-w-2xl text-sm leading-6 text-slate-500">
+          <p className="mx-auto max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
             Use these pages to compare common relocation paths, understand what usually changes
             most in a move, and pressure-test whether a destination may actually improve your budget.
           </p>
 
-          <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-slate-500">
+          <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
             <span>Planning estimates only.</span>
             <span className="hidden sm:inline">•</span>
             <span>Results depend on salary, tax status, and housing assumptions.</span>
             <span className="hidden sm:inline">•</span>
             <Link
               href="/methodology"
-              className="font-medium text-slate-700 underline underline-offset-4 hover:no-underline"
+              className="font-medium text-slate-700 dark:text-slate-300 underline underline-offset-4 hover:no-underline"
             >
               See methodology
             </Link>
@@ -129,31 +129,31 @@ export default function CompareHubPage() {
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             <Link
               href="/"
-              className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+              className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
             >
               Open relocation calculator
             </Link>
             <Link
               href="/explore"
-              className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+              className="inline-flex items-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-slate-100 transition hover:bg-slate-50 hover:dark:bg-slate-950"
             >
               Explore all tools
             </Link>
           </div>
         </header>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <div className="max-w-3xl">
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               What these city comparison pages are built to show
             </h2>
-            <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
+            <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
               These comparison pages are designed to help you look past headline salary and
               focus on what a move may actually do to your budget. Instead of comparing cities
               only by broad cost-of-living rankings, the pages estimate how taxes, housing,
               and monthly flexibility may change across a specific route.
             </p>
-            <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
+            <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
               That matters because the same move can look very different depending on your
               income, filing status, and housing assumptions. A city with lower taxes is not
               automatically the better choice if rent, home prices, insurance, or other core
@@ -162,23 +162,23 @@ export default function CompareHubPage() {
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">Compare take-home pay</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Compare take-home pay</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 Look beyond gross salary and see how state income taxes and deductions may
                 affect your real monthly income in each city.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">Compare housing pressure</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Compare housing pressure</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 Rent, mortgage, property tax, and insurance often change the affordability
                 picture more than people expect when moving between cities.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">Estimate comparable salary</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Estimate comparable salary</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 Each comparison page helps estimate what salary may feel equivalent after a
                 move once taxes and housing costs are considered together.
               </p>
@@ -186,11 +186,11 @@ export default function CompareHubPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Common relocation patterns people compare most
           </h2>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
             The strongest city-to-city searches usually follow a few predictable patterns.
             Understanding those patterns helps you read comparison pages more intelligently
             instead of focusing on one number in isolation.
@@ -200,10 +200,10 @@ export default function CompareHubPage() {
             {PATTERNS.map((item) => (
               <div
                 key={item.title}
-                className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4"
               >
-                <h3 className="font-semibold text-slate-900">{item.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100">{item.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">{item.body}</p>
               </div>
             ))}
           </div>
@@ -213,9 +213,9 @@ export default function CompareHubPage() {
           {groupedComparisons.map(({ group, items }) => (
             <div
               key={group}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+              className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm"
             >
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
                 {group}
               </h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -223,7 +223,7 @@ export default function CompareHubPage() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-white hover:shadow-sm"
+                    className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-4 text-sm font-semibold text-slate-900 dark:text-slate-100 transition hover:bg-white hover:dark:bg-slate-900 hover:shadow-sm"
                   >
                     {item.label} →
                   </Link>
@@ -233,11 +233,11 @@ export default function CompareHubPage() {
           ))}
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Example relocation tradeoffs
           </h2>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
             These quick examples show why a move should be evaluated as a full budget decision,
             not just a tax decision or a salary decision.
           </p>
@@ -246,14 +246,14 @@ export default function CompareHubPage() {
             {EXAMPLES.map((item) => (
               <div
                 key={item.href}
-                className="rounded-xl border border-slate-200 bg-slate-50 p-5"
+                className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-5"
               >
-                <h3 className="font-semibold text-slate-900">{item.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100">{item.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">{item.body}</p>
                 <div className="mt-4">
                   <Link
                     href={item.href}
-                    className="text-sm font-semibold text-slate-900 underline underline-offset-4 hover:no-underline"
+                    className="text-sm font-semibold text-slate-900 dark:text-slate-100 underline underline-offset-4 hover:no-underline"
                   >
                     Explore this comparison
                   </Link>
@@ -263,35 +263,35 @@ export default function CompareHubPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             What changes most when you move to a new city?
           </h2>
           <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">State income taxes</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">State income taxes</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 Moving from a high-tax state to a lower-tax state can improve take-home pay,
                 but it does not automatically create a better overall budget.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">Rent and home prices</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Rent and home prices</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 Housing is usually the biggest monthly expense and often the biggest reason a
                 move either helps or hurts affordability.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">Transportation costs</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Transportation costs</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 Car dependence, parking, commute patterns, and transit access can change the
                 real monthly cost of living more than people expect.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">Monthly flexibility</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Monthly flexibility</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 The most important question is usually simple: how much is left after essential
                 costs each month, and does the move improve that number?
               </p>
@@ -299,13 +299,13 @@ export default function CompareHubPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Frequently asked questions about city cost of living comparisons
           </h2>
-          <dl className="mt-5 space-y-5 text-sm text-slate-600">
+          <dl className="mt-5 space-y-5 text-sm text-slate-600 dark:text-slate-400">
             <div>
-              <dt className="font-semibold text-slate-900">
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">
                 How do you compare cost of living between two cities?
               </dt>
               <dd className="mt-1">
@@ -316,7 +316,7 @@ export default function CompareHubPage() {
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-slate-900">
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">
                 What is the equivalent salary when moving from one city to another?
               </dt>
               <dd className="mt-1">
@@ -326,7 +326,7 @@ export default function CompareHubPage() {
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-slate-900">
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">
                 Why can a lower-tax city still feel expensive?
               </dt>
               <dd className="mt-1">
@@ -335,7 +335,7 @@ export default function CompareHubPage() {
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-slate-900">
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">
                 Which US cities are common lower-cost alternatives to high-cost metros?
               </dt>
               <dd className="mt-1">
@@ -345,7 +345,7 @@ export default function CompareHubPage() {
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-slate-900">
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">
                 Are these pages meant to replace exact personal budgeting?
               </dt>
               <dd className="mt-1">
@@ -357,30 +357,30 @@ export default function CompareHubPage() {
           </dl>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             Keep exploring relocation tools
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
             Compare cities, then go deeper with the main relocation calculator and other
             relocation planning tools.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link
               href="/"
-              className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+              className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
             >
               Open relocation calculator
             </Link>
             <Link
               href="/explore"
-              className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+              className="inline-flex items-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-slate-100 transition hover:bg-slate-50 hover:dark:bg-slate-950"
             >
               Explore all tools
             </Link>
             <Link
               href="/methodology"
-              className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+              className="inline-flex items-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-slate-100 transition hover:bg-slate-50 hover:dark:bg-slate-950"
             >
               View methodology
             </Link>

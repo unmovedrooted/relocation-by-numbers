@@ -34,12 +34,12 @@ export default function InternationalRelocationFAQ() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h3 className="text-2xl font-semibold tracking-tight text-slate-900">
+    <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+      <h3 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
         Frequently asked questions
       </h3>
 
-      <p className="mt-3 text-base leading-7 text-slate-600">
+      <p className="mt-3 text-base leading-7 text-slate-600 dark:text-slate-400">
         A few quick answers to common questions about planning an international move.
       </p>
 
@@ -50,20 +50,20 @@ export default function InternationalRelocationFAQ() {
           return (
             <div
               key={faq.question}
-              className="overflow-hidden rounded-[24px] border border-slate-200 bg-slate-50"
+              className="overflow-hidden rounded-[24px] border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
             >
               <button
                 type="button"
                 onClick={() => setOpenFaq(isOpen ? null : i)}
                 className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
               >
-                <span className="text-lg font-medium text-slate-900">
+                <span className="text-lg font-medium text-slate-900 dark:text-slate-100">
                   {faq.question}
                 </span>
 
                 <span
                   className={`shrink-0 text-xl leading-none ${
-                    isOpen ? "text-amber-500" : "text-slate-400"
+                    isOpen ? "text-amber-500 dark:text-amber-400" : "text-slate-400 dark:text-slate-500"
                   }`}
                 >
                   {isOpen ? "−" : "+"}
@@ -71,7 +71,7 @@ export default function InternationalRelocationFAQ() {
               </button>
 
               {isOpen ? (
-                <div className="border-t border-slate-200 px-6 py-5 text-base leading-8 text-slate-600">
+                <div className="border-t border-slate-200 dark:border-slate-800 px-6 py-5 text-base leading-8 text-slate-600 dark:text-slate-400">
                   {faq.answer}
                 </div>
               ) : null}

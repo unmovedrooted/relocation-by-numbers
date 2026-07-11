@@ -251,33 +251,33 @@ export default async function ComparePage({ params }: PageProps) {
     .slice(0, 5) as { href: string; label: string; from: string; to: string }[];
 
   return (
-    <main className="min-h-screen bg-slate-50 py-10">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10">
       <div className="mx-auto max-w-5xl space-y-10 px-4">
         <header className="space-y-4 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
             {fromCity.name} vs {toCity.name} Cost of Living Comparison
           </h1>
 
-          <p className="mt-1 text-lg font-semibold text-slate-700">
+          <p className="mt-1 text-lg font-semibold text-slate-700 dark:text-slate-300">
             {fromCity.name}, {fromCity.state.toUpperCase()} vs {toCity.name},{" "}
             {toCity.state.toUpperCase()} — Salary, Taxes &amp; Housing
           </p>
 
-          <p className="mx-auto max-w-3xl text-slate-600 leading-7">
+          <p className="mx-auto max-w-3xl text-slate-600 dark:text-slate-400 leading-7">
             Compare take-home pay, housing costs, and monthly affordability between{" "}
-            <span className="font-semibold text-slate-900">{fromCity.name}</span> and{" "}
-            <span className="font-semibold text-slate-900">{toCity.name}</span>. This page is built
+            <span className="font-semibold text-slate-900 dark:text-slate-100">{fromCity.name}</span> and{" "}
+            <span className="font-semibold text-slate-900 dark:text-slate-100">{toCity.name}</span>. This page is built
             to help you look past headline salary and see what a move may actually do to your budget.
           </p>
 
-          <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-slate-500">
+          <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
             <span>Planning estimates only.</span>
             <span className="hidden sm:inline">•</span>
             <span>Results depend on salary, tax status, and housing assumptions.</span>
             <span className="hidden sm:inline">•</span>
             <Link
               href="/methodology"
-              className="font-medium text-slate-700 underline underline-offset-4 hover:no-underline"
+              className="font-medium text-slate-700 dark:text-slate-300 underline underline-offset-4 hover:no-underline"
             >
               See methodology
             </Link>
@@ -289,7 +289,7 @@ export default async function ComparePage({ params }: PageProps) {
                 <Link
                   key={x.href}
                   href={x.href}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-900 hover:bg-slate-50"
+                  className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-slate-900 dark:text-slate-100 hover:bg-slate-50 hover:dark:bg-slate-950"
                 >
                   {x.label}
                 </Link>
@@ -298,16 +298,16 @@ export default async function ComparePage({ params }: PageProps) {
           ) : null}
         </header>
 
-        <div className="text-center text-xs text-slate-500">
+        <div className="text-center text-xs text-slate-500 dark:text-slate-400">
           Assumptions updated: March 2026
         </div>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             What to pay attention to when comparing {fromCity.name} and {toCity.name}
           </h2>
 
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400">
             <p>{routeContent.primary}</p>
             <p>{routeContent.secondary}</p>
             <p>{routeContent.caution}</p>
@@ -322,30 +322,30 @@ export default async function ComparePage({ params }: PageProps) {
           initialToCityId={toCity.id}
         />
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             How to read this {fromCity.name} vs {toCity.name} comparison
           </h2>
 
           <div className="mt-4 grid gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">Start with take-home pay</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Start with take-home pay</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 {sameState
                   ? `Because both cities are in ${fromCity.state.toUpperCase()}, the tax difference is less likely to be the main story. Start by looking at housing and budget pressure first.`
                   : `Because this move crosses state lines, start by checking whether the change in state tax treatment materially improves take-home pay.`}
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">Then check housing pressure</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Then check housing pressure</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 Housing is usually the largest expense in a move. A tax win can disappear fast if
                 rent, home prices, insurance, or ownership costs rise enough.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">Focus on monthly flexibility</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Focus on monthly flexibility</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 The most useful question is simple: after essential costs, do you have more room,
                 less room, or roughly the same room in your budget?
               </p>
@@ -353,26 +353,26 @@ export default async function ComparePage({ params }: PageProps) {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Who this comparison is most useful for
           </h2>
 
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
-            <h3 className="font-semibold text-slate-900">{routeContent.audienceTitle}</h3>
-            <p className="mt-2 text-sm leading-7 text-slate-600">{routeContent.audienceBody}</p>
+          <div className="mt-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-5">
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">{routeContent.audienceTitle}</h3>
+            <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-400">{routeContent.audienceBody}</p>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             What this comparison includes — and what it does not
           </h2>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
-              <h3 className="font-semibold text-slate-900">Included</h3>
-              <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+            <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-5">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Included</h3>
+              <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-700 dark:text-slate-300">
                 <li>Estimated state and federal tax differences</li>
                 <li>Housing-related affordability differences</li>
                 <li>Monthly budget comparison between the two cities</li>
@@ -380,9 +380,9 @@ export default async function ComparePage({ params }: PageProps) {
               </ul>
             </div>
 
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
-              <h3 className="font-semibold text-slate-900">Not fully modeled</h3>
-              <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+            <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-5">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Not fully modeled</h3>
+              <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-700 dark:text-slate-300">
                 <li>Neighborhood-level rent variation</li>
                 <li>Childcare, school, or family-specific costs</li>
                 <li>Detailed insurance and healthcare variation</li>
@@ -391,19 +391,19 @@ export default async function ComparePage({ params }: PageProps) {
             </div>
           </div>
 
-          <p className="mt-5 text-sm leading-7 text-slate-600">
+          <p className="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-400">
             This page is built for planning direction and tradeoffs, not perfect prediction. It is
             most useful as a first-pass comparison before you plug in exact housing and household numbers.
           </p>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             {fromCity.name} vs {toCity.name} — common questions
           </h2>
-          <dl className="mt-5 space-y-5 text-sm text-slate-600">
+          <dl className="mt-5 space-y-5 text-sm text-slate-600 dark:text-slate-400">
             <div>
-              <dt className="font-semibold text-slate-900">
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">
                 Is {toCity.name} cheaper than {fromCity.name}?
               </dt>
               <dd className="mt-1">
@@ -414,7 +414,7 @@ export default async function ComparePage({ params }: PageProps) {
             </div>
 
             <div>
-              <dt className="font-semibold text-slate-900">
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">
                 How does moving from {fromCity.name} to {toCity.name} affect taxes?
               </dt>
               <dd className="mt-1">
@@ -425,7 +425,7 @@ export default async function ComparePage({ params }: PageProps) {
             </div>
 
             <div>
-              <dt className="font-semibold text-slate-900">
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">
                 What salary do I need in {toCity.name} to match my lifestyle in {fromCity.name}?
               </dt>
               <dd className="mt-1">
@@ -436,7 +436,7 @@ export default async function ComparePage({ params }: PageProps) {
             </div>
 
             <div>
-              <dt className="font-semibold text-slate-900">
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">
                 Why is housing such a big part of this comparison?
               </dt>
               <dd className="mt-1">
@@ -448,11 +448,11 @@ export default async function ComparePage({ params }: PageProps) {
         </section>
 
         {relatedComparisons.length > 0 ? (
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+          <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               Related city comparisons
             </h2>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
               Explore nearby relocation paths from the same small set of flagship comparisons.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
@@ -460,7 +460,7 @@ export default async function ComparePage({ params }: PageProps) {
                 <Link
                   key={x.href}
                   href={x.href}
-                  className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  className="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 hover:dark:bg-slate-900/40"
                 >
                   {x.label}
                 </Link>
@@ -470,27 +470,27 @@ export default async function ComparePage({ params }: PageProps) {
         ) : null}
 
         <div className="mt-8 text-center">
-          <div className="mb-3 text-xs text-slate-500">
+          <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
             Assumptions updated: March 2026
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-slate-500">
-            <Link href="/about" className="transition hover:text-slate-900">
+          <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <Link href="/about" className="transition hover:text-slate-900 hover:dark:text-slate-100">
               About
             </Link>
             <span>•</span>
-            <Link href="/disclaimer" className="transition hover:text-slate-900">
+            <Link href="/disclaimer" className="transition hover:text-slate-900 hover:dark:text-slate-100">
               Disclaimer
             </Link>
             <span>•</span>
-            <Link href="/privacy" className="transition hover:text-slate-900">
+            <Link href="/privacy" className="transition hover:text-slate-900 hover:dark:text-slate-100">
               Privacy
             </Link>
             <span>•</span>
-            <Link href="/terms" className="transition hover:text-slate-900">
+            <Link href="/terms" className="transition hover:text-slate-900 hover:dark:text-slate-100">
               Terms
             </Link>
             <span>•</span>
-            <Link href="/methodology" className="transition hover:text-slate-900">
+            <Link href="/methodology" className="transition hover:text-slate-900 hover:dark:text-slate-100">
               Methodology
             </Link>
           </div>

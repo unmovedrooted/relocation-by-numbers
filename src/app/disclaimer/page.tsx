@@ -4,11 +4,11 @@ export default function DisclaimerPage() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-12">
       <header className="max-w-3xl">
-        <h1 className="mb-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="mb-4 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
           Disclaimer
         </h1>
 
-        <p className="text-base leading-7 text-slate-700">
+        <p className="text-base leading-7 text-slate-700 dark:text-slate-300">
           Relocation By Numbers provides planning tools and educational information
           for relocation, cost of living, salary comparison, housing, and FIRE
           planning. The site is designed to help users compare scenarios and think
@@ -17,12 +17,12 @@ export default function DisclaimerPage() {
         </p>
       </header>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Planning estimates only
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             Calculator results are planning estimates based on the information you
             enter and simplified assumptions about taxes, investment returns,
@@ -40,12 +40,12 @@ export default function DisclaimerPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Tax, mortgage, and legal limitations
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             Tax estimates use simplified federal, state, or country-specific models
             for comparison purposes. They are not intended to represent exact tax
@@ -69,12 +69,12 @@ export default function DisclaimerPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           FIRE and investment planning limitations
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             FIRE calculators on this site use simplified planning assumptions about
             spending, withdrawal rates, investment growth, and inflation. They do
@@ -91,12 +91,12 @@ export default function DisclaimerPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Your responsibility
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             Before making financial, tax, investment, housing, mortgage, legal, or
             relocation decisions, you should consult qualified professionals as
@@ -111,17 +111,17 @@ export default function DisclaimerPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-6">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-6">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           More information
         </h2>
 
-        <p className="mt-4 text-base leading-7 text-slate-700">
+        <p className="mt-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           For more detail on how Relocation By Numbers builds its estimates and
           comparison tools, see the{" "}
           <Link
             href="/methodology"
-            className="font-medium text-slate-900 underline underline-offset-4 hover:no-underline"
+            className="font-medium text-slate-900 dark:text-slate-100 underline underline-offset-4 hover:no-underline"
           >
             methodology page
           </Link>.

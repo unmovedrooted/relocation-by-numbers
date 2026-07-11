@@ -241,11 +241,11 @@ function EstimatedLivingCosts({
   ];
 
   return (
-    <div className="mt-4 border-t border-slate-200 pt-4">
+    <div className="mt-4 border-t border-slate-200 pt-4 dark:border-slate-800">
       <div className="mb-3 flex items-center justify-between">
-        <div className="text-sm font-semibold">Estimated Living Costs (Target City)</div>
+        <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">Estimated Living Costs (Target City)</div>
         {hasCOLData && (
-          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-blue-200">
+          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-blue-200 dark:bg-blue-950/30 dark:text-blue-300 dark:ring-blue-800">
             · City-level estimate
           </span>
         )}
@@ -257,16 +257,16 @@ function EstimatedLivingCosts({
           const showEstBadge = value === "" && est != null;
           return (
             <label key={label} className="text-sm">
-              <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-600">
+              <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
                 {label}
                 {showEstBadge && (
-                  <span className="rounded bg-amber-50 px-1 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-200">
+                  <span className="rounded bg-amber-50 px-1 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:ring-amber-800">
                     est.
                   </span>
                 )}
               </div>
               <input
-                className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800 dark:placeholder:text-slate-500"
                 type="number"
                 value={value}
                 onChange={(e) => setter(e.target.value)}
@@ -277,7 +277,7 @@ function EstimatedLivingCosts({
         })}
       </div>
 
-      <div className="mt-2 text-xs text-slate-500">
+      <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         {hasCOLData
           ? "City estimates pre-filled where available. Edit any field to override."
           : "Enter your expected monthly costs in the target city."}
@@ -693,10 +693,30 @@ export default function Calculator({
   );
 
   const VS_MAP: Record<VerdictLevel, { border: string; bg: string; tag: string; label: string }> = {
-    Comfortable: { border: "border-emerald-200", bg: "bg-emerald-50/80", tag: "text-emerald-700 ring-emerald-200", label: "text-emerald-700" },
-    Manageable:  { border: "border-yellow-200",  bg: "bg-yellow-50/80",  tag: "text-yellow-700 ring-yellow-200",  label: "text-yellow-700"  },
-    Tight:       { border: "border-orange-200",  bg: "bg-orange-50/80",  tag: "text-orange-700 ring-orange-200",  label: "text-orange-700"  },
-    Risky:       { border: "border-rose-200",    bg: "bg-rose-50/80",    tag: "text-rose-700 ring-rose-200",      label: "text-rose-700"    },
+    Comfortable: {
+      border: "border-emerald-200 dark:border-emerald-900/60",
+      bg: "bg-emerald-50/80 dark:bg-emerald-950/30",
+      tag: "text-emerald-700 ring-emerald-200 dark:text-emerald-300 dark:ring-emerald-800",
+      label: "text-emerald-700 dark:text-emerald-400",
+    },
+    Manageable: {
+      border: "border-yellow-200 dark:border-yellow-900/60",
+      bg: "bg-yellow-50/80 dark:bg-yellow-950/20",
+      tag: "text-yellow-700 ring-yellow-200 dark:text-yellow-300 dark:ring-yellow-800",
+      label: "text-yellow-700 dark:text-yellow-400",
+    },
+    Tight: {
+      border: "border-orange-200 dark:border-orange-900/60",
+      bg: "bg-orange-50/80 dark:bg-orange-950/20",
+      tag: "text-orange-700 ring-orange-200 dark:text-orange-300 dark:ring-orange-800",
+      label: "text-orange-700 dark:text-orange-400",
+    },
+    Risky: {
+      border: "border-rose-200 dark:border-rose-900/60",
+      bg: "bg-rose-50/80 dark:bg-rose-950/20",
+      tag: "text-rose-700 ring-rose-200 dark:text-rose-300 dark:ring-rose-800",
+      label: "text-rose-700 dark:text-rose-400",
+    },
   };
   const vs = VS_MAP[verdict.level];
 
@@ -753,23 +773,23 @@ export default function Calculator({
   // RENDER
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="text-slate-900">
+    <div className="text-slate-900 dark:text-slate-100">
       {/* Mode toggle + Reset */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="text-sm font-semibold" />
         <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200/70">
+          <div className="inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-700">
             <button
               type="button"
               onClick={() => setMode("rent")}
-              className={`rounded-lg px-3 py-1 text-sm ${mode === "rent" ? "bg-slate-900 text-white" : "text-slate-700"}`}
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "rent" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300"}`}
             >
               Rent
             </button>
             <button
               type="button"
               onClick={() => setMode("buy")}
-              className={`rounded-lg px-3 py-1 text-sm ${mode === "buy" ? "bg-slate-900 text-white" : "text-slate-700"}`}
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "buy" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300"}`}
             >
               Buy
             </button>
@@ -777,7 +797,7 @@ export default function Calculator({
           <button
             type="button"
             onClick={resetInputsKeepContext}
-            className="rounded-lg px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+            className="rounded-lg px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
             title="Reset to defaults (keeps states)"
           >
             Reset
@@ -789,22 +809,22 @@ export default function Calculator({
         {/* ══════════════════════════ INPUTS ══════════════════════════ */}
         <div className="space-y-3">
           {/* Income & Location */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-3 text-sm font-semibold">Income & Location</div>
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Income & Location</div>
             <div className="grid gap-3 sm:grid-cols-2">
 
               <label className="text-sm">
-                <div className="mb-1 text-xs font-medium text-slate-600">Salary</div>
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Salary</div>
                 <input
-                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                   type="number" value={salary} onChange={(e) => setSalary(e.target.value)} placeholder=" "
                 />
               </label>
 
               <label className="text-sm">
-                <div className="mb-1 text-xs font-medium text-slate-600">Filing status</div>
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Filing status</div>
                 <select
-                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                   value={filing} onChange={(e) => setFiling(e.target.value as FilingStatus)}
                 >
                   <option value="single">Single</option>
@@ -813,35 +833,35 @@ export default function Calculator({
               </label>
 
               <label className="text-sm">
-                <div className="mb-1 text-xs font-medium text-slate-600">401(k) % (est.)</div>
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">401(k) % (est.)</div>
                 <input
-                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                   type="number" value={k401Pct} onChange={(e) => setK401Pct(e.target.value)} placeholder=" "
                 />
               </label>
 
               <div className="text-sm">
-                <div className="mb-1 text-xs font-medium text-slate-600">Income impact</div>
-                <div className="flex w-full items-center justify-between rounded-xl border border-slate-300 p-2">
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Income impact</div>
+                <div className="flex w-full items-center justify-between rounded-xl border border-slate-300 p-2 dark:border-slate-700">
                   {results.salaryReady ? (
                     <>
-                      <span className={`font-semibold ${results.monthlyIncomeDiff > 0 ? "text-emerald-600" : results.monthlyIncomeDiff < 0 ? "text-rose-600" : "text-slate-900"}`}>
+                      <span className={`font-semibold ${results.monthlyIncomeDiff > 0 ? "text-emerald-600 dark:text-emerald-400" : results.monthlyIncomeDiff < 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-slate-100"}`}>
                         {results.monthlyIncomeDiff > 0 ? "+" : ""}{money(results.monthlyIncomeDiff, 0)}
                       </span>
-                      <span className="whitespace-nowrap text-xs text-slate-500">
+                      <span className="whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">
                         {results.monthlyIncomeDiff > 0 ? "Higher" : results.monthlyIncomeDiff < 0 ? "Lower" : "Same"}
                       </span>
                     </>
                   ) : (
-                    <span className="text-slate-400">—</span>
+                    <span className="text-slate-400 dark:text-slate-500">—</span>
                   )}
                 </div>
               </div>
 
               <label className="text-sm">
-                <div className="mb-1 text-xs font-medium text-slate-600">Current state</div>
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Current state</div>
                 <select
-                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                   value={fromState}
                   onChange={(e) => { const state = e.target.value as StateCode; setFromState(state); setFromCityId(""); setFromCityOther(""); }}
                 >
@@ -850,9 +870,9 @@ export default function Calculator({
               </label>
 
               <label className="text-sm">
-                <div className="mb-1 text-xs font-medium text-slate-600">Target state</div>
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Target state</div>
                 <select
-                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                   value={toState}
                   onChange={(e) => { const state = e.target.value as StateCode; setToState(state); setToCityId(""); setToCityOther(""); }}
                 >
@@ -861,9 +881,9 @@ export default function Calculator({
               </label>
 
               <label className="text-sm">
-                <div className="mb-1 text-xs font-medium text-slate-600">Current city (optional)</div>
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Current city (optional)</div>
                 <select
-                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                   value={fromCityId}
                   onChange={(e) => {
                     const id = e.target.value;
@@ -882,9 +902,9 @@ export default function Calculator({
               </label>
 
               <label className="text-sm">
-                <div className="mb-1 text-xs font-medium text-slate-600">Target city (optional)</div>
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Target city (optional)</div>
                 <select
-                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                   value={toCityId}
                   onChange={(e) => {
                     const id = e.target.value;
@@ -904,9 +924,9 @@ export default function Calculator({
 
               {isFromOther && (
                 <label className="text-sm sm:col-span-2">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Enter current city</div>
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Enter current city</div>
                   <input
-                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     value={fromCityOther} onChange={(e) => setFromCityOther(e.target.value)} placeholder="Type your city"
                   />
                 </label>
@@ -914,39 +934,39 @@ export default function Calculator({
 
               {isToOther && (
                 <label className="text-sm sm:col-span-2">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Enter target city</div>
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Enter target city</div>
                   <input
-                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     value={toCityOther} onChange={(e) => setToCityOther(e.target.value)} placeholder="Type your city"
                   />
                 </label>
               )}
 
               <label className="text-sm sm:col-span-2">
-                <div className="mb-1 text-xs font-medium text-slate-600">
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">
                   Current housing cost/mo{" "}
-                  <span className="font-normal text-slate-400">(optional — improves side-by-side comparison)</span>
+                  <span className="font-normal text-slate-400 dark:text-slate-500">(optional — improves side-by-side comparison)</span>
                 </div>
                 <input
-                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                   type="number" value={currentHousingMonthly} onChange={(e) => setCurrentHousingMonthly(e.target.value)}
                   placeholder={currentHousingEst != null ? `~${Math.round(currentHousingEst)} estimated` : "e.g. 2500"}
                 />
               </label>
 
               <label className="text-sm sm:col-span-2">
-                <div className="mb-1 text-xs font-medium text-slate-600">
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">
                   Net worth{" "}
-                  <span className="font-normal text-slate-400">(optional — adjusts financial verdict)</span>
+                  <span className="font-normal text-slate-400 dark:text-slate-500">(optional — adjusts financial verdict)</span>
                 </div>
                 <input
-                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                   type="number" value={netWorth} onChange={(e) => setNetWorth(e.target.value)} placeholder="e.g. 500000"
                 />
               </label>
 
               {fromCityId && toCityId && !compareRouteAllowed ? (
-                <div className="sm:col-span-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                <div className="sm:col-span-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
                   Compare pages are currently available only when at least one selected city is a major city.
                 </div>
               ) : null}
@@ -955,47 +975,47 @@ export default function Calculator({
 
           {/* Buy Inputs */}
           {mode === "buy" && (
-            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-              <div className="mb-3 text-sm font-semibold">Buy Inputs</div>
+            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+              <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Buy Inputs</div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block text-sm sm:col-span-2">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Home price</div>
-                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Home price</div>
+                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     type="number" value={homePrice} onChange={(e) => setHomePrice(e.target.value)} placeholder=" " />
                 </label>
                 <label className="block text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Down payment %</div>
-                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Down payment %</div>
+                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     type="number" value={downPct} onChange={(e) => setDownPct(e.target.value)} placeholder=" " />
                 </label>
                 <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Interest rate %</div>
-                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Interest rate %</div>
+                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     type="number" step="0.01" value={ratePct} onChange={(e) => setRatePct(e.target.value)} placeholder=" " />
                 </label>
                 <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Term (years)</div>
-                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Term (years)</div>
+                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     type="number" value={termYears} onChange={(e) => setTermYears(e.target.value)} placeholder=" " />
                 </label>
                 <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Property tax % (annual)</div>
-                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Property tax % (annual)</div>
+                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     type="number" step="0.01" value={propertyTaxPct} onChange={(e) => setPropertyTaxPct(e.target.value)} placeholder=" " />
                 </label>
                 <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Home insurance (monthly)</div>
-                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Home insurance (monthly)</div>
+                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     type="number" value={homeInsMonthly} onChange={(e) => setHomeInsMonthly(e.target.value)} placeholder=" " />
                 </label>
                 <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">HOA (monthly)</div>
-                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">HOA (monthly)</div>
+                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     type="number" value={hoaMonthly} onChange={(e) => setHoaMonthly(e.target.value)} placeholder=" " />
                 </label>
                 <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">PMI % (annual, if down &lt; 20%)</div>
-                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">PMI % (annual, if down &lt; 20%)</div>
+                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     type="number" step="0.01" value={pmiAnnualPct} onChange={(e) => setPmiAnnualPct(e.target.value)} placeholder=" " />
                 </label>
               </div>
@@ -1013,22 +1033,22 @@ export default function Calculator({
 
           {/* Rent Inputs */}
           {mode === "rent" && (
-            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-              <div className="mb-3 text-sm font-semibold">Rent Inputs</div>
+            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+              <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Rent Inputs</div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="text-sm sm:col-span-2">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Monthly rent</div>
-                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Monthly rent</div>
+                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     type="number" value={rentMonthly} onChange={(e) => setRentMonthly(e.target.value)} placeholder=" " />
                 </label>
                 <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Renter's insurance (monthly)</div>
-                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Renter's insurance (monthly)</div>
+                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     type="number" value={rentersInsMonthly} onChange={(e) => setRentersInsMonthly(e.target.value)} placeholder=" " />
                 </label>
                 <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600">Parking (monthly)</div>
-                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Parking (monthly)</div>
+                  <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     type="number" value={parkingMonthly} onChange={(e) => setParkingMonthly(e.target.value)} placeholder=" " />
                 </label>
               </div>
@@ -1053,51 +1073,51 @@ export default function Calculator({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className={`text-xs font-semibold uppercase tracking-[0.14em] ${vs.label}`}>Bottom Line</div>
-                <div className="mt-1.5 text-2xl font-bold text-slate-900">{verdict.level}</div>
+                <div className="mt-1.5 text-2xl font-bold text-slate-900 dark:text-white">{verdict.level}</div>
               </div>
-              <div className={`rounded-full bg-white px-3 py-1 text-xs font-semibold ring-1 ${vs.tag}`}>
+              <div className={`rounded-full bg-white px-3 py-1 text-xs font-semibold ring-1 dark:bg-slate-800 ${vs.tag}`}>
                 Move assessment
               </div>
             </div>
 
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/70 ring-1 ring-slate-200/50">
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/70 ring-1 ring-slate-200/50 dark:bg-slate-800/70 dark:ring-slate-700/50">
               <div className={`h-full rounded-full transition-all ${verdict.barColor} ${verdict.barWidth}`} />
             </div>
 
-            <p className="mt-3 text-sm text-slate-700">{verdict.description}</p>
+            <p className="mt-3 text-sm text-slate-700 dark:text-slate-300">{verdict.description}</p>
 
             {verdict.netWorthNote && (
-              <div className="mt-2 rounded-lg bg-white/60 px-3 py-2 text-xs font-medium text-emerald-800 ring-1 ring-emerald-200">
+              <div className="mt-2 rounded-lg bg-white/60 px-3 py-2 text-xs font-medium text-emerald-800 ring-1 ring-emerald-200 dark:bg-slate-800/60 dark:text-emerald-300 dark:ring-emerald-800">
                 💼 {verdict.netWorthNote}
               </div>
             )}
 
             {results.salaryReady && (
-              <div className="mt-4 grid gap-2 rounded-xl bg-white/60 p-3 text-sm">
+              <div className="mt-4 grid gap-2 rounded-xl bg-white/60 p-3 text-sm dark:bg-slate-800/60">
                 {Number.isFinite(trueMonthlyLeftover) && (
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600">Est. leftover after essentials</span>
-                    <span className={`font-semibold ${trueMonthlyLeftover >= 0 ? "text-emerald-700" : "text-rose-600"}`}>
+                    <span className="text-slate-600 dark:text-slate-400">Est. leftover after essentials</span>
+                    <span className={`font-semibold ${trueMonthlyLeftover >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                       {money(trueMonthlyLeftover)}
                     </span>
                   </div>
                 )}
                 {maxSafeHousing > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600">Aim for housing under</span>
-                    <span className="font-semibold text-slate-900">{money(maxSafeHousing)}/mo</span>
+                    <span className="text-slate-600 dark:text-slate-400">Aim for housing under</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{money(maxSafeHousing)}/mo</span>
                   </div>
                 )}
                 {neededSalary != null && neededSalary > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600">Salary to match current lifestyle</span>
-                    <span className="font-semibold text-slate-900">{money(neededSalary)}</span>
+                    <span className="text-slate-600 dark:text-slate-400">Salary to match current lifestyle</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{money(neededSalary)}</span>
                   </div>
                 )}
                 {comparable && (
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600">COL-equivalent salary</span>
-                    <span className="font-semibold text-slate-900">{money(comparable.comparableSalary)}</span>
+                    <span className="text-slate-600 dark:text-slate-400">COL-equivalent salary</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{money(comparable.comparableSalary)}</span>
                   </div>
                 )}
               </div>
@@ -1105,59 +1125,59 @@ export default function Calculator({
           </div>
 
           {/* ── 2. RESULTS DETAIL ── */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-2 text-sm font-semibold">Results</div>
-            <div className="mb-3 text-xs text-slate-500">
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Results</div>
+            <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
               {TAX_YEAR} federal &amp; state tax assumptions · Planning estimates only
             </div>
-            <div className="mb-2 space-y-1 text-sm text-slate-600">
-              <div>Current city: <span className="font-semibold">{currentCityLabel}</span></div>
-              <div>Target city: <span className="font-semibold">{targetCityLabel}</span></div>
+            <div className="mb-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
+              <div>Current city: <span className="font-semibold text-slate-900 dark:text-slate-100">{currentCityLabel}</span></div>
+              <div>Target city: <span className="font-semibold text-slate-900 dark:text-slate-100">{targetCityLabel}</span></div>
             </div>
-            <div className="grid gap-2 text-sm">
-              <div>Net monthly (current): <span className="font-semibold">{money(results.netFromMonthly)}</span></div>
-              <div>Net monthly (target): <span className="font-semibold">{money(results.netToMonthly)}</span></div>
+            <div className="grid gap-2 text-sm text-slate-700 dark:text-slate-300">
+              <div>Net monthly (current): <span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.netFromMonthly)}</span></div>
+              <div>Net monthly (target): <span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.netToMonthly)}</span></div>
 
               {results.salaryReady && targetBreakdown && (
                 <>
-                  <div className="mt-2">Gross monthly: <span className="font-semibold">{money(results.grossMonthly, 2)}</span></div>
-                  <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                    <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <div className="mt-2">Gross monthly: <span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.grossMonthly, 2)}</span></div>
+                  <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950">
+                    <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       Target city — est. annual taxes
                     </div>
-                    <div className="grid gap-1.5 text-xs text-slate-600">
+                    <div className="grid gap-1.5 text-xs text-slate-600 dark:text-slate-400">
                       <div className="flex justify-between">
                         <span>Federal income tax</span>
-                        <span className="font-semibold text-slate-900">{money(targetBreakdown.federal)}</span>
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">{money(targetBreakdown.federal)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>FICA (SS + Medicare)</span>
-                        <span className="font-semibold text-slate-900">{money(targetBreakdown.fica)}</span>
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">{money(targetBreakdown.fica)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>State income tax</span>
-                        <span className="font-semibold text-slate-900">{money(targetBreakdown.state)}</span>
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">{money(targetBreakdown.state)}</span>
                       </div>
                       {targetBreakdown.local > 0 && (
                         <div className="flex justify-between">
                           <span>Local income tax</span>
-                          <span className="font-semibold text-slate-900">{money(targetBreakdown.local)}</span>
+                          <span className="font-semibold text-slate-900 dark:text-slate-100">{money(targetBreakdown.local)}</span>
                         </div>
                       )}
-                      <div className="mt-1 flex justify-between border-t border-slate-200 pt-1.5 font-semibold text-slate-900">
+                      <div className="mt-1 flex justify-between border-t border-slate-200 pt-1.5 font-semibold text-slate-900 dark:border-slate-800 dark:text-slate-100">
                         <span>Total taxes</span>
                         <span>{money(targetBreakdown.federal + targetBreakdown.fica + targetBreakdown.state + targetBreakdown.local)}</span>
                       </div>
-                      <div className="flex justify-between text-slate-500">
+                      <div className="flex justify-between text-slate-500 dark:text-slate-400">
                         <span>Effective rate</span>
                         <span>{results.effTaxToPct.toFixed(1)}%</span>
                       </div>
                     </div>
                   </div>
-                  <div className="text-xs text-slate-500">
-                    Current city effective rate: <span className="font-semibold">{results.effTaxFromPct.toFixed(1)}%</span>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">
+                    Current city effective rate: <span className="font-semibold text-slate-900 dark:text-slate-100">{results.effTaxFromPct.toFixed(1)}%</span>
                   </div>
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-slate-500 dark:text-slate-400">
                     Includes local city income tax where applicable. NY, CA, NJ, MA, PA, and IL tax 401(k) contributions at the state level — accounted for above.
                   </div>
                 </>
@@ -1165,52 +1185,52 @@ export default function Calculator({
 
               {mode === "buy" ? (
                 <>
-                  <div className="mt-2 font-semibold">Monthly housing (buy)</div>
+                  <div className="mt-2 font-semibold text-slate-900 dark:text-slate-100">Monthly housing (buy)</div>
                   <div className="grid gap-1 text-sm">
-                    <div>Principal + Interest: <span className="font-semibold">{money(results.buy.principalInterest, 2)}</span></div>
-                    <div>Property tax: <span className="font-semibold">{money(results.buy.propertyTax, 2)}</span></div>
-                    <div>Home insurance: <span className="font-semibold">{money(results.buy.homeInsurance, 2)}</span></div>
-                    <div>HOA: <span className="font-semibold">{money(results.buy.hoa, 2)}</span></div>
-                    <div>PMI: <span className="font-semibold">{money(results.pmiMonthly, 2)}</span></div>
-                    <div className="pt-2">Total: <span className="font-bold">{money(results.buyTotal, 2)}</span></div>
+                    <div>Principal + Interest: <span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.buy.principalInterest, 2)}</span></div>
+                    <div>Property tax: <span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.buy.propertyTax, 2)}</span></div>
+                    <div>Home insurance: <span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.buy.homeInsurance, 2)}</span></div>
+                    <div>HOA: <span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.buy.hoa, 2)}</span></div>
+                    <div>PMI: <span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.pmiMonthly, 2)}</span></div>
+                    <div className="pt-2">Total: <span className="font-bold text-slate-900 dark:text-slate-100">{money(results.buyTotal, 2)}</span></div>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="mt-2 font-semibold">Monthly housing (rent)</div>
-                  <div>Total (rent + renter's ins + parking): <span className="font-bold">{money(results.rentTotal, 2)}</span></div>
+                  <div className="mt-2 font-semibold text-slate-900 dark:text-slate-100">Monthly housing (rent)</div>
+                  <div>Total (rent + renter's ins + parking): <span className="font-bold text-slate-900 dark:text-slate-100">{money(results.rentTotal, 2)}</span></div>
                 </>
               )}
 
               <div className="mt-2">
                 Housing % of net (target):{" "}
-                <span className="font-semibold">{Number.isFinite(results.pct) ? results.pct.toFixed(1) + "%" : "—"}</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100">{Number.isFinite(results.pct) ? results.pct.toFixed(1) + "%" : "—"}</span>
               </div>
 
-              <div className="mt-4 space-y-1 border-t border-slate-200 pt-3 text-xs text-slate-500">
+              <div className="mt-4 space-y-1 border-t border-slate-200 pt-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
                 <div>Results are estimates only. No information entered is stored or shared.</div>
                 <div>Tax estimates include federal income tax, FICA, state income tax, and supported local city income taxes where applicable.</div>
               </div>
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-slate-500 dark:text-slate-400">
                 Tip: Your URL updates as you type — copy the page link to share this scenario.
               </div>
             </div>
           </div>
 
           {/* ── 3. MONTHLY FLEXIBILITY ── */}
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-amber-900/60 dark:bg-amber-950/20">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Monthly Flexibility</div>
-                <div className="mt-2 text-3xl font-bold text-slate-900">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700 dark:text-amber-400">Monthly Flexibility</div>
+                <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
                   {results.netToMonthly > 0 ? money(monthlyFlexibility, 2) : "—"}
                 </div>
               </div>
-              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200 dark:bg-slate-800 dark:text-amber-300 dark:ring-amber-800">
                 After housing
               </div>
             </div>
-            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-amber-100">
+            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-amber-100 dark:bg-slate-800/80 dark:ring-amber-900/40">
               <div className={`h-full rounded-full ${
                 !results.netToMonthly ? "w-[0%] bg-slate-300"
                 : monthlyFlexibility >= 3000 ? "w-[92%] bg-emerald-500"
@@ -1220,7 +1240,7 @@ export default function Calculator({
                 : "w-[24%] bg-rose-400"
               }`} />
             </div>
-            <div className="mt-3 text-sm text-slate-700">
+            <div className="mt-3 text-sm text-slate-700 dark:text-slate-300">
               {!results.netToMonthly
                 ? "Add salary and housing inputs to estimate how much room you have left each month."
                 : `What's left each month in ${targetCityLabel} after housing — before groceries, utilities, and other essentials.`}
@@ -1229,17 +1249,17 @@ export default function Calculator({
 
           {/* ── 4. TRUE MONTHLY LEFTOVER ── */}
           {hasCOLData && results.salaryReady && (
-            <div className="rounded-2xl border border-violet-200 bg-violet-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+            <div className="rounded-2xl border border-violet-200 bg-violet-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-violet-900/60 dark:bg-violet-950/20">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-violet-700">True Monthly Leftover</div>
-                  <div className="mt-2 text-3xl font-bold text-slate-900">{money(trueMonthlyLeftover, 2)}</div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-400">True Monthly Leftover</div>
+                  <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{money(trueMonthlyLeftover, 2)}</div>
                 </div>
-                <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-violet-700 ring-1 ring-violet-200">
+                <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-violet-700 ring-1 ring-violet-200 dark:bg-slate-800 dark:text-violet-300 dark:ring-violet-800">
                   After essentials
                 </div>
               </div>
-              <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-violet-100">
+              <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-violet-100 dark:bg-slate-800/80 dark:ring-violet-900/40">
                 <div className={`h-full rounded-full ${
                   trueMonthlyLeftover <= 0  ? "w-[4%] bg-rose-400"
                   : trueMonthlyLeftover >= 2000 ? "w-[90%] bg-emerald-500"
@@ -1248,10 +1268,10 @@ export default function Calculator({
                   : "w-[28%] bg-orange-400"
                 }`} />
               </div>
-              <div className="mt-3 grid gap-1.5 text-xs text-slate-600">
+              <div className="mt-3 grid gap-1.5 text-xs text-slate-600 dark:text-slate-400">
                 <div className="flex justify-between">
                   <span>Net monthly (target)</span>
-                  <span className="font-semibold">{money(results.netToMonthly, 2)}</span>
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.netToMonthly, 2)}</span>
                 </div>
                 {(
                   [
@@ -1263,19 +1283,19 @@ export default function Calculator({
                     ["Est. subscriptions & misc", effectiveMisc],
                   ] as [string, number][]
                 ).map(([label, val]) => (
-                  <div key={label} className="flex justify-between text-slate-500">
+                  <div key={label} className="flex justify-between text-slate-500 dark:text-slate-400">
                     <span>{label}</span>
                     <span>− {money(val, 2)}</span>
                   </div>
                 ))}
-                <div className="mt-1 flex justify-between border-t border-violet-200 pt-1.5 font-semibold text-slate-900">
+                <div className="mt-1 flex justify-between border-t border-violet-200 pt-1.5 font-semibold text-slate-900 dark:border-violet-800 dark:text-slate-100">
                   <span>Leftover</span>
-                  <span className={trueMonthlyLeftover >= 0 ? "text-emerald-700" : "text-rose-600"}>
+                  <span className={trueMonthlyLeftover >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}>
                     {money(trueMonthlyLeftover, 2)}
                   </span>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-slate-500">
+              <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                 Essential cost estimates are based on city cost-of-living index data.
               </div>
             </div>
@@ -1283,51 +1303,51 @@ export default function Calculator({
 
           {/* ── 5. CURRENT VS TARGET COMPARISON ── */}
           {hasCOLData && results.salaryReady && currentHousingActual != null && (
-            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-              <div className="mb-1 text-sm font-semibold">Current vs. Target</div>
+            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+              <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Current vs. Target</div>
               {isCurrentHousingEstimated && (
-                <div className="mb-3 text-xs text-slate-500">
+                <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
                   Current housing is{" "}
-                  <span className="font-semibold text-amber-700">estimated</span>{" "}
+                  <span className="font-semibold text-amber-700 dark:text-amber-400">estimated</span>{" "}
                   from your selected target housing cost and the city housing index — not your actual number. Enter your real amount above for a precise comparison.
                 </div>
               )}
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <tr className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                     <th className="pb-2 text-left">Metric</th>
                     <th className="pb-2 text-right">{currentCityLabel}</th>
                     <th className="pb-2 text-right">{targetCityLabel}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   <tr>
-                    <td className="py-2 text-slate-600">Net monthly</td>
-                    <td className="py-2 text-right font-semibold">{money(results.netFromMonthly)}</td>
-                    <td className="py-2 text-right font-semibold">{money(results.netToMonthly)}</td>
+                    <td className="py-2 text-slate-600 dark:text-slate-400">Net monthly</td>
+                    <td className="py-2 text-right font-semibold text-slate-900 dark:text-slate-100">{money(results.netFromMonthly)}</td>
+                    <td className="py-2 text-right font-semibold text-slate-900 dark:text-slate-100">{money(results.netToMonthly)}</td>
                   </tr>
                   <tr>
-                    <td className="py-2 text-slate-600">Housing</td>
-                    <td className="py-2 text-right font-semibold">
+                    <td className="py-2 text-slate-600 dark:text-slate-400">Housing</td>
+                    <td className="py-2 text-right font-semibold text-slate-900 dark:text-slate-100">
                       {money(currentHousingActual)}
-                      {isCurrentHousingEstimated && <span className="ml-1 text-xs font-normal text-slate-400">est.</span>}
+                      {isCurrentHousingEstimated && <span className="ml-1 text-xs font-normal text-slate-400 dark:text-slate-500">est.</span>}
                     </td>
-                    <td className="py-2 text-right font-semibold">{money(results.activeHousing)}</td>
+                    <td className="py-2 text-right font-semibold text-slate-900 dark:text-slate-100">{money(results.activeHousing)}</td>
                   </tr>
                   <tr>
-                    <td className="py-2 text-slate-600">Essentials</td>
-                    <td className="py-2 text-right font-semibold">{money(currentEssentialNonHousing)}</td>
-                    <td className="py-2 text-right font-semibold">{money(targetEssentialNonHousing)}</td>
+                    <td className="py-2 text-slate-600 dark:text-slate-400">Essentials</td>
+                    <td className="py-2 text-right font-semibold text-slate-900 dark:text-slate-100">{money(currentEssentialNonHousing)}</td>
+                    <td className="py-2 text-right font-semibold text-slate-900 dark:text-slate-100">{money(targetEssentialNonHousing)}</td>
                   </tr>
                   <tr className="font-semibold">
-                    <td className="py-2">Left after essentials</td>
+                    <td className="py-2 text-slate-900 dark:text-slate-100">Left after essentials</td>
                     <td className="py-2 text-right">
-                      <span className={currentTrueLeftover != null && currentTrueLeftover >= 0 ? "text-emerald-700" : "text-rose-600"}>
+                      <span className={currentTrueLeftover != null && currentTrueLeftover >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}>
                         {currentTrueLeftover != null ? money(currentTrueLeftover) : "—"}
                       </span>
                     </td>
                     <td className="py-2 text-right">
-                      <span className={trueMonthlyLeftover >= 0 ? "text-emerald-700" : "text-rose-600"}>
+                      <span className={trueMonthlyLeftover >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}>
                         {money(trueMonthlyLeftover)}
                       </span>
                     </td>
@@ -1335,7 +1355,7 @@ export default function Calculator({
                 </tbody>
               </table>
               {flexibilityDelta != null && (
-                <div className={`mt-3 rounded-xl px-3 py-2 text-sm font-semibold ${flexibilityDelta >= 0 ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-800"}`}>
+                <div className={`mt-3 rounded-xl px-3 py-2 text-sm font-semibold ${flexibilityDelta >= 0 ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300" : "bg-rose-50 text-rose-800 dark:bg-rose-950/30 dark:text-rose-300"}`}>
                   {flexibilityDelta >= 0
                     ? `Your move adds about ${money(Math.abs(flexibilityDelta))}/mo in room.`
                     : `You'd likely lose about ${money(Math.abs(flexibilityDelta))}/mo in flexibility.`}
@@ -1346,18 +1366,18 @@ export default function Calculator({
 
           {/* ── 6. COMPARABLE SALARY ── */}
           {comparable && (
-            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-              <div className="text-xs font-semibold tracking-widest text-slate-500">COMPARABLE SALARY</div>
-              <div className="mt-2 text-3xl font-bold">{money(comparable.comparableSalary)}</div>
-              <p className="mt-2 text-sm text-slate-600">
+            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+              <div className="text-xs font-semibold tracking-widest text-slate-500 dark:text-slate-400">COMPARABLE SALARY</div>
+              <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{money(comparable.comparableSalary)}</div>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
                 {comparable.toCityName} is roughly{" "}
-                <span className="font-semibold">{Math.abs(comparable.pctLessMore).toFixed(0)}%</span>{" "}
+                <span className="font-semibold text-slate-900 dark:text-slate-100">{Math.abs(comparable.pctLessMore).toFixed(0)}%</span>{" "}
                 {comparable.pctLessMore >= 0 ? "less" : "more"} expensive than {comparable.fromCityName}.
               </p>
-              <div className="mt-1 text-xs text-slate-500">Based on housing, transportation, and essential cost weighting.</div>
+              <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Based on housing, transportation, and essential cost weighting.</div>
               <button
                 type="button"
-                className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-800"
+                className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                 onClick={() => window.open("http://relocationbynumbers.com/mortgage-calculator", "_blank", "noopener,noreferrer")}
               >
                 See if you can afford a mortgage →
@@ -1366,11 +1386,11 @@ export default function Calculator({
           )}
 
           {/* ── 7. SHARE ── */}
-          <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-sky-900/60 dark:bg-sky-950/20">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700">Share this scenario</div>
-                <div className="mt-1 text-sm text-slate-700">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-400">Share this scenario</div>
+                <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">
                   Copy your current comparison link and send it to a partner, friend, or future self.
                 </div>
               </div>
@@ -1406,7 +1426,7 @@ export default function Calculator({
                     }
                   }
                 }}
-                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
               >
                 {shareStatus === "copied" ? "Link copied!" : shareStatus === "shared" ? "Shared!" : shareStatus === "error" ? "Share failed" : "Share scenario"}
               </button>

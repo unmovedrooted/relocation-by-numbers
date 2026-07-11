@@ -140,16 +140,16 @@ function getReadinessBand(ratio: number) {
 
 function confidenceBadge(confidence: Confidence) {
   switch (confidence) {
-    case "high":       return { label: "● High confidence",     cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" };
-    case "moderate":   return { label: "● Moderate",            cls: "bg-amber-50 text-amber-700 ring-amber-200" };
-    case "simplified": return { label: "● Simplified estimate", cls: "bg-orange-50 text-orange-700 ring-orange-200" };
-    default:           return { label: "⚠ Pending",             cls: "bg-slate-50 text-slate-500 ring-slate-200" };
+    case "high":       return { label: "● High confidence",     cls: "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:ring-emerald-800" };
+    case "moderate":   return { label: "● Moderate",            cls: "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:ring-amber-800" };
+    case "simplified": return { label: "● Simplified estimate", cls: "bg-orange-50 text-orange-700 ring-orange-200 dark:bg-orange-950/30 dark:text-orange-300 dark:ring-orange-800" };
+    default:           return { label: "⚠ Pending",             cls: "bg-slate-50 text-slate-500 ring-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:ring-slate-700" };
   }
 }
 
-const inputCls     = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-teal-500/15";
-const selectCls    = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-teal-500/15";
-const labelHeadCls = "mb-1 text-xs font-medium leading-4 text-slate-600";
+const inputCls     = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-teal-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800";
+const selectCls    = "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-teal-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800";
+const labelHeadCls = "mb-1 text-xs font-medium leading-4 text-slate-600 dark:text-slate-400";
 
 // ---------------------------------------------------------------------------
 // INFO TIP
@@ -161,7 +161,7 @@ function InfoTip({ text, align = "left" }: { text: string; align?: "left" | "rig
   return (
     <span className="group relative ml-1 inline-flex align-middle">
       <button type="button" aria-label="More info"
-        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 bg-white text-[10px] font-bold text-slate-700 shadow-sm transition hover:bg-slate-50">
+        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 bg-white text-[10px] font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
         i
       </button>
       <span className={`pointer-events-none absolute top-full z-50 mt-2 hidden max-w-[calc(100vw-2rem)] w-72 rounded-xl bg-slate-900 px-3 py-2 text-xs leading-5 text-white shadow-xl group-hover:block group-focus-within:block ${positionClass}`}>
@@ -180,13 +180,13 @@ function VisaContextCard({ countryCode }: { countryCode: string }) {
 
   if (ctx.restricted) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
-        <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-800">
+      <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-amber-900/60 dark:bg-amber-950/20">
+        <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-800 dark:text-amber-300">
           <span>{ctx.icon}</span>
           <span>⚠ Travel Advisory</span>
         </div>
-        <div className="mb-1 text-xs font-medium text-amber-700">{ctx.program}</div>
-        <p className="text-sm leading-6 text-amber-900">{ctx.summary}</p>
+        <div className="mb-1 text-xs font-medium text-amber-700 dark:text-amber-400">{ctx.program}</div>
+        <p className="text-sm leading-6 text-amber-900 dark:text-amber-200">{ctx.summary}</p>
       </div>
     );
   }
@@ -194,20 +194,20 @@ function VisaContextCard({ countryCode }: { countryCode: string }) {
   const headerLabel = ctx.territoryOf ? `${ctx.territoryOf} Territory` : "Visa / Residency Context";
 
   return (
-    <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-      <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
+    <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+      <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
         <span>{ctx.icon}</span>
         <span>{headerLabel}</span>
       </div>
-      <div className="mb-1 text-xs font-medium text-teal-700">{ctx.program}</div>
-      <p className="text-sm leading-6 text-slate-700">{ctx.summary}</p>
-      <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+      <div className="mb-1 text-xs font-medium text-teal-700 dark:text-teal-400">{ctx.program}</div>
+      <p className="text-sm leading-6 text-slate-700 dark:text-slate-300">{ctx.summary}</p>
+      <div className="mt-3 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
         <span>
           {ctx.feeNote}:{" "}
-          <span className="font-semibold text-slate-700">${ctx.estimatedFeeUsd.toLocaleString()}</span>
+          <span className="font-semibold text-slate-700 dark:text-slate-200">${ctx.estimatedFeeUsd.toLocaleString()}</span>
         </span>
         {ctx.highlight && (
-          <span className="rounded-full bg-teal-50 px-2.5 py-1 font-medium text-teal-700 ring-1 ring-teal-200">
+          <span className="rounded-full bg-teal-50 px-2.5 py-1 font-medium text-teal-700 ring-1 ring-teal-200 dark:bg-teal-950/30 dark:text-teal-300 dark:ring-teal-800">
             {ctx.highlight}
           </span>
         )}
@@ -258,9 +258,9 @@ function RelocationVerdict({ results, toCityLabel, displayAmount }: {
     : "amber";
 
   const colorMap = {
-    emerald: "border-emerald-200 bg-emerald-50/70 text-emerald-800",
-    rose:    "border-rose-200 bg-rose-50/70 text-rose-800",
-    amber:   "border-amber-200 bg-amber-50/70 text-amber-800",
+    emerald: "border-emerald-200 bg-emerald-50/70 text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:text-emerald-300",
+    rose:    "border-rose-200 bg-rose-50/70 text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/20 dark:text-rose-300",
+    amber:   "border-amber-200 bg-amber-50/70 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-300",
   };
 
   return (
@@ -917,22 +917,22 @@ const relativeDifference =
   // RENDER
   // ---------------------------------------------------------------------------
   return (
-    <div className="text-slate-900">
+    <div className="text-slate-900 dark:text-slate-100">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="text-sm font-semibold" />
         <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200/70">
+          <div className="inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-700">
             <button type="button" onClick={() => setMode("working")}
-              className={`rounded-lg px-3 py-1 text-sm ${mode === "working" ? "bg-slate-900 text-white" : "text-slate-700"}`}>
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "working" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300"}`}>
               Working
             </button>
             <button type="button" onClick={() => setMode("retired")}
-              className={`rounded-lg px-3 py-1 text-sm ${mode === "retired" ? "bg-slate-900 text-white" : "text-slate-700"}`}>
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "retired" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300"}`}>
               Retired
             </button>
           </div>
           <button type="button" onClick={resetInputsKeepContext}
-            className="rounded-lg px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+            className="rounded-lg px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
             title="Clear all fields">
             Reset
           </button>
@@ -947,14 +947,14 @@ const relativeDifference =
         <div className="space-y-3">
 
           {/* Income & Location */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-3 text-sm font-semibold">Income &amp; Location</div>
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Income &amp; Location</div>
             <div className="grid gap-3 sm:grid-cols-2">
 
               <label className="text-sm">
                 <div className={labelHeadCls}>
                   {mode === "retired" ? "Gross annual retirement income" : "Gross annual salary"}{" "}
-                  <span className="text-slate-400">({originCurrency})</span>
+                  <span className="text-slate-400 dark:text-slate-500">({originCurrency})</span>
                 </div>
                 <input className={inputCls} type="number"
                   value={mode === "retired" ? retirementIncome : salary}
@@ -1004,17 +1004,17 @@ const relativeDifference =
                   Income impact
                   <InfoTip align="right" text="Shows how your estimated monthly take-home pay changes between your current location and your Caribbean destination after taxes." />
                 </div>
-                <div className="flex h-11 w-full items-center justify-between rounded-xl border border-slate-300 px-3">
+                <div className="flex h-11 w-full items-center justify-between rounded-xl border border-slate-300 px-3 dark:border-slate-700">
                   {results.salaryReady ? (
                     <>
-                      <span className={`font-semibold ${results.monthlyIncomeDiff > 0 ? "text-emerald-600" : results.monthlyIncomeDiff < 0 ? "text-rose-600" : "text-slate-900"}`}>
+                      <span className={`font-semibold ${results.monthlyIncomeDiff > 0 ? "text-emerald-600 dark:text-emerald-400" : results.monthlyIncomeDiff < 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-slate-100"}`}>
                         {results.monthlyIncomeDiff > 0 ? "+" : ""}{displayAmount(results.monthlyIncomeDiff, 0)}
                       </span>
-                      <span className="whitespace-nowrap text-xs text-slate-500">
+                      <span className="whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">
                         {results.monthlyIncomeDiff > 0 ? "Higher" : results.monthlyIncomeDiff < 0 ? "Lower" : "Same"}
                       </span>
                     </>
-                  ) : <span className="text-slate-400">—</span>}
+                  ) : <span className="text-slate-400 dark:text-slate-500">—</span>}
                 </div>
               </div>
 
@@ -1054,8 +1054,8 @@ const relativeDifference =
 
           {/* Dominican Republic residency question */}
           {toCountry === "DO" && incomeScenario === "remote" && (
-            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-              <div className="mb-3 text-sm font-semibold">Dominican Republic — Residency</div>
+            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+              <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Dominican Republic — Residency</div>
               <label className="text-sm">
                 <div className={labelHeadCls}>
                   How long have you been a tax resident in the Dominican Republic?
@@ -1073,8 +1073,8 @@ const relativeDifference =
           )}
 
           {/* Housing */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-3 text-sm font-semibold">Housing</div>
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Housing</div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm sm:col-span-2">
                 <div className={labelHeadCls}>Rent in destination (monthly)</div>
@@ -1131,12 +1131,12 @@ const relativeDifference =
           </div>
 
           {/* Estimated Living Costs */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-3 text-sm font-semibold">
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
               Estimated Living Costs
               <InfoTip text="Adjusted for family size. City multipliers are only applied when no city-specific data exists." />
             </div>
-            <div className="mt-3 space-y-3 text-[15px] text-slate-700">
+            <div className="mt-3 space-y-3 text-[15px] text-slate-700 dark:text-slate-300">
               <label className="block text-sm">
   <div className={labelHeadCls}>Groceries</div>
   <input
@@ -1181,12 +1181,12 @@ const relativeDifference =
   />
 </label>
             </div>
-            <div className="mt-2 text-xs text-slate-500">Estimated costs adjust automatically based on the selected city.</div>
+            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Estimated costs adjust automatically based on the selected city.</div>
           </div>
 
           {/* One-Time Moving Costs */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-3 text-sm font-semibold">One-Time Moving Costs</div>
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">One-Time Moving Costs</div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm"><div className={labelHeadCls}>Visa / permit estimate</div><input className={inputCls} type="number" value={visaCost} onChange={e => setVisaCost(e.target.value)} placeholder=" " /></label>
               <label className="text-sm"><div className={labelHeadCls}>One-way flight estimate</div><input className={inputCls} type="number" value={flightCost} onChange={e => setFlightCost(e.target.value)} placeholder=" " /></label>
@@ -1196,10 +1196,10 @@ const relativeDifference =
               <label className="text-sm"><div className={labelHeadCls}>Furniture / setup estimate</div><input className={inputCls} type="number" value={furnitureSetup} onChange={e => setFurnitureSetup(e.target.value)} placeholder=" " /></label>
               <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Recommended cash buffer</div><input className={inputCls} type="number" value={emergencyCashBuffer} onChange={e => setEmergencyCashBuffer(e.target.value)} placeholder=" " /></label>
             </div>
-            <div className="mt-4 w-full text-xs text-slate-500">Planning estimates only.</div>
+            <div className="mt-4 w-full text-xs text-slate-500 dark:text-slate-400">Planning estimates only.</div>
           </div>
         </div>
-          
+
         {/* ================================================================
             RIGHT — RESULTS
         ================================================================ */}
@@ -1209,48 +1209,48 @@ const relativeDifference =
           <VisaContextCard countryCode={toCountry} />
 
           {/* Main results */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-2 text-sm font-semibold">Results</div>
-            <div className="mb-3 text-xs text-slate-500">
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Results</div>
+            <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
               {CARIBBEAN_TAX_ASSUMPTIONS_LABEL} · Planning estimates only
             </div>
-            <div className="mb-2 space-y-1 text-sm text-slate-600">
-              <div>Current country: <span className="font-semibold">{getCountryByCode(fromCountry)?.name ?? fromCountry}</span></div>
-              <div>Target country:  <span className="font-semibold">{getCaribbeanCountryByCode(toCountry)?.name ?? toCountry}</span></div>
-              <div>Income scenario: <span className="font-semibold capitalize">{incomeScenario}</span></div>
+            <div className="mb-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
+              <div>Current country: <span className="font-semibold text-slate-900 dark:text-slate-100">{getCountryByCode(fromCountry)?.name ?? fromCountry}</span></div>
+              <div>Target country:  <span className="font-semibold text-slate-900 dark:text-slate-100">{getCaribbeanCountryByCode(toCountry)?.name ?? toCountry}</span></div>
+              <div>Income scenario: <span className="font-semibold capitalize text-slate-900 dark:text-slate-100">{incomeScenario}</span></div>
             </div>
 
-            <div className="grid gap-2 text-sm">
-              <div>Net monthly (current): <span className="font-semibold">{displayAmount(results.netMonthlyFrom)}</span></div>
-              <div>Net monthly (target):  <span className="font-semibold">{displayAmount(results.netMonthlyTo)}</span></div>
+            <div className="grid gap-2 text-sm text-slate-700 dark:text-slate-300">
+              <div>Net monthly (current): <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.netMonthlyFrom)}</span></div>
+              <div>Net monthly (target):  <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.netMonthlyTo)}</span></div>
 
               {results.salaryReady && (
                 <>
-                  <div className="mt-2">Gross monthly: <span className="font-semibold">{displayAmount(results.grossMonthly, 2)}</span></div>
-                  <div>Est. taxes (current): <span className="font-semibold">{displayAmount(results.currentMonthlyTaxUsd, 2)}</span>{" "}
-                    <span className="text-xs text-slate-500">({(results.currentTaxRate * 100).toFixed(1)}%)</span>
+                  <div className="mt-2">Gross monthly: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.grossMonthly, 2)}</span></div>
+                  <div>Est. taxes (current): <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.currentMonthlyTaxUsd, 2)}</span>{" "}
+                    <span className="text-xs text-slate-500 dark:text-slate-400">({(results.currentTaxRate * 100).toFixed(1)}%)</span>
                   </div>
                   {results.targetIsDisclaimer ? (
-                    <div className="text-slate-500 text-sm">Est. taxes (target): <span className="italic">See notes below</span></div>
+                    <div className="text-slate-500 dark:text-slate-400 text-sm">Est. taxes (target): <span className="italic">See notes below</span></div>
                   ) : (
-                    <div>Est. taxes (target): <span className="font-semibold">{displayAmount(results.targetMonthlyTaxUsd, 2)}</span>{" "}
-                      <span className="text-xs text-slate-500">({(results.targetTaxRate * 100).toFixed(1)}%)</span>
+                    <div>Est. taxes (target): <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.targetMonthlyTaxUsd, 2)}</span>{" "}
+                      <span className="text-xs text-slate-500 dark:text-slate-400">({(results.targetTaxRate * 100).toFixed(1)}%)</span>
                     </div>
                   )}
 
-                  <div className="mt-3 rounded-2xl border border-teal-200 bg-teal-50/80 px-4 py-3 shadow-sm">
+                  <div className="mt-3 rounded-2xl border border-teal-200 bg-teal-50/80 px-4 py-3 shadow-sm dark:border-teal-900/60 dark:bg-teal-950/20">
                     <div className="flex flex-wrap items-center gap-2 text-xs">
-                      <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 font-semibold tracking-wide text-teal-700 ring-1 ring-teal-200">Tax model status</span>
+                      <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 font-semibold tracking-wide text-teal-700 ring-1 ring-teal-200 dark:bg-slate-800 dark:text-teal-300 dark:ring-teal-800">Tax model status</span>
                       <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${badge.cls}`}>{badge.label}</span>
                       <InfoTip text="Describes how complete and verified the tax estimate is for this destination and scenario." />
                     </div>
                     {results.targetIsDisclaimer && (
-                      <div className="mt-2 text-sm text-slate-500 italic">A tax estimate is not available for this scenario. See notes below.</div>
+                      <div className="mt-2 text-sm text-slate-500 dark:text-slate-400 italic">A tax estimate is not available for this scenario. See notes below.</div>
                     )}
                     {results.targetTaxNotes.length > 0 && (
                       <div className="mt-2 space-y-1">
                         {results.targetTaxNotes.map((note, i) => (
-                          <div key={i} className="text-sm leading-6 text-slate-700">• {note}</div>
+                          <div key={i} className="text-sm leading-6 text-slate-700 dark:text-slate-300">• {note}</div>
                         ))}
                       </div>
                     )}
@@ -1258,41 +1258,41 @@ const relativeDifference =
                 </>
               )}
 
-              <div className="mt-2 font-semibold">Monthly housing</div>
+              <div className="mt-2 font-semibold text-slate-900 dark:text-slate-100">Monthly housing</div>
               <div className="grid gap-1 text-sm">
-                <div>Rent: <span className="font-semibold">{displayAmount(results.rentTo, 2)}</span></div>
-                {results.housingUtilities > 0 && <div>Utilities gap: <span className="font-semibold">{displayAmount(results.housingUtilities, 2)}</span></div>}
-                {results.carCost > 0 && <div>Car: <span className="font-semibold">{displayAmount(results.carCost, 2)}</span></div>}
-                <div className="pt-1">Total housing: <span className="font-bold">{displayAmount(results.housingTotal, 2)}</span></div>
+                <div>Rent: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.rentTo, 2)}</span></div>
+                {results.housingUtilities > 0 && <div>Utilities gap: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.housingUtilities, 2)}</span></div>}
+                {results.carCost > 0 && <div>Car: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.carCost, 2)}</span></div>}
+                <div className="pt-1">Total housing: <span className="font-bold text-slate-900 dark:text-slate-100">{displayAmount(results.housingTotal, 2)}</span></div>
               </div>
-              <div className="mt-2 font-semibold">Monthly living costs</div>
-              <div>Total: <span className="font-bold">{displayAmount(results.livingCosts, 2)}</span></div>
-              <div className="mt-2">Upfront cash needed: <span className="font-semibold">{displayAmount(results.upfrontCashNeeded)}</span></div>
-              <div>Months covered by savings: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
-              <div className="mt-2">Housing % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
+              <div className="mt-2 font-semibold text-slate-900 dark:text-slate-100">Monthly living costs</div>
+              <div>Total: <span className="font-bold text-slate-900 dark:text-slate-100">{displayAmount(results.livingCosts, 2)}</span></div>
+              <div className="mt-2">Upfront cash needed: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.upfrontCashNeeded)}</span></div>
+              <div>Months covered by savings: <span className="font-semibold text-slate-900 dark:text-slate-100">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
+              <div className="mt-2">Housing % of net (target): <span className="font-semibold text-slate-900 dark:text-slate-100">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
             </div>
 
-            <div className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500 space-y-1">
+            <div className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400 space-y-1">
               <div>Results are estimates only. No information entered is stored or shared.</div>
               <div>Tax estimates, rent, immigration costs, and retirement treatment vary by destination and personal circumstances.</div>
             </div>
-            <div className="text-xs text-slate-500">Tip: Your URL updates as you type — copy the page link to share this scenario.</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Tip: Your URL updates as you type — copy the page link to share this scenario.</div>
           </div>
 
           {/* Monthly Flexibility */}
-          <div className="rounded-2xl border border-teal-200 bg-teal-50/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="rounded-2xl border border-teal-200 bg-teal-50/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-teal-900/60 dark:bg-teal-950/20">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700">Monthly Flexibility</div>
-                <div className="mt-2 text-3xl font-bold text-slate-900">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700 dark:text-teal-400">Monthly Flexibility</div>
+                <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
                   {results.salaryReady ? displayAmount(results.monthlyFlexibility, 2) : "—"}
                 </div>
               </div>
-              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-teal-700 ring-1 ring-teal-200">
+              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-teal-700 ring-1 ring-teal-200 dark:bg-slate-800 dark:text-teal-300 dark:ring-teal-800">
                 After housing and essentials
               </div>
             </div>
-            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-teal-100">
+            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-teal-100 dark:bg-slate-800/80 dark:ring-teal-900/40">
               <div className={`h-full rounded-full ${
                 !results.salaryReady                         ? "w-[0%]  bg-slate-300"
                 : results.monthlyFlexibility >= 3000        ? "w-[92%] bg-emerald-500"
@@ -1302,42 +1302,42 @@ const relativeDifference =
                 :                                             "w-[24%] bg-rose-400"
               }`} />
             </div>
-            <div className="mt-3 text-sm text-slate-700">
+            <div className="mt-3 text-sm text-slate-700 dark:text-slate-300">
               {!results.salaryReady
                 ? "Add salary and housing inputs to estimate how much room you have left each month."
                 : `This is what you may have left each month in ${toCityLabel} after housing costs and core living expenses.`}
             </div>
-            <div className="mt-2 text-xs text-slate-500">Higher flexibility gives you more room for saving, investing, travel, and unexpected expenses.</div>
+            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Higher flexibility gives you more room for saving, investing, travel, and unexpected expenses.</div>
           </div>
 
           {/* Comparable Salary */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="text-xs font-semibold tracking-widest text-slate-500">COMPARABLE SALARY</div>
-            <div className="mt-2 text-3xl font-bold">{displayAmount(results.comparableSalary)}</div>
-            <p className="mt-2 text-sm text-slate-600">
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="text-xs font-semibold tracking-widest text-slate-500 dark:text-slate-400">COMPARABLE SALARY</div>
+            <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{displayAmount(results.comparableSalary)}</div>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
               {toCityLabel} is roughly{" "}
-              <span className="font-semibold">{Math.abs(Math.round(results.relativeDifference * 100))}%</span>{" "}
+              <span className="font-semibold text-slate-900 dark:text-slate-100">{Math.abs(Math.round(results.relativeDifference * 100))}%</span>{" "}
               {results.relativeDifference >= 0 ? "more" : "less"} expensive than {fromCityLabel}.
             </p>
-            <div className="mt-1 text-xs text-slate-500">Based on housing, transportation, healthcare, and essential cost weighting.</div>
+            <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Based on housing, transportation, healthcare, and essential cost weighting.</div>
           </div>
 
           {/* Comfort Score */}
-          <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-teal-900/60 dark:bg-teal-950/20">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700 dark:text-teal-400">
                   {mode === "retired" ? "Retirement Readiness Score" : "Comfort Score™"}
                 </div>
-                <div className="mt-2 text-2xl font-bold text-slate-900">
+                <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
                   {results.comfort.band} · {results.comfort.label}
                 </div>
               </div>
-              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-teal-700 ring-1 ring-teal-200">
+              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-teal-700 ring-1 ring-teal-200 dark:bg-slate-800 dark:text-teal-300 dark:ring-teal-800">
                 Housing &amp; living costs
               </div>
             </div>
-            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-teal-100">
+            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-teal-100 dark:bg-slate-800/80 dark:ring-teal-900/40">
               <div className={`h-full rounded-full ${
                 results.comfort.band === "A" ? "w-[92%] bg-emerald-500"
                 : results.comfort.band === "B" ? "w-[78%] bg-emerald-400"
@@ -1345,18 +1345,18 @@ const relativeDifference =
                 :                               "w-[42%] bg-orange-400"
               }`} />
             </div>
-            <div className="mt-3 text-sm text-slate-700">{results.comfort.note}</div>
-            <div className="mt-2 text-xs text-slate-500">
+            <div className="mt-3 text-sm text-slate-700 dark:text-slate-300">{results.comfort.note}</div>
+            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
               Based on how much of your target net monthly income goes toward housing and core living costs.
             </div>
           </div>
 
           {/* Share */}
-          <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-teal-900/60 dark:bg-teal-950/20">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700">Share this scenario</div>
-                <div className="mt-1 text-sm text-slate-700">Copy your current comparison link and send it to a partner, friend, or future self.</div>
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700 dark:text-teal-400">Share this scenario</div>
+                <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">Copy your current comparison link and send it to a partner, friend, or future self.</div>
               </div>
               <button type="button"
                 onClick={async () => {
@@ -1378,7 +1378,7 @@ const relativeDifference =
                     window.setTimeout(() => setShareStatus("idle"), 2500);
                   }
                 }}
-                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">
+                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
                 {shareStatus === "copied" ? "Link copied!" : shareStatus === "shared" ? "Shared!" : shareStatus === "error" ? "Share failed" : "Share scenario"}
               </button>
             </div>

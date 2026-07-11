@@ -26,14 +26,14 @@ export default function AffiliateCard({
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="text-sm font-semibold text-slate-900">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+      <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
         {isRent
           ? `Best rental sites for ${placeLabel}`
           : `Next steps after choosing ${placeLabel}`}
       </div>
 
-      <div className="mt-2 text-xs text-slate-500">
+      <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         {isRent
           ? "Explore rental platforms and listing sites."
           : "Compare home-buying and move-related services."}
@@ -43,73 +43,73 @@ export default function AffiliateCard({
         {isRent ? (
           <>
             <a
-              className="flex items-center justify-between rounded-xl border border-slate-200 p-3 hover:bg-slate-50"
+              className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 p-3 hover:bg-slate-50 hover:dark:bg-slate-950"
               href={LINKS.apartments}
               target="_blank"
               rel="noopener noreferrer nofollow sponsored"
             >
-              <span className="font-medium text-slate-800">🏢 Apartments.com</span>
-              <span className="text-slate-400">Search →</span>
+              <span className="font-medium text-slate-800 dark:text-slate-200">🏢 Apartments.com</span>
+              <span className="text-slate-400 dark:text-slate-500">Search →</span>
             </a>
 
             <a
-              className="flex items-center justify-between rounded-xl border border-slate-200 p-3 hover:bg-slate-50"
+              className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 p-3 hover:bg-slate-50 hover:dark:bg-slate-950"
               href={LINKS.realtorRent}
               target="_blank"
               rel="noopener noreferrer nofollow sponsored"
             >
-              <span className="font-medium text-slate-800">🏠 Realtor.com Rentals</span>
-              <span className="text-slate-400">View →</span>
+              <span className="font-medium text-slate-800 dark:text-slate-200">🏠 Realtor.com Rentals</span>
+              <span className="text-slate-400 dark:text-slate-500">View →</span>
             </a>
 
             <a
-              className="flex items-center justify-between rounded-xl border border-slate-200 p-3 hover:bg-slate-50"
+              className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 p-3 hover:bg-slate-50 hover:dark:bg-slate-950"
               href={LINKS.zumper}
               target="_blank"
               rel="noopener noreferrer nofollow sponsored"
             >
-              <span className="font-medium text-slate-800">📱 Zumper</span>
-              <span className="text-slate-400">Browse →</span>
+              <span className="font-medium text-slate-800 dark:text-slate-200">📱 Zumper</span>
+              <span className="text-slate-400 dark:text-slate-500">Browse →</span>
             </a>
           </>
         ) : (
           <>
             <a
-              className="flex items-center justify-between rounded-xl border border-slate-200 p-3 hover:bg-slate-50"
+              className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 p-3 hover:bg-slate-50 hover:dark:bg-slate-950"
               href={LINKS.mortgage}
               target="_blank"
               rel="noopener noreferrer nofollow sponsored"
             >
-              <span className="font-medium text-slate-800">🏦 Compare mortgage rates</span>
-              <span className="text-slate-400">Check →</span>
+              <span className="font-medium text-slate-800 dark:text-slate-200">🏦 Compare mortgage rates</span>
+              <span className="text-slate-400 dark:text-slate-500">Check →</span>
             </a>
 
             <a
-              className="flex items-center justify-between rounded-xl border border-slate-200 p-3 hover:bg-slate-50"
+              className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 p-3 hover:bg-slate-50 hover:dark:bg-slate-950"
               href={LINKS.homes}
               target="_blank"
               rel="noopener noreferrer nofollow sponsored"
             >
-              <span className="font-medium text-slate-800">
+              <span className="font-medium text-slate-800 dark:text-slate-200">
                 🏡 Browse homes in {placeLabel}
               </span>
-              <span className="text-slate-400">Explore →</span>
+              <span className="text-slate-400 dark:text-slate-500">Explore →</span>
             </a>
 
             <a
-              className="flex items-center justify-between rounded-xl border border-slate-200 p-3 hover:bg-slate-50"
+              className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 p-3 hover:bg-slate-50 hover:dark:bg-slate-950"
               href={LINKS.insurance}
               target="_blank"
               rel="noopener noreferrer nofollow sponsored"
             >
-              <span className="font-medium text-slate-800">🛡️ Get insurance quotes</span>
-              <span className="text-slate-400">Compare →</span>
+              <span className="font-medium text-slate-800 dark:text-slate-200">🛡️ Get insurance quotes</span>
+              <span className="text-slate-400 dark:text-slate-500">Compare →</span>
             </a>
           </>
         )}
       </div>
 
-      <div className="mt-3 text-xs text-slate-500">
+      <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
         Disclosure: some links may earn a commission at no cost to you.
       </div>
     </div>

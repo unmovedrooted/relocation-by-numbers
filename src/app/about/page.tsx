@@ -4,11 +4,11 @@ export default function AboutPage() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-12">
       <header className="max-w-3xl">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-4 sm:text-4xl">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-4 sm:text-4xl">
           About Relocation By Numbers
         </h1>
 
-        <p className="text-slate-700 text-base leading-7 mb-4">
+        <p className="text-slate-700 dark:text-slate-300 text-base leading-7 mb-4">
           Relocation By Numbers was created to help people make smarter move decisions
           with clearer financial context. Instead of relying on scattered calculators,
           generic cost-of-living lists, or headline salary comparisons, the goal is to
@@ -16,45 +16,45 @@ export default function AboutPage() {
           long-term financial path.
         </p>
 
-        <p className="text-slate-700 text-base leading-7">
-          The site focuses on one practical question: <span className="font-semibold text-slate-900">
+        <p className="text-slate-700 dark:text-slate-300 text-base leading-7">
+          The site focuses on one practical question: <span className="font-semibold text-slate-900 dark:text-slate-100">
             how far does your money really go if you move?
           </span>
         </p>
       </header>
 
       <section className="mt-10 grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Relocation planning</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Relocation planning</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
             Compare how taxes, housing costs, and affordability may change when moving
             between states or cities.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Salary context</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Salary context</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
             Look past gross income and estimate what salary may feel equivalent after a
             move once taxes and housing costs are considered together.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">FIRE and long-term planning</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">FIRE and long-term planning</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
             Explore how relocation may affect financial independence timelines, spending
             pressure, and long-term planning assumptions.
           </p>
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-  <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+  <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
     Why this site exists
   </h2>
 
-  <div className="mt-4 space-y-4 text-slate-700 text-base leading-7">
+  <div className="mt-4 space-y-4 text-slate-700 dark:text-slate-300 text-base leading-7">
     <p>
       When researching relocation and financial independence, the information
       needed to make a real decision was often split across multiple tools.
@@ -74,41 +74,41 @@ export default function AboutPage() {
   </div>
 </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           What makes Relocation By Numbers different
         </h2>
 
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <h3 className="font-semibold text-slate-900">More than headline salary</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">More than headline salary</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
               A higher salary does not always mean a better financial move. The site is
               built around take-home pay, housing pressure, and monthly flexibility,
               not just gross income.
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <h3 className="font-semibold text-slate-900">Relocation-first framing</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">Relocation-first framing</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
               Many calculators treat location as a side note. This site treats location
               as the main variable because taxes, housing, and recurring costs can change
               the outcome of a move fast.
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <h3 className="font-semibold text-slate-900">Planning tools in one place</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">Planning tools in one place</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
               Instead of jumping between separate tools, users can compare relocation,
               salary, cost of living, and FIRE-related tradeoffs in one connected system.
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <h3 className="font-semibold text-slate-900">Transparent assumptions</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">Transparent assumptions</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
               The site is built for planning estimates, with methodology and assumptions
               intended to be clear enough for users to understand what the tools are
               modeling and where the limits are.
@@ -117,14 +117,14 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Who this site is for
         </h2>
 
-        <div className="mt-4 space-y-3 text-slate-700 text-base leading-7">
+        <div className="mt-4 space-y-3 text-slate-700 dark:text-slate-300 text-base leading-7">
           <p>Relocation By Numbers is built for people who are trying to make a move decision with clearer financial context, including:</p>
-          <ul className="list-disc pl-6 space-y-2 text-sm leading-6 text-slate-600">
+          <ul className="list-disc pl-6 space-y-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
             <li>people comparing two cities or states before relocating</li>
             <li>remote workers deciding whether a move improves affordability</li>
             <li>households evaluating whether lower taxes actually improve the budget</li>
@@ -134,12 +134,12 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Important note
         </h2>
 
-        <div className="mt-4 space-y-4 text-slate-700 text-base leading-7">
+        <div className="mt-4 space-y-4 text-slate-700 dark:text-slate-300 text-base leading-7">
           <p>
             Relocation By Numbers provides planning estimates, not financial, tax, legal,
             or investment advice. Actual costs can vary based on neighborhood, household
@@ -151,7 +151,7 @@ export default function AboutPage() {
             making a decision. For more detail on assumptions and modeling, see the{" "}
             <Link
               href="/methodology"
-              className="font-medium text-slate-900 underline underline-offset-4 hover:no-underline"
+              className="font-medium text-slate-900 dark:text-slate-100 underline underline-offset-4 hover:no-underline"
             >
               methodology page
             </Link>.

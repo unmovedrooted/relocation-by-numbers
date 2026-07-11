@@ -3,6 +3,8 @@ import Link from "next/link";
 import Script from "next/script";
 import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
+import ThemeToggle from "@/components/ThemeToggle";
 // @ts-ignore: allow importing global CSS in Next.js app
 import "./globals.css";
 
@@ -45,64 +47,69 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-white text-slate-900 antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-white text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100`}
       >
-        {GA_MEASUREMENT_ID ? (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                window.gtag = gtag;
-                gtag('js', new Date());
-                gtag('config', '${GA_MEASUREMENT_ID}');
-              `}
-            </Script>
-          </>
-        ) : null}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {GA_MEASUREMENT_ID ? (
+            <>
+              <Script
+                src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+                strategy="afterInteractive"
+              />
+              <Script id="google-analytics" strategy="afterInteractive">
+                {`
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  window.gtag = gtag;
+                  gtag('js', new Date());
+                  gtag('config', '${GA_MEASUREMENT_ID}');
+                `}
+              </Script>
+            </>
+          ) : null}
 
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5257549146198249"
-          crossOrigin="anonymous"
-          strategy="beforeInteractive"
-        />
+          <Script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5257549146198249"
+            crossOrigin="anonymous"
+            strategy="beforeInteractive"
+          />
 
-        <div className="flex min-h-screen flex-col">
-          <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
-            <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-              <Link href="/" className="flex items-center">
-  <Image
-    src="/logo.svg"
-    alt="Relocation by Numbers"
-    width={160}
-    height={48}
-    priority
-  />
-</Link>
+          <div className="flex min-h-screen flex-col">
+            <header className="border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
+              <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+                <Link href="/" className="flex items-center">
+                  <Image
+                    src="/logo.svg"
+                    alt="Relocation by Numbers"
+                    width={160}
+                    height={48}
+                    priority
+                  />
+                </Link>
 
-              <nav className="flex items-center gap-4 text-sm text-slate-600">
-                {NAV_LINKS.map(({ href, label }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    className="transition hover:text-slate-900"
-                  >
-                    {label}
-                  </Link>
-                ))}
-              </nav>
-            </div>
-          </header>
+                <div className="flex items-center gap-4">
+                  <nav className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-300">
+                    {NAV_LINKS.map(({ href, label }) => (
+                      <Link
+                        key={href}
+                        href={href}
+                        className="transition hover:text-slate-900 dark:hover:text-white"
+                      >
+                        {label}
+                      </Link>
+                    ))}
+                  </nav>
+                  <ThemeToggle />
+                </div>
+              </div>
+            </header>
 
-          <main className="flex-1">{children}</main>
-        </div>
+            <main className="flex-1">{children}</main>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -4,23 +4,23 @@ export default function PrivacyPage() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-12">
       <header className="max-w-3xl">
-        <h1 className="mb-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="mb-4 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
           Privacy Policy
         </h1>
 
-        <p className="text-base leading-7 text-slate-700">
+        <p className="text-base leading-7 text-slate-700 dark:text-slate-300">
           Relocation By Numbers respects your privacy. This page explains what
           information may be collected when you use the site, what is not stored,
           and how calculator inputs are generally handled.
         </p>
       </header>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Calculator inputs
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             The calculator tools on Relocation By Numbers are designed primarily
             to run in your browser. In general, calculator inputs are used to
@@ -42,12 +42,12 @@ export default function PrivacyPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Analytics and usage data
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             Like most websites, Relocation By Numbers may use analytics tools to
             understand general site traffic and improve the user experience. This
@@ -63,12 +63,12 @@ export default function PrivacyPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Cookies and similar technologies
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             The site may use cookies or similar technologies for analytics,
             site functionality, performance measurement, and advertising support.
@@ -82,12 +82,12 @@ export default function PrivacyPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Advertising and third-party services
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             Relocation By Numbers may display advertisements and may use third-party
             services for analytics, advertising, or site functionality. These third
@@ -103,12 +103,12 @@ export default function PrivacyPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Shared links and URLs
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             Some tools on the site may support shareable links or URL-based scenarios.
             When that happens, values used to recreate a scenario may appear in the URL.
@@ -122,12 +122,12 @@ export default function PrivacyPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Data security and limitations
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             Reasonable efforts are made to keep the site secure, but no website or
             online service can guarantee absolute security.
@@ -140,34 +140,34 @@ export default function PrivacyPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Changes to this policy
         </h2>
 
-        <p className="mt-4 text-base leading-7 text-slate-700">
+        <p className="mt-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           This privacy policy may be updated from time to time as the site, tools,
           analytics, or advertising setup evolves.
         </p>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-6">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-6">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Related pages
         </h2>
 
-        <p className="mt-4 text-base leading-7 text-slate-700">
+        <p className="mt-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           You may also want to review the{" "}
           <Link
             href="/disclaimer"
-            className="font-medium text-slate-900 underline underline-offset-4 hover:no-underline"
+            className="font-medium text-slate-900 dark:text-slate-100 underline underline-offset-4 hover:no-underline"
           >
             disclaimer
           </Link>{" "}
           and{" "}
           <Link
             href="/methodology"
-            className="font-medium text-slate-900 underline underline-offset-4 hover:no-underline"
+            className="font-medium text-slate-900 dark:text-slate-100 underline underline-offset-4 hover:no-underline"
           >
             methodology
           </Link>{" "}

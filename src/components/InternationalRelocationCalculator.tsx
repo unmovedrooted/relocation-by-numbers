@@ -106,21 +106,21 @@ function getSalaryTypeMultiplier(salaryType: SalaryType) {
 
 function confidenceBadge(confidence: TaxConfidence) {
   switch (confidence) {
-    case "verified":    return { label: "● Verified",            cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" };
-    case "partial":     return { label: "● Planning estimate",   cls: "bg-blue-50 text-blue-700 ring-blue-200" };
-    case "simplified":  return { label: "● Simplified estimate", cls: "bg-amber-50 text-amber-700 ring-amber-200" };
-    case "placeholder": return { label: "⚠ Directional only",   cls: "bg-rose-50 text-rose-700 ring-rose-200" };
-    default:            return { label: "⚠ Unknown",             cls: "bg-slate-50 text-slate-500 ring-slate-200" };
+    case "verified":    return { label: "● Verified",            cls: "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:ring-emerald-800" };
+    case "partial":     return { label: "● Planning estimate",   cls: "bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/30 dark:text-blue-300 dark:ring-blue-800" };
+    case "simplified":  return { label: "● Simplified estimate", cls: "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:ring-amber-800" };
+    case "placeholder": return { label: "⚠ Directional only",   cls: "bg-rose-50 text-rose-700 ring-rose-200 dark:bg-rose-950/30 dark:text-rose-300 dark:ring-rose-800" };
+    default:            return { label: "⚠ Unknown",             cls: "bg-slate-50 text-slate-500 ring-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:ring-slate-700" };
   }
 }
 
 const INT_TAX_LABEL = "Tax model updated March 2026 · figures are 2024, 2024–25, or 2025 by jurisdiction";
 
 const inputCls =
-  "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15";
+  "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800";
 const selectCls =
-  "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15";
-const labelHeadCls = "mb-1 text-xs font-medium leading-4 text-slate-600";
+  "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800";
+const labelHeadCls = "mb-1 text-xs font-medium leading-4 text-slate-600 dark:text-slate-400";
 
 function InfoTip({ text, align = "left" }: { text: string; align?: "left" | "right" | "center" }) {
   const positionClass =
@@ -130,7 +130,7 @@ function InfoTip({ text, align = "left" }: { text: string; align?: "left" | "rig
       <button
         type="button"
         aria-label="More info"
-        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 bg-white text-[10px] font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 bg-white text-[10px] font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
       >
         i
       </button>
@@ -147,13 +147,13 @@ function InfoTip({ text, align = "left" }: { text: string; align?: "left" | "rig
 function CostConfidenceBadge({ hasCityDefaults }: { hasCityDefaults: boolean }) {
   if (hasCityDefaults) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-blue-200 dark:bg-blue-950/30 dark:text-blue-300 dark:ring-blue-800">
         ● City-level estimate
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:ring-amber-800">
       ● Country-level estimate
     </span>
   );
@@ -612,22 +612,22 @@ const readinessRecommendation =
   const originCurrLabel = `(${originCurrency})`;
 
   return (
-    <div className="text-slate-900">
+    <div className="text-slate-900 dark:text-slate-100">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="text-sm font-semibold" />
         <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200/70">
+          <div className="inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-700">
             <button type="button" onClick={() => setMode("working")}
-              className={`rounded-lg px-3 py-1 text-sm ${mode === "working" ? "bg-slate-900 text-white" : "text-slate-700"}`}>
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "working" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300"}`}>
               Working
             </button>
             <button type="button" onClick={() => setMode("retired")}
-              className={`rounded-lg px-3 py-1 text-sm ${mode === "retired" ? "bg-slate-900 text-white" : "text-slate-700"}`}>
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "retired" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300"}`}>
               Retired
             </button>
           </div>
           <button type="button" onClick={resetInputsKeepContext}
-            className="rounded-lg px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+            className="rounded-lg px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
             title="Clear all fields (keeps countries + scenario)">
             Reset
           </button>
@@ -637,14 +637,14 @@ const readinessRecommendation =
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         {/* ── LEFT COLUMN ── */}
         <div className="space-y-3">
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-3 text-sm font-semibold">Income &amp; Location</div>
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Income &amp; Location</div>
             <div className="grid gap-3 sm:grid-cols-2">
               {/* Fix #1: salary label shows origin currency */}
               <label className="text-sm">
                 <div className={labelHeadCls}>
                   {mode === "retired" ? "Gross annual retirement income" : "Gross annual salary"}{" "}
-                  <span className="text-slate-400">{originCurrLabel}</span>
+                  <span className="text-slate-400 dark:text-slate-500">{originCurrLabel}</span>
                 </div>
                 <input className={inputCls} type="number" min="0"
                   value={mode === "retired" ? retirementIncome : salary}
@@ -698,17 +698,17 @@ const readinessRecommendation =
                 <div className={labelHeadCls}>Income impact
                   <InfoTip align="right" text="Shows how your estimated monthly take-home pay changes between your current location and destination after taxes." />
                 </div>
-                <div className="flex h-11 w-full items-center justify-between rounded-xl border border-slate-300 px-3">
+                <div className="flex h-11 w-full items-center justify-between rounded-xl border border-slate-300 px-3 dark:border-slate-700">
                   {results.salaryReady ? (
                     <>
-                      <span className={`font-semibold ${results.monthlyIncomeDiff > 0 ? "text-emerald-600" : results.monthlyIncomeDiff < 0 ? "text-rose-600" : "text-slate-900"}`}>
+                      <span className={`font-semibold ${results.monthlyIncomeDiff > 0 ? "text-emerald-600 dark:text-emerald-400" : results.monthlyIncomeDiff < 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-slate-100"}`}>
                         {results.monthlyIncomeDiff > 0 ? "+" : ""}{displayAmount(results.monthlyIncomeDiff, 0)}
                       </span>
-                      <span className="whitespace-nowrap text-xs text-slate-500">
+                      <span className="whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">
                         {results.monthlyIncomeDiff > 0 ? "Higher" : results.monthlyIncomeDiff < 0 ? "Lower" : "Same"}
                       </span>
                     </>
-                  ) : <span className="text-slate-400">—</span>}
+                  ) : <span className="text-slate-400 dark:text-slate-500">—</span>}
                 </div>
               </div>
               {mode === "working" && (
@@ -722,7 +722,7 @@ const readinessRecommendation =
                 </label>
               )}
               <label className="text-sm">
-                <div className={labelHeadCls}>Current savings available <span className="text-slate-400">{originCurrLabel}</span></div>
+                <div className={labelHeadCls}>Current savings available <span className="text-slate-400 dark:text-slate-500">{originCurrLabel}</span></div>
                 <input className={inputCls} type="number" min="0" value={currentSavings}
                   onChange={(e) => setCurrentSavings(e.target.value)} placeholder=" " />
               </label>
@@ -742,8 +742,8 @@ const readinessRecommendation =
 
           {/* Dynamic conditional tax questions */}
           {getConditionalQuestionsForCountry(toCountry, incomeScenario).map((q: ConditionalQuestion) => (
-            <div key={q.key} className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-              <div className="mb-3 text-sm font-semibold">{getCountryByCode(toCountry)?.name ?? toCountry} — Tax Question</div>
+            <div key={q.key} className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+              <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{getCountryByCode(toCountry)?.name ?? toCountry} — Tax Question</div>
               <label className="text-sm">
                 <div className={labelHeadCls}>
                   {q.label}
@@ -764,29 +764,29 @@ const readinessRecommendation =
           ))}
 
           {/* Housing */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-3 text-sm font-semibold">Housing</div>
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Housing</div>
             <div className="grid gap-3 sm:grid-cols-2">
               {/* Fix #1: All housing inputs now show destination currency */}
               <label className="text-sm sm:col-span-2">
                 <div className={labelHeadCls}>
-                  Rent in destination (monthly) <span className="text-slate-400">{destCurrLabel}</span>
+                  Rent in destination (monthly) <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span>
                 </div>
                 <input className={inputCls} type="number" min="0" value={destinationRent}
                   onChange={(e) => setDestinationRent(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
-                <div className={labelHeadCls}>Deposit required <span className="text-slate-400">{destCurrLabel}</span></div>
+                <div className={labelHeadCls}>Deposit required <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span></div>
                 <input className={inputCls} type="number" min="0" value={depositRequired}
                   onChange={(e) => setDepositRequired(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
-                <div className={labelHeadCls}>First month rent <span className="text-slate-400">{destCurrLabel}</span></div>
+                <div className={labelHeadCls}>First month rent <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span></div>
                 <input className={inputCls} type="number" min="0" value={firstMonthRent}
                   onChange={(e) => setFirstMonthRent(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
-                <div className={labelHeadCls}>Last month rent <span className="text-slate-400">{destCurrLabel}</span></div>
+                <div className={labelHeadCls}>Last month rent <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span></div>
                 <input className={inputCls} type="number" min="0" value={lastMonthRent}
                   onChange={(e) => setLastMonthRent(e.target.value)} placeholder=" " />
               </label>
@@ -808,37 +808,37 @@ const readinessRecommendation =
           </div>
 
           {/* Fix #2: Estimated Living Costs — now fully editable inputs */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
             <div className="mb-1 flex items-center justify-between">
-              <div className="text-sm font-semibold">
+              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                 Estimated Living Costs
                 <InfoTip text="Enter your estimated monthly costs in your destination currency. Family-size adjustments are applied automatically." />
               </div>
               {/* Fix #7: Cost data confidence badge */}
               <CostConfidenceBadge hasCityDefaults={!!selectedCityDefaults} />
             </div>
-            <div className="mb-3 text-xs text-slate-500">
+            <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
               All amounts are entered in destination currency <span className="font-medium">{destCurrLabel}</span>. Family-size adjustments are applied automatically.
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {/* Fix #1 + #2: Editable inputs with destination currency label */}
               <label className="text-sm">
-                <div className={labelHeadCls}>Groceries (monthly) <span className="text-slate-400">{destCurrLabel}</span></div>
+                <div className={labelHeadCls}>Groceries (monthly) <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span></div>
                 <input className={inputCls} type="number" min="0" value={groceries}
                   onChange={(e) => setGroceries(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
-                <div className={labelHeadCls}>Utilities (monthly) <span className="text-slate-400">{destCurrLabel}</span></div>
+                <div className={labelHeadCls}>Utilities (monthly) <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span></div>
                 <input className={inputCls} type="number" min="0" value={utilities}
                   onChange={(e) => setUtilities(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
-                <div className={labelHeadCls}>Transportation (monthly) <span className="text-slate-400">{destCurrLabel}</span></div>
+                <div className={labelHeadCls}>Transportation (monthly) <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span></div>
                 <input className={inputCls} type="number" min="0" value={transportation}
                   onChange={(e) => setTransportation(e.target.value)} placeholder=" " />
               </label>
               <label className="text-sm">
-                <div className={labelHeadCls}>Healthcare (monthly) <span className="text-slate-400">{destCurrLabel}</span></div>
+                <div className={labelHeadCls}>Healthcare (monthly) <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span></div>
                 <input className={inputCls} type="number" min="0" value={healthcare}
                   onChange={(e) => setHealthcare(e.target.value)} placeholder=" " />
               </label>
@@ -853,7 +853,7 @@ const readinessRecommendation =
               {needCar === "yes" && (
                 <label className="text-sm sm:col-span-2">
                   <div className={labelHeadCls}>
-                    Est. monthly car cost <span className="text-slate-400">{destCurrLabel}</span>
+                    Est. monthly car cost <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span>
                     <InfoTip text="Include loan/lease, insurance, fuel, and parking. Vary this by country — $350 may be too high or too low depending on the market." />
                   </div>
                   <input className={inputCls} type="number" min="0" value={carCostMonthly}
@@ -861,7 +861,7 @@ const readinessRecommendation =
                 </label>
               )}
             </div>
-            <div className="mt-3 text-xs text-slate-500">
+            <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
               {!!selectedCityDefaults
                 ? "Pre-filled from city-level data. Adjust freely — these are starting points."
                 : "Pre-filled from country-level data. City-level data not available for this city — your own research may be more accurate."}
@@ -869,8 +869,8 @@ const readinessRecommendation =
           </div>
 
           {/* One-Time Moving Costs */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-3 text-sm font-semibold">One-Time Moving Costs</div>
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">One-Time Moving Costs</div>
             <div className="grid gap-3 sm:grid-cols-2">
               {/* Fix #1: All moving cost inputs now show destination currency */}
               {([
@@ -883,7 +883,7 @@ const readinessRecommendation =
               ] as [string, string, (v: string) => void, boolean][]).map(([label, value, setter, isDestCurr]) => (
                 <label key={label} className="text-sm">
                   <div className={labelHeadCls}>
-                    {label} <span className="text-slate-400">{isDestCurr ? destCurrLabel : "(USD)"}</span>
+                    {label} <span className="text-slate-400 dark:text-slate-500">{isDestCurr ? destCurrLabel : "(USD)"}</span>
                   </div>
                   <input className={inputCls} type="number" min="0" value={value}
                     onChange={(e) => setter(e.target.value)} placeholder=" " />
@@ -891,28 +891,28 @@ const readinessRecommendation =
               ))}
               <label className="text-sm sm:col-span-2">
                 <div className={labelHeadCls}>
-                  Recommended cash buffer <span className="text-slate-400">{destCurrLabel}</span>
+                  Recommended cash buffer <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span>
                 </div>
                 <input className={inputCls} type="number" min="0" value={emergencyCashBuffer}
                   onChange={(e) => setEmergencyCashBuffer(e.target.value)} placeholder=" " />
               </label>
             </div>
-            <div className="mt-4 w-full text-xs text-slate-500">Planning estimates only.</div>
+            <div className="mt-4 w-full text-xs text-slate-500 dark:text-slate-400">Planning estimates only.</div>
           </div>
         </div>
 
         {/* ── RIGHT COLUMN ── */}
         {isUSDomesticRoute ? (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
-            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Domestic U.S. move detected</div>
-            <div className="mt-2 text-lg font-semibold text-slate-900">Use your U.S. relocation calculator for state-to-state comparisons.</div>
-            <p className="mt-2 text-sm leading-6 text-slate-700">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-amber-900/60 dark:bg-amber-950/20">
+            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700 dark:text-amber-400">Domestic U.S. move detected</div>
+            <div className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">Use your U.S. relocation calculator for state-to-state comparisons.</div>
+            <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">
               This calculator is designed for international moves. For{" "}
               <span className="font-medium">United States → United States</span>,
               your domestic calculator will give a more trustworthy result.
             </p>
             <a href="https://www.relocationbynumbers.com/" target="_blank" rel="noreferrer"
-              className="mt-4 inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800">
+              className="mt-4 inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
               Go to Relocation by Numbers
             </a>
           </div>
@@ -920,49 +920,49 @@ const readinessRecommendation =
 
         <div className="space-y-3">
           {/* Main results card */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-            <div className="mb-2 text-sm font-semibold">Results</div>
-            <div className="mb-3 text-xs text-slate-500">{INT_TAX_LABEL} · Planning estimates only</div>
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Results</div>
+            <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">{INT_TAX_LABEL} · Planning estimates only</div>
 
-            <div className="mb-2 space-y-1 text-sm text-slate-600">
-              <div>Current: <span className="font-semibold">{fromCityLabel}</span>
+            <div className="mb-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
+              <div>Current: <span className="font-semibold text-slate-900 dark:text-slate-100">{fromCityLabel}</span>
                 {getCountryByCode(fromCountry)?.name && fromCityLabel !== getCountryByCode(fromCountry)!.name && (
-                  <span className="text-slate-400">, {getCountryByCode(fromCountry)!.name}</span>
+                  <span className="text-slate-400 dark:text-slate-500">, {getCountryByCode(fromCountry)!.name}</span>
                 )}
               </div>
-              <div>Target: <span className="font-semibold">{toCityLabel}</span>
+              <div>Target: <span className="font-semibold text-slate-900 dark:text-slate-100">{toCityLabel}</span>
                 {getCountryByCode(toCountry)?.name && toCityLabel !== getCountryByCode(toCountry)!.name && (
-                  <span className="text-slate-400">, {getCountryByCode(toCountry)!.name}</span>
+                  <span className="text-slate-400 dark:text-slate-500">, {getCountryByCode(toCountry)!.name}</span>
                 )}
               </div>
             </div>
 
-            <div className="grid gap-2 text-sm">
-              <div>Net monthly (current): <span className="font-semibold">{displayAmount(results.netMonthlyFrom)}</span></div>
-              <div>Net monthly (target): <span className="font-semibold">{displayAmount(results.netMonthlyTo)}</span></div>
+            <div className="grid gap-2 text-sm text-slate-700 dark:text-slate-300">
+              <div>Net monthly (current): <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.netMonthlyFrom)}</span></div>
+              <div>Net monthly (target): <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.netMonthlyTo)}</span></div>
 
               {results.salaryReady && (
                 <>
-                  <div className="mt-2">Gross monthly: <span className="font-semibold">{displayAmount(results.grossMonthly, 2)}</span></div>
-                  <div>Est. taxes (current): <span className="font-semibold">{displayAmount(results.grossMonthly * results.currentTaxRate, 2)}</span>{" "}
-                    <span className="text-xs text-slate-500">({(results.currentTaxRate * 100).toFixed(1)}%)</span>
+                  <div className="mt-2">Gross monthly: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.grossMonthly, 2)}</span></div>
+                  <div>Est. taxes (current): <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.grossMonthly * results.currentTaxRate, 2)}</span>{" "}
+                    <span className="text-xs text-slate-500 dark:text-slate-400">({(results.currentTaxRate * 100).toFixed(1)}%)</span>
                   </div>
-                  <div>Est. taxes (target): <span className="font-semibold">{displayAmount(results.grossMonthly * results.targetTaxRate, 2)}</span>{" "}
-                    <span className="text-xs text-slate-500">({(results.targetTaxRate * 100).toFixed(1)}%)</span>
+                  <div>Est. taxes (target): <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.grossMonthly * results.targetTaxRate, 2)}</span>{" "}
+                    <span className="text-xs text-slate-500 dark:text-slate-400">({(results.targetTaxRate * 100).toFixed(1)}%)</span>
                   </div>
 
                   {/* Confidence banner */}
                   <div className={`mt-3 rounded-xl ring-1 overflow-hidden ${
-                    results.targetConfidence === "verified"     ? "bg-emerald-50 ring-emerald-200"
-                    : results.targetConfidence === "partial"   ? "bg-blue-50 ring-blue-200"
-                    : results.targetConfidence === "placeholder" ? "bg-rose-50 ring-rose-200"
-                    : "bg-amber-50 ring-amber-200"
+                    results.targetConfidence === "verified"     ? "bg-emerald-50 ring-emerald-200 dark:bg-emerald-950/20 dark:ring-emerald-800"
+                    : results.targetConfidence === "partial"   ? "bg-blue-50 ring-blue-200 dark:bg-blue-950/20 dark:ring-blue-800"
+                    : results.targetConfidence === "placeholder" ? "bg-rose-50 ring-rose-200 dark:bg-rose-950/20 dark:ring-rose-800"
+                    : "bg-amber-50 ring-amber-200 dark:bg-amber-950/20 dark:ring-amber-800"
                   }`}>
                     <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-3 pb-2">
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${badge.cls}`}>
                         {badge.label}
                       </span>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
                         {results.targetConfidence === "verified"    && "Exact or near-exact for most incomes"}
                         {results.targetConfidence === "partial"     && "Sound structure · named gap ≤ ~4 pp"}
                         {results.targetConfidence === "simplified"  && "Reasonable ballpark · gap may be 5–10 pp"}
@@ -970,7 +970,7 @@ const readinessRecommendation =
                       </span>
                     </div>
                     {results.targetMissingFactor && (
-                      <div className="px-4 pb-2 text-xs text-slate-600">
+                      <div className="px-4 pb-2 text-xs text-slate-600 dark:text-slate-400">
                         <span className="font-medium">Key gap: </span>{results.targetMissingFactor}
                       </div>
                     )}
@@ -979,15 +979,15 @@ const readinessRecommendation =
                         <button
                           type="button"
                           onClick={() => setTaxNotesExpanded(v => !v)}
-                          className="flex w-full items-center justify-between border-t border-black/5 px-4 py-2 text-xs font-medium text-slate-600 hover:bg-black/[0.03] transition-colors"
+                          className="flex w-full items-center justify-between border-t border-black/5 px-4 py-2 text-xs font-medium text-slate-600 hover:bg-black/[0.03] transition-colors dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5"
                         >
                           <span>{taxNotesExpanded ? "Hide detail" : "Show full detail"}</span>
                           <span className="opacity-50">{taxNotesExpanded ? "▲" : "▼"}</span>
                         </button>
                         {taxNotesExpanded && (
-                          <div className="space-y-1.5 border-t border-black/5 px-4 py-3">
+                          <div className="space-y-1.5 border-t border-black/5 px-4 py-3 dark:border-white/10">
                             {results.targetTaxNotes.map((note, i) => (
-                              <div key={i} className="flex gap-2 text-xs leading-5 text-slate-700">
+                              <div key={i} className="flex gap-2 text-xs leading-5 text-slate-700 dark:text-slate-300">
                                 <span className="mt-px shrink-0 opacity-40">•</span>
                                 <span>{note}</span>
                               </div>
@@ -1000,84 +1000,84 @@ const readinessRecommendation =
                 </>
               )}
 
-              <div className="mt-2 font-semibold">Monthly housing</div>
+              <div className="mt-2 font-semibold text-slate-900 dark:text-slate-100">Monthly housing</div>
               <div className="grid gap-1 text-sm">
-                <div>Rent: <span className="font-semibold">{displayAmount(results.rentTo, 2)}</span></div>
-                {results.housingUtilities > 0 && <div>Utilities: <span className="font-semibold">{displayAmount(results.housingUtilities, 2)}</span></div>}
-                {results.carCostTo > 0 && <div>Car: <span className="font-semibold">{displayAmount(results.carCostTo, 2)}</span></div>}
-                <div className="pt-1">Total housing: <span className="font-bold">{displayAmount(results.housingTotal, 2)}</span></div>
+                <div>Rent: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.rentTo, 2)}</span></div>
+                {results.housingUtilities > 0 && <div>Utilities: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.housingUtilities, 2)}</span></div>}
+                {results.carCostTo > 0 && <div>Car: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.carCostTo, 2)}</span></div>}
+                <div className="pt-1">Total housing: <span className="font-bold text-slate-900 dark:text-slate-100">{displayAmount(results.housingTotal, 2)}</span></div>
               </div>
-              <div className="mt-2 font-semibold">Monthly living costs</div>
+              <div className="mt-2 font-semibold text-slate-900 dark:text-slate-100">Monthly living costs</div>
               <div className="grid gap-1 text-sm">
-                <div>Groceries: <span className="font-semibold">{displayAmount(results.groceriesAdj, 2)}</span></div>
-                <div>Transportation: <span className="font-semibold">{displayAmount(results.transportationAdj, 2)}</span></div>
-                <div>Healthcare: <span className="font-semibold">{displayAmount(results.healthcareAdj, 2)}</span></div>
-                <div className="pt-1">Total: <span className="font-bold">{displayAmount(results.livingCosts, 2)}</span></div>
+                <div>Groceries: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.groceriesAdj, 2)}</span></div>
+                <div>Transportation: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.transportationAdj, 2)}</span></div>
+                <div>Healthcare: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.healthcareAdj, 2)}</span></div>
+                <div className="pt-1">Total: <span className="font-bold text-slate-900 dark:text-slate-100">{displayAmount(results.livingCosts, 2)}</span></div>
               </div>
-              <div className="mt-2">Upfront cash needed: <span className="font-semibold">{displayAmount(results.upfrontCashNeeded)}</span></div>
-              <div>Months covered by savings: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
-              <div className="mt-2">Housing % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
+              <div className="mt-2">Upfront cash needed: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.upfrontCashNeeded)}</span></div>
+              <div>Months covered by savings: <span className="font-semibold text-slate-900 dark:text-slate-100">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
+              <div className="mt-2">Housing % of net (target): <span className="font-semibold text-slate-900 dark:text-slate-100">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
             </div>
 
-            <div className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500 space-y-1">
+            <div className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400 space-y-1">
               <div>Results are estimates only. No information entered is stored or shared.</div>
               <div>Tax estimates, rent, immigration costs, and retirement treatment vary by destination and personal circumstances.</div>
             </div>
-            <div className="text-xs text-slate-500">Tip: Your URL updates as you type — copy the page link to share this scenario.</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Tip: Your URL updates as you type — copy the page link to share this scenario.</div>
           </div>
 
           {/* Move Readiness — top-level decision verdict */}
           {results.salaryReady && (
             <div className={`rounded-2xl p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ${
               results.readinessRecommendation.tone === "good"
-                ? "bg-emerald-50/80 ring-emerald-200"
+                ? "bg-emerald-50/80 ring-emerald-200 dark:bg-emerald-950/20 dark:ring-emerald-800"
                 : results.readinessRecommendation.tone === "caution"
-                  ? "bg-amber-50/80 ring-amber-200"
-                  : "bg-rose-50/80 ring-rose-200"
+                  ? "bg-amber-50/80 ring-amber-200 dark:bg-amber-950/20 dark:ring-amber-800"
+                  : "bg-rose-50/80 ring-rose-200 dark:bg-rose-950/20 dark:ring-rose-800"
             }`}>
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className={`text-xs font-semibold uppercase tracking-[0.14em] ${
                     results.readinessRecommendation.tone === "good"
-                      ? "text-emerald-700"
+                      ? "text-emerald-700 dark:text-emerald-400"
                       : results.readinessRecommendation.tone === "caution"
-                        ? "text-amber-700"
-                        : "text-rose-700"
+                        ? "text-amber-700 dark:text-amber-400"
+                        : "text-rose-700 dark:text-rose-400"
                   }`}>
                     Move Readiness
                   </div>
-                  <div className="mt-2 text-2xl font-bold text-slate-900">
+                  <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
                     {results.readinessRecommendation.label}
                   </div>
                 </div>
-                <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-black/10">
+                <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-black/10 dark:bg-slate-800 dark:text-slate-300 dark:ring-white/10">
                   Decision check
                 </div>
               </div>
-              <p className="mt-3 text-sm leading-6 text-slate-700">
+              <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
                 {results.readinessRecommendation.note}
               </p>
               <div className="mt-4 grid gap-2 text-xs sm:grid-cols-2">
-                <div className="rounded-xl bg-white/75 p-3 ring-1 ring-black/5">
-                  <div className="font-semibold text-slate-700">Income target gap</div>
+                <div className="rounded-xl bg-white/75 p-3 ring-1 ring-black/5 dark:bg-slate-800/60 dark:ring-white/10">
+                  <div className="font-semibold text-slate-700 dark:text-slate-300">Income target gap</div>
                   <div className={`mt-1 font-semibold ${
-                    results.incomeGap > 0 ? "text-rose-700" : "text-emerald-700"
+                    results.incomeGap > 0 ? "text-rose-700 dark:text-rose-400" : "text-emerald-700 dark:text-emerald-400"
                   }`}>
                     {results.incomeGap > 0
                       ? `${displayAmount(results.incomeGap, 0)} below target`
                       : `${displayAmount(Math.abs(results.incomeGap), 0)} above target`}
                   </div>
                 </div>
-                <div className="rounded-xl bg-white/75 p-3 ring-1 ring-black/5">
-                  <div className="font-semibold text-slate-700">Monthly room</div>
+                <div className="rounded-xl bg-white/75 p-3 ring-1 ring-black/5 dark:bg-slate-800/60 dark:ring-white/10">
+                  <div className="font-semibold text-slate-700 dark:text-slate-300">Monthly room</div>
                   <div className={`mt-1 font-semibold ${
-                    results.monthlyFlexibility >= 500 ? "text-emerald-700" : "text-rose-700"
+                    results.monthlyFlexibility >= 500 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"
                   }`}>
                     {displayAmount(results.monthlyFlexibility, 0)}
                   </div>
                 </div>
               </div>
-              <div className="text-xs text-slate-600 mt-2">
+              <div className="text-xs text-slate-600 dark:text-slate-400 mt-2">
   Your monthly margin {results.marginChangePct >= 0 ? "improves" : "drops"} by{" "}
   <span className="font-semibold">
     {Math.abs(results.marginChangePct).toFixed(1)}%
@@ -1088,19 +1088,19 @@ const readinessRecommendation =
           )}
 
           {/* Monthly Flexibility */}
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-amber-900/60 dark:bg-amber-950/20">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Monthly Flexibility</div>
-                <div className="mt-2 text-3xl font-bold text-slate-900">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700 dark:text-amber-400">Monthly Flexibility</div>
+                <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
                   {results.salaryReady ? displayAmount(results.monthlyFlexibility, 2) : "—"}
                 </div>
               </div>
-              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200 dark:bg-slate-800 dark:text-amber-300 dark:ring-amber-800">
                 After housing and essentials
               </div>
             </div>
-            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-amber-100">
+            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-amber-100 dark:bg-slate-800/80 dark:ring-amber-900/40">
               <div className={`h-full rounded-full ${
                 !results.salaryReady ? "w-[0%] bg-slate-300"
                 : results.monthlyFlexibility >= 3000 ? "w-[92%] bg-emerald-500"
@@ -1110,53 +1110,53 @@ const readinessRecommendation =
                 : "w-[24%] bg-rose-400"
               }`} />
             </div>
-            <div className="mt-3 text-sm text-slate-700">
+            <div className="mt-3 text-sm text-slate-700 dark:text-slate-300">
               {!results.salaryReady
                 ? "Add salary and housing inputs to estimate how much room you have left each month."
                 : `This is what you may have left each month in ${toCityLabel} after housing costs and core living expenses.`}
             </div>
-            <div className="mt-2 text-xs text-slate-500">Higher flexibility gives you more room for saving, investing, travel, and unexpected expenses.</div>
+            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Higher flexibility gives you more room for saving, investing, travel, and unexpected expenses.</div>
           </div>
 
           {/* Comfortable Income Target — the "decision layer" card */}
           {results.salaryReady && (
-            <div className="rounded-2xl border border-blue-200 bg-blue-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+            <div className="rounded-2xl border border-blue-200 bg-blue-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-blue-900/60 dark:bg-blue-950/20">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-700">
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-700 dark:text-blue-400">
                     Comfortable Income Target
                   </div>
-                  <div className="mt-2 text-3xl font-bold text-slate-900">
+                  <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
                     {displayAmount(results.requiredAnnualIncome, 0)}
                   </div>
                 </div>
-                <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">
+                <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-200 dark:bg-slate-800 dark:text-blue-300 dark:ring-blue-800">
                   Annual gross
                 </div>
               </div>
-              <p className="mt-3 text-sm leading-6 text-slate-700">
+              <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
                 Based on your inputs, this is the estimated gross annual income needed to keep housing
                 and essential living costs around 70% of take-home pay in {toCityLabel}.
               </p>
-              <div className="mt-3 grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
-                <div className="rounded-xl bg-white/70 p-3 ring-1 ring-blue-100">
-                  <div className="font-semibold text-slate-700">Required net monthly</div>
+              <div className="mt-3 grid gap-2 text-xs text-slate-600 dark:text-slate-400 sm:grid-cols-2">
+                <div className="rounded-xl bg-white/70 p-3 ring-1 ring-blue-100 dark:bg-slate-800/60 dark:ring-blue-900/40">
+                  <div className="font-semibold text-slate-700 dark:text-slate-300">Required net monthly</div>
                   <div className="mt-1">{displayAmount(results.requiredNetMonthly, 0)}</div>
                 </div>
-                <div className="rounded-xl bg-white/70 p-3 ring-1 ring-blue-100">
-                  <div className="font-semibold text-slate-700">Current target net monthly</div>
+                <div className="rounded-xl bg-white/70 p-3 ring-1 ring-blue-100 dark:bg-slate-800/60 dark:ring-blue-900/40">
+                  <div className="font-semibold text-slate-700 dark:text-slate-300">Current target net monthly</div>
                   <div className="mt-1">{displayAmount(results.netMonthlyTo, 0)}</div>
                 </div>
               </div>
-              <div className="mt-3 text-xs text-slate-500">
+              <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                 This is a planning target, not a guarantee. Lower housing, lower taxes, or lower monthly costs reduce the income needed.
               </div>
               {results.incomeGap > 0 ? (
-                <div className="mt-2 text-sm font-medium text-rose-600">
+                <div className="mt-2 text-sm font-medium text-rose-600 dark:text-rose-400">
                   You're about {displayAmount(results.incomeGap, 0)} below this target.
                 </div>
               ) : (
-                <div className="mt-2 text-sm font-medium text-emerald-600">
+                <div className="mt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">
                   You exceed this target by {displayAmount(Math.abs(results.incomeGap), 0)}.
                 </div>
               )}
@@ -1165,32 +1165,32 @@ const readinessRecommendation =
 
           {/* Comparable Salary */}
           {results.salaryReady && (
-            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
-              <div className="text-xs font-semibold tracking-widest text-slate-500">COMPARABLE SALARY</div>
-              <div className="mt-2 text-3xl font-bold">{displayAmount(results.comparableSalary)}</div>
-              <p className="mt-2 text-sm text-slate-600">
+            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+              <div className="text-xs font-semibold tracking-widest text-slate-500 dark:text-slate-400">COMPARABLE SALARY</div>
+              <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{displayAmount(results.comparableSalary)}</div>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
                 {toCityLabel} is roughly{" "}
-                <span className="font-semibold">{Math.abs(Math.round(results.relativeDifference * 100))}%</span>{" "}
+                <span className="font-semibold text-slate-900 dark:text-slate-100">{Math.abs(Math.round(results.relativeDifference * 100))}%</span>{" "}
                 {results.relativeDifference >= 0 ? "more" : "less"} expensive than {fromCityLabel}.
               </p>
-              <div className="mt-1 text-xs text-slate-500">Based on housing, transportation, healthcare, and essential cost weighting.</div>
+              <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Based on housing, transportation, healthcare, and essential cost weighting.</div>
             </div>
           )}
 
           {/* Comfort Score */}
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-emerald-900/60 dark:bg-emerald-950/20">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400">
                   {mode === "retired" ? "Retirement Readiness Score" : "Comfort Score™"}
                 </div>
-                <div className="mt-2 text-2xl font-bold text-slate-900">
+                <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
                   {results.comfort.band} · {results.comfort.label}
                 </div>
               </div>
-              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">Essential costs</div>
+              <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200 dark:bg-slate-800 dark:text-emerald-300 dark:ring-emerald-800">Essential costs</div>
             </div>
-            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-emerald-100">
+            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-emerald-100 dark:bg-slate-800/80 dark:ring-emerald-900/40">
               <div className={`h-full rounded-full ${
                 results.comfort.band === "A" ? "w-[92%] bg-emerald-500"
                 : results.comfort.band === "B" ? "w-[78%] bg-emerald-400"
@@ -1198,30 +1198,30 @@ const readinessRecommendation =
                 : "w-[42%] bg-orange-400"
               }`} />
             </div>
-            <div className="mt-3 text-sm text-slate-700">{results.comfort.note}</div>
-            <div className="mt-2 text-xs text-slate-500">Based on how much of your net monthly income goes toward housing and essential living costs.</div>
+            <div className="mt-3 text-sm text-slate-700 dark:text-slate-300">{results.comfort.note}</div>
+            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Based on how much of your net monthly income goes toward housing and essential living costs.</div>
           </div>
 
           {/* Fix #4: How we calculate this — transparent methodology block */}
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60">
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
             <button
               type="button"
               onClick={() => setHowCalcExpanded(v => !v)}
-              className="flex w-full items-center justify-between text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
+              className="flex w-full items-center justify-between text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors dark:text-slate-300 dark:hover:text-white"
             >
               <span>How we calculate this</span>
-              <span className="text-slate-400">{howCalcExpanded ? "▲" : "▼"}</span>
+              <span className="text-slate-400 dark:text-slate-500">{howCalcExpanded ? "▲" : "▼"}</span>
             </button>
             {howCalcExpanded && (
-              <div className="mt-4 space-y-4 text-xs leading-5 text-slate-600">
+              <div className="mt-4 space-y-4 text-xs leading-5 text-slate-600 dark:text-slate-400">
                 <p>
                   This calculator estimates monthly take-home pay, housing and essential living costs, upfront moving cash,
                   and savings runway. Tax estimates come from country-specific models and may be verified, partial,
                   simplified, or directional depending on jurisdiction.
                 </p>
                 <div className="space-y-2">
-                  <div className="font-semibold text-slate-700">Key formulas</div>
-                  <div className="rounded-xl bg-slate-50 px-4 py-3 space-y-1.5 font-mono text-[11px] text-slate-700">
+                  <div className="font-semibold text-slate-700 dark:text-slate-300">Key formulas</div>
+                  <div className="rounded-xl bg-slate-50 px-4 py-3 space-y-1.5 font-mono text-[11px] text-slate-700 dark:bg-slate-950 dark:text-slate-300">
                     <div>Net monthly = gross monthly × (1 − effective tax rate)</div>
                     <div>Monthly flexibility = net monthly − housing − essential living costs</div>
                     <div className="pt-1">Upfront cash = deposit + first month + last month</div>
@@ -1233,7 +1233,7 @@ const readinessRecommendation =
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <div className="font-semibold text-slate-700">Cost data</div>
+                  <div className="font-semibold text-slate-700 dark:text-slate-300">Cost data</div>
                   <p>
                     Living costs (groceries, transport, utilities, healthcare) are pre-filled from city-level data where
                     available, or country-level data as a fallback. A <span className="font-medium">City-level estimate</span> badge
@@ -1246,25 +1246,25 @@ const readinessRecommendation =
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <div className="font-semibold text-slate-700">Tax estimates</div>
+                  <div className="font-semibold text-slate-700 dark:text-slate-300">Tax estimates</div>
                   <p>
-                    Tax confidence levels range from <span className="font-medium text-emerald-700">Verified</span> (exact
-                    or near-exact) to <span className="font-medium text-rose-700">Directional only</span> (high-level
+                    Tax confidence levels range from <span className="font-medium text-emerald-700 dark:text-emerald-400">Verified</span> (exact
+                    or near-exact) to <span className="font-medium text-rose-700 dark:text-rose-400">Directional only</span> (high-level
                     estimate; verify before planning). US citizens abroad may owe US taxes regardless of residency —
                     consult a cross-border tax adviser.
                   </p>
                 </div>
-                <p className="text-slate-400">All figures are planning estimates. No data is stored or shared.</p>
+                <p className="text-slate-400 dark:text-slate-500">All figures are planning estimates. No data is stored or shared.</p>
               </div>
             )}
           </div>
 
           {/* Share */}
-          <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-sky-900/60 dark:bg-sky-950/20">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700">Share this scenario</div>
-                <div className="mt-1 text-sm text-slate-700">Copy your current comparison link and send it to a partner, friend, or future self.</div>
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-400">Share this scenario</div>
+                <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">Copy your current comparison link and send it to a partner, friend, or future self.</div>
               </div>
               <button
                 type="button"
@@ -1289,7 +1289,7 @@ const readinessRecommendation =
                     window.setTimeout(() => setShareStatus("idle"), 2500);
                   }
                 }}
-                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
               >
                 {shareStatus === "copied" ? "Link copied!" : shareStatus === "shared" ? "Shared!" : shareStatus === "error" ? "Share failed" : "Share scenario"}
               </button>

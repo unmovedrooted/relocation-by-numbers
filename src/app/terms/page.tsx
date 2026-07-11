@@ -5,11 +5,11 @@ export default function TermsPage() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-12">
       <header className="max-w-3xl">
-        <h1 className="mb-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="mb-4 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
           Terms of Use
         </h1>
 
-        <p className="text-base leading-7 text-slate-700">
+        <p className="text-base leading-7 text-slate-700 dark:text-slate-300">
           By accessing or using Relocation By Numbers, you agree to these terms.
           If you do not agree, do not use the site.
         </p>
@@ -17,12 +17,12 @@ export default function TermsPage() {
 
     
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Informational and educational use only
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             The calculators, comparisons, guides, and other information on
             Relocation By Numbers are provided for informational and educational
@@ -38,12 +38,12 @@ export default function TermsPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           No guarantees or warranties
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             While reasonable efforts are made to keep the site useful and
             accurate, Relocation By Numbers makes no guarantee that any calculator
@@ -59,12 +59,12 @@ export default function TermsPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           User responsibility
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             You are responsible for evaluating whether any information, estimate,
             or calculator result is appropriate for your needs.
@@ -78,12 +78,12 @@ export default function TermsPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Calculator and comparison limitations
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             Calculator outputs on this site are planning estimates only. They may
             rely on simplified assumptions about taxes, investment returns,
@@ -99,12 +99,12 @@ export default function TermsPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Third-party services and links
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             Relocation By Numbers may contain links to third-party websites,
             services, tools, affiliates, analytics providers, or advertising
@@ -119,12 +119,12 @@ export default function TermsPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Acceptable use
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             You agree not to misuse the site, interfere with its operation,
             attempt unauthorized access, copy or scrape content at scale in a way
@@ -138,12 +138,12 @@ export default function TermsPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Intellectual property
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             The site design, written content, branding, tools, and calculator
             presentation are the property of Relocation By Numbers unless
@@ -158,12 +158,12 @@ export default function TermsPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Limitation of liability
         </h2>
 
-        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700">
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
             To the fullest extent permitted by law, Relocation By Numbers and its
             operators are not liable for any losses, damages, claims, liabilities,
@@ -178,42 +178,42 @@ export default function TermsPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Changes to these terms
         </h2>
 
-        <p className="mt-4 text-base leading-7 text-slate-700">
+        <p className="mt-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           These terms may be updated from time to time as the site and its tools
           evolve. Continued use of the site after changes are posted means you
           accept the updated terms.
         </p>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-6">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-6">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Related pages
         </h2>
 
-        <p className="mt-4 text-base leading-7 text-slate-700">
+        <p className="mt-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           You may also want to review the{" "}
           <Link
             href="/disclaimer"
-            className="font-medium text-slate-900 underline underline-offset-4 hover:no-underline"
+            className="font-medium text-slate-900 dark:text-slate-100 underline underline-offset-4 hover:no-underline"
           >
             disclaimer
           </Link>
           ,{" "}
           <Link
             href="/privacy"
-            className="font-medium text-slate-900 underline underline-offset-4 hover:no-underline"
+            className="font-medium text-slate-900 dark:text-slate-100 underline underline-offset-4 hover:no-underline"
           >
             privacy policy
           </Link>
           , and{" "}
           <Link
             href="/methodology"
-            className="font-medium text-slate-900 underline underline-offset-4 hover:no-underline"
+            className="font-medium text-slate-900 dark:text-slate-100 underline underline-offset-4 hover:no-underline"
           >
             methodology
           </Link>{" "}

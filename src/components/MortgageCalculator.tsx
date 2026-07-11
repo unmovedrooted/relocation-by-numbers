@@ -166,9 +166,9 @@ function getBuyWaitRentVerdict({
       type: "buy", title: "Enter your details",
       description: "Fill in income, home price, and costs to see your personalized verdict.",
       reasons: [],
-      border: "border-slate-200", bg: "bg-slate-50/80",
-      tag: "text-slate-600 ring-slate-200", labelColor: "text-slate-600",
-      barColor: "bg-slate-300", barWidth: "w-0",
+      border: "border-slate-200 dark:border-slate-800", bg: "bg-slate-50/80 dark:bg-slate-950/80",
+      tag: "text-slate-600 dark:text-slate-400 ring-slate-200 dark:ring-slate-800", labelColor: "text-slate-600 dark:text-slate-400",
+      barColor: "bg-slate-300 dark:bg-slate-800", barWidth: "w-0",
     };
   }
 
@@ -190,9 +190,9 @@ function getBuyWaitRentVerdict({
         (breakEvenYears === null || breakEvenYears > 10) ? `Break-even is ${breakEvenYears ? breakEvenYears.toFixed(1) + " years" : "30+ years"} — too long to justify the upfront cost` : "",
         housingPremium > 40 ? `Buying costs ${housingPremium.toFixed(0)}% more per month than renting` : "",
       ].filter(Boolean),
-      border: "border-rose-200", bg: "bg-rose-50/80",
-      tag: "text-rose-700 ring-rose-200", labelColor: "text-rose-700",
-      barColor: "bg-rose-400", barWidth: "w-[20%]",
+      border: "border-rose-200 dark:border-rose-800", bg: "bg-rose-50/80 dark:bg-rose-950/30",
+      tag: "text-rose-700 dark:text-rose-300 ring-rose-200 dark:ring-rose-800", labelColor: "text-rose-700 dark:text-rose-300",
+      barColor: "bg-rose-400 dark:bg-rose-700", barWidth: "w-[20%]",
     };
   }
 
@@ -210,9 +210,9 @@ function getBuyWaitRentVerdict({
         cashTight  ? `Cash after close (${downPct.toFixed(0)}% down) falls below your emergency fund target` : "",
         dtiStretched ? `Front-end DTI of ${frontDTI.toFixed(0)}% is above the 36% caution zone` : "",
       ].filter(Boolean),
-      border: "border-amber-200", bg: "bg-amber-50/80",
-      tag: "text-amber-700 ring-amber-200", labelColor: "text-amber-700",
-      barColor: "bg-amber-400", barWidth: "w-[40%]",
+      border: "border-amber-200 dark:border-amber-800", bg: "bg-amber-50/80 dark:bg-amber-950/30",
+      tag: "text-amber-700 dark:text-amber-300 ring-amber-200 dark:ring-amber-800", labelColor: "text-amber-700 dark:text-amber-300",
+      barColor: "bg-amber-400 dark:bg-amber-700", barWidth: "w-[40%]",
     };
   }
 
@@ -229,9 +229,9 @@ function getBuyWaitRentVerdict({
         elevatedDTI   ? `Front-end DTI of ${frontDTI.toFixed(0)}% is above the 28% guideline` : "",
         housingPremium > 20 ? `Monthly cost is ${housingPremium.toFixed(0)}% more than renting` : "",
       ].filter(Boolean),
-      border: "border-sky-200", bg: "bg-sky-50/80",
-      tag: "text-sky-700 ring-sky-200", labelColor: "text-sky-700",
-      barColor: "bg-sky-400", barWidth: "w-[60%]",
+      border: "border-sky-200 dark:border-sky-800", bg: "bg-sky-50/80 dark:bg-sky-950/30",
+      tag: "text-sky-700 dark:text-sky-300 ring-sky-200 dark:ring-sky-800", labelColor: "text-sky-700 dark:text-sky-300",
+      barColor: "bg-sky-400 dark:bg-sky-700", barWidth: "w-[60%]",
     };
   }
 
@@ -244,9 +244,9 @@ function getBuyWaitRentVerdict({
       cashAfterClose >= emergencyFundTarget ? "Cash after closing covers your emergency fund target" : "",
       breakEvenYears ? `Break-even in ${breakEvenYears.toFixed(1)} years is manageable` : "",
     ].filter(Boolean),
-    border: "border-emerald-200", bg: "bg-emerald-50/80",
-    tag: "text-emerald-700 ring-emerald-200", labelColor: "text-emerald-700",
-    barColor: "bg-emerald-500", barWidth: "w-[90%]",
+    border: "border-emerald-200 dark:border-emerald-800", bg: "bg-emerald-50/80 dark:bg-emerald-950/30",
+    tag: "text-emerald-700 dark:text-emerald-300 ring-emerald-200 dark:ring-emerald-800", labelColor: "text-emerald-700 dark:text-emerald-300",
+    barColor: "bg-emerald-500 dark:bg-emerald-600", barWidth: "w-[90%]",
   };
 }
 
@@ -490,21 +490,21 @@ function writeHashState(state: object) {
 // UI PRIMITIVES
 // ═══════════════════════════════════════════════════════════════════════
 
-const lbl = "mb-1 block text-xs font-medium text-slate-500";
+const lbl = "mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400";
 
 function inputCls(err = "") {
-  return `h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner outline-none ring-1 transition focus:bg-white focus:ring-4 ${
-    err ? "ring-rose-400 focus:ring-rose-300/40" : "ring-slate-200 focus:ring-violet-500/20"
+  return `h-11 w-full rounded-xl bg-slate-50 dark:bg-slate-950 px-3 text-sm text-slate-900 dark:text-slate-100 shadow-inner outline-none ring-1 transition focus:bg-white focus:dark:bg-slate-900 focus:ring-4 ${
+    err ? "ring-rose-400 dark:ring-rose-600 focus:ring-rose-300/40 focus:dark:ring-rose-700/40" : "ring-slate-200 dark:ring-slate-800 focus:ring-violet-500/20 focus:dark:ring-violet-500/20"
   }`;
 }
-const selectCls = "h-11 w-full cursor-pointer rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-violet-500/20";
+const selectCls = "h-11 w-full cursor-pointer rounded-xl bg-slate-50 dark:bg-slate-950 px-3 text-sm text-slate-900 dark:text-slate-100 shadow-inner ring-1 ring-slate-200 dark:ring-slate-800 outline-none transition focus:bg-white focus:dark:bg-slate-900 focus:ring-4 focus:ring-violet-500/20 focus:dark:ring-violet-500/20";
 
 function Tip({ text, side = "left" }: { text: string; side?: string }) {
   const pos = side === "right" ? "right-0" : side === "center" ? "left-1/2 -translate-x-1/2" : "left-0";
   return (
     <span className="group relative ml-1.5 inline-flex align-middle">
       <button type="button" aria-label={text}
-        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 bg-white text-[9px] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-400">i</button>
+        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[9px] font-bold text-slate-600 dark:text-slate-400 shadow-sm transition hover:bg-slate-50 hover:dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:dark:ring-violet-600">i</button>
       <span role="tooltip"
         className={`pointer-events-none absolute top-full z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-xl bg-slate-900 px-3 py-2.5 text-xs leading-relaxed text-slate-100 opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 ${pos}`}>
         {text}
@@ -520,14 +520,14 @@ function F({ label, tip = "", tipSide = "left", err = "", span2 = false, childre
     <div className={span2 ? "sm:col-span-2" : ""}>
       <span className={lbl}>{label}{tip && <Tip text={tip} side={tipSide} />}</span>
       {children}
-      {err && <p className="mt-1 text-xs text-rose-500">{err}</p>}
+      {err && <p className="mt-1 text-xs text-rose-500 dark:text-rose-400">{err}</p>}
     </div>
   );
 }
 
 function RO({ value }: { value: string }) {
   return (
-    <div className="flex h-11 items-center rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700">
+    <div className="flex h-11 items-center rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
       {value}
     </div>
   );
@@ -539,27 +539,27 @@ function Slider({ val, set, min, max, step = 0.5 }: {
   return (
     <input type="range" min={min} max={max} step={step} value={val}
       onChange={e => set(e.target.value)}
-      className="mt-1.5 h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-violet-600" />
+      className="mt-1.5 h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-200 dark:bg-slate-800 accent-violet-600" />
   );
 }
 
 function Card({ children, className = "" }: { children:React.ReactNode; className?:string }) {
   return (
-    <div className={`rounded-2xl bg-white p-5 ring-1 ring-slate-200/60 shadow-[0_6px_20px_rgba(15,23,42,0.07)] ${className}`}>
+    <div className={`rounded-2xl bg-white dark:bg-slate-900 p-5 ring-1 ring-slate-200/60 dark:ring-slate-800/60 shadow-[0_6px_20px_rgba(15,23,42,0.07)] ${className}`}>
       {children}
     </div>
   );
 }
 function VCard({ children, className = "" }: { children:React.ReactNode; className?:string }) {
   return (
-    <div className={`rounded-2xl border border-violet-200 bg-violet-50/70 p-5 shadow-[0_6px_20px_rgba(109,40,217,0.07)] ${className}`}>
+    <div className={`rounded-2xl border border-violet-200 dark:border-violet-800 bg-violet-50/70 dark:bg-violet-950/30 p-5 shadow-[0_6px_20px_rgba(109,40,217,0.07)] ${className}`}>
       {children}
     </div>
   );
 }
 function ACard({ children, className = "" }: { children:React.ReactNode; className?:string }) {
   return (
-    <div className={`rounded-2xl border border-amber-200 bg-amber-50/80 p-4 ${className}`}>
+    <div className={`rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/30 p-4 ${className}`}>
       {children}
     </div>
   );
@@ -567,28 +567,28 @@ function ACard({ children, className = "" }: { children:React.ReactNode; classNa
 function H2({ children, action = null }: { children:React.ReactNode; action?:React.ReactNode }) {
   return (
     <div className="mb-3 flex items-center justify-between">
-      <span className="text-sm font-semibold text-slate-800">{children}</span>
+      <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{children}</span>
       {action && <span>{action}</span>}
     </div>
   );
 }
 
-function dtiColor(v: number) { return v <= 28 ? "text-emerald-600" : v <= 36 ? "text-amber-600" : "text-rose-600"; }
-function dtiBar(v: number)   { return v <= 28 ? "bg-emerald-500"   : v <= 36 ? "bg-amber-400"   : "bg-rose-500"; }
+function dtiColor(v: number) { return v <= 28 ? "text-emerald-600 dark:text-emerald-400" : v <= 36 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400"; }
+function dtiBar(v: number)   { return v <= 28 ? "bg-emerald-500 dark:bg-emerald-600"   : v <= 36 ? "bg-amber-400 dark:bg-amber-700"   : "bg-rose-500 dark:bg-rose-600"; }
 function dtiLabel(v: number) { return v <= 28 ? "Within guideline" : v <= 36 ? "Elevated"        : "Above guideline"; }
 
 function DTIRow({ label, value, guide, tip = "" }: { label:string; value:number; guide:string; tip?:string }) {
   return (
     <div>
       <div className="flex items-center justify-between text-sm">
-        <span className="text-slate-600">{label}{tip && <Tip text={tip} side="right" />}</span>
+        <span className="text-slate-600 dark:text-slate-400">{label}{tip && <Tip text={tip} side="right" />}</span>
         <span className={`font-bold ${dtiColor(value)}`}>{fmtPct(value)} — {dtiLabel(value)}</span>
       </div>
-      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-900/40">
         <div className={`h-full rounded-full transition-all ${dtiBar(value)}`}
           style={{ width: `${Math.min((value / 50) * 100, 100)}%` }} />
       </div>
-      <div className="mt-0.5 text-xs text-slate-400">{guide}</div>
+      <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">{guide}</div>
     </div>
   );
 }
@@ -598,10 +598,10 @@ function AffordabilityVerdict({ frontDTI, backDTI }: { frontDTI:number; backDTI:
   const caution = !pass && frontDTI <= 36 && backDTI <= 43;
   const verdict = pass ? "PASS" : caution ? "CAUTION" : "STRETCH";
   const cls     = pass
-    ? "border-emerald-600/50 bg-emerald-900/40 text-emerald-400"
+    ? "border-emerald-600/50 dark:border-emerald-500/50 bg-emerald-900/40 dark:bg-emerald-950/40 text-emerald-400 dark:text-emerald-500"
     : caution
-    ? "border-amber-600/50 bg-amber-900/40 text-amber-400"
-    : "border-rose-600/50 bg-rose-900/40 text-rose-400";
+    ? "border-amber-600/50 dark:border-amber-500/50 bg-amber-900/40 dark:bg-amber-950/40 text-amber-400 dark:text-amber-500"
+    : "border-rose-600/50 dark:border-rose-500/50 bg-rose-900/40 dark:bg-rose-950/40 text-rose-400 dark:text-rose-500";
   const note = pass
     ? "Your income comfortably supports this loan at standard guidelines."
     : caution
@@ -617,16 +617,16 @@ function AffordabilityVerdict({ frontDTI, backDTI }: { frontDTI:number; backDTI:
 function HowThisWorks({ items }: { items: string[] }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="mt-3 border-t border-violet-200 pt-3">
+    <div className="mt-3 border-t border-violet-200 dark:border-violet-800 pt-3">
       <button type="button" onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 text-xs font-semibold text-violet-700 hover:text-violet-900 focus:outline-none">
+        className="flex items-center gap-1.5 text-xs font-semibold text-violet-700 dark:text-violet-300 hover:text-violet-900 hover:dark:text-violet-100 focus:outline-none">
         <span className="text-[10px]">{open ? "▾" : "▸"}</span> How this is calculated
       </button>
       {open && (
-        <ul className="mt-2 space-y-1.5 rounded-xl bg-white/70 px-3 py-2.5 text-xs text-slate-600 ring-1 ring-violet-200">
+        <ul className="mt-2 space-y-1.5 rounded-xl bg-white/70 dark:bg-slate-900 px-3 py-2.5 text-xs text-slate-600 dark:text-slate-400 ring-1 ring-violet-200 dark:ring-violet-800">
           {items.map((item, i) => (
             <li key={i} className="flex gap-2">
-              <span className="flex-shrink-0 text-slate-400">·</span>
+              <span className="flex-shrink-0 text-slate-400 dark:text-slate-500">·</span>
               <span>{item}</span>
             </li>
           ))}
@@ -650,7 +650,7 @@ function ShareButton({ state }: { state: object }) {
   }, [state]);
   return (
     <button type="button" onClick={handle}
-      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-400">
+      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition hover:bg-slate-50 hover:dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:dark:ring-violet-600">
       {copied ? "✓ Copied!" : "🔗 Share link"}
     </button>
   );
@@ -659,7 +659,7 @@ function ShareButton({ state }: { state: object }) {
 function ResetButton({ onReset }: { onReset: () => void }) {
   return (
     <button type="button" onClick={onReset}
-      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-500 shadow-sm transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-300">
+      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 py-1 text-xs font-medium text-slate-500 dark:text-slate-400 shadow-sm transition hover:border-rose-200 hover:dark:border-rose-800 hover:bg-rose-50 hover:dark:bg-rose-950/30 hover:text-rose-600 hover:dark:text-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:dark:ring-rose-700">
       ↺ Reset
     </button>
   );
@@ -724,10 +724,10 @@ function AmortizationTable({ rows }: { rows: ReturnType<typeof buildSchedule> })
   const display = expanded ? years : years.slice(0, 5);
   return (
     <div>
-      <div className="overflow-x-auto rounded-xl ring-1 ring-slate-200">
+      <div className="overflow-x-auto rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold text-slate-500">
+            <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold text-slate-500 dark:text-slate-400">
               <th className="px-4 py-2 text-left">Year</th>
               <th className="px-4 py-2 text-right">Principal</th>
               <th className="px-4 py-2 text-right">Interest</th>
@@ -736,11 +736,11 @@ function AmortizationTable({ rows }: { rows: ReturnType<typeof buildSchedule> })
           </thead>
           <tbody>
             {display.map((y, i) => (
-              <tr key={y.year} className={`border-b border-slate-100 ${i % 2 === 0 ? "bg-white" : "bg-slate-50/50"}`}>
-                <td className="px-4 py-2 font-medium text-slate-700">Year {y.year}</td>
-                <td className="px-4 py-2 text-right text-slate-900">{money(y.principal)}</td>
-                <td className="px-4 py-2 text-right text-slate-600">{money(y.interest)}</td>
-                <td className="px-4 py-2 text-right font-semibold text-slate-900">{money(y.balance)}</td>
+              <tr key={y.year} className={`border-b border-slate-100 dark:border-slate-900/60 ${i % 2 === 0 ? "bg-white dark:bg-slate-900" : "bg-slate-50/50 dark:bg-slate-950/50"}`}>
+                <td className="px-4 py-2 font-medium text-slate-700 dark:text-slate-300">Year {y.year}</td>
+                <td className="px-4 py-2 text-right text-slate-900 dark:text-slate-100">{money(y.principal)}</td>
+                <td className="px-4 py-2 text-right text-slate-600 dark:text-slate-400">{money(y.interest)}</td>
+                <td className="px-4 py-2 text-right font-semibold text-slate-900 dark:text-slate-100">{money(y.balance)}</td>
               </tr>
             ))}
           </tbody>
@@ -748,7 +748,7 @@ function AmortizationTable({ rows }: { rows: ReturnType<typeof buildSchedule> })
       </div>
       {years.length > 5 && (
         <button type="button" onClick={() => setExpanded(!expanded)}
-          className="mt-2 text-xs font-semibold text-violet-700 hover:underline focus:outline-none focus:underline">
+          className="mt-2 text-xs font-semibold text-violet-700 dark:text-violet-300 hover:underline focus:outline-none focus:underline">
           {expanded ? "Show less ↑" : `Show all ${years.length} years ↓`}
         </button>
       )}
@@ -762,9 +762,9 @@ function AmortizationTable({ rows }: { rows: ReturnType<typeof buildSchedule> })
 
 function MobileSummaryBar({ monthly }: { monthly: number }) {
   return (
-    <div className="sticky top-0 z-40 -mx-4 mb-4 flex items-center justify-between bg-white/95 px-4 py-3 backdrop-blur-sm shadow-sm ring-1 ring-slate-200 lg:hidden">
-      <span className="text-xs font-medium text-slate-500">Est. monthly payment</span>
-      <span className="text-lg font-bold text-violet-700">{money(monthly, 2)}/mo</span>
+    <div className="sticky top-0 z-40 -mx-4 mb-4 flex items-center justify-between bg-white/95 dark:bg-slate-900 px-4 py-3 backdrop-blur-sm shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 lg:hidden">
+      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Est. monthly payment</span>
+      <span className="text-lg font-bold text-violet-700 dark:text-violet-300">{money(monthly, 2)}/mo</span>
     </div>
   );
 }
@@ -814,7 +814,7 @@ function RefinanceTab() {
             <F label="Remaining months" err={monthsErr}
                tip="How many monthly payments you have left on your current loan.">
               <input className={inputCls(monthsErr)} type="number" value={curMonthsLeft} onChange={e => setCurMonthsLeft(e.target.value)} />
-              <div className="mt-0.5 text-xs text-slate-400">{(nz(curMonthsLeft) / 12).toFixed(1)} years remaining</div>
+              <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">{(nz(curMonthsLeft) / 12).toFixed(1)} years remaining</div>
             </F>
           </div>
         </Card>
@@ -846,13 +846,13 @@ function RefinanceTab() {
         {result ? (
           <>
             <VCard>
-              <div className="text-xs font-semibold uppercase tracking-widest text-violet-700">Break-Even Point</div>
-              <div className="mt-2 text-3xl font-bold text-slate-900">
+              <div className="text-xs font-semibold uppercase tracking-widest text-violet-700 dark:text-violet-300">Break-Even Point</div>
+              <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">
                 {result.breakEvenMonths
                   ? `${result.breakEvenMonths} months`
                   : result.monthlySavings <= 0 ? "Never — higher payment" : "Immediate"}
               </div>
-              <p className="mt-2 text-sm text-slate-700">
+              <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
                 {result.breakEvenMonths
                   ? `Refinancing pays for itself after ${result.breakEvenMonths} months (${(result.breakEvenMonths / 12).toFixed(1)} years).`
                   : result.monthlySavings <= 0
@@ -863,17 +863,17 @@ function RefinanceTab() {
             <Card>
               <H2>Payment Comparison</H2>
               <div className="space-y-3">
-                <div className="flex justify-between text-sm border-t border-slate-100 pt-3">
-                  <span className="text-slate-600">Current monthly payment</span>
-                  <span className="font-bold text-slate-900">{money(result.curMonthly, 2)}</span>
+                <div className="flex justify-between text-sm border-t border-slate-100 dark:border-slate-900/60 pt-3">
+                  <span className="text-slate-600 dark:text-slate-400">Current monthly payment</span>
+                  <span className="font-bold text-slate-900 dark:text-slate-100">{money(result.curMonthly, 2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">New monthly payment</span>
-                  <span className="font-bold text-slate-900">{money(result.newMonthly, 2)}</span>
+                  <span className="text-slate-600 dark:text-slate-400">New monthly payment</span>
+                  <span className="font-bold text-slate-900 dark:text-slate-100">{money(result.newMonthly, 2)}</span>
                 </div>
-                <div className="flex justify-between text-sm border-t border-slate-100 pt-3">
-                  <span className="font-semibold text-slate-800">Monthly savings</span>
-                  <span className={`text-lg font-bold ${result.monthlySavings >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                <div className="flex justify-between text-sm border-t border-slate-100 dark:border-slate-900/60 pt-3">
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">Monthly savings</span>
+                  <span className={`text-lg font-bold ${result.monthlySavings >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                     {result.monthlySavings >= 0 ? "+" : ""}{money(result.monthlySavings, 2)}/mo
                   </span>
                 </div>
@@ -883,31 +883,31 @@ function RefinanceTab() {
               <H2>Total Cost Comparison</H2>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Closing costs</span>
-                  <span className="font-semibold text-slate-900">{money(nz(closingCosts))}</span>
+                  <span className="text-slate-600 dark:text-slate-400">Closing costs</span>
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">{money(nz(closingCosts))}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Total remaining on current loan</span>
-                  <span className="font-semibold text-slate-900">{money(result.curMonthly * nz(curMonthsLeft))}</span>
+                  <span className="text-slate-600 dark:text-slate-400">Total remaining on current loan</span>
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">{money(result.curMonthly * nz(curMonthsLeft))}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Total cost of new loan + closing</span>
-                  <span className="font-semibold text-slate-900">{money(result.newMonthly * newTerm * 12 + nz(closingCosts))}</span>
+                  <span className="text-slate-600 dark:text-slate-400">Total cost of new loan + closing</span>
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">{money(result.newMonthly * newTerm * 12 + nz(closingCosts))}</span>
                 </div>
-                <div className="flex justify-between border-t border-slate-100 pt-3">
-                  <span className="font-semibold text-slate-800">Net savings over life of loan</span>
-                  <span className={`text-lg font-bold ${result.totalSavings >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                <div className="flex justify-between border-t border-slate-100 dark:border-slate-900/60 pt-3">
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">Net savings over life of loan</span>
+                  <span className={`text-lg font-bold ${result.totalSavings >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                     {result.totalSavings >= 0 ? "+" : ""}{money(result.totalSavings)}
                   </span>
                 </div>
               </div>
-              <div className="mt-3 rounded-xl bg-slate-50 px-3 py-2.5 text-xs text-slate-600 ring-1 ring-slate-200">
+              <div className="mt-3 rounded-xl bg-slate-50 dark:bg-slate-950 px-3 py-2.5 text-xs text-slate-600 dark:text-slate-400 ring-1 ring-slate-200 dark:ring-slate-800">
                 Net savings accounts for the longer term if extending. A 30-yr refi on 25 years remaining reduces monthly payments but may increase total interest — consider a shorter term if net savings matter more than monthly relief.
               </div>
             </Card>
           </>
         ) : (
-          <Card className="flex min-h-40 items-center justify-center text-sm text-slate-400">
+          <Card className="flex min-h-40 items-center justify-center text-sm text-slate-400 dark:text-slate-500">
             Fix the errors above to see refinance analysis.
           </Card>
         )}
@@ -1067,9 +1067,9 @@ function USTab() {
     : stressedFrontDTI <= 43 ? "Fragile — consider a lower price"
     : "High risk — budget unlikely to survive this scenario";
   const stressVerdictColor =
-    stressedFrontDTI <= 28 ? "text-emerald-700 bg-emerald-50"
-    : stressedFrontDTI <= 36 ? "text-amber-700 bg-amber-50"
-    : "text-rose-700 bg-rose-50";
+    stressedFrontDTI <= 28 ? "text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/30"
+    : stressedFrontDTI <= 36 ? "text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30"
+    : "text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/30";
 
   const verdict = useMemo(() => getBuyWaitRentVerdict({
     frontDTI, backDTI, cashAfterClose, emergencyFundTarget,
@@ -1101,7 +1101,7 @@ function USTab() {
       return {
         delta, testRate, testPayment, diff, isCurrent: delta === 0,
         diffStr:   absDiff < 0.5 ? "—" : (diff > 0 ? "+" : "") + money(diff, 0),
-        diffColor: absDiff < 0.5 ? "text-slate-400" : diff > 0 ? "text-rose-600" : "text-emerald-600",
+        diffColor: absDiff < 0.5 ? "text-slate-400 dark:text-slate-500" : diff > 0 ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400",
       };
     });
   }, [loan, r, term, monthlyPI]);
@@ -1243,16 +1243,16 @@ function USTab() {
             </F>
             <div className="sm:col-span-2 flex items-center gap-2">
               <input type="checkbox" id="biweekly" checked={biweekly} onChange={e => setBiweekly(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 accent-violet-600" />
-              <label htmlFor="biweekly" className="text-sm text-slate-700 cursor-pointer">
+                className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 accent-violet-600" />
+              <label htmlFor="biweekly" className="text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
                 Bi-weekly payments
                 <Tip text="26 half-payments per year equals 13 full monthly payments — equivalent to one extra payment annually." />
               </label>
             </div>
             <div className="sm:col-span-2 flex items-center gap-2">
               <input type="checkbox" id="appreciationPMI" checked={appreciationPMI} onChange={e => setAppreciationPMI(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 accent-violet-600" />
-              <label htmlFor="appreciationPMI" className="text-sm text-slate-700 cursor-pointer">
+                className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 accent-violet-600" />
+              <label htmlFor="appreciationPMI" className="text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
                 Appreciation-adjusted PMI cancellation
                 <Tip text="When checked, PMI cancellation is estimated using the appreciated home value. Requires a formal appraisal in practice." side="right" />
               </label>
@@ -1319,18 +1319,18 @@ function USTab() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className={`text-xs font-semibold uppercase tracking-[0.14em] ${verdict.labelColor}`}>Buy · Wait · Rent</div>
-              <div className="mt-1.5 text-2xl font-bold text-slate-900">{verdict.title}</div>
+              <div className="mt-1.5 text-2xl font-bold text-slate-900 dark:text-slate-100">{verdict.title}</div>
             </div>
-            <div className={`rounded-full bg-white px-3 py-1 text-xs font-semibold ring-1 ${verdict.tag}`}>Decision</div>
+            <div className={`rounded-full bg-white dark:bg-slate-900 px-3 py-1 text-xs font-semibold ring-1 ${verdict.tag}`}>Decision</div>
           </div>
-          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/70 ring-1 ring-slate-200/40">
+          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/70 dark:bg-slate-900 ring-1 ring-slate-200/40 dark:ring-slate-800/40">
             <div className={`h-full rounded-full transition-all ${verdict.barColor} ${verdict.barWidth}`} />
           </div>
-          <p className="mt-3 text-sm text-slate-700">{verdict.description}</p>
+          <p className="mt-3 text-sm text-slate-700 dark:text-slate-300">{verdict.description}</p>
           {verdict.reasons.length > 0 && (
             <ul className="mt-2 space-y-1">
               {verdict.reasons.map((r, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs text-slate-600">
+                <li key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400">
                   <span className={`mt-0.5 flex-shrink-0 ${verdict.labelColor}`}>·</span>
                   <span>{r}</span>
                 </li>
@@ -1339,25 +1339,25 @@ function USTab() {
           )}
         </div>
 
-        <div className="rounded-2xl bg-slate-900 p-5 text-white shadow-[0_8px_24px_rgba(15,23,42,0.18)]">
-          <div className="text-xs font-semibold uppercase tracking-widest text-slate-400">Your Bottom Line</div>
+        <div className="rounded-2xl bg-slate-900 dark:bg-white p-5 text-white dark:text-slate-900 shadow-[0_8px_24px_rgba(15,23,42,0.18)]">
+          <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Your Bottom Line</div>
           <div className="mt-3 mb-4">
-            <div className="text-xs text-slate-400">Estimated monthly payment</div>
+            <div className="text-xs text-slate-400 dark:text-slate-500">Estimated monthly payment</div>
             <div className="flex items-end gap-1.5">
               <span className="text-4xl font-bold tracking-tight">{money(totalMonthly, 0)}</span>
-              <span className="mb-1 text-base text-slate-400">/mo</span>
+              <span className="mb-1 text-base text-slate-400 dark:text-slate-500">/mo</span>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
+          <div className="grid grid-cols-2 gap-4 border-t border-white/10 dark:border-slate-200 pt-4">
             <div>
-              <div className="text-xs text-slate-400">Cash to close</div>
+              <div className="text-xs text-slate-400 dark:text-slate-500">Cash to close</div>
               <div className="text-xl font-bold">{money(totalCashNeeded)}</div>
-              <div className="mt-0.5 text-[10px] text-slate-500">down + closing + 3-mo buffer</div>
+              <div className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">down + closing + 3-mo buffer</div>
             </div>
             <div>
-              <div className="text-xs text-slate-400">Income for 28% DTI</div>
+              <div className="text-xs text-slate-400 dark:text-slate-500">Income for 28% DTI</div>
               <div className="text-xl font-bold">{money(recommendedIncome)}/yr</div>
-              <div className="mt-0.5 text-[10px] text-slate-500">not a lender requirement</div>
+              <div className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">not a lender requirement</div>
             </div>
           </div>
           <AffordabilityVerdict frontDTI={frontDTI} backDTI={backDTI} />
@@ -1374,25 +1374,25 @@ function USTab() {
               ...(monthlyPMI > 0 ? [{ label: "PMI (auto-estimated)", value: monthlyPMI }] : []),
             ].map(row => (
               <div key={row.label} className="flex justify-between">
-                <span className="text-slate-600">{row.label}</span>
-                <span className="font-semibold text-slate-900">{money(row.value, 2)}</span>
+                <span className="text-slate-600 dark:text-slate-400">{row.label}</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100">{money(row.value, 2)}</span>
               </div>
             ))}
-            <div className="mt-2 flex justify-between border-t border-slate-200 pt-2">
-              <span className="font-semibold text-slate-900">Total monthly</span>
-              <span className="text-xl font-bold text-violet-700">{money(totalMonthly, 2)}</span>
+            <div className="mt-2 flex justify-between border-t border-slate-200 dark:border-slate-800 pt-2">
+              <span className="font-semibold text-slate-900 dark:text-slate-100">Total monthly</span>
+              <span className="text-xl font-bold text-violet-700 dark:text-violet-300">{money(totalMonthly, 2)}</span>
             </div>
           </div>
 
           {monthlyPMI > 0 && activePMIDropMonth && (
-            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-slate-700">
-              <span className="font-semibold text-amber-700">PMI auto-estimated at {money(monthlyPMI, 0)}/mo.</span>{" "}
+            <div className="mt-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-300">
+              <span className="font-semibold text-amber-700 dark:text-amber-300">PMI auto-estimated at {money(monthlyPMI, 0)}/mo.</span>{" "}
               PMI can be cancelled around{" "}
               <strong>month {activePMIDropMonth} ({(activePMIDropMonth / 12).toFixed(1)} yrs)</strong>{" "}
               when LTV reaches 80%{appreciationPMI ? " of the appreciated value" : ""}.
               It is not removed automatically — you must request cancellation.
-              {appreciationPMI && <span className="ml-1 text-violet-700">Appreciation-adjusted estimate requires a formal appraisal.</span>}
-              <div className="mt-1 text-slate-500">PMI is estimated using LTV tiers; lender pricing varies.</div>
+              {appreciationPMI && <span className="ml-1 text-violet-700 dark:text-violet-300">Appreciation-adjusted estimate requires a formal appraisal.</span>}
+              <div className="mt-1 text-slate-500 dark:text-slate-400">PMI is estimated using LTV tiers; lender pricing varies.</div>
             </div>
           )}
         </Card>
@@ -1401,48 +1401,48 @@ function USTab() {
           <H2>First Year &amp; 5-Year Cost</H2>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <div className="text-xs text-slate-500">First year (own)</div>
-              <div className="text-2xl font-bold text-slate-900">{money(firstYearCost)}</div>
-              <div className="mt-0.5 text-xs text-slate-400">payments + maintenance</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">First year (own)</div>
+              <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{money(firstYearCost)}</div>
+              <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">payments + maintenance</div>
             </div>
             <div>
-              <div className="text-xs text-slate-500">First year (rent)</div>
-              <div className="text-2xl font-bold text-slate-900">{money(nz(monthlyRent) * 12)}</div>
-              <div className="mt-0.5 text-xs text-slate-400">at current rent</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">First year (rent)</div>
+              <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{money(nz(monthlyRent) * 12)}</div>
+              <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">at current rent</div>
             </div>
             <div>
-              <div className="text-xs text-slate-500">5-year cost (own)</div>
-              <div className="text-2xl font-bold text-slate-900">{money(fiveYearOwnCost)}</div>
-              <div className="mt-0.5 text-xs text-slate-400">payments + maintenance</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">5-year cost (own)</div>
+              <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{money(fiveYearOwnCost)}</div>
+              <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">payments + maintenance</div>
             </div>
             <div>
-              <div className="text-xs text-slate-500">5-year cost (rent)</div>
-              <div className="text-2xl font-bold text-slate-900">{money(fiveYearRentCost)}</div>
-              <div className="mt-0.5 text-xs text-slate-400">with {fmtPct(nz(rentGrowth))}/yr growth</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">5-year cost (rent)</div>
+              <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{money(fiveYearRentCost)}</div>
+              <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">with {fmtPct(nz(rentGrowth))}/yr growth</div>
             </div>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-4 border-t border-slate-200 pt-3 text-sm">
+          <div className="mt-3 grid grid-cols-2 gap-4 border-t border-slate-200 dark:border-slate-800 pt-3 text-sm">
             <div>
-              <div className="text-xs text-slate-500">5-yr equity built</div>
-              <div className="text-lg font-bold text-emerald-700">{money(fiveYearEquity)}</div>
-              <div className="mt-0.5 text-xs text-slate-400">principal + appreciation</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">5-yr equity built</div>
+              <div className="text-lg font-bold text-emerald-700 dark:text-emerald-300">{money(fiveYearEquity)}</div>
+              <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">principal + appreciation</div>
             </div>
             <div>
-              <div className="text-xs text-slate-500">5-yr net buy cost</div>
-              <div className={`text-lg font-bold ${fiveYearNetOwn < fiveYearRentCost ? "text-emerald-700" : "text-rose-600"}`}>
+              <div className="text-xs text-slate-500 dark:text-slate-400">5-yr net buy cost</div>
+              <div className={`text-lg font-bold ${fiveYearNetOwn < fiveYearRentCost ? "text-emerald-700 dark:text-emerald-300" : "text-rose-600 dark:text-rose-400"}`}>
                 {money(fiveYearNetOwn)}
               </div>
-              <div className="mt-0.5 text-xs text-slate-400">after equity deducted</div>
+              <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">after equity deducted</div>
             </div>
           </div>
           <div className={`mt-3 rounded-xl px-3 py-2 text-xs font-semibold ${
-            fiveYearNetOwn < fiveYearRentCost ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-800"
+            fiveYearNetOwn < fiveYearRentCost ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200" : "bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-200"
           }`}>
             {fiveYearNetOwn < fiveYearRentCost
               ? `Over 5 years, buying is ~${money(fiveYearRentCost - fiveYearNetOwn)} cheaper than renting (net of equity).`
               : `Over 5 years, renting is ~${money(fiveYearNetOwn - fiveYearRentCost)} cheaper than buying (net of equity).`}
           </div>
-          <div className="mt-2 text-xs text-slate-400">Break-even is sensitive to appreciation and rent growth assumptions.</div>
+          <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">Break-even is sensitive to appreciation and rent growth assumptions.</div>
         </Card>
 
         <Card>
@@ -1454,57 +1454,57 @@ function USTab() {
               { label: "3-month planning buffer",                      value: recommendedReserve },
             ].map(row => (
               <div key={row.label} className="flex justify-between">
-                <span className="text-slate-600">{row.label}</span>
-                <span className="font-semibold text-slate-900">{money(row.value)}</span>
+                <span className="text-slate-600 dark:text-slate-400">{row.label}</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100">{money(row.value)}</span>
               </div>
             ))}
-            <div className="mt-2 flex justify-between border-t border-slate-200 pt-2">
-              <span className="font-semibold text-slate-900">Total cash needed</span>
-              <span className="text-xl font-bold text-slate-900">{money(totalCashNeeded)}</span>
+            <div className="mt-2 flex justify-between border-t border-slate-200 dark:border-slate-800 pt-2">
+              <span className="font-semibold text-slate-900 dark:text-slate-100">Total cash needed</span>
+              <span className="text-xl font-bold text-slate-900 dark:text-slate-100">{money(totalCashNeeded)}</span>
             </div>
           </div>
-          <p className="mt-3 text-xs text-slate-400">
+          <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
             The 3-month buffer is a planning target, not a universal lender requirement.
           </p>
         </Card>
 
         <div className={`rounded-2xl border p-5 shadow-[0_6px_20px_rgba(15,23,42,0.07)] ${
-          cashStatus === "healthy" ? "border-emerald-200 bg-emerald-50/70"
-          : cashStatus === "tight" ? "border-amber-200 bg-amber-50/70"
-          : "border-rose-200 bg-rose-50/70"
+          cashStatus === "healthy" ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/30"
+          : cashStatus === "tight" ? "border-amber-200 dark:border-amber-800 bg-amber-50/70 dark:bg-amber-950/30"
+          : "border-rose-200 dark:border-rose-800 bg-rose-50/70 dark:bg-rose-950/30"
         }`}>
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className={`text-xs font-semibold uppercase tracking-[0.14em] ${
-                cashStatus === "healthy" ? "text-emerald-700" : cashStatus === "tight" ? "text-amber-700" : "text-rose-700"
+                cashStatus === "healthy" ? "text-emerald-700 dark:text-emerald-300" : cashStatus === "tight" ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300"
               }`}>Cash After Close</div>
-              <div className="mt-2 text-3xl font-bold text-slate-900">{money(cashAfterClose)}</div>
+              <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">{money(cashAfterClose)}</div>
             </div>
-            <div className={`rounded-full bg-white px-3 py-1 text-xs font-semibold ring-1 ${
-              cashStatus === "healthy" ? "text-emerald-700 ring-emerald-200"
-              : cashStatus === "tight" ? "text-amber-700 ring-amber-200"
-              : "text-rose-700 ring-rose-200"
+            <div className={`rounded-full bg-white dark:bg-slate-900 px-3 py-1 text-xs font-semibold ring-1 ${
+              cashStatus === "healthy" ? "text-emerald-700 dark:text-emerald-300 ring-emerald-200 dark:ring-emerald-800"
+              : cashStatus === "tight" ? "text-amber-700 dark:text-amber-300 ring-amber-200 dark:ring-amber-800"
+              : "text-rose-700 dark:text-rose-300 ring-rose-200 dark:ring-rose-800"
             }`}>
               {cashStatus === "healthy" ? "Healthy" : cashStatus === "tight" ? "Tight" : "Danger"}
             </div>
           </div>
-          <div className="mt-3 grid gap-1.5 text-xs text-slate-600">
-            <div className="flex justify-between"><span>Total savings</span><span className="font-semibold text-slate-900">{money(nz(currentSavings))}</span></div>
-            <div className="flex justify-between text-slate-500"><span>Cash to close</span><span>− {money(totalCashNeeded)}</span></div>
-            <div className="flex justify-between text-slate-500"><span>Moving / furnishing</span><span>− {money(nz(movingBudget))}</span></div>
-            <div className="mt-1 flex justify-between border-t border-slate-200/60 pt-1.5 font-semibold text-slate-900">
+          <div className="mt-3 grid gap-1.5 text-xs text-slate-600 dark:text-slate-400">
+            <div className="flex justify-between"><span>Total savings</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(nz(currentSavings))}</span></div>
+            <div className="flex justify-between text-slate-500 dark:text-slate-400"><span>Cash to close</span><span>− {money(totalCashNeeded)}</span></div>
+            <div className="flex justify-between text-slate-500 dark:text-slate-400"><span>Moving / furnishing</span><span>− {money(nz(movingBudget))}</span></div>
+            <div className="mt-1 flex justify-between border-t border-slate-200/60 dark:border-slate-800/60 pt-1.5 font-semibold text-slate-900 dark:text-slate-100">
               <span>Cash remaining</span>
-              <span className={cashAfterClose < 0 ? "text-rose-600" : ""}>{money(cashAfterClose)}</span>
+              <span className={cashAfterClose < 0 ? "text-rose-600 dark:text-rose-400" : ""}>{money(cashAfterClose)}</span>
             </div>
-            <div className="flex justify-between text-slate-500">
+            <div className="flex justify-between text-slate-500 dark:text-slate-400">
               <span>Emergency fund target ({emergencyFundMonths} mo)</span>
               <span>{money(emergencyFundTarget)}</span>
             </div>
           </div>
           <div className={`mt-3 rounded-xl px-3 py-2 text-xs font-semibold ${
-            cashStatus === "healthy" ? "bg-emerald-100/80 text-emerald-800"
-            : cashStatus === "tight"  ? "bg-amber-100/80 text-amber-800"
-            : "bg-rose-100/80 text-rose-800"
+            cashStatus === "healthy" ? "bg-emerald-100/80 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200"
+            : cashStatus === "tight"  ? "bg-amber-100/80 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200"
+            : "bg-rose-100/80 dark:bg-rose-900/40 text-rose-800 dark:text-rose-200"
           }`}>
             {cashStatus === "healthy"
               ? "Your cash position after closing covers your emergency fund target."
@@ -1521,43 +1521,43 @@ function USTab() {
               tip="Housing costs as % of gross monthly income." />
             <DTIRow label="Back-end DTI" value={backDTI} guide="≤36–43% guideline"
               tip="All monthly debts as % of gross income." />
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2.5 text-xs text-slate-600 dark:text-slate-400">
               Max home price at 28% front-end DTI:{" "}
-              <span className="font-semibold text-slate-900">
+              <span className="font-semibold text-slate-900 dark:text-slate-100">
                 {grossMonthly > 0 && maxHomePriceSolved > 0 ? money(maxHomePriceSolved) : "—"}
               </span>
-              <span className="ml-1 text-slate-400">(solver estimate, not a lender pre-approval)</span>
+              <span className="ml-1 text-slate-400 dark:text-slate-500">(solver estimate, not a lender pre-approval)</span>
             </div>
           </div>
         </Card>
 
         <Card>
           <H2>Stress Test</H2>
-          <p className="mb-3 text-xs text-slate-500">Drag the slider to see how your budget holds up if conditions worsen.</p>
+          <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">Drag the slider to see how your budget holds up if conditions worsen.</p>
           <div className="mb-4">
-            <div className="flex justify-between text-xs font-medium text-slate-600 mb-1">
+            <div className="flex justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
               <span>None</span><span>Low</span><span>Moderate</span><span>Severe</span>
             </div>
             <input type="range" min={0} max={3} step={1}
               value={["none","low","moderate","severe"].indexOf(stressLevel)}
               onChange={e => setStressLevel((["none","low","moderate","severe"][Number(e.target.value)] as StressLevel))}
-              className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-violet-600" />
-            <div className="mt-1.5 text-xs text-slate-500">{stressCfg.description}</div>
+              className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 dark:bg-slate-800 accent-violet-600" />
+            <div className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{stressCfg.description}</div>
           </div>
           {stressLevel !== "none" ? (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <div className="text-xs text-slate-500">Stressed monthly</div>
-                  <div className={`text-xl font-bold ${stressedTotal > totalMonthly * 1.2 ? "text-rose-600" : "text-slate-900"}`}>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">Stressed monthly</div>
+                  <div className={`text-xl font-bold ${stressedTotal > totalMonthly * 1.2 ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-slate-100"}`}>
                     {money(stressedTotal, 0)}
                   </div>
-                  <div className="text-xs text-slate-400">+{money(stressedTotal - totalMonthly, 0)} vs. base</div>
+                  <div className="text-xs text-slate-400 dark:text-slate-500">+{money(stressedTotal - totalMonthly, 0)} vs. base</div>
                 </div>
                 <div>
-                  <div className="text-xs text-slate-500">Stressed income</div>
-                  <div className="text-xl font-bold text-slate-900">{money(stressedIncome * 12)}/yr</div>
-                  {stressCfg.incomeMult < 1 && <div className="text-xs text-slate-400">{((1 - stressCfg.incomeMult) * 100).toFixed(0)}% income drop modelled</div>}
+                  <div className="text-xs text-slate-500 dark:text-slate-400">Stressed income</div>
+                  <div className="text-xl font-bold text-slate-900 dark:text-slate-100">{money(stressedIncome * 12)}/yr</div>
+                  {stressCfg.incomeMult < 1 && <div className="text-xs text-slate-400 dark:text-slate-500">{((1 - stressCfg.incomeMult) * 100).toFixed(0)}% income drop modelled</div>}
                 </div>
               </div>
               <div className="space-y-2">
@@ -1567,7 +1567,7 @@ function USTab() {
               <div className={`rounded-xl px-3 py-2 text-xs font-semibold ${stressVerdictColor}`}>{stressVerdict}</div>
             </div>
           ) : (
-            <div className="rounded-xl bg-slate-50 px-3 py-3 text-xs text-slate-500 text-center ring-1 ring-slate-200">
+            <div className="rounded-xl bg-slate-50 dark:bg-slate-950 px-3 py-3 text-xs text-slate-500 dark:text-slate-400 text-center ring-1 ring-slate-200 dark:ring-slate-800">
               Move the slider above to model stress scenarios
             </div>
           )}
@@ -1575,11 +1575,11 @@ function USTab() {
 
         <Card>
           <H2>Rate Sensitivity</H2>
-          <p className="mb-3 text-xs text-slate-500">How monthly P&amp;I shifts if rates move from your current {fmtPct(r)}.</p>
-          <div className="overflow-x-auto rounded-xl ring-1 ring-slate-200">
+          <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">How monthly P&amp;I shifts if rates move from your current {fmtPct(r)}.</p>
+          <div className="overflow-x-auto rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold text-slate-500">
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold text-slate-500 dark:text-slate-400">
                   <th className="px-3 py-2 text-left">Rate</th>
                   <th className="px-3 py-2 text-right">Monthly P&amp;I</th>
                   <th className="px-3 py-2 text-right">vs. current</th>
@@ -1587,12 +1587,12 @@ function USTab() {
               </thead>
               <tbody>
                 {sensitivityRows.map(row => (
-                  <tr key={row.delta} className={`border-b border-slate-100 ${row.isCurrent ? "bg-violet-50" : ""}`}>
-                    <td className={`px-3 py-2 ${row.isCurrent ? "font-semibold text-slate-900" : "text-slate-700"}`}>
+                  <tr key={row.delta} className={`border-b border-slate-100 dark:border-slate-900/60 ${row.isCurrent ? "bg-violet-50 dark:bg-violet-950/30" : ""}`}>
+                    <td className={`px-3 py-2 ${row.isCurrent ? "font-semibold text-slate-900 dark:text-slate-100" : "text-slate-700 dark:text-slate-300"}`}>
                       {fmtPct(row.testRate)}
-                      {row.isCurrent && <span className="ml-1.5 text-[10px] font-normal text-violet-600 uppercase tracking-wide">current</span>}
+                      {row.isCurrent && <span className="ml-1.5 text-[10px] font-normal text-violet-600 dark:text-violet-400 uppercase tracking-wide">current</span>}
                     </td>
-                    <td className="px-3 py-2 text-right text-slate-900">{money(row.testPayment, 0)}/mo</td>
+                    <td className="px-3 py-2 text-right text-slate-900 dark:text-slate-100">{money(row.testPayment, 0)}/mo</td>
                     <td className={`px-3 py-2 text-right font-semibold ${row.diffColor}`}>{row.diffStr}</td>
                   </tr>
                 ))}
@@ -1602,7 +1602,7 @@ function USTab() {
         </Card>
 
         <VCard>
-          <div className="text-xs font-semibold uppercase tracking-widest text-violet-700">Long-Term Cost</div>
+          <div className="text-xs font-semibold uppercase tracking-widest text-violet-700 dark:text-violet-300">Long-Term Cost</div>
           <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
             {[
               { label:"Loan amount",         value: money(loan) },
@@ -1611,36 +1611,36 @@ function USTab() {
               { label:"Interest/price ratio",value: hp > 0 ? fmtPct((totalInterest / hp) * 100) : "—" },
             ].map(s => (
               <div key={s.label}>
-                <div className="text-xs text-slate-500">{s.label}</div>
-                <div className="text-lg font-bold text-slate-900">{s.value}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">{s.label}</div>
+                <div className="text-lg font-bold text-slate-900 dark:text-slate-100">{s.value}</div>
               </div>
             ))}
           </div>
           {nz(extraMonthly) > 0 && (
-            <div className="mt-3 rounded-xl border border-violet-200 bg-white px-3 py-2.5 text-xs text-slate-700">
+            <div className="mt-3 rounded-xl border border-violet-200 dark:border-violet-800 bg-white dark:bg-slate-900 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-300">
               <span className="font-semibold">Extra {money(nz(extraMonthly), 0)}/mo:</span>{" "}
-              save <span className="font-semibold text-emerald-600">{money(extraInterest)}</span> in interest,
-              pay off <span className="font-semibold text-emerald-600">{extraMonthsSaved} months early</span>.
+              save <span className="font-semibold text-emerald-600 dark:text-emerald-400">{money(extraInterest)}</span> in interest,
+              pay off <span className="font-semibold text-emerald-600 dark:text-emerald-400">{extraMonthsSaved} months early</span>.
             </div>
           )}
           {bwSavings && (
-            <div className="mt-2 rounded-xl border border-violet-200 bg-white px-3 py-2.5 text-xs text-slate-700">
+            <div className="mt-2 rounded-xl border border-violet-200 dark:border-violet-800 bg-white dark:bg-slate-900 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-300">
               <span className="font-semibold">Bi-weekly payments:</span>{" "}
-              save <span className="font-semibold text-emerald-600">{money(bwSavings.interestSaved)}</span> in interest,
-              pay off <span className="font-semibold text-emerald-600">{bwSavings.monthsSaved} months early</span>.
+              save <span className="font-semibold text-emerald-600 dark:text-emerald-400">{money(bwSavings.interestSaved)}</span> in interest,
+              pay off <span className="font-semibold text-emerald-600 dark:text-emerald-400">{bwSavings.monthsSaved} months early</span>.
             </div>
           )}
         </VCard>
 
         <VCard>
-          <div className="text-xs font-semibold uppercase tracking-widest text-violet-700">Rent vs Buy Break-Even</div>
-          <div className="mt-2 text-3xl font-bold text-slate-900">{beYears ? `${beYears} years` : "30+ years"}</div>
-          <p className="mt-2 text-sm text-slate-700">
+          <div className="text-xs font-semibold uppercase tracking-widest text-violet-700 dark:text-violet-300">Rent vs Buy Break-Even</div>
+          <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">{beYears ? `${beYears} years` : "30+ years"}</div>
+          <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
             {beYears
               ? `Buying becomes cheaper than renting after ~${beYears} years at current assumptions.`
               : "Buying doesn't break even within 30 years. Renting may be more cost-effective."}
           </p>
-          <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600">
+          <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-400">
             <div>Monthly rent: <strong>{money(nz(monthlyRent))}</strong></div>
             <div>Monthly own: <strong>{money(totalMonthly)}</strong></div>
             <div>Rent growth: <strong>{fmtPct(nz(rentGrowth))}/yr</strong></div>
@@ -1662,11 +1662,11 @@ function USTab() {
 
         <Card>
           <H2>Scenario Comparison</H2>
-          <p className="mb-3 text-xs text-slate-500">Four pre-set scenarios based on your current inputs. Click a name to rename it.</p>
-          <div className="overflow-x-auto rounded-xl ring-1 ring-slate-200">
+          <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">Four pre-set scenarios based on your current inputs. Click a name to rename it.</p>
+          <div className="overflow-x-auto rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold text-slate-500">
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold text-slate-500 dark:text-slate-400">
                   <th className="px-3 py-2 text-left">Scenario</th>
                   <th className="px-3 py-2 text-right">Monthly</th>
                   <th className="px-3 py-2 text-right">Cash to Close</th>
@@ -1676,10 +1676,10 @@ function USTab() {
               </thead>
               <tbody>
                 {scenarioData.map((s, i) => (
-                  <tr key={i} className={`border-b border-slate-100 ${s.isCurrent ? "bg-violet-50" : ""}`}>
+                  <tr key={i} className={`border-b border-slate-100 dark:border-slate-900/60 ${s.isCurrent ? "bg-violet-50 dark:bg-violet-950/30" : ""}`}>
                     <td className="px-3 py-2">
                       <input
-                        className="w-full bg-transparent text-xs font-semibold text-slate-800 outline-none focus:underline"
+                        className="w-full bg-transparent text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none focus:underline"
                         value={s.name}
                         onChange={e => {
                           const names = [...scenarioNames];
@@ -1687,35 +1687,35 @@ function USTab() {
                           setScenarioNames(names);
                         }}
                       />
-                      <div className="text-[10px] text-slate-400">{money(s.homePrice, 0)} · {s.downPct.toFixed(0)}% down</div>
+                      <div className="text-[10px] text-slate-400 dark:text-slate-500">{money(s.homePrice, 0)} · {s.downPct.toFixed(0)}% down</div>
                     </td>
                     <td className="px-3 py-2 text-right">
-                      <span className={`font-semibold ${s.totalMonthly === bestMonthly ? "text-emerald-700" : "text-slate-900"}`}>
+                      <span className={`font-semibold ${s.totalMonthly === bestMonthly ? "text-emerald-700 dark:text-emerald-300" : "text-slate-900 dark:text-slate-100"}`}>
                         {money(s.totalMonthly, 0)}
                       </span>
-                      {s.totalMonthly === bestMonthly && <div className="text-[10px] text-emerald-600">lowest</div>}
+                      {s.totalMonthly === bestMonthly && <div className="text-[10px] text-emerald-600 dark:text-emerald-400">lowest</div>}
                     </td>
                     <td className="px-3 py-2 text-right">
-                      <span className="font-semibold text-slate-900">{money(s.cashToClose, 0)}</span>
+                      <span className="font-semibold text-slate-900 dark:text-slate-100">{money(s.cashToClose, 0)}</span>
                     </td>
                     <td className="px-3 py-2 text-right">
-                      <span className={`font-semibold ${s.fiveYearOwnCost === bestFiveYear ? "text-emerald-700" : "text-slate-900"}`}>
+                      <span className={`font-semibold ${s.fiveYearOwnCost === bestFiveYear ? "text-emerald-700 dark:text-emerald-300" : "text-slate-900 dark:text-slate-100"}`}>
                         {money(s.fiveYearOwnCost, 0)}
                       </span>
-                      {s.fiveYearOwnCost === bestFiveYear && <div className="text-[10px] text-emerald-600">lowest</div>}
+                      {s.fiveYearOwnCost === bestFiveYear && <div className="text-[10px] text-emerald-600 dark:text-emerald-400">lowest</div>}
                     </td>
                     <td className="px-3 py-2 text-right">
-                      <span className={`font-semibold ${s.breakEvenYears !== null && s.breakEvenYears === bestBreakEven ? "text-emerald-700" : "text-slate-900"}`}>
+                      <span className={`font-semibold ${s.breakEvenYears !== null && s.breakEvenYears === bestBreakEven ? "text-emerald-700 dark:text-emerald-300" : "text-slate-900 dark:text-slate-100"}`}>
                         {s.breakEvenYears ? `${s.breakEvenYears.toFixed(1)} yr` : "30+"}
                       </span>
-                      {s.breakEvenYears !== null && s.breakEvenYears === bestBreakEven && <div className="text-[10px] text-emerald-600">fastest</div>}
+                      {s.breakEvenYears !== null && s.breakEvenYears === bestBreakEven && <div className="text-[10px] text-emerald-600 dark:text-emerald-400">fastest</div>}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <div className="mt-2 text-xs text-slate-400">Scenario names are editable. Metrics update instantly as you change inputs.</div>
+          <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">Scenario names are editable. Metrics update instantly as you change inputs.</div>
         </Card>
 
         <Card>
@@ -1858,11 +1858,11 @@ const beYears =
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 px-5 py-4">
+      <div className="rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30 px-5 py-4">
         <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-sm font-bold text-amber-800">⚠️ International data is for planning only — not financial or legal advice</span>
+          <span className="text-sm font-bold text-amber-800 dark:text-amber-200">⚠️ International data is for planning only — not financial or legal advice</span>
         </div>
-        <p className="text-xs leading-relaxed text-amber-900">
+        <p className="text-xs leading-relaxed text-amber-900 dark:text-amber-100">
           Mortgage access for foreign buyers varies enormously by country, residency status, employment type, and individual bank policy. Rates shown are indicative benchmarks. Some countries listed may not offer mortgages to non-residents at all. Consult a local mortgage broker, tax adviser, and property lawyer.
         </p>
       </div>
@@ -1871,29 +1871,29 @@ const beYears =
         <div className="space-y-3">
           <ACard>
             <div className="flex items-start justify-between gap-3 mb-2">
-              <div className="text-xs font-semibold uppercase tracking-widest text-amber-700">⚠️ Planning Estimates Only</div>
-              <span className="flex-shrink-0 rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-800">Not a quote</span>
+              <div className="text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">⚠️ Planning Estimates Only</div>
+              <span className="flex-shrink-0 rounded-full bg-amber-200 dark:bg-amber-800 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-200">Not a quote</span>
             </div>
-            <p className="text-sm leading-6 text-slate-700">{country.notes}</p>
+            <p className="text-sm leading-6 text-slate-700 dark:text-slate-300">{country.notes}</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+              <span className="inline-flex items-center rounded-full bg-white dark:bg-slate-900 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800">
                 Min. down (est.): {effectiveDownMin}%
                 {isNonResident && buyerRules?.nonResidentDownMin && buyerRules.nonResidentDownMin !== country.downMin && (
-                  <span className="ml-1 text-amber-600">↑ non-resident</span>
+                  <span className="ml-1 text-amber-600 dark:text-amber-400">↑ non-resident</span>
                 )}
               </span>
-              <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+              <span className="inline-flex items-center rounded-full bg-white dark:bg-slate-900 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-800">
                 Indicative rate: ~{baseRate}%
                 {isNonResident && buyerRules?.nonResidentRate && buyerRules.nonResidentRate !== country.rate && (
-                  <span className="ml-1 text-amber-600">↑ non-resident</span>
+                  <span className="ml-1 text-amber-600 dark:text-amber-400">↑ non-resident</span>
                 )}
               </span>
               {/* FX Risk badge */}
               {fxRisk !== "low" && (
                 <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${
                   fxRisk === "high"
-                    ? "bg-rose-50 text-rose-700 ring-rose-200"
-                    : "bg-amber-50 text-amber-700 ring-amber-200"
+                    ? "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 ring-rose-200 dark:ring-rose-800"
+                    : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 ring-amber-200 dark:ring-amber-800"
                 }`}>
                   {fxRisk === "high" ? "⚠ High FX risk" : "~ Medium FX risk"}
                 </span>
@@ -1904,8 +1904,8 @@ const beYears =
             {fxRisk !== "low" && (
               <div className={`mt-3 rounded-xl px-3 py-2.5 text-xs leading-5 ${
                 fxRisk === "high"
-                  ? "bg-rose-50 text-rose-900 ring-1 ring-rose-200"
-                  : "bg-amber-50 text-amber-900 ring-1 ring-amber-200"
+                  ? "bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100 ring-1 ring-rose-200 dark:ring-rose-800"
+                  : "bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-100 ring-1 ring-amber-200 dark:ring-amber-800"
               }`}>
                 <span className="font-semibold">
                   {fxRisk === "high" ? "High currency volatility:" : "Moderate currency risk:"}
@@ -1918,7 +1918,7 @@ const beYears =
 
             {/* Non-resident mortgage block warning */}
             {mortgageBlocked && buyerRules?.warning && (
-              <div className="mt-3 rounded-xl border border-rose-300 bg-rose-50 px-3 py-2.5 text-xs leading-5 text-rose-900">
+              <div className="mt-3 rounded-xl border border-rose-300 dark:border-rose-700 bg-rose-50 dark:bg-rose-950/30 px-3 py-2.5 text-xs leading-5 text-rose-900 dark:text-rose-100">
                 <span className="font-semibold">🚫 Mortgage not available for non-residents:</span>{" "}
                 {buyerRules.warning}
               </div>
@@ -1926,7 +1926,7 @@ const beYears =
 
             {/* Non-resident warning (mortgage available but with caveats) */}
             {!mortgageBlocked && isNonResident && buyerRules?.warning && (
-              <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5 text-xs leading-5 text-amber-900">
+              <div className="mt-3 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-xs leading-5 text-amber-900 dark:text-amber-100">
                 <span className="font-semibold">Non-resident note:</span>{" "}
                 {buyerRules.warning}
               </div>
@@ -1946,12 +1946,12 @@ const beYears =
               <F label="Your residency status" tipSide="right"
                  tip="Non-residents often face higher down payments, higher rates, or no mortgage access at all. Selecting 'Resident' uses standard country defaults."
                  span2>
-                <div className="inline-flex rounded-xl bg-slate-100 p-1">
+                <div className="inline-flex rounded-xl bg-slate-100 dark:bg-slate-900/40 p-1">
                   {(["non-resident", "resident"] as ResidencyStatus[]).map(s => (
                     <button key={s} type="button"
                       onClick={() => setResidencyStatus(s)}
                       className={`rounded-lg px-4 py-1.5 text-xs font-semibold capitalize transition ${
-                        residencyStatus === s ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                        residencyStatus === s ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 hover:dark:text-slate-300"
                       }`}>
                       {s}
                     </button>
@@ -1972,9 +1972,9 @@ const beYears =
                 <F label="Interest rate (%)" tipSide="right"
                    tip={`${country.name} ${residencyStatus === "non-resident" && buyerRules?.nonResidentRate ? "non-resident" : "typical"} rate: ~${baseRate}%.`}>
                   <div className="space-y-1.5">
-                    <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
                       <input type="checkbox" id="customRate" checked={useCustomRate} onChange={e => setUseCustomRate(e.target.checked)}
-                        className="h-3.5 w-3.5 rounded border-slate-300 accent-violet-600" />
+                        className="h-3.5 w-3.5 rounded border-slate-300 dark:border-slate-700 accent-violet-600" />
                       <label htmlFor="customRate" className="cursor-pointer">Use custom rate</label>
                     </div>
                     {useCustomRate
@@ -2047,9 +2047,9 @@ const beYears =
 
           {/* Mortgage blocked callout */}
           {mortgageBlocked && (
-            <div className="rounded-2xl border border-rose-300 bg-rose-50 p-5">
-              <div className="text-sm font-bold text-rose-800">🚫 Mortgage figures unavailable</div>
-              <p className="mt-2 text-xs text-rose-700 leading-5">
+            <div className="rounded-2xl border border-rose-300 dark:border-rose-700 bg-rose-50 dark:bg-rose-950/30 p-5">
+              <div className="text-sm font-bold text-rose-800 dark:text-rose-200">🚫 Mortgage figures unavailable</div>
+              <p className="mt-2 text-xs text-rose-700 dark:text-rose-300 leading-5">
                 Local mortgages are generally not accessible to non-residents in {country.name}.
                 The monthly payment and amortization figures below reflect cash purchase or tax/insurance costs only.
                 Switch to <strong>Resident</strong> to model a mortgage scenario.
@@ -2058,13 +2058,13 @@ const beYears =
           )}
 
           <VCard>
-            <div className="text-xs font-semibold uppercase tracking-widest text-violet-700">Total Upfront Cash Needed</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">{money(totalUpfront)}</div>
+            <div className="text-xs font-semibold uppercase tracking-widest text-violet-700 dark:text-violet-300">Total Upfront Cash Needed</div>
+            <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">{money(totalUpfront)}</div>
             <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
               <div>Down payment: <strong>{money(dp)}</strong></div>
               <div>Closing costs: <strong>{money(closingCosts)}</strong></div>
             </div>
-            <div className="mt-2 text-xs text-slate-500">
+            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
               Does not include moving costs, currency conversion fees, or cash reserve requirements.
             </div>
           </VCard>
@@ -2079,13 +2079,13 @@ const beYears =
                   { label:"Insurance",            value: monthlyIns },
                 ].map(row => (
                   <div key={row.label} className="flex justify-between">
-                    <span className="text-slate-600">{row.label}</span>
-                    <span className="font-semibold text-slate-900">{money(row.value, 2)}</span>
+                    <span className="text-slate-600 dark:text-slate-400">{row.label}</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{money(row.value, 2)}</span>
                   </div>
                 ))}
-                <div className="flex justify-between border-t border-slate-200 pt-2 mt-2">
-                  <span className="font-semibold text-slate-900">Total monthly</span>
-                  <span className="text-xl font-bold text-violet-700">{money(totalMonthly, 2)}</span>
+                <div className="flex justify-between border-t border-slate-200 dark:border-slate-800 pt-2 mt-2">
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">Total monthly</span>
+                  <span className="text-xl font-bold text-violet-700 dark:text-violet-300">{money(totalMonthly, 2)}</span>
                 </div>
               </div>
             </Card>
@@ -2102,8 +2102,8 @@ const beYears =
                   { label:"Effective rate", value: fmtPct(effectiveRate) },
                 ].map(s => (
                   <div key={s.label}>
-                    <div className="text-xs text-slate-500">{s.label}</div>
-                    <div className="text-lg font-bold text-slate-900">{s.value}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">{s.label}</div>
+                    <div className="text-lg font-bold text-slate-900 dark:text-slate-100">{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -2119,11 +2119,11 @@ const beYears =
           </Card>
 
           <VCard>
-            <div className="text-xs font-semibold uppercase tracking-widest text-violet-700">Rent vs Buy Break-Even</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">
+            <div className="text-xs font-semibold uppercase tracking-widest text-violet-700 dark:text-violet-300">Rent vs Buy Break-Even</div>
+            <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">
               {mortgageBlocked ? "N/A" : beYears ? `${beYears} years` : "30+ years"}
             </div>
-            <p className="mt-2 text-sm text-slate-700">
+            <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
               {mortgageBlocked
                 ? "Break-even analysis requires a mortgage — not available for non-residents in this country."
                 : beYears
@@ -2181,19 +2181,19 @@ export default function MortgageCalculator() {
   ];
 
   return (
-    <div className="text-slate-900">
+    <div className="text-slate-900 dark:text-slate-100">
       <div className="flex flex-wrap items-center gap-3">
-        <div className="inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200/70 flex-wrap gap-1">
+        <div className="inline-flex rounded-xl bg-white dark:bg-slate-900 p-1 shadow-sm ring-1 ring-slate-200/70 dark:ring-slate-800/70 flex-wrap gap-1">
           {tabs.map(tab => (
             <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
               className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${
-                activeTab === tab.id ? "bg-slate-900 text-white" : "text-slate-600 hover:text-slate-900"
+                activeTab === tab.id ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
               }`}>
               {tab.label}
             </button>
           ))}
         </div>
-        <div className="text-xs text-slate-500">
+        <div className="text-xs text-slate-500 dark:text-slate-400">
           {tabs.find(t => t.id === activeTab)?.sub}
         </div>
       </div>

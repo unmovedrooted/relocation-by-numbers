@@ -9,10 +9,10 @@ export const metadata: Metadata = {
 
 export default function MethodologyPage() {
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       <div className="mx-auto max-w-5xl space-y-10 px-4 py-10">
         <header className="space-y-4">
-          <div className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+          <div className="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 dark:text-slate-400">
             Methodology
           </div>
 
@@ -20,29 +20,29 @@ export default function MethodologyPage() {
             How Relocation by Numbers Works
           </h1>
 
-          <p className="max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">
+          <p className="max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-400 sm:text-lg">
             Relocation by Numbers is built to help users compare how taxes, housing,
             cost of living, and location-based spending may affect affordability,
             relocation decisions, and financial independence planning before they move.
           </p>
 
-          <p className="max-w-3xl text-sm leading-6 text-slate-500">
+          <p className="max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">
             The tools on this site are designed for planning and comparison. They are
             intended to help users understand direction and tradeoffs, not replace tax
             filing software, lender underwriting, legal advice, or personalized financial advice.
           </p>
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             Assumptions updated: March 2026
           </p>
         </header>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             What these tools are designed to do
           </h2>
 
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 sm:text-base">
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
             <p>
               These calculators are built to compare how a move could change take-home pay,
               monthly housing pressure, cost of living, relocation readiness, and long-term
@@ -63,39 +63,39 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             How the core model works
           </h2>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">1. Income input</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">1. Income input</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 The model starts with user inputs such as salary, filing status,
                 household assumptions, savings, and housing choices where relevant.
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">2. Tax estimate</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">2. Tax estimate</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 Federal, payroll, state, or country-level tax assumptions are applied
                 to estimate after-tax income for planning comparison purposes.
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">3. Cost adjustment</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">3. Cost adjustment</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 Housing and other recurring cost assumptions are applied so the tool
                 can estimate budget pressure in the origin and destination.
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">4. Planning output</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">4. Planning output</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 The result is a comparison view showing tradeoffs such as affordability,
                 comparable salary, monthly flexibility, or FIRE impact.
               </p>
@@ -103,12 +103,12 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Tax estimates
           </h2>
 
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 sm:text-base">
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
             <p>
               Relocation by Numbers estimates after-tax income using a simplified
               planning model that may include federal income tax, FICA payroll taxes,
@@ -132,12 +132,12 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Housing and affordability estimates
           </h2>
 
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 sm:text-base">
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
             <p>
               Housing estimates are one of the largest parts of the model because housing
               is often the biggest recurring expense in a move. Depending on the calculator,
@@ -159,12 +159,12 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Cost of living assumptions
           </h2>
 
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 sm:text-base">
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
             <p>
               Cost-of-living comparisons use location-specific assumptions for categories
               such as housing, groceries, utilities, transportation, healthcare, and
@@ -187,12 +187,12 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             International relocation estimates
           </h2>
 
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 sm:text-base">
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
             <p>
               International tools add another layer beyond domestic relocation because
               visa path, residency status, one-time setup costs, and country-specific
@@ -215,12 +215,12 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             FIRE calculations
           </h2>
 
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 sm:text-base">
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
             <p>
               FIRE estimates are based on a planning framework that may include annual
               spending, withdrawal rate, after-tax income, savings assumptions, investment
@@ -243,12 +243,12 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Exact inputs, modeled estimates, and heuristics
           </h2>
 
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 sm:text-base">
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
             <p>
               Not every number on the site is the same kind of input. In general, the
               models rely on three different layers:
@@ -256,15 +256,15 @@ export default function MethodologyPage() {
 
             <ul className="list-disc space-y-2 pl-5">
               <li>
-                <span className="font-medium text-slate-900">Rule-based inputs:</span> examples include
+                <span className="font-medium text-slate-900 dark:text-slate-100">Rule-based inputs:</span> examples include
                 tax brackets, filing status logic, and structured formula-based calculations.
               </li>
               <li>
-                <span className="font-medium text-slate-900">Modeled estimates:</span> examples include
+                <span className="font-medium text-slate-900 dark:text-slate-100">Modeled estimates:</span> examples include
                 housing assumptions, monthly essentials, and affordability comparisons built from location data.
               </li>
               <li>
-                <span className="font-medium text-slate-900">Comparison heuristics:</span> examples include
+                <span className="font-medium text-slate-900 dark:text-slate-100">Comparison heuristics:</span> examples include
                 weighted affordability logic, comfort signals, and scenario-planning shortcuts used to keep the tools practical.
               </li>
             </ul>
@@ -276,12 +276,12 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Data sources and updates
           </h2>
 
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 sm:text-base">
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
             <p>
               Relocation by Numbers uses a combination of public tax parameters, housing and
               cost assumptions, internally maintained location data, and comparison logic built
@@ -301,51 +301,51 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-6">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Important disclaimer
           </h2>
 
-          <p className="mt-4 text-sm leading-7 text-slate-700 sm:text-base">
+          <p className="mt-4 text-sm leading-7 text-slate-700 dark:text-slate-300 sm:text-base">
             Relocation by Numbers provides planning estimates only. Nothing on this site should
             be considered tax, legal, mortgage, investment, or financial advice. Always verify
             major financial or relocation decisions with qualified professionals and current source documents.
           </p>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Explore the tools
           </h2>
 
           <div className="mt-4 flex flex-wrap gap-3">
             <Link
               href="/"
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-800 transition hover:bg-slate-100"
+              className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2 text-sm font-medium text-slate-800 dark:text-slate-200 transition hover:bg-slate-100 hover:dark:bg-slate-900/40"
             >
               Homepage
             </Link>
             <Link
               href="/explore"
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-800 transition hover:bg-slate-100"
+              className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2 text-sm font-medium text-slate-800 dark:text-slate-200 transition hover:bg-slate-100 hover:dark:bg-slate-900/40"
             >
               Explore
             </Link>
             <Link
               href="/compare"
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-800 transition hover:bg-slate-100"
+              className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2 text-sm font-medium text-slate-800 dark:text-slate-200 transition hover:bg-slate-100 hover:dark:bg-slate-900/40"
             >
               Compare Cities
             </Link>
             <Link
               href="/fire-calculator"
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-800 transition hover:bg-slate-100"
+              className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2 text-sm font-medium text-slate-800 dark:text-slate-200 transition hover:bg-slate-100 hover:dark:bg-slate-900/40"
             >
               FIRE Calculator
             </Link>
             <Link
               href="/international-relocation"
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-800 transition hover:bg-slate-100"
+              className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2 text-sm font-medium text-slate-800 dark:text-slate-200 transition hover:bg-slate-100 hover:dark:bg-slate-900/40"
             >
               International Relocation
             </Link>
