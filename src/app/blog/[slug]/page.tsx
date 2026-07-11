@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
+import remarkGfm from "remark-gfm";
 import { getAllPosts, getPost } from "@/lib/posts";
 
 // MDX component overrides — styled to match the site
@@ -153,7 +154,15 @@ export default async function BlogPostPage({ params }: Props) {
 
         {/* Article body */}
         <article className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 sm:p-8">
-          <MDXRemote source={post.content} components={components} />
+          <MDXRemote
+  source={post.content}
+  components={components}
+  options={{
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+    },
+  }}
+/>
         </article>
 
         {/* CTA */}
