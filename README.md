@@ -16,6 +16,17 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## FIRE report deployment settings
+
+The optional AI FIRE report requires these server-side environment variables:
+
+- `ANTHROPIC_API_KEY`: Anthropic API credential. Never expose it with a `NEXT_PUBLIC_` prefix.
+- `UPSTASH_REDIS_REST_URL`: Upstash Redis REST endpoint used for distributed rate limiting.
+- `UPSTASH_REDIS_REST_TOKEN`: Server-side token for that Redis database.
+- `FIRE_REPORT_ALLOWED_ORIGINS`: Optional comma-separated HTTPS origins allowed to call the report API. The request host is always allowed; use this for additional production or preview origins.
+
+In production, the report endpoint fails closed when distributed rate limiting is not configured. Configure the three required secrets in the deployment environment, redeploy, and verify one report request before enabling the feature publicly.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

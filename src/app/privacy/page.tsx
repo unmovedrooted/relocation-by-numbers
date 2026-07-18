@@ -44,6 +44,33 @@ export default function PrivacyPage() {
 
       <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
         <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+          AI-generated FIRE reports
+        </h2>
+
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
+          <p>
+            The optional personalized FIRE report is different from the calculators
+            that run only in your browser. The report is generated only after you
+            select the generate button.
+          </p>
+          <p>
+            At that time, the site sends the financial assumptions needed to produce
+            the report to our AI provider. These may include age, state, filing status,
+            income, spending, savings rate, projected FIRE age, withdrawal assumptions,
+            and balances by account type. The information is used to create the report
+            you requested.
+          </p>
+          <p>
+            Do not use the report feature if you do not want those selected values
+            transmitted to the AI provider. Avoid entering names, account numbers,
+            addresses, or other identifying information; the report does not require them.
+            The provider handles transmitted data under its own terms and data practices.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Analytics and usage data
         </h2>
 

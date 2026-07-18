@@ -137,9 +137,15 @@ export default function FireReport({ inputs }: { inputs: FireReportInputs }) {
                 ? "Account withdrawal order, Roth conversions, tax bracket management, and ACA strategy — built from your exact numbers."
                 : "Withdrawal order, Roth conversion windows, healthcare bridge, and sequence-of-returns protection for your specific situation."}
             </p>
+            <p className="text-xs leading-5 text-slate-500">
+              When you continue, your age, location, income, spending, tax assumptions,
+              and account balances shown here are sent to our AI provider solely to
+              generate this report. Do not include information you do not want transmitted.
+            </p>
           </div>
 
           <button
+            type="button"
             onClick={generate}
             className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-violet-300/30 bg-violet-300/10 px-4 py-2.5 text-sm font-medium text-violet-100 transition hover:bg-violet-300/20 active:scale-[0.98]"
           >
@@ -165,6 +171,7 @@ export default function FireReport({ inputs }: { inputs: FireReportInputs }) {
 
         {status === "done" && (
           <button
+            type="button"
             onClick={generate}
             className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400 transition hover:bg-white/10 hover:text-white"
           >
@@ -198,6 +205,7 @@ export default function FireReport({ inputs }: { inputs: FireReportInputs }) {
             Failed to generate — please try again.
           </p>
           <button
+            type="button"
             onClick={generate}
             className="mt-2 text-xs text-red-300 underline hover:text-red-200"
           >

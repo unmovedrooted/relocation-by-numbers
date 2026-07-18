@@ -13,6 +13,7 @@ import { getCityDefaultsByCode } from "@/lib/internationalCityDefaults";
 import { estimateInternationalTax } from "@/lib/internationalTaxes";
 import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
 import { USD_TO_LOCAL } from "@/lib/internationalFx";
+import { calculateSouthAmericaCarCost } from "@/lib/southAmericaCarCost";
 import AdSlot from "./AdSlot";
 
 // ---------------------------------------------------------------------------
@@ -413,6 +414,7 @@ const lastDefaultsCityCode = useRef<string | null>(null);
       ["healthcare", setHealthcare], ["visa", setVisaCost], ["flight", setFlightCost],
       ["shipping", setShippingCost], ["tempStay", setTemporaryStay], ["admin", setAdminFees],
       ["furniture", setFurnitureSetup], ["emergency", setEmergencyCashBuffer], ["savings", setCurrentSavings],
+      ["carCost", setCarCostMonthly],
     ];
     for (const [key, setter] of fields) { const val = qs.get(key); if (val) setter(val); }
     const vCar = qs.get("car") as YesNo | null; if (vCar === "yes" || vCar === "no") setNeedCar(vCar);
@@ -443,6 +445,7 @@ const lastDefaultsCityCode = useRef<string | null>(null);
     if (emergencyCashBuffer) qs.set("emergency", emergencyCashBuffer);
     if (currentSavings) qs.set("savings", currentSavings);
     qs.set("car", needCar);
+    if (carCostMonthly) qs.set("carCost", carCostMonthly);
     setQS(qs);
   }, [
     mode, filing, fromCountry, toCountry, fromCityCode, toCityCode,
@@ -450,7 +453,7 @@ const lastDefaultsCityCode = useRef<string | null>(null);
     destinationRent, depositRequired, firstMonthRent, lastMonthRent, furnished,
     utilitiesIncluded, groceries, utilities, transportation, healthcare, visaCost,
     flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
-    emergencyCashBuffer, currentSavings, needCar,
+    emergencyCashBuffer, currentSavings, needCar, carCostMonthly,
   ]);
 
   const targetProfile = getCountryByCode(toCountry);
@@ -506,7 +509,7 @@ const groceriesFrom = familyGroceries * fromCityMultipliers.groceries;
 const transportationFrom = familyTransportation * fromCityMultipliers.transit;
 const utilitiesFrom = familyUtilities * fromCityMultipliers.utilities;
 
-    const carCost = needCar === "yes" ? destToUsd(nz(carCostMonthly)) : 0;
+    const carCost = calculateSouthAmericaCarCost(needCar, carCostMonthly, destToUsd);
     const housingUtilities = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
     const housingTotal = rentTo + housingUtilities + carCost;
     const livingCosts = groceriesAdj + transportationAdj + healthcareAdj;
@@ -576,7 +579,7 @@ recommendation,
   }, [
     mode, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
     fromCityMultipliers, toCityMultipliers, currentCityDefaults, targetCityDefaults,
-    adults, children, needCar, furnished, utilitiesIncluded, utilities, destinationRent,
+    adults, children, needCar, carCostMonthly, furnished, utilitiesIncluded, utilities, destinationRent,
     groceries, transportation, healthcare, depositRequired, firstMonthRent, lastMonthRent,
     visaCost, flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
     emergencyCashBuffer, currentSavings, targetProfile,
@@ -823,11 +826,25 @@ recommendation,
             <div className="mt-3">
               <label className="text-sm">
                 <div className={labelHeadCls}>Need a car?</div>
-                <select className={selectCls} value={needCar} onChange={(e) => setNeedCar(e.target.value as YesNo)}>
+                <select id="south-america-need-car" className={selectCls} value={needCar} onChange={(e) => setNeedCar(e.target.value as YesNo)}>
                   <option value="no">No</option>
-                  <option value="yes">Yes (~$350/mo estimate)</option>
+                  <option value="yes">Yes</option>
                 </select>
               </label>
+              {needCar === "yes" ? (
+                <label className="mt-3 block text-sm" htmlFor="south-america-car-cost-monthly">
+                  <div className={labelHeadCls}>Monthly car estimate</div>
+                  <input
+                    id="south-america-car-cost-monthly"
+                    className={inputCls}
+                    type="number"
+                    min="0"
+                    value={carCostMonthly}
+                    onChange={(e) => setCarCostMonthly(e.target.value)}
+                    placeholder=" "
+                  />
+                </label>
+              ) : null}
             </div>
             <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Base values auto-populate from city defaults. Adjusted totals reflect family size and city cost multipliers.</div>
           </div>
@@ -1012,6 +1029,5 @@ recommendation,
       </div>
       </div>
     </div>
-  
   );
 }

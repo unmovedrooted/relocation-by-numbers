@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { Children, cloneElement, isValidElement, useState, useMemo, useEffect, useCallback, useId, type ReactNode } from "react";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer,
@@ -500,13 +500,13 @@ function inputCls(err = "") {
 const selectCls = "h-11 w-full cursor-pointer rounded-xl bg-slate-50 dark:bg-slate-950 px-3 text-sm text-slate-900 dark:text-slate-100 shadow-inner ring-1 ring-slate-200 dark:ring-slate-800 outline-none transition focus:bg-white focus:dark:bg-slate-900 focus:ring-4 focus:ring-violet-500/20 focus:dark:ring-violet-500/20";
 
 function Tip({ text, side = "left" }: { text: string; side?: string }) {
-  const pos = side === "right" ? "sm:right-0" : side === "center" ? "sm:left-1/2 sm:-translate-x-1/2" : "sm:left-0";
+  const pos = side === "right" ? "lg:right-0" : side === "center" ? "lg:left-1/2 lg:-translate-x-1/2" : "lg:left-0";
   return (
     <span className="group relative ml-1.5 inline-flex align-middle">
       <button type="button" aria-label={text}
         className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[9px] font-bold text-slate-600 dark:text-slate-400 shadow-sm transition hover:bg-slate-50 hover:dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:dark:ring-violet-600">i</button>
       <span role="tooltip"
-        className={`pointer-events-none fixed inset-x-4 top-20 z-50 w-auto rounded-xl bg-slate-900 px-3 py-2.5 text-xs leading-relaxed text-slate-100 opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 sm:absolute sm:inset-x-auto sm:top-full sm:mt-2 sm:w-64 sm:max-w-[calc(100vw-2rem)] ${pos}`}>
+        className={`pointer-events-none fixed inset-x-4 top-20 z-50 w-auto rounded-xl bg-slate-900 px-3 py-2.5 text-xs leading-relaxed text-slate-100 opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 lg:absolute lg:inset-x-auto lg:top-full lg:mt-2 lg:w-64 lg:max-w-[calc(100vw-2rem)] ${pos}`}>
         {text}
       </span>
     </span>
@@ -516,11 +516,35 @@ function Tip({ text, side = "left" }: { text: string; side?: string }) {
 function F({ label, tip = "", tipSide = "left", err = "", span2 = false, children }: {
   label:string; tip?:string; tipSide?:string; err?:string; span2?:boolean; children:React.ReactNode;
 }) {
+  const generatedId = useId().replace(/:/g, "");
+  const controlId = `mortgage-${generatedId}`;
+  const labelId = `${controlId}-label`;
+  const errorId = `${controlId}-error`;
+  let controlIndex = 0;
+  const associateControls = (node: ReactNode): ReactNode => Children.map(node, (child) => {
+    if (!isValidElement<Record<string, unknown>>(child)) return child;
+    const nativeControl = typeof child.type === "string" && ["input", "select", "textarea"].includes(child.type);
+    const sliderControl = child.type === Slider;
+    if (nativeControl || sliderControl) {
+      if (child.props.id) return child;
+      const id = `${controlId}-${controlIndex++}`;
+      return cloneElement(child, {
+        id,
+        "aria-labelledby": child.props["aria-labelledby"] ?? labelId,
+        ...(err ? { "aria-describedby": errorId, "aria-invalid": true } : {}),
+      });
+    }
+    if (child.props.children) {
+      return cloneElement(child, { children: associateControls(child.props.children as ReactNode) });
+    }
+    return child;
+  });
+  const associatedChild = associateControls(children);
   return (
     <div className={span2 ? "sm:col-span-2" : ""}>
-      <span className={lbl}>{label}{tip && <Tip text={tip} side={tipSide} />}</span>
-      {children}
-      {err && <p className="mt-1 text-xs text-rose-500 dark:text-rose-400">{err}</p>}
+      <span id={labelId} className={lbl}>{label}{tip && <Tip text={tip} side={tipSide} />}</span>
+      {associatedChild}
+      {err && <p id={errorId} className="mt-1 text-xs text-rose-500 dark:text-rose-400">{err}</p>}
     </div>
   );
 }
@@ -533,11 +557,11 @@ function RO({ value }: { value: string }) {
   );
 }
 
-function Slider({ val, set, min, max, step = 0.5 }: {
-  val: string|number; set: (v:string)=>void; min:number; max:number; step?:number;
+function Slider({ val, set, min, max, step = 0.5, id, "aria-labelledby": ariaLabelledBy }: {
+  val: string|number; set: (v:string)=>void; min:number; max:number; step?:number; id?: string; "aria-labelledby"?: string;
 }) {
   return (
-    <input type="range" min={min} max={max} step={step} value={val}
+    <input id={id} aria-labelledby={ariaLabelledBy} type="range" min={min} max={max} step={step} value={val}
       onChange={e => set(e.target.value)}
       className="mt-1.5 h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-200 dark:bg-slate-800 accent-violet-600" />
   );
@@ -1538,7 +1562,7 @@ function USTab() {
             <div className="flex justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
               <span>None</span><span>Low</span><span>Moderate</span><span>Severe</span>
             </div>
-            <input type="range" min={0} max={3} step={1}
+            <input id="mortgage-stress-level" aria-label="Stress test severity" type="range" min={0} max={3} step={1}
               value={["none","low","moderate","severe"].indexOf(stressLevel)}
               onChange={e => setStressLevel((["none","low","moderate","severe"][Number(e.target.value)] as StressLevel))}
               className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 dark:bg-slate-800 accent-violet-600" />
@@ -1679,6 +1703,8 @@ function USTab() {
                   <tr key={i} className={`border-b border-slate-100 dark:border-slate-900/60 ${s.isCurrent ? "bg-violet-50 dark:bg-violet-950/30" : ""}`}>
                     <td className="px-3 py-2">
                       <input
+                        id={`mortgage-scenario-name-${i}`}
+                        aria-label={`Scenario ${i + 1} name`}
                         className="w-full bg-transparent text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none focus:underline"
                         value={s.name}
                         onChange={e => {
@@ -1983,8 +2009,8 @@ const beYears =
                   </div>
                 </F>
                 <div className="pt-5">
-                  <span className={lbl}>Loan term</span>
-                  <select className={selectCls} value={term} onChange={e => setTerm(Number(e.target.value))} disabled={mortgageBlocked}>
+                  <label htmlFor="international-mortgage-loan-term" className={lbl}>Loan term</label>
+                  <select id="international-mortgage-loan-term" className={selectCls} value={term} onChange={e => setTerm(Number(e.target.value))} disabled={mortgageBlocked}>
                     {TERMS.map(t => <option key={t} value={t}>{t} years</option>)}
                   </select>
                 </div>

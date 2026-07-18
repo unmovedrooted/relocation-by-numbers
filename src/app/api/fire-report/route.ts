@@ -1,18 +1,28 @@
-// app/api/fire-report/route.ts
 import Anthropic from "@anthropic-ai/sdk";
 
-const client = new Anthropic();
+const MAX_BODY_BYTES = 16_384;
+const PROVIDER_TIMEOUT_MS = 25_000;
+const RATE_LIMIT_REQUESTS = 5;
+const RATE_LIMIT_WINDOW_SECONDS = 60 * 60;
 
-const SYSTEM_PROMPT = `You are a FIRE planning specialist who writes personalized withdrawal strategy reports. 
-You write in plain, direct language — no jargon, no hedging. Each section is specific to the person's actual numbers, not generic advice.
-Format your response in markdown. Use ## for section headers, **bold** for key figures and terms, and bullet points for action items.
-Keep the total report under 600 words. Every sentence should earn its place.
-Always end with a one-line disclaimer.`;
+const SYSTEM_PROMPT = `You are a FIRE planning specialist who writes personalized withdrawal strategy reports.
+Write in plain, direct language. Make each section specific to the supplied numbers.
+Format the response in markdown with ## section headers, **bold** key figures, and bullet points.
+Keep the report under 600 words and end with a one-line planning disclaimer.`;
+
+const REQUIRED_KEYS = [
+  "age", "state", "filingStatus", "fireAge", "yearsToFI", "expensesMonthly",
+  "withdrawalRatePct", "withdrawalTaxRatePct", "bal401k", "balIra",
+  "balBrokerage", "taxTreatment401k", "taxTreatmentIra", "netAnnual",
+  "currentPortfolio", "savingsRatePct", "income",
+] as const;
+const OPTIONAL_KEYS = ["targetRetirementAge"] as const;
+const ALLOWED_KEYS = new Set<string>([...REQUIRED_KEYS, ...OPTIONAL_KEYS]);
 
 type ReportInputs = {
   age: number;
   state: string;
-  filingStatus: string;
+  filingStatus: "single" | "married";
   fireAge: number | null;
   yearsToFI: number | null;
   expensesMonthly: number;
@@ -21,106 +31,275 @@ type ReportInputs = {
   bal401k: number;
   balIra: number;
   balBrokerage: number;
-  taxTreatment401k: string;
-  taxTreatmentIra: string;
+  taxTreatment401k: "traditional" | "roth";
+  taxTreatmentIra: "traditional" | "roth";
   netAnnual: number;
   currentPortfolio: number;
   savingsRatePct: number;
-  targetRetirementAge?: number;
   income: number;
+  targetRetirementAge?: number;
 };
 
-function buildPrompt(inputs: ReportInputs): string {
-  const {
-    age, state, filingStatus, fireAge, yearsToFI,
-    expensesMonthly, withdrawalRatePct, withdrawalTaxRatePct,
-    bal401k, balIra, balBrokerage,
-    taxTreatment401k, taxTreatmentIra,
-    netAnnual, currentPortfolio, savingsRatePct,
-    targetRetirementAge, income,
-  } = inputs;
+const safeHeaders = {
+  "Cache-Control": "no-store",
+  "X-Content-Type-Options": "nosniff",
+};
 
-  const annualSpend = expensesMonthly * 12;
-  const fireNumber = annualSpend / (withdrawalRatePct / 100);
-  const totalPortfolio = (bal401k || 0) + (balIra || 0) + (balBrokerage || 0) || currentPortfolio;
-  const alreadyFI = (yearsToFI ?? 1) <= 0;
-  const yearsToMedicare = Math.max(0, 65 - (fireAge ?? age));
-  const yearsToRMD = Math.max(0, 73 - (fireAge ?? age));
+function errorResponse(message: string, status: number, extraHeaders: HeadersInit = {}) {
+  return Response.json(
+    { error: message },
+    { status, headers: { ...safeHeaders, ...extraHeaders } },
+  );
+}
+
+function boundedNumber(
+  value: unknown,
+  name: string,
+  min: number,
+  max: number,
+  nullable = false,
+): number | null {
+  if (nullable && value === null) return null;
+  if (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max) {
+    throw new Error(`Invalid ${name}`);
+  }
+  return value;
+}
+
+function parseInputs(value: unknown): ReportInputs {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("Invalid body");
+  }
+  const body = value as Record<string, unknown>;
+  if (Object.keys(body).some((key) => !ALLOWED_KEYS.has(key))) {
+    throw new Error("Unknown field");
+  }
+  if (REQUIRED_KEYS.some((key) => !(key in body))) {
+    throw new Error("Missing field");
+  }
+  if (typeof body.state !== "string" || !/^[A-Za-z]{2}$/.test(body.state)) {
+    throw new Error("Invalid state");
+  }
+  if (body.filingStatus !== "single" && body.filingStatus !== "married") {
+    throw new Error("Invalid filingStatus");
+  }
+  if (body.taxTreatment401k !== "traditional" && body.taxTreatment401k !== "roth") {
+    throw new Error("Invalid taxTreatment401k");
+  }
+  if (body.taxTreatmentIra !== "traditional" && body.taxTreatmentIra !== "roth") {
+    throw new Error("Invalid taxTreatmentIra");
+  }
+
+  const targetRetirementAge = body.targetRetirementAge === undefined
+    ? undefined
+    : boundedNumber(body.targetRetirementAge, "targetRetirementAge", 18, 100) as number;
+
+  return {
+    age: boundedNumber(body.age, "age", 18, 100) as number,
+    state: body.state.toLowerCase(),
+    filingStatus: body.filingStatus,
+    fireAge: boundedNumber(body.fireAge, "fireAge", 18, 120, true),
+    yearsToFI: boundedNumber(body.yearsToFI, "yearsToFI", -1, 100, true),
+    expensesMonthly: boundedNumber(body.expensesMonthly, "expensesMonthly", 0, 1_000_000) as number,
+    withdrawalRatePct: boundedNumber(body.withdrawalRatePct, "withdrawalRatePct", 0.1, 20) as number,
+    withdrawalTaxRatePct: boundedNumber(body.withdrawalTaxRatePct, "withdrawalTaxRatePct", 0, 60) as number,
+    bal401k: boundedNumber(body.bal401k, "bal401k", 0, 1_000_000_000) as number,
+    balIra: boundedNumber(body.balIra, "balIra", 0, 1_000_000_000) as number,
+    balBrokerage: boundedNumber(body.balBrokerage, "balBrokerage", 0, 1_000_000_000) as number,
+    taxTreatment401k: body.taxTreatment401k,
+    taxTreatmentIra: body.taxTreatmentIra,
+    netAnnual: boundedNumber(body.netAnnual, "netAnnual", 0, 100_000_000) as number,
+    currentPortfolio: boundedNumber(body.currentPortfolio, "currentPortfolio", 0, 3_000_000_000) as number,
+    savingsRatePct: boundedNumber(body.savingsRatePct, "savingsRatePct", -100, 100) as number,
+    income: boundedNumber(body.income, "income", 0, 100_000_000) as number,
+    ...(targetRetirementAge === undefined ? {} : { targetRetirementAge }),
+  };
+}
+
+function requestOriginAllowed(request: Request): boolean {
+  const origin = request.headers.get("origin");
+  if (!origin) return false;
+  const requestUrl = new URL(request.url);
+  const allowed = new Set([
+    requestUrl.origin,
+    ...(process.env.FIRE_REPORT_ALLOWED_ORIGINS ?? "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+  ]);
+  return allowed.has(origin);
+}
+
+async function clientKey(request: Request): Promise<string> {
+  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const address = forwarded || request.headers.get("x-real-ip") || "unknown";
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(address));
+  return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function enforceRateLimit(request: Request): Promise<{ allowed: boolean; retryAfter: number }> {
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!redisUrl || !redisToken) {
+    if (process.env.NODE_ENV === "production") return { allowed: false, retryAfter: 60 };
+    return { allowed: true, retryAfter: 0 };
+  }
+
+  const bucket = Math.floor(Date.now() / (RATE_LIMIT_WINDOW_SECONDS * 1000));
+  const key = `fire-report:${await clientKey(request)}:${bucket}`;
+  const response = await fetch(`${redisUrl}/pipeline`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${redisToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify([
+      ["INCR", key],
+      ["EXPIRE", key, RATE_LIMIT_WINDOW_SECONDS],
+    ]),
+    cache: "no-store",
+    signal: AbortSignal.timeout(5_000),
+  });
+  if (!response.ok) throw new Error("Rate limit provider unavailable");
+  const result = await response.json() as Array<{ result?: number; error?: string }>;
+  if (!Array.isArray(result) || result[0]?.error || typeof result[0]?.result !== "number") {
+    throw new Error("Invalid rate limit response");
+  }
+  return {
+    allowed: result[0].result <= RATE_LIMIT_REQUESTS,
+    retryAfter: RATE_LIMIT_WINDOW_SECONDS,
+  };
+}
+
+async function readBoundedBody(request: Request): Promise<string> {
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const decoder = new TextDecoder();
+  let bytesRead = 0;
+  let result = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    bytesRead += value.byteLength;
+    if (bytesRead > MAX_BODY_BYTES) {
+      await reader.cancel();
+      throw new RangeError("Request too large");
+    }
+    result += decoder.decode(value, { stream: true });
+  }
+  return result + decoder.decode();
+}
+
+function buildPrompt(inputs: ReportInputs): string {
+  const annualSpend = inputs.expensesMonthly * 12;
+  const fireNumber = annualSpend / (inputs.withdrawalRatePct / 100);
+  const totalPortfolio = inputs.bal401k + inputs.balIra + inputs.balBrokerage || inputs.currentPortfolio;
+  const alreadyFI = (inputs.yearsToFI ?? 1) <= 0;
+  const yearsToMedicare = Math.max(0, 65 - (inputs.fireAge ?? inputs.age));
+  const yearsToRMD = Math.max(0, 73 - (inputs.fireAge ?? inputs.age));
 
   return `Generate a personalized withdrawal strategy report for this person:
 
-**Their situation:**
-- Age: ${age}, filing ${filingStatus}, state: ${state.toUpperCase()}
-- Gross income: $${income.toLocaleString()}/yr, net: $${Math.round(netAnnual).toLocaleString()}/yr
-- Savings rate: ${savingsRatePct}%
-- Monthly spending (retirement target): $${expensesMonthly.toLocaleString()} ($${annualSpend.toLocaleString()}/yr)
-- FIRE number: $${Math.round(fireNumber).toLocaleString()} at ${withdrawalRatePct}% withdrawal rate
-- ${alreadyFI ? `Already financially independent — FIRE age ${fireAge}` : `FIRE projected at age ${fireAge} — ${yearsToFI} years away`}
+**Situation:**
+- Age ${inputs.age}, filing ${inputs.filingStatus}, state ${inputs.state.toUpperCase()}
+- Gross income $${inputs.income.toLocaleString()}/yr; net $${Math.round(inputs.netAnnual).toLocaleString()}/yr
+- Savings rate ${inputs.savingsRatePct}%; monthly spending $${inputs.expensesMonthly.toLocaleString()}
+- FIRE number $${Math.round(fireNumber).toLocaleString()} at ${inputs.withdrawalRatePct}%
+- ${alreadyFI ? `Already financially independent; FIRE age ${inputs.fireAge}` : `Projected FIRE age ${inputs.fireAge}; ${inputs.yearsToFI} years away`}
 
 **Portfolio:**
-- 401(k) (${taxTreatment401k}): $${(bal401k || 0).toLocaleString()}
-- IRA (${taxTreatmentIra}): $${(balIra || 0).toLocaleString()}
-- Brokerage (taxable): $${(balBrokerage || 0).toLocaleString()}
-- Total: $${totalPortfolio.toLocaleString()}
-- Estimated withdrawal tax rate on traditional accounts: ${withdrawalTaxRatePct}%
+- 401(k), ${inputs.taxTreatment401k}: $${inputs.bal401k.toLocaleString()}
+- IRA, ${inputs.taxTreatmentIra}: $${inputs.balIra.toLocaleString()}
+- Taxable brokerage: $${inputs.balBrokerage.toLocaleString()}
+- Total: $${totalPortfolio.toLocaleString()}; estimated traditional-account withdrawal tax ${inputs.withdrawalTaxRatePct}%
 
-**Key timeline facts:**
-- Years until Medicare eligibility (age 65): ${yearsToMedicare}
-- Years until RMDs begin (age 73): ${yearsToRMD}
-${targetRetirementAge ? `- Target full retirement age: ${targetRetirementAge}` : ""}
+**Timeline:** ${yearsToMedicare} years to Medicare and ${yearsToRMD} years to RMDs.
+${inputs.targetRetirementAge ? `Target retirement age: ${inputs.targetRetirementAge}.` : ""}
 
-Write a personalized withdrawal strategy covering:
-1. **Withdrawal order** — which accounts to draw from first and why, given their specific mix of traditional/Roth/taxable
-2. **Roth conversion window** — whether they have a conversion opportunity, which tax brackets to target, and rough annual amounts
-3. **Tax bracket management** — how to mix account types to minimize lifetime tax on $${annualSpend.toLocaleString()}/yr spending
-4. **Healthcare bridge** — ACA subsidy strategy for the ${yearsToMedicare} years before Medicare, given their income and state
-5. **Sequence of returns protection** — specific first-5-years strategy given their account mix
-6. **Top 3 risks** — the biggest risks specific to their numbers, not generic ones
-
-Be specific to their numbers throughout. Reference their actual balances, ages, and amounts.`;
+Cover withdrawal order, Roth conversion opportunities, tax-bracket management,
+the healthcare bridge, first-five-year sequence risk, and the three largest risks.
+Use only the supplied values and do not infer identifying information.`;
 }
 
 export async function POST(request: Request) {
-  try {
-    const inputs: ReportInputs = await request.json();
+  if (!requestOriginAllowed(request)) return errorResponse("Request not allowed", 403);
 
-    const stream = client.messages.stream({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1500,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: buildPrompt(inputs) }],
-    });
+  const declaredLength = Number(request.headers.get("content-length") ?? "0");
+  if (declaredLength > MAX_BODY_BYTES) return errorResponse("Request too large", 413);
+
+  try {
+    const rateLimit = await enforceRateLimit(request);
+    if (!rateLimit.allowed) {
+      return errorResponse("Too many requests", 429, { "Retry-After": String(rateLimit.retryAfter) });
+    }
+
+    let rawBody: string;
+    try {
+      rawBody = await readBoundedBody(request);
+    } catch (error) {
+      if (error instanceof RangeError) return errorResponse("Request too large", 413);
+      throw error;
+    }
+
+    let decoded: unknown;
+    try {
+      decoded = JSON.parse(rawBody);
+    } catch {
+      return errorResponse("Invalid request", 400);
+    }
+
+    let inputs: ReportInputs;
+    try {
+      inputs = parseInputs(decoded);
+    } catch {
+      return errorResponse("Invalid request", 400);
+    }
+
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return errorResponse("Report service unavailable", 503);
+    }
+
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS);
+    const stream = client.messages.stream(
+      {
+        model: "claude-sonnet-4-6",
+        max_tokens: 1500,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: "user", content: buildPrompt(inputs) }],
+      },
+      { signal: controller.signal },
+    );
 
     const readable = new ReadableStream({
-      async start(controller) {
-        const enc = new TextEncoder();
+      async start(streamController) {
+        const encoder = new TextEncoder();
+        let failed = false;
         try {
           for await (const chunk of stream) {
-            if (
-              chunk.type === "content_block_delta" &&
-              chunk.delta.type === "text_delta"
-            ) {
-              controller.enqueue(enc.encode(chunk.delta.text));
+            if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
+              streamController.enqueue(encoder.encode(chunk.delta.text));
             }
           }
+        } catch {
+          failed = true;
+          streamController.error(new Error("Report generation failed"));
         } finally {
-          controller.close();
+          clearTimeout(timeout);
+          controller.abort();
+          if (!failed) streamController.close();
         }
       },
     });
 
     return new Response(readable, {
       headers: {
+        ...safeHeaders,
         "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-store",
-        "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (err) {
-    console.error("[fire-report]", err);
-    return new Response("Failed to generate report", {
-      status: 500,
-      headers: { "Cache-Control": "no-store" },
-    });
+  } catch {
+    return errorResponse("Report service unavailable", 503);
   }
 }

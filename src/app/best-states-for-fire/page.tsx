@@ -142,7 +142,7 @@ export default function Page() {
             {ranked.map((state, i) => (
               <div
                 key={state.code}
-                className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 p-4"
+                className="flex flex-col items-start gap-4 rounded-xl border border-white/10 bg-white/5 p-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex items-center gap-3">
                   <span className="w-6 text-sm font-semibold text-slate-400">
@@ -165,7 +165,7 @@ export default function Page() {
 
                 <Link
                   href={`/best-states-for-fire/${state.name.toLowerCase().replace(/\s/g, "-")}`}
-                  className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-emerald-300 hover:bg-white/10"
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-emerald-300 hover:bg-white/10 sm:shrink-0"
                 >
                   View state →
                 </Link>
