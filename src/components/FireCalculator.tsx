@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import CalculatorNumberField from "./calculator-form/CalculatorNumberField";
 import FireEmailCapture from "@/components/FireEmailCapture";
 import FireReport, { type FireReportInputs } from "@/components/FireReport";
 import FireUpsellCard from "@/components/FireUpsellCard";
@@ -899,28 +900,16 @@ function Field({ label, value, onChange, prefix, suffix, info }: {
   label: string; value: number; onChange: (v: number) => void;
   prefix?: string; suffix?: string; info?: string;
 }) {
-  const [raw, setRaw] = useState(value === 0 ? "" : String(value));
-  useEffect(() => { setRaw(value === 0 ? "" : String(value)); }, [value]);
   return (
-    <label className="block">
-      <div className="mb-1 flex items-center text-[11px] font-medium leading-tight text-slate-300">
-        <span>{label}</span>
-        {info ? <InfoTip text={info} /> : null}
-      </div>
-      <div className="flex items-center rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 shadow-inner transition focus-within:border-emerald-400/50 focus-within:ring-4 focus-within:ring-emerald-400/10">
-        {prefix ? <span className="mr-2 text-sm text-slate-400">{prefix}</span> : null}
-        <input type="text" inputMode="numeric" value={raw}
-          className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
-          onChange={e => setRaw(e.target.value)}
-          onBlur={() => {
-            const n = raw.trim() === "" ? 0 : Number(raw.trim());
-            const safe = Number.isFinite(n) ? n : 0;
-            onChange(safe);
-            setRaw(safe === 0 ? "" : String(safe));
-          }} />
-        {suffix ? <span className="ml-2 text-sm text-slate-400">{suffix}</span> : null}
-      </div>
-    </label>
+    <CalculatorNumberField
+      label={label}
+      ariaLabel={label || "Brokerage tax drag"}
+      value={value}
+      onChange={onChange}
+      prefix={prefix}
+      suffix={suffix}
+      info={info ? <InfoTip text={info} /> : null}
+    />
   );
 }
 
@@ -1491,26 +1480,26 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             <Field label="Current age" value={inputs.age} onChange={v => setInputs(s => ({ ...s, age: clamp(v, 0, 100) }))} />
             <Field label="Annual gross income" value={inputs.income} onChange={v => setInputs(s => ({ ...s, income: clamp(v, 0, 2_000_000) }))} prefix="$" />
 
-            <label className="block">
+            <div className="block">
               <div className="mb-0.5 flex items-center text-[11px] font-medium leading-tight text-slate-300">
-                State for tax estimate
+                <label htmlFor="fire-state">State for tax estimate</label>
                 <InfoTip text="Used to estimate after-tax income with a simplified state-specific tax model." />
               </div>
-              <select value={inputs.state} onChange={e => setInputs(s => ({ ...s, state: e.target.value as StateChoice }))}
+              <select id="fire-state" value={inputs.state} onChange={e => setInputs(s => ({ ...s, state: e.target.value as StateChoice }))}
                 className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10">
                 <option value="" disabled className="bg-slate-900">Select a state…</option>
                 {STATES.map(st => <option key={st.code} value={st.code} className="bg-slate-900">{st.name}</option>)}
               </select>
-            </label>
+            </div>
 
-            <label className="block">
-              <div className="mb-0.5 text-[11px] font-medium leading-tight text-slate-300">Filing status</div>
-              <select value={inputs.filingStatus} onChange={e => setInputs(s => ({ ...s, filingStatus: e.target.value as FilingStatus }))}
+            <div className="block">
+              <label htmlFor="fire-filing-status" className="mb-0.5 block text-[11px] font-medium leading-tight text-slate-300">Filing status</label>
+              <select id="fire-filing-status" value={inputs.filingStatus} onChange={e => setInputs(s => ({ ...s, filingStatus: e.target.value as FilingStatus }))}
                 className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10">
                 <option value="single" className="bg-slate-900">Single</option>
                 <option value="married" className="bg-slate-900">Married</option>
               </select>
-            </label>
+            </div>
 
             <Field label="401(k) contribution %" info="Percentage of salary contributed to a 401(k). Lowers taxable income." value={inputs.k401Pct} onChange={v => setInputs(s => ({ ...s, k401Pct: clamp(v, 0, 60) }))} suffix="%" />
             <Field label="Monthly spending" info="Used to calculate your FIRE target. Higher spending = larger number." value={inputs.expensesMonthly} onChange={v => setInputs(s => ({ ...s, expensesMonthly: clamp(v, 0, 200_000) }))} prefix="$" />
