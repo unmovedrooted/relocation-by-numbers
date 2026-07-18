@@ -16,6 +16,14 @@ import { estimateInternationalTax } from "@/lib/internationalTaxes";
 import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
 import { USD_TO_LOCAL } from "@/lib/internationalFx";
 import { calculateSouthAmericaCarCost } from "@/lib/southAmericaCarCost";
+import {
+  applySouthAmericaScenarioVersion,
+  getSouthAmericaFieldInputUnit,
+  getSouthAmericaScenarioContract,
+  southAmericaInputToUsd,
+  type SouthAmericaDestinationCostField,
+  type SouthAmericaScenarioContract,
+} from "@/lib/southAmericaCurrencyContract";
 import AdSlot from "./AdSlot";
 
 // ---------------------------------------------------------------------------
@@ -254,11 +262,15 @@ function VisaContextCard({ countryCode }: { countryCode: string }) {
 // MAIN COMPONENT
 // ---------------------------------------------------------------------------
 export default function SouthAmericaRelocationCalculator() {
-  const hasMounted = useRef(false);
   // FIX 4: Prevent city defaults from overwriting QS-restored custom values
   const restoredFromUrl = useRef(false);
 const lastDefaultsCityCode = useRef<string | null>(null);
   const [qsHydrated, setQsHydrated] = useState(false);
+  const [scenarioContract, setScenarioContract] = useState<SouthAmericaScenarioContract>({
+    kind: "v2",
+    requestedVersion: "2",
+    destinationInputUnit: "usd",
+  });
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
 
   const [mode, setMode] = useState<Mode>("working");
@@ -326,6 +338,10 @@ const lastDefaultsCityCode = useRef<string | null>(null);
   );
 
   const originCurrency = COUNTRY_TO_CURRENCY[fromCountry] ?? "USD";
+  const destinationCurrency = COUNTRY_TO_CURRENCY[toCountry] ?? "USD";
+  const destinationInputCurrency = scenarioContract.destinationInputUnit === "usd" ? "USD" : destinationCurrency;
+  const destinationFieldCurrency = (field: SouthAmericaDestinationCostField) =>
+    getSouthAmericaFieldInputUnit(scenarioContract, field) === "usd" ? "USD" : destinationCurrency;
 
   const displayAmount = (amountUsd: number, digits: number = 0) => {
     if (currencyDisplay === "CURRENT") return money(convertUsdToLocal(amountUsd, fromCountry), digits, COUNTRY_TO_CURRENCY[fromCountry] ?? "USD");
@@ -390,6 +406,7 @@ const lastDefaultsCityCode = useRef<string | null>(null);
   useEffect(() => {
   const qs = getQS();
   restoredFromUrl.current = qs.toString().length > 0;
+  setScenarioContract(getSouthAmericaScenarioContract(qs));
 
   const vMode = qs.get("mode");
   if (vMode === "working" || vMode === "retired") setMode(vMode);
@@ -424,8 +441,9 @@ const lastDefaultsCityCode = useRef<string | null>(null);
   }, []);
 
   useEffect(() => {
-    if (!hasMounted.current) { hasMounted.current = true; return; }
+    if (!qsHydrated) return;
     const qs = new URLSearchParams();
+    applySouthAmericaScenarioVersion(qs, scenarioContract);
     qs.set("mode", mode); qs.set("filing", filing);
     qs.set("fromCountry", fromCountry); qs.set("toCountry", toCountry);
     if (fromCityCode) qs.set("fromCityCode", fromCityCode);
@@ -456,6 +474,7 @@ const lastDefaultsCityCode = useRef<string | null>(null);
     utilitiesIncluded, groceries, utilities, transportation, healthcare, visaCost,
     flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
     emergencyCashBuffer, currentSavings, needCar, carCostMonthly,
+    qsHydrated, scenarioContract,
   ]);
 
   const targetProfile = getCountryByCode(toCountry);
@@ -468,6 +487,8 @@ const lastDefaultsCityCode = useRef<string | null>(null);
    const annualIncome = convertLocalToUsd(annualIncomeLocalOrigin, fromCountry);
 
 const destToUsd = (v: number) => convertLocalToUsd(v, toCountry);
+const destinationInputToUsd = (v: number, field: SouthAmericaDestinationCostField) =>
+  southAmericaInputToUsd(v, getSouthAmericaFieldInputUnit(scenarioContract, field), destToUsd);
 const originToUsd = (v: number) => convertLocalToUsd(v, fromCountry);
 
 const grossMonthly = annualIncome / 12;
@@ -487,31 +508,36 @@ const grossMonthly = annualIncome / 12;
     const adultCount = Math.max(1, nz(adults));
     const childCount = Math.max(0, nz(children));
   const familyGroceries =
-  destToUsd(nz(groceries)) *
+  destinationInputToUsd(nz(groceries), "groceries") *
   (1 + (adultCount - 1) * 0.55 + childCount * 0.35);
 
 const familyTransportation =
-  destToUsd(nz(transportation)) *
+  destinationInputToUsd(nz(transportation), "transport") *
   (1 + (adultCount - 1) * 0.35 + childCount * 0.15);
 
 const healthcareAdj =
-  destToUsd(nz(healthcare)) *
+  destinationInputToUsd(nz(healthcare), "healthcare") *
   (1 + (adultCount - 1) * 0.7 + childCount * 0.5);
 
 const familyUtilities =
-  destToUsd(nz(utilities)) *
+  destinationInputToUsd(nz(utilities), "utilities") *
   (1 + (adultCount - 1) * 0.25 + childCount * 0.15);
 
 const groceriesAdj = familyGroceries * toCityMultipliers.groceries;
 const transportationAdj = familyTransportation * toCityMultipliers.transit;
 const utilitiesAdj = familyUtilities * toCityMultipliers.utilities;
-const rentTo = destToUsd(nz(destinationRent)) * toCityMultipliers.housing;
+const rentTo = destinationInputToUsd(nz(destinationRent), "rent") * toCityMultipliers.housing;
 
 const groceriesFrom = familyGroceries * fromCityMultipliers.groceries;
 const transportationFrom = familyTransportation * fromCityMultipliers.transit;
 const utilitiesFrom = familyUtilities * fromCityMultipliers.utilities;
 
-    const carCost = calculateSouthAmericaCarCost(needCar, carCostMonthly, destToUsd);
+    const carCost = calculateSouthAmericaCarCost(
+      needCar,
+      carCostMonthly,
+      getSouthAmericaFieldInputUnit(scenarioContract, "carCost"),
+      destToUsd,
+    );
     const housingUtilities = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
     const housingTotal = rentTo + housingUtilities + carCost;
     const livingCosts = groceriesAdj + transportationAdj + healthcareAdj;
@@ -526,16 +552,16 @@ const utilitiesFrom = familyUtilities * fromCityMultipliers.utilities;
 
     const furnitureAdj = furnished === "furnished" ? 0 : nz(furnitureSetup);
     const upfrontCashNeeded =
-  destToUsd(nz(depositRequired)) +
-  destToUsd(nz(firstMonthRent)) +
-  destToUsd(nz(lastMonthRent)) +
-  destToUsd(nz(visaCost)) +
-  nz(flightCost) +
-  destToUsd(nz(shippingCost)) +
-  destToUsd(nz(temporaryStay)) +
-  destToUsd(nz(adminFees)) +
-  destToUsd(furnitureAdj) +
-  destToUsd(nz(emergencyCashBuffer));
+  destinationInputToUsd(nz(depositRequired), "deposit") +
+  destinationInputToUsd(nz(firstMonthRent), "firstRent") +
+  destinationInputToUsd(nz(lastMonthRent), "lastRent") +
+  destinationInputToUsd(nz(visaCost), "visa") +
+  destinationInputToUsd(nz(flightCost), "flight") +
+  destinationInputToUsd(nz(shippingCost), "shipping") +
+  destinationInputToUsd(nz(temporaryStay), "tempStay") +
+  destinationInputToUsd(nz(adminFees), "admin") +
+  destinationInputToUsd(furnitureAdj, "furniture") +
+  destinationInputToUsd(nz(emergencyCashBuffer), "emergency");
 
     const totalMonthlyOutflow = housingTotal + livingCosts;
     // FIX 5: Convert savings from origin currency to USD before dividing
@@ -584,7 +610,7 @@ recommendation,
     adults, children, needCar, carCostMonthly, furnished, utilitiesIncluded, utilities, destinationRent,
     groceries, transportation, healthcare, depositRequired, firstMonthRent, lastMonthRent,
     visaCost, flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
-    emergencyCashBuffer, currentSavings, targetProfile,
+    emergencyCashBuffer, currentSavings, targetProfile, scenarioContract,
   ]);
 
   const adultsNum = Math.max(1, Number(adults) || 1);
@@ -647,6 +673,17 @@ recommendation,
         </div>
       </div>
 
+      {qsHydrated && scenarioContract.kind === "legacy" ? (
+        <aside aria-label="Legacy scenario currency information" className="mt-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-100">
+          This older shared scenario keeps its original currency rules: destination costs use {destinationCurrency}, except the flight estimate uses USD. New scenarios use USD for destination-cost inputs.
+        </aside>
+      ) : null}
+      {qsHydrated && scenarioContract.kind === "unsupported" ? (
+        <aside aria-label="Unsupported scenario version information" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+          Scenario version “{scenarioContract.requestedVersion}” is not supported. To avoid silently changing these values, destination costs are being interpreted with the legacy {destinationCurrency} rules; the flight estimate remains USD.
+        </aside>
+      ) : null}
+
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* LEFT — INPUTS */}
         <div className="space-y-3">
@@ -708,7 +745,7 @@ recommendation,
                   <option value="freelance">Freelance / self-employed</option>
               </CalculatorSelect>
 
-              <CalculatorImmediateNumberField id="south-america-savings" label="Current savings available" className={inputCls} value={currentSavings} onChange={setCurrentSavings} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-savings" label={`Current savings available (${originCurrency})`} className={inputCls} value={currentSavings} onChange={setCurrentSavings} placeholder=" " />
 
               <CalculatorImmediateNumberField id="south-america-adults" label="Number of adults" className={inputCls} value={adults} onChange={setAdults} placeholder=" " />
 
@@ -722,10 +759,10 @@ recommendation,
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">Housing</div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <CalculatorImmediateNumberField id="south-america-rent" label="Rent in destination (monthly)" wrapperClassName="sm:col-span-2" className={inputCls} value={destinationRent} onChange={setDestinationRent} placeholder=" " />
-              <CalculatorImmediateNumberField id="south-america-deposit" label="Deposit required" className={inputCls} value={depositRequired} onChange={setDepositRequired} placeholder=" " />
-              <CalculatorImmediateNumberField id="south-america-first-rent" label="First month rent" className={inputCls} value={firstMonthRent} onChange={setFirstMonthRent} placeholder=" " />
-              <CalculatorImmediateNumberField id="south-america-last-rent" label="Last month rent (if applicable)" className={inputCls} value={lastMonthRent} onChange={setLastMonthRent} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-rent" label={`Rent in destination (${destinationInputCurrency}/month)`} wrapperClassName="sm:col-span-2" className={inputCls} value={destinationRent} onChange={setDestinationRent} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-deposit" label={`Deposit required (${destinationInputCurrency})`} className={inputCls} value={depositRequired} onChange={setDepositRequired} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-first-rent" label={`First month rent (${destinationInputCurrency})`} className={inputCls} value={firstMonthRent} onChange={setFirstMonthRent} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-last-rent" label={`Last month rent (${destinationInputCurrency}, if applicable)`} className={inputCls} value={lastMonthRent} onChange={setLastMonthRent} placeholder=" " />
               <CalculatorSelect id="south-america-furnished" label="Furnished or unfurnished" className={selectCls} value={furnished} onChange={(e) => setFurnished(e.target.value as FurnishedType)}>
                   <option value="unfurnished">Unfurnished</option>
                   <option value="furnished">Furnished</option>
@@ -744,10 +781,10 @@ recommendation,
               <InfoTip text="Base estimates for a single adult in the destination city. Adjusted automatically for family size and city-level cost multipliers. Edit to match your actual expectations." />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <CalculatorImmediateNumberField id="south-america-groceries" label="Groceries (base, single adult)" info={<InfoTip text="Adjusted for family size and destination city cost index." />} className={inputCls} value={groceries} onChange={setGroceries} placeholder=" " helpText={<>Adjusted: {displayAmount(results.groceriesAdj, 0)}</>} />
-              <CalculatorImmediateNumberField id="south-america-utilities" label="Utilities (base, single adult)" info={<InfoTip text="Only counted if utilities are not included in your rent." />} className={inputCls} value={utilities} onChange={setUtilities} placeholder=" " helpText={<>Adjusted: {displayAmount(results.utilitiesAdj, 0)}</>} />
-              <CalculatorImmediateNumberField id="south-america-transportation" label="Transportation (base, single adult)" info={<InfoTip text="Adjusted for family size and destination city transit costs." />} className={inputCls} value={transportation} onChange={setTransportation} placeholder=" " helpText={<>Adjusted: {displayAmount(results.transportationAdj, 0)}</>} />
-              <CalculatorImmediateNumberField id="south-america-healthcare" label="Healthcare (base, single adult)" info={<InfoTip text="Adjusted for family size. Covers insurance and out-of-pocket estimates." />} className={inputCls} value={healthcare} onChange={setHealthcare} placeholder=" " helpText={<>Adjusted: {displayAmount(results.healthcareAdj, 0)}</>} />
+              <CalculatorImmediateNumberField id="south-america-groceries" label={`Groceries (${destinationInputCurrency}/month, base single adult)`} info={<InfoTip text="Adjusted for family size and destination city cost index." />} className={inputCls} value={groceries} onChange={setGroceries} placeholder=" " helpText={<>Adjusted: {displayAmount(results.groceriesAdj, 0)}</>} />
+              <CalculatorImmediateNumberField id="south-america-utilities" label={`Utilities (${destinationInputCurrency}/month, base single adult)`} info={<InfoTip text="Only counted if utilities are not included in your rent." />} className={inputCls} value={utilities} onChange={setUtilities} placeholder=" " helpText={<>Adjusted: {displayAmount(results.utilitiesAdj, 0)}</>} />
+              <CalculatorImmediateNumberField id="south-america-transportation" label={`Transportation (${destinationInputCurrency}/month, base single adult)`} info={<InfoTip text="Adjusted for family size and destination city transit costs." />} className={inputCls} value={transportation} onChange={setTransportation} placeholder=" " helpText={<>Adjusted: {displayAmount(results.transportationAdj, 0)}</>} />
+              <CalculatorImmediateNumberField id="south-america-healthcare" label={`Healthcare (${destinationInputCurrency}/month, base single adult)`} info={<InfoTip text="Adjusted for family size. Covers insurance and out-of-pocket estimates." />} className={inputCls} value={healthcare} onChange={setHealthcare} placeholder=" " helpText={<>Adjusted: {displayAmount(results.healthcareAdj, 0)}</>} />
             </div>
             <div className="mt-3">
               <CalculatorSelect id="south-america-need-car" label="Need a car?" className={selectCls} value={needCar} onChange={(e) => setNeedCar(e.target.value as YesNo)}>
@@ -755,7 +792,7 @@ recommendation,
                   <option value="yes">Yes</option>
               </CalculatorSelect>
               {needCar === "yes" ? (
-                <CalculatorImmediateNumberField id="south-america-car-cost-monthly" label="Monthly car estimate" wrapperClassName="mt-3" className={inputCls} min={0} value={carCostMonthly} onChange={setCarCostMonthly} placeholder=" " />
+                <CalculatorImmediateNumberField id="south-america-car-cost-monthly" label={`Monthly car estimate (${destinationInputCurrency}/month)`} wrapperClassName="mt-3" className={inputCls} min={0} value={carCostMonthly} onChange={setCarCostMonthly} placeholder=" " />
               ) : null}
             </div>
             <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Base values auto-populate from city defaults. Adjusted totals reflect family size and city cost multipliers.</div>
@@ -765,13 +802,13 @@ recommendation,
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">One-Time Moving Costs</div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <CalculatorImmediateNumberField id="south-america-visa" label="Visa / permit estimate" className={inputCls} value={visaCost} onChange={setVisaCost} placeholder=" " />
-              <CalculatorImmediateNumberField id="south-america-flight" label="One-way flight estimate" className={inputCls} value={flightCost} onChange={setFlightCost} placeholder=" " />
-              <CalculatorImmediateNumberField id="south-america-shipping" label="Shipping / baggage estimate" className={inputCls} value={shippingCost} onChange={setShippingCost} placeholder=" " />
-              <CalculatorImmediateNumberField id="south-america-temporary-stay" label="Temporary housing estimate" className={inputCls} value={temporaryStay} onChange={setTemporaryStay} placeholder=" " />
-              <CalculatorImmediateNumberField id="south-america-admin" label="Setup / admin estimate" className={inputCls} value={adminFees} onChange={setAdminFees} placeholder=" " />
-              <CalculatorImmediateNumberField id="south-america-furniture" label="Furniture / setup estimate" className={inputCls} value={furnitureSetup} onChange={setFurnitureSetup} placeholder=" " />
-              <CalculatorImmediateNumberField id="south-america-emergency" label="Recommended cash buffer" wrapperClassName="sm:col-span-2" className={inputCls} value={emergencyCashBuffer} onChange={setEmergencyCashBuffer} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-visa" label={`Visa / permit estimate (${destinationFieldCurrency("visa")})`} className={inputCls} value={visaCost} onChange={setVisaCost} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-flight" label={`One-way flight estimate (${destinationFieldCurrency("flight")})`} className={inputCls} value={flightCost} onChange={setFlightCost} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-shipping" label={`Shipping / baggage estimate (${destinationFieldCurrency("shipping")})`} className={inputCls} value={shippingCost} onChange={setShippingCost} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-temporary-stay" label={`Temporary housing estimate (${destinationFieldCurrency("tempStay")})`} className={inputCls} value={temporaryStay} onChange={setTemporaryStay} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-admin" label={`Setup / admin estimate (${destinationFieldCurrency("admin")})`} className={inputCls} value={adminFees} onChange={setAdminFees} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-furniture" label={`Furniture / setup estimate (${destinationFieldCurrency("furniture")})`} className={inputCls} value={furnitureSetup} onChange={setFurnitureSetup} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-emergency" label={`Recommended cash buffer (${destinationFieldCurrency("emergency")})`} wrapperClassName="sm:col-span-2" className={inputCls} value={emergencyCashBuffer} onChange={setEmergencyCashBuffer} placeholder=" " />
             </div>
             <div className="mt-4 w-full text-xs text-slate-500 dark:text-slate-400">Planning estimates only.</div>
           </div>
