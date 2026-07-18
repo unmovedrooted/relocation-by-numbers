@@ -79,19 +79,20 @@ export default function RootLayout({
 
           <div className="flex min-h-screen flex-col">
             <header className="border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
-              <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-                <Link href="/" className="flex items-center">
+              <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:py-4">
+                <Link href="/" className="flex min-w-0 items-center">
                   <Image
                     src="/logo.svg"
                     alt="Relocation by Numbers"
                     width={160}
                     height={48}
+                    className="h-auto w-[132px] sm:w-[160px]"
                     priority
                   />
                 </Link>
 
-                <div className="flex items-center gap-4">
-                  <nav className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-300">
+                <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+                  <nav aria-label="Primary navigation" className="hidden items-center gap-4 text-sm text-slate-600 dark:text-slate-300 lg:flex">
                     {NAV_LINKS.map(({ href, label }) => (
                       <Link
                         key={href}
@@ -103,6 +104,18 @@ export default function RootLayout({
                     ))}
                   </nav>
                   <ThemeToggle />
+                  <details className="group relative lg:hidden">
+                    <summary className="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-xl border border-slate-200 text-slate-700 marker:content-none dark:border-slate-700 dark:text-slate-200" aria-label="Open navigation menu">
+                      <span className="text-xl leading-none" aria-hidden="true">☰</span>
+                    </summary>
+                    <nav aria-label="Mobile navigation" className="absolute right-0 z-50 mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                      {NAV_LINKS.map(({ href, label }) => (
+                        <Link key={href} href={href} className="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                          {label}
+                        </Link>
+                      ))}
+                    </nav>
+                  </details>
                 </div>
               </div>
             </header>

@@ -78,6 +78,32 @@ export default function Page() {
 
         <InternationalRelocationCalculator />
 
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">
+            Explore more relocation planning tools
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            Keep comparing your options with more relocation, budgeting, and FIRE tools from Relocation by Numbers.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link href="/explore" className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+              Explore all tools
+            </Link>
+            <Link href="/europe-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800">
+              Europe Calculator
+            </Link>
+            <Link href="/asia-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800">
+              Asia Calculator
+            </Link>
+            <Link href="/caribbean-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800">
+              Caribbean Calculator
+            </Link>
+            <Link href="/south-america-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800">
+              South America Calculator
+            </Link>
+          </div>
+        </section>
+
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID ? (
           <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <AdSlot
@@ -277,7 +303,7 @@ export default function Page() {
           </dl>
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div>
           <section className="rounded-2xl border border-emerald-200/60 bg-emerald-50 p-5">
             <div className="text-sm font-semibold text-slate-900">
               Thinking bigger than just moving?
@@ -301,31 +327,6 @@ export default function Page() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold tracking-tight text-slate-900">
-              Explore more relocation planning tools
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              Keep comparing your options with more relocation, budgeting, and FIRE tools from Relocation by Numbers.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <a href="/explore" className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-                Explore all tools
-              </a>
-              <a href="/europe-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                Europe Calculator
-              </a>
-              <a href="/asia-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                Asia Calculator
-              </a>
-              <a href="/caribbean-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                Caribbean Calculator
-              </a>
-              <a href="/south-america-relocation-calculator" className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                South America Calculator
-              </a>
-            </div>
-          </section>
         </div>
       </section>
 

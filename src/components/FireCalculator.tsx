@@ -1880,7 +1880,8 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
                   <div className="text-sm font-semibold text-white">Part-time income sensitivity</div>
                   <div className="mt-1 text-xs text-slate-400">How different income levels change your number and timeline</div>
-                  <div className="mt-3 overflow-hidden rounded-xl border border-white/10">
+                <div className="mt-3 overflow-x-auto overscroll-x-contain rounded-xl border border-white/10" role="region" aria-label="Part-time income sensitivity" tabIndex={0}>
+                  <div className="min-w-[26rem]">
                     <div className="grid grid-cols-4 bg-white/5 px-3 py-2 text-[11px] font-semibold tracking-widest text-slate-300/80">
                       <div>PT INCOME</div><div>FIRE #</div><div>YEARS</div><div>AGE</div>
                     </div>
@@ -1897,6 +1898,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                         </div>
                       ))}
                     </div>
+                  </div>
                   </div>
                 </div>
               </>)}
@@ -1961,11 +1963,11 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 <div className="text-xs text-slate-400">{projection.length > 0 ? `Age ${projection[0].age} → ${projection[projection.length - 1].age}` : ""}</div>
               </div>
               <div className="mt-3 h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={comparisonChartData} margin={{ top: 18, right: 24, bottom: 6, left: 6 }}>
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                  <LineChart data={comparisonChartData} margin={{ top: 18, right: 8, bottom: 6, left: 0 }}>
                     <CartesianGrid stroke="rgba(255,255,255,0.07)" vertical={false} />
                     <XAxis dataKey="age" tick={{ fontSize: 12, fill: "rgba(148,163,184,0.95)" }} axisLine={false} tickLine={false} minTickGap={24} />
-                    <YAxis tick={{ fontSize: 12, fill: "rgba(148,163,184,0.95)" }} axisLine={false} tickLine={false} width={74}
+                    <YAxis tick={{ fontSize: 11, fill: "rgba(148,163,184,0.95)" }} axisLine={false} tickLine={false} width={52}
                       tickFormatter={v => { const n = Number(v); if (!Number.isFinite(n)) return ""; if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`; if (n >= 1_000) return `${Math.round(n / 1_000)}k`; return `${Math.round(n)}`; }} />
                     <Tooltip formatter={(value, name) => {
                       const label =
@@ -2025,9 +2027,11 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="mt-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-slate-300">
                 Current rate: {pct(savingsRate)} · nearest row highlighted
               </div>
-              <div className="mt-4 overflow-hidden rounded-xl border border-white/10">
+              <div className="mt-4 overflow-x-auto overscroll-x-contain rounded-xl border border-white/10" role="region" aria-label="Savings rate sensitivity" tabIndex={0}>
+                <div className="min-w-[26rem]">
                 <div className="grid grid-cols-4 bg-white/5 px-3 py-2 text-[11px] font-semibold tracking-widest text-slate-300/80">
                   <div>RATE</div><div>SPENDING</div><div>YEARS</div><div>AGE</div>
+                </div>
                 </div>
                 <div className="divide-y divide-white/10">
                   {savingsTable.map(row => {

@@ -192,7 +192,7 @@ export default function Page() {
             aria-hidden
             className="pointer-events-none absolute inset-0 flex items-center justify-center"
           >
-            <div className="h-[420px] w-[700px] rounded-full bg-violet-100/50 blur-3xl dark:bg-violet-950/30" />
+            <div className="h-[420px] w-[min(700px,100vw)] rounded-full bg-violet-100/50 blur-3xl dark:bg-violet-950/30" />
           </div>
 
           <div className="relative mx-auto max-w-3xl px-4 sm:px-6">
@@ -256,7 +256,7 @@ export default function Page() {
               { stat: 'Real taxes',   label: 'Federal + state + local' },
               { stat: 'Instant answer', label: 'Safe · Tight · Stretch' },
             ].map(({ stat, label }) => (
-              <div key={label} className="py-4 text-center">
+              <div key={label} className="min-w-0 px-1 py-4 text-center sm:px-3">
                 <p className="text-base font-bold text-slate-900 dark:text-white sm:text-lg">{stat}</p>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{label}</p>
               </div>

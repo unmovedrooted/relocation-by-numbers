@@ -1312,7 +1312,8 @@ export default function Calculator({
                   from your selected target housing cost and the city housing index — not your actual number. Enter your real amount above for a precise comparison.
                 </div>
               )}
-              <table className="w-full text-sm">
+              <div className="overflow-x-auto overscroll-x-contain" role="region" aria-label="Current and target cost comparison" tabIndex={0}>
+              <table className="w-full min-w-[30rem] text-sm">
                 <thead>
                   <tr className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                     <th className="pb-2 text-left">Metric</th>
@@ -1354,6 +1355,7 @@ export default function Calculator({
                   </tr>
                 </tbody>
               </table>
+              </div>
               {flexibilityDelta != null && (
                 <div className={`mt-3 rounded-xl px-3 py-2 text-sm font-semibold ${flexibilityDelta >= 0 ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300" : "bg-rose-50 text-rose-800 dark:bg-rose-950/30 dark:text-rose-300"}`}>
                   {flexibilityDelta >= 0

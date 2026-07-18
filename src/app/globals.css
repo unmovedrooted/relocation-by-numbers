@@ -19,3 +19,53 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+html {
+  max-width: 100%;
+}
+
+body {
+  min-width: 0;
+  max-width: 100%;
+}
+
+main,
+section,
+article,
+header,
+footer,
+nav,
+form,
+fieldset {
+  min-width: 0;
+}
+
+img,
+svg,
+canvas,
+video {
+  max-width: 100%;
+}
+
+p,
+li,
+dd,
+td,
+th {
+  overflow-wrap: anywhere;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+}
+
+@media (max-width: 639px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

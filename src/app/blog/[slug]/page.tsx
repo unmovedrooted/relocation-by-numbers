@@ -60,7 +60,7 @@ const components = {
   ),
   table: (props: React.HTMLAttributes<HTMLTableElement>) => (
     <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-      <table className="w-full text-sm" {...props} />
+      <table className="w-full min-w-[32rem] text-sm" {...props} />
     </div>
   ),
   thead: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
