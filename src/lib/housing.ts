@@ -64,10 +64,14 @@ export function monthlyHousingCost(i: HousingCostInputs): HousingCostResult {
   const loan = Math.max(0, i.homePrice - down);
   const r    = i.ratePct / 100 / 12;
   const n    = i.termYears * 12;
-  const pi   =
-    loan > 0 && r > 0 && n > 0
-      ? (loan * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
-      : 0;
+  let pi = 0;
+  if (loan > 0 && Number.isFinite(n) && n > 0) {
+    pi = r === 0
+      ? loan / n
+      : r > 0 && Number.isFinite(r)
+        ? (loan * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
+        : 0;
+  }
   const tax = (i.homePrice * (i.propertyTaxPct / 100)) / 12;
   return {
     principalInterest: pi,
