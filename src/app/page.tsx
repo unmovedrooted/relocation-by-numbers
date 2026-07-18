@@ -412,7 +412,7 @@ export default function Page() {
             </p>
             <div className="mt-3">
               <Link
-                href="/international-relocation-calculator"
+                href="/international-relocation"
                 className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
               >
                 Explore International Relocation →

@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/mo",
-        destination: "/best-states-for-fire/missouri",
+        destination: "/?from=mo",
         permanent: true,
       },
       {

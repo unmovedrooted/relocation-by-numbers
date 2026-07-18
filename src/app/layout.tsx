@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import ThemeToggle from "@/components/ThemeToggle";
 import PwaRegistration from "@/components/PwaRegistration";
+import MobileNavigation from "@/components/MobileNavigation";
 // @ts-ignore: allow importing global CSS in Next.js app
 import "./globals.css";
 
@@ -103,7 +104,7 @@ export default function RootLayout({
           />
 
           <div className="flex min-h-screen flex-col">
-            <header className="border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
+            <header className="relative z-[60] border-b border-slate-200 bg-white backdrop-blur dark:border-slate-800 dark:bg-slate-950">
               <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:py-4">
                 <Link href="/" className="flex min-w-0 items-center">
                   <Image
@@ -129,18 +130,7 @@ export default function RootLayout({
                     ))}
                   </nav>
                   <ThemeToggle />
-                  <details className="group relative lg:hidden">
-                    <summary className="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-xl border border-slate-200 text-slate-700 marker:content-none dark:border-slate-700 dark:text-slate-200" aria-label="Open navigation menu">
-                      <span className="text-xl leading-none" aria-hidden="true">☰</span>
-                    </summary>
-                    <nav aria-label="Mobile navigation" className="absolute right-0 z-50 mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
-                      {NAV_LINKS.map(({ href, label }) => (
-                        <Link key={href} href={href} className="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
-                          {label}
-                        </Link>
-                      ))}
-                    </nav>
-                  </details>
+                  <MobileNavigation links={NAV_LINKS} />
                 </div>
               </div>
             </header>

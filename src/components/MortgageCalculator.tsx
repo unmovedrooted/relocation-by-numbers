@@ -500,13 +500,13 @@ function inputCls(err = "") {
 const selectCls = "h-11 w-full cursor-pointer rounded-xl bg-slate-50 dark:bg-slate-950 px-3 text-sm text-slate-900 dark:text-slate-100 shadow-inner ring-1 ring-slate-200 dark:ring-slate-800 outline-none transition focus:bg-white focus:dark:bg-slate-900 focus:ring-4 focus:ring-violet-500/20 focus:dark:ring-violet-500/20";
 
 function Tip({ text, side = "left" }: { text: string; side?: string }) {
-  const pos = side === "right" ? "right-0" : side === "center" ? "left-1/2 -translate-x-1/2" : "left-0";
+  const pos = side === "right" ? "sm:right-0" : side === "center" ? "sm:left-1/2 sm:-translate-x-1/2" : "sm:left-0";
   return (
     <span className="group relative ml-1.5 inline-flex align-middle">
       <button type="button" aria-label={text}
         className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[9px] font-bold text-slate-600 dark:text-slate-400 shadow-sm transition hover:bg-slate-50 hover:dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:dark:ring-violet-600">i</button>
       <span role="tooltip"
-        className={`pointer-events-none absolute top-full z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-xl bg-slate-900 px-3 py-2.5 text-xs leading-relaxed text-slate-100 opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 ${pos}`}>
+        className={`pointer-events-none fixed inset-x-4 top-20 z-50 w-auto rounded-xl bg-slate-900 px-3 py-2.5 text-xs leading-relaxed text-slate-100 opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 sm:absolute sm:inset-x-auto sm:top-full sm:mt-2 sm:w-64 sm:max-w-[calc(100vw-2rem)] ${pos}`}>
         {text}
       </span>
     </span>
@@ -800,7 +800,7 @@ function RefinanceTab() {
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div className="space-y-3">
         <Card>
           <H2 action={<ResetButton onReset={handleReset} />}>Current Loan</H2>
@@ -1183,7 +1183,7 @@ function USTab() {
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div className="space-y-3">
         <Card>
           <H2 action={<ResetButton onReset={handleReset} />}>Home &amp; Loan Details</H2>
@@ -1867,7 +1867,7 @@ const beYears =
         </p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="space-y-3">
           <ACard>
             <div className="flex items-start justify-between gap-3 mb-2">

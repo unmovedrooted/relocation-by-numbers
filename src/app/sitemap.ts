@@ -3,6 +3,8 @@ import { findCity } from "@/lib/cities";
 import { STATES } from "@/lib/states";
 import {
   ALLOWED_FIRE_CITY_PAGES,
+  ALLOWED_CITY_DETAIL_PAGES,
+  ALLOWED_COMPARE_ROUTES,
   ALLOWED_STATE_CODES,
 } from "@/lib/seo-allowlists";
 
@@ -90,27 +92,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
   }));
 
-  const compareRoutes = [
-    "/compare/nyc-ny/charlotte-nc",
-    "/compare/nyc-ny/austin-tx",
-    "/compare/nyc-ny/la-ca",
-    "/compare/la-ca/nyc-ny",
-    "/compare/la-ca/austin-tx",
-    "/compare/la-ca/charlotte-nc",
-    "/compare/austin-tx/nyc-ny",
-    "/compare/austin-tx/la-ca",
-    "/compare/austin-tx/seattle-wa",
-    "/compare/seattle-wa/nyc-ny",
-    "/compare/seattle-wa/austin-tx",
-    "/compare/seattle-wa/boston-ma",
-    "/compare/boston-ma/nyc-ny",
-    "/compare/boston-ma/seattle-wa",
-    "/compare/boston-ma/miami-fl",
-    "/compare/charlotte-nc/nyc-ny",
-    "/compare/charlotte-nc/austin-tx",
-    "/compare/charlotte-nc/miami-fl",
-  ].map((route) => ({
-    url: `${baseUrl}${route}`,
+  const compareRoutes = ALLOWED_COMPARE_ROUTES.map(({ from, to }) => ({
+    url: `${baseUrl}/compare/${from}/${to}`,
     lastModified: now,
     priority: 0.7,
     changeFrequency: "monthly" as const,
@@ -127,7 +110,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
   }));
 
-  const costOfLivingPages = fireCities.map((city) => ({
+  const detailCities = ALLOWED_CITY_DETAIL_PAGES
+    .map((cityId) => findCity(cityId))
+    .filter((city): city is NonNullable<typeof city> => Boolean(city));
+
+  const costOfLivingPages = detailCities.map((city) => ({
     url: `${baseUrl}/cost-of-living/${city.id}`,
     lastModified: now,
     priority: 0.7,

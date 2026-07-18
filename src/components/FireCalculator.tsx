@@ -1431,7 +1431,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
       </div>
 
       {/* ── Main grid ──────────────────────────────────────────────────────── */}
-      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_0.9fr]">
 
         {/* ── LEFT: Inputs panel ─────────────────────────────────────────── */}
         <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">

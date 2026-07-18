@@ -939,7 +939,7 @@ const relativeDifference =
         </div>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
 
         {/* ================================================================
             LEFT — INPUTS

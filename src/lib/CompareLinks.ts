@@ -1,6 +1,7 @@
 // src/lib/compareLinks.ts
 
 import { MAJOR_CITIES } from "./majorCities";
+import { ALLOWED_COMPARE_ROUTES } from "./seo-allowlists";
 
 function cityLabelById(id: string) {
   const c = MAJOR_CITIES.find((x) => x.id === id);
@@ -26,7 +27,11 @@ export function buildCompareAgainstCityLinks(
   const targetLabel = cityLabelById(targetCityId);
 
   return MAJOR_CITIES
-    .filter((c) => c.id !== targetCityId)
+    .filter((c) =>
+      ALLOWED_COMPARE_ROUTES.some(
+        (route) => route.from === c.id && route.to === targetCityId,
+      ),
+    )
     .slice(0, limit)
     .map((c) => ({
       href: `/compare/${c.id}/${targetCityId}`,

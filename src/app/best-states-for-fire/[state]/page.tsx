@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { STATES, type StateCode } from "@/lib/states";
 import { citiesForState } from "@/lib/cities";
-import { ALLOWED_STATE_CODES } from "@/lib/seo-allowlists";
+import { ALLOWED_FIRE_CITY_PAGES, ALLOWED_STATE_CODES } from "@/lib/seo-allowlists";
 
 type PageProps = {
   params: Promise<{ state: string }>;
@@ -235,7 +235,9 @@ export default async function BestStateForFirePage({ params }: PageProps) {
   const noTax = NO_INCOME_TAX_STATES.includes(found.code);
 
   const stateCities = citiesForState(found.code).filter((c) => !c.id.startsWith("other-"));
-  const featuredCities = stateCities.slice(0, 3);
+  const featuredCities = stateCities
+    .filter((city) => ALLOWED_FIRE_CITY_PAGES.includes(city.id as (typeof ALLOWED_FIRE_CITY_PAGES)[number]))
+    .slice(0, 3);
 
   const avgRent =
     stateCities.length > 0

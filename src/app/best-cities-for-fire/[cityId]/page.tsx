@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findCity } from "@/lib/cities";
-import { ALLOWED_FIRE_CITY_PAGES } from "@/lib/seo-allowlists";
+import { ALLOWED_CITY_DETAIL_PAGES, ALLOWED_FIRE_CITY_PAGES } from "@/lib/seo-allowlists";
 
 type PageProps = {
   params: Promise<{ cityId: string }>;
@@ -199,6 +199,7 @@ export default async function CityFirePage({ params }: PageProps) {
   if (!routeContent) return notFound();
 
   const relatedCities = (RELATED_CITY_MAP[cityId] ?? [])
+    .filter((id) => ALLOWED_FIRE_CITY_PAGES.includes(id as (typeof ALLOWED_FIRE_CITY_PAGES)[number]))
     .map((id) => findCity(id))
     .filter(Boolean);
 
@@ -234,18 +235,22 @@ export default async function CityFirePage({ params }: PageProps) {
             >
               FIRE Calculator
             </Link>
-            <Link
-              href={`/cost-of-living/${cityId}`}
-              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
-            >
-              Cost of living in {city.name}
-            </Link>
-            <Link
-              href={`/salary-needed-in/${cityId}`}
-              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
-            >
-              Salary needed in {city.name}
-            </Link>
+            {ALLOWED_CITY_DETAIL_PAGES.includes(cityId as (typeof ALLOWED_CITY_DETAIL_PAGES)[number]) && (
+              <>
+                <Link
+                  href={`/cost-of-living/${cityId}`}
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
+                >
+                  Cost of living in {city.name}
+                </Link>
+                <Link
+                  href={`/salary-needed-in/${cityId}`}
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
+                >
+                  Salary needed in {city.name}
+                </Link>
+              </>
+            )}
             <Link
               href="/"
               className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-3 py-2 text-sm font-semibold text-emerald-200 hover:bg-emerald-400/20"
@@ -420,12 +425,14 @@ export default async function CityFirePage({ params }: PageProps) {
             >
               Compare Cities
             </Link>
-            <Link
-              href={`/cost-of-living/${cityId}`}
-              className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
-            >
-              Full cost of living guide
-            </Link>
+            {ALLOWED_CITY_DETAIL_PAGES.includes(cityId as (typeof ALLOWED_CITY_DETAIL_PAGES)[number]) && (
+              <Link
+                href={`/cost-of-living/${cityId}`}
+                className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+              >
+                Full cost of living guide
+              </Link>
+            )}
           </div>
         </section>
 

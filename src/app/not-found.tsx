@@ -58,7 +58,7 @@ export default function NotFound() {
               { href: "/fire-calculator", label: "FIRE Calculator" },
               { href: "/compare/nyc-ny/charlotte-nc", label: "NYC vs Charlotte" },
               { href: "/best-cities-for-fire", label: "Best Cities for FIRE" },
-              { href: "/international-relocation-calculator", label: "International Calculator" },
+              { href: "/international-relocation", label: "International Calculator" },
               { href: "/best-states-for-fire", label: "Best States for FIRE" },
             ].map((link) => (
               <Link

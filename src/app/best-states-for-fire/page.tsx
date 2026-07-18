@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { STATES, type StateCode } from "@/lib/states";
 import { citiesForState } from "@/lib/cities";
 import Link from "next/link";
+import { ALLOWED_STATE_CODES } from "@/lib/seo-allowlists";
 
 export const metadata: Metadata = {
   title: "Best States for FIRE | Lowest Cost of Living & Taxes for Early Retirement",
@@ -38,6 +39,7 @@ function scoreState(code: StateCode) {
 
 export default function Page() {
   const ranked = STATES
+    .filter((state) => ALLOWED_STATE_CODES.includes(state.code))
     .map((s) => ({
       ...s,
       score: scoreState(s.code),

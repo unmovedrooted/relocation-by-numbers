@@ -42,22 +42,13 @@ export const metadata: Metadata = {
     title: "Mortgage Calculator — US & International | Rent vs Buy & Affordability",
     description:
       "Estimate monthly payments, cash to close, rent vs buy break-even, and DTI for US and international home purchases. Built for anyone planning to buy at home or abroad.",
-    images: [
-      {
-        url: `${SITE_URL}/og/mortgage-calculator.png`,
-        width: 1200,
-        height: 630,
-        alt: "Mortgage Calculator — US & International Home Buying",
-      },
-    ],
     locale: "en_US",
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "Mortgage Calculator — US & International | Rent vs Buy & Affordability",
     description:
       "Monthly payments, cash to close, rent vs buy break-even, DTI, refinance savings — for US and international buyers. Free planning tool.",
-    images: [`${SITE_URL}/og/mortgage-calculator.png`],
     site: "@relocationbynumbers",
   },
   robots: {

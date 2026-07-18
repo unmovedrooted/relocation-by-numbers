@@ -4,6 +4,7 @@ import { findCity } from "@/lib/cities";
 import Link from "next/link";
 import { estimateMortgageMonthly } from "@/lib/mortgage";
 import type { Metadata } from "next";
+import { ALLOWED_FIRE_CITY_PAGES } from "@/lib/seo-allowlists";
 
 type PageProps = {
   params: Promise<{ cityId: string }>;
@@ -189,7 +190,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
 
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Link
-              href={`/compare/nyc-ny/${city.id}`}
+              href="/compare"
               className="inline-flex items-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
             >
               Compare {city.name} with NYC
@@ -428,7 +429,11 @@ export default async function CostOfLivingPage({ params }: PageProps) {
               Salary Needed in {city.name}
             </Link>
             <Link
-              href={`/fire-in/${city.id}`}
+              href={
+                ALLOWED_FIRE_CITY_PAGES.includes(city.id as (typeof ALLOWED_FIRE_CITY_PAGES)[number])
+                  ? `/fire-in/${city.id}`
+                  : "/fire-calculator"
+              }
               className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
               FIRE in {city.name}

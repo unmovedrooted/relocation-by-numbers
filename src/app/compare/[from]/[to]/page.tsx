@@ -3,21 +3,9 @@ import Calculator from "@/components/Calculator";
 import { findCity } from "@/lib/cities";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ALLOWED_COMPARE_ROUTES } from "@/lib/seo-allowlists";
 
 export const dynamicParams = true;
-
-const ALLOWED_COMPARE_ROUTES = [
-  { from: "nyc-ny", to: "charlotte-nc" },
-  { from: "nyc-ny", to: "austin-tx" },
-  { from: "nyc-ny", to: "miami-fl" },
-  { from: "la-ca", to: "austin-tx" },
-  { from: "la-ca", to: "charlotte-nc" },
-  { from: "seattle-wa", to: "dallas-tx" },
-  { from: "seattle-wa", to: "miami-fl" },
-  { from: "boston-ma", to: "miami-fl" },
-  { from: "boston-ma", to: "charlotte-nc" },
-  { from: "seattle-wa", to: "charlotte-nc" },
-] as const;
 
 const isAllowedWhitelistedRoute = (from: string, to: string) =>
   ALLOWED_COMPARE_ROUTES.some((route) => route.from === from && route.to === to);

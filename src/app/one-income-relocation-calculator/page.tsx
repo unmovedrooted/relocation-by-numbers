@@ -23,22 +23,13 @@ export const metadata: Metadata = {
     title: 'One Income vs Two Income Relocation Calculator',
     description:
       'Can you afford to move on one income — or do you need two? Compare housing burden, taxes, monthly flexibility, and minimum second income needed for any US city.',
-    images: [
-      {
-        url: `${SITE_URL}/og/one-income-relocation-calculator.png`,
-        width: 1200,
-        height: 630,
-        alt: 'One Income vs Two Income Relocation Calculator',
-      },
-    ],
     locale: 'en_US',
   },
   twitter: {
-    card: 'summary_large_image',
+    card: 'summary',
     title: 'One Income vs Two Income Relocation Calculator',
     description:
       'Find out if you can afford to relocate on one income — taxes, housing, and monthly flexibility for any US city.',
-    images: [`${SITE_URL}/og/one-income-relocation-calculator.png`],
     site: '@relocationbynumbers',
   },
 }
@@ -265,6 +256,16 @@ export default function Page() {
         </div>
 
         {/* ── MAIN CONTENT ───────────────────────────────────────────────────── */}
+        <div className="px-4 pt-4 text-center sm:hidden">
+          <a
+            href="#calculator"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg ring-1 ring-violet-500/30 transition hover:bg-violet-500"
+          >
+            <span>Start Calculator</span>
+            <span aria-hidden>↓</span>
+          </a>
+        </div>
+
         <div className="mx-auto max-w-5xl space-y-10 px-4 pb-16 pt-8 sm:px-6">
 
           {/* ── WHO THIS IS FOR ─────────────────────────────────────────────── */}
@@ -506,16 +507,6 @@ export default function Page() {
             </div>
           </div>
         </footer>
-
-        {/* ── STICKY MOBILE CTA ────────────────────────────────────────────── */}
-        {/* Hidden on sm+ where the calculator is already visible in the viewport */}
-        <a
-          href="#calculator"
-          className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg ring-1 ring-violet-500/30 transition hover:bg-violet-500 sm:hidden"
-        >
-          <span>Start Calculator</span>
-          <span aria-hidden>↑</span>
-        </a>
 
       </main>
     </>
