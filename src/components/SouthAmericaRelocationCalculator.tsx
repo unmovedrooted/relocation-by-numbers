@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import CalculatorImmediateNumberField from "./calculator-form/CalculatorImmediateNumberField";
 import CalculatorSelect from "./calculator-form/CalculatorSelect";
 import {
   INTERNATIONAL_COUNTRIES,
@@ -653,13 +654,7 @@ recommendation,
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">Income &amp; Location</div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm">
-                <div className={labelHeadCls}>
-                  {mode === "retired" ? "Gross annual retirement income" : "Gross annual salary"}{" "}
-                  <span className="text-slate-400 dark:text-slate-500">({originCurrency})</span>
-                </div>
-                <input id="south-america-income" className={inputCls} type="number" value={mode === "retired" ? retirementIncome : salary} onChange={(e) => mode === "retired" ? setRetirementIncome(e.target.value) : setSalary(e.target.value)} placeholder=" " />
-              </label>
+              <CalculatorImmediateNumberField id="south-america-income" label={<>{mode === "retired" ? "Gross annual retirement income" : "Gross annual salary"} <span className="text-slate-400 dark:text-slate-500">({originCurrency})</span></>} className={inputCls} value={mode === "retired" ? retirementIncome : salary} onChange={(value) => mode === "retired" ? setRetirementIncome(value) : setSalary(value)} placeholder=" " />
 
               <CalculatorSelect id="south-america-filing" label="Filing status" className={selectCls} value={filing} onChange={(e) => setFiling(e.target.value as FilingStatus)}>
                   <option value="single">Single</option>
@@ -713,20 +708,11 @@ recommendation,
                   <option value="freelance">Freelance / self-employed</option>
               </CalculatorSelect>
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>Current savings available</div>
-                <input id="south-america-savings" className={inputCls} type="number" value={currentSavings} onChange={(e) => setCurrentSavings(e.target.value)} placeholder=" " />
-              </label>
+              <CalculatorImmediateNumberField id="south-america-savings" label="Current savings available" className={inputCls} value={currentSavings} onChange={setCurrentSavings} placeholder=" " />
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>Number of adults</div>
-                <input id="south-america-adults" className={inputCls} type="number" value={adults} onChange={(e) => setAdults(e.target.value)} placeholder=" " />
-              </label>
+              <CalculatorImmediateNumberField id="south-america-adults" label="Number of adults" className={inputCls} value={adults} onChange={setAdults} placeholder=" " />
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>Number of children</div>
-                <input id="south-america-children" className={inputCls} type="number" value={children} onChange={(e) => setChildren(e.target.value)} placeholder=" " />
-              </label>
+              <CalculatorImmediateNumberField id="south-america-children" label="Number of children" className={inputCls} value={children} onChange={setChildren} placeholder=" " />
             </div>
           </div>
 
@@ -736,10 +722,10 @@ recommendation,
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">Housing</div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Rent in destination (monthly)</div><input id="south-america-rent" className={inputCls} type="number" value={destinationRent} onChange={(e) => setDestinationRent(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Deposit required</div><input id="south-america-deposit" className={inputCls} type="number" value={depositRequired} onChange={(e) => setDepositRequired(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>First month rent</div><input id="south-america-first-rent" className={inputCls} type="number" value={firstMonthRent} onChange={(e) => setFirstMonthRent(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Last month rent (if applicable)</div><input id="south-america-last-rent" className={inputCls} type="number" value={lastMonthRent} onChange={(e) => setLastMonthRent(e.target.value)} placeholder=" " /></label>
+              <CalculatorImmediateNumberField id="south-america-rent" label="Rent in destination (monthly)" wrapperClassName="sm:col-span-2" className={inputCls} value={destinationRent} onChange={setDestinationRent} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-deposit" label="Deposit required" className={inputCls} value={depositRequired} onChange={setDepositRequired} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-first-rent" label="First month rent" className={inputCls} value={firstMonthRent} onChange={setFirstMonthRent} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-last-rent" label="Last month rent (if applicable)" className={inputCls} value={lastMonthRent} onChange={setLastMonthRent} placeholder=" " />
               <CalculatorSelect id="south-america-furnished" label="Furnished or unfurnished" className={selectCls} value={furnished} onChange={(e) => setFurnished(e.target.value as FurnishedType)}>
                   <option value="unfurnished">Unfurnished</option>
                   <option value="furnished">Furnished</option>
@@ -758,38 +744,10 @@ recommendation,
               <InfoTip text="Base estimates for a single adult in the destination city. Adjusted automatically for family size and city-level cost multipliers. Edit to match your actual expectations." />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm">
-                <div className={labelHeadCls}>
-                  Groceries (base, single adult)
-                  <InfoTip text="Adjusted for family size and destination city cost index." />
-                </div>
-                <input id="south-america-groceries" className={inputCls} type="number" value={groceries} onChange={(e) => setGroceries(e.target.value)} placeholder=" " />
-                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Adjusted: {displayAmount(results.groceriesAdj, 0)}</div>
-              </label>
-              <label className="text-sm">
-                <div className={labelHeadCls}>
-                  Utilities (base, single adult)
-                  <InfoTip text="Only counted if utilities are not included in your rent." />
-                </div>
-                <input id="south-america-utilities" className={inputCls} type="number" value={utilities} onChange={(e) => setUtilities(e.target.value)} placeholder=" " />
-                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Adjusted: {displayAmount(results.utilitiesAdj, 0)}</div>
-              </label>
-              <label className="text-sm">
-                <div className={labelHeadCls}>
-                  Transportation (base, single adult)
-                  <InfoTip text="Adjusted for family size and destination city transit costs." />
-                </div>
-                <input id="south-america-transportation" className={inputCls} type="number" value={transportation} onChange={(e) => setTransportation(e.target.value)} placeholder=" " />
-                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Adjusted: {displayAmount(results.transportationAdj, 0)}</div>
-              </label>
-              <label className="text-sm">
-                <div className={labelHeadCls}>
-                  Healthcare (base, single adult)
-                  <InfoTip text="Adjusted for family size. Covers insurance and out-of-pocket estimates." />
-                </div>
-                <input id="south-america-healthcare" className={inputCls} type="number" value={healthcare} onChange={(e) => setHealthcare(e.target.value)} placeholder=" " />
-                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Adjusted: {displayAmount(results.healthcareAdj, 0)}</div>
-              </label>
+              <CalculatorImmediateNumberField id="south-america-groceries" label="Groceries (base, single adult)" info={<InfoTip text="Adjusted for family size and destination city cost index." />} className={inputCls} value={groceries} onChange={setGroceries} placeholder=" " helpText={<>Adjusted: {displayAmount(results.groceriesAdj, 0)}</>} />
+              <CalculatorImmediateNumberField id="south-america-utilities" label="Utilities (base, single adult)" info={<InfoTip text="Only counted if utilities are not included in your rent." />} className={inputCls} value={utilities} onChange={setUtilities} placeholder=" " helpText={<>Adjusted: {displayAmount(results.utilitiesAdj, 0)}</>} />
+              <CalculatorImmediateNumberField id="south-america-transportation" label="Transportation (base, single adult)" info={<InfoTip text="Adjusted for family size and destination city transit costs." />} className={inputCls} value={transportation} onChange={setTransportation} placeholder=" " helpText={<>Adjusted: {displayAmount(results.transportationAdj, 0)}</>} />
+              <CalculatorImmediateNumberField id="south-america-healthcare" label="Healthcare (base, single adult)" info={<InfoTip text="Adjusted for family size. Covers insurance and out-of-pocket estimates." />} className={inputCls} value={healthcare} onChange={setHealthcare} placeholder=" " helpText={<>Adjusted: {displayAmount(results.healthcareAdj, 0)}</>} />
             </div>
             <div className="mt-3">
               <CalculatorSelect id="south-america-need-car" label="Need a car?" className={selectCls} value={needCar} onChange={(e) => setNeedCar(e.target.value as YesNo)}>
@@ -797,18 +755,7 @@ recommendation,
                   <option value="yes">Yes</option>
               </CalculatorSelect>
               {needCar === "yes" ? (
-                <label className="mt-3 block text-sm" htmlFor="south-america-car-cost-monthly">
-                  <div className={labelHeadCls}>Monthly car estimate</div>
-                  <input
-                    id="south-america-car-cost-monthly"
-                    className={inputCls}
-                    type="number"
-                    min="0"
-                    value={carCostMonthly}
-                    onChange={(e) => setCarCostMonthly(e.target.value)}
-                    placeholder=" "
-                  />
-                </label>
+                <CalculatorImmediateNumberField id="south-america-car-cost-monthly" label="Monthly car estimate" wrapperClassName="mt-3" className={inputCls} min={0} value={carCostMonthly} onChange={setCarCostMonthly} placeholder=" " />
               ) : null}
             </div>
             <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Base values auto-populate from city defaults. Adjusted totals reflect family size and city cost multipliers.</div>
@@ -818,13 +765,13 @@ recommendation,
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">One-Time Moving Costs</div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm"><div className={labelHeadCls}>Visa / permit estimate</div><input id="south-america-visa" className={inputCls} type="number" value={visaCost} onChange={(e) => setVisaCost(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>One-way flight estimate</div><input id="south-america-flight" className={inputCls} type="number" value={flightCost} onChange={(e) => setFlightCost(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Shipping / baggage estimate</div><input id="south-america-shipping" className={inputCls} type="number" value={shippingCost} onChange={(e) => setShippingCost(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Temporary housing estimate</div><input id="south-america-temporary-stay" className={inputCls} type="number" value={temporaryStay} onChange={(e) => setTemporaryStay(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Setup / admin estimate</div><input id="south-america-admin" className={inputCls} type="number" value={adminFees} onChange={(e) => setAdminFees(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Furniture / setup estimate</div><input id="south-america-furniture" className={inputCls} type="number" value={furnitureSetup} onChange={(e) => setFurnitureSetup(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Recommended cash buffer</div><input id="south-america-emergency" className={inputCls} type="number" value={emergencyCashBuffer} onChange={(e) => setEmergencyCashBuffer(e.target.value)} placeholder=" " /></label>
+              <CalculatorImmediateNumberField id="south-america-visa" label="Visa / permit estimate" className={inputCls} value={visaCost} onChange={setVisaCost} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-flight" label="One-way flight estimate" className={inputCls} value={flightCost} onChange={setFlightCost} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-shipping" label="Shipping / baggage estimate" className={inputCls} value={shippingCost} onChange={setShippingCost} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-temporary-stay" label="Temporary housing estimate" className={inputCls} value={temporaryStay} onChange={setTemporaryStay} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-admin" label="Setup / admin estimate" className={inputCls} value={adminFees} onChange={setAdminFees} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-furniture" label="Furniture / setup estimate" className={inputCls} value={furnitureSetup} onChange={setFurnitureSetup} placeholder=" " />
+              <CalculatorImmediateNumberField id="south-america-emergency" label="Recommended cash buffer" wrapperClassName="sm:col-span-2" className={inputCls} value={emergencyCashBuffer} onChange={setEmergencyCashBuffer} placeholder=" " />
             </div>
             <div className="mt-4 w-full text-xs text-slate-500 dark:text-slate-400">Planning estimates only.</div>
           </div>
@@ -840,7 +787,7 @@ recommendation,
               <div>Current city: <span className="font-semibold">{fromCityLabel}</span></div>
               <div>Target city: <span className="font-semibold">{toCityLabel}</span></div>
             </div>
-            <div className="grid gap-2 text-sm">
+            <div className="grid min-w-0 gap-2 text-sm [overflow-wrap:anywhere]">
               <div>Net monthly (current): <span className="font-semibold">{displayAmount(results.netMonthlyFrom)}</span></div>
               <div>Net monthly (target): <span className="font-semibold">{displayAmount(results.netMonthlyTo)}</span></div>
 
@@ -884,9 +831,9 @@ recommendation,
           {/* Monthly Flexibility — amber accent */}
           <div className="rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/30 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="flex items-start justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700 dark:text-amber-300">Monthly Flexibility</div>
-                <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">{results.salaryReady ? displayAmount(results.monthlyFlexibility, 2) : "—"}</div>
+                <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100 [overflow-wrap:anywhere]">{results.salaryReady ? displayAmount(results.monthlyFlexibility, 2) : "—"}</div>
               </div>
               <div className="rounded-full bg-white dark:bg-slate-900 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-800">
                 After housing + core living costs
@@ -919,7 +866,7 @@ recommendation,
           {/* Comparable Salary */}
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="text-xs font-semibold tracking-widest text-slate-500 dark:text-slate-400">COMPARABLE SALARY</div>
-            <div className="mt-2 text-3xl font-bold">{displayAmount(results.comparableSalary)}</div>
+            <div className="mt-2 text-3xl font-bold [overflow-wrap:anywhere]">{displayAmount(results.comparableSalary)}</div>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
               {toCityLabel} is roughly <span className="font-semibold">{Math.abs(Math.round(results.relativeDifference * 100))}%</span>{" "}
               {results.relativeDifference >= 0 ? "more" : "less"} expensive than {fromCityLabel}.
