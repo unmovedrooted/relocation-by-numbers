@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import ThemeToggle from "@/components/ThemeToggle";
+import PwaRegistration from "@/components/PwaRegistration";
 // @ts-ignore: allow importing global CSS in Next.js app
 import "./globals.css";
 
@@ -21,15 +22,38 @@ const geistMono = Geist_Mono({
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.relocationbynumbers.com",
+  ),
   title: {
     default: "Relocation by Numbers",
     template: "%s | Relocation by Numbers",
   },
   description:
     "Compare cost of living, take-home pay, housing, and FIRE impact before you move.",
+  applicationName: "Relocation by Numbers",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Relocation",
+  },
+  icons: {
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   other: {
     "google-adsense-account": "ca-pub-5257549146198249",
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+  ],
 };
 
 const NAV_LINKS = [
@@ -52,6 +76,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-white text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <PwaRegistration />
           {GA_MEASUREMENT_ID ? (
             <>
               <Script

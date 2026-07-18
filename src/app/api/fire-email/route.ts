@@ -64,14 +64,23 @@ export async function POST(request: Request) {
     const email = body.email?.trim();
 
     if (!email || !email.includes("@")) {
-      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid email" },
+        { status: 400, headers: { "Cache-Control": "no-store" } },
+      );
     }
 
     await addToList({ email, fireAge: body.fireAge, location: body.location });
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json(
+      { ok: true },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   } catch (err) {
     console.error("[fire-email] error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Server error" },
+      { status: 500, headers: { "Cache-Control": "no-store" } },
+    );
   }
 }

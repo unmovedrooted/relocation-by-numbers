@@ -112,11 +112,15 @@ export async function POST(request: Request) {
     return new Response(readable, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-store",
         "X-Content-Type-Options": "nosniff",
       },
     });
   } catch (err) {
     console.error("[fire-report]", err);
-    return new Response("Failed to generate report", { status: 500 });
+    return new Response("Failed to generate report", {
+      status: 500,
+      headers: { "Cache-Control": "no-store" },
+    });
   }
 }
