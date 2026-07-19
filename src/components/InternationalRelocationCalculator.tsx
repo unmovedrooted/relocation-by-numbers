@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import SavedScenariosPanel from "./SavedScenariosPanel";
 import {
   INTERNATIONAL_COUNTRIES,
   getCountryByCode,
@@ -1295,6 +1296,13 @@ const readinessRecommendation =
               </button>
             </div>
           </div>
+
+          <SavedScenariosPanel getCurrentScenario={() => ({
+            label: `${fromCityLabel} → ${toCityLabel}`,
+            url: typeof window !== "undefined" ? window.location.pathname + window.location.search : "/",
+            subtitle: `${results.comfort.label} · ${displayAmount(results.monthlyFlexibility, 0)}/mo flexibility`,
+            source: "International",
+          })} />
 
           {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (
   <AdSlot

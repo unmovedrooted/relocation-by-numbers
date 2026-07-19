@@ -622,10 +622,10 @@ function AffordabilityVerdict({ frontDTI, backDTI }: { frontDTI:number; backDTI:
   const caution = !pass && frontDTI <= 36 && backDTI <= 43;
   const verdict = pass ? "PASS" : caution ? "CAUTION" : "STRETCH";
   const cls     = pass
-    ? "border-emerald-600/50 dark:border-emerald-500/50 bg-emerald-900/40 dark:bg-emerald-950/40 text-emerald-400 dark:text-emerald-500"
+    ? "border-emerald-600/50 dark:border-emerald-300 bg-emerald-900/40 dark:bg-emerald-50 text-emerald-400 dark:text-emerald-700"
     : caution
-    ? "border-amber-600/50 dark:border-amber-500/50 bg-amber-900/40 dark:bg-amber-950/40 text-amber-400 dark:text-amber-500"
-    : "border-rose-600/50 dark:border-rose-500/50 bg-rose-900/40 dark:bg-rose-950/40 text-rose-400 dark:text-rose-500";
+    ? "border-amber-600/50 dark:border-amber-300 bg-amber-900/40 dark:bg-amber-50 text-amber-400 dark:text-amber-700"
+    : "border-rose-600/50 dark:border-rose-300 bg-rose-900/40 dark:bg-rose-50 text-rose-400 dark:text-rose-700";
   const note = pass
     ? "Your income comfortably supports this loan at standard guidelines."
     : caution

@@ -13,6 +13,7 @@ import {
 } from "../lib/tax";
 import { monthlyHousingCost } from "../lib/housing";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
+import SavedScenariosPanel from "./SavedScenariosPanel";
 
 type Mode = "rent" | "buy";
 
@@ -767,6 +768,30 @@ export default function Calculator({
     [isToOther, toCityOther, toCityId, stateName]
   );
 
+  // ── Negotiation range ────────────────────────────────────────────────────
+  const negotiationEstimate = useMemo(() => {
+    if (!comparable) return null;
+    const currentOffer = n(salary);
+    if (!Number.isFinite(currentOffer) || currentOffer <= 0) return null;
+
+    const candidates = [comparable.comparableSalary];
+    if (neededSalary !== null && Number.isFinite(neededSalary)) candidates.push(neededSalary);
+    const target = Math.max(...candidates);
+    const suggestedAsk = Math.ceil(target / 1000) * 1000;
+    const gapPct = currentOffer > 0 ? ((suggestedAsk - currentOffer) / currentOffer) * 100 : 0;
+
+    return {
+      currentOffer,
+      suggestedAsk,
+      gapPct,
+      aheadOfTarget: suggestedAsk <= currentOffer,
+      toCityName: comparable.toCityName,
+      fromCityName: comparable.fromCityName,
+      costDeltaPct: Math.abs(comparable.pctLessMore),
+      costDeltaDirection: comparable.pctLessMore >= 0 ? "less" : "more",
+    };
+  }, [comparable, salary, neededSalary]);
+
   // ── CSV export ───────────────────────────────────────────────────────────
   const csvExportRows = useMemo<CsvRow[]>(() => {
     const rows: CsvRow[] = [
@@ -809,17 +834,29 @@ export default function Calculator({
         rows.push({ Metric: "Local tax withheld (to city, annual)", Value: money(targetBreakdown.local) });
       }
     }
+    if (negotiationEstimate && !negotiationEstimate.aheadOfTarget) {
+      rows.push({ Metric: "Suggested negotiation ask", Value: money(negotiationEstimate.suggestedAsk) });
+      rows.push({ Metric: "Ask vs. current offer", Value: `${negotiationEstimate.gapPct.toFixed(1)}% higher` });
+    }
 
     return rows;
   }, [
     currentCityLabel, targetCityLabel, mode, results, monthlyFlexibility,
     trueMonthlyLeftover, maxSafeHousing, verdict, neededSalary, comparable, targetBreakdown,
+    negotiationEstimate,
   ]);
 
   const handleExportCsv = () => {
     const filenameCity = (targetCityLabel || "scenario").toLowerCase().replace(/[^a-z0-9]+/g, "-");
     downloadCsv(`relocation-scenario-${filenameCity}`, csvExportRows);
   };
+
+  const getCurrentScenario = () => ({
+    label: `${currentCityLabel} → ${targetCityLabel}`,
+    url: typeof window !== "undefined" ? window.location.pathname + window.location.search : "/",
+    subtitle: `${verdict.level}${results.salaryReady ? ` · ${money(monthlyFlexibility, 0)}/mo flexibility` : ""}`,
+    source: "US",
+  });
 
   const isStatePage = monetization === "state";
   const isPremiumState = ["tx", "fl", "ca", "nc", "ny", "ma", "wa"].includes(toState);
@@ -1455,6 +1492,43 @@ export default function Calculator({
             </div>
           )}
 
+          {/* ── 6.5 NEGOTIATION RANGE ── */}
+          {negotiationEstimate && (
+            <div className="rounded-2xl border border-violet-200 bg-violet-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-violet-900/60 dark:bg-violet-950/20">
+              <div className="text-xs font-semibold tracking-widest text-violet-700 dark:text-violet-400">NEGOTIATION RANGE</div>
+
+              {negotiationEstimate.aheadOfTarget ? (
+                <>
+                  <div className="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
+                    Your offer already covers the move
+                  </div>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                    {money(negotiationEstimate.currentOffer)}{" "}
+                    is at or above what&apos;s typically needed to match your
+                    current budget in {negotiationEstimate.toCityName}, which is{" "}
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{negotiationEstimate.costDeltaPct.toFixed(0)}%</span>{" "}
+                    {negotiationEstimate.costDeltaDirection} expensive than {negotiationEstimate.fromCityName}. You may have
+                    room to negotiate for equity, remote flexibility, or other terms instead of base salary.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">{money(negotiationEstimate.suggestedAsk)}</div>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                    Suggested starting ask for a role in {negotiationEstimate.toCityName} — about{" "}
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{negotiationEstimate.gapPct.toFixed(0)}% higher</span>{" "}
+                    than your current offer of {money(negotiationEstimate.currentOffer)}, based on the cost-of-living
+                    difference and what it takes to keep your monthly budget where it is today.
+                  </p>
+                </>
+              )}
+
+              <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                This is a planning estimate, not a guarantee, use it as a starting point for your own research and negotiation.
+              </div>
+            </div>
+          )}
+
           {/* ── 7. SHARE ── */}
           <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-sky-900/60 dark:bg-sky-950/20">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1511,6 +1585,9 @@ export default function Calculator({
               </div>
             </div>
           </div>
+
+          {/* ── 8. SAVED SCENARIOS ── */}
+          <SavedScenariosPanel getCurrentScenario={getCurrentScenario} />
 
         </div>
       </div>
