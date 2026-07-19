@@ -22,6 +22,7 @@ import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
 import { USD_TO_LOCAL } from "@/lib/internationalFx";
 import { buildEuropeSearchParams, createEuropeCityPresetPatch, createEuropeInitialState } from "@/lib/europeCalculatorState";
 import AdSlot from "./AdSlot";
+import CalculatorImmediateNumberField from "./calculator-form/CalculatorImmediateNumberField";
 import CalculatorSelect from "./calculator-form/CalculatorSelect";
 
 // ---------------------------------------------------------------------------
@@ -1041,19 +1042,25 @@ readinessRecommendation,
             <div className="mb-3 text-sm font-semibold">Income &amp; Location</div>
             <div className="grid gap-3 sm:grid-cols-2">
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>
-                  {mode === "retired" ? "Gross annual retirement income" : "Gross annual salary"}{" "}
-                  <span className="text-slate-400 dark:text-slate-500">({originCurrency})</span>
-                </div>
-                <input
+              {mode === "retired" ? (
+                <CalculatorImmediateNumberField
+                  id="europe-retirement-income"
+                  label={<>Gross annual retirement income <span className="text-slate-400 dark:text-slate-500">({originCurrency})</span></>}
                   className={inputCls}
-                  type="number"
-                  value={mode === "retired" ? retirementIncome : salary}
-                  onChange={(e) => mode === "retired" ? setRetirementIncome(e.target.value) : setSalary(e.target.value)}
+                  value={retirementIncome}
+                  onChange={setRetirementIncome}
                   placeholder=" "
                 />
-              </label>
+              ) : (
+                <CalculatorImmediateNumberField
+                  id="europe-salary"
+                  label={<>Gross annual salary <span className="text-slate-400 dark:text-slate-500">({originCurrency})</span></>}
+                  className={inputCls}
+                  value={salary}
+                  onChange={setSalary}
+                  placeholder=" "
+                />
+              )}
 
               <CalculatorSelect id="europe-filing-status" label="Filing status" className={selectCls} value={filing} onChange={(e) => setFiling(e.target.value as FilingStatus)}>
                   <option value="single">Single</option>
@@ -1112,20 +1119,11 @@ readinessRecommendation,
                 </CalculatorSelect>
               )}
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>Current savings available</div>
-                <input className={inputCls} type="number" value={currentSavings} onChange={(e) => setCurrentSavings(e.target.value)} placeholder=" " />
-              </label>
+              <CalculatorImmediateNumberField id="europe-current-savings" label="Current savings available" className={inputCls} value={currentSavings} onChange={setCurrentSavings} placeholder=" " />
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>Number of adults</div>
-                <input className={inputCls} type="number" min="1" step="1" value={adults} onChange={(e) => setAdults(e.target.value)} placeholder=" " />
-              </label>
+              <CalculatorImmediateNumberField id="europe-adults" label="Number of adults" className={inputCls} min="1" step="1" value={adults} onChange={setAdults} placeholder=" " />
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>Number of children</div>
-                <input className={inputCls} type="number" min="0" step="1" value={children} onChange={(e) => setChildren(e.target.value)} placeholder=" " />
-              </label>
+              <CalculatorImmediateNumberField id="europe-children" label="Number of children" className={inputCls} min="0" step="1" value={children} onChange={setChildren} placeholder=" " />
             </div>
           </div>
 
