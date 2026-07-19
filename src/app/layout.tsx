@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import ThemeToggle from "@/components/ThemeToggle";
 import PwaRegistration from "@/components/PwaRegistration";
 import MobileNavigation from "@/components/MobileNavigation";
+import NavToolsDropdown from "@/components/NavToolsDropdown";
 // @ts-ignore: allow importing global CSS in Next.js app
 import "./globals.css";
 
@@ -57,14 +58,22 @@ export const viewport = {
   ],
 };
 
-const NAV_LINKS = [
+const PRIMARY_NAV_LINKS = [
   { href: "/explore",               label: "Explore" },
   { href: "/fire-calculator",       label: "FIRE Calculator" },
-  { href: "/mortgage-calculator",   label: "Mortgage" },
   { href: "/international-relocation", label: "International" },
-  { href: "/one-income-relocation-calculator",  label: "Income Calculator" },
   { href: "/blog", label: "Blogs" },
 ];
+
+const TOOLS_NAV_LINKS = [
+  { href: "/mortgage-calculator",   label: "Mortgage" },
+  { href: "/housing-affordability-calculator", label: "Affordability" },
+  { href: "/compare-cities", label: "Compare Cities" },
+  { href: "/one-income-relocation-calculator",  label: "Income Calculator" },
+];
+
+// Flat list for mobile — the dropdown is a desktop-only affordance.
+const NAV_LINKS = [...PRIMARY_NAV_LINKS, ...TOOLS_NAV_LINKS];
 
 export default function RootLayout({
   children,
@@ -119,7 +128,7 @@ export default function RootLayout({
 
                 <div className="flex shrink-0 items-center gap-2 sm:gap-4">
                   <nav aria-label="Primary navigation" className="hidden items-center gap-4 text-sm text-slate-600 dark:text-slate-300 lg:flex">
-                    {NAV_LINKS.map(({ href, label }) => (
+                    {PRIMARY_NAV_LINKS.map(({ href, label }) => (
                       <Link
                         key={href}
                         href={href}
@@ -128,6 +137,7 @@ export default function RootLayout({
                         {label}
                       </Link>
                     ))}
+                    <NavToolsDropdown label="Tools" links={TOOLS_NAV_LINKS} />
                   </nav>
                   <ThemeToggle />
                   <MobileNavigation links={NAV_LINKS} />

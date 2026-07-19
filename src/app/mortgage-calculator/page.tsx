@@ -213,19 +213,19 @@ export default function Page() {
       <Script
         id="sd-webapp"
         type="application/ld+json"
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
       />
       <Script
         id="sd-faq"
         type="application/ld+json"
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <Script
         id="sd-breadcrumb"
         type="application/ld+json"
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
@@ -315,6 +315,13 @@ export default function Page() {
                     mortgage-interest deduction assumptions. The{" "}
                     <strong className="text-slate-800 dark:text-slate-200">International tab</strong>{" "}
                     adds country-specific planning guidance for foreign buyers.
+                  </p>
+                  <p>
+                    Don&apos;t have a specific price in mind yet? Start with the{" "}
+                    <Link href="/housing-affordability-calculator" className="font-medium text-violet-700 underline underline-offset-4 hover:no-underline dark:text-violet-300">
+                      Housing Affordability Calculator
+                    </Link>{" "}
+                    to see your price range first.
                   </p>
                 </div>
 
