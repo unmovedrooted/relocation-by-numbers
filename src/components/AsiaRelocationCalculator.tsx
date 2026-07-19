@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import SavedScenariosPanel from "./SavedScenariosPanel";
+import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
 import {
   INTERNATIONAL_COUNTRIES,
   getCountryByCode,
@@ -606,6 +607,43 @@ export default function AsiaRelocationCalculator() {
   const childrenNum = Math.max(0, Number(children) || 0);
   const badge = confidenceBadge(results.targetConfidence);
 
+  // ---------------------------------------------------------------------------
+  // PDF EXPORT
+  // ---------------------------------------------------------------------------
+  const pdfRows = useMemo<PdfRow[]>(() => {
+    const rows: PdfRow[] = [
+      { Metric: "From", Value: `${fromCityLabel}, ${getCountryByCode(fromCountry)?.name ?? fromCountry}` },
+      { Metric: "To", Value: `${toCityLabel}, ${getCountryByCode(toCountry)?.name ?? toCountry}` },
+      { Metric: "Mode", Value: mode === "retired" ? "Retired" : "Working" },
+      { Metric: mode === "retired" ? "Gross annual retirement income" : "Gross annual salary", Value: displayAmount(results.annualIncome) },
+      { Metric: "Net monthly income (current)", Value: displayAmount(results.netMonthlyFrom) },
+      { Metric: "Net monthly income (target)", Value: displayAmount(results.netMonthlyTo) },
+      { Metric: "Effective tax rate (current)", Value: `${(results.currentTaxRate * 100).toFixed(1)}%` },
+      { Metric: "Effective tax rate (target)", Value: `${(results.targetTaxRate * 100).toFixed(1)}% (${results.targetTaxLabel})` },
+      { Metric: "Monthly housing cost (target)", Value: displayAmount(results.housingTotal) },
+      { Metric: "Housing as % of net income", Value: `${results.pct.toFixed(1)}%` },
+      { Metric: "Total monthly expenses as % of net income", Value: `${results.totalPctOfNet.toFixed(1)}%` },
+      { Metric: "Monthly flexibility after expenses", Value: displayAmount(results.monthlyFlexibility) },
+      { Metric: "Comfort score", Value: `${results.comfort.band} · ${results.comfort.label}` },
+      { Metric: "Upfront cash needed", Value: displayAmount(results.upfrontCashNeeded) },
+      { Metric: "Savings runway", Value: `${results.monthsCovered.toFixed(1)} months` },
+      { Metric: "Cost-of-living-adjusted comparable income", Value: displayAmount(results.comparableSalary) },
+      { Metric: `${toCityLabel} vs ${fromCityLabel} cost difference`, Value: `${Math.abs(results.relativeDifference * 100).toFixed(1)}% ${results.relativeDifference >= 0 ? "more" : "less"} expensive` },
+    ];
+    return rows;
+  }, [fromCityLabel, toCityLabel, fromCountry, toCountry, mode, results, displayAmount]);
+
+  const handleExportPdf = () => {
+    const filenameCity = (toCityLabel || "scenario").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    downloadPdfReport({
+      filename: `asia-relocation-scenario-${filenameCity}`,
+      title: `${fromCityLabel} → ${toCityLabel}`,
+      subtitle: `${results.comfort.label}${results.salaryReady ? ` · ${displayAmount(results.monthlyFlexibility, 0)}/mo flexibility` : ""}`,
+      rows: pdfRows,
+      footerNote: "Estimates only, based on public cost-of-living and tax data. Not financial or tax advice. relocationbynumbers.com",
+    });
+  };
+
   function resetInputsKeepContext() {
     const cityDefaults    = getCityDefaultsByCode(toCityCode);
     const countryDefaults = getCountryByCode(toCountry);
@@ -1062,6 +1100,7 @@ export default function AsiaRelocationCalculator() {
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-rose-700 dark:text-rose-300">Share this scenario</div>
                 <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">Copy your current comparison link and send it to a partner, friend, or future self.</div>
               </div>
+              <div className="flex flex-wrap items-center gap-2">
               <button type="button"
                 onClick={async () => {
                   try {
@@ -1085,6 +1124,11 @@ export default function AsiaRelocationCalculator() {
                 className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
                 {shareStatus === "copied" ? "Link copied!" : shareStatus === "shared" ? "Shared!" : shareStatus === "error" ? "Share failed" : "Share scenario"}
               </button>
+              <button type="button" onClick={handleExportPdf}
+                className="inline-flex items-center justify-center rounded-xl border border-rose-300 bg-white px-4 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 dark:border-rose-800 dark:bg-slate-900 dark:text-rose-300 dark:hover:bg-slate-950">
+                Export PDF
+              </button>
+              </div>
             </div>
           </div>
 
