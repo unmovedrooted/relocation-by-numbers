@@ -172,38 +172,38 @@ export default async function CostOfLivingPage({ params }: PageProps) {
   const comfort = rent ? Math.round((rent * 12) / 0.28) : null;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-10 text-slate-900 dark:from-slate-950 dark:to-slate-900 dark:text-slate-100">
+    <main className="min-h-screen bg-gradient-to-b from-slate-50 dark:from-slate-950 to-white dark:to-slate-900 py-10 text-slate-900 dark:text-slate-100">
       <div className="mx-auto max-w-5xl space-y-10 px-4 sm:px-6">
         <header className="py-2 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
             Cost of Living in {city.name}, {city.state.toUpperCase()}
           </h1>
 
-          <p className="mx-auto mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+          <p className="mx-auto mt-3 max-w-3xl text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
             This page looks at rent, median home prices, property taxes, income taxes, and the
             salary you may need to live with breathing room in {city.name}.
           </p>
 
-          <div className="mt-3 text-xs text-slate-500">
+          <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
             Assumptions updated: March 2026
           </div>
 
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Link
               href="/compare"
-              className="inline-flex items-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
+              className="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-3 text-sm font-semibold text-slate-900 dark:text-slate-100 shadow-sm transition hover:bg-slate-50 hover:dark:bg-slate-950"
             >
               Compare {city.name} with NYC
             </Link>
             <Link
               href="/methodology"
-              className="inline-flex items-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
+              className="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-3 text-sm font-semibold text-slate-900 dark:text-slate-100 shadow-sm transition hover:bg-slate-50 hover:dark:bg-slate-950"
             >
               See methodology
             </Link>
           </div>
 
-          <div className="mx-auto mt-5 h-1 w-16 rounded-full bg-blue-600/80" />
+          <div className="mx-auto mt-5 h-1 w-16 rounded-full bg-blue-600/80 dark:bg-blue-700/80" />
 
           {popular.length > 0 ? (
             <div className="mx-auto mt-5 flex flex-wrap justify-center gap-2">
@@ -211,7 +211,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
                 <Link
                   key={x.href}
                   href={x.href}
-                  className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"
+                  className="rounded-full bg-white dark:bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 transition hover:bg-slate-50 hover:dark:bg-slate-950"
                 >
                   {x.label}
                 </Link>
@@ -220,11 +220,11 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           ) : null}
         </header>
 
-        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
+        <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:ring-slate-800/70">
           <h2 className="text-sm font-semibold">
             {city.name} cost of living snapshot
           </h2>
-          <div className="mt-4 h-px w-full bg-slate-100" />
+          <div className="mt-4 h-px w-full bg-slate-100 dark:bg-slate-900/40" />
 
           <div className="mb-4 mt-4 grid grid-cols-1 gap-2 sm:grid-cols-4">
             {[
@@ -257,14 +257,14 @@ export default async function CostOfLivingPage({ params }: PageProps) {
             ].map((item) => (
               <div
                 key={item.label}
-                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
+                className="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-slate-600">{item.label}</span>
-                  <span className="text-sm font-semibold text-slate-900">{item.value}</span>
+                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{item.label}</span>
+                  <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{item.value}</span>
                 </div>
                 {item.extra ? (
-                  <div className="mt-1 text-xs text-slate-500">{item.extra}</div>
+                  <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.extra}</div>
                 ) : null}
               </div>
             ))}
@@ -272,7 +272,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
 
           {rent ? (
             <>
-              <div className="mb-2 mt-4 text-sm font-semibold text-slate-900">
+              <div className="mb-2 mt-4 text-sm font-semibold text-slate-900 dark:text-slate-100">
                 Salary needed in {city.name} (rent ≈ ${rent.toLocaleString()}/mo)
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -283,55 +283,55 @@ export default async function CostOfLivingPage({ params }: PageProps) {
                 ].map((x) => (
                   <div
                     key={x.label}
-                    className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
+                    className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2"
                   >
-                    <span className="text-xs font-medium text-slate-600">{x.label}</span>
-                    <span className="text-sm font-semibold text-slate-900">
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{x.label}</span>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                       ${x.value?.toLocaleString()}
                     </span>
                   </div>
                 ))}
               </div>
-              <div className="mt-2 text-xs text-slate-500">
+              <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                 Rule of thumb: rent is roughly 28–35% of gross income.
               </div>
             </>
           ) : (
-            <div className="text-xs text-slate-500">No rent estimate found for this city yet.</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">No rent estimate found for this city yet.</div>
           )}
         </section>
 
-        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:ring-slate-800/70">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Is {city.name} expensive to live in?
           </h2>
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400">
             <p>{cityContent.primary}</p>
             <p>{cityContent.secondary}</p>
             <p>{cityContent.caution}</p>
           </div>
         </section>
 
-        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:ring-slate-800/70">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             What this page measures
           </h2>
           <div className="mt-4 grid gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">Housing pressure</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Housing pressure</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 Rent, home prices, and property taxes usually have the biggest effect on whether a city feels affordable.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">Salary fit</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Salary fit</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 A city is only workable if your income is high enough relative to its housing and tax burden.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-semibold text-slate-900">Take-home pay</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Take-home pay</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 State and federal taxes shape how much of your paycheck is actually available for rent, savings, and flexibility.
               </p>
             </div>
@@ -346,11 +346,11 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           />
         </section>
 
-        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:ring-slate-800/70">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             What salary do you need to live in {city.name}?
           </h2>
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400">
             <p>{cityContent.salaryNote}</p>
             <p>
               The tighter, target, and comfort ranges are not exact promises. They are planning
@@ -360,22 +360,22 @@ export default async function CostOfLivingPage({ params }: PageProps) {
             {target ? (
               <p>
                 Based on the current rent estimate for {city.name}, a salary around{" "}
-                <span className="font-semibold text-slate-900">${target.toLocaleString()}</span>{" "}
+                <span className="font-semibold text-slate-900 dark:text-slate-100">${target.toLocaleString()}</span>{" "}
                 is a reasonable starting point for many renters, while a salary closer to{" "}
-                <span className="font-semibold text-slate-900">${comfort?.toLocaleString()}</span>{" "}
+                <span className="font-semibold text-slate-900 dark:text-slate-100">${comfort?.toLocaleString()}</span>{" "}
                 may leave more room for savings and unexpected costs.
               </p>
             ) : null}
           </div>
         </section>
 
-        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:ring-slate-800/70">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Frequently asked questions about {city.name}
           </h2>
-          <dl className="mt-5 space-y-5 text-sm text-slate-600">
+          <dl className="mt-5 space-y-5 text-sm text-slate-600 dark:text-slate-400">
             <div>
-              <dt className="font-semibold text-slate-900">
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">
                 What is the cost of living in {city.name}?
               </dt>
               <dd className="mt-1">
@@ -383,7 +383,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-slate-900">
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">
                 What salary do you need to live comfortably in {city.name}?
               </dt>
               <dd className="mt-1">
@@ -399,7 +399,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-slate-900">
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">
                 Is {city.name} a good place to move for affordability?
               </dt>
               <dd className="mt-1">
@@ -407,7 +407,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-slate-900">
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">
                 How does {city.state.toUpperCase()} state income tax affect take-home pay in {city.name}?
               </dt>
               <dd className="mt-1">
@@ -417,14 +417,14 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           </dl>
         </section>
 
-        <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:ring-slate-800/70">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Related pages for {city.name}
           </h2>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link
               href={`/salary-needed-in/${city.id}`}
-              className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              className="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 hover:dark:bg-slate-900/40"
             >
               Salary Needed in {city.name}
             </Link>
@@ -434,13 +434,13 @@ export default async function CostOfLivingPage({ params }: PageProps) {
                   ? `/fire-in/${city.id}`
                   : "/fire-calculator"
               }
-              className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              className="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 hover:dark:bg-slate-900/40"
             >
               FIRE in {city.name}
             </Link>
             <Link
               href="/compare"
-              className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              className="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 hover:dark:bg-slate-900/40"
             >
               Explore Compare Pages
             </Link>
@@ -448,19 +448,19 @@ export default async function CostOfLivingPage({ params }: PageProps) {
         </section>
 
         <div className="mt-8 text-center">
-          <div className="mb-3 text-xs text-slate-500">
+          <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
             Assumptions updated: March 2026
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-slate-500">
-            <Link href="/about" className="transition hover:text-slate-900">About</Link>
+          <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <Link href="/about" className="transition hover:text-slate-900 hover:dark:text-slate-100">About</Link>
             <span>•</span>
-            <Link href="/disclaimer" className="transition hover:text-slate-900">Disclaimer</Link>
+            <Link href="/disclaimer" className="transition hover:text-slate-900 hover:dark:text-slate-100">Disclaimer</Link>
             <span>•</span>
-            <Link href="/privacy" className="transition hover:text-slate-900">Privacy</Link>
+            <Link href="/privacy" className="transition hover:text-slate-900 hover:dark:text-slate-100">Privacy</Link>
             <span>•</span>
-            <Link href="/terms" className="transition hover:text-slate-900">Terms</Link>
+            <Link href="/terms" className="transition hover:text-slate-900 hover:dark:text-slate-100">Terms</Link>
             <span>•</span>
-            <Link href="/methodology" className="transition hover:text-slate-900">Methodology</Link>
+            <Link href="/methodology" className="transition hover:text-slate-900 hover:dark:text-slate-100">Methodology</Link>
           </div>
         </div>
       </div>
