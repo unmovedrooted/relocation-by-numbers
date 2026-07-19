@@ -301,6 +301,8 @@ const FX_FALLBACK: Record<string, number> = {
   BE: 0.92,
 };
 
+const EUROPE_FALLBACK_CAR_COST_USD = 300;
+
 function convertLocalToUsd(amountLocal: number, countryCode: string): number {
   const rate = (USD_TO_LOCAL[countryCode] ?? FX_FALLBACK[countryCode]) ?? 1;
   return rate > 0 ? amountLocal / rate : amountLocal;
@@ -586,16 +588,43 @@ const [carCostMonthly, setCarCostMonthly] = useState<string>(initial.carCostMont
     setAdminFees(patch.adminFees);
     setFurnitureSetup(patch.furnitureSetup);
     setEmergencyCashBuffer(patch.emergencyCashBuffer);
+    setCarCostMonthly(String(
+      d.monthlyDefaults.car ?? convertUsdToLocal(EUROPE_FALLBACK_CAR_COST_USD, d.countryCode)
+    ));
     return true;
   }
 
   function applyCountryFallback(countryCode: string) {
     const d = EUROPE_COST_DEFAULTS[countryCode];
-    if (!d) return;
-    setGroceries(String(d.groceries));
-    setUtilities(String(d.utilities));
-    setTransportation(String(d.transport));
-    setHealthcare(String(d.healthcare));
+    const country = getCountryByCode(countryCode);
+    if (!d || !country) return false;
+
+    // Country fallbacks are USD planning estimates. Inputs use destination-local
+    // currency, so localize every fallback exactly once before storing it.
+    const local = (amountUsd: number) => String(convertUsdToLocal(amountUsd, countryCode));
+    const adultCount = Math.max(1, Math.floor(numericValue(adults)));
+    const childCount = Math.max(0, Math.floor(numericValue(children)));
+    const family = adultCount >= 2 || childCount > 0;
+    const rentUsd = family ? country.defaultRentFamily : country.defaultRentSingle;
+
+    setDestinationRent(local(rentUsd));
+    setDepositRequired(local(rentUsd * (country.startupCosts.depositMonths ?? 1)));
+    setFirstMonthRent(local(rentUsd));
+    setLastMonthRent("0");
+    setUtilitiesIncluded("no");
+    setGroceries(local(d.groceries));
+    setUtilities(local(d.utilities));
+    setTransportation(local(d.transport));
+    setHealthcare(local(d.healthcare));
+    setVisaCost(local(country.startupCosts.visa));
+    setFlightCost(local(country.startupCosts.flight));
+    setShippingCost("");
+    setTemporaryStay(local(country.startupCosts.temporaryHousing));
+    setAdminFees("");
+    setFurnitureSetup(local(country.startupCosts.setup));
+    setEmergencyCashBuffer("");
+    setCarCostMonthly(local(EUROPE_FALLBACK_CAR_COST_USD));
+    return true;
   }
 
   function changeFromCountry(countryCode: string) {
@@ -944,49 +973,14 @@ readinessRecommendation,
     emergencyCashBuffer, currentSavings, targetProfile,
   ]);
 
-  const adultsNum   = Math.max(1, Number(adults)   || 1);
-  const childrenNum = Math.max(0, Number(children) || 0);
-
   function resetInputsKeepContext() {
-    const cityDefaults    = getCityDefaultsByCode(toCityCode);
-    const countryDefaults = getCountryByCode(toCountry);
     setSalary(""); setRetirementIncome("");
-    if (cityDefaults) {
-      const d = cityDefaults;
-      setDestinationRent(String(d.monthlyDefaults.rent));
-      setDepositRequired(String(d.monthlyDefaults.rent * d.housing.depositMonths));
-      setFirstMonthRent(String(d.monthlyDefaults.rent));
-      setLastMonthRent(String(d.housing.lastMonthRentDefault));
-      setUtilitiesIncluded(d.housing.utilitiesIncludedDefault);
-      setGroceries(String(d.monthlyDefaults.groceries));
-      setUtilities(String(d.monthlyDefaults.utilities));
-      setTransportation(String(d.monthlyDefaults.transport));
-      setHealthcare(String(d.monthlyDefaults.healthcare));
-      setVisaCost(String(d.startupCosts.visa));
-      setFlightCost(String(d.startupCosts.flight));
-      setShippingCost(String(d.startupCosts.shipping));
-      setTemporaryStay(String(d.startupCosts.temporaryStay));
-      setAdminFees(String(d.startupCosts.adminFees));
-      setFurnitureSetup(String(d.housing.furnishedSetupCost));
-      setEmergencyCashBuffer(String(d.startupCosts.emergencyBuffer));
-    } else if (countryDefaults) {
-      const fallbackRent = adultsNum >= 2 || childrenNum > 0 ? countryDefaults.defaultRentFamily : countryDefaults.defaultRentSingle;
-      setDestinationRent(String(fallbackRent));
-      setDepositRequired(String(fallbackRent * (countryDefaults.startupCosts.depositMonths ?? 1)));
-      setFirstMonthRent(String(fallbackRent));
-      setLastMonthRent("0"); setUtilitiesIncluded("no");
-      setGroceries(""); setUtilities(""); setTransportation("");
-      setHealthcare(String(adultsNum >= 2 || childrenNum > 0 ? countryDefaults.healthcareMonthlyFamily : countryDefaults.healthcareMonthlySingle));
-      setVisaCost(String(countryDefaults.startupCosts.visa));
-      setFlightCost(String(countryDefaults.startupCosts.flight));
-      setShippingCost(""); setTemporaryStay(String(countryDefaults.startupCosts.temporaryHousing));
-      setAdminFees(""); setFurnitureSetup(String(countryDefaults.startupCosts.setup));
-      setEmergencyCashBuffer("");
-    } else {
+    if (!applyCityDefaults(toCityCode) && !applyCountryFallback(toCountry)) {
       setDestinationRent(""); setDepositRequired(""); setFirstMonthRent(""); setLastMonthRent("");
       setGroceries(""); setUtilities(""); setTransportation(""); setHealthcare("");
       setVisaCost(""); setFlightCost(""); setShippingCost(""); setTemporaryStay("");
       setAdminFees(""); setFurnitureSetup(""); setEmergencyCashBuffer("");
+      setCarCostMonthly("");
     }
     setCurrentSavings("");
     setConditionalAnswers({});
