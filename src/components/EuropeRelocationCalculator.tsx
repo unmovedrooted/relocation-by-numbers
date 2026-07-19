@@ -1210,90 +1210,49 @@ readinessRecommendation,
   </div>
 
   <div className="grid gap-3 sm:grid-cols-2">
-    <label className="text-sm">
-      <div className={labelHeadCls}>
-        Groceries monthly ({COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})
-      </div>
-      <input
-        className={inputCls}
-        type="number"
-        min="0"
-        value={groceries}
-        onChange={(e) => setGroceries(e.target.value)}
-        placeholder=" "
-      />
-      <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-        Adjusted estimate: {displayAmount(results.groceriesAdj, 0)}
-      </div>
-        <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-  Current location estimate: {displayAmount(results.groceriesFrom, 0)}
-</div>
-    </label>
+    <CalculatorImmediateNumberField
+      id="europe-groceries"
+      label={<>Groceries monthly ({COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})</>}
+      className={inputCls}
+      min="0"
+      value={groceries}
+      onChange={setGroceries}
+      placeholder=" "
+      helpText={<>Adjusted estimate: {displayAmount(results.groceriesAdj, 0)}<div className="mt-1 text-xs text-slate-400 dark:text-slate-500">Current location estimate: {displayAmount(results.groceriesFrom, 0)}</div></>}
+    />
 
-  
+    <CalculatorImmediateNumberField
+      id="europe-utilities"
+      label={<>Utilities monthly ({COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})</>}
+      className={inputCls}
+      min="0"
+      value={utilities}
+      onChange={setUtilities}
+      placeholder=" "
+      helpText={<>Adjusted estimate: {displayAmount(results.utilitiesAdj, 0)}<div className="mt-1 text-xs text-slate-400 dark:text-slate-500">Current location estimate: {displayAmount(results.utilitiesFrom, 0)}</div></>}
+    />
 
-    <label className="text-sm">
-      <div className={labelHeadCls}>
-        Utilities monthly ({COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})
-      </div>
-      <input
-        className={inputCls}
-        type="number"
-        min="0"
-        value={utilities}
-        onChange={(e) => setUtilities(e.target.value)}
-        placeholder=" "
-      />
-      <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-        Adjusted estimate: {displayAmount(results.utilitiesAdj, 0)}
-      </div>
-         <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-  Current location estimate: {displayAmount(results.utilitiesFrom, 0)}
-</div>
+    <CalculatorImmediateNumberField
+      id="europe-transportation"
+      label={<>Transportation monthly ({COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})</>}
+      className={inputCls}
+      min="0"
+      value={transportation}
+      onChange={setTransportation}
+      placeholder=" "
+      helpText={<>Adjusted estimate: {displayAmount(results.transportationAdj, 0)}<div className="mt-1 text-xs text-slate-400 dark:text-slate-500">Current location estimate: {displayAmount(results.transportationFrom, 0)}</div></>}
+    />
 
-    </label>
-
- 
-    <label className="text-sm">
-      <div className={labelHeadCls}>
-        Transportation monthly ({COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})
-      </div>
-      <input
-        className={inputCls}
-        type="number"
-        min="0"
-        value={transportation}
-        onChange={(e) => setTransportation(e.target.value)}
-        placeholder=" "
-      />
-      <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-        Adjusted estimate: {displayAmount(results.transportationAdj, 0)}
-      </div>
-      <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-  Current location estimate: {displayAmount(results.transportationFrom, 0)}
-</div>
-    </label>
-
-
-    <label className="text-sm">
-      <div className={labelHeadCls}>
-        Healthcare monthly ({COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})
-      </div>
-      <input
-        className={inputCls}
-        type="number"
-        min="0"
-        value={healthcare}
-        onChange={(e) => setHealthcare(e.target.value)}
-        placeholder=" "
-      />
-      <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-        Adjusted estimate: {displayAmount(results.healthcareAdj, 0)}
-      </div>
-         <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-  Current location estimate: {displayAmount(results.healthcareFrom, 0)}
-</div>
-    </label>
+    <CalculatorImmediateNumberField
+      id="europe-healthcare"
+      label={<>Healthcare monthly ({COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})</>}
+      className={inputCls}
+      min="0"
+      value={healthcare}
+      onChange={setHealthcare}
+      placeholder=" "
+      helpText={<>Adjusted estimate: {displayAmount(results.healthcareAdj, 0)}<div className="mt-1 text-xs text-slate-400 dark:text-slate-500">Current location estimate: {displayAmount(results.healthcareFrom, 0)}</div></>}
+    />
    
   </div>
 

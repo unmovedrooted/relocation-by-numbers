@@ -35,7 +35,7 @@ describe("EuropeRelocationCalculator housing amount fields", () => {
   });
 
   it("leaves excluded monthly, car, and moving-cost inputs untouched", () => {
-    for (const value of ["utilities", "groceries", "carCostMonthly", "visaCost", "temporaryStay"]) {
+    for (const value of ["flightCost", "shippingCost", "carCostMonthly", "visaCost", "temporaryStay"]) {
       expect(source).toMatch(new RegExp(`<input[^>]*value=\\{${value}\\}`));
     }
   });
