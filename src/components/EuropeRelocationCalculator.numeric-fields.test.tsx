@@ -36,10 +36,4 @@ describe("EuropeRelocationCalculator immediate numeric fields", () => {
     expect(source).toMatch(/id="europe-children"[^>]*label="Number of children"[^>]*min="0"[^>]*step="1"[^>]*value=\{children\}[^>]*onChange=\{setChildren\}/);
   });
 
-  it("leaves excluded numeric fields as native inputs", () => {
-    expect(source).toMatch(/<input[^>]*value=\{temporaryStay\}/);
-    expect(source).toMatch(/<input[^>]*value=\{carCostMonthly\}/);
-    expect(source).toMatch(/<input[^>]*value=\{shippingCost\}/);
-    expect(source).toMatch(/<input[^>]*value=\{visaCost\}/);
-  });
 });

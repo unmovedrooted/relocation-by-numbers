@@ -38,9 +38,4 @@ describe("EuropeRelocationCalculator monthly living-cost fields", () => {
     }
   });
 
-  it("leaves car and moving-cost inputs native and untouched", () => {
-    for (const value of ["carCostMonthly", "visaCost", "flightCost", "shippingCost", "temporaryStay", "adminFees", "furnitureSetup", "emergencyCashBuffer"]) {
-      expect(source).toMatch(new RegExp(`<input[^>]*value=\\{${value}\\}`));
-    }
-  });
 });

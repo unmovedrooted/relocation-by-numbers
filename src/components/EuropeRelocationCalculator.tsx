@@ -1181,19 +1181,16 @@ readinessRecommendation,
   </CalculatorSelect>
 
 {needCar === "yes" && (
-  <label className="mt-3 block text-sm">
-    <div className={labelHeadCls}>
-      Estimated monthly car cost ({COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})
-    </div>
-    <input
-      className={inputCls}
-      type="number"
-      min="0"
-      value={carCostMonthly}
-      onChange={(e) => setCarCostMonthly(e.target.value)}
-      placeholder=" "
-    />
-  </label>
+  <CalculatorImmediateNumberField
+    id="europe-car-cost-monthly"
+    label={<>Estimated monthly car cost ({COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})</>}
+    wrapperClassName="mt-3 block"
+    className={inputCls}
+    min="0"
+    value={carCostMonthly}
+    onChange={setCarCostMonthly}
+    placeholder=" "
+  />
 )}
 </div>
 
@@ -1271,13 +1268,13 @@ readinessRecommendation,
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">One-Time Moving Costs</div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm"><div className={labelHeadCls}>Visa / permit estimate</div><input className={inputCls} type="number" value={visaCost} onChange={(e) => setVisaCost(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>One-way flight estimate</div><input className={inputCls} type="number" value={flightCost} onChange={(e) => setFlightCost(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Shipping / baggage estimate</div><input className={inputCls} type="number" value={shippingCost} onChange={(e) => setShippingCost(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Temporary housing estimate</div><input className={inputCls} type="number" value={temporaryStay} onChange={(e) => setTemporaryStay(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Setup / admin estimate</div><input className={inputCls} type="number" value={adminFees} onChange={(e) => setAdminFees(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Furniture / setup estimate</div><input className={inputCls} type="number" value={furnitureSetup} onChange={(e) => setFurnitureSetup(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Recommended cash buffer</div><input className={inputCls} type="number" value={emergencyCashBuffer} onChange={(e) => setEmergencyCashBuffer(e.target.value)} placeholder=" " /></label>
+              <CalculatorImmediateNumberField id="europe-visa-cost" label="Visa / permit estimate" className={inputCls} value={visaCost} onChange={setVisaCost} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-flight-cost" label="One-way flight estimate" className={inputCls} value={flightCost} onChange={setFlightCost} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-shipping-cost" label="Shipping / baggage estimate" className={inputCls} value={shippingCost} onChange={setShippingCost} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-temporary-stay" label="Temporary housing estimate" className={inputCls} value={temporaryStay} onChange={setTemporaryStay} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-admin-fees" label="Setup / admin estimate" className={inputCls} value={adminFees} onChange={setAdminFees} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-furniture-setup" label="Furniture / setup estimate" className={inputCls} value={furnitureSetup} onChange={setFurnitureSetup} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-emergency-cash-buffer" label="Recommended cash buffer" wrapperClassName="sm:col-span-2" className={inputCls} value={emergencyCashBuffer} onChange={setEmergencyCashBuffer} placeholder=" " />
             </div>
             <div className="mt-4 w-full text-xs text-slate-500 dark:text-slate-400">Planning estimates only.</div>
           </div>
