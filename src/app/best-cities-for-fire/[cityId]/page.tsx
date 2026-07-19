@@ -252,7 +252,7 @@ export default async function CityFirePage({ params }: PageProps) {
               </>
             )}
             <Link
-              href="/"
+              href={`/?to=${city.state}&toCity=${city.id}`}
               className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-3 py-2 text-sm font-semibold text-emerald-200 hover:bg-emerald-400/20"
             >
               Compare Cities →
@@ -420,10 +420,10 @@ export default async function CityFirePage({ params }: PageProps) {
               Open FIRE Calculator
             </Link>
             <Link
-              href="/"
+              href={`/?to=${city.state}&toCity=${city.id}`}
               className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
             >
-              Compare Cities
+              Full relocation cost breakdown for {city.name}
             </Link>
             {ALLOWED_CITY_DETAIL_PAGES.includes(cityId as (typeof ALLOWED_CITY_DETAIL_PAGES)[number]) && (
               <Link

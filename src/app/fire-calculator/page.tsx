@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import AdSlot from "@/components/AdSlot";
 import FireCalculator from "@/components/FireCalculator";
+import { parseIncomeParam } from "@/lib/incomeParam";
 
 export const metadata: Metadata = {
   title: "FIRE Calculator | Years to Financial Independence by Location",
@@ -26,7 +27,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function FireCalculatorPage() {
+type PageProps = { searchParams: Promise<{ income?: string }> };
+
+export default async function FireCalculatorPage({ searchParams }: PageProps) {
+  const { income } = await searchParams;
+  const initialIncome = parseIncomeParam(income);
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-6xl px-4 py-10 space-y-10">
@@ -109,7 +114,7 @@ export default function FireCalculatorPage() {
           </p>
         </section>
 
-        <FireCalculator />
+        <FireCalculator initialIncome={initialIncome} />
 
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID ? (
           <section className="rounded-2xl border border-white/10 bg-white/5 p-4">

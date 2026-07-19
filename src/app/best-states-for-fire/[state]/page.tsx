@@ -449,10 +449,10 @@ export default async function BestStateForFirePage({ params }: PageProps) {
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/"
+              href={`/?to=${found.code}`}
               className="inline-flex items-center rounded-xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:opacity-90"
             >
-              Compare Cities →
+              Full relocation cost breakdown for {found.name} →
             </Link>
             <Link
               href="/fire-calculator"

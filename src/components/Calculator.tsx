@@ -12,6 +12,7 @@ import {
   type TaxBreakdown,
 } from "../lib/tax";
 import { monthlyHousingCost } from "../lib/housing";
+import { downloadCsv, type CsvRow } from "../lib/csvExport";
 
 type Mode = "rent" | "buy";
 
@@ -766,6 +767,60 @@ export default function Calculator({
     [isToOther, toCityOther, toCityId, stateName]
   );
 
+  // ── CSV export ───────────────────────────────────────────────────────────
+  const csvExportRows = useMemo<CsvRow[]>(() => {
+    const rows: CsvRow[] = [
+      { Metric: "From city", Value: currentCityLabel },
+      { Metric: "To city", Value: targetCityLabel },
+      { Metric: "Housing mode", Value: mode === "buy" ? "Buying" : "Renting" },
+      { Metric: "Gross annual salary", Value: money(results.grossMonthly * 12) },
+      { Metric: "Net monthly pay (from city)", Value: money(results.netFromMonthly) },
+      { Metric: "Net monthly pay (to city)", Value: money(results.netToMonthly) },
+      { Metric: "Monthly take-home difference", Value: money(results.monthlyIncomeDiff) },
+      { Metric: "Effective tax rate (from city)", Value: `${results.effTaxFromPct.toFixed(1)}%` },
+      { Metric: "Effective tax rate (to city)", Value: `${results.effTaxToPct.toFixed(1)}%` },
+      { Metric: "Monthly housing cost (to city)", Value: money(results.activeHousing) },
+      { Metric: "Housing as % of net income", Value: Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—" },
+      { Metric: "Monthly flexibility after housing", Value: money(monthlyFlexibility) },
+      { Metric: "True monthly leftover (after essentials)", Value: money(trueMonthlyLeftover) },
+      { Metric: "Max safe housing budget (30% rule)", Value: money(maxSafeHousing) },
+      { Metric: "Verdict", Value: verdict.level },
+      { Metric: "Verdict summary", Value: verdict.description },
+    ];
+
+    if (neededSalary !== null) {
+      rows.push({ Metric: "Salary needed to match current lifestyle", Value: money(neededSalary) });
+    }
+    if (comparable) {
+      rows.push({
+        Metric: `Cost-of-living-adjusted comparable salary (${comparable.toCityName})`,
+        Value: money(comparable.comparableSalary),
+      });
+      rows.push({
+        Metric: `${comparable.toCityName} vs ${comparable.fromCityName} cost difference`,
+        Value: `${Math.abs(comparable.pctLessMore).toFixed(1)}% ${comparable.pctLessMore >= 0 ? "less" : "more"} expensive`,
+      });
+    }
+    if (targetBreakdown) {
+      rows.push({ Metric: "Federal tax withheld (to city, annual)", Value: money(targetBreakdown.federal) });
+      rows.push({ Metric: "State tax withheld (to city, annual)", Value: money(targetBreakdown.state) });
+      rows.push({ Metric: "FICA withheld (to city, annual)", Value: money(targetBreakdown.fica) });
+      if (targetBreakdown.local > 0) {
+        rows.push({ Metric: "Local tax withheld (to city, annual)", Value: money(targetBreakdown.local) });
+      }
+    }
+
+    return rows;
+  }, [
+    currentCityLabel, targetCityLabel, mode, results, monthlyFlexibility,
+    trueMonthlyLeftover, maxSafeHousing, verdict, neededSalary, comparable, targetBreakdown,
+  ]);
+
+  const handleExportCsv = () => {
+    const filenameCity = (targetCityLabel || "scenario").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    downloadCsv(`relocation-scenario-${filenameCity}`, csvExportRows);
+  };
+
   const isStatePage = monetization === "state";
   const isPremiumState = ["tx", "fl", "ca", "nc", "ny", "ma", "wa"].includes(toState);
 
@@ -1384,6 +1439,19 @@ export default function Calculator({
               >
                 See if you can afford a mortgage →
               </button>
+              <button
+                type="button"
+                className="mt-2 flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+                onClick={() => {
+                  const salaryN = Math.round(n(salary));
+                  const url = salaryN > 0
+                    ? `https://www.relocationbynumbers.com/fire-calculator?income=${salaryN}`
+                    : "https://www.relocationbynumbers.com/fire-calculator";
+                  window.open(url, "_blank", "noopener,noreferrer");
+                }}
+              >
+                See your FIRE number after this move →
+              </button>
             </div>
           )}
 
@@ -1396,6 +1464,7 @@ export default function Calculator({
                   Copy your current comparison link and send it to a partner, friend, or future self.
                 </div>
               </div>
+              <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={async () => {
@@ -1432,6 +1501,14 @@ export default function Calculator({
               >
                 {shareStatus === "copied" ? "Link copied!" : shareStatus === "shared" ? "Shared!" : shareStatus === "error" ? "Share failed" : "Share scenario"}
               </button>
+              <button
+                type="button"
+                onClick={handleExportCsv}
+                className="inline-flex items-center justify-center rounded-xl border border-sky-300 bg-white px-4 py-2.5 text-sm font-semibold text-sky-700 transition hover:bg-sky-50 dark:border-sky-800 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-slate-950"
+              >
+                Export CSV
+              </button>
+              </div>
             </div>
           </div>
 

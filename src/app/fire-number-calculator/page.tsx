@@ -3,6 +3,7 @@ import Link from "next/link";
 import AdSlot from "@/components/AdSlot";
 import FireCalculator from "@/components/FireCalculator";
 import { SEOFAQItem } from "@/components/SeoFAQ";
+import { parseIncomeParam } from "@/lib/incomeParam";
 
 export const metadata: Metadata = {
   title: "FIRE Number Calculator | How Much Do You Need to Retire Early?",
@@ -27,7 +28,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Page() {
+type PageProps = { searchParams: Promise<{ income?: string }> };
+
+export default async function Page({ searchParams }: PageProps) {
+  const { income } = await searchParams;
+  const initialIncome = parseIncomeParam(income);
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-10">
@@ -75,7 +80,7 @@ export default function Page() {
 
         <section aria-label="FIRE number calculator">
           {/* hideFAQ removes the component's built-in FAQ so only the page-level FAQ below renders */}
-          <FireCalculator hideFAQ />
+          <FireCalculator hideFAQ initialIncome={initialIncome} />
         </section>
 
         <section className="space-y-4">

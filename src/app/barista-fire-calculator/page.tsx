@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import FireCalculator from "@/components/FireCalculator";
 import { SEOFAQItem } from "@/components/SeoFAQ";
+import { parseIncomeParam } from "@/lib/incomeParam";
 
 export const metadata: Metadata = {
   title: "Barista FIRE Calculator | Part-Time Income & Partial Retirement Planning",
@@ -26,7 +27,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Page() {
+type PageProps = { searchParams: Promise<{ income?: string }> };
+
+export default async function Page({ searchParams }: PageProps) {
+  const { income } = await searchParams;
+  const initialIncome = parseIncomeParam(income);
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-10">
@@ -62,7 +67,7 @@ export default function Page() {
         </header>
 
         <section aria-label="Barista FIRE calculator">
-          <FireCalculator hideFAQ />
+          <FireCalculator hideFAQ initialIncome={initialIncome} />
         </section>
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">

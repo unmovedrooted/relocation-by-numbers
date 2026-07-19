@@ -3,6 +3,7 @@ import Link from "next/link";
 import FireCalculator from "@/components/FireCalculator";
 import AdSlot from "@/components/AdSlot";
 import { SEOFAQItem } from "@/components/SeoFAQ";
+import { parseIncomeParam } from "@/lib/incomeParam";
 
 export const metadata: Metadata = {
   title: "Lean FIRE Calculator | Retire Early on a Smaller Budget",
@@ -27,7 +28,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Page() {
+type PageProps = { searchParams: Promise<{ income?: string }> };
+
+export default async function Page({ searchParams }: PageProps) {
+  const { income } = await searchParams;
+  const initialIncome = parseIncomeParam(income);
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-10">
@@ -97,7 +102,7 @@ export default function Page() {
         </section>
 
         <section aria-label="Lean FIRE calculator">
-          <FireCalculator hideFAQ />
+          <FireCalculator hideFAQ initialIncome={initialIncome} />
         </section>
 
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID ? (
