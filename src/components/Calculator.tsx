@@ -13,7 +13,7 @@ import {
 } from "../lib/tax";
 import { monthlyHousingCost } from "../lib/housing";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
-import { downloadPdfReport } from "../lib/pdfExport";
+import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 
 type Mode = "rent" | "buy";
@@ -858,7 +858,7 @@ export default function Calculator({
       filename: `relocation-scenario-${filenameCity}`,
       title: `${currentCityLabel} → ${targetCityLabel}`,
       subtitle: `${verdict.level}${results.salaryReady ? ` · ${money(monthlyFlexibility, 0)}/mo flexibility` : ""}`,
-      rows: csvExportRows,
+      rows: csvExportRows as PdfRow[],
       footerNote: "Estimates only, based on public cost-of-living and tax data. Not financial or tax advice. relocationbynumbers.com",
     });
   };
