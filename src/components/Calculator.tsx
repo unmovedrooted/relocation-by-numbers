@@ -13,6 +13,7 @@ import {
 } from "../lib/tax";
 import { monthlyHousingCost } from "../lib/housing";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
+import { downloadPdfReport } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 
 type Mode = "rent" | "buy";
@@ -851,6 +852,17 @@ export default function Calculator({
     downloadCsv(`relocation-scenario-${filenameCity}`, csvExportRows);
   };
 
+  const handleExportPdf = () => {
+    const filenameCity = (targetCityLabel || "scenario").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    downloadPdfReport({
+      filename: `relocation-scenario-${filenameCity}`,
+      title: `${currentCityLabel} → ${targetCityLabel}`,
+      subtitle: `${verdict.level}${results.salaryReady ? ` · ${money(monthlyFlexibility, 0)}/mo flexibility` : ""}`,
+      rows: csvExportRows,
+      footerNote: "Estimates only, based on public cost-of-living and tax data. Not financial or tax advice. relocationbynumbers.com",
+    });
+  };
+
   const getCurrentScenario = () => ({
     label: `${currentCityLabel} → ${targetCityLabel}`,
     url: typeof window !== "undefined" ? window.location.pathname + window.location.search : "/",
@@ -1581,6 +1593,13 @@ export default function Calculator({
                 className="inline-flex items-center justify-center rounded-xl border border-sky-300 bg-white px-4 py-2.5 text-sm font-semibold text-sky-700 transition hover:bg-sky-50 dark:border-sky-800 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-slate-950"
               >
                 Export CSV
+              </button>
+              <button
+                type="button"
+                onClick={handleExportPdf}
+                className="inline-flex items-center justify-center rounded-xl border border-sky-300 bg-white px-4 py-2.5 text-sm font-semibold text-sky-700 transition hover:bg-sky-50 dark:border-sky-800 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-slate-950"
+              >
+                Export PDF
               </button>
               </div>
             </div>
