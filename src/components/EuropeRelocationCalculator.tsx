@@ -22,6 +22,7 @@ import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
 import { USD_TO_LOCAL } from "@/lib/internationalFx";
 import { buildEuropeSearchParams, createEuropeCityPresetPatch, createEuropeInitialState } from "@/lib/europeCalculatorState";
 import AdSlot from "./AdSlot";
+import CalculatorSelect from "./calculator-form/CalculatorSelect";
 
 // ---------------------------------------------------------------------------
 // EUROPE-SPECIFIC CONFIG
@@ -1054,56 +1055,32 @@ readinessRecommendation,
                 />
               </label>
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>Filing status</div>
-                <select className={selectCls} value={filing} onChange={(e) => setFiling(e.target.value as FilingStatus)}>
+              <CalculatorSelect id="europe-filing-status" label="Filing status" className={selectCls} value={filing} onChange={(e) => setFiling(e.target.value as FilingStatus)}>
                   <option value="single">Single</option>
                   <option value="married">Married (joint)</option>
-                </select>
-              </label>
+              </CalculatorSelect>
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>Current country</div>
-                <select className={selectCls} value={fromCountry} onChange={(e) => changeFromCountry(e.target.value)}>
+              <CalculatorSelect id="europe-current-country" label="Current country" className={selectCls} value={fromCountry} onChange={(e) => changeFromCountry(e.target.value)}>
                   {allCountriesSorted.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
-                </select>
-              </label>
+              </CalculatorSelect>
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>
-                  Target country
-                  <InfoTip align="right" text="Filtered to European countries. Use the International Relocation Calculator for destinations outside Europe." />
-                </div>
-                <select className={selectCls} value={toCountry} onChange={(e) => changeToCountry(e.target.value)}>
+              <CalculatorSelect id="europe-destination-country" label="Target country" info={<InfoTip align="right" text="Filtered to European countries. Use the International Relocation Calculator for destinations outside Europe." />} className={selectCls} value={toCountry} onChange={(e) => changeToCountry(e.target.value)}>
                   {europeCountriesSorted.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
-                </select>
-              </label>
+              </CalculatorSelect>
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>Current city</div>
-                <select className={selectCls} value={fromCityCode} onChange={(e) => setFromCityCode(e.target.value)}>
+              <CalculatorSelect id="europe-current-city" label="Current city" className={selectCls} value={fromCityCode} onChange={(e) => setFromCityCode(e.target.value)}>
                   {fromCities.map(city => <option key={city.code} value={city.code}>{city.name}</option>)}
-                </select>
-              </label>
+              </CalculatorSelect>
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>Target city</div>
-                <select className={selectCls} value={toCityCode} onChange={(e) => changeToCity(e.target.value)}>
+              <CalculatorSelect id="europe-destination-city" label="Target city" className={selectCls} value={toCityCode} onChange={(e) => changeToCity(e.target.value)}>
                   {toCities.map(city => <option key={city.code} value={city.code}>{city.name}</option>)}
-                </select>
-              </label>
+              </CalculatorSelect>
 
-              <label className="text-sm">
-                <div className={labelHeadCls}>
-                  Currency display
-                  <InfoTip align="right" text="Choose how amounts appear in the calculator. View in USD, your current country's currency, or your European destination currency." />
-                </div>
-                <select className={selectCls} value={currencyDisplay} onChange={(e) => setCurrencyDisplay(e.target.value as CurrencyDisplay)}>
+              <CalculatorSelect id="europe-display-currency" label="Currency display" info={<InfoTip align="right" text="Choose how amounts appear in the calculator. View in USD, your current country's currency, or your European destination currency." />} className={selectCls} value={currencyDisplay} onChange={(e) => setCurrencyDisplay(e.target.value as CurrencyDisplay)}>
                   <option value="USD">US Dollar (USD)</option>
                   <option value="CURRENT">Current currency ({COUNTRY_TO_CURRENCY[fromCountry] ?? "USD"})</option>
                   <option value="DESTINATION">Destination currency ({COUNTRY_TO_CURRENCY[toCountry] ?? "USD"})</option>
-                </select>
-              </label>
+              </CalculatorSelect>
 
               <div className="text-sm">
                 <div className={labelHeadCls}>
@@ -1129,16 +1106,10 @@ readinessRecommendation,
 
               {/* Income type — matches Caribbean pattern */}
               {mode === "working" && (
-                <label className="text-sm sm:col-span-2">
-                  <div className={labelHeadCls}>
-                    Income type
-                    <InfoTip align="right" text="Select how you earn income. This determines which tax scenario applies for the destination country." />
-                  </div>
-                  <select className={selectCls} value={salaryType} onChange={(e) => changeSalaryType(e.target.value as SalaryType)}>
+                <CalculatorSelect id="europe-income-type" label="Income type" info={<InfoTip align="right" text="Select how you earn income. This determines which tax scenario applies for the destination country." />} wrapperClassName="sm:col-span-2" className={selectCls} value={salaryType} onChange={(e) => changeSalaryType(e.target.value as SalaryType)}>
                     <option value="local">I earn locally in the destination country</option>
                     <option value="remote">I earn remotely / foreign-source income</option>
-                  </select>
-                </label>
+                </CalculatorSelect>
               )}
 
               <label className="text-sm">
@@ -1162,36 +1133,19 @@ readinessRecommendation,
           {getConditionalQuestionsForCountry(toCountry, incomeScenario).map((q: ConditionalQuestion) => (
             <div key={q.key} className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
               <div className="mb-3 text-sm font-semibold">{getCountryByCode(toCountry)?.name ?? toCountry} — Tax Question</div>
-              <label className="text-sm">
-                <div className={labelHeadCls}>
-                  {q.label}
-                  {q.helpText && <InfoTip text={q.helpText} />}
-                </div>
-                {/* Province/canton questions use a plain select with all options */}
-                {q.options.length > 6 ? (
-                  <select
-                    className={selectCls}
-                    value={conditionalAnswers[q.key] ?? ""}
-                    onChange={(e) => setConditionalAnswers((prev) => ({ ...prev, [q.key]: e.target.value }))}
-                  >
-                    <option value="">Select…</option>
-                    {q.options.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <select
-                    className={selectCls}
-                    value={conditionalAnswers[q.key] ?? ""}
-                    onChange={(e) => setConditionalAnswers((prev) => ({ ...prev, [q.key]: e.target.value }))}
-                  >
-                    <option value="">Select…</option>
-                    {q.options.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                )}
-              </label>
+              <CalculatorSelect
+                id={`europe-tax-question-${q.key}`}
+                label={q.label}
+                info={q.helpText ? <InfoTip text={q.helpText} /> : undefined}
+                className={selectCls}
+                value={conditionalAnswers[q.key] ?? ""}
+                onChange={(e) => setConditionalAnswers((prev) => ({ ...prev, [q.key]: e.target.value }))}
+              >
+                <option value="">Select…</option>
+                {q.options.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </CalculatorSelect>
             </div>
           ))}
 
@@ -1218,33 +1172,27 @@ readinessRecommendation,
                 <div className={labelHeadCls}>Last month rent (if applicable)</div>
                 <input className={inputCls} type="number" min="0" value={lastMonthRent} onChange={(e) => setLastMonthRent(e.target.value)} placeholder=" " />
               </label>
-              <label className="text-sm">
-                <div className={labelHeadCls}>Furnished or unfurnished</div>
-                <select className={selectCls} value={furnished} onChange={(e) => setFurnished(e.target.value as FurnishedType)}>
+              <CalculatorSelect id="europe-furnishing" label="Furnished or unfurnished" className={selectCls} value={furnished} onChange={(e) => setFurnished(e.target.value as FurnishedType)}>
                   <option value="unfurnished">Unfurnished</option>
                   <option value="furnished">Furnished</option>
-                </select>
-              </label>
-              <label className="text-sm sm:col-span-2">
-                <div className={labelHeadCls}>Utilities included?</div>
-                <select className={selectCls} value={utilitiesIncluded} onChange={(e) => setUtilitiesIncluded(e.target.value as YesNo)}>
+              </CalculatorSelect>
+              <CalculatorSelect id="europe-utilities-included" label="Utilities included?" wrapperClassName="sm:col-span-2" className={selectCls} value={utilitiesIncluded} onChange={(e) => setUtilitiesIncluded(e.target.value as YesNo)}>
                   <option value="no">No</option>
                   <option value="yes">Yes</option>
-                </select>
-              </label>
+              </CalculatorSelect>
             </div>
             {/* Car field — now in Housing, matching Caribbean */}
-            <label className="mt-3 block text-sm">
-  <div className={labelHeadCls}>Will you need a car?</div>
-  <select
+            <CalculatorSelect
+    id="europe-need-car"
+    label="Will you need a car?"
+    wrapperClassName="mt-3 block"
     className={selectCls}
     value={needCar}
     onChange={(e) => setNeedCar(e.target.value as YesNo)}
   >
     <option value="no">No</option>
     <option value="yes">Yes</option>
-  </select>
-</label>
+  </CalculatorSelect>
 
 {needCar === "yes" && (
   <label className="mt-3 block text-sm">
