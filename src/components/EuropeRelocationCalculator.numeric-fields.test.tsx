@@ -37,7 +37,7 @@ describe("EuropeRelocationCalculator immediate numeric fields", () => {
   });
 
   it("leaves excluded numeric fields as native inputs", () => {
-    expect(source).toMatch(/<input[^>]*value=\{destinationRent\}/);
+    expect(source).toMatch(/<input[^>]*value=\{utilities\}/);
     expect(source).toMatch(/<input[^>]*value=\{carCostMonthly\}/);
     expect(source).toMatch(/<input[^>]*value=\{groceries\}/);
     expect(source).toMatch(/<input[^>]*value=\{visaCost\}/);

@@ -1154,22 +1154,10 @@ readinessRecommendation,
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">Housing</div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm sm:col-span-2">
-                <div className={labelHeadCls}>Rent in destination (monthly)</div>
-                  <input className={inputCls} type="number" min="0" value={destinationRent} onChange={(e) => setDestinationRent(e.target.value)} placeholder=" " />
-              </label>
-              <label className="text-sm">
-                <div className={labelHeadCls}>Deposit required</div>
-                <input className={inputCls} type="number" min="0" value={depositRequired} onChange={(e) => setDepositRequired(e.target.value)} placeholder=" " />
-              </label>
-              <label className="text-sm">
-                <div className={labelHeadCls}>First month rent</div>
-                <input className={inputCls} type="number" min="0" value={firstMonthRent} onChange={(e) => setFirstMonthRent(e.target.value)} placeholder=" " />
-              </label>
-              <label className="text-sm">
-                <div className={labelHeadCls}>Last month rent (if applicable)</div>
-                <input className={inputCls} type="number" min="0" value={lastMonthRent} onChange={(e) => setLastMonthRent(e.target.value)} placeholder=" " />
-              </label>
+              <CalculatorImmediateNumberField id="europe-destination-rent" label="Rent in destination (monthly)" wrapperClassName="sm:col-span-2" className={inputCls} min="0" value={destinationRent} onChange={setDestinationRent} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-security-deposit" label="Deposit required" className={inputCls} min="0" value={depositRequired} onChange={setDepositRequired} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-first-month-rent" label="First month rent" className={inputCls} min="0" value={firstMonthRent} onChange={setFirstMonthRent} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-last-month-rent" label="Last month rent (if applicable)" className={inputCls} min="0" value={lastMonthRent} onChange={setLastMonthRent} placeholder=" " />
               <CalculatorSelect id="europe-furnishing" label="Furnished or unfurnished" className={selectCls} value={furnished} onChange={(e) => setFurnished(e.target.value as FurnishedType)}>
                   <option value="unfurnished">Unfurnished</option>
                   <option value="furnished">Furnished</option>
