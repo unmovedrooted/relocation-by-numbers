@@ -708,11 +708,6 @@ recommendation,
         </div>
       </div>
 
-      {urlReady && scenarioContract.kind === "legacy" ? (
-        <aside aria-label="Legacy scenario currency information" className="mt-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-100">
-          This older shared scenario keeps its original currency rules: destination costs use {destinationCurrency}, except the flight estimate uses USD. New scenarios use USD for destination-cost inputs.
-        </aside>
-      ) : null}
       {urlReady && scenarioContract.kind === "unsupported" ? (
         <aside aria-label="Unsupported scenario version information" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
           Scenario version “{scenarioContract.requestedVersion}” is not supported. To avoid silently changing these values, destination costs are being interpreted with the legacy {destinationCurrency} rules; the flight estimate remains USD.
