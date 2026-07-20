@@ -1282,7 +1282,7 @@ export default function Calculator({
                     Current city effective rate: <span className="font-semibold text-slate-900 dark:text-slate-100">{results.effTaxFromPct.toFixed(1)}%</span>
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-400">
-                    Includes local city income tax where applicable. NY, CA, NJ, MA, PA, and IL tax 401(k) contributions at the state level — accounted for above.
+                    Includes local city income tax where applicable. CA and PA tax traditional 401(k) contributions at the state level (most other states exclude them, matching federal treatment) — accounted for above.
                   </div>
                 </>
               )}
