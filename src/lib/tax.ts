@@ -101,17 +101,25 @@ type StateDeductConfig = {
 };
 
 const STATE_DEDUCT_CONFIG: Partial<Record<StateCode, StateDeductConfig>> = {
-  // ── States that tax 401k contributions ───────────────────────────────────
-  // These are high-impact: a user contributing 10% 401k on $150k will have
-  // ~$15k MORE state-taxable income than the old code assumed.
-  ny: { single: 8_000,  married: 16_050, allows401k: false }, // NY does not recognize 401k exclusion
+  // ── States that genuinely tax traditional 401(k) employee contributions ───
+  // Verified against each state's own tax authority: CA (FTB — CA does not
+  // conform to federal deferred-comp exclusion) and PA (PA DOR — 401k
+  // elective deferrals are taxable PA compensation). These are the only two
+  // states in this list where wages must be computed from gross, not
+  // after-401k pay.
   ca: { single: 5_202,  married: 10_404, allows401k: false }, // CA does not recognize 401k exclusion
-  nj: { single: 1_000,  married: 2_000,  allows401k: false }, // NJ taxes 401k; small personal exemption
-  ma: { single: 4_400,  married: 8_800,  allows401k: false }, // MA does not recognize 401k exclusion
   pa: { single: 0,      married: 0,      allows401k: false }, // PA taxes 401k; no standard deduction
-  il: { single: 2_425,  married: 4_850,  allows401k: false }, // IL personal exemption; taxes 401k
 
   // ── States with 401k exclusion and their own standard deductions ──────────
+  // NY, NJ, MA, and IL all exclude standard employee elective 401(k)
+  // deferrals from state wages for W-2 employees (confirmed via NY DTF, NJ
+  // Division of Taxation, Mass.gov, and IL DOR guidance) — despite each
+  // having other retirement-plan quirks (e.g. NJ taxes IRA/403(b)
+  // contributions, MA taxes self-employed/partner 401k contributions).
+  ny: { single: 8_000,  married: 16_050, allows401k: true  },
+  nj: { single: 1_000,  married: 2_000,  allows401k: true  },
+  ma: { single: 4_400,  married: 8_800,  allows401k: true  },
+  il: { single: 2_425,  married: 4_850,  allows401k: true  },
   ct: { single: 15_000, married: 24_000, allows401k: true  }, // CT personal exemption
   va: { single: 8_000,  married: 16_000, allows401k: true  },
   ga: { single: 12_000, married: 24_000, allows401k: true  }, // GA doubled std deduction in 2022
@@ -425,6 +433,18 @@ export type TaxOpts = {
   filing: FilingStatus;
   k401Pct: number;
   cityId?: string;
+  /**
+   * Optional pre-computed 401(k) dollar amount, used instead of deriving it
+   * from k401Pct. Needed for married dual-income households: the IRS elective
+   * deferral limit (EMPLOYEE_401K_LIMIT) applies PER PERSON, not per return,
+   * so a couple who each max out their own 401(k) can jointly exclude up to
+   * 2x the single-filer limit. Callers combining two incomes into one
+   * grossAnnual figure should compute each spouse's capped 401(k) dollar
+   * amount separately, sum them, and pass the sum here — otherwise the
+   * k401Pct path below re-applies the single-person cap to the household
+   * total and understates the exclusion.
+   */
+  k401Dollar?: number;
 };
 
 /**
@@ -447,7 +467,10 @@ function compute(opts: TaxOpts): {
 
   const gross    = Math.max(0, Number(opts.grossAnnual) || 0);
   const k401Pct  = clamp(Number(opts.k401Pct) || 0, 0, 60);
-  const k401     = Math.min(gross * (k401Pct / 100), EMPLOYEE_401K_LIMIT);
+  const hasDollarOverride = typeof opts.k401Dollar === "number" && Number.isFinite(opts.k401Dollar);
+  const k401     = hasDollarOverride
+    ? clamp(opts.k401Dollar as number, 0, gross)
+    : Math.min(gross * (k401Pct / 100), EMPLOYEE_401K_LIMIT);
   const after401k = Math.max(0, gross - k401);
 
   // Federal taxable income

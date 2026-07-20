@@ -155,11 +155,16 @@ function estimateCombinedNet(
     return estimateNetAnnual({ grossAnnual: income1, state, filing, k401Pct: k401Pct1, cityId })
   }
   if (filing === 'married') {
+    // The IRS elective deferral limit (EMPLOYEE_401K_LIMIT) applies per
+    // person, not per return — a couple who each max out their own 401(k)
+    // can jointly exclude up to 2x the single-filer limit. Cap each
+    // spouse's contribution individually, then pass the summed dollar
+    // amount via k401Dollar so tax.ts doesn't re-apply the single-person
+    // cap to the household total.
     const k401_1 = Math.min(income1 * (k401Pct1 / 100), EMPLOYEE_401K_LIMIT)
     const k401_2 = Math.min(income2 * (k401Pct2 / 100), EMPLOYEE_401K_LIMIT)
     const combined = income1 + income2
-    const effectiveK401Pct = combined > 0 ? ((k401_1 + k401_2) / combined) * 100 : 0
-    return estimateNetAnnual({ grossAnnual: combined, state, filing: 'married', k401Pct: effectiveK401Pct, cityId })
+    return estimateNetAnnual({ grossAnnual: combined, state, filing: 'married', k401Pct: 0, k401Dollar: k401_1 + k401_2, cityId })
   }
   const net1 = estimateNetAnnual({ grossAnnual: income1, state, filing: 'single', k401Pct: k401Pct1, cityId })
   const net2 = estimateNetAnnual({ grossAnnual: income2, state, filing: 'single', k401Pct: k401Pct2, cityId })
@@ -538,11 +543,14 @@ export default function RelocationIncomeCalculator() {
 
     let taxesTwo: number
     if (i2 > 0 && filing === 'married') {
+      // See estimateCombinedNet above — each spouse's 401(k) is capped
+      // individually, then the summed dollar amount is passed via
+      // k401Dollar so the household total isn't re-capped to a single
+      // person's limit.
       const k401_1 = Math.min(i1 * (k1 / 100), EMPLOYEE_401K_LIMIT)
       const k401_2 = Math.min(i2 * (k2 / 100), EMPLOYEE_401K_LIMIT)
       const combined = i1 + i2
-      const effectiveK401Pct = combined > 0 ? ((k401_1 + k401_2) / combined) * 100 : 0
-      const bd = estimateNetBreakdown({ grossAnnual: combined, state: targetState, filing: 'married', k401Pct: effectiveK401Pct, cityId: targetCityId })
+      const bd = estimateNetBreakdown({ grossAnnual: combined, state: targetState, filing: 'married', k401Pct: 0, k401Dollar: k401_1 + k401_2, cityId: targetCityId })
       taxesTwo = bd.totalTax
     } else if (i2 > 0) {
       const bd1 = estimateNetBreakdown({ grossAnnual: i1, state: targetState, filing: 'single', k401Pct: k1, cityId: targetCityId })

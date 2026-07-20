@@ -315,14 +315,20 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   ES: ({ annualIncome, filing, incomeScenario = "local", answers }) => {
     if ((incomeScenario === "remote" || incomeScenario === "local") && answers?.es_beckham === "yes") {
-      const effectiveRate = annualIncome <= 600000 ? 0.24 : 0.30;
+      // Beckham Law: 24% flat up to €600k, 47% flat on the excess (not 30% —
+      // verified against current AEAT/Beckham Law guidance). Blend the two
+      // bands into a single effective rate on total income.
+      const taxOwed = annualIncome <= 600000
+        ? annualIncome * 0.24
+        : 600000 * 0.24 + (annualIncome - 600000) * 0.47;
+      const effectiveRate = annualIncome > 0 ? taxOwed / annualIncome : 0;
       return {
         effectiveRate: clampRate(effectiveRate),
         model: "flat",
         confidence: "partial",
         label: "Spain Beckham Law planning estimate",
         missingFactor: "Eligibility requires employer sponsorship and formal AEAT application approval.",
-        note: "The Beckham Law rate (24% up to €600k) is legislated and well-defined. Main uncertainty: eligibility requires employer sponsorship, non-residency in Spain for the prior 5 years, and formal application approval. Blended rate above €600k is approximate. Confirm eligibility with a Spanish tax advisor.",
+        note: "The Beckham Law rate is legislated and well-defined: 24% flat up to €600k, 47% flat on the excess. Main uncertainty: eligibility requires employer sponsorship, non-residency in Spain for the prior 5 years, and formal application approval. Confirm eligibility with a Spanish tax advisor.",
       };
     }
 
