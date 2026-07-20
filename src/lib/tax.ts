@@ -172,7 +172,7 @@ const STATE_NONE = new Set<StateCode>([
 
 // Flat-rate states (rate applied to state taxable income after state deduction)
 const STATE_FLAT: Partial<Record<StateCode, number>> = {
-  ga:  0.0549, // 2024 flat rate; reducing ~0.1%/yr
+  ga:  0.0519, // 2025 flat rate (down from 5.39% in 2024 under HB 1015; verified vs. GA DOR, further reduced to 4.99% for 2026 under HB 463 — update when this calculator's base tax year advances)
   nc:  0.0425,
   ma:  0.05,
   pa:  0.0307,
@@ -378,7 +378,18 @@ function estimateStateTax(
   const bracketSet = STATE_BRACKETS[state];
   if (bracketSet) {
     const brackets = filing === "married" ? bracketSet.married : bracketSet.single;
-    if (brackets.length > 0) return sumBrackets(taxableState, brackets);
+    if (brackets.length > 0) {
+      let tax = sumBrackets(taxableState, brackets);
+      // CA Mental Health Services Tax (Prop 63): flat 1% surtax on CA taxable
+      // income above $1,000,000. Applied as a separate add-on rather than a
+      // bracket tier because the $1M threshold is identical across filing
+      // statuses — it is NOT doubled for married filers the way CA's other
+      // brackets are, and it has never been inflation-indexed since 2004.
+      if (state === "ca") {
+        tax += Math.max(0, taxableState - 1_000_000) * 0.01;
+      }
+      return tax;
+    }
   }
 
   // Last resort: rough effective rate fallback
