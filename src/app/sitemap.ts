@@ -27,6 +27,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const calculatorPages = [
     "/mortgage-calculator",
+    "/housing-affordability-calculator",
+    "/compare-cities",
     "/one-income-relocation-calculator",
      "/blog",
     "/fire-calculator",

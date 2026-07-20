@@ -50,6 +50,7 @@ const labelHeadCls = "mb-1 text-xs font-medium leading-4 text-slate-600 dark:tex
 
 type Mode = "rent" | "buy";
 type IncomeMode = "working" | "retired";
+type IntlHousingMode = "rent" | "buy";
 type RegionKey = "us" | "caribbean" | "asia" | "europe" | "south-america" | "international";
 
 type UsTargetSlot = { id: string; stateCode: StateCode; cityId: string };
@@ -218,6 +219,7 @@ export default function CompareCitiesCalculator() {
   const [k401Pct, setK401Pct] = useState<string>("10");
   const [mode, setMode] = useState<Mode>("rent");
   const [incomeMode, setIncomeMode] = useState<IncomeMode>("working");
+  const [intlHousingMode, setIntlHousingMode] = useState<IntlHousingMode>("rent");
 
   const [downPct, setDownPct] = useState<string>("20");
   const [ratePct, setRatePct] = useState<string>("6.5");
@@ -229,6 +231,10 @@ export default function CompareCitiesCalculator() {
 
   const [rentersInsMonthly, setRentersInsMonthly] = useState<string>("20");
   const [parkingMonthly, setParkingMonthly] = useState<string>("100");
+
+  const [intlDownPct, setIntlDownPct] = useState<string>("20");
+  const [intlRatePct, setIntlRatePct] = useState<string>("7");
+  const [intlTermYears, setIntlTermYears] = useState<string>("30");
 
   const [targets, setTargets] = useState<UsTargetSlot[]>(() => [
     { id: newSlotId(), stateCode: "tx" as StateCode, cityId: citiesForState("tx" as StateCode)[0]?.id ?? "" },
@@ -281,6 +287,11 @@ export default function CompareCitiesCalculator() {
     if (vRegion && REGIONS.some((r) => r.key === vRegion)) setRegion(vRegion);
     const vIncomeMode = qs.get("incomeMode");
     if (vIncomeMode === "working" || vIncomeMode === "retired") setIncomeMode(vIncomeMode);
+    const vIntlHousingMode = qs.get("intlHousingMode");
+    if (vIntlHousingMode === "rent" || vIntlHousingMode === "buy") setIntlHousingMode(vIntlHousingMode);
+    const vIntlDown = qs.get("intlDown"); if (vIntlDown) setIntlDownPct(vIntlDown);
+    const vIntlRate = qs.get("intlRate"); if (vIntlRate) setIntlRatePct(vIntlRate);
+    const vIntlTerm = qs.get("intlTerm"); if (vIntlTerm) setIntlTermYears(vIntlTerm);
 
     const vDown = qs.get("down"); if (vDown) setDownPct(vDown);
     const vRate = qs.get("rate"); if (vRate) setRatePct(vRate);
@@ -359,6 +370,12 @@ export default function CompareCitiesCalculator() {
       }
     } else {
       qs.set("incomeMode", incomeMode);
+      qs.set("intlHousingMode", intlHousingMode);
+      if (intlHousingMode === "buy") {
+        if (intlDownPct) qs.set("intlDown", intlDownPct);
+        if (intlRatePct) qs.set("intlRate", intlRatePct);
+        if (intlTermYears) qs.set("intlTerm", intlTermYears);
+      }
       if (region === "caribbean") {
         if (caribTargets.length > 0) {
           qs.set("caribTargets", caribTargets.map((t) => t.countryCode).join(","));
@@ -372,6 +389,7 @@ export default function CompareCitiesCalculator() {
     region, originState, originCityId, grossAnnual, filing, k401Pct, mode, incomeMode,
     downPct, ratePct, termYears, propertyTaxPct, homeInsMonthly, hoaMonthly, pmiAnnualPct,
     rentersInsMonthly, parkingMonthly, targets, intlTargets, caribTargets,
+    intlHousingMode, intlDownPct, intlRatePct, intlTermYears,
   ]);
 
   // Reset any intl targets that don't belong to the newly selected region's
@@ -466,6 +484,11 @@ export default function CompareCitiesCalculator() {
       );
   }, [targets, grossN, filing, k401Pct, mode, downPct, ratePct, termYears, propertyTaxPct, homeInsMonthly, hoaMonthly, pmiAnnualPct, rentersInsMonthly, parkingMonthly]);
 
+  const intlBuyAssumptions = useMemo(
+    () => ({ downPct: nz(intlDownPct), ratePct: nz(intlRatePct), termYears: nz(intlTermYears) }),
+    [intlDownPct, intlRatePct, intlTermYears]
+  );
+
   const intlResults = useMemo(() => {
     if (region === "us" || region === "caribbean") return [];
     return intlTargets.map((t) =>
@@ -475,9 +498,11 @@ export default function CompareCitiesCalculator() {
         grossAnnualUsd: grossN,
         filing,
         mode: incomeMode,
+        housingMode: intlHousingMode,
+        buy: intlBuyAssumptions,
       })
     );
-  }, [region, intlTargets, grossN, filing, incomeMode]);
+  }, [region, intlTargets, grossN, filing, incomeMode, intlHousingMode, intlBuyAssumptions]);
 
   const caribResults = useMemo(() => {
     if (region !== "caribbean") return [];
@@ -487,9 +512,11 @@ export default function CompareCitiesCalculator() {
         grossAnnualUsd: grossN,
         filing,
         mode: incomeMode,
+        housingMode: intlHousingMode,
+        buy: intlBuyAssumptions,
       })
     );
-  }, [region, caribTargets, grossN, filing, incomeMode]);
+  }, [region, caribTargets, grossN, filing, incomeMode, intlHousingMode, intlBuyAssumptions]);
 
   const activeResults = useMemo<CompareRow[]>(() => {
     if (region === "us") {
@@ -516,7 +543,9 @@ export default function CompareCitiesCalculator() {
   }, [activeResults]);
 
   const isUs = region === "us";
-  const housingRowLabel = isUs ? (mode === "buy" ? "Est. monthly payment + extras" : "Est. rent + extras") : "Est. monthly living costs";
+  const housingRowLabel = isUs
+    ? (mode === "buy" ? "Est. monthly payment + extras" : "Est. rent + extras")
+    : (intlHousingMode === "buy" ? "Est. monthly costs (buying)" : "Est. monthly living costs (renting)");
   const pctRowLabel = isUs ? "Housing as % of net income" : "Living costs as % of net income";
 
   // ── EXPORT ROWS (shared by CSV + PDF) ───────────────────────────────────
@@ -525,8 +554,11 @@ export default function CompareCitiesCalculator() {
     const rows: CsvRow[] = [
       { Metric: "Gross annual salary", Value: money(grossN) },
       { Metric: "Filing status", Value: filing === "married" ? "Married (joint)" : "Single" },
-      { Metric: isUs ? "Housing mode" : "Income mode", Value: isUs ? (mode === "buy" ? "Buying" : "Renting") : (incomeMode === "retired" ? "Retired" : "Working") },
+      { Metric: "Housing mode", Value: isUs ? (mode === "buy" ? "Buying" : "Renting") : (intlHousingMode === "buy" ? "Buying" : "Renting") },
     ];
+    if (!isUs) {
+      rows.push({ Metric: "Income mode", Value: incomeMode === "retired" ? "Retired" : "Working" });
+    }
     if (originResult) {
       rows.push(
         { Metric: "Current city", Value: originResult.cityName },
@@ -543,7 +575,7 @@ export default function CompareCitiesCalculator() {
       );
     }
     return rows;
-  }, [salaryReady, activeResults, grossN, filing, mode, incomeMode, isUs, housingRowLabel, pctRowLabel, originResult]);
+  }, [salaryReady, activeResults, grossN, filing, mode, incomeMode, intlHousingMode, isUs, housingRowLabel, pctRowLabel, originResult]);
 
   const handleExportCsv = () => {
     downloadCsv("compare-cities", exportRows);
@@ -625,24 +657,42 @@ export default function CompareCitiesCalculator() {
 
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
             <div className="mb-3 flex items-center justify-between">
-              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">{isUs ? "Housing mode" : "Income mode"}</div>
-              {isUs ? (
+              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">{isUs ? "Housing mode" : "Income & housing"}</div>
+              {isUs && (
                 <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
                   <button type="button" onClick={() => setMode("rent")} className={`rounded-lg px-3 py-1 text-sm ${mode === "rent" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Rent</button>
                   <button type="button" onClick={() => setMode("buy")} className={`rounded-lg px-3 py-1 text-sm ${mode === "buy" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Buy</button>
                 </div>
-              ) : (
-                <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
-                  <button type="button" onClick={() => setIncomeMode("working")} className={`rounded-lg px-3 py-1 text-sm ${incomeMode === "working" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Working</button>
-                  <button type="button" onClick={() => setIncomeMode("retired")} className={`rounded-lg px-3 py-1 text-sm ${incomeMode === "retired" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Retired</button>
-                </div>
               )}
             </div>
+
+            {!isUs && (
+              <div className="mb-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Income</span>
+                  <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+                    <button type="button" onClick={() => setIncomeMode("working")} className={`rounded-lg px-3 py-1 text-sm ${incomeMode === "working" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Working</button>
+                    <button type="button" onClick={() => setIncomeMode("retired")} className={`rounded-lg px-3 py-1 text-sm ${incomeMode === "retired" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Retired</button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Housing</span>
+                  <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+                    <button type="button" onClick={() => setIntlHousingMode("rent")} className={`rounded-lg px-3 py-1 text-sm ${intlHousingMode === "rent" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Rent</button>
+                    <button type="button" onClick={() => setIntlHousingMode("buy")} className={`rounded-lg px-3 py-1 text-sm ${intlHousingMode === "buy" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Buy</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {isUs
                 ? "Rent and home price default to each city's typical values — no need to look them up yourself. Adjust the shared assumptions below if you want."
+                : intlHousingMode === "buy"
+                ? "No destination here has a verified home-price dataset, so Buy mode estimates a home price from each destination's typical rent (16x annual rent, a standard rule of thumb) and runs it through the mortgage math below. Treat this as a rough planning figure, not a real listing price."
                 : "Housing and living costs default to each destination's typical values. Tax assumes remote/foreign-sourced income where applicable — for a country-specific breakdown with follow-up questions, use the matching regional calculator."}
             </p>
+
             {isUs && (mode === "rent" ? (
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <label className="text-sm">
@@ -686,6 +736,27 @@ export default function CompareCitiesCalculator() {
                 </label>
               </div>
             ))}
+
+            {!isUs && intlHousingMode === "buy" && (
+              <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                <label className="text-sm">
+                  <div className={labelHeadCls}>Down payment (%)</div>
+                  <input className={inputCls} type="number" value={intlDownPct} onChange={(e) => setIntlDownPct(e.target.value)} placeholder=" " />
+                </label>
+                <label className="text-sm">
+                  <div className={labelHeadCls}>Interest rate (%)</div>
+                  <input className={inputCls} type="number" step="0.1" value={intlRatePct} onChange={(e) => setIntlRatePct(e.target.value)} placeholder=" " />
+                </label>
+                <label className="text-sm">
+                  <div className={labelHeadCls}>Loan term (years)</div>
+                  <select className={selectCls} value={intlTermYears} onChange={(e) => setIntlTermYears(e.target.value)}>
+                    <option value="15">15 years</option>
+                    <option value="20">20 years</option>
+                    <option value="30">30 years</option>
+                  </select>
+                </label>
+              </div>
+            )}
           </div>
 
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">

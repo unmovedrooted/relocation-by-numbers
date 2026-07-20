@@ -64,6 +64,18 @@ const quickLinks: HubLink[] = [
       "Estimate your FIRE age and financial independence number.",
   },
   {
+    href: "/housing-affordability-calculator",
+    title: "Housing Affordability Calculator",
+    description:
+      "How much rent or house can you afford, based on your income?",
+  },
+  {
+    href: "/compare-cities",
+    title: "Compare Cities Side by Side",
+    description:
+      "One income, up to 3 destinations. Net pay, taxes, housing, and flexibility at once.",
+  },
+  {
     href: "/mortgage-calculator",
     title: "Mortgage Calculator",
     description:
@@ -83,6 +95,12 @@ const sections: HubSection[] = [
     description:
       "Plan your move with calculators that go beyond basic cost of living — covering one-income affordability, tax impact, and city-by-city housing pressure.",
     links: [
+      {
+        href: "/compare-cities",
+        title: "Compare Cities Side by Side",
+        description:
+          "Pick your own income and up to 3 target cities — net pay, taxes, housing, and flexibility in one table.",
+      },
       {
         href: "/one-income-relocation-calculator",
         title: "One Income vs Two Income Relocation Calculator",
@@ -110,6 +128,12 @@ const sections: HubSection[] = [
     description:
       "Plan a home purchase with payment estimates, cash to close, rent vs buy, DTI checks, and refinance analysis.",
     links: [
+      {
+        href: "/housing-affordability-calculator",
+        title: "Housing Affordability Calculator",
+        description:
+          "How much rent or house can you afford? 30% rent rule and 28/36 debt-to-income guidelines, just from your income.",
+      },
       {
         href: "/mortgage-calculator",
         title: "Mortgage Calculator",

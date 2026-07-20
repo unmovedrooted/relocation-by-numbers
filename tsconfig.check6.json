@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "paths": { "@/*": ["./src/*"] },
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "module": "esnext",
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx"
+  },
+  "include": ["src/components/AsiaRelocationCalculator.tsx", "src/lib/**/*.ts", "src/components/SavedScenariosPanel.tsx", "src/components/AdSlot.tsx"]
+}

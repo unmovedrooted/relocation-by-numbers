@@ -23,6 +23,8 @@ import {
 import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
 import { USD_TO_LOCAL } from "@/lib/internationalFx";
 import AdSlot from "./AdSlot";
+import { estimateMortgageMonthly } from "@/lib/mortgage";
+import { estimateHomePriceFromRent, DEFAULT_TAX_INSURANCE_PCT } from "@/lib/compareEngines/homePrice";
 
 // FX_FALLBACK is intentionally empty — all supported country codes should be
 // in USD_TO_LOCAL in internationalFx.ts. If a code is missing there, add it
@@ -66,6 +68,7 @@ type SalaryType = "remote" | "local" | "freelance";
 type FurnishedType = "furnished" | "unfurnished";
 type YesNo = "yes" | "no";
 type CurrencyDisplay = "USD" | "CURRENT" | "DESTINATION";
+type HousingMode = "rent" | "buy";
 
 function money(n: number, digits: number = 0, currency: string = "USD") {
   if (!Number.isFinite(n)) return "—";
@@ -210,6 +213,11 @@ export default function InternationalRelocationCalculator() {
   // Fix #6: Editable car cost
   const [carCostMonthly, setCarCostMonthly] = useState<string>("350");
 
+  const [housingMode, setHousingMode] = useState<HousingMode>("rent");
+  const [buyDownPct, setBuyDownPct] = useState<string>("20");
+  const [buyRatePct, setBuyRatePct] = useState<string>("7");
+  const [buyTermYears, setBuyTermYears] = useState<string>("30");
+
   const originCurrency = COUNTRY_TO_CURRENCY[fromCountry] ?? "USD";
   const destCurrency   = COUNTRY_TO_CURRENCY[toCountry]   ?? "USD";
 
@@ -310,6 +318,11 @@ export default function InternationalRelocationCalculator() {
     ];
     for (const [key, setter] of fields) { const val = qs.get(key); if (val) setter(val); }
     const vCar = qs.get("car") as YesNo | null; if (vCar === "yes" || vCar === "no") setNeedCar(vCar);
+    const vHousingMode = qs.get("housingMode") as HousingMode | null;
+    if (vHousingMode === "rent" || vHousingMode === "buy") setHousingMode(vHousingMode);
+    const vBuyDown = qs.get("buyDown"); if (vBuyDown) setBuyDownPct(vBuyDown);
+    const vBuyRate = qs.get("buyRate"); if (vBuyRate) setBuyRatePct(vBuyRate);
+    const vBuyTerm = qs.get("buyTerm"); if (vBuyTerm) setBuyTermYears(vBuyTerm);
     const vTaxAnswers = qs.get("taxAnswers");
     if (vTaxAnswers) { try { const parsed = JSON.parse(vTaxAnswers); if (typeof parsed === "object" && parsed !== null) setConditionalAnswers(parsed); } catch {} }
     setQsHydrated(true);
@@ -342,6 +355,12 @@ export default function InternationalRelocationCalculator() {
     qs.set("car", needCar);
     const answersJson = JSON.stringify(conditionalAnswers);
     if (answersJson !== "{}") qs.set("taxAnswers", answersJson);
+    qs.set("housingMode", housingMode);
+    if (housingMode === "buy") {
+      qs.set("buyDown", buyDownPct);
+      qs.set("buyRate", buyRatePct);
+      qs.set("buyTerm", buyTermYears);
+    }
     setQS(qs);
   }, [
     mode, filing, fromCountry, toCountry, fromCityCode, toCityCode,
@@ -350,6 +369,7 @@ export default function InternationalRelocationCalculator() {
     furnished, utilitiesIncluded, groceries, utilities, transportation, healthcare,
     visaCost, flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
     emergencyCashBuffer, currentSavings, needCar, carCostMonthly, conditionalAnswers,
+    housingMode, buyDownPct, buyRatePct, buyTermYears,
   ]);
 
   const targetProfile = getCountryByCode(toCountry);
@@ -425,6 +445,18 @@ export default function InternationalRelocationCalculator() {
     const utilitiesTo        = destToUsd(nonNegative(utilities))      * familySizeMultUtilities;
     const rentTo             = destToUsd(nonNegative(destinationRent));
 
+    const estimatedHomePrice = estimateHomePriceFromRent(rentTo);
+    const buyMonthlyPI = housingMode === "buy"
+      ? estimateMortgageMonthly(estimatedHomePrice, {
+          downPct: nonNegative(buyDownPct) / 100,
+          rate: nonNegative(buyRatePct) / 100,
+          years: nonNegative(buyTermYears),
+          taxAndInsurancePct: DEFAULT_TAX_INSURANCE_PCT,
+        }) ?? 0
+      : 0;
+    const housingLine = housingMode === "buy" ? buyMonthlyPI : rentTo;
+    const downPaymentUsd = housingMode === "buy" ? estimatedHomePrice * (nonNegative(buyDownPct) / 100) : 0;
+
     // Car cost applies only to the destination side — we don't know (or assume) the
     // user has the same car expense in their current city, so we zero it on the from side.
     const carCostTo   = needCar === "yes" ? destToUsd(nonNegative(carCostMonthly)) : 0;
@@ -463,7 +495,7 @@ export default function InternationalRelocationCalculator() {
     const housingUtilitiesFrom = utilitiesIncluded === "yes" ? 0 : utilitiesFrom;
     const housingUtilities     = utilitiesIncluded === "yes" ? 0 : utilitiesTo;
     const housingTotalFrom     = rentFrom + housingUtilitiesFrom + carCostFrom;
-    const housingTotal         = rentTo   + housingUtilities    + carCostTo;
+    const housingTotal         = housingLine + housingUtilities  + carCostTo;
     const livingCostsFrom      = groceriesFrom + transportationFrom + healthcareFrom;
     const livingCosts          = groceriesAdj  + transportationAdj  + healthcareAdj;
 
@@ -522,9 +554,12 @@ const readinessRecommendation =
     const furnitureAdj    = furnished === "furnished" ? 0 : destToUsd(nonNegative(furnitureSetup));
 
     // Fix #5: nonNegative applied to all upfront cost inputs
+    const rentUpfront =
+      destToUsd(nonNegative(depositRequired)) + destToUsd(nonNegative(firstMonthRent)) +
+      destToUsd(nonNegative(lastMonthRent));
+    const housingUpfront = housingMode === "buy" ? downPaymentUsd : rentUpfront;
     const upfrontCashNeeded =
-      destToUsd(nonNegative(depositRequired))   + destToUsd(nonNegative(firstMonthRent)) +
-      destToUsd(nonNegative(lastMonthRent))     + destToUsd(nonNegative(visaCost))       +
+      housingUpfront                            + destToUsd(nonNegative(visaCost))       +
       destToUsd(nonNegative(flightCost))        + destToUsd(nonNegative(shippingCost))   +
       destToUsd(nonNegative(temporaryStay))     + destToUsd(nonNegative(adminFees))      +
       furnitureAdj + destToUsd(nonNegative(emergencyCashBuffer));
@@ -545,7 +580,7 @@ const readinessRecommendation =
       netMonthlyFrom, netMonthlyTo, monthlyIncomeDiff,
       groceriesFrom, transportationFrom, utilitiesFrom, rentFrom, healthcareFrom, housingTotalFrom, livingCostsFrom,
       groceriesAdj, transportationAdj, healthcareAdj, utilitiesTo,
-      housingTotal, rentTo, housingUtilities, carCostTo, carCostFrom, livingCosts,
+      housingTotal, rentTo, housingMode, estimatedHomePrice, buyMonthlyPI, downPaymentUsd, housingUtilities, carCostTo, carCostFrom, livingCosts,
       monthlyFlexibility,
       requiredNetMonthly, requiredGrossMonthly, requiredAnnualIncome,
       incomeGap, marginChangePct, flexibilityRatio, readinessRecommendation,
@@ -561,6 +596,7 @@ const readinessRecommendation =
     depositRequired, firstMonthRent, lastMonthRent,
     visaCost, flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
     emergencyCashBuffer, currentSavings, targetProfile,
+    housingMode, buyDownPct, buyRatePct, buyTermYears,
   ]);
 
   const badge = confidenceBadge(results.targetConfidence);
@@ -581,6 +617,8 @@ const readinessRecommendation =
       { Metric: "Net monthly income (target)", Value: displayAmount(results.netMonthlyTo) },
       { Metric: "Effective tax rate (current)", Value: `${(results.currentTaxRate * 100).toFixed(1)}%` },
       { Metric: "Effective tax rate (target)", Value: `${(results.targetTaxRate * 100).toFixed(1)}% (${results.targetTaxLabel})` },
+      { Metric: "Housing mode", Value: results.housingMode === "buy" ? "Buying" : "Renting" },
+      ...(results.housingMode === "buy" ? [{ Metric: "Estimated home price", Value: displayAmount(results.estimatedHomePrice) }] : []),
       { Metric: "Monthly housing cost (target)", Value: displayAmount(results.housingTotal) },
       { Metric: "Housing as % of net income", Value: `${results.pct.toFixed(1)}%` },
       { Metric: "Total monthly expenses as % of net income", Value: `${totalPctOfNet.toFixed(1)}%` },
@@ -807,7 +845,13 @@ const readinessRecommendation =
 
           {/* Housing */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
-            <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Housing</div>
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">Housing</div>
+              <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+                <button type="button" onClick={() => setHousingMode("rent")} className={`rounded-lg px-3 py-1 text-sm ${housingMode === "rent" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Rent</button>
+                <button type="button" onClick={() => setHousingMode("buy")} className={`rounded-lg px-3 py-1 text-sm ${housingMode === "buy" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Buy</button>
+              </div>
+            </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {/* Fix #1: All housing inputs now show destination currency */}
               <label className="text-sm sm:col-span-2">
@@ -817,21 +861,51 @@ const readinessRecommendation =
                 <input className={inputCls} type="number" min="0" value={destinationRent}
                   onChange={(e) => setDestinationRent(e.target.value)} placeholder=" " />
               </label>
-              <label className="text-sm">
-                <div className={labelHeadCls}>Deposit required <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span></div>
-                <input className={inputCls} type="number" min="0" value={depositRequired}
-                  onChange={(e) => setDepositRequired(e.target.value)} placeholder=" " />
-              </label>
-              <label className="text-sm">
-                <div className={labelHeadCls}>First month rent <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span></div>
-                <input className={inputCls} type="number" min="0" value={firstMonthRent}
-                  onChange={(e) => setFirstMonthRent(e.target.value)} placeholder=" " />
-              </label>
-              <label className="text-sm">
-                <div className={labelHeadCls}>Last month rent <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span></div>
-                <input className={inputCls} type="number" min="0" value={lastMonthRent}
-                  onChange={(e) => setLastMonthRent(e.target.value)} placeholder=" " />
-              </label>
+              {housingMode === "buy" ? (
+                <>
+                  <label className="text-sm sm:col-span-2">
+                    <div className={labelHeadCls}>Estimated home price</div>
+                    <input className={`${inputCls} opacity-70`} type="text" readOnly
+                      value={displayAmount(results.estimatedHomePrice ?? 0)} />
+                  </label>
+                  <label className="text-sm">
+                    <div className={labelHeadCls}>Down payment (%)</div>
+                    <input className={inputCls} type="number" value={buyDownPct}
+                      onChange={(e) => setBuyDownPct(e.target.value)} placeholder=" " />
+                  </label>
+                  <label className="text-sm">
+                    <div className={labelHeadCls}>Interest rate (%)</div>
+                    <input className={inputCls} type="number" step="0.1" value={buyRatePct}
+                      onChange={(e) => setBuyRatePct(e.target.value)} placeholder=" " />
+                  </label>
+                  <label className="text-sm sm:col-span-2">
+                    <div className={labelHeadCls}>Loan term (years)</div>
+                    <select className={selectCls} value={buyTermYears} onChange={(e) => setBuyTermYears(e.target.value)}>
+                      <option value="15">15 years</option>
+                      <option value="20">20 years</option>
+                      <option value="30">30 years</option>
+                    </select>
+                  </label>
+                </>
+              ) : (
+                <>
+                  <label className="text-sm">
+                    <div className={labelHeadCls}>Deposit required <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span></div>
+                    <input className={inputCls} type="number" min="0" value={depositRequired}
+                      onChange={(e) => setDepositRequired(e.target.value)} placeholder=" " />
+                  </label>
+                  <label className="text-sm">
+                    <div className={labelHeadCls}>First month rent <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span></div>
+                    <input className={inputCls} type="number" min="0" value={firstMonthRent}
+                      onChange={(e) => setFirstMonthRent(e.target.value)} placeholder=" " />
+                  </label>
+                  <label className="text-sm">
+                    <div className={labelHeadCls}>Last month rent <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span></div>
+                    <input className={inputCls} type="number" min="0" value={lastMonthRent}
+                      onChange={(e) => setLastMonthRent(e.target.value)} placeholder=" " />
+                  </label>
+                </>
+              )}
               <label className="text-sm">
                 <div className={labelHeadCls}>Furnished or unfurnished</div>
                 <select className={selectCls} value={furnished} onChange={(e) => setFurnished(e.target.value as FurnishedType)}>
@@ -847,6 +921,13 @@ const readinessRecommendation =
                 </select>
               </label>
             </div>
+            {housingMode === "buy" && (
+              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                No destination here has a verified home-price dataset, so the price above is estimated from the rent
+                figure (16x annual rent, a standard rule of thumb) — treat it as a rough planning figure, not a real
+                listing price.
+              </p>
+            )}
           </div>
 
           {/* Fix #2: Estimated Living Costs — now fully editable inputs */}

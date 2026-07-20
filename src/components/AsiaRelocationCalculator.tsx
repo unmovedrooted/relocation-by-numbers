@@ -21,6 +21,8 @@ import {
 import { estimateInternationalTax } from "@/lib/internationalTaxes";
 import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
 import { USD_TO_LOCAL } from "@/lib/internationalFx";
+import { estimateMortgageMonthly } from "@/lib/mortgage";
+import { estimateHomePriceFromRent, DEFAULT_TAX_INSURANCE_PCT } from "@/lib/compareEngines/homePrice";
 import AdSlot from "./AdSlot";
 
 // ---------------------------------------------------------------------------
@@ -199,6 +201,7 @@ type SalaryType = "remote" | "local" | "freelance";
 type FurnishedType = "furnished" | "unfurnished";
 type YesNo = "yes" | "no";
 type CurrencyDisplay = "USD" | "CURRENT" | "DESTINATION";
+type HousingMode = "rent" | "buy";
 
 // FIX 3: floating point precision — run toFixed(10) before toLocaleString
 function money(n: number, digits: number = 0, currency: string = "USD") {
@@ -322,6 +325,11 @@ export default function AsiaRelocationCalculator() {
   const [furnished, setFurnished] = useState<FurnishedType>("unfurnished");
   const [utilitiesIncluded, setUtilitiesIncluded] = useState<YesNo>("no");
 
+  const [housingMode, setHousingMode] = useState<HousingMode>("rent");
+  const [buyDownPct, setBuyDownPct] = useState<string>("20");
+  const [buyRatePct, setBuyRatePct] = useState<string>("7");
+  const [buyTermYears, setBuyTermYears] = useState<string>("30");
+
   const [groceries, setGroceries] = useState<string>("280");
   const [utilities, setUtilities] = useState<string>("100");
   const [transportation, setTransportation] = useState<string>("55");
@@ -434,6 +442,10 @@ export default function AsiaRelocationCalculator() {
     const vLast = qs.get("lastRent"); if (vLast) setLastMonthRent(vLast);
     const vFurnished = qs.get("furnished") as FurnishedType | null; if (vFurnished === "furnished" || vFurnished === "unfurnished") setFurnished(vFurnished);
     const vUtilIncl = qs.get("utilIncl") as YesNo | null; if (vUtilIncl === "yes" || vUtilIncl === "no") setUtilitiesIncluded(vUtilIncl);
+    const vHousingMode = qs.get("housingMode") as HousingMode | null; if (vHousingMode === "rent" || vHousingMode === "buy") setHousingMode(vHousingMode);
+    const vBuyDown = qs.get("buyDown"); if (vBuyDown) setBuyDownPct(vBuyDown);
+    const vBuyRate = qs.get("buyRate"); if (vBuyRate) setBuyRatePct(vBuyRate);
+    const vBuyTerm = qs.get("buyTerm"); if (vBuyTerm) setBuyTermYears(vBuyTerm);
     const fields: [string, (v: string) => void][] = [
       ["groceries", setGroceries], ["utilities", setUtilities], ["transport", setTransportation],
       ["healthcare", setHealthcare], ["visa", setVisaCost], ["flight", setFlightCost],
@@ -463,6 +475,12 @@ export default function AsiaRelocationCalculator() {
     if (firstMonthRent) qs.set("firstRent", firstMonthRent);
     if (lastMonthRent) qs.set("lastRent", lastMonthRent);
     qs.set("furnished", furnished); qs.set("utilIncl", utilitiesIncluded);
+    qs.set("housingMode", housingMode);
+    if (housingMode === "buy") {
+      if (buyDownPct) qs.set("buyDown", buyDownPct);
+      if (buyRatePct) qs.set("buyRate", buyRatePct);
+      if (buyTermYears) qs.set("buyTerm", buyTermYears);
+    }
     if (groceries) qs.set("groceries", groceries); if (utilities) qs.set("utilities", utilities);
     if (transportation) qs.set("transport", transportation); if (healthcare) qs.set("healthcare", healthcare);
     if (visaCost) qs.set("visa", visaCost); if (flightCost) qs.set("flight", flightCost);
@@ -481,6 +499,7 @@ export default function AsiaRelocationCalculator() {
     utilitiesIncluded, groceries, utilities, transportation, healthcare, visaCost,
     flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
     emergencyCashBuffer, currentSavings, needCar, conditionalAnswers,
+    housingMode, buyDownPct, buyRatePct, buyTermYears,
   ]);
 
   const targetProfile = getCountryByCode(toCountry);
@@ -549,13 +568,28 @@ export default function AsiaRelocationCalculator() {
     const utilitiesAdj      = familyUtilities;
     const rentTo            = nz(destinationRent);
 
+    // Buy mode: no destination here has verified home-price data, so the
+    // estimate is derived from the destination rent via a standard
+    // price-to-rent rule of thumb (see lib/compareEngines/homePrice.ts).
+    const estimatedHomePrice = estimateHomePriceFromRent(rentTo);
+    const buyMonthlyPI = housingMode === "buy"
+      ? estimateMortgageMonthly(estimatedHomePrice, {
+          downPct: nz(buyDownPct) / 100,
+          rate: nz(buyRatePct) / 100,
+          years: nz(buyTermYears),
+          taxAndInsurancePct: DEFAULT_TAX_INSURANCE_PCT,
+        }) ?? 0
+      : 0;
+    const housingLine = housingMode === "buy" ? buyMonthlyPI : rentTo;
+    const downPaymentUsd = housingMode === "buy" ? estimatedHomePrice * (nz(buyDownPct) / 100) : 0;
+
     const groceriesFrom      = familyGroceries      * fromCityMultipliers.groceries;
     const transportationFrom = familyTransportation * fromCityMultipliers.transit;
     const utilitiesFrom      = familyUtilities       * fromCityMultipliers.utilities;
 
     const carCost          = needCar === "yes" ? 350 : 0;
     const housingUtilities = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
-    const housingTotal     = rentTo + housingUtilities + carCost;
+    const housingTotal     = housingLine + housingUtilities + carCost;
     const livingCosts      = groceriesAdj + transportationAdj + healthcareAdj;
     const monthlyFlexibility = netMonthlyTo - housingTotal - livingCosts;
 
@@ -564,8 +598,10 @@ export default function AsiaRelocationCalculator() {
     const comfort         = getReadinessBand(totalPctOfNet);
 
     const furnitureAdj = furnished === "furnished" ? 0 : nz(furnitureSetup);
+    const rentUpfront = nz(depositRequired) + nz(firstMonthRent) + nz(lastMonthRent);
+    const housingUpfront = housingMode === "buy" ? downPaymentUsd : rentUpfront;
     const upfrontCashNeeded =
-      nz(depositRequired) + nz(firstMonthRent) + nz(lastMonthRent) +
+      housingUpfront +
       nz(visaCost) + nz(flightCost) + nz(shippingCost) +
       nz(temporaryStay) + nz(adminFees) + furnitureAdj + nz(emergencyCashBuffer);
 
@@ -592,6 +628,7 @@ export default function AsiaRelocationCalculator() {
       totalPctOfNet: totalPctOfNet * 100,
       comfort,
       upfrontCashNeeded, monthsCovered, comparableSalary, relativeDifference,
+      housingMode, estimatedHomePrice, buyMonthlyPI, downPaymentUsd,
     };
   }, [
     mode, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
@@ -601,6 +638,7 @@ export default function AsiaRelocationCalculator() {
     groceries, transportation, healthcare, depositRequired, firstMonthRent, lastMonthRent,
     visaCost, flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
     emergencyCashBuffer, currentSavings, targetProfile,
+    housingMode, buyDownPct, buyRatePct, buyTermYears,
   ]);
 
   const adultsNum   = Math.max(1, Number(adults)   || 1);
@@ -620,6 +658,8 @@ export default function AsiaRelocationCalculator() {
       { Metric: "Net monthly income (target)", Value: displayAmount(results.netMonthlyTo) },
       { Metric: "Effective tax rate (current)", Value: `${(results.currentTaxRate * 100).toFixed(1)}%` },
       { Metric: "Effective tax rate (target)", Value: `${(results.targetTaxRate * 100).toFixed(1)}% (${results.targetTaxLabel})` },
+      { Metric: "Housing mode", Value: housingMode === "buy" ? "Buying" : "Renting" },
+      ...(housingMode === "buy" ? [{ Metric: "Estimated home price", Value: displayAmount(results.estimatedHomePrice) }] : []),
       { Metric: "Monthly housing cost (target)", Value: displayAmount(results.housingTotal) },
       { Metric: "Housing as % of net income", Value: `${results.pct.toFixed(1)}%` },
       { Metric: "Total monthly expenses as % of net income", Value: `${results.totalPctOfNet.toFixed(1)}%` },
@@ -631,7 +671,7 @@ export default function AsiaRelocationCalculator() {
       { Metric: `${toCityLabel} vs ${fromCityLabel} cost difference`, Value: `${Math.abs(results.relativeDifference * 100).toFixed(1)}% ${results.relativeDifference >= 0 ? "more" : "less"} expensive` },
     ];
     return rows;
-  }, [fromCityLabel, toCityLabel, fromCountry, toCountry, mode, results, displayAmount]);
+  }, [fromCityLabel, toCityLabel, fromCountry, toCountry, mode, housingMode, results, displayAmount]);
 
   const handleExportPdf = () => {
     const filenameCity = (toCityLabel || "scenario").toLowerCase().replace(/[^a-z0-9]+/g, "-");
@@ -814,12 +854,35 @@ export default function AsiaRelocationCalculator() {
 
           {/* Housing */}
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
-            <div className="mb-3 text-sm font-semibold">Housing</div>
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-sm font-semibold">Housing</div>
+              <div className="inline-flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1">
+                <button type="button" onClick={() => setHousingMode("rent")} className={`rounded-lg px-3 py-1 text-sm ${housingMode === "rent" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Rent</button>
+                <button type="button" onClick={() => setHousingMode("buy")} className={`rounded-lg px-3 py-1 text-sm ${housingMode === "buy" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Buy</button>
+              </div>
+            </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Rent in destination (monthly)</div><input className={inputCls} type="number" value={destinationRent} onChange={(e) => setDestinationRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Deposit required</div><input className={inputCls} type="number" value={depositRequired} onChange={(e) => setDepositRequired(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>First month rent</div><input className={inputCls} type="number" value={firstMonthRent} onChange={(e) => setFirstMonthRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Last month rent (if applicable)</div><input className={inputCls} type="number" value={lastMonthRent} onChange={(e) => setLastMonthRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              {housingMode === "buy" ? (
+                <>
+                  <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Estimated home price</div><input className={`${inputCls} opacity-70`} type="text" readOnly value={displayAmount(results.estimatedHomePrice ?? 0)} /></label>
+                  <label className="text-sm"><div className={labelHeadCls}>Down payment (%)</div><input className={inputCls} type="number" value={buyDownPct} onChange={(e) => setBuyDownPct(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+                  <label className="text-sm"><div className={labelHeadCls}>Interest rate (%)</div><input className={inputCls} type="number" step="0.1" value={buyRatePct} onChange={(e) => setBuyRatePct(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+                  <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Loan term (years)</div>
+                    <select className={selectCls} value={buyTermYears} onChange={(e) => setBuyTermYears(e.target.value)}>
+                      <option value="15">15 years</option>
+                      <option value="20">20 years</option>
+                      <option value="30">30 years</option>
+                    </select>
+                  </label>
+                </>
+              ) : (
+                <>
+                  <label className="text-sm"><div className={labelHeadCls}>Deposit required</div><input className={inputCls} type="number" value={depositRequired} onChange={(e) => setDepositRequired(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+                  <label className="text-sm"><div className={labelHeadCls}>First month rent</div><input className={inputCls} type="number" value={firstMonthRent} onChange={(e) => setFirstMonthRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+                  <label className="text-sm"><div className={labelHeadCls}>Last month rent (if applicable)</div><input className={inputCls} type="number" value={lastMonthRent} onChange={(e) => setLastMonthRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+                </>
+              )}
               <label className="text-sm"><div className={labelHeadCls}>Furnished or unfurnished</div>
                 <select className={selectCls} value={furnished} onChange={(e) => setFurnished(e.target.value as FurnishedType)}>
                   <option value="unfurnished">Unfurnished</option>
@@ -833,6 +896,13 @@ export default function AsiaRelocationCalculator() {
                 </select>
               </label>
             </div>
+            {housingMode === "buy" && (
+              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                No destination here has a verified home-price dataset, so the price above is estimated from the rent
+                figure (16x annual rent, a standard rule of thumb) — treat it as a rough planning figure, not a real
+                listing price.
+              </p>
+            )}
           </div>
 
           {/* Living Costs */}

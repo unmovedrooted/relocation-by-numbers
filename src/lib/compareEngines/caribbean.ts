@@ -22,9 +22,18 @@ import { estimateScenarioTax } from "../caribbeanTax/engine";
 import type { IncomeScenario, FilingStatus as CaribFilingStatus, CaribbeanTaxCode } from "../caribbeanTax/types";
 import { estimateInternationalTax, type FilingStatus } from "../internationalTaxes";
 import { USD_TO_LOCAL } from "../internationalFx";
+import { estimateMortgageMonthly } from "../mortgage";
+import { estimateHomePriceFromRent, DEFAULT_TAX_INSURANCE_PCT } from "./homePrice";
 
 export type CaribCompareMode = "working" | "retired";
 export type CaribSalaryType = "local" | "remote";
+export type CaribHousingMode = "rent" | "buy";
+
+export type CaribBuyAssumptions = {
+  downPct: number;
+  ratePct: number;
+  termYears: number;
+};
 
 export type CaribCompareInput = {
   countryCode: string;
@@ -34,6 +43,10 @@ export type CaribCompareInput = {
   /** Only relevant when mode === "working". Defaults to "remote" — the
    *  calculator's own default salaryType — since compare view doesn't ask. */
   salaryType?: CaribSalaryType;
+  /** Defaults to "rent". */
+  housingMode?: CaribHousingMode;
+  /** Only used when housingMode === "buy". */
+  buy?: CaribBuyAssumptions;
 };
 
 export type CaribCompareResult = {
@@ -49,6 +62,8 @@ export type CaribCompareResult = {
   housingLabel: string;
   monthlyFlexibility: number;
   pctOfIncome: number;
+  /** Only set when housingMode === "buy". Rough estimate — see homePrice.ts. */
+  estimatedHomePrice?: number;
 };
 
 function convertUsdToLocal(amountUsd: number, countryCode: string): number {
@@ -57,7 +72,7 @@ function convertUsdToLocal(amountUsd: number, countryCode: string): number {
 }
 
 export function computeCaribCityResult(input: CaribCompareInput): CaribCompareResult {
-  const { countryCode, grossAnnualUsd, filing, mode, salaryType = "remote" } = input;
+  const { countryCode, grossAnnualUsd, filing, mode, salaryType = "remote", housingMode = "rent", buy } = input;
   const salaryReady = Number.isFinite(grossAnnualUsd) && grossAnnualUsd > 0;
 
   const country = getCaribbeanCountryByCode(countryCode);
@@ -114,9 +129,26 @@ export function computeCaribCityResult(input: CaribCompareInput): CaribCompareRe
   const groceries = baseRent * 0.18;
   const utilities = baseRent * 0.08;
   const transport = baseRent * 0.07;
-  const housingMonthly = baseRent + groceries + utilities + transport + baseHealthcare;
-  const housingLabel = `Est. rent ${baseRent.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}/mo`;
 
+  let housingLine: number;
+  let housingLabel: string;
+  let estimatedHomePrice: number | undefined;
+
+  if (housingMode === "buy") {
+    estimatedHomePrice = estimateHomePriceFromRent(baseRent);
+    const downPct = (buy?.downPct ?? 20) / 100;
+    const ratePct = (buy?.ratePct ?? 7) / 100;
+    const termYears = buy?.termYears ?? 30;
+    housingLine = estimateMortgageMonthly(estimatedHomePrice, {
+      downPct, rate: ratePct, years: termYears, taxAndInsurancePct: DEFAULT_TAX_INSURANCE_PCT,
+    }) ?? 0;
+    housingLabel = `Est. home price ${estimatedHomePrice.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}`;
+  } else {
+    housingLine = baseRent;
+    housingLabel = `Est. rent ${baseRent.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}/mo`;
+  }
+
+  const housingMonthly = housingLine + groceries + utilities + transport + baseHealthcare;
   const monthlyFlexibility = netMonthly - housingMonthly;
   const pctOfIncome = netMonthly > 0 ? (housingMonthly / netMonthly) * 100 : 0;
 
@@ -133,5 +165,6 @@ export function computeCaribCityResult(input: CaribCompareInput): CaribCompareRe
     housingLabel,
     monthlyFlexibility,
     pctOfIncome,
+    estimatedHomePrice,
   };
 }

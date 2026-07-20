@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/components/EuropeRelocationCalculator.tsx",
+    "src/lib/**/*.ts",
+    "src/components/SavedScenariosPanel.tsx",
+    "src/components/AdSlot.tsx",
+    "src/components/calculator-form/**/*.tsx",
+    "src/components/VisaContextCard.tsx"
+  ]
+}

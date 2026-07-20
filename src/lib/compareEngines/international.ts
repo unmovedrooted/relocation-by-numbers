@@ -28,8 +28,17 @@ import { getCityCostMultipliers } from "../internationalCityCosts";
 import { getCountryByCode } from "../internationalCountries";
 import { getInternationalCityByCode } from "../internationalCities";
 import { USD_TO_LOCAL } from "../internationalFx";
+import { estimateMortgageMonthly } from "../mortgage";
+import { estimateHomePriceFromRent, DEFAULT_TAX_INSURANCE_PCT } from "./homePrice";
 
 export type IntlMode = "working" | "retired";
+export type IntlHousingMode = "rent" | "buy";
+
+export type IntlBuyAssumptions = {
+  downPct: number;
+  ratePct: number;
+  termYears: number;
+};
 
 export type IntlCompareInput = {
   countryCode: string;
@@ -38,6 +47,10 @@ export type IntlCompareInput = {
   grossAnnualUsd: number;
   filing: FilingStatus;
   mode: IntlMode;
+  /** Defaults to "rent". */
+  housingMode?: IntlHousingMode;
+  /** Only used when housingMode === "buy". */
+  buy?: IntlBuyAssumptions;
 };
 
 export type IntlCompareResult = {
@@ -53,6 +66,8 @@ export type IntlCompareResult = {
   housingLabel: string;
   monthlyFlexibility: number;
   pctOfIncome: number;
+  /** Only set when housingMode === "buy". Rough estimate — see homePrice.ts. */
+  estimatedHomePrice?: number;
 };
 
 function convertUsdToLocal(amountUsd: number, countryCode: string): number {
@@ -61,7 +76,7 @@ function convertUsdToLocal(amountUsd: number, countryCode: string): number {
 }
 
 export function computeIntlCityResult(input: IntlCompareInput): IntlCompareResult {
-  const { countryCode, cityCode, grossAnnualUsd, filing, mode } = input;
+  const { countryCode, cityCode, grossAnnualUsd, filing, mode, housingMode = "rent", buy } = input;
   const salaryReady = Number.isFinite(grossAnnualUsd) && grossAnnualUsd > 0;
 
   const country = getCountryByCode(countryCode);
@@ -85,28 +100,47 @@ export function computeIntlCityResult(input: IntlCompareInput): IntlCompareResul
   const cityDefaults = cityCode ? getCityDefaultsByCode(cityCode) : undefined;
   const multipliers = cityCode ? getCityCostMultipliers(cityCode) : null;
 
-  let housingMonthly: number;
-  let housingLabel: string;
+  let rent: number;
+  let groceries: number;
+  let utilities: number;
+  let transport: number;
+  let healthcare: number;
 
   if (cityDefaults) {
     // City-level defaults are already calibrated — no extra multiplier.
     const d = cityDefaults.monthlyDefaults;
-    housingMonthly = d.rent + d.groceries + d.utilities + d.transport + d.healthcare;
-    housingLabel = `Est. rent ${d.rent.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}/mo`;
+    rent = d.rent; groceries = d.groceries; utilities = d.utilities; transport = d.transport; healthcare = d.healthcare;
   } else {
     // No city-specific data — fall back to country-level single-adult
     // defaults, scaled by city multipliers when available.
     const baseRent = country?.defaultRentSingle ?? 1_200;
-    const baseHealthcare = country?.healthcareMonthlySingle ?? 100;
     const mult = multipliers ?? { housing: 1, transit: 1, groceries: 1, utilities: 1 };
-    const rent = baseRent * mult.housing;
-    const groceries = baseRent * 0.18 * mult.groceries;
-    const utilities = baseRent * 0.08 * mult.utilities;
-    const transport = baseRent * 0.07 * mult.transit;
-    housingMonthly = rent + groceries + utilities + transport + baseHealthcare;
+    rent = baseRent * mult.housing;
+    groceries = baseRent * 0.18 * mult.groceries;
+    utilities = baseRent * 0.08 * mult.utilities;
+    transport = baseRent * 0.07 * mult.transit;
+    healthcare = country?.healthcareMonthlySingle ?? 100;
+  }
+
+  let housingLine: number;
+  let housingLabel: string;
+  let estimatedHomePrice: number | undefined;
+
+  if (housingMode === "buy") {
+    estimatedHomePrice = estimateHomePriceFromRent(rent);
+    const downPct = (buy?.downPct ?? 20) / 100;
+    const ratePct = (buy?.ratePct ?? 7) / 100;
+    const termYears = buy?.termYears ?? 30;
+    housingLine = estimateMortgageMonthly(estimatedHomePrice, {
+      downPct, rate: ratePct, years: termYears, taxAndInsurancePct: DEFAULT_TAX_INSURANCE_PCT,
+    }) ?? 0;
+    housingLabel = `Est. home price ${estimatedHomePrice.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}`;
+  } else {
+    housingLine = rent;
     housingLabel = `Est. rent ${rent.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}/mo`;
   }
 
+  const housingMonthly = housingLine + groceries + utilities + transport + healthcare;
   const monthlyFlexibility = netMonthly - housingMonthly;
   const pctOfIncome = netMonthly > 0 ? (housingMonthly / netMonthly) * 100 : 0;
 
@@ -117,6 +151,7 @@ export function computeIntlCityResult(input: IntlCompareInput): IntlCompareResul
     countryName,
     netMonthly,
     effTaxPct,
+    estimatedHomePrice,
     taxLabel: taxEstimate?.label ?? "Tax estimate unavailable",
     taxConfidencePlaceholder: taxEstimate?.confidence === "placeholder",
     housingMonthly,

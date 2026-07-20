@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/components/InternationalRelocationCalculator.tsx",
+    "src/lib/**/*.ts",
+    "src/components/SavedScenariosPanel.tsx",
+    "src/components/AdSlot.tsx"
+  ]
+}

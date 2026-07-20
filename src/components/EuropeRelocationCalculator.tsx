@@ -23,6 +23,8 @@ import {
 import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
 import { USD_TO_LOCAL } from "@/lib/internationalFx";
 import { buildEuropeSearchParams, createEuropeCityPresetPatch, createEuropeInitialState } from "@/lib/europeCalculatorState";
+import { estimateMortgageMonthly } from "@/lib/mortgage";
+import { estimateHomePriceFromRent, DEFAULT_TAX_INSURANCE_PCT } from "@/lib/compareEngines/homePrice";
 import AdSlot from "./AdSlot";
 import CalculatorImmediateNumberField from "./calculator-form/CalculatorImmediateNumberField";
 import CalculatorSelect from "./calculator-form/CalculatorSelect";
@@ -336,6 +338,7 @@ type SalaryType = "local" | "remote";
 type FurnishedType = "furnished" | "unfurnished";
 type YesNo = "yes" | "no";
 type CurrencyDisplay = "USD" | "CURRENT" | "DESTINATION";
+type HousingMode = "rent" | "buy";
 // ---------------------------------------------------------------------------
 // UTILITIES
 // ---------------------------------------------------------------------------
@@ -527,6 +530,14 @@ function EuropeRelocationCalculatorContent({ initialSearch, urlReady }: { initia
 const [needCar, setNeedCar] = useState<YesNo>(initial.needCar);
 const [carCostMonthly, setCarCostMonthly] = useState<string>(initial.carCostMonthly);
 
+  const [housingMode, setHousingMode] = useState<HousingMode>(() => {
+    const v = new URLSearchParams(initialSearch).get("housingMode");
+    return v === "buy" ? "buy" : "rent";
+  });
+  const [buyDownPct, setBuyDownPct] = useState<string>(() => new URLSearchParams(initialSearch).get("buyDown") ?? "20");
+  const [buyRatePct, setBuyRatePct] = useState<string>(() => new URLSearchParams(initialSearch).get("buyRate") ?? "7");
+  const [buyTermYears, setBuyTermYears] = useState<string>(() => new URLSearchParams(initialSearch).get("buyTerm") ?? "30");
+
   // Derive income scenario (mirrors Caribbean pattern)
   const incomeScenario: "remote" | "local" | "retired" =
     mode === "retired" ? "retired" : salaryType === "remote" ? "remote" : "local";
@@ -662,13 +673,20 @@ const [carCostMonthly, setCarCostMonthly] = useState<string>(initial.carCostMont
   // QS sync on state change
   useEffect(() => {
     if (!urlReady) return;
-    setQS(buildEuropeSearchParams({
+    const qs = buildEuropeSearchParams({
       mode, salary, retirementIncome, filing, fromCountry, toCountry, fromCityCode, toCityCode,
       currencyDisplay, salaryType, adults, children, conditionalAnswers, destinationRent,
       depositRequired, firstMonthRent, lastMonthRent, furnished, utilitiesIncluded, groceries,
       utilities, transportation, healthcare, visaCost, flightCost, shippingCost, temporaryStay,
       adminFees, furnitureSetup, emergencyCashBuffer, currentSavings, needCar, carCostMonthly,
-    }));
+    });
+    qs.set("housingMode", housingMode);
+    if (housingMode === "buy") {
+      qs.set("buyDown", buyDownPct);
+      qs.set("buyRate", buyRatePct);
+      qs.set("buyTerm", buyTermYears);
+    }
+    setQS(qs);
   }, [
   mode, filing, fromCountry, toCountry, fromCityCode, toCityCode,
   salary, retirementIncome, currencyDisplay, salaryType, adults, children,
@@ -676,7 +694,7 @@ const [carCostMonthly, setCarCostMonthly] = useState<string>(initial.carCostMont
   utilitiesIncluded, groceries, utilities, transportation, healthcare, visaCost,
   flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
   emergencyCashBuffer, currentSavings, needCar, carCostMonthly,
-  conditionalAnswers, urlReady,
+  conditionalAnswers, urlReady, housingMode, buyDownPct, buyRatePct, buyTermYears,
 ]);
 
   const targetProfile = getCountryByCode(toCountry);
@@ -767,6 +785,18 @@ const utilitiesAdj =
 const rentTo =
   destToUsd(nonNegative(destinationRent));
 
+const estimatedHomePrice = estimateHomePriceFromRent(rentTo);
+const buyMonthlyPI = housingMode === "buy"
+  ? estimateMortgageMonthly(estimatedHomePrice, {
+      downPct: numericValue(buyDownPct) / 100,
+      rate: numericValue(buyRatePct) / 100,
+      years: numericValue(buyTermYears),
+      taxAndInsurancePct: DEFAULT_TAX_INSURANCE_PCT,
+    }) ?? 0
+  : 0;
+const housingLine = housingMode === "buy" ? buyMonthlyPI : rentTo;
+const downPaymentUsd = housingMode === "buy" ? estimatedHomePrice * (numericValue(buyDownPct) / 100) : 0;
+
 const carCost =
   needCar === "yes" ? destToUsd(nonNegative(carCostMonthly)) : 0;
 
@@ -831,7 +861,7 @@ if (currentCityDefaults) {
     destToUsd(nonNegative(healthcare)) * familySizeMultHealthcare;
 }
    const housingUtilities = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
-const housingTotal = rentTo + housingUtilities + carCost;
+const housingTotal = housingLine + housingUtilities + carCost;
 const livingCosts = groceriesAdj + transportationAdj + healthcareAdj;
 
 const housingUtilitiesFrom = utilitiesIncluded === "yes" ? 0 : utilitiesFrom;
@@ -894,10 +924,13 @@ const readinessRecommendation =
     const comfort            = getReadinessBand(totalPctOfNet);
 
     const furnitureAdj = furnished === "furnished" ? 0 : destToUsd(numericValue(furnitureSetup));
-    const upfrontCashNeeded =
+    const rentUpfront =
   destToUsd(nonNegative(depositRequired)) +
   destToUsd(nonNegative(firstMonthRent)) +
-  destToUsd(nonNegative(lastMonthRent)) +
+  destToUsd(nonNegative(lastMonthRent));
+    const housingUpfront = housingMode === "buy" ? downPaymentUsd : rentUpfront;
+    const upfrontCashNeeded =
+  housingUpfront +
   destToUsd(nonNegative(visaCost)) +
   destToUsd(nonNegative(flightCost)) +
   destToUsd(nonNegative(shippingCost)) +
@@ -942,6 +975,10 @@ const readinessRecommendation =
       utilitiesAdj,
       housingTotal,
       rentTo,
+      housingMode,
+      estimatedHomePrice,
+      buyMonthlyPI,
+      downPaymentUsd,
       housingUtilities,
       carCost,
       livingCosts,
@@ -973,6 +1010,7 @@ readinessRecommendation,
     groceries, transportation, healthcare, depositRequired, firstMonthRent, lastMonthRent,
     visaCost, flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
     emergencyCashBuffer, currentSavings, targetProfile,
+    housingMode, buyDownPct, buyRatePct, buyTermYears,
   ]);
 
   function resetInputsKeepContext() {
@@ -1006,6 +1044,8 @@ readinessRecommendation,
       { Metric: "Net monthly income (target)", Value: displayAmount(results.netMonthlyTo) },
       { Metric: "Effective tax rate (current)", Value: `${(results.currentTaxRate * 100).toFixed(1)}%` },
       { Metric: "Effective tax rate (target)", Value: `${(results.targetTaxRate * 100).toFixed(1)}% (${results.targetTaxLabel})` },
+      { Metric: "Housing mode", Value: results.housingMode === "buy" ? "Buying" : "Renting" },
+      ...(results.housingMode === "buy" ? [{ Metric: "Estimated home price", Value: displayAmount(results.estimatedHomePrice) }] : []),
       { Metric: "Monthly housing cost (target)", Value: displayAmount(results.housingTotal) },
       { Metric: "Housing as % of net income", Value: `${results.pct.toFixed(1)}%` },
       { Metric: "Total monthly expenses as % of net income", Value: `${totalPctOfNet.toFixed(1)}%` },
@@ -1188,12 +1228,36 @@ readinessRecommendation,
 
           {/* Housing */}
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
-            <div className="mb-3 text-sm font-semibold">Housing</div>
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-sm font-semibold">Housing</div>
+              <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+                <button type="button" onClick={() => setHousingMode("rent")} className={`rounded-lg px-3 py-1 text-sm ${housingMode === "rent" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Rent</button>
+                <button type="button" onClick={() => setHousingMode("buy")} className={`rounded-lg px-3 py-1 text-sm ${housingMode === "buy" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Buy</button>
+              </div>
+            </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <CalculatorImmediateNumberField id="europe-destination-rent" label="Rent in destination (monthly)" wrapperClassName="sm:col-span-2" className={inputCls} min="0" value={destinationRent} onChange={setDestinationRent} placeholder=" " />
-              <CalculatorImmediateNumberField id="europe-security-deposit" label="Deposit required" className={inputCls} min="0" value={depositRequired} onChange={setDepositRequired} placeholder=" " />
-              <CalculatorImmediateNumberField id="europe-first-month-rent" label="First month rent" className={inputCls} min="0" value={firstMonthRent} onChange={setFirstMonthRent} placeholder=" " />
-              <CalculatorImmediateNumberField id="europe-last-month-rent" label="Last month rent (if applicable)" className={inputCls} min="0" value={lastMonthRent} onChange={setLastMonthRent} placeholder=" " />
+              {housingMode === "buy" ? (
+                <>
+                  <div className="text-sm sm:col-span-2">
+                    <div className="mb-1 flex items-center text-xs font-medium leading-4 text-slate-600 dark:text-slate-400">Estimated home price</div>
+                    <div className={`${inputCls} flex items-center opacity-70`}>{displayAmount(results.estimatedHomePrice ?? 0)}</div>
+                  </div>
+                  <CalculatorImmediateNumberField id="europe-buy-down-pct" label="Down payment (%)" className={inputCls} min="0" value={buyDownPct} onChange={setBuyDownPct} placeholder=" " />
+                  <CalculatorImmediateNumberField id="europe-buy-rate-pct" label="Interest rate (%)" className={inputCls} min="0" step="0.1" value={buyRatePct} onChange={setBuyRatePct} placeholder=" " />
+                  <CalculatorSelect id="europe-buy-term-years" label="Loan term (years)" wrapperClassName="sm:col-span-2" className={selectCls} value={buyTermYears} onChange={(e) => setBuyTermYears(e.target.value)}>
+                    <option value="15">15 years</option>
+                    <option value="20">20 years</option>
+                    <option value="30">30 years</option>
+                  </CalculatorSelect>
+                </>
+              ) : (
+                <>
+                  <CalculatorImmediateNumberField id="europe-security-deposit" label="Deposit required" className={inputCls} min="0" value={depositRequired} onChange={setDepositRequired} placeholder=" " />
+                  <CalculatorImmediateNumberField id="europe-first-month-rent" label="First month rent" className={inputCls} min="0" value={firstMonthRent} onChange={setFirstMonthRent} placeholder=" " />
+                  <CalculatorImmediateNumberField id="europe-last-month-rent" label="Last month rent (if applicable)" className={inputCls} min="0" value={lastMonthRent} onChange={setLastMonthRent} placeholder=" " />
+                </>
+              )}
               <CalculatorSelect id="europe-furnishing" label="Furnished or unfurnished" className={selectCls} value={furnished} onChange={(e) => setFurnished(e.target.value as FurnishedType)}>
                   <option value="unfurnished">Unfurnished</option>
                   <option value="furnished">Furnished</option>
@@ -1203,6 +1267,13 @@ readinessRecommendation,
                   <option value="yes">Yes</option>
               </CalculatorSelect>
             </div>
+            {housingMode === "buy" && (
+              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                No destination here has a verified home-price dataset, so the price above is estimated from the rent
+                figure (16x annual rent, a standard rule of thumb) — treat it as a rough planning figure, not a real
+                listing price.
+              </p>
+            )}
             {/* Car field — now in Housing, matching Caribbean */}
             <CalculatorSelect
     id="europe-need-car"
