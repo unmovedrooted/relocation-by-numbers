@@ -58,11 +58,22 @@ export const viewport = {
   ],
 };
 
-const PRIMARY_NAV_LINKS = [
-  { href: "/explore",               label: "Explore" },
-  { href: "/fire-calculator",       label: "FIRE Calculator" },
-  { href: "/international-relocation", label: "International" },
-  { href: "/blog", label: "Blogs" },
+const EXPLORE_LINK = { href: "/explore", label: "Explore" };
+const BLOG_LINK = { href: "/blog", label: "Blogs" };
+
+const FIRE_NAV_LINKS = [
+  { href: "/fire-calculator",        label: "FIRE Calculator" },
+  { href: "/lean-fire-calculator",   label: "Lean FIRE" },
+  { href: "/barista-fire-calculator", label: "Barista FIRE" },
+  { href: "/coast-fire-calculator",  label: "Coast FIRE" },
+];
+
+const INTERNATIONAL_NAV_LINKS = [
+  { href: "/international-relocation", label: "International (All)" },
+  { href: "/caribbean-relocation-calculator", label: "Caribbean" },
+  { href: "/asia-relocation-calculator", label: "Asia" },
+  { href: "/europe-relocation-calculator", label: "Europe" },
+  { href: "/south-america-relocation-calculator", label: "South America" },
 ];
 
 const TOOLS_NAV_LINKS = [
@@ -72,8 +83,20 @@ const TOOLS_NAV_LINKS = [
   { href: "/one-income-relocation-calculator",  label: "Income Calculator" },
 ];
 
-// Flat list for mobile — the dropdown is a desktop-only affordance.
-const NAV_LINKS = [...PRIMARY_NAV_LINKS, ...TOOLS_NAV_LINKS];
+const CALCULATOR_NAV_LINKS = [
+  { href: "/", label: "Calculator" },
+  { href: "/compare", label: "City Pair Comparisons" },
+];
+
+// Flat list for mobile — dropdowns are a desktop-only affordance.
+const NAV_LINKS = [
+  ...CALCULATOR_NAV_LINKS,
+  EXPLORE_LINK,
+  ...FIRE_NAV_LINKS,
+  ...INTERNATIONAL_NAV_LINKS,
+  ...TOOLS_NAV_LINKS,
+  BLOG_LINK,
+];
 
 export default function RootLayout({
   children,
@@ -128,16 +151,16 @@ export default function RootLayout({
 
                 <div className="flex shrink-0 items-center gap-2 sm:gap-4">
                   <nav aria-label="Primary navigation" className="hidden items-center gap-4 text-sm text-slate-600 dark:text-slate-300 lg:flex">
-                    {PRIMARY_NAV_LINKS.map(({ href, label }) => (
-                      <Link
-                        key={href}
-                        href={href}
-                        className="transition hover:text-slate-900 dark:hover:text-white"
-                      >
-                        {label}
-                      </Link>
-                    ))}
+                    <NavToolsDropdown label="Calculator" links={CALCULATOR_NAV_LINKS} />
+                    <Link href="/explore" className="transition hover:text-slate-900 dark:hover:text-white">
+                      Explore
+                    </Link>
+                    <NavToolsDropdown label="FIRE" links={FIRE_NAV_LINKS} />
+                    <NavToolsDropdown label="International" links={INTERNATIONAL_NAV_LINKS} />
                     <NavToolsDropdown label="Tools" links={TOOLS_NAV_LINKS} />
+                    <Link href="/blog" className="transition hover:text-slate-900 dark:hover:text-white">
+                      Blogs
+                    </Link>
                   </nav>
                   <ThemeToggle />
                   <MobileNavigation links={NAV_LINKS} />
