@@ -96,10 +96,22 @@ const sections: HubSection[] = [
       "Plan your move with calculators that go beyond basic cost of living — covering one-income affordability, tax impact, and city-by-city housing pressure.",
     links: [
       {
+        href: "/",
+        title: "US Relocation & Take-Home Calculator",
+        description:
+          "The main calculator — compare take-home pay, taxes, and living costs for a move between US cities.",
+      },
+      {
         href: "/compare-cities",
         title: "Compare Cities Side by Side",
         description:
           "Pick your own income and up to 3 target cities — net pay, taxes, housing, and flexibility in one table.",
+      },
+      {
+        href: "/compare",
+        title: "City Pair Comparisons",
+        description:
+          "Browse ready-made two-city comparisons of pay, taxes, and monthly budget.",
       },
       {
         href: "/one-income-relocation-calculator",
@@ -129,6 +141,12 @@ const sections: HubSection[] = [
       "Plan a home purchase with payment estimates, cash to close, rent vs buy, DTI checks, and refinance analysis.",
     links: [
       {
+        href: "/paycheck-calculator",
+        title: "Paycheck Calculator",
+        description:
+          "Your take-home pay after federal, Social Security, Medicare, and state taxes — salary or hourly, any state.",
+      },
+      {
         href: "/housing-affordability-calculator",
         title: "Housing Affordability Calculator",
         description:
@@ -139,6 +157,12 @@ const sections: HubSection[] = [
         title: "Mortgage Calculator",
         description:
           "Monthly payment, cash to close, DTI, rent vs buy break-even, and amortization schedule.",
+      },
+      {
+        href: "/rent-vs-buy-calculator",
+        title: "Rent vs. Buy Calculator",
+        description:
+          "Compare buying vs. renting-and-investing by net worth, with a break-even year and all the real costs.",
       },
       {
         href: "/mortgage-calculator#refinance",
@@ -202,13 +226,48 @@ const sections: HubSection[] = [
     links: [
       { href: "/fire-calculator", title: "FIRE Calculator" },
       { href: "/fire-number-calculator", title: "FIRE Number Calculator" },
-      { href: "/coast-fire-calculator", title: "Coast FIRE Calculator" },
-      { href: "/barista-fire-calculator", title: "Barista FIRE Calculator" },
       { href: "/lean-fire-calculator", title: "Lean FIRE Calculator" },
+      { href: "/barista-fire-calculator", title: "Barista FIRE Calculator" },
+      { href: "/coast-fire-calculator", title: "Coast FIRE Calculator" },
+      { href: "/chubby-fire-calculator", title: "Chubby FIRE Calculator" },
+      { href: "/fat-fire-calculator", title: "Fat FIRE Calculator" },
       { href: "/savings-rate-for-fire", title: "Savings Rate for FIRE" },
     ],
     ctaHref: "/fire-calculator",
     ctaLabel: "Open the main FIRE calculator",
+  },
+  {
+    title: "Retirement Planning Calculators",
+    description:
+      "Project your savings, plan withdrawals with market-volatility modeling, weigh a Roth conversion, and size up your HSA — all with federal and state taxes built in.",
+    links: [
+      {
+        href: "/retirement-calculator",
+        title: "Retirement Calculator",
+        description:
+          "Project what your savings grow into, with a live balance chart and a Monte Carlo range of outcomes.",
+      },
+      {
+        href: "/retirement-withdrawal-calculator",
+        title: "Retirement Withdrawal Calculator",
+        description:
+          "How long will your money last, or how much can you safely withdraw — with taxes and sequence-of-returns risk.",
+      },
+      {
+        href: "/roth-conversion-calculator",
+        title: "Roth Conversion Calculator",
+        description:
+          "Convert now or pay tax later? See the tax due, both after-tax paths, and the break-even future tax rate.",
+      },
+      {
+        href: "/hsa-calculator",
+        title: "HSA Calculator",
+        description:
+          "2025 contribution limits, real federal + FICA + state tax savings, and long-term tax-free growth.",
+      },
+    ],
+    ctaHref: "/retirement-calculator",
+    ctaLabel: "Open the retirement calculator",
   },
   {
     title: "Best Places for FIRE",

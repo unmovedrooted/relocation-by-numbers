@@ -240,6 +240,47 @@ export default function MethodologyPage() {
               your target lifestyle and may shorten the path to financial independence.
               A higher-cost move may do the opposite.
             </p>
+
+            <p>
+              The FIRE variants share this same math with different spending assumptions:
+              Lean FIRE (a smaller budget), Chubby FIRE (roughly $100k&ndash;$150k a year,
+              about $2.5M&ndash;$3.75M at a 4% rate), and Fat FIRE (roughly $200k+ a year,
+              about $5M+). The dollar targets are simply annual spending divided by the
+              withdrawal rate; the &ldquo;Lean / Chubby / Fat&rdquo; labels are community
+              conventions rather than official thresholds.
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            Retirement planning calculators
+          </h2>
+
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
+            <p>
+              The Retirement, Retirement Withdrawal, Roth Conversion, and HSA calculators
+              work in today&rsquo;s dollars: contributions and withdrawals grow with inflation
+              and the portfolio compounds at an inflation-adjusted &ldquo;real&rdquo; return,
+              so results reflect present-day buying power. Taxes on traditional retirement
+              withdrawals and Roth conversions use the same federal and state engine as the
+              rest of the site, treated as ordinary income (no FICA); Illinois, Pennsylvania,
+              Mississippi, and the nine no-income-tax states are handled as exempting
+              qualified retirement income. HSA figures use the 2025 IRS limits, with
+              California and New Jersey modeled as not conforming to the federal HSA exemption.
+            </p>
+
+            <p>
+              <span className="font-medium text-slate-900 dark:text-slate-100">Market volatility (Monte Carlo):</span>{" "}
+              the Retirement and Retirement Withdrawal calculators offer an optional
+              &ldquo;market ups &amp; downs&rdquo; view that runs 5,000 simulated market
+              histories, drawing each year&rsquo;s return from a lognormal distribution
+              centered on your expected return at a chosen volatility (Conservative, Balanced,
+              Aggressive, or custom). It reports a range of outcomes and, for withdrawals, a
+              success rate that captures sequence-of-returns risk. The simulation uses a fixed
+              random seed, so the same inputs always reproduce the same result. It is a model
+              of risk, not a prediction, and does not use historical return sequences.
+            </p>
           </div>
         </section>
 

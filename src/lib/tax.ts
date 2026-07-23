@@ -399,7 +399,8 @@ function estimateStateTax(
 // ─── Local tax ────────────────────────────────────────────────────────────────
 type LocalTaxRule =
   | { type: "flat"; rate: number }
-  | { type: "brackets"; single: Bracket[]; married: Bracket[] };
+  | { type: "brackets"; single: Bracket[]; married: Bracket[] }
+  | { type: "pctOfStateTax"; rate: number }; // e.g. Yonkers surcharge on NY state tax
 
 const LOCAL_TAX_RULES: Record<string, LocalTaxRule> = {
   "nyc-ny": {
@@ -418,20 +419,46 @@ const LOCAL_TAX_RULES: Record<string, LocalTaxRule> = {
     ],
   },
   "philadelphia-pa": { type: "flat", rate: 0.0375 },
+  "pittsburgh-pa":   { type: "flat", rate: 0.03   }, // 1% city + 2% school district resident EIT (excludes ~$52/yr LST). Verified 2025.
   "kansas-city-mo":  { type: "flat", rate: 0.01   },
+  "st-louis-mo":     { type: "flat", rate: 0.01   }, // St. Louis earnings tax, resident. Verified 2025.
   "columbus-oh":     { type: "flat", rate: 0.025  },
   "cleveland-oh":    { type: "flat", rate: 0.025  },
   "cincinnati-oh":   { type: "flat", rate: 0.018  },
+  "detroit-mi":      { type: "flat", rate: 0.024  }, // Detroit resident income tax. Verified 2025.
+  // Yonkers residents pay a surcharge equal to 16.75% of their NY state tax. Verified 2025.
+  "yonkers-ny":      { type: "pctOfStateTax", rate: 0.1675 },
+  // Maryland county income tax (residence-based, on MD taxable income). Verified 2025.
+  "baltimore-md":    { type: "flat", rate: 0.032  }, // Baltimore City 3.20%
+  "rockville-md":    { type: "flat", rate: 0.032  }, // Montgomery County 3.20%
+  "frederick-md": {
+    type: "brackets", // Frederick County graduated resident rates, 2025
+    single: [
+      { upTo: 25_000,                   rate: 0.0225 },
+      { upTo: 50_000,                   rate: 0.0275 },
+      { upTo: 150_000,                  rate: 0.0296 },
+      { upTo: Number.POSITIVE_INFINITY, rate: 0.032  },
+    ],
+    married: [
+      { upTo: 50_000,                   rate: 0.0225 },
+      { upTo: 100_000,                  rate: 0.0275 },
+      { upTo: 150_000,                  rate: 0.0296 },
+      { upTo: Number.POSITIVE_INFINITY, rate: 0.032  },
+    ],
+  },
 };
 
 function estimateLocalIncomeTax(
   cityId: string | undefined,
   taxableIncome: number,
-  filing: FilingStatus
+  filing: FilingStatus,
+  stateTax: number
 ): number {
-  if (!cityId || taxableIncome <= 0) return 0;
+  if (!cityId) return 0;
   const rule = LOCAL_TAX_RULES[cityId.toLowerCase()];
   if (!rule) return 0;
+  if (rule.type === "pctOfStateTax") return Math.max(0, stateTax) * rule.rate;
+  if (taxableIncome <= 0) return 0;
   if (rule.type === "flat") return taxableIncome * rule.rate;
   const brackets = filing === "married" ? rule.married : rule.single;
   return sumBrackets(taxableIncome, brackets);
@@ -500,7 +527,7 @@ function compute(opts: TaxOpts): {
   const stateGross     = allows401k ? after401k : gross;
   const taxableState   = Math.max(0, stateGross - stateDeduction);
   const state          = estimateStateTax(opts.state, taxableState, opts.filing);
-  const local          = estimateLocalIncomeTax(opts.cityId, taxableState, opts.filing);
+  const local          = estimateLocalIncomeTax(opts.cityId, taxableState, opts.filing, state);
 
 const totalTax = federal + fica + state + local;
 const net = Math.max(0, after401k - totalTax);
