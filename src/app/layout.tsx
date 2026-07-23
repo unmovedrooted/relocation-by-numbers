@@ -62,36 +62,40 @@ const EXPLORE_LINK = { href: "/explore", label: "Explore" };
 const BLOG_LINK = { href: "/blog", label: "Blogs" };
 
 const FIRE_NAV_LINKS = [
+  { href: "/barista-fire-calculator", label: "Barista FIRE" },
+  { href: "/chubby-fire-calculator", label: "Chubby FIRE" },
+  { href: "/coast-fire-calculator",  label: "Coast FIRE" },
+  { href: "/fat-fire-calculator",    label: "Fat FIRE" },
   { href: "/fire-calculator",        label: "FIRE Calculator" },
   { href: "/lean-fire-calculator",   label: "Lean FIRE" },
-  { href: "/barista-fire-calculator", label: "Barista FIRE" },
-  { href: "/coast-fire-calculator",  label: "Coast FIRE" },
-  { href: "/chubby-fire-calculator", label: "Chubby FIRE" },
-  { href: "/fat-fire-calculator",    label: "Fat FIRE" },
 ];
 
 const INTERNATIONAL_NAV_LINKS = [
-  { href: "/international-relocation", label: "International (All)" },
-  { href: "/caribbean-relocation-calculator", label: "Caribbean" },
   { href: "/asia-relocation-calculator", label: "Asia" },
+  { href: "/caribbean-relocation-calculator", label: "Caribbean" },
   { href: "/europe-relocation-calculator", label: "Europe" },
+  { href: "/international-relocation", label: "International (All)" },
   { href: "/south-america-relocation-calculator", label: "South America" },
 ];
 
 const TOOLS_NAV_LINKS = [
-  { href: "/paycheck-calculator", label: "Paycheck" },
-  { href: "/mortgage-calculator",   label: "Mortgage" },
-  { href: "/rent-vs-buy-calculator", label: "Rent vs. Buy" },
   { href: "/housing-affordability-calculator", label: "Affordability" },
   { href: "/compare-cities", label: "Compare Cities" },
   { href: "/one-income-relocation-calculator",  label: "Income Calculator" },
+  { href: "/income-tax-calculator", label: "Income Tax" },
+  { href: "/investment-calculator", label: "Investment" },
+  { href: "/mortgage-calculator",   label: "Mortgage" },
+  { href: "/paycheck-calculator", label: "Paycheck" },
+  { href: "/rent-vs-buy-calculator", label: "Rent vs. Buy" },
 ];
 
 const RETIREMENT_NAV_LINKS = [
-  { href: "/retirement-calculator", label: "Retirement Calculator" },
+  { href: "/401k-calculator", label: "401(k) Calculator" },
   { href: "/hsa-calculator", label: "HSA Calculator" },
-  { href: "/retirement-withdrawal-calculator", label: "Withdrawal Calculator" },
+  { href: "/retirement-calculator", label: "Retirement Calculator" },
+  { href: "/rmd-calculator", label: "RMD Calculator" },
   { href: "/roth-conversion-calculator", label: "Roth Conversion" },
+  { href: "/retirement-withdrawal-calculator", label: "Withdrawal Calculator" },
 ];
 
 const CALCULATOR_NAV_LINKS = [

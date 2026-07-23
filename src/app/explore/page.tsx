@@ -147,6 +147,12 @@ const sections: HubSection[] = [
           "Your take-home pay after federal, Social Security, Medicare, and state taxes — salary or hourly, any state.",
       },
       {
+        href: "/income-tax-calculator",
+        title: "Income Tax Calculator",
+        description:
+          "Federal tax, effective and marginal rates, and a bracket-by-bracket breakdown — with optional state tax.",
+      },
+      {
         href: "/housing-affordability-calculator",
         title: "Housing Affordability Calculator",
         description:
@@ -260,10 +266,28 @@ const sections: HubSection[] = [
           "Convert now or pay tax later? See the tax due, both after-tax paths, and the break-even future tax rate.",
       },
       {
+        href: "/rmd-calculator",
+        title: "RMD Calculator",
+        description:
+          "Your required minimum distribution from the IRS Uniform Lifetime Table, with a multi-year schedule and tax estimate.",
+      },
+      {
+        href: "/401k-calculator",
+        title: "401(k) Calculator",
+        description:
+          "Employer match, this year's tax savings, and projected balance — with 2025 limits and a Monte Carlo range.",
+      },
+      {
         href: "/hsa-calculator",
         title: "HSA Calculator",
         description:
           "2025 contribution limits, real federal + FICA + state tax savings, and long-term tax-free growth.",
+      },
+      {
+        href: "/investment-calculator",
+        title: "Investment Calculator",
+        description:
+          "Compound growth from a lump sum plus contributions, with a Monte Carlo range of outcomes.",
       },
     ],
     ctaHref: "/retirement-calculator",

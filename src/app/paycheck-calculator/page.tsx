@@ -132,8 +132,10 @@ export default function Page() {
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
               Salary or hourly, any state, with 401(k) impact — 2025 tax rules.
             </p>
-            <div className="mt-3">
-              <Link href="/methodology" className="text-sm font-medium text-slate-700 underline underline-offset-4 hover:no-underline dark:text-slate-300">See methodology</Link>
+            <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+              <Link href="/methodology" className="font-medium text-slate-700 underline underline-offset-4 hover:no-underline dark:text-slate-300">See methodology</Link>
+              <span className="mx-2" aria-hidden="true">·</span>
+              Planning estimates only. Results depend on your inputs, tax status, and assumptions.
             </div>
             <div className="mt-5 flex flex-wrap justify-center gap-2">
               {["Federal + FICA + state", "Salary or hourly", "By state", "401(k) impact"].map((f) => (

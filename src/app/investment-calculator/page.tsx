@@ -1,37 +1,37 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import Link from "next/link";
-import RentVsBuyCalculator from "@/components/RentVsBuyCalculator";
+import InvestmentCalculator from "@/components/InvestmentCalculator";
 
 const SITE_URL = "https://www.relocationbynumbers.com";
-const PAGE_PATH = "/rent-vs-buy-calculator";
+const PAGE_PATH = "/investment-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "Rent vs. Buy Calculator — Which Is Cheaper Over Time?",
+  title: "Investment Calculator — Compound Growth with a Realistic Range",
   description:
-    "Free rent vs. buy calculator. Compare the net worth of buying a home against renting and investing the difference, with a break-even year, mortgage, appreciation, and closing/selling costs built in.",
+    "Free investment & compound interest calculator. Project how your savings grow with regular contributions, then switch to a Monte Carlo view to see the realistic range of outcomes with market volatility.",
   keywords: [
-    "rent vs buy calculator",
-    "should i rent or buy",
-    "buy vs rent break even",
-    "renting vs buying a house",
-    "is it cheaper to rent or buy",
-    "rent or buy calculator with investment",
+    "investment calculator",
+    "compound interest calculator",
+    "investment growth calculator",
+    "monte carlo investment calculator",
+    "future value calculator",
+    "how much will my investment grow",
   ],
   alternates: { canonical: CANONICAL },
   openGraph: {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "Rent vs. Buy Calculator — Which Is Cheaper Over Time?",
-    description: "Compare buying vs. renting-and-investing by net worth, with a break-even year and all the real costs built in.",
+    title: "Investment Calculator — Compound Growth with a Realistic Range",
+    description: "Project compound growth with contributions, plus a Monte Carlo range of outcomes for market volatility.",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "Rent vs. Buy Calculator — Which Is Cheaper Over Time?",
-    description: "Buy vs. rent-and-invest, compared by net worth with a break-even year.",
+    title: "Investment Calculator — Compound Growth with a Realistic Range",
+    description: "Compound growth with contributions and a Monte Carlo range of outcomes.",
     site: "@relocationbynumbers",
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" } },
@@ -40,18 +40,18 @@ export const metadata: Metadata = {
 const webAppSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  name: "Rent vs. Buy Calculator",
+  name: "Investment Calculator",
   url: CANONICAL,
   description:
-    "Free rent vs. buy calculator that compares the net worth of buying a home against renting and investing the difference, including mortgage, taxes, maintenance, appreciation, closing and selling costs, and a break-even year.",
+    "Free investment and compound interest calculator that projects growth from a starting amount and regular contributions, with an optional Monte Carlo view showing a percentile range of outcomes under market volatility.",
   applicationCategory: "FinanceApplication",
   operatingSystem: "Any",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   featureList: [
-    "Net-worth comparison of buying vs. renting-and-investing",
-    "Break-even year and crossover chart",
-    "Mortgage, property tax, maintenance, HOA, appreciation",
-    "Closing and selling costs, rent growth, investment return",
+    "Compound growth from a lump sum plus monthly contributions",
+    "Growth-over-time chart splitting contributions vs. growth",
+    "Optional inflation adjustment (today's dollars)",
+    "Monte Carlo range of outcomes (10th–90th percentile)",
     "PDF and CSV export, shareable links",
   ],
   author: { "@type": "Organization", name: "Relocation by Numbers", url: SITE_URL },
@@ -61,10 +61,10 @@ const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
   mainEntity: [
-    { "@type": "Question", name: "How does a rent vs. buy calculator work?", acceptedAnswer: { "@type": "Answer", text: "It compares net worth over time. The buyer's net worth is their home equity (value minus mortgage balance, net of selling costs). The renter invests the same upfront cash a buyer would tie up, plus whatever they save each month, at an assumed investment return. Whichever ends with more net worth 'wins,' and the break-even is when buying catches up to renting." } },
-    { "@type": "Question", name: "Is it cheaper to rent or buy?", acceptedAnswer: { "@type": "Answer", text: "It depends on price-to-rent ratio, how long you stay, mortgage rate, home appreciation, and what you'd otherwise earn investing. Buying usually wins the longer you stay, because purchase and sale costs are spread over more years and you build equity; renting often wins over short horizons or when investment returns beat home appreciation." } },
-    { "@type": "Question", name: "What is the break-even point for buying?", acceptedAnswer: { "@type": "Answer", text: "It's the number of years you'd need to stay for buying to leave you with as much net worth as renting and investing. Before that point renting is ahead; after it, buying is." } },
-    { "@type": "Question", name: "Does this include tax benefits of owning?", acceptedAnswer: { "@type": "Answer", text: "No. This calculator focuses on cash flows, equity, and investment returns. It doesn't model the mortgage-interest or property-tax deductions, PMI, or investment taxes, which vary a lot by situation." } },
+    { "@type": "Question", name: "How does compound growth work?", acceptedAnswer: { "@type": "Answer", text: "Your returns earn returns. Each period, growth is added to your balance, and the next period's growth is calculated on the larger balance. Over long horizons, this compounding means most of your final balance can come from growth rather than contributions." } },
+    { "@type": "Question", name: "What return should I assume?", acceptedAnswer: { "@type": "Answer", text: "There's no single right number. A diversified stock-and-bond portfolio has historically returned roughly 6–8% per year before inflation over long periods, but future returns are uncertain. Try a range, and use the Monte Carlo view to see how volatility widens the outcomes." } },
+    { "@type": "Question", name: "What does the Monte Carlo view show?", acceptedAnswer: { "@type": "Answer", text: "Instead of one smooth average, it runs 5,000 simulated market histories where each year's return varies around your expected return. It reports a range — the worst 10%, median, and best 10% — so you can see realistic uncertainty. The median usually lands below the simple average, which is normal (volatility drag)." } },
+    { "@type": "Question", name: "Should I adjust for inflation?", acceptedAnswer: { "@type": "Answer", text: "If you want the final number to reflect real buying power, turn on 'today's dollars.' The portfolio then grows at your return minus inflation. Leaving it off shows the nominal (future-dollar) balance." } },
   ],
 };
 
@@ -74,15 +74,15 @@ const breadcrumbSchema = {
   itemListElement: [
     { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
     { "@type": "ListItem", position: 2, name: "Calculators", item: `${SITE_URL}/explore` },
-    { "@type": "ListItem", position: 3, name: "Rent vs. Buy Calculator", item: CANONICAL },
+    { "@type": "ListItem", position: 3, name: "Investment Calculator", item: CANONICAL },
   ],
 };
 
 const FAQ_ITEMS = [
-  { q: "How does this calculator work?", a: "It compares net worth: the buyer's home equity (net of selling costs) vs. the renter investing the same upfront cash plus monthly savings. Whoever ends with more wins, and the break-even is when buying catches renting." },
-  { q: "Is it cheaper to rent or buy?", a: "It depends on price-to-rent, how long you stay, your mortgage rate, appreciation, and investment returns. Buying tends to win the longer you stay; renting often wins over short horizons or when investments beat appreciation." },
-  { q: "What's the break-even point?", a: "The number of years you'd need to stay for buying to match renting-and-investing. Before it, renting is ahead; after it, buying is." },
-  { q: "Does it include tax benefits of owning?", a: "No — it focuses on cash flow, equity, and investment returns, and doesn't model mortgage-interest/property-tax deductions, PMI, or investment taxes." },
+  { q: "How does compound growth work?", a: "Your returns earn returns. Growth is added to the balance each period, and the next period's growth is figured on the larger balance — so over long horizons, most of the final total can come from growth, not contributions." },
+  { q: "What return should I assume?", a: "No single right number. A diversified portfolio has historically returned ~6–8% before inflation over long periods, but the future is uncertain. Try a range, and use the Monte Carlo view to see how volatility widens outcomes." },
+  { q: "What does the Monte Carlo view show?", a: "5,000 simulated market histories with year-to-year variation, reported as a range: worst 10%, median, best 10%. The median usually sits below the simple average — that's normal volatility drag." },
+  { q: "Should I adjust for inflation?", a: "Turn on 'today's dollars' if you want the result in real buying power; the portfolio then grows at your return minus inflation. Off shows the nominal future-dollar balance." },
 ];
 
 export default function Page() {
@@ -95,13 +95,13 @@ export default function Page() {
       <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:from-slate-950 dark:to-slate-900 dark:text-slate-100">
         <header className="py-10 text-center">
           <div className="mx-auto max-w-4xl px-4 sm:px-6">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Rent vs. Buy Calculator</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Investment Calculator</h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              Compare the real cost of buying a home against renting and investing the difference — see which builds
-              more net worth, and the year buying breaks even.
+              Project how your money grows with compound returns and regular contributions — then see the realistic
+              range of outcomes once you add market volatility.
             </p>
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-              Mortgage, taxes, maintenance, appreciation, and closing/selling costs all included.
+              Compound interest, contributions, optional inflation adjustment, and a Monte Carlo range.
             </p>
             <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">
               <Link href="/methodology" className="font-medium text-slate-700 underline underline-offset-4 hover:no-underline dark:text-slate-300">See methodology</Link>
@@ -109,7 +109,7 @@ export default function Page() {
               Planning estimates only. Results depend on your inputs, tax status, and assumptions.
             </div>
             <div className="mt-5 flex flex-wrap justify-center gap-2">
-              {["Net-worth comparison", "Break-even year", "Crossover chart", "All real costs"].map((f) => (
+              {["Compound growth", "Regular contributions", "Monte Carlo range", "Today's dollars"].map((f) => (
                 <span key={f} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">{f}</span>
               ))}
             </div>
@@ -118,7 +118,7 @@ export default function Page() {
         </header>
 
         <section className="mx-auto max-w-5xl space-y-10 px-4 pb-12 sm:px-6">
-          <RentVsBuyCalculator />
+          <InvestmentCalculator />
 
           <section aria-labelledby="how-heading" className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
             <div className="grid gap-6 lg:grid-cols-2">
@@ -126,23 +126,22 @@ export default function Page() {
                 <h2 id="how-heading" className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white sm:text-xl">How this calculator works</h2>
                 <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
                   <p>
-                    The honest way to compare renting and buying isn&apos;t monthly payment vs. rent — it&apos;s net
-                    worth. This tool runs a month-by-month simulation of both paths. The buyer builds equity as they pay
-                    down the mortgage and the home appreciates; the renter invests the cash a buyer would tie up (down
-                    payment and closing costs), plus whatever they save whenever renting costs less than owning.
+                    Start with a lump sum, add a monthly contribution, and pick a return and time horizon. The average
+                    view compounds it year by year and shows how much of your final balance comes from contributions
+                    versus growth.
                   </p>
                   <p>
-                    At the end, it compares what each person could walk away with — the buyer&apos;s home equity net of
-                    selling costs vs. the renter&apos;s investment portfolio — and finds the year the two cross, your
-                    break-even point.
+                    The Monte Carlo view replaces the single smooth return with 5,000 simulated market histories, so you
+                    see a realistic range instead of one optimistic line. It&apos;s the honest way to picture an
+                    uncertain future — and the seeded engine means the same inputs always reproduce the same range.
                   </p>
                 </div>
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
                   {[
-                    { title: "Net worth, not payments", body: "Equity + appreciation vs. invested savings." },
-                    { title: "Break-even year", body: "How long you'd need to stay for buying to win." },
-                    { title: "Real costs", body: "Taxes, maintenance, HOA, closing and selling costs." },
-                    { title: "Opportunity cost", body: "What the renter earns investing instead." },
+                    { title: "Compound growth", body: "See returns compounding on a growing balance." },
+                    { title: "Contributions vs. growth", body: "The chart splits what you put in from what the market added." },
+                    { title: "Realistic range", body: "Monte Carlo shows the 10th–90th percentile outcomes." },
+                    { title: "Today's dollars", body: "Optional inflation adjustment for real buying power." },
                   ].map((item) => (
                     <div key={item.title} className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
                       <div className="text-sm font-semibold text-slate-900 dark:text-white">{item.title}</div>
@@ -154,13 +153,13 @@ export default function Page() {
               <div className="rounded-2xl border border-cyan-200/70 bg-cyan-50 p-5 dark:border-cyan-900/60 dark:bg-cyan-950/30">
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Good to know</h3>
                 <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                  <p>Results are very sensitive to two guesses: home appreciation and investment return. Try a range for both.</p>
-                  <p>The biggest driver is usually how long you&apos;ll stay — transaction costs make short stays favor renting.</p>
-                  <p>This doesn&apos;t model income-tax effects (mortgage-interest/SALT deductions, investment taxes), PMI, or moving costs.</p>
-                  <p>It&apos;s a planning comparison, not financial advice.</p>
+                  <p>The Monte Carlo median usually sits below the average line. That&apos;s volatility drag, not a bug — a single average tends to look optimistic.</p>
+                  <p>Results are very sensitive to the return assumption. Small changes compound into big differences over decades.</p>
+                  <p>This doesn&apos;t model taxes, fees, or changing contributions over time.</p>
+                  <p>It&apos;s a projection, not investment advice.</p>
                 </div>
                 <div className="mt-5 space-y-2">
-                  {["No account or sign-up required", "Month-by-month net-worth simulation", "Shareable, exportable results"].map((t) => (
+                  {["No account or sign-up required", "Seeded, reproducible simulation", "Shareable, exportable results"].map((t) => (
                     <div key={t} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400"><span className="mt-0.5 flex-shrink-0 text-cyan-500">✓</span><span>{t}</span></div>
                   ))}
                 </div>
@@ -184,14 +183,14 @@ export default function Page() {
           </section>
 
           <section aria-labelledby="crosssell-heading" className="rounded-2xl border border-cyan-200/60 bg-cyan-50 p-5 dark:border-cyan-900/40 dark:bg-cyan-950/20">
-            <h2 id="crosssell-heading" className="text-sm font-semibold text-slate-900 dark:text-white">Keep planning your home purchase</h2>
-            <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">Once you&apos;ve decided, size up the payment and what you can afford.</p>
+            <h2 id="crosssell-heading" className="text-sm font-semibold text-slate-900 dark:text-white">Put it to work</h2>
+            <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">See how this growth fits your retirement and financial-independence plans.</p>
             <nav aria-label="Related calculators" className="mt-3 flex flex-wrap gap-3">
               {[
-                { label: "Mortgage Calculator", href: "/mortgage-calculator" },
-                { label: "Housing Affordability", href: "/housing-affordability-calculator" },
-                { label: "Paycheck Calculator", href: "/paycheck-calculator" },
-                { label: "Compare Cities", href: "/compare-cities" },
+                { label: "Retirement Calculator", href: "/retirement-calculator" },
+                { label: "FIRE Calculator", href: "/fire-calculator" },
+                { label: "HSA Calculator", href: "/hsa-calculator" },
+                { label: "Roth Conversion", href: "/roth-conversion-calculator" },
               ].map(({ label, href }, i) => (
                 <a key={href} href={href} className={`inline-flex items-center rounded-xl px-4 py-2 text-sm font-semibold transition ${i === 0 ? "bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"}`}>{label}</a>
               ))}

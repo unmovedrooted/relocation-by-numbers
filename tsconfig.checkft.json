@@ -1,0 +1,2 @@
+{ "extends": "./tsconfig.json", "compilerOptions": { "noEmit": true },
+  "include": ["src/app/income-tax-calculator/page.tsx","src/components/FederalTaxCalculator.tsx","src/components/SavedScenariosPanel.tsx","src/lib/**/*.ts","next-env.d.ts"] }

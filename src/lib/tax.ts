@@ -72,6 +72,16 @@ function federalBrackets(filing: FilingStatus): Bracket[] {
   ];
 }
 
+/** 2025 federal standard deduction for the given filing status. */
+export function getFederalStandardDeduction(filing: FilingStatus): number {
+  return federalStandardDeduction(filing);
+}
+
+/** 2025 federal income-tax brackets ({ upTo, rate }) for the given filing status. */
+export function getFederalBrackets(filing: FilingStatus): { upTo: number; rate: number }[] {
+  return federalBrackets(filing).map((b) => ({ upTo: b.upTo, rate: b.rate }));
+}
+
 // ─── FICA ─────────────────────────────────────────────────────────────────────
 function ficaTax(grossWages: number, filing: FilingStatus): number {
   const wages = Math.max(0, grossWages);

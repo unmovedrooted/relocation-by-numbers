@@ -28,6 +28,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const calculatorPages = [
     "/mortgage-calculator",
     "/paycheck-calculator",
+    "/income-tax-calculator",
     "/rent-vs-buy-calculator",
     "/housing-affordability-calculator",
     "/compare-cities",
@@ -41,9 +42,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/chubby-fire-calculator",
     "/fat-fire-calculator",
     "/retirement-calculator",
+    "/401k-calculator",
     "/retirement-withdrawal-calculator",
+    "/rmd-calculator",
     "/roth-conversion-calculator",
     "/hsa-calculator",
+    "/investment-calculator",
     "/how-much-do-i-need-to-retire",
     "/savings-rate-for-fire",
   ].map((route) => ({
