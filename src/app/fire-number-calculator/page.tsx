@@ -8,14 +8,14 @@ import { parseIncomeParam } from "@/lib/incomeParam";
 export const metadata: Metadata = {
   title: "FIRE Number Calculator | How Much Do You Need to Retire Early?",
   description:
-    "Calculate your FIRE number — the portfolio size you need to retire early. Estimate years to financial independence using the 4% rule and your annual expenses.",
+    "Calculate your FIRE number, the portfolio size you need to retire early. Estimate years to financial independence using the 4% rule and your annual expenses.",
   alternates: {
     canonical: "https://www.relocationbynumbers.com/fire-number-calculator",
   },
   openGraph: {
     title: "FIRE Number Calculator | How Much Do You Need to Retire Early?",
     description:
-      "Calculate your FIRE number — the portfolio size you need to retire early. Estimate years to financial independence using the 4% rule and your annual expenses.",
+      "Calculate your FIRE number, the portfolio size you need to retire early. Estimate years to financial independence using the 4% rule and your annual expenses.",
     url: "https://www.relocationbynumbers.com/fire-number-calculator",
     siteName: "Relocation by Numbers",
     type: "website",
@@ -106,7 +106,7 @@ export default async function Page({ searchParams }: PageProps) {
             />
             <SEOFAQItem
               q="How does location affect my FIRE number?"
-              a="Your FIRE number is directly tied to your annual spending. If you move to a lower cost-of-living city or a state with no income tax, your annual expenses in retirement may be lower — which means a smaller FIRE number and potentially years shaved off your timeline."
+              a="Your FIRE number is directly tied to your annual spending. If you move to a lower cost-of-living city or a state with no income tax, your annual expenses in retirement may be lower, which means a smaller FIRE number and potentially years shaved off your timeline."
             />
             <SEOFAQItem
               q="Do I need to include taxes in my FIRE number?"

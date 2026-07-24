@@ -8,7 +8,7 @@ const PAGE_PATH = "/rmd-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "RMD Calculator — Required Minimum Distribution (2025)",
+  title: "RMD Calculator, Required Minimum Distribution (2025)",
   description:
     "Free RMD calculator. Find your required minimum distribution from a traditional IRA or 401(k) using the IRS Uniform Lifetime Table, plus a multi-year schedule and an estimate of the tax you'll owe.",
   keywords: [
@@ -24,11 +24,11 @@ export const metadata: Metadata = {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "RMD Calculator — Required Minimum Distribution (2025)",
+    title: "RMD Calculator, Required Minimum Distribution (2025)",
     description: "Your required minimum distribution from a traditional IRA/401(k), with a multi-year schedule and tax estimate.",
     locale: "en_US",
   },
-  twitter: { card: "summary", title: "RMD Calculator — Required Minimum Distribution (2025)", description: "Required minimum distribution with a multi-year schedule and tax estimate.", site: "@relocationbynumbers" },
+  twitter: { card: "summary", title: "RMD Calculator, Required Minimum Distribution (2025)", description: "Required minimum distribution with a multi-year schedule and tax estimate.", site: "@relocationbynumbers" },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" } },
 };
 
@@ -75,10 +75,10 @@ const breadcrumbSchema = {
 };
 
 const FAQ_ITEMS = [
-  { q: "What is an RMD?", a: "The minimum you must withdraw each year from a traditional IRA/401(k) once you reach the required age — your prior year-end balance divided by an IRS Uniform Lifetime Table factor." },
+  { q: "What is an RMD?", a: "The minimum you must withdraw each year from a traditional IRA/401(k) once you reach the required age, your prior year-end balance divided by an IRS Uniform Lifetime Table factor." },
   { q: "At what age do RMDs start?", a: "Age 73 under SECURE 2.0 (rising to 75 in 2033). The first can be delayed to April 1 of the following year, but then you take two that year." },
   { q: "How is it calculated?", a: "December 31 prior-year balance ÷ the age divisor. At 73 the divisor is 26.5, so $500,000 gives about an $18,868 RMD." },
-  { q: "Do Roth accounts have RMDs?", a: "No — Roth IRAs never require lifetime RMDs, and as of 2024 neither do Roth 401(k)s. RMDs apply to traditional pre-tax accounts." },
+  { q: "Do Roth accounts have RMDs?", a: "No, Roth IRAs never require lifetime RMDs, and as of 2024 neither do Roth 401(k)s. RMDs apply to traditional pre-tax accounts." },
   { q: "What if I miss one?", a: "A 25% penalty on the shortfall (10% if corrected promptly), and the RMD is taxed as ordinary income when taken." },
 ];
 
@@ -95,7 +95,7 @@ export default function Page() {
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">RMD Calculator</h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
               Find your required minimum distribution from a traditional IRA or 401(k) using the IRS Uniform Lifetime
-              Table — plus a multi-year schedule and the tax you&apos;ll owe.
+              Table, plus a multi-year schedule and the tax you&apos;ll owe.
             </p>
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">SECURE 2.0 age-73 start · Uniform Lifetime Table · tax estimate.</p>
             <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">
@@ -120,7 +120,7 @@ export default function Page() {
                 <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
                   <p>
                     Your RMD is your prior year-end balance divided by a life-expectancy factor from the IRS Uniform
-                    Lifetime Table for your age. At 73 that factor is 26.5 — about 3.77% of your balance — and it drops
+                    Lifetime Table for your age. At 73 that factor is 26.5, about 3.77% of your balance, and it drops
                     each year, so RMDs take a larger share as you age.
                   </p>
                   <p>
@@ -148,7 +148,7 @@ export default function Page() {
                 <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
                   <p>Missing an RMD triggers a 25% penalty (10% if corrected promptly), so the deadlines matter.</p>
                   <p>This uses the Uniform Lifetime Table. If your sole beneficiary is a spouse more than 10 years younger, a different (lower) table applies.</p>
-                  <p>Roth IRAs — and, since 2024, Roth 401(k)s — have no lifetime RMDs.</p>
+                  <p>Roth IRAs, and, since 2024, Roth 401(k)s, have no lifetime RMDs.</p>
                   <p>It&apos;s a planning estimate, not tax advice.</p>
                 </div>
                 <div className="mt-5 space-y-2">

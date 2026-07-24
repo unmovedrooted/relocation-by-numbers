@@ -91,7 +91,7 @@ function StatCard({
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// MATH — everything runs in REAL (today's-dollar) terms. Withdrawals are
+// MATH, everything runs in REAL (today's-dollar) terms. Withdrawals are
 // held constant in real terms (i.e. they grow with inflation to preserve
 // buying power), and the portfolio grows at the inflation-adjusted "real"
 // return. Withdrawal happens at the START of each year, then the remainder
@@ -239,7 +239,7 @@ export default function RetirementWithdrawalCalculator() {
     const r = realReturnRate(nz(expectedReturnPct), nz(inflationPct));
     const stateExemptOrNone = RETIREMENT_STATE_EXEMPT.has(state);
 
-    // The gross annual withdrawal — entered directly (howLong) or solved (safeAmount).
+    // The gross annual withdrawal, entered directly (howLong) or solved (safeAmount).
     let grossWithdrawal: number;
     let yearsLasts: number;
     let depletes: boolean;
@@ -463,7 +463,7 @@ export default function RetirementWithdrawalCalculator() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* ================================================================
-            LEFT — INPUTS
+            LEFT, INPUTS
         ================================================================ */}
         <div className="space-y-3">
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
@@ -553,13 +553,13 @@ export default function RetirementWithdrawalCalculator() {
               </label>
             </div>
             <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              Real return used: {(results.realReturn * 100).toFixed(2)}%. This is a smooth, average-return projection — it does not model market volatility or sequence-of-returns risk.
+              Real return used: {(results.realReturn * 100).toFixed(2)}%. This is a smooth, average-return projection, it does not model market volatility or sequence-of-returns risk.
             </div>
           </div>
         </div>
 
         {/* ================================================================
-            RIGHT — RESULTS
+            RIGHT, RESULTS
         ================================================================ */}
         <div className="space-y-3">
           {!inputsReady ? (
@@ -579,7 +579,7 @@ export default function RetirementWithdrawalCalculator() {
                         ? results.depletionAge
                           ? `Drawing ${money(results.grossWithdrawal)}/yr, the balance runs out around age ${results.depletionAge}.`
                           : `Drawing ${money(results.grossWithdrawal)}/yr, the balance eventually runs out.`
-                        : `At ${money(results.grossWithdrawal)}/yr, growth keeps pace — the balance is effectively self-sustaining over ${CAP_YEARS}+ years.`
+                        : `At ${money(results.grossWithdrawal)}/yr, growth keeps pace, the balance is effectively self-sustaining over ${CAP_YEARS}+ years.`
                     }
                   />
                 ) : (
@@ -587,7 +587,7 @@ export default function RetirementWithdrawalCalculator() {
                     label={`Safe withdrawal for ${horizonYears} years`}
                     value={`${money(results.grossWithdrawal)}/yr`}
                     tone="emerald"
-                    note={`That's ${money(results.grossWithdrawal / 12)}/mo gross, or ${(results.withdrawalPctOfBalance * 100).toFixed(1)}% of your balance — vs. the 4%-rule reference of ${money(results.fourPctBenchmark)}/yr.`}
+                    note={`That's ${money(results.grossWithdrawal / 12)}/mo gross, or ${(results.withdrawalPctOfBalance * 100).toFixed(1)}% of your balance, vs. the 4%-rule reference of ${money(results.fourPctBenchmark)}/yr.`}
                   />
                 )
               ) : mc ? (
@@ -614,7 +614,7 @@ export default function RetirementWithdrawalCalculator() {
                 tone="cyan"
                 note={
                   accountType === "roth"
-                    ? `${money(results.afterTaxAnnual)}/yr — Roth withdrawals are tax-free.`
+                    ? `${money(results.afterTaxAnnual)}/yr, Roth withdrawals are tax-free.`
                     : `${money(results.afterTaxAnnual)}/yr after an estimated ${money(results.tax.total)} in income tax (${(results.effectiveTaxRate * 100).toFixed(1)}% effective) on a ${money(results.grossWithdrawal)} gross withdrawal.`
                 }
               />
@@ -665,7 +665,7 @@ export default function RetirementWithdrawalCalculator() {
                 extra standard deduction at 65+, capital-gains treatment, or Required Minimum Distributions (which
                 begin at age 73).{" "}
                 {viewMode === "montecarlo"
-                  ? "The Monte Carlo view runs 5,000 seeded simulations drawing each year's return from a lognormal distribution around your expected return at the chosen volatility — a model of market risk, not a prediction."
+                  ? "The Monte Carlo view runs 5,000 seeded simulations drawing each year's return from a lognormal distribution around your expected return at the chosen volatility, a model of market risk, not a prediction."
                   : "This is a smooth average-return projection; switch to “Market ups & downs” to model volatility and sequence-of-returns risk."}{" "}
                 Planning estimates only, not tax or investment advice.
               </div>

@@ -42,7 +42,7 @@ export default async function Page({ searchParams }: PageProps) {
           </h1>
 
           <p className="mt-2 text-lg font-semibold text-slate-200">
-            Retire Early on a Smaller Budget — How Low Can Your FIRE Number Go?
+            Retire Early on a Smaller Budget, How Low Can Your FIRE Number Go?
           </p>
 
           <p className="max-w-3xl leading-relaxed text-slate-300">
@@ -171,7 +171,7 @@ export default async function Page({ searchParams }: PageProps) {
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
           <h2 className="text-xl font-semibold">
-            What this calculator includes — and what it does not
+            What this calculator includes, and what it does not
           </h2>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">

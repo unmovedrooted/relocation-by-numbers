@@ -12,7 +12,7 @@ const PAGE_PATH = "/hsa-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "HSA Calculator — Contribution Limits, Tax Savings & Growth Projection",
+  title: "HSA Calculator, Contribution Limits, Tax Savings & Growth Projection",
   description:
     "Free HSA calculator. See your 2025 contribution limit, this year's federal + FICA + state tax savings, and how your HSA balance could grow over time with tax-advantaged investing.",
   keywords: [
@@ -32,14 +32,14 @@ export const metadata: Metadata = {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "HSA Calculator — Contribution Limits, Tax Savings & Growth Projection",
+    title: "HSA Calculator, Contribution Limits, Tax Savings & Growth Projection",
     description:
       "See your 2025 HSA contribution limit, this year's real tax savings (federal, FICA, and state), and a long-term growth projection.",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "HSA Calculator — Contribution Limits, Tax Savings & Growth Projection",
+    title: "HSA Calculator, Contribution Limits, Tax Savings & Growth Projection",
     description: "2025 contribution limits, real tax savings, and long-term growth projection for your HSA.",
     site: "@relocationbynumbers",
   },
@@ -103,7 +103,7 @@ const faqSchema = {
       name: "Do all states give HSA contributions the same tax treatment as the IRS?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "No. California and New Jersey are the only two states that do not conform to the federal HSA tax exemption — contributions are still taxed at the state level in those states, and investment earnings inside the HSA are taxed annually as ordinary income rather than growing tax-free.",
+        text: "No. California and New Jersey are the only two states that do not conform to the federal HSA tax exemption, contributions are still taxed at the state level in those states, and investment earnings inside the HSA are taxed annually as ordinary income rather than growing tax-free.",
       },
     },
     {
@@ -119,7 +119,7 @@ const faqSchema = {
       name: "Can I use HSA money for non-medical expenses?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes, but before age 65 non-medical withdrawals are taxed as ordinary income plus a 20% penalty. After age 65, non-medical withdrawals are taxed as ordinary income with no penalty — similar to a traditional IRA.",
+        text: "Yes, but before age 65 non-medical withdrawals are taxed as ordinary income plus a 20% penalty. After age 65, non-medical withdrawals are taxed as ordinary income with no penalty, similar to a traditional IRA.",
       },
     },
   ],
@@ -142,11 +142,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "What is the triple tax advantage of an HSA?",
-    a: "Contributions are pre-tax, growth is tax-free, and qualified medical withdrawals are tax-free — no other account offers all three.",
+    a: "Contributions are pre-tax, growth is tax-free, and qualified medical withdrawals are tax-free, no other account offers all three.",
   },
   {
     q: "Do California and New Jersey tax HSA contributions?",
-    a: "Yes. They're the only two states that don't conform to the federal HSA exemption — contributions are still state-taxed, and earnings are taxed annually as ordinary income rather than growing tax-free.",
+    a: "Yes. They're the only two states that don't conform to the federal HSA exemption, contributions are still state-taxed, and earnings are taxed annually as ordinary income rather than growing tax-free.",
   },
   {
     q: "What if I contribute over the limit?",
@@ -154,7 +154,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can I spend HSA money on non-medical expenses?",
-    a: "Yes, but under 65 you'll owe ordinary income tax plus a 20% penalty. After 65, only ordinary income tax applies — no penalty.",
+    a: "Yes, but under 65 you'll owe ordinary income tax plus a 20% penalty. After 65, only ordinary income tax applies, no penalty.",
   },
 ];
 
@@ -193,7 +193,7 @@ export default function Page() {
             </p>
 
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-              Accounts for federal, FICA, and state tax rules — including California and New Jersey's HSA
+              Accounts for federal, FICA, and state tax rules, including California and New Jersey's HSA
               non-conformity.
             </p>
 
@@ -236,8 +236,8 @@ export default function Page() {
                 <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
                   <p>
                     Enter your coverage type, contribution amounts, and income. The calculator applies the actual
-                    2025 IRS limits, then computes your real combined tax savings — federal income tax, FICA
-                    (Social Security and Medicare), and state income tax — by comparing your tax bill with and
+                    2025 IRS limits, then computes your real combined tax savings, federal income tax, FICA
+                    (Social Security and Medicare), and state income tax, by comparing your tax bill with and
                     without the contribution, the same verified tax engine used across this site's other
                     calculators.
                   </p>
@@ -251,7 +251,7 @@ export default function Page() {
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
                   {[
                     { title: "2025 IRS limits", body: "Self-only, family, and 55+ catch-up contribution limits." },
-                    { title: "Real tax savings", body: "Federal, FICA, and state — not just a flat estimate." },
+                    { title: "Real tax savings", body: "Federal, FICA, and state, not just a flat estimate." },
                     { title: "CA / NJ handling", body: "The only two states that tax HSA contributions and growth." },
                     { title: "Growth projection", body: "Balance at 5, 10, 20, and 30 years, plus your custom horizon." },
                   ].map((item) => (

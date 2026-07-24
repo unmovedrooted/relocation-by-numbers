@@ -4,14 +4,14 @@
  *
  * None of the country/city data files in this app (internationalCountries.ts,
  * internationalCityDefaults.ts, caribbeanCountries.ts) carry a verified
- * home-price figure — only rent. Rather than inventing per-country prices
+ * home-price figure, only rent. Rather than inventing per-country prices
  * with no source, this derives a rough estimate from each destination's
  * already-verified rent figure using a flat price-to-rent ratio, a standard
  * real-estate rule of thumb (home price ≈ N years of rent). It's explicitly
  * a planning estimate, labeled as such in the UI, not a real listing price.
  */
 
-// Home price ≈ 16x annual rent — a reasonable global mid-point. Actual
+// Home price ≈ 16x annual rent, a reasonable global mid-point. Actual
 // price-to-rent ratios vary a lot by market (roughly 10-15 in cheaper
 // markets, 25+ in tight/expensive ones), but with no per-country data to
 // vary it responsibly, one flat, clearly-labeled multiplier is more honest

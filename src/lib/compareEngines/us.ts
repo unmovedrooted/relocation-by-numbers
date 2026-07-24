@@ -7,7 +7,7 @@
  * compare tool needs N results at once rather than one component instance
  * per destination. It calls the exact same underlying lib functions
  * (estimateNetAnnual, monthlyHousingCost) so the numbers stay consistent
- * with the main calculator — only the housing defaults (rent/home price)
+ * with the main calculator, only the housing defaults (rent/home price)
  * differ, since Calculator.tsx requires manual entry per city while this
  * tool auto-fills from each city's defaultRent / medianHomePrice so 2-3
  * targets can be compared without re-typing housing assumptions each time.

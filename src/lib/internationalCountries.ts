@@ -267,7 +267,7 @@ export const INTERNATIONAL_COUNTRIES: CountryRelocationProfile[] = [
   },
   healthcareMonthlySingle: 85,
   healthcareMonthlyFamily: 210,
-  notes: "Ecuador is dollarized — no FX conversion needed. Popular with retirees and remote workers. Cuenca and Quito are the main expat hubs.",
+  notes: "Ecuador is dollarized, no FX conversion needed. Popular with retirees and remote workers. Cuenca and Quito are the main expat hubs.",
 },
 {
   code: "UY",
@@ -339,7 +339,7 @@ export const INTERNATIONAL_COUNTRIES: CountryRelocationProfile[] = [
   },
   healthcareMonthlySingle: 75,
   healthcareMonthlyFamily: 185,
-  notes: "Bolivia offers very low living costs, especially outside premium neighborhoods. La Paz and Santa Cruz are the most likely planning anchors. Administrative processes can be slower — build in extra buffer time.",
+  notes: "Bolivia offers very low living costs, especially outside premium neighborhoods. La Paz and Santa Cruz are the most likely planning anchors. Administrative processes can be slower, build in extra buffer time.",
 },
 {
   code: "GY",
@@ -363,7 +363,7 @@ export const INTERNATIONAL_COUNTRIES: CountryRelocationProfile[] = [
   },
   healthcareMonthlySingle: 95,
   healthcareMonthlyFamily: 235,
-  notes: "Guyana is the only English-speaking country in South America. Georgetown is the main expat and business hub. Imported goods and expat-oriented housing can be more expensive than expected — use a conservative budget buffer.",
+  notes: "Guyana is the only English-speaking country in South America. Georgetown is the main expat and business hub. Imported goods and expat-oriented housing can be more expensive than expected, use a conservative budget buffer.",
 },
 {
   code: "SR",

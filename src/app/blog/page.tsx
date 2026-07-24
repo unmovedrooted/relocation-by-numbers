@@ -38,7 +38,7 @@ export default function BlogPage() {
             Relocation Insights
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-            The financial side of moving — taxes, take-home pay, and what a
+            The financial side of moving, taxes, take-home pay, and what a
             cross-state move actually costs before you commit.
           </p>
           <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-blue-600/80" />
@@ -95,7 +95,7 @@ export default function BlogPage() {
           </p>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
             Compare take-home pay, housing costs, and monthly flexibility across
-            any two states — free, no signup required.
+            any two states, free, no signup required.
           </p>
           <div className="mt-4">
             <Link

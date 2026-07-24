@@ -12,7 +12,7 @@ const PAGE_PATH = "/housing-affordability-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "Housing Affordability Calculator — How Much Rent or House Can I Afford?",
+  title: "Housing Affordability Calculator, How Much Rent or House Can I Afford?",
   description:
     "Free housing affordability calculator. Enter your income to see how much rent you can afford (30% rule) and the maximum home price you qualify for using standard 28/36 debt-to-income guidelines.",
   keywords: [
@@ -33,14 +33,14 @@ export const metadata: Metadata = {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "Housing Affordability Calculator — How Much Rent or House Can I Afford?",
+    title: "Housing Affordability Calculator, How Much Rent or House Can I Afford?",
     description:
       "See how much rent you can afford using the 30% rule, and the maximum home price you qualify for using standard 28/36 debt-to-income guidelines. Just enter your income.",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "Housing Affordability Calculator — How Much Rent or House Can I Afford?",
+    title: "Housing Affordability Calculator, How Much Rent or House Can I Afford?",
     description:
       "Enter your income to see your safe rent range and maximum affordable home price, using standard lending guidelines.",
     site: "@relocationbynumbers",
@@ -132,7 +132,7 @@ const breadcrumbSchema = {
 const FAQ_ITEMS = [
   {
     q: "How much of my income should go to rent?",
-    a: "The classic guideline is the 30% rule — no more than 30% of gross monthly income. 25% is more comfortable; 35%+ gets tight, especially with other debts.",
+    a: "The classic guideline is the 30% rule, no more than 30% of gross monthly income. 25% is more comfortable; 35%+ gets tight, especially with other debts.",
   },
   {
     q: "How much house can I afford?",
@@ -140,7 +140,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What counts as 'other debts'?",
-    a: "Car loans, student loans, credit card minimums, personal loans — recurring obligations that show up on a credit report.",
+    a: "Car loans, student loans, credit card minimums, personal loans, recurring obligations that show up on a credit report.",
   },
   {
     q: "Gross or net income?",
@@ -211,7 +211,7 @@ export default function Page() {
         </header>
 
         <section className="mx-auto max-w-5xl space-y-10 px-4 pb-12 sm:px-6">
-          {/* Ad slots hidden for now — re-enable by restoring the two
+          {/* Ad slots hidden for now, re-enable by restoring the two
               AdSlot blocks (see git history) once ready to show ads here. */}
 
           <HousingAffordabilityCalculator />
@@ -265,7 +265,7 @@ export default function Page() {
                     guidelines are conventionally quoted. Your real after-tax budget will be tighter.
                   </p>
                   <p>
-                    Lenders apply both front-end and back-end ratios and use whichever is more restrictive — this
+                    Lenders apply both front-end and back-end ratios and use whichever is more restrictive, this
                     tool does the same, so adding debts can only tighten your buying power, never loosen it.
                   </p>
                   <p>These are planning guidelines, not guaranteed loan approval or lease terms.</p>

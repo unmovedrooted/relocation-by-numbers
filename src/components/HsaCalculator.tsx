@@ -8,7 +8,7 @@ import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 
 // ─────────────────────────────────────────────────────────────────────────
-// 2025 IRS / HHS FIGURES — this calculator's base tax year, matching
+// 2025 IRS / HHS FIGURES, this calculator's base tax year, matching
 // src/lib/tax.ts's TAX_YEAR constant. Update both together each January.
 // ─────────────────────────────────────────────────────────────────────────
 const HSA_LIMITS = {
@@ -110,7 +110,7 @@ function StatCard({
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// GROWTH PROJECTION — contribute at the start of each year, then apply one
+// GROWTH PROJECTION, contribute at the start of each year, then apply one
 // year of growth. effectiveReturn already has any CA/NJ annual state tax
 // drag baked in by the caller.
 // ─────────────────────────────────────────────────────────────────────────
@@ -189,7 +189,7 @@ export default function HsaCalculator() {
   function changeCoverage(next: CoverageType) {
     setCoverageType(next);
     // Re-fill "your contribution" to the new max only if it was previously
-    // sitting at the old max — respects a user who already customized it.
+    // sitting at the old max, respects a user who already customized it.
     const oldLimit = (coverageType === "family" ? HSA_LIMITS.family : HSA_LIMITS.self) + (nz(age) >= 55 ? HSA_LIMITS.catchUp55 : 0);
     if (nz(yourContribution) === oldLimit) {
       const newLimit = (next === "family" ? HSA_LIMITS.family : HSA_LIMITS.self) + (nz(age) >= 55 ? HSA_LIMITS.catchUp55 : 0);
@@ -211,7 +211,7 @@ export default function HsaCalculator() {
     // Tax savings: diff a full tax computation against one with gross income
     // reduced by your contribution. This correctly reflects marginal bracket
     // effects, the Social Security wage base cap, and the additional
-    // Medicare surtax threshold — the same verified engine used across the
+    // Medicare surtax threshold, the same verified engine used across the
     // rest of the site's calculators.
     const grossFull = Math.max(0, nz(grossAnnualIncome));
     const grossReduced = Math.max(0, grossFull - yourContributionAmount);
@@ -321,7 +321,7 @@ export default function HsaCalculator() {
     <div className="text-slate-900 dark:text-slate-100">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* ================================================================
-            LEFT — INPUTS
+            LEFT, INPUTS
         ================================================================ */}
         <div className="space-y-3">
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
@@ -413,7 +413,7 @@ export default function HsaCalculator() {
         </div>
 
         {/* ================================================================
-            RIGHT — RESULTS
+            RIGHT, RESULTS
         ================================================================ */}
         <div className="space-y-3">
           {!salaryReady ? (
@@ -448,7 +448,7 @@ export default function HsaCalculator() {
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
                 An HSA has three tax advantages: contributions are pre-tax (or deductible), growth is tax-free, and
                 withdrawals for qualified medical expenses are tax-free. After age 65, non-medical withdrawals are
-                taxed as ordinary income (like a traditional IRA) with no penalty — before 65, non-medical withdrawals
+                taxed as ordinary income (like a traditional IRA) with no penalty, before 65, non-medical withdrawals
                 carry a 20% penalty plus ordinary income tax. This tool does not model neighborhood-level HDHP plan
                 selection, HSA custodian fees, or investment sequencing. Planning estimates only, not tax or
                 investment advice.

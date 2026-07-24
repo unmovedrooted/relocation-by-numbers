@@ -13,7 +13,7 @@ const PAGE_PATH = "/mortgage-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "Mortgage Calculator — US & International | Rent vs Buy, Affordability & Cash to Close",
+  title: "Mortgage Calculator, US & International | Rent vs Buy, Affordability & Cash to Close",
   description:
     "Free mortgage calculator for US and international home buyers. Estimate monthly payments, total interest, cash to close, rent vs buy break-even, DTI ratios, and refinance savings. Includes 26 countries.",
   keywords: [
@@ -39,16 +39,16 @@ export const metadata: Metadata = {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "Mortgage Calculator — US & International | Rent vs Buy & Affordability",
+    title: "Mortgage Calculator, US & International | Rent vs Buy & Affordability",
     description:
       "Estimate monthly payments, cash to close, rent vs buy break-even, and DTI for US and international home purchases. Built for anyone planning to buy at home or abroad.",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "Mortgage Calculator — US & International | Rent vs Buy & Affordability",
+    title: "Mortgage Calculator, US & International | Rent vs Buy & Affordability",
     description:
-      "Monthly payments, cash to close, rent vs buy break-even, DTI, refinance savings — for US and international buyers. Free planning tool.",
+      "Monthly payments, cash to close, rent vs buy break-even, DTI, refinance savings, for US and international buyers. Free planning tool.",
     site: "@relocationbynumbers",
   },
   robots: {
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
 const webAppSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  name: "Mortgage Calculator — US & International",
+  name: "Mortgage Calculator, US & International",
   url: CANONICAL,
   description:
     "Free mortgage calculator for US and international home buyers covering monthly payments, total interest, cash to close, rent vs buy break-even, DTI ratios, PMI, bi-weekly savings, rate sensitivity, and refinance analysis.",
@@ -108,7 +108,7 @@ const faqSchema = {
       name: "What is included in the cash to close estimate?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "The cash to close estimate includes: (1) your down payment, (2) estimated closing costs (typically 2–5% of the loan for US purchases — you can adjust this percentage), and (3) a 3-month planning buffer representing common post-closing reserve targets. The 3-month buffer is a planning guideline, not a universal lender requirement. Your official Loan Estimate will show the exact closing figure.",
+        text: "The cash to close estimate includes: (1) your down payment, (2) estimated closing costs (typically 2–5% of the loan for US purchases, you can adjust this percentage), and (3) a 3-month planning buffer representing common post-closing reserve targets. The 3-month buffer is a planning guideline, not a universal lender requirement. Your official Loan Estimate will show the exact closing figure.",
       },
     },
     {
@@ -124,7 +124,7 @@ const faqSchema = {
       name: "What is PMI and when is it removed?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Private Mortgage Insurance (PMI) is required by most conventional lenders when your down payment is less than 20% of the purchase price. The calculator auto-estimates PMI at 0.7–1.5% of the loan annually, depending on your loan-to-value ratio. Once your outstanding loan balance falls to 80% of the original purchase price, you can request PMI cancellation — it is not removed automatically. The calculator shows approximately when this month will occur at current payment levels.",
+        text: "Private Mortgage Insurance (PMI) is required by most conventional lenders when your down payment is less than 20% of the purchase price. The calculator auto-estimates PMI at 0.7–1.5% of the loan annually, depending on your loan-to-value ratio. Once your outstanding loan balance falls to 80% of the original purchase price, you can request PMI cancellation, it is not removed automatically. The calculator shows approximately when this month will occur at current payment levels.",
       },
     },
     {
@@ -132,7 +132,7 @@ const faqSchema = {
       name: "Can foreigners get a mortgage abroad?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "It depends heavily on the country, your residency status, income documentation, and the individual lender. Some countries are relatively accessible to foreign buyers, while others restrict foreign ownership heavily. Rates for non-residents are typically higher than those for residents, and down payment requirements are usually 25–40%. The international tab provides country-specific guidance, but all figures are planning estimates — always consult a local mortgage broker and property lawyer before committing.",
+        text: "It depends heavily on the country, your residency status, income documentation, and the individual lender. Some countries are relatively accessible to foreign buyers, while others restrict foreign ownership heavily. Rates for non-residents are typically higher than those for residents, and down payment requirements are usually 25–40%. The international tab provides country-specific guidance, but all figures are planning estimates, always consult a local mortgage broker and property lawyer before committing.",
       },
     },
     {
@@ -140,7 +140,7 @@ const faqSchema = {
       name: "How does the refinance calculator work?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "The refinance tab compares your current remaining loan against a new loan at a different rate or term. It calculates: (1) the monthly payment difference, (2) the break-even point in months — how long until closing costs are recouped through lower payments, and (3) net lifetime savings, accounting for any extension of the loan term. A lower monthly payment does not always mean net savings if the new term is significantly longer.",
+        text: "The refinance tab compares your current remaining loan against a new loan at a different rate or term. It calculates: (1) the monthly payment difference, (2) the break-even point in months, how long until closing costs are recouped through lower payments, and (3) net lifetime savings, accounting for any extension of the loan term. A lower monthly payment does not always mean net savings if the new term is significantly longer.",
       },
     },
     {
@@ -156,7 +156,7 @@ const faqSchema = {
       name: "How do bi-weekly payments save money?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Making half your monthly payment every two weeks results in 26 half-payments per year — equivalent to 13 full monthly payments instead of 12. The extra payment goes directly to principal, reducing the balance faster and saving significant interest over the life of the loan.",
+        text: "Making half your monthly payment every two weeks results in 26 half-payments per year, equivalent to 13 full monthly payments instead of 12. The extra payment goes directly to principal, reducing the balance faster and saving significant interest over the life of the loan.",
       },
     },
   ],
@@ -237,7 +237,7 @@ export default function Page() {
             </h1>
 
             <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              Monthly payments, cash to close, rent vs buy break-even, and affordability — for US
+              Monthly payments, cash to close, rent vs buy break-even, and affordability, for US
               and international home buyers.
             </p>
 

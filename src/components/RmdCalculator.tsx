@@ -177,7 +177,7 @@ export default function RmdCalculator() {
             <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Your account</div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm"><div className={labelHeadCls}>Your age</div><input className={inputCls} type="number" min="1" value={age} onChange={(e) => setAge(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Prior year-end balance<InfoTip text="Your traditional (pre-tax) IRA / 401(k) balance as of December 31 last year. Roth IRAs — and, from 2024, Roth 401(k)s — have no RMDs." /></div><input className={inputCls} type="number" min="0" value={balance} onChange={(e) => setBalance(e.target.value)} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Prior year-end balance<InfoTip text="Your traditional (pre-tax) IRA / 401(k) balance as of December 31 last year. Roth IRAs, and, from 2024, Roth 401(k)s, have no RMDs." /></div><input className={inputCls} type="number" min="0" value={balance} onChange={(e) => setBalance(e.target.value)} placeholder=" " /></label>
               <label className="text-sm"><div className={labelHeadCls}>Expected annual return (%)<InfoTip text="Used to project future balances and RMDs. RMDs are recalculated each year from that year's balance and divisor." /></div><input className={inputCls} type="number" step="0.1" value={expectedReturnPct} onChange={(e) => setExpectedReturnPct(e.target.value)} placeholder=" " /></label>
             </div>
           </div>

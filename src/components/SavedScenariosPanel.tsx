@@ -76,7 +76,7 @@ export default function SavedScenariosPanel({
       {savedScenarios.length > 0 && (
         <div className="mt-4 border-t border-sky-200 pt-4 dark:border-sky-900/60">
           <div className="mb-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-            Saved Scenarios — {savedScenarios.length}/20
+            Saved Scenarios, {savedScenarios.length}/20
           </div>
           <div className="space-y-2">
             {savedScenarios.map((scenario) => (

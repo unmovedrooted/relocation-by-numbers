@@ -41,7 +41,7 @@ export default async function Page({ searchParams }: PageProps) {
           </h1>
 
           <p className="text-lg font-semibold text-slate-200">
-            Part-Time Income, Partial Retirement — How Much Do You Actually Need?
+            Part-Time Income, Partial Retirement, How Much Do You Actually Need?
           </p>
 
           <p className="leading-relaxed text-slate-300">
@@ -141,7 +141,7 @@ export default async function Page({ searchParams }: PageProps) {
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
           <h2 className="text-xl font-semibold">
-            What this calculator includes — and what it does not
+            What this calculator includes, and what it does not
           </h2>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -180,7 +180,7 @@ export default async function Page({ searchParams }: PageProps) {
           <div className="grid gap-3">
             <SEOFAQItem
               q="What is Barista FIRE?"
-              a="Barista FIRE is a partial retirement strategy where you leave full-time work but continue earning part-time income — enough to cover some living expenses so your investment portfolio can be smaller."
+              a="Barista FIRE is a partial retirement strategy where you leave full-time work but continue earning part-time income, enough to cover some living expenses so your investment portfolio can be smaller."
             />
             <SEOFAQItem
               q="How is Barista FIRE different from regular FIRE?"

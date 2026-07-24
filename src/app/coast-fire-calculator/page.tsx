@@ -7,14 +7,14 @@ import { parseIncomeParam } from "@/lib/incomeParam";
 export const metadata: Metadata = {
   title: "Coast FIRE Calculator | How Much Do You Need to Stop Contributing?",
   description:
-    "Calculate your Coast FIRE number — the portfolio size you need today so compound growth alone carries you to retirement. Model your target, timeline, and investment return assumptions.",
+    "Calculate your Coast FIRE number, the portfolio size you need today so compound growth alone carries you to retirement. Model your target, timeline, and investment return assumptions.",
   alternates: {
     canonical: "https://www.relocationbynumbers.com/coast-fire-calculator",
   },
   openGraph: {
     title: "Coast FIRE Calculator | How Much Do You Need to Stop Contributing?",
     description:
-      "Calculate your Coast FIRE number — the portfolio size you need today so compound growth alone carries you to retirement.",
+      "Calculate your Coast FIRE number, the portfolio size you need today so compound growth alone carries you to retirement.",
     url: "https://www.relocationbynumbers.com/coast-fire-calculator",
     siteName: "Relocation by Numbers",
     type: "website",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Coast FIRE Calculator | How Much Do You Need to Stop Contributing?",
     description:
-      "Calculate your Coast FIRE number — the portfolio size you need today so compound growth alone carries you to retirement.",
+      "Calculate your Coast FIRE number, the portfolio size you need today so compound growth alone carries you to retirement.",
   },
 };
 
@@ -47,7 +47,7 @@ export default async function Page({ searchParams }: PageProps) {
           <p className="leading-relaxed text-slate-300">
             <span className="font-semibold text-white">Coast FIRE</span> is the point where
             your current investments are large enough that compound growth alone can carry
-            your portfolio to your full retirement target by your chosen age — even if you
+            your portfolio to your full retirement target by your chosen age, even if you
             stop making new contributions.
           </p>
 
@@ -142,7 +142,7 @@ export default async function Page({ searchParams }: PageProps) {
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
           <h2 className="text-xl font-semibold">
-            What this calculator includes — and what it does not
+            What this calculator includes, and what it does not
           </h2>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">

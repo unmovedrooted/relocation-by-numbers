@@ -8,7 +8,7 @@
  * rather than the single estimateInternationalTax fallback. Caribbean
  * countries also have no entries in internationalCities.ts, so
  * CaribbeanRelocationCalculator.tsx itself falls back to country-level
- * rent/cost defaults for any Caribbean destination — this engine does the
+ * rent/cost defaults for any Caribbean destination, this engine does the
  * same, using each country's defaultRentSingle/healthcareMonthlySingle.
  *
  * Tax handling mirrors the real calculator's degrade path: if a country has
@@ -40,8 +40,8 @@ export type CaribCompareInput = {
   grossAnnualUsd: number;
   filing: FilingStatus;
   mode: CaribCompareMode;
-  /** Only relevant when mode === "working". Defaults to "remote" — the
-   *  calculator's own default salaryType — since compare view doesn't ask. */
+  /** Only relevant when mode === "working". Defaults to "remote", the
+   *  calculator's own default salaryType, since compare view doesn't ask. */
   salaryType?: CaribSalaryType;
   /** Defaults to "rent". */
   housingMode?: CaribHousingMode;
@@ -62,7 +62,7 @@ export type CaribCompareResult = {
   housingLabel: string;
   monthlyFlexibility: number;
   pctOfIncome: number;
-  /** Only set when housingMode === "buy". Rough estimate — see homePrice.ts. */
+  /** Only set when housingMode === "buy". Rough estimate, see homePrice.ts. */
   estimatedHomePrice?: number;
 };
 
@@ -122,7 +122,7 @@ export function computeCaribCityResult(input: CaribCompareInput): CaribCompareRe
 
   const netMonthly = netAnnualUsd / 12;
 
-  // No per-city cost data exists for Caribbean territories — use the same
+  // No per-city cost data exists for Caribbean territories, use the same
   // country-level fallback formula the shared international engine uses.
   const baseRent = country?.defaultRentSingle ?? 1_200;
   const baseHealthcare = country?.healthcareMonthlySingle ?? 150;

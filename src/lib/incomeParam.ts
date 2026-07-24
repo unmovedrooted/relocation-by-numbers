@@ -7,6 +7,6 @@ export function parseIncomeParam(value: string | string[] | undefined): number |
   if (typeof value !== "string") return undefined;
   const n = Number(value);
   if (!Number.isFinite(n) || n <= 0) return undefined;
-  // Sanity bound — same order of magnitude as salary inputs elsewhere on the site.
+  // Sanity bound, same order of magnitude as salary inputs elsewhere on the site.
   return Math.min(n, 10_000_000);
 }

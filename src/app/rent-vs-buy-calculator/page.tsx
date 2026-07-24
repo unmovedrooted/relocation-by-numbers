@@ -8,7 +8,7 @@ const PAGE_PATH = "/rent-vs-buy-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "Rent vs. Buy Calculator — Which Is Cheaper Over Time?",
+  title: "Rent vs. Buy Calculator, Which Is Cheaper Over Time?",
   description:
     "Free rent vs. buy calculator. Compare the net worth of buying a home against renting and investing the difference, with a break-even year, mortgage, appreciation, and closing/selling costs built in.",
   keywords: [
@@ -24,13 +24,13 @@ export const metadata: Metadata = {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "Rent vs. Buy Calculator — Which Is Cheaper Over Time?",
+    title: "Rent vs. Buy Calculator, Which Is Cheaper Over Time?",
     description: "Compare buying vs. renting-and-investing by net worth, with a break-even year and all the real costs built in.",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "Rent vs. Buy Calculator — Which Is Cheaper Over Time?",
+    title: "Rent vs. Buy Calculator, Which Is Cheaper Over Time?",
     description: "Buy vs. rent-and-invest, compared by net worth with a break-even year.",
     site: "@relocationbynumbers",
   },
@@ -82,7 +82,7 @@ const FAQ_ITEMS = [
   { q: "How does this calculator work?", a: "It compares net worth: the buyer's home equity (net of selling costs) vs. the renter investing the same upfront cash plus monthly savings. Whoever ends with more wins, and the break-even is when buying catches renting." },
   { q: "Is it cheaper to rent or buy?", a: "It depends on price-to-rent, how long you stay, your mortgage rate, appreciation, and investment returns. Buying tends to win the longer you stay; renting often wins over short horizons or when investments beat appreciation." },
   { q: "What's the break-even point?", a: "The number of years you'd need to stay for buying to match renting-and-investing. Before it, renting is ahead; after it, buying is." },
-  { q: "Does it include tax benefits of owning?", a: "No — it focuses on cash flow, equity, and investment returns, and doesn't model mortgage-interest/property-tax deductions, PMI, or investment taxes." },
+  { q: "Does it include tax benefits of owning?", a: "No, it focuses on cash flow, equity, and investment returns, and doesn't model mortgage-interest/property-tax deductions, PMI, or investment taxes." },
 ];
 
 export default function Page() {
@@ -97,7 +97,7 @@ export default function Page() {
           <div className="mx-auto max-w-4xl px-4 sm:px-6">
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Rent vs. Buy Calculator</h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              Compare the real cost of buying a home against renting and investing the difference — see which builds
+              Compare the real cost of buying a home against renting and investing the difference, see which builds
               more net worth, and the year buying breaks even.
             </p>
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
@@ -126,14 +126,14 @@ export default function Page() {
                 <h2 id="how-heading" className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white sm:text-xl">How this calculator works</h2>
                 <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
                   <p>
-                    The honest way to compare renting and buying isn&apos;t monthly payment vs. rent — it&apos;s net
+                    The honest way to compare renting and buying isn&apos;t monthly payment vs. rent, it&apos;s net
                     worth. This tool runs a month-by-month simulation of both paths. The buyer builds equity as they pay
                     down the mortgage and the home appreciates; the renter invests the cash a buyer would tie up (down
                     payment and closing costs), plus whatever they save whenever renting costs less than owning.
                   </p>
                   <p>
-                    At the end, it compares what each person could walk away with — the buyer&apos;s home equity net of
-                    selling costs vs. the renter&apos;s investment portfolio — and finds the year the two cross, your
+                    At the end, it compares what each person could walk away with, the buyer&apos;s home equity net of
+                    selling costs vs. the renter&apos;s investment portfolio, and finds the year the two cross, your
                     break-even point.
                   </p>
                 </div>
@@ -155,7 +155,7 @@ export default function Page() {
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Good to know</h3>
                 <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
                   <p>Results are very sensitive to two guesses: home appreciation and investment return. Try a range for both.</p>
-                  <p>The biggest driver is usually how long you&apos;ll stay — transaction costs make short stays favor renting.</p>
+                  <p>The biggest driver is usually how long you&apos;ll stay, transaction costs make short stays favor renting.</p>
                   <p>This doesn&apos;t model income-tax effects (mortgage-interest/SALT deductions, investment taxes), PMI, or moving costs.</p>
                   <p>It&apos;s a planning comparison, not financial advice.</p>
                 </div>

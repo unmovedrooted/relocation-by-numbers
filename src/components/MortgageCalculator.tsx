@@ -26,21 +26,21 @@ const COUNTRIES = [
   { code:"HR", name:"Croatia",        rate:4.0,  downMin:30, notes:"EU citizens can buy freely. Non-EU buyers need reciprocity agreement. Growing expat market." },
   { code:"MT", name:"Malta",          rate:3.5,  downMin:10, notes:"English-speaking, EU member. Non-residents can buy in designated areas. AIP permit required for some zones." },
   { code:"CY", name:"Cyprus",         rate:4.0,  downMin:30, notes:"Non-EU buyers need permission. Non-dom tax regime popular with expats. Limassol is a major expat hub." },
-  { code:"MX", name:"Mexico",         rate:9.5,  downMin:30, notes:"Foreigners buy via fideicomiso (bank trust) in restricted zones. High rates — many foreigners pay cash." },
+  { code:"MX", name:"Mexico",         rate:9.5,  downMin:30, notes:"Foreigners buy via fideicomiso (bank trust) in restricted zones. High rates, many foreigners pay cash." },
   { code:"PA", name:"Panama",         rate:6.5,  downMin:20, notes:"Foreigners have same property rights as citizens. Pensionado discounts apply. USD economy reduces FX risk." },
   { code:"CR", name:"Costa Rica",     rate:8.0,  downMin:30, notes:"Local bank mortgages available to foreigners but complex. Many expats use developer financing or cash." },
-  { code:"CO", name:"Colombia",       rate:12.0, downMin:30, notes:"High local rates — many foreign buyers pay cash or use home-country financing. No restrictions on foreign ownership." },
-  { code:"TH", name:"Thailand",       rate:6.5,  downMin:30, notes:"Foreigners cannot own land — only condos (up to 49% of building). Thai bank mortgages not available to most foreigners." },
+  { code:"CO", name:"Colombia",       rate:12.0, downMin:30, notes:"High local rates, many foreign buyers pay cash or use home-country financing. No restrictions on foreign ownership." },
+  { code:"TH", name:"Thailand",       rate:6.5,  downMin:30, notes:"Foreigners cannot own land, only condos (up to 49% of building). Thai bank mortgages not available to most foreigners." },
   { code:"JP", name:"Japan",          rate:1.5,  downMin:10, notes:"Some of the world's lowest mortgage rates. Foreigners can buy freely but getting a mortgage requires Japanese residency." },
   { code:"SG", name:"Singapore",      rate:3.5,  downMin:25, notes:"Foreigners pay Additional Buyer's Stamp Duty (ABSD) of 60%. Most foreigners buy condos rather than landed property." },
   { code:"AU", name:"Australia",      rate:6.2,  downMin:20, notes:"Foreign buyers need FIRB approval. Typically limited to new builds. Stamp duty surcharges apply in most states." },
   { code:"NZ", name:"New Zealand",    rate:6.5,  downMin:20, notes:"Most overseas buyers are banned from purchasing existing homes since 2018. New builds generally permitted." },
   { code:"AE", name:"UAE (Dubai)",    rate:4.5,  downMin:25, notes:"Foreigners can buy in designated freehold areas. No income tax. Mortgages available for non-residents but at higher rates." },
-  { code:"VN", name:"Vietnam",        rate:8.0,  downMin:30, notes:"Foreigners limited to 50-year renewable leases — no freehold ownership. Condo ownership capped at 30% of building." },
+  { code:"VN", name:"Vietnam",        rate:8.0,  downMin:30, notes:"Foreigners limited to 50-year renewable leases, no freehold ownership. Condo ownership capped at 30% of building." },
   { code:"MY", name:"Malaysia",       rate:4.5,  downMin:30, notes:"MM2H visa holders get better buying access. Minimum purchase price for foreigners: RM 1M+ in most states." },
   { code:"ID", name:"Indonesia",      rate:9.0,  downMin:30, notes:"Foreigners cannot own freehold land. Long-term lease (Hak Pakai) available. Bali has large expat leasehold market." },
-  { code:"BR", name:"Brazil",         rate:10.5, downMin:30, notes:"No restrictions on foreign ownership. High local rates — most foreigners use savings or foreign financing." },
-  { code:"AR", name:"Argentina",      rate:15.0, downMin:30, notes:"Significant currency risk. Many transactions done in USD cash. Legal reforms ongoing — verify current rules." },
+  { code:"BR", name:"Brazil",         rate:10.5, downMin:30, notes:"No restrictions on foreign ownership. High local rates, most foreigners use savings or foreign financing." },
+  { code:"AR", name:"Argentina",      rate:15.0, downMin:30, notes:"Significant currency risk. Many transactions done in USD cash. Legal reforms ongoing, verify current rules." },
   { code:"CL", name:"Chile",          rate:5.5,  downMin:20, notes:"Most stable South American mortgage market. Foreigners can access local financing with RUT and proof of income." },
 ];
 
@@ -90,7 +90,7 @@ const FOREIGN_BUYER_RULES: Record<string, ForeignBuyerRule> = {
     mortgageAvailable: true,
     nonResidentRate: 4.0,
     nonResidentDownMin: 25,
-    warning: "Additional Buyer's Stamp Duty (ABSD) of 60% applies to all foreign buyers — a major upfront cost on top of the purchase price.",
+    warning: "Additional Buyer's Stamp Duty (ABSD) of 60% applies to all foreign buyers, a major upfront cost on top of the purchase price.",
   },
   AU: {
     mortgageAvailable: true,
@@ -187,7 +187,7 @@ function getBuyWaitRentVerdict({
       description: "At this price and income level, renting outperforms buying. Consider a lower price point or building more savings first.",
       reasons: [
         backDTI > 50 ? `Back-end DTI of ${backDTI.toFixed(0)}% is well above safe limits` : "",
-        (breakEvenYears === null || breakEvenYears > 10) ? `Break-even is ${breakEvenYears ? breakEvenYears.toFixed(1) + " years" : "30+ years"} — too long to justify the upfront cost` : "",
+        (breakEvenYears === null || breakEvenYears > 10) ? `Break-even is ${breakEvenYears ? breakEvenYears.toFixed(1) + " years" : "30+ years"}, too long to justify the upfront cost` : "",
         housingPremium > 40 ? `Buying costs ${housingPremium.toFixed(0)}% more per month than renting` : "",
       ].filter(Boolean),
       border: "border-rose-200 dark:border-rose-800", bg: "bg-rose-50/80 dark:bg-rose-950/30",
@@ -206,7 +206,7 @@ function getBuyWaitRentVerdict({
       title: "Wait 12–18 months",
       description: "You're close, but improving your cash position or income first would meaningfully lower your risk.",
       reasons: [
-        cashDanger ? "You'd be cash-negative after closing — can't cover emergencies" : "",
+        cashDanger ? "You'd be cash-negative after closing, can't cover emergencies" : "",
         cashTight  ? `Cash after close (${downPct.toFixed(0)}% down) falls below your emergency fund target` : "",
         dtiStretched ? `Front-end DTI of ${frontDTI.toFixed(0)}% is above the 36% caution zone` : "",
       ].filter(Boolean),
@@ -302,7 +302,7 @@ function calcAutoPMI(loan: number, homePrice: number, downPct: number) {
   return (loan * rate) / 12;
 }
 
-// ─── FIX 2: Algebraic PMI drop-off — O(1) instead of O(360) loop ─────────
+// ─── FIX 2: Algebraic PMI drop-off, O(1) instead of O(360) loop ─────────
 // Uses the closed-form loan balance formula:
 //   B(m) = L·(1+r)^m − PMT·((1+r)^m − 1)/r
 // Solving B(m) = 0.8·homePrice algebraically:
@@ -606,7 +606,7 @@ function DTIRow({ label, value, guide, tip = "" }: { label:string; value:number;
     <div>
       <div className="flex items-center justify-between text-sm">
         <span className="text-slate-600 dark:text-slate-400">{label}{tip && <Tip text={tip} side="right" />}</span>
-        <span className={`font-bold ${dtiColor(value)}`}>{fmtPct(value)} — {dtiLabel(value)}</span>
+        <span className={`font-bold ${dtiColor(value)}`}>{fmtPct(value)}, {dtiLabel(value)}</span>
       </div>
       <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-900/40">
         <div className={`h-full rounded-full transition-all ${dtiBar(value)}`}
@@ -629,11 +629,11 @@ function AffordabilityVerdict({ frontDTI, backDTI }: { frontDTI:number; backDTI:
   const note = pass
     ? "Your income comfortably supports this loan at standard guidelines."
     : caution
-    ? "This loan stretches lender guidelines — workable but watch your cash flow."
+    ? "This loan stretches lender guidelines, workable but watch your cash flow."
     : "Above standard guidelines. Consider a lower price or larger down payment.";
   return (
     <div className={`mt-4 rounded-xl border px-3 py-2.5 text-xs ${cls}`}>
-      <span className="font-bold">{verdict}</span> — {note}
+      <span className="font-bold">{verdict}</span>, {note}
     </div>
   );
 }
@@ -874,13 +874,13 @@ function RefinanceTab() {
               <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">
                 {result.breakEvenMonths
                   ? `${result.breakEvenMonths} months`
-                  : result.monthlySavings <= 0 ? "Never — higher payment" : "Immediate"}
+                  : result.monthlySavings <= 0 ? "Never, higher payment" : "Immediate"}
               </div>
               <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
                 {result.breakEvenMonths
                   ? `Refinancing pays for itself after ${result.breakEvenMonths} months (${(result.breakEvenMonths / 12).toFixed(1)} years).`
                   : result.monthlySavings <= 0
-                  ? "Your new monthly payment is higher — refinancing increases your costs."
+                  ? "Your new monthly payment is higher, refinancing increases your costs."
                   : "Refinancing saves money immediately with no closing costs to recoup."}
               </p>
             </VCard>
@@ -926,7 +926,7 @@ function RefinanceTab() {
                 </div>
               </div>
               <div className="mt-3 rounded-xl bg-slate-50 dark:bg-slate-950 px-3 py-2.5 text-xs text-slate-600 dark:text-slate-400 ring-1 ring-slate-200 dark:ring-slate-800">
-                Net savings accounts for the longer term if extending. A 30-yr refi on 25 years remaining reduces monthly payments but may increase total interest — consider a shorter term if net savings matter more than monthly relief.
+                Net savings accounts for the longer term if extending. A 30-yr refi on 25 years remaining reduces monthly payments but may increase total interest, consider a shorter term if net savings matter more than monthly relief.
               </div>
             </Card>
           </>
@@ -1088,8 +1088,8 @@ function USTab() {
   const stressVerdict =
     stressedFrontDTI <= 28 ? "Handles stress well"
     : stressedFrontDTI <= 36 ? "Manageable under this scenario"
-    : stressedFrontDTI <= 43 ? "Fragile — consider a lower price"
-    : "High risk — budget unlikely to survive this scenario";
+    : stressedFrontDTI <= 43 ? "Fragile, consider a lower price"
+    : "High risk, budget unlikely to survive this scenario";
   const stressVerdictColor =
     stressedFrontDTI <= 28 ? "text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/30"
     : stressedFrontDTI <= 36 ? "text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30"
@@ -1214,7 +1214,7 @@ function USTab() {
           <div className="grid gap-3 sm:grid-cols-2">
             <F label="Property state" tip="Select your state to auto-fill typical property tax, insurance, and closing cost estimates. You can override any of these." span2>
               <select className={selectCls} value={propertyState} onChange={e => setPropertyState(e.target.value)}>
-                <option value="">— Select state (optional) —</option>
+                <option value="">Select state (optional)</option>
                 {US_STATES_LIST.map(s => <option key={s.code} value={s.code}>{s.name}</option>)}
               </select>
             </F>
@@ -1270,7 +1270,7 @@ function USTab() {
                 className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 accent-violet-600" />
               <label htmlFor="biweekly" className="text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
                 Bi-weekly payments
-                <Tip text="26 half-payments per year equals 13 full monthly payments — equivalent to one extra payment annually." />
+                <Tip text="26 half-payments per year equals 13 full monthly payments, equivalent to one extra payment annually." />
               </label>
             </div>
             <div className="sm:col-span-2 flex items-center gap-2">
@@ -1291,7 +1291,7 @@ function USTab() {
               <input className={inputCls()} type="number" value={grossIncome} onChange={e => setGrossIncome(e.target.value)} />
             </F>
             <F label="Other monthly debts" tipSide="right"
-               tip="Car loans, student loans, credit cards — used to calculate back-end DTI.">
+               tip="Car loans, student loans, credit cards, used to calculate back-end DTI.">
               <input className={inputCls()} type="number" value={otherDebts} onChange={e => setOtherDebts(e.target.value)} />
             </F>
             <F label="Current monthly rent">
@@ -1317,7 +1317,7 @@ function USTab() {
         <Card>
           <H2>Cash Position</H2>
           <div className="grid gap-3 sm:grid-cols-2">
-            <F label="Total savings / liquid cash" tip="All accessible cash — savings, checking, investment accounts you'd tap." span2>
+            <F label="Total savings / liquid cash" tip="All accessible cash, savings, checking, investment accounts you'd tap." span2>
               <input className={inputCls()} type="number" value={currentSavings} onChange={e => setCurrentSavings(e.target.value)} />
             </F>
             <F label="Emergency fund target (months)"
@@ -1414,7 +1414,7 @@ function USTab() {
               PMI can be cancelled around{" "}
               <strong>month {activePMIDropMonth} ({(activePMIDropMonth / 12).toFixed(1)} yrs)</strong>{" "}
               when LTV reaches 80%{appreciationPMI ? " of the appreciated value" : ""}.
-              It is not removed automatically — you must request cancellation.
+              It is not removed automatically, you must request cancellation.
               {appreciationPMI && <span className="ml-1 text-violet-700 dark:text-violet-300">Appreciation-adjusted estimate requires a formal appraisal.</span>}
               <div className="mt-1 text-slate-500 dark:text-slate-400">PMI is estimated using LTV tiers; lender pricing varies.</div>
             </div>
@@ -1533,7 +1533,7 @@ function USTab() {
             {cashStatus === "healthy"
               ? "Your cash position after closing covers your emergency fund target."
               : cashStatus === "tight"
-              ? "You'll have some cash left but below your emergency fund target — consider waiting or lowering the price."
+              ? "You'll have some cash left but below your emergency fund target, consider waiting or lowering the price."
               : "You'd be cash-negative after closing. This purchase is not financially safe at current inputs."}
           </div>
         </div>
@@ -1675,12 +1675,12 @@ function USTab() {
           <HowThisWorks items={[
             `Each month, cumulative ownership cost (P&I + tax + insurance + HOA + ${fmtPct(nz(maintenanceRate))}/yr maintenance) is compared to cumulative rent.`,
             `Rent grows at ${fmtPct(nz(rentGrowth))}/yr compounding.`,
-            `Your ${money(dp)} down payment is modelled as an investment earning ${fmtPct(nz(investReturn))}/yr — this is the opportunity cost of buying.`,
+            `Your ${money(dp)} down payment is modelled as an investment earning ${fmtPct(nz(investReturn))}/yr, this is the opportunity cost of buying.`,
             "Equity paydown (principal repaid + appreciation) is credited back to the buyer each month.",
             nz(taxDeductRate) > 0
               ? `A ${fmtPct(nz(taxDeductRate))} marginal tax deduction on mortgage interest is applied.`
               : "No mortgage interest tax deduction is applied (standard deduction assumed).",
-            "Break-even is sensitive to appreciation and rent growth assumptions — small changes can shift the result by years.",
+            "Break-even is sensitive to appreciation and rent growth assumptions, small changes can shift the result by years.",
           ]} />
         </VCard>
 
@@ -1759,7 +1759,7 @@ function USTab() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// INTERNATIONAL TAB — with residency fix + FX risk
+// INTERNATIONAL TAB, with residency fix + FX risk
 // ═══════════════════════════════════════════════════════════════════════
 
 type ResidencyStatus = "resident" | "non-resident";
@@ -1886,7 +1886,7 @@ const beYears =
     <div className="space-y-4">
       <div className="rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30 px-5 py-4">
         <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-sm font-bold text-amber-800 dark:text-amber-200">⚠️ International data is for planning only — not financial or legal advice</span>
+          <span className="text-sm font-bold text-amber-800 dark:text-amber-200">⚠️ International data is for planning only, not financial or legal advice</span>
         </div>
         <p className="text-xs leading-relaxed text-amber-900 dark:text-amber-100">
           Mortgage access for foreign buyers varies enormously by country, residency status, employment type, and individual bank policy. Rates shown are indicative benchmarks. Some countries listed may not offer mortgages to non-residents at all. Consult a local mortgage broker, tax adviser, and property lawyer.
@@ -1938,7 +1938,7 @@ const beYears =
                 </span>{" "}
                 {fxRisk === "high"
                   ? "This country's currency has historically shown significant volatility against USD/EUR. Property values in USD terms can swing dramatically even if local prices are stable. Consider hedging or using USD-denominated pricing where available."
-                  : "This currency carries moderate volatility. Factor potential FX swings into your budget — a 10–20% move in exchange rates can meaningfully affect your purchasing power and property value in home-currency terms."}
+                  : "This currency carries moderate volatility. Factor potential FX swings into your budget, a 10–20% move in exchange rates can meaningfully affect your purchasing power and property value in home-currency terms."}
               </div>
             )}
 
@@ -2151,7 +2151,7 @@ const beYears =
             </div>
             <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
               {mortgageBlocked
-                ? "Break-even analysis requires a mortgage — not available for non-residents in this country."
+                ? "Break-even analysis requires a mortgage, not available for non-residents in this country."
                 : beYears
                 ? `Buying in ${country.name} becomes cheaper than renting after ~${beYears} years.`
                 : `Buying in ${country.name} doesn't break even within 30 years.`}
@@ -2162,7 +2162,7 @@ const beYears =
                 `Equity credited monthly from principal repayment and ${fmtPct(nz(appreciation))}/yr appreciation.`,
                 `Maintenance cost of ${fmtPct(nz(maintenanceRate))}/yr charged monthly.`,
                 `Rent grows at ${fmtPct(nz(rentGrowth))}/yr. Higher rent growth = sooner break-even.`,
-                "No mortgage interest deduction modelled — tax treatment varies widely internationally.",
+                "No mortgage interest deduction modelled, tax treatment varies widely internationally.",
                 "All rates and country data are estimates for planning only.",
               ]} />
             )}

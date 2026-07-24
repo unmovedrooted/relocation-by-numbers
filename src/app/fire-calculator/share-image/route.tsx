@@ -42,9 +42,9 @@ export async function GET(request: Request) {
                   Relocation by Numbers
                 </div>
 
-                {/* Headline — the dramatic stat */}
+                {/* Headline, the dramatic stat */}
                 <div style={{ display: "flex", fontSize: 68, fontWeight: 800, lineHeight: 1.0, letterSpacing: -2, maxWidth: 620 }}>
-                  FIRE at {data.fireAge} —{" "}
+                  FIRE at {data.fireAge},{" "}
                   <span style={{ color: "#86efac", marginLeft: 16 }}>
                     {data.years} {yearsNum === 1 ? "yr" : "yrs"} earlier
                   </span>

@@ -3,9 +3,9 @@
 // ---------------------------------------------------------------------------
 // INCOME SCENARIO
 // The three scenarios a user can be in. These map directly to the UI dropdown.
-// "local"   — tax resident earning income sourced within the destination country
-// "remote"  — tax resident earning income sourced outside the destination country
-// "retired" — tax resident living on pension, investment, or savings income
+// "local", tax resident earning income sourced within the destination country
+// "remote", tax resident earning income sourced outside the destination country
+// "retired", tax resident living on pension, investment, or savings income
 // ---------------------------------------------------------------------------
 export type IncomeScenario = "local" | "remote" | "retired"
 
@@ -14,19 +14,19 @@ export type IncomeScenario = "local" | "remote" | "retired"
 // Describes the tax treatment category for a given scenario.
 // This is classification metadata, not just an engine routing flag.
 //
-// "none"          — no personal income tax exists in this jurisdiction
-// "flat"          — single rate applied to taxable income after any allowance
-// "progressive"   — standard bracket system with allowance and bracket array
-// "territorial"   — territorial or mostly territorial treatment; local-source
+// "none", no personal income tax exists in this jurisdiction
+// "flat", single rate applied to taxable income after any allowance
+// "progressive", standard bracket system with allowance and bracket array
+// "territorial", territorial or mostly territorial treatment; local-source
 //                   income is taxed and foreign-source income may be exempt
 //                   or treated differently depending on country-specific rules
-// "custom"        — true one-off logic that does not fit any other kind;
+// "custom", true one-off logic that does not fit any other kind;
 //                   requires a compute function
-// "us_mirror"     — U.S. Internal Revenue Code applies by mirror code;
+// "us_mirror", U.S. Internal Revenue Code applies by mirror code;
 //                   returns disclaimer result, no calculation performed now
-// "french_system" — French metropolitan tax system applies; returns disclaimer
+// "french_system", French metropolitan tax system applies; returns disclaimer
 //                   result until full French schedule is modeled
-// "pending"       — not yet researched or modeled; no tax figure is shown
+// "pending", not yet researched or modeled; no tax figure is shown
 // ---------------------------------------------------------------------------
 export type ScenarioKind =
   | "none"
@@ -42,11 +42,11 @@ export type ScenarioKind =
 // CONFIDENCE
 // Per-scenario signal describing how complete and verified the tax model is.
 //
-// "high"       — published rates, verified, brackets confirmed
-// "moderate"   — published rates but simplified
-// "simplified" — planning estimate only; structural rules known but details
+// "high", published rates, verified, brackets confirmed
+// "moderate", published rates but simplified
+// "simplified", planning estimate only; structural rules known but details
 //                approximated or not fully confirmed
-// "pending"    — not yet modeled; no confidence can be assigned
+// "pending", not yet modeled; no confidence can be assigned
 // ---------------------------------------------------------------------------
 export type Confidence = "high" | "moderate" | "simplified" | "pending"
 

@@ -22,7 +22,7 @@ import SavedScenariosPanel from "./SavedScenariosPanel";
 const SAFE_WITHDRAWAL_RATE = 0.04; // classic 4% rule reference
 
 // state kept only for the shareable-scenario source label / cross-links
-// (no tax math here — this tool is pre-tax and descriptive).
+// (no tax math here, this tool is pre-tax and descriptive).
 
 // ─────────────────────────────────────────────────────────────────────────
 // UTILITIES
@@ -78,7 +78,7 @@ function InfoTip({ text }: { text: string }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// MATH — accumulation in real (today's-dollar) terms. Contribute at the
+// MATH, accumulation in real (today's-dollar) terms. Contribute at the
 // start of each year, then grow the balance for that year.
 // ─────────────────────────────────────────────────────────────────────────
 function realReturnRate(nominalPct: number, inflationPct: number): number {
@@ -220,7 +220,7 @@ export default function RetirementCalculator() {
 
     // In a taxable brokerage account, investment gains are taxed each year, so
     // the state's marginal rate drags the return (and thus the ending balance).
-    // In a tax-advantaged account (401k/IRA/Roth) growth is sheltered — no drag.
+    // In a tax-advantaged account (401k/IRA/Roth) growth is sheltered, no drag.
     const stateReturnDrag = isTaxable ? representativeStateMarginalRate(state, filing) : 0;
     // Given a base nominal % return, apply the drag then convert to a real rate.
     const realFromNominal = (nominalPct: number) =>
@@ -230,7 +230,7 @@ export default function RetirementCalculator() {
 
     const base = computeProjection({ startingBalance, annualContribution, realReturn, years });
 
-    // Pie slices (today's dollars). Clamp growth for geometry only — the true
+    // Pie slices (today's dollars). Clamp growth for geometry only, the true
     // signed value is still shown in labels/exports.
     const pie = [
       { key: "start", name: "Current savings", value: base.startingBalance, fill: "#0e7490" },
@@ -238,7 +238,7 @@ export default function RetirementCalculator() {
       { key: "growth", name: "Investment growth", value: Math.max(0, base.growth), fill: "#10b981" },
     ];
 
-    // "What if" levers — descriptive nudges, each recomputed independently.
+    // "What if" levers, descriptive nudges, each recomputed independently.
     const leverSaveMore = computeProjection({
       startingBalance,
       annualContribution: annualContribution + 200 * 12,
@@ -286,7 +286,7 @@ export default function RetirementCalculator() {
     // Tax-advantaged (traditional) withdrawals are taxed as ordinary income at
     // drawdown. In a taxable brokerage the tax was already paid annually during
     // growth (that's the balance drag above), so withdrawals aren't taxed again
-    // as ordinary income — the supportable income is effectively after-tax.
+    // as ordinary income, the supportable income is effectively after-tax.
     const incomeTax = isTaxable
       ? { total: 0, federal: 0, state: 0 }
       : withdrawalIncomeTax(base.annualIncome, state, filing, "traditional");
@@ -318,7 +318,7 @@ export default function RetirementCalculator() {
   const volatility = riskLevel === "custom" ? Math.max(0, nz(customVolatilityPct)) / 100 : RISK_PRESETS[riskLevel].volatilityPct / 100;
 
   // ── MONTE CARLO ─────────────────────────────────────────────────────────
-  // Descriptive range of outcomes — no target, no pass/fail. Same expected
+  // Descriptive range of outcomes, no target, no pass/fail. Same expected
   // real return as the average view (so the median reconciles) + volatility.
   const mc = useMemo(() => {
     if (viewMode !== "montecarlo" || !inputsReady) return null;
@@ -354,9 +354,9 @@ export default function RetirementCalculator() {
     rows.push(
       { Metric: "Real (inflation-adjusted) return", Value: `${(results.realReturn * 100).toFixed(2)}%` },
       { Metric: "Projected balance at retirement (today's $)", Value: money(results.projectedBalance) },
-      { Metric: "— from current savings", Value: money(results.startingBalance) },
-      { Metric: "— from your contributions", Value: money(results.totalContributed) },
-      { Metric: "— from investment growth", Value: money(results.growth) },
+      { Metric: "from current savings", Value: money(results.startingBalance) },
+      { Metric: "from your contributions", Value: money(results.totalContributed) },
+      { Metric: "from investment growth", Value: money(results.growth) },
       { Metric: "Supportable income (4% rule), gross per year", Value: money(results.annualIncome) },
       { Metric: "Supportable income (4% rule), gross per month", Value: money(results.monthlyIncome) },
       { Metric: "State", Value: stateName },
@@ -427,7 +427,7 @@ export default function RetirementCalculator() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* ================================================================
-            LEFT — INPUTS
+            LEFT, INPUTS
         ================================================================ */}
         <div className="space-y-3">
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
@@ -526,16 +526,16 @@ export default function RetirementCalculator() {
               Real return used: {(results.realReturn * 100).toFixed(2)}%
               {results.isTaxable && results.stateReturnDrag > 0
                 ? ` (after ${stateName}'s ~${(results.stateReturnDrag * 100).toFixed(1)}% annual tax drag on a taxable account)`
-                : ""}. This is a smooth average-return projection — it does not model market volatility. No target or &ldquo;on track&rdquo; judgment: it simply shows where your current path lands.
+                : ""}. This is a smooth average-return projection, it does not model market volatility. No target or &ldquo;on track&rdquo; judgment: it simply shows where your current path lands.
               {results.isTaxable
-                ? " Taxable mode assumes gains are taxed each year at your state's marginal rate — a conservative estimate; buy-and-hold investors who defer gains would see less drag."
+                ? " Taxable mode assumes gains are taxed each year at your state's marginal rate, a conservative estimate; buy-and-hold investors who defer gains would see less drag."
                 : ""}
             </div>
           </div>
         </div>
 
         {/* ================================================================
-            RIGHT — RESULTS (headline + pie)
+            RIGHT, RESULTS (headline + pie)
         ================================================================ */}
         <div className="space-y-3">
           {!inputsReady ? (
@@ -549,17 +549,17 @@ export default function RetirementCalculator() {
                   <div className="text-xs font-semibold uppercase tracking-[0.14em] opacity-80">Projected balance at age {retirementAge}</div>
                   <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">{money(results.projectedBalance)}</div>
                   <p className="mt-2 text-sm leading-5 opacity-90">
-                    In today&apos;s dollars — about {growthPct.toFixed(0)}% of it is investment growth. That supports roughly{" "}
+                    In today&apos;s dollars, about {growthPct.toFixed(0)}% of it is investment growth. That supports roughly{" "}
                     <span className="font-semibold">{money(results.monthlyIncome)}/mo</span> ({money(results.annualIncome)}/yr) gross, using the 4% rule.
                   </p>
                   <p className="mt-2 border-t border-cyan-200/60 pt-2 text-sm leading-5 opacity-90 dark:border-cyan-900/60">
                     {results.isTaxable ? (
                       <>
-                        That&apos;s effectively after-tax — a taxable brokerage is taxed as it grows (already reflected in the balance{results.stateReturnDrag > 0 ? ` via ${stateName}'s ~${(results.stateReturnDrag * 100).toFixed(1)}% annual drag` : ""}), so withdrawals aren&apos;t taxed again as income.
+                        That&apos;s effectively after-tax, a taxable brokerage is taxed as it grows (already reflected in the balance{results.stateReturnDrag > 0 ? ` via ${stateName}'s ~${(results.stateReturnDrag * 100).toFixed(1)}% annual drag` : ""}), so withdrawals aren&apos;t taxed again as income.
                       </>
                     ) : results.incomeIsStateExempt ? (
                       <>
-                        ≈ <span className="font-semibold">{money(results.afterTaxMonthlyIncome)}/mo</span> after federal tax — {stateName} doesn&apos;t tax qualified retirement withdrawals.
+                        ≈ <span className="font-semibold">{money(results.afterTaxMonthlyIncome)}/mo</span> after federal tax, {stateName} doesn&apos;t tax qualified retirement withdrawals.
                       </>
                     ) : (
                       <>
@@ -573,7 +573,7 @@ export default function RetirementCalculator() {
                   <div className="text-xs font-semibold uppercase tracking-[0.14em] opacity-80">Likely range at age {retirementAge}</div>
                   <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">{money(mc.ending.p10)} – {money(mc.ending.p90)}</div>
                   <p className="mt-2 text-sm leading-5 opacity-90">
-                    Across 5,000 simulated markets at {(volatility * 100).toFixed(0)}% volatility, most outcomes land here (10th–90th percentile). The median is <span className="font-semibold">{money(mc.ending.p50)}</span> — vs. the average view&apos;s {money(results.projectedBalance)}. All in today&apos;s dollars.
+                    Across 5,000 simulated markets at {(volatility * 100).toFixed(0)}% volatility, most outcomes land here (10th–90th percentile). The median is <span className="font-semibold">{money(mc.ending.p50)}</span>, vs. the average view&apos;s {money(results.projectedBalance)}. All in today&apos;s dollars.
                   </p>
                 </div>
               ) : null}
@@ -632,12 +632,12 @@ export default function RetirementCalculator() {
       </div>
 
       {/* ================================================================
-          WHAT-IF LEVERS (full width, average view only — deterministic)
+          WHAT-IF LEVERS (full width, average view only, deterministic)
       ================================================================ */}
       {inputsReady && viewMode === "average" && (
         <div className="mt-4 rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
           <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-            What if&hellip; <span className="font-normal text-slate-500 dark:text-slate-400">— small changes, big difference. Explore, no pressure.</span>
+            What if&hellip; <span className="font-normal text-slate-500 dark:text-slate-400">Small changes, big difference. Explore, no pressure.</span>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             {results.levers.map((lever) => (

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────
-// RENT vs BUY — monthly net-worth simulation.
+// RENT vs BUY, monthly net-worth simulation.
 //
 // Both scenarios start with the same cash (down payment + buyer closing costs).
 // The buyer spends it on the home; the renter invests it. Each month, whoever

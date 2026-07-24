@@ -106,7 +106,7 @@ const EUROPE_VISA_CONTEXT: Record<string, {
   CH: {
     program: "EU/EFTA Permit / Non-EU Work Permit (B/L)",
     highlight: "Non-EU Work Permit",
-    notes: "Switzerland is not EU — separate permit system. EU/EFTA citizens get preferential access. Non-EU: employer sponsorship typically required. Strict quotas apply.",
+    notes: "Switzerland is not EU, separate permit system. EU/EFTA citizens get preferential access. Non-EU: employer sponsorship typically required. Strict quotas apply.",
     estimatedFee: 350,
     euFreeMovement: false,
   },
@@ -148,7 +148,7 @@ const EUROPE_VISA_CONTEXT: Record<string, {
   FI: {
     program: "Residence Permit / EU Freedom of Movement",
     highlight: "Residence Permit",
-    notes: "EU citizens register at local office. Non-EU need a residence permit — categories include employee, self-employed, and family. Finland's startup permit available.",
+    notes: "EU citizens register at local office. Non-EU need a residence permit, categories include employee, self-employed, and family. Finland's startup permit available.",
     estimatedFee: 350,
     euFreeMovement: true,
   },
@@ -1109,7 +1109,7 @@ readinessRecommendation,
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
 
         {/* ================================================================
-            LEFT — INPUTS
+            LEFT, INPUTS
         ================================================================ */}
         <div className="space-y-3">
 
@@ -1187,7 +1187,7 @@ readinessRecommendation,
                 </div>
               </div>
 
-              {/* Income type — matches Caribbean pattern */}
+              {/* Income type, matches Caribbean pattern */}
               {mode === "working" && (
                 <CalculatorSelect id="europe-income-type" label="Income type" info={<InfoTip align="right" text="Select how you earn income. This determines which tax scenario applies for the destination country." />} wrapperClassName="sm:col-span-2" className={selectCls} value={salaryType} onChange={(e) => changeSalaryType(e.target.value as SalaryType)}>
                     <option value="local">I earn locally in the destination country</option>
@@ -1203,10 +1203,10 @@ readinessRecommendation,
             </div>
           </div>
 
-          {/* Dynamic conditional tax questions — driven by getConditionalQuestionsForCountry */}
+          {/* Dynamic conditional tax questions, driven by getConditionalQuestionsForCountry */}
           {getConditionalQuestionsForCountry(toCountry, incomeScenario).map((q: ConditionalQuestion) => (
             <div key={q.key} className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
-              <div className="mb-3 text-sm font-semibold">{getCountryByCode(toCountry)?.name ?? toCountry} — Tax Question</div>
+              <div className="mb-3 text-sm font-semibold">{getCountryByCode(toCountry)?.name ?? toCountry}, Tax Question</div>
               <CalculatorSelect
                 id={`europe-tax-question-${q.key}`}
                 label={q.label}
@@ -1270,11 +1270,11 @@ readinessRecommendation,
             {housingMode === "buy" && (
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                 No destination here has a verified home-price dataset, so the price above is estimated from the rent
-                figure (16x annual rent, a standard rule of thumb) — treat it as a rough planning figure, not a real
+                figure (16x annual rent, a standard rule of thumb), treat it as a rough planning figure, not a real
                 listing price.
               </p>
             )}
-            {/* Car field — now in Housing, matching Caribbean */}
+            {/* Car field, now in Housing, matching Caribbean */}
             <CalculatorSelect
     id="europe-need-car"
     label="Will you need a car?"
@@ -1388,7 +1388,7 @@ readinessRecommendation,
         </div>
 
         {/* ================================================================
-            RIGHT — RESULTS
+            RIGHT, RESULTS
         ================================================================ */}
         <div className="space-y-3">
 
@@ -1434,7 +1434,7 @@ readinessRecommendation,
                         {results.targetConfidence === "placeholder" && "Directional only · verify before planning"}
                       </span>
                     </div>
-                    {/* Largest missing factor — always visible */}
+                    {/* Largest missing factor, always visible */}
                     {results.targetMissingFactor && (
                       <div className="px-4 pb-2 text-xs text-slate-600 dark:text-slate-400">
                         <span className="font-medium">Key gap: </span>{results.targetMissingFactor}
@@ -1487,7 +1487,7 @@ readinessRecommendation,
               <div>Results are estimates only. No information entered is stored or shared.</div>
               <div>Tax estimates, rent, immigration costs, and retirement treatment vary by destination and personal circumstances.</div>
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Tip: Your URL updates as you type — copy the page link to share this scenario.</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Tip: Your URL updates as you type, copy the page link to share this scenario.</div>
           </div>
 
           {/* Monthly Flexibility */}

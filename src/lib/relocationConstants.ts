@@ -21,7 +21,7 @@ export const CAR_COST_FALLBACK_USD = 350;
 // ---------------------------------------------------------------------------
 // FEE NOTE LABELS
 // ---------------------------------------------------------------------------
-// Canonical strings for VisaContext.feeNote — avoids typo drift across entries.
+// Canonical strings for VisaContext.feeNote, avoids typo drift across entries.
 export const FEE_NOTE = {
   processing:          "Est. government processing fee",
   minimumInvestment:   "Minimum investment required",

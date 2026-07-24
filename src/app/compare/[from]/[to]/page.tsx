@@ -248,7 +248,7 @@ export default async function ComparePage({ params }: PageProps) {
 
           <p className="mt-1 text-lg font-semibold text-slate-700 dark:text-slate-300">
             {fromCity.name}, {fromCity.state.toUpperCase()} vs {toCity.name},{" "}
-            {toCity.state.toUpperCase()} — Salary, Taxes &amp; Housing
+            {toCity.state.toUpperCase()}, Salary, Taxes &amp; Housing
           </p>
 
           <p className="mx-auto max-w-3xl text-slate-600 dark:text-slate-400 leading-7">
@@ -354,7 +354,7 @@ export default async function ComparePage({ params }: PageProps) {
 
         <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            What this comparison includes — and what it does not
+            What this comparison includes, and what it does not
           </h2>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -387,7 +387,7 @@ export default async function ComparePage({ params }: PageProps) {
 
         <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            {fromCity.name} vs {toCity.name} — common questions
+            {fromCity.name} vs {toCity.name}, common questions
           </h2>
           <dl className="mt-5 space-y-5 text-sm text-slate-600 dark:text-slate-400">
             <div>

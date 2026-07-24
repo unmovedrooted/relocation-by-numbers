@@ -77,7 +77,7 @@ export default function FireEmailCapture({ fireAge, location }: Props) {
 
       {status === "error" && (
         <p className="mt-2 text-xs text-red-400">
-          Something went wrong — try again.
+          Something went wrong, try again.
         </p>
       )}
     </div>

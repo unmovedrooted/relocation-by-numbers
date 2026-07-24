@@ -127,7 +127,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const city = findCity(cityId);
   if (!city) return {};
 
-  const title = `Cost of Living in ${city.name}, ${city.state.toUpperCase()} — Rent, Taxes & Salary Guide`;
+  const title = `Cost of Living in ${city.name}, ${city.state.toUpperCase()}, Rent, Taxes & Salary Guide`;
   const description = `How much does it cost to live in ${city.name}? Compare rent, median home prices, income taxes, and take-home pay. See the salary you need to live comfortably in ${city.name}.`;
 
   return {

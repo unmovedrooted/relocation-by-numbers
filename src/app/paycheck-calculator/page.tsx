@@ -8,9 +8,9 @@ const PAGE_PATH = "/paycheck-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "Paycheck Calculator — Take-Home Pay by State (2025)",
+  title: "Paycheck Calculator, Take-Home Pay by State (2025)",
   description:
-    "Free take-home pay calculator. Enter your salary or hourly wage and state to see your paycheck after federal, Social Security, Medicare, and state taxes — plus a full breakdown and 401(k) impact.",
+    "Free take-home pay calculator. Enter your salary or hourly wage and state to see your paycheck after federal, Social Security, Medicare, and state taxes, plus a full breakdown and 401(k) impact.",
   keywords: [
     "paycheck calculator",
     "take home pay calculator",
@@ -25,13 +25,13 @@ export const metadata: Metadata = {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "Paycheck Calculator — Take-Home Pay by State (2025)",
+    title: "Paycheck Calculator, Take-Home Pay by State (2025)",
     description: "See your paycheck after federal, FICA, and state taxes, with a full breakdown and 401(k) impact.",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "Paycheck Calculator — Take-Home Pay by State (2025)",
+    title: "Paycheck Calculator, Take-Home Pay by State (2025)",
     description: "Your take-home pay after federal, FICA, and state taxes, with a full breakdown.",
     site: "@relocationbynumbers",
   },
@@ -75,7 +75,7 @@ const faqSchema = {
       name: "Does a 401(k) contribution increase my take-home pay?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "A pre-tax 401(k) lowers your taxable income, so it reduces federal (and usually state) income tax — but it still reduces your net paycheck, because the contributed money goes into your retirement account. It does not reduce Social Security or Medicare taxes.",
+        text: "A pre-tax 401(k) lowers your taxable income, so it reduces federal (and usually state) income tax, but it still reduces your net paycheck, because the contributed money goes into your retirement account. It does not reduce Social Security or Medicare taxes.",
       },
     },
     {
@@ -109,7 +109,7 @@ const breadcrumbSchema = {
 
 const FAQ_ITEMS = [
   { q: "How is take-home pay calculated?", a: "Gross pay minus federal income tax, Social Security and Medicare (FICA), state/local income tax, and pre-tax deductions like a 401(k). This tool uses 2025 federal brackets, the standard deduction, and state income tax." },
-  { q: "Does a 401(k) increase my take-home pay?", a: "No — it lowers your taxable income (reducing federal and usually state tax), but the contribution still leaves your paycheck and goes to your retirement account. It doesn't reduce Social Security or Medicare." },
+  { q: "Does a 401(k) increase my take-home pay?", a: "No, it lowers your taxable income (reducing federal and usually state tax), but the contribution still leaves your paycheck and goes to your retirement account. It doesn't reduce Social Security or Medicare." },
   { q: "Which states have no income tax?", a: "Alaska, Florida, Nevada, New Hampshire, South Dakota, Tennessee, Texas, Washington, and Wyoming. Paychecks there are reduced only by federal tax and FICA." },
   { q: "What is FICA?", a: "Social Security (6.2% up to a wage base) plus Medicare (1.45%, plus 0.9% above higher-income thresholds). It's separate from federal income tax." },
 ];
@@ -126,11 +126,11 @@ export default function Page() {
           <div className="mx-auto max-w-4xl px-4 sm:px-6">
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Paycheck Calculator</h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              See your take-home pay after federal, Social Security, Medicare, and state taxes — with a full breakdown
+              See your take-home pay after federal, Social Security, Medicare, and state taxes, with a full breakdown
               of where every dollar of your paycheck goes.
             </p>
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-              Salary or hourly, any state, with 401(k) impact — 2025 tax rules.
+              Salary or hourly, any state, with 401(k) impact, 2025 tax rules.
             </p>
             <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">
               <Link href="/methodology" className="font-medium text-slate-700 underline underline-offset-4 hover:no-underline dark:text-slate-300">See methodology</Link>
@@ -157,7 +157,7 @@ export default function Page() {
                   <p>
                     Enter your salary (or hourly rate and hours), your state, and filing status. The calculator applies
                     2025 federal tax brackets and the standard deduction, Social Security and Medicare (FICA), and your
-                    state&rsquo;s income tax — the same verified tax engine used across the rest of this site.
+                    state&rsquo;s income tax, the same verified tax engine used across the rest of this site.
                   </p>
                   <p>
                     It then splits your pay into take-home, federal tax, FICA, state and local tax, and any 401(k)

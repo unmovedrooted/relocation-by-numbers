@@ -8,7 +8,7 @@ const PAGE_PATH = "/investment-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "Investment Calculator — Compound Growth with a Realistic Range",
+  title: "Investment Calculator, Compound Growth with a Realistic Range",
   description:
     "Free investment & compound interest calculator. Project how your savings grow with regular contributions, then switch to a Monte Carlo view to see the realistic range of outcomes with market volatility.",
   keywords: [
@@ -24,13 +24,13 @@ export const metadata: Metadata = {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "Investment Calculator — Compound Growth with a Realistic Range",
+    title: "Investment Calculator, Compound Growth with a Realistic Range",
     description: "Project compound growth with contributions, plus a Monte Carlo range of outcomes for market volatility.",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "Investment Calculator — Compound Growth with a Realistic Range",
+    title: "Investment Calculator, Compound Growth with a Realistic Range",
     description: "Compound growth with contributions and a Monte Carlo range of outcomes.",
     site: "@relocationbynumbers",
   },
@@ -63,7 +63,7 @@ const faqSchema = {
   mainEntity: [
     { "@type": "Question", name: "How does compound growth work?", acceptedAnswer: { "@type": "Answer", text: "Your returns earn returns. Each period, growth is added to your balance, and the next period's growth is calculated on the larger balance. Over long horizons, this compounding means most of your final balance can come from growth rather than contributions." } },
     { "@type": "Question", name: "What return should I assume?", acceptedAnswer: { "@type": "Answer", text: "There's no single right number. A diversified stock-and-bond portfolio has historically returned roughly 6–8% per year before inflation over long periods, but future returns are uncertain. Try a range, and use the Monte Carlo view to see how volatility widens the outcomes." } },
-    { "@type": "Question", name: "What does the Monte Carlo view show?", acceptedAnswer: { "@type": "Answer", text: "Instead of one smooth average, it runs 5,000 simulated market histories where each year's return varies around your expected return. It reports a range — the worst 10%, median, and best 10% — so you can see realistic uncertainty. The median usually lands below the simple average, which is normal (volatility drag)." } },
+    { "@type": "Question", name: "What does the Monte Carlo view show?", acceptedAnswer: { "@type": "Answer", text: "Instead of one smooth average, it runs 5,000 simulated market histories where each year's return varies around your expected return. It reports a range, the worst 10%, median, and best 10%, so you can see realistic uncertainty. The median usually lands below the simple average, which is normal (volatility drag)." } },
     { "@type": "Question", name: "Should I adjust for inflation?", acceptedAnswer: { "@type": "Answer", text: "If you want the final number to reflect real buying power, turn on 'today's dollars.' The portfolio then grows at your return minus inflation. Leaving it off shows the nominal (future-dollar) balance." } },
   ],
 };
@@ -79,9 +79,9 @@ const breadcrumbSchema = {
 };
 
 const FAQ_ITEMS = [
-  { q: "How does compound growth work?", a: "Your returns earn returns. Growth is added to the balance each period, and the next period's growth is figured on the larger balance — so over long horizons, most of the final total can come from growth, not contributions." },
+  { q: "How does compound growth work?", a: "Your returns earn returns. Growth is added to the balance each period, and the next period's growth is figured on the larger balance, so over long horizons, most of the final total can come from growth, not contributions." },
   { q: "What return should I assume?", a: "No single right number. A diversified portfolio has historically returned ~6–8% before inflation over long periods, but the future is uncertain. Try a range, and use the Monte Carlo view to see how volatility widens outcomes." },
-  { q: "What does the Monte Carlo view show?", a: "5,000 simulated market histories with year-to-year variation, reported as a range: worst 10%, median, best 10%. The median usually sits below the simple average — that's normal volatility drag." },
+  { q: "What does the Monte Carlo view show?", a: "5,000 simulated market histories with year-to-year variation, reported as a range: worst 10%, median, best 10%. The median usually sits below the simple average, that's normal volatility drag." },
   { q: "Should I adjust for inflation?", a: "Turn on 'today's dollars' if you want the result in real buying power; the portfolio then grows at your return minus inflation. Off shows the nominal future-dollar balance." },
 ];
 
@@ -97,7 +97,7 @@ export default function Page() {
           <div className="mx-auto max-w-4xl px-4 sm:px-6">
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Investment Calculator</h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              Project how your money grows with compound returns and regular contributions — then see the realistic
+              Project how your money grows with compound returns and regular contributions, then see the realistic
               range of outcomes once you add market volatility.
             </p>
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
@@ -133,7 +133,7 @@ export default function Page() {
                   <p>
                     The Monte Carlo view replaces the single smooth return with 5,000 simulated market histories, so you
                     see a realistic range instead of one optimistic line. It&apos;s the honest way to picture an
-                    uncertain future — and the seeded engine means the same inputs always reproduce the same range.
+                    uncertain future, and the seeded engine means the same inputs always reproduce the same range.
                   </p>
                 </div>
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -153,7 +153,7 @@ export default function Page() {
               <div className="rounded-2xl border border-cyan-200/70 bg-cyan-50 p-5 dark:border-cyan-900/60 dark:bg-cyan-950/30">
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Good to know</h3>
                 <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                  <p>The Monte Carlo median usually sits below the average line. That&apos;s volatility drag, not a bug — a single average tends to look optimistic.</p>
+                  <p>The Monte Carlo median usually sits below the average line. That&apos;s volatility drag, not a bug, a single average tends to look optimistic.</p>
                   <p>Results are very sensitive to the return assumption. Small changes compound into big differences over decades.</p>
                   <p>This doesn&apos;t model taxes, fees, or changing contributions over time.</p>
                   <p>It&apos;s a projection, not investment advice.</p>

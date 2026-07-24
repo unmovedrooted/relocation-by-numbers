@@ -107,7 +107,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!city) return { title: "City not found" };
 
   const title = `Salary Needed to Live in ${city.name}, ${city.state.toUpperCase()} (2026)`;
-  const description = `How much salary do you need to live comfortably in ${city.name}? See estimates based on rent, housing costs, and the 30% income rule — plus a minimum salary for tighter budgets.`;
+  const description = `How much salary do you need to live comfortably in ${city.name}? See estimates based on rent, housing costs, and the 30% income rule, plus a minimum salary for tighter budgets.`;
 
   return {
     title,

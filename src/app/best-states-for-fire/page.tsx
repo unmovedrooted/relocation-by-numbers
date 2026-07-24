@@ -7,14 +7,14 @@ import { ALLOWED_STATE_CODES } from "@/lib/seo-allowlists";
 export const metadata: Metadata = {
   title: "Best States for FIRE | Lowest Cost of Living & Taxes for Early Retirement",
   description:
-    "Discover the best US states for financial independence and early retirement. Ranked by housing costs and tax burden — see which states let your money go furthest.",
+    "Discover the best US states for financial independence and early retirement. Ranked by housing costs and tax burden, see which states let your money go furthest.",
   alternates: {
     canonical: "https://www.relocationbynumbers.com/best-states-for-fire",
   },
   openGraph: {
     title: "Best States for FIRE | Lowest Cost of Living & Taxes for Early Retirement",
     description:
-      "Discover the best US states for financial independence and early retirement. Ranked by housing costs and tax burden — see which states let your money go furthest.",
+      "Discover the best US states for financial independence and early retirement. Ranked by housing costs and tax burden, see which states let your money go furthest.",
     url: "https://www.relocationbynumbers.com/best-states-for-fire",
     siteName: "Relocation by Numbers",
     type: "website",
@@ -71,7 +71,7 @@ export default function Page() {
           <p className="max-w-3xl text-sm leading-6 text-slate-400">
             This page is a starting-point ranking based primarily on average rent across
             major cities in each state, with no-income-tax states clearly marked. It is
-            designed to help you spot promising FIRE-friendly states — not to replace
+            designed to help you spot promising FIRE-friendly states, not to replace
             a personalized comparison based on your own salary, taxes, and lifestyle.
           </p>
 
@@ -121,7 +121,7 @@ export default function Page() {
             <p>
               States with no personal income tax are also flagged because lower tax drag
               can improve take-home pay during the accumulation phase. That matters, but
-              it is shown as an additional signal — not the only ranking factor.
+              it is shown as an additional signal, not the only ranking factor.
             </p>
 
             <p>
@@ -187,7 +187,7 @@ export default function Page() {
           <div className="space-y-3 text-sm leading-7 text-slate-300">
             <p>
               Your FIRE number is based on annual spending. If you live in a lower-cost
-              state, your annual expenses may fall — which means a smaller portfolio target
+              state, your annual expenses may fall, which means a smaller portfolio target
               and potentially a shorter timeline to financial independence.
             </p>
             <p>

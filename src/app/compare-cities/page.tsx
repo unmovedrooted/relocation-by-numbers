@@ -8,9 +8,9 @@ const PAGE_PATH = "/compare-cities";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "Compare Cities Side by Side — Take-Home Pay, Housing & Monthly Flexibility",
+  title: "Compare Cities Side by Side, Take-Home Pay, Housing & Monthly Flexibility",
   description:
-    "Compare up to 3 destinations side by side — US, Caribbean, Asia, Europe, South America, or worldwide. See net monthly income, effective tax rate, housing costs, and monthly flexibility for each — all from one income and one form.",
+    "Compare up to 3 destinations side by side, US, Caribbean, Asia, Europe, South America, or worldwide. See net monthly income, effective tax rate, housing costs, and monthly flexibility for each, all from one income and one form.",
   keywords: [
     "compare cities cost of living",
     "compare cities side by side",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "Compare Cities Side by Side — Take-Home Pay, Housing & Monthly Flexibility",
+    title: "Compare Cities Side by Side, Take-Home Pay, Housing & Monthly Flexibility",
     description:
       "Compare up to 3 US cities side by side: net income, taxes, housing costs, and monthly flexibility, from a single income entry.",
     locale: "en_US",
@@ -82,7 +82,7 @@ export default function Page() {
               for each city at once.
             </p>
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-              US, Caribbean, Asia, Europe, South America, or worldwide — pick a region and compare.
+              US, Caribbean, Asia, Europe, South America, or worldwide, pick a region and compare.
             </p>
             <div className="mt-3">
               <Link href="/methodology" className="text-sm font-medium text-slate-700 underline underline-offset-4 hover:no-underline dark:text-slate-300">

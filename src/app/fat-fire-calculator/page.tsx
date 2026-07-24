@@ -8,14 +8,14 @@ import { parseIncomeParam } from "@/lib/incomeParam";
 export const metadata: Metadata = {
   title: "Fat FIRE Calculator | Retire Early With a Luxury Budget",
   description:
-    "Calculate your Fat FIRE number — the portfolio that funds a high-spending, luxury early retirement (roughly $200k+ a year, $5M+). Model spending, timeline, taxes, and withdrawal rate.",
+    "Calculate your Fat FIRE number, the portfolio that funds a high-spending, luxury early retirement (roughly $200k+ a year, $5M+). Model spending, timeline, taxes, and withdrawal rate.",
   alternates: {
     canonical: "https://www.relocationbynumbers.com/fat-fire-calculator",
   },
   openGraph: {
     title: "Fat FIRE Calculator | Retire Early With a Luxury Budget",
     description:
-      "Calculate your Fat FIRE number — the portfolio for a high-spending, luxury early retirement.",
+      "Calculate your Fat FIRE number, the portfolio for a high-spending, luxury early retirement.",
     url: "https://www.relocationbynumbers.com/fat-fire-calculator",
     siteName: "Relocation by Numbers",
     type: "website",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Fat FIRE Calculator | Retire Early With a Luxury Budget",
     description:
-      "Calculate your Fat FIRE number — a high-spending, luxury early retirement.",
+      "Calculate your Fat FIRE number, a high-spending, luxury early retirement.",
   },
 };
 
@@ -42,13 +42,13 @@ export default async function Page({ searchParams }: PageProps) {
           </h1>
 
           <p className="mt-2 text-lg font-semibold text-slate-200">
-            Retire Early Without Cutting Back — The Luxury End of FIRE
+            Retire Early Without Cutting Back, The Luxury End of FIRE
           </p>
 
           <p className="max-w-3xl leading-relaxed text-slate-300">
             <span className="font-semibold text-white">Fat FIRE</span> is financial independence
             with a high, no-compromises spending level: premium travel, a larger home, private
-            education, or whatever a full lifestyle looks like for you — without a budget hanging
+            education, or whatever a full lifestyle looks like for you, without a budget hanging
             over every decision.
           </p>
 
@@ -81,8 +81,8 @@ export default async function Page({ searchParams }: PageProps) {
           <h2 className="text-xl font-semibold">How Fat FIRE actually works</h2>
           <div className="mt-4 space-y-4 text-sm leading-7 text-slate-300">
             <p>
-              Fat FIRE uses the same math as traditional FIRE — annual spending divided by your
-              withdrawal rate — but with a much higher spending target, which means a much larger
+              Fat FIRE uses the same math as traditional FIRE, annual spending divided by your
+              withdrawal rate, but with a much higher spending target, which means a much larger
               portfolio. The trade-off is more years of saving (or higher earning) in exchange for
               a retirement with no lifestyle compromises.
             </p>
@@ -120,7 +120,7 @@ export default async function Page({ searchParams }: PageProps) {
               <h3 className="font-semibold text-white">Taxes</h3>
               <p className="mt-2 text-sm leading-6 text-slate-300">
                 At Fat FIRE spending levels, taxes on withdrawals and investment income become a
-                significant line item — worth modeling carefully, not assuming away.
+                significant line item, worth modeling carefully, not assuming away.
               </p>
             </div>
 
@@ -152,7 +152,7 @@ export default async function Page({ searchParams }: PageProps) {
             </p>
             <p>
               It is the right frame for people whose planned retirement spending simply won&apos;t
-              fit inside a traditional or Chubby FIRE budget — and who would rather build a bigger
+              fit inside a traditional or Chubby FIRE budget, and who would rather build a bigger
               cushion than constrain their life.
             </p>
           </div>
@@ -164,7 +164,7 @@ export default async function Page({ searchParams }: PageProps) {
           <div className="grid gap-3">
             <SEOFAQItem
               q="What is Fat FIRE?"
-              a="Fat FIRE is early retirement on a high, luxury-level spending budget — commonly $200,000 or more a year — with little need to budget or optimize spending."
+              a="Fat FIRE is early retirement on a high, luxury-level spending budget, commonly $200,000 or more a year, with little need to budget or optimize spending."
             />
             <SEOFAQItem
               q="What is the Fat FIRE number?"

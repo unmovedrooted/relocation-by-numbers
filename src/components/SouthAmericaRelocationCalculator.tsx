@@ -49,15 +49,15 @@ const SOUTH_AMERICA_VISA_CONTEXT: Record<string, {
   CO: {
     icon: "🇨🇴",
     program: "Digital Nomad Visa / Pensionado / Migrant Visa",
-    highlight: "Digital Nomad Visa — $800/mo",
-    notes: "Colombia's Digital Nomad Visa (V) is one of the most accessible in the world — remote workers earning just $800+/mo qualify for a 2-year renewable stay. Pensionado Visa requires $700+/mo in pension income. Migrant Visa (M) leads to permanent residency after 5 years of continuous stay. Medellín and Bogotá are the continent's top expat hubs. Cost of living is very low by North American and European standards.",
+    highlight: "Digital Nomad Visa, $800/mo",
+    notes: "Colombia's Digital Nomad Visa (V) is one of the most accessible in the world, remote workers earning just $800+/mo qualify for a 2-year renewable stay. Pensionado Visa requires $700+/mo in pension income. Migrant Visa (M) leads to permanent residency after 5 years of continuous stay. Medellín and Bogotá are the continent's top expat hubs. Cost of living is very low by North American and European standards.",
     estimatedFee: 160,
   },
   BR: {
     icon: "🇧🇷",
     program: "Digital Nomad Visa / Retirement Visa / VITEM V",
     highlight: "Digital Nomad Visa",
-    notes: "Brazil's Digital Nomad Visa requires $1,500/mo income and is valid for 1 year, renewable for another year. Retirement Visa (Aposentado) needs $2,000/mo pension income. VITEM V is a temporary work visa for those with a job offer. Brazil is the continent's largest economy — São Paulo is a global city, while smaller cities like Florianópolis and Curitiba offer excellent quality of life at lower costs.",
+    notes: "Brazil's Digital Nomad Visa requires $1,500/mo income and is valid for 1 year, renewable for another year. Retirement Visa (Aposentado) needs $2,000/mo pension income. VITEM V is a temporary work visa for those with a job offer. Brazil is the continent's largest economy, São Paulo is a global city, while smaller cities like Florianópolis and Curitiba offer excellent quality of life at lower costs.",
     estimatedFee: 180,
   },
   AR: {
@@ -65,7 +65,7 @@ const SOUTH_AMERICA_VISA_CONTEXT: Record<string, {
     program: "Rentista Visa / Pensionado / Digital Nomad (Nómade Digital)",
     highlight: "Rentista Visa",
     warning: "Argentina's parallel exchange rate means your USD purchasing power is often significantly higher than official rates suggest. Verify current rates before planning.",
-    notes: "Argentina's Rentista Visa requires proof of regular income (~$800/mo). Pensionado Visa for retirees. Argentina launched a Digital Nomad Visa (Nómade Digital) in 2022. High inflation and periodic economic instability are key considerations — many expats hold USD savings and convert as needed. Buenos Aires remains one of the most culturally rich cities in the Americas at a fraction of Western costs.",
+    notes: "Argentina's Rentista Visa requires proof of regular income (~$800/mo). Pensionado Visa for retirees. Argentina launched a Digital Nomad Visa (Nómade Digital) in 2022. High inflation and periodic economic instability are key considerations, many expats hold USD savings and convert as needed. Buenos Aires remains one of the most culturally rich cities in the Americas at a fraction of Western costs.",
     estimatedFee: 180,
   },
   CL: {
@@ -79,14 +79,14 @@ const SOUTH_AMERICA_VISA_CONTEXT: Record<string, {
     icon: "🇵🇪",
     program: "Temporary Residence / Rentista Visa",
     highlight: "Rentista Visa",
-    notes: "Peru's Rentista Visa is available for those with $1,000+/mo in passive income. Temporary Residence can be obtained with a job offer or business registration. No dedicated digital nomad visa yet — many remote workers use tourist visa extensions (183 days). Lima has a growing expat scene and world-class cuisine. Cusco and Arequipa are popular alternatives with lower costs and high quality of life.",
+    notes: "Peru's Rentista Visa is available for those with $1,000+/mo in passive income. Temporary Residence can be obtained with a job offer or business registration. No dedicated digital nomad visa yet, many remote workers use tourist visa extensions (183 days). Lima has a growing expat scene and world-class cuisine. Cusco and Arequipa are popular alternatives with lower costs and high quality of life.",
     estimatedFee: 150,
   },
   EC: {
   icon: "🇪🇨",
   program: "Temporary Residence / Pensioner Visa / Rentista",
   highlight: "Pensioner visa option",
-  notes: "Ecuador is popular with retirees and remote workers because of its lower living costs and established expat communities in Quito, Cuenca, and Manta. Pensioner and rentista-style residency paths are common planning routes. Ecuador is dollarized — no currency conversion complexity. Healthcare and rent can be materially lower than in many North American cities.",
+  notes: "Ecuador is popular with retirees and remote workers because of its lower living costs and established expat communities in Quito, Cuenca, and Manta. Pensioner and rentista-style residency paths are common planning routes. Ecuador is dollarized, no currency conversion complexity. Healthcare and rent can be materially lower than in many North American cities.",
   estimatedFee: 150,
 },
 UY: {
@@ -99,8 +99,8 @@ UY: {
 PY: {
   icon: "🇵🇾",
   program: "Temporary Residence / Permanent Residency Path",
-  highlight: "Territorial tax system — low tax burden",
-  notes: "Paraguay is often considered by budget-conscious movers because housing and day-to-day costs can be relatively low. Asunción is the main relocation hub. Paraguay's territorial tax system may mean foreign-source income is treated differently from locally-earned income — but tax treatment depends on your specific situation and residency status. Verify with a local advisor before treating this as a planning assumption.",
+  highlight: "Territorial tax system, low tax burden",
+  notes: "Paraguay is often considered by budget-conscious movers because housing and day-to-day costs can be relatively low. Asunción is the main relocation hub. Paraguay's territorial tax system may mean foreign-source income is treated differently from locally-earned income, but tax treatment depends on your specific situation and residency status. Verify with a local advisor before treating this as a planning assumption.",
   estimatedFee: 140,
 },
 BO: {
@@ -114,7 +114,7 @@ GY: {
   icon: "🇬🇾",
   program: "Temporary Stay / Work Permit / Residency",
   highlight: "English-speaking destination",
-  notes: "Guyana stands out as the only English-speaking country in South America. Georgetown is the main destination for expats and business relocations. Costs can be less predictable than expected — especially for imported goods and expat-oriented housing — so use a conservative budget buffer.",
+  notes: "Guyana stands out as the only English-speaking country in South America. Georgetown is the main destination for expats and business relocations. Costs can be less predictable than expected, especially for imported goods and expat-oriented housing, so use a conservative budget buffer.",
   estimatedFee: 170,
 },
 SR: {
@@ -127,7 +127,7 @@ SR: {
 VE: {
   icon: "🇻🇪",
   program: "Temporary Residence / Work or Family-Based Residency",
-  highlight: "Use with extra caution — simplified estimates only",
+  highlight: "Use with extra caution, simplified estimates only",
   warning: "Exchange rate volatility, inflation, and policy changes can make all planning estimates stale very quickly. Verify every assumption independently before making any decisions.",
   notes: "Venezuela is included for geographic completeness. All cost, tax, and currency figures here are simplified planning estimates and should be treated as directional only. FX controls, rapid inflation, and policy changes mean assumptions can become stale quickly. Verify every figure independently before using this for any planning decision.",
   estimatedFee: 150,
@@ -215,7 +215,7 @@ function InfoTip({ text, align = "left" }: { text: string; align?: "left" | "rig
 }
 
 // ---------------------------------------------------------------------------
-// VISA CONTEXT CARD — South America-specific
+// VISA CONTEXT CARD, South America-specific
 // ---------------------------------------------------------------------------
 function VisaContextCard({ countryCode }: { countryCode: string }) {
   const ctx = SOUTH_AMERICA_VISA_CONTEXT[countryCode];
@@ -577,8 +577,8 @@ const utilitiesFrom = familyUtilities * fromCityMultipliers.utilities;
       : monthlyFlexibility >= 500
         ? "Viable move, but keep a close eye on recurring costs."
         : monthlyFlexibility >= 0
-          ? "Tight move — small surprises could create pressure."
-          : "High-risk move — estimated expenses exceed income.";
+          ? "Tight move, small surprises could create pressure."
+          : "High-risk move, estimated expenses exceed income.";
 
     return {
       salaryReady, annualIncome, grossMonthly, currentTaxRate, targetTaxRate,
@@ -715,7 +715,7 @@ recommendation,
       ) : null}
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* LEFT — INPUTS */}
+        {/* LEFT, INPUTS */}
         <div className="space-y-3">
 
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
@@ -829,7 +829,7 @@ recommendation,
             {housingMode === "buy" && (
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                 No destination here has a verified home-price dataset, so the price above is estimated from the rent
-                figure (16x annual rent, a standard rule of thumb) — treat it as a rough planning figure, not a real
+                figure (16x annual rent, a standard rule of thumb), treat it as a rough planning figure, not a real
                 listing price.
               </p>
             )}
@@ -875,7 +875,7 @@ recommendation,
           </div>
         </div>
 
-        {/* RIGHT — RESULTS */}
+        {/* RIGHT, RESULTS */}
         <div className="space-y-3">
 
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
@@ -923,10 +923,10 @@ recommendation,
               <div>Results are estimates only. No information entered is stored or shared.</div>
               <div>Tax estimates, rent, immigration costs, and retirement treatment vary by destination and personal circumstances.</div>
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Tip: Your URL updates as you type — copy the page link to share this scenario.</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Tip: Your URL updates as you type, copy the page link to share this scenario.</div>
           </div>
 
-          {/* Monthly Flexibility — amber accent */}
+          {/* Monthly Flexibility, amber accent */}
           <div className="rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/30 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -972,7 +972,7 @@ recommendation,
             <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Based on housing, transportation, healthcare, and essential cost weighting.</div>
           </div>
 
-          {/* Comfort Score — amber accent */}
+          {/* Comfort Score, amber accent */}
           <div className="rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50/70 dark:bg-amber-950/30 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="flex items-start justify-between gap-3">
               <div>

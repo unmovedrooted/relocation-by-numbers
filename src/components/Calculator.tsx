@@ -65,7 +65,7 @@ function getVerdict(
   if (netWorthN > 0 && homePriceN > 0) {
     const nwRatio = netWorthN / homePriceN;
     const currentIdx = LEVELS.indexOf(baseLevel);
-    // Adjusted — more realistic thresholds
+    // Adjusted, more realistic thresholds
   if (nwRatio >= 2.5 && baseLevel !== "Comfortable") {
     level = LEVELS[Math.min(currentIdx + 2, 3)];
     netWorthNote = "Your strong net worth significantly cushions this move.";
@@ -80,9 +80,9 @@ function getVerdict(
 
   const BASE_DESCRIPTIONS: Record<VerdictLevel, string> = {
     Comfortable: "This move looks financially healthy based on your inputs.",
-    Manageable:  "Workable budget — but watch discretionary spending.",
+    Manageable:  "Workable budget, but watch discretionary spending.",
     Tight:       "You'll feel the financial pressure month to month.",
-    Risky:       "High likelihood of financial stress — revisit housing cost or salary.",
+    Risky:       "High likelihood of financial stress, revisit housing cost or salary.",
   };
 
   const STYLES: Record<VerdictLevel, Pick<Verdict, "barColor" | "barWidth">> = {
@@ -528,7 +528,7 @@ export default function Calculator({
     };
   }, [fromCity, toCity, salary, isFromOther, isToOther]);
 
-  // ── Estimated Living Costs — TARGET city ─────────────────────────────────
+  // ── Estimated Living Costs, TARGET city ─────────────────────────────────
   const estGroceries = useMemo<number | null>(() => {
     if (!hasCOLData) return null;
     return 600 * ((toCity as any).col.groceries / (fromCity as any).col.groceries);
@@ -549,7 +549,7 @@ export default function Calculator({
     return 200 * ((toCity as any).col.healthcare / (fromCity as any).col.healthcare);
   }, [hasCOLData, fromCity, toCity]);
 
-  // ── Effective COL values — user override → city estimate → national default ──
+  // ── Effective COL values, user override → city estimate → national default ──
   const effectiveGroceries = useMemo(
     () => colGroceries !== "" ? nz(colGroceries) : (estGroceries ?? 500),
     [colGroceries, estGroceries]
@@ -998,9 +998,9 @@ export default function Calculator({
                     if ((city as any).state && (city as any).state !== fromState) setFromState((city as any).state);
                   }}
                 >
-                  <option value="">— Select city —</option>
+                  <option value="">Select city</option>
                   {fromCities.map((c: any) => (
-                    <option key={c.id} value={c.id}>{c.name}{c.tier ? ` — ${c.tier}` : ""}</option>
+                    <option key={c.id} value={c.id}>{c.name}{c.tier ? `, ${c.tier}` : ""}</option>
                   ))}
                 </select>
               </label>
@@ -1019,9 +1019,9 @@ export default function Calculator({
                     if ((city as any).state && (city as any).state !== toState) setToState((city as any).state);
                   }}
                 >
-                  <option value="">— Select city —</option>
+                  <option value="">Select city</option>
                   {toCities.map((c: any) => (
-                    <option key={c.id} value={c.id}>{c.name}{c.tier ? ` — ${c.tier}` : ""}</option>
+                    <option key={c.id} value={c.id}>{c.name}{c.tier ? `, ${c.tier}` : ""}</option>
                   ))}
                 </select>
               </label>
@@ -1049,7 +1049,7 @@ export default function Calculator({
               <label className="text-sm sm:col-span-2">
                 <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">
                   Current housing cost/mo{" "}
-                  <span className="font-normal text-slate-400 dark:text-slate-500">(optional — improves side-by-side comparison)</span>
+                  <span className="font-normal text-slate-400 dark:text-slate-500">(optional, improves side-by-side comparison)</span>
                 </div>
                 <input
                   className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
@@ -1061,7 +1061,7 @@ export default function Calculator({
               <label className="text-sm sm:col-span-2">
                 <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">
                   Net worth{" "}
-                  <span className="font-normal text-slate-400 dark:text-slate-500">(optional — adjusts financial verdict)</span>
+                  <span className="font-normal text-slate-400 dark:text-slate-500">(optional, adjusts financial verdict)</span>
                 </div>
                 <input
                   className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
@@ -1247,7 +1247,7 @@ export default function Calculator({
                   <div className="mt-2">Gross monthly: <span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.grossMonthly, 2)}</span></div>
                   <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950">
                     <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                      Target city — est. annual taxes
+                      Target city, est. annual taxes
                     </div>
                     <div className="grid gap-1.5 text-xs text-slate-600 dark:text-slate-400">
                       <div className="flex justify-between">
@@ -1282,7 +1282,7 @@ export default function Calculator({
                     Current city effective rate: <span className="font-semibold text-slate-900 dark:text-slate-100">{results.effTaxFromPct.toFixed(1)}%</span>
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-400">
-                    Includes local city income tax where applicable. CA and PA tax traditional 401(k) contributions at the state level (most other states exclude them, matching federal treatment) — accounted for above.
+                    Includes local city income tax where applicable. CA and PA tax traditional 401(k) contributions at the state level (most other states exclude them, matching federal treatment), accounted for above.
                   </div>
                 </>
               )}
@@ -1316,7 +1316,7 @@ export default function Calculator({
                 <div>Tax estimates include federal income tax, FICA, state income tax, and supported local city income taxes where applicable.</div>
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400">
-                Tip: Your URL updates as you type — copy the page link to share this scenario.
+                Tip: Your URL updates as you type, copy the page link to share this scenario.
               </div>
             </div>
           </div>
@@ -1347,7 +1347,7 @@ export default function Calculator({
             <div className="mt-3 text-sm text-slate-700 dark:text-slate-300">
               {!results.netToMonthly
                 ? "Add salary and housing inputs to estimate how much room you have left each month."
-                : `What's left each month in ${targetCityLabel} after housing — before groceries, utilities, and other essentials.`}
+                : `What's left each month in ${targetCityLabel} after housing, before groceries, utilities, and other essentials.`}
             </div>
           </div>
 
@@ -1413,7 +1413,7 @@ export default function Calculator({
                 <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
                   Current housing is{" "}
                   <span className="font-semibold text-amber-700 dark:text-amber-400">estimated</span>{" "}
-                  from your selected target housing cost and the city housing index — not your actual number. Enter your real amount above for a precise comparison.
+                  from your selected target housing cost and the city housing index, not your actual number. Enter your real amount above for a precise comparison.
                 </div>
               )}
               <div className="overflow-x-auto overscroll-x-contain" role="region" aria-label="Current and target cost comparison" tabIndex={0}>
@@ -1527,7 +1527,7 @@ export default function Calculator({
                 <>
                   <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">{money(negotiationEstimate.suggestedAsk)}</div>
                   <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                    Suggested starting ask for a role in {negotiationEstimate.toCityName} — about{" "}
+                    Suggested starting ask for a role in {negotiationEstimate.toCityName}, about{" "}
                     <span className="font-semibold text-slate-900 dark:text-slate-100">{negotiationEstimate.gapPct.toFixed(0)}% higher</span>{" "}
                     than your current offer of {money(negotiationEstimate.currentOffer)}, based on the cost-of-living
                     difference and what it takes to keep your monthly budget where it is today.

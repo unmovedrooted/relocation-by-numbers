@@ -93,19 +93,19 @@ const sections: HubSection[] = [
   {
     title: "Relocation Budget Calculators",
     description:
-      "Plan your move with calculators that go beyond basic cost of living — covering one-income affordability, tax impact, and city-by-city housing pressure.",
+      "Plan your move with calculators that go beyond basic cost of living, covering one-income affordability, tax impact, and city-by-city housing pressure.",
     links: [
       {
         href: "/",
         title: "US Relocation & Take-Home Calculator",
         description:
-          "The main calculator — compare take-home pay, taxes, and living costs for a move between US cities.",
+          "The main calculator, compare take-home pay, taxes, and living costs for a move between US cities.",
       },
       {
         href: "/compare-cities",
         title: "Compare Cities Side by Side",
         description:
-          "Pick your own income and up to 3 target cities — net pay, taxes, housing, and flexibility in one table.",
+          "Pick your own income and up to 3 target cities, net pay, taxes, housing, and flexibility in one table.",
       },
       {
         href: "/compare",
@@ -144,13 +144,13 @@ const sections: HubSection[] = [
         href: "/paycheck-calculator",
         title: "Paycheck Calculator",
         description:
-          "Your take-home pay after federal, Social Security, Medicare, and state taxes — salary or hourly, any state.",
+          "Your take-home pay after federal, Social Security, Medicare, and state taxes, salary or hourly, any state.",
       },
       {
         href: "/income-tax-calculator",
         title: "Income Tax Calculator",
         description:
-          "Federal tax, effective and marginal rates, and a bracket-by-bracket breakdown — with optional state tax.",
+          "Federal tax, effective and marginal rates, and a bracket-by-bracket breakdown, with optional state tax.",
       },
       {
         href: "/housing-affordability-calculator",
@@ -245,7 +245,7 @@ const sections: HubSection[] = [
   {
     title: "Retirement Planning Calculators",
     description:
-      "Project your savings, plan withdrawals with market-volatility modeling, weigh a Roth conversion, and size up your HSA — all with federal and state taxes built in.",
+      "Project your savings, plan withdrawals with market-volatility modeling, weigh a Roth conversion, and size up your HSA, all with federal and state taxes built in.",
     links: [
       {
         href: "/retirement-calculator",
@@ -257,7 +257,7 @@ const sections: HubSection[] = [
         href: "/retirement-withdrawal-calculator",
         title: "Retirement Withdrawal Calculator",
         description:
-          "How long will your money last, or how much can you safely withdraw — with taxes and sequence-of-returns risk.",
+          "How long will your money last, or how much can you safely withdraw, with taxes and sequence-of-returns risk.",
       },
       {
         href: "/roth-conversion-calculator",
@@ -275,7 +275,7 @@ const sections: HubSection[] = [
         href: "/401k-calculator",
         title: "401(k) Calculator",
         description:
-          "Employer match, this year's tax savings, and projected balance — with 2025 limits and a Monte Carlo range.",
+          "Employer match, this year's tax savings, and projected balance, with 2025 limits and a Monte Carlo range.",
       },
       {
         href: "/hsa-calculator",

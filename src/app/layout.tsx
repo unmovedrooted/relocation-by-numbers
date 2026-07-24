@@ -103,7 +103,7 @@ const CALCULATOR_NAV_LINKS = [
   { href: "/compare", label: "City Pair Comparisons" },
 ];
 
-// Flat list for mobile — dropdowns are a desktop-only affordance.
+// Flat list for mobile, dropdowns are a desktop-only affordance.
 const NAV_LINKS = [
   EXPLORE_LINK,
   ...CALCULATOR_NAV_LINKS,

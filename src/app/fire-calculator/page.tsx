@@ -52,7 +52,7 @@ export default async function FireCalculatorPage({ searchParams }: PageProps) {
           </div>
 
           <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            FIRE Calculator — Financial Independence by Location
+            FIRE Calculator, Financial Independence by Location
           </h1>
 
           <p className="mt-2 text-lg font-semibold text-slate-200">
@@ -178,7 +178,7 @@ export default async function FireCalculatorPage({ searchParams }: PageProps) {
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
           <h2 className="text-xl font-semibold text-white">
-            What this calculator includes — and what it does not
+            What this calculator includes, and what it does not
           </h2>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">

@@ -8,14 +8,14 @@ import { parseIncomeParam } from "@/lib/incomeParam";
 export const metadata: Metadata = {
   title: "Chubby FIRE Calculator | Comfortable Early Retirement Number",
   description:
-    "Calculate your Chubby FIRE number — the portfolio that funds a comfortable early retirement (roughly $100k–$150k a year) without a Fat FIRE budget. Model spending, timeline, taxes, and withdrawal rate.",
+    "Calculate your Chubby FIRE number, the portfolio that funds a comfortable early retirement (roughly $100k–$150k a year) without a Fat FIRE budget. Model spending, timeline, taxes, and withdrawal rate.",
   alternates: {
     canonical: "https://www.relocationbynumbers.com/chubby-fire-calculator",
   },
   openGraph: {
     title: "Chubby FIRE Calculator | Comfortable Early Retirement Number",
     description:
-      "Calculate your Chubby FIRE number — the portfolio for a comfortable early retirement without a Fat FIRE budget.",
+      "Calculate your Chubby FIRE number, the portfolio for a comfortable early retirement without a Fat FIRE budget.",
     url: "https://www.relocationbynumbers.com/chubby-fire-calculator",
     siteName: "Relocation by Numbers",
     type: "website",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Chubby FIRE Calculator | Comfortable Early Retirement Number",
     description:
-      "Calculate your Chubby FIRE number — a comfortable early retirement without a Fat FIRE budget.",
+      "Calculate your Chubby FIRE number, a comfortable early retirement without a Fat FIRE budget.",
   },
 };
 
@@ -42,7 +42,7 @@ export default async function Page({ searchParams }: PageProps) {
           </h1>
 
           <p className="mt-2 text-lg font-semibold text-slate-200">
-            A Comfortable Early Retirement — Between Regular FIRE and Fat FIRE
+            A Comfortable Early Retirement, Between Regular FIRE and Fat FIRE
           </p>
 
           <p className="max-w-3xl leading-relaxed text-slate-300">
@@ -88,7 +88,7 @@ export default async function Page({ searchParams }: PageProps) {
             <p>
               At $100,000 per year in expenses and a 4% withdrawal rate, the target portfolio is
               about $2.5 million. At $150,000 per year, it is about $3.75 million. The higher
-              spending is the whole point — Chubby FIRE trades a bigger number for a roomier life.
+              spending is the whole point, Chubby FIRE trades a bigger number for a roomier life.
             </p>
           </div>
         </section>
@@ -146,7 +146,7 @@ export default async function Page({ searchParams }: PageProps) {
           <div className="mt-4 space-y-4 text-sm leading-7 text-slate-300">
             <p>
               Chubby FIRE tends to fit people who want financial independence without giving up a
-              comfortable lifestyle — those who would rather work a bit longer or save a bit more
+              comfortable lifestyle, those who would rather work a bit longer or save a bit more
               than commit to a tight budget for decades.
             </p>
             <p>
@@ -162,7 +162,7 @@ export default async function Page({ searchParams }: PageProps) {
           <div className="grid gap-3">
             <SEOFAQItem
               q="What is Chubby FIRE?"
-              a="Chubby FIRE is early retirement on a comfortable but not luxurious budget — commonly around $100,000 to $150,000 a year — sitting between traditional FIRE and Fat FIRE."
+              a="Chubby FIRE is early retirement on a comfortable but not luxurious budget, commonly around $100,000 to $150,000 a year, sitting between traditional FIRE and Fat FIRE."
             />
             <SEOFAQItem
               q="What is the Chubby FIRE number?"
@@ -174,7 +174,7 @@ export default async function Page({ searchParams }: PageProps) {
             />
             <SEOFAQItem
               q="How is Chubby FIRE different from regular FIRE?"
-              a="Regular FIRE often assumes a moderate, middle-class budget, while Chubby FIRE plans for a roomier lifestyle — more travel, dining, and discretionary spending — and therefore a larger portfolio."
+              a="Regular FIRE often assumes a moderate, middle-class budget, while Chubby FIRE plans for a roomier lifestyle, more travel, dining, and discretionary spending, and therefore a larger portfolio."
             />
             <SEOFAQItem
               q="What withdrawal rate should I use for Chubby FIRE?"

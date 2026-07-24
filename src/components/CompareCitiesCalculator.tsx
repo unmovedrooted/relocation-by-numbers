@@ -567,11 +567,11 @@ export default function CompareCitiesCalculator() {
     }
     for (const r of activeResults) {
       rows.push(
-        { Metric: `${r.name} — net monthly`, Value: money(r.netMonthly) },
-        { Metric: `${r.name} — effective tax rate`, Value: `${r.effTaxPct.toFixed(1)}%` },
-        { Metric: `${r.name} — ${housingRowLabel.toLowerCase()}`, Value: money(r.housingMonthly) },
-        { Metric: `${r.name} — ${pctRowLabel.toLowerCase()}`, Value: `${r.pctOfIncome.toFixed(1)}%` },
-        { Metric: `${r.name} — monthly flexibility`, Value: money(r.monthlyFlexibility) },
+        { Metric: `${r.name}, net monthly`, Value: money(r.netMonthly) },
+        { Metric: `${r.name}, effective tax rate`, Value: `${r.effTaxPct.toFixed(1)}%` },
+        { Metric: `${r.name}, ${housingRowLabel.toLowerCase()}`, Value: money(r.housingMonthly) },
+        { Metric: `${r.name}, ${pctRowLabel.toLowerCase()}`, Value: `${r.pctOfIncome.toFixed(1)}%` },
+        { Metric: `${r.name}, monthly flexibility`, Value: money(r.monthlyFlexibility) },
       );
     }
     return rows;
@@ -625,7 +625,7 @@ export default function CompareCitiesCalculator() {
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* ================================================================
-            LEFT — INPUTS
+            LEFT, INPUTS
         ================================================================ */}
         <div className="space-y-3">
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
@@ -687,10 +687,10 @@ export default function CompareCitiesCalculator() {
 
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {isUs
-                ? "Rent and home price default to each city's typical values — no need to look them up yourself. Adjust the shared assumptions below if you want."
+                ? "Rent and home price default to each city's typical values, no need to look them up yourself. Adjust the shared assumptions below if you want."
                 : intlHousingMode === "buy"
                 ? "No destination here has a verified home-price dataset, so Buy mode estimates a home price from each destination's typical rent (16x annual rent, a standard rule of thumb) and runs it through the mortgage math below. Treat this as a rough planning figure, not a real listing price."
-                : "Housing and living costs default to each destination's typical values. Tax assumes remote/foreign-sourced income where applicable — for a country-specific breakdown with follow-up questions, use the matching regional calculator."}
+                : "Housing and living costs default to each destination's typical values. Tax assumes remote/foreign-sourced income where applicable, for a country-specific breakdown with follow-up questions, use the matching regional calculator."}
             </p>
 
             {isUs && (mode === "rent" ? (
@@ -830,7 +830,7 @@ export default function CompareCitiesCalculator() {
         </div>
 
         {/* ================================================================
-            RIGHT — RESULTS
+            RIGHT, RESULTS
         ================================================================ */}
         <div className="space-y-3">
           {!salaryReady ? (
@@ -900,8 +900,8 @@ export default function CompareCitiesCalculator() {
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
                 {isUs
-                  ? "Rent and home price use each city's typical values as a starting point — for an exact scenario with your own numbers, use the full relocation calculator for a single destination."
-                  : "Housing and living costs use each destination's typical values, and tax uses a simplified estimate — for an exact scenario with a country-specific tax breakdown, use the matching full regional calculator."}{" "}
+                  ? "Rent and home price use each city's typical values as a starting point, for an exact scenario with your own numbers, use the full relocation calculator for a single destination."
+                  : "Housing and living costs use each destination's typical values, and tax uses a simplified estimate, for an exact scenario with a country-specific tax breakdown, use the matching full regional calculator."}{" "}
                 Planning estimates only, not financial or tax advice.
               </div>
             </>

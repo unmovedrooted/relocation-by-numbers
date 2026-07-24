@@ -178,9 +178,9 @@ const MODE_NAV: { mode: FireMode; label: string; href: string }[] = [
 // ── Mode contextual notes (inside calculator) ─────────────────────────────────
 const MODE_NOTES: Record<FireMode, string> = {
   standard: "Estimates the portfolio you need to cover your full lifestyle indefinitely at your chosen withdrawal rate.",
-  lean:     "Shows how a lower spending target shrinks the portfolio you need — and how much faster Lean FIRE arrives vs a higher-spending plan.",
+  lean:     "Shows how a lower spending target shrinks the portfolio you need, and how much faster Lean FIRE arrives vs a higher-spending plan.",
   coast:    "Answers a different question: do you already have enough that compound growth alone can carry you to retirement without another dollar contributed?",
-  barista:  "Part-time income reduces the gap your portfolio must cover. The lower the gap, the smaller the number — and the sooner you can walk away from full-time work.",
+  barista:  "Part-time income reduces the gap your portfolio must cover. The lower the gap, the smaller the number, and the sooner you can walk away from full-time work.",
 };
 
 // ── Mode-specific affiliates (swap hrefs for real affiliate links later) ──────
@@ -191,17 +191,17 @@ const MODE_AFFILIATES: Record<FireMode, Affiliate[]> = {
     { name: "M1 Finance",  blurb: "Automated investing with custom portfolios. Good for hands-off savers on the path to FI.",           href: "#", tag: "Automated"   },
   ],
   lean: [
-    { name: "Fidelity",    blurb: "Zero-fee funds — essential when every basis point matters on a lean plan.",          href: "#", tag: "Brokerage"   },
+    { name: "Fidelity",    blurb: "Zero-fee funds, essential when every basis point matters on a lean plan.",          href: "#", tag: "Brokerage"   },
     { name: "Vanguard",    blurb: "Lowest-cost funds available. Critical when a lean budget leaves no room for fees.", href: "#", tag: "Index funds" },
     { name: "Ally Bank",   blurb: "High-yield savings for your emergency fund and cash buffer.",                        href: "#", tag: "HYSA"         },
   ],
   coast: [
-    { name: "Fidelity",    blurb: "Strong IRA and brokerage options — ideal once contributions stop and compounding takes over.", href: "#", tag: "Brokerage"    },
+    { name: "Fidelity",    blurb: "Strong IRA and brokerage options, ideal once contributions stop and compounding takes over.", href: "#", tag: "Brokerage"    },
     { name: "Vanguard",    blurb: "Low-cost index funds let compounding work without friction in the coast phase.",               href: "#", tag: "Index funds"  },
     { name: "Betterment",  blurb: "Set-and-forget robo-advisor. Once you've coasted, automation does the rest.",                 href: "#", tag: "Robo-advisor" },
   ],
   barista: [
-    { name: "Fidelity",       blurb: "Strong IRA and HSA options — important when employer benefits are limited.", href: "#", tag: "Brokerage"  },
+    { name: "Fidelity",       blurb: "Strong IRA and HSA options, important when employer benefits are limited.", href: "#", tag: "Brokerage"  },
     { name: "Stride Health",  blurb: "Find affordable health insurance for self-employed and part-time workers.", href: "#", tag: "Healthcare" },
     { name: "M1 Finance",     blurb: "Automate investing around a part-time schedule with custom portfolio pies.", href: "#", tag: "Automated"  },
   ],
@@ -211,27 +211,27 @@ const MODE_AFFILIATES: Record<FireMode, Affiliate[]> = {
 const INTERNAL_FAQS: Record<FireMode, { q: string; a: string }[]> = {
   standard: [
     { q: "Why does location affect my FIRE timeline?",  a: "Location changes two of the biggest drivers: taxes and spending. A lower-cost or lower-tax city can increase how much you keep and reduce how much you need." },
-    { q: "Are the tax numbers exact?",                  a: "No. They are simplified estimates based on your state and filing status — for planning comparisons, not tax filing." },
+    { q: "Are the tax numbers exact?",                  a: "No. They are simplified estimates based on your state and filing status, for planning comparisons, not tax filing." },
     { q: "Why does my FIRE number change between cities?", a: "Your FIRE number is based on spending. If projected spending changes in a different city, the portfolio needed changes too." },
-    { q: "Does Move Impact assume the same salary?",    a: "Yes. It isolates the effect of location — same income and investing assumptions, different expenses." },
+    { q: "Does Move Impact assume the same salary?",    a: "Yes. It isolates the effect of location, same income and investing assumptions, different expenses." },
   ],
   lean: [
     { q: "What counts as Lean FIRE?",         a: "There's no official threshold. Many use $40,000/year or less as a rough benchmark. The real question is whether the target spending is sustainably low for your life." },
-    { q: "Is Lean FIRE risky?",               a: "It leaves less cushion for surprises like healthcare costs. It's most sustainable when paired with flexibility — like the ability to earn a small amount if needed." },
+    { q: "Is Lean FIRE risky?",               a: "It leaves less cushion for surprises like healthcare costs. It's most sustainable when paired with flexibility, like the ability to earn a small amount if needed." },
     { q: "How does location help with Lean FIRE?", a: "Lower-cost cities reduce annual spending directly, which shrinks both your FIRE number and the years needed to reach it." },
     { q: "What withdrawal rate should I use?", a: "Many Lean FIRE planners use 3.5% or below for long retirement horizons, since the margin for error is smaller." },
   ],
   coast: [
-    { q: "What is the Coast FIRE number?",           a: "The amount you need invested today so compound growth alone — with no new contributions — grows your portfolio to your full FIRE target by retirement age." },
-    { q: "How is Coast FIRE different from regular FIRE?", a: "Regular FIRE means you already have enough to fund retirement. Coast FIRE is an earlier milestone — compounding can do the rest, but you still need earned income for current expenses." },
+    { q: "What is the Coast FIRE number?",           a: "The amount you need invested today so compound growth alone, with no new contributions, grows your portfolio to your full FIRE target by retirement age." },
+    { q: "How is Coast FIRE different from regular FIRE?", a: "Regular FIRE means you already have enough to fund retirement. Coast FIRE is an earlier milestone, compounding can do the rest, but you still need earned income for current expenses." },
     { q: "What return should I use?",                a: "Many people use 5–7% as a planning range. Small changes matter a lot because Coast FIRE depends heavily on long compounding periods." },
     { q: "Can I stop working after reaching Coast FIRE?", a: "Not necessarily. You still need income to cover current living costs. Coast FIRE only means you can stop contributing to retirement investments." },
   ],
   barista: [
-    { q: "What counts as Barista FIRE?",           a: "Working part-time — in any field — to cover some expenses, letting a smaller portfolio cover the rest. The name comes from taking a low-stress job, sometimes one with benefits." },
+    { q: "What counts as Barista FIRE?",           a: "Working part-time, in any field, to cover some expenses, letting a smaller portfolio cover the rest. The name comes from taking a low-stress job, sometimes one with benefits." },
     { q: "How does part-time income reduce my FIRE number?", a: "It reduces the gap your portfolio must cover. Less gap ÷ withdrawal rate = smaller target." },
     { q: "What about healthcare?",                 a: "Healthcare is the biggest wildcard. Some part-time jobs offer benefits, which can meaningfully reduce financial pressure on your portfolio." },
-    { q: "Is Barista FIRE a permanent state?",     a: "Not necessarily. Many use it as a bridge — working part-time while the portfolio grows, eventually transitioning to full FIRE." },
+    { q: "Is Barista FIRE a permanent state?",     a: "Not necessarily. Many use it as a bridge, working part-time while the portfolio grows, eventually transitioning to full FIRE." },
   ],
 };
 
@@ -357,7 +357,7 @@ function totalFromBuckets(b: Buckets): number {
 
 // Spendable value using year-N bucket balances (not frozen year-0 inputs).
 // Traditional accounts get a withdrawal tax haircut.
-// Roth accounts and brokerage are post-tax — no haircut.
+// Roth accounts and brokerage are post-tax, no haircut.
 function calcSpendableFromBuckets(i: Inputs, b: Buckets): number {
   const wTax = (Number(i.withdrawalTaxRatePct) || 0) / 100;
   const sp401k = i.taxTreatment401k === "traditional" ? b.b401k * (1 - wTax) : b.b401k;
@@ -394,7 +394,7 @@ function initBuckets(i: Inputs, netAnnualBase: number): {
 }
 
 // Grow all three buckets by one year.
-//   401k / IRA:  base return (tax-deferred — no annual drag)
+//   401k / IRA:  base return (tax-deferred, no annual drag)
 //   Brokerage:   base return minus tax drag (drag applied each year on gains)
 //   Employer match flows into the 401k bucket only.
 //   autoContrib is only used in simple mode when yearlyInvestment is blank.
@@ -423,7 +423,7 @@ return {
 };
 }
 
-// Base nominal return from volatility preset — used by growBuckets.
+// Base nominal return from volatility preset, used by growBuckets.
 function returnForYear(i: Inputs, yearIndex: number): number {
   const y       = Math.max(0, yearIndex);
   const switchAt = clamp(Number(i.phase2StartsYear) || 0, 0, 200);
@@ -450,7 +450,7 @@ const futureFireNumber =
 
 
 
-// ── Core simulation — all 4 modes ────────────────────────────────────────────
+// ── Core simulation, all 4 modes ────────────────────────────────────────────
 function simulateYearsToFI(
   i: Inputs,
   netAnnualBase: number,
@@ -612,13 +612,13 @@ function getUnderinvestedNudge(i: Inputs, mode: FireMode): string | null {
     return "You have no tax-advantaged accounts. A 401(k) or IRA could reduce tax drag and meaningfully accelerate your timeline.";
 
   if (i.employerMatchPct > 0 && i.contrib401k === 0)
-    return `You may be leaving free employer match on the table — worth up to ${money(calcEmployerMatch(i), 0)}/year at your salary.`;
+    return `You may be leaving free employer match on the table, worth up to ${money(calcEmployerMatch(i), 0)}/year at your salary.`;
 
   if (balBrokerage > 0 && i.bal401k === 0 && i.balIra === 0)
     return "Your entire portfolio is in a taxable brokerage. Adding tax-sheltered accounts (401k or IRA) can reduce annual drag over a long compounding period.";
 
   if (mode === "barista" && (Number(i.baristaPartTimeIncome) || 0) > 0)
-    return "Part-time work often means no employer healthcare. Budget for this separately — it's one of the biggest wildcards in Barista FIRE.";
+    return "Part-time work often means no employer healthcare. Budget for this separately, it's one of the biggest wildcards in Barista FIRE.";
 
   return null;
 }
@@ -643,7 +643,7 @@ function getDecisionScenarioCopy(
     case "higher_savings":
       return {
         explanation:
-          "A higher savings rate means more capital compounding every year — the most direct lever on any FIRE timeline.",
+          "A higher savings rate means more capital compounding every year, the most direct lever on any FIRE timeline.",
         shortCopy: "More of your income working for you sooner.",
       };
     case "move":
@@ -735,7 +735,7 @@ function buildDecisionEngine(
     },
   });
 
-  // ── Scenario 2: Higher savings — honest 10-point rate increase ────────────
+  // ── Scenario 2: Higher savings, honest 10-point rate increase ────────────
   const currentSavingsRate =
     netAnnual > 0
       ? clamp((netAnnual - annualExpensesFromMonthly(inputs.expensesMonthly)) / netAnnual, 0, 1)
@@ -1616,7 +1616,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 </div>
               )}
 
-              {/* Withdrawal tax rate — shown only when Traditional accounts are selected */}
+              {/* Withdrawal tax rate, shown only when Traditional accounts are selected */}
               {(inputs.taxTreatment401k === "traditional" || inputs.taxTreatmentIra === "traditional") && (<>
                 <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">WITHDRAWAL TAX ESTIMATE</div>
                 <Field
@@ -1732,7 +1732,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
   <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
     <p className="text-xs text-slate-400">
       {result.yearsToFI === 0
-        ? "You've hit your FIRE number — share the milestone."
+        ? "You've hit your FIRE number, share the milestone."
         : `FIRE at ${fiAge ?? "—"} · ${result.yearsToFI} years away`}
     </p>
     <button
@@ -1773,7 +1773,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   {fiAge === null
                     ? <>Lean FIRE not projected within <strong>{inputs.maxYears} years</strong> at current inputs.</>
                     : <>With lean spending of <strong>{money(inputs.expensesMonthly, 0)}/mo</strong>, you could reach Lean FIRE at <strong>age {fiAge}</strong>
-                      {leanYearsSaved !== null && leanYearsSaved > 0 ? <> — <strong>{leanYearsSaved} years sooner</strong> than a higher-spending plan.</> : <>.</>}</>}
+                      {leanYearsSaved !== null && leanYearsSaved > 0 ? <>, <strong>{leanYearsSaved} years sooner</strong> than a higher-spending plan.</> : <>.</>}</>}
                 </p>
                 {/* Side-by-side comparison */}
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -1812,7 +1812,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   {!hasCoreInputs
                     ? "Enter your inputs to calculate your Coast FIRE number."
                     : isCoastReady
-                    ? <>Your portfolio has already reached your Coast FIRE number. Compound growth alone can carry you to full retirement at <strong>age {inputs.targetRetirementAge}</strong> — even with no new contributions.</>
+                    ? <>Your portfolio has already reached your Coast FIRE number. Compound growth alone can carry you to full retirement at <strong>age {inputs.targetRetirementAge}</strong>, even with no new contributions.</>
                     : <>You need <strong>{money(coastFireNumber ?? 0, 0)}</strong> invested by age <strong>{inputs.coastAge}</strong> for your portfolio to coast to retirement without new contributions.
                       {yearsToCoast !== null ? <> At your current pace, you could reach it in <strong>{yearsToCoast} years</strong>.</> : null}</>}
                 </p>
@@ -1837,7 +1837,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     ? "Enter your inputs to see your Barista FIRE number."
                     : fiAge === null
                     ? <>Barista FIRE not projected within <strong>{inputs.maxYears} years</strong>. Try adjusting your inputs.</>
-                    : <>With <strong>{money(inputs.baristaPartTimeIncome, 0)}/yr</strong> of part-time income, your portfolio only needs to cover <strong>{money(Math.max(0, annualExp - (Number(inputs.baristaPartTimeIncome) || 0)), 0)}/yr</strong> — reaching Barista FIRE at <strong>age {fiAge}</strong>.</>}
+                    : <>With <strong>{money(inputs.baristaPartTimeIncome, 0)}/yr</strong> of part-time income, your portfolio only needs to cover <strong>{money(Math.max(0, annualExp - (Number(inputs.baristaPartTimeIncome) || 0)), 0)}/yr</strong>, reaching Barista FIRE at <strong>age {fiAge}</strong>.</>}
                 </p>
                 {/* Side-by-side */}
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -2063,7 +2063,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="grid gap-3 sm:grid-cols-2">
                 {MODE_AFFILIATES[mode].map(a => <AffiliateCard key={a.name} a={a} />)}
               </div>
-              <p className="mt-3 text-[11px] text-slate-500">Affiliate links — we may earn a commission at no cost to you. Recommendations are based on your FIRE mode, not paid placement.</p>
+              <p className="mt-3 text-[11px] text-slate-500">Affiliate links, we may earn a commission at no cost to you. Recommendations are based on your FIRE mode, not paid placement.</p>
             </div>
           )}
 

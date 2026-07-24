@@ -32,14 +32,14 @@ export type TaxModelKind =
   | "flat"
   | "placeholder";
 
-// Confidence rubric — used to drive UI badge colour and disclaimer text:
+// Confidence rubric, used to drive UI badge colour and disclaimer text:
 //
-//  "verified"    — Brackets are legislative, filing logic is structurally
+//  "verified", Brackets are legislative, filing logic is structurally
 //                  correct, major credits/deductions modelled, result is
 //                  within ~2-3 pp of a professional estimate for most incomes.
 //                  Currently: AE (zero-tax, trivially exact).
 //
-//  "partial"     — Core national brackets are correct and current. The
+//  "partial", Core national brackets are correct and current. The
 //                  dominant structural components are modelled. One or two
 //                  meaningful items are omitted (named explicitly in the note)
 //                  but the gap is bounded and unlikely to exceed ~3-4 pp for
@@ -47,7 +47,7 @@ export type TaxModelKind =
 //                  Countries: US, GB, AU, NZ, DK, NO, HR, HU, BG, MT,
 //                             PA, RO, PT-IFICI, ES-Beckham.
 //
-//  "simplified"  — Structurally believable but at least one significant
+//  "simplified", Structurally believable but at least one significant
 //                  source of real-world variation is unmodelled: major
 //                  local/cantonal spread, large omitted credit or deduction
 //                  systems, blended social overlays that could be off by
@@ -59,7 +59,7 @@ export type TaxModelKind =
 //                             JP, KR, SG, MX, CR, CO, BR, CL, PE,
 //                             TH, VN, MY, ID, ZA.
 //
-//  "placeholder" — Either thresholds change faster than we can reliably track
+//  "placeholder", Either thresholds change faster than we can reliably track
 //                  (Turkey revised mid-year for inflation; Argentina updated
 //                  quarterly) or the model is so simplified that the number
 //                  could easily be off by 10+ pp. Treat as directional only.
@@ -153,7 +153,7 @@ function progressiveTax(
 const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
   // -------------------------------------------------------------------------
-  // UNITED STATES — USD
+  // UNITED STATES, USD
   // 2025 tax year figures (IRS Rev. Proc. 2024-40 + OBBB amendments).
   // Standard deduction: $15,750 single / $31,500 MFJ (post-OBBB).
   // Social Security wage base 2025: $176,100.
@@ -210,22 +210,22 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "progressive-country",
       confidence: "partial",
       label: isRetired ? "US federal estimate (2025)" : "US federal + payroll estimate (2025)",
-      missingFactor: "State income tax not included — adds 0–13% depending on state.",
+      missingFactor: "State income tax not included, adds 0–13% depending on state.",
       note: isRetired
-        ? "Brackets and standard deduction are exact 2025 IRS figures (OBBB-adjusted). State and local taxes are not included — these add 0–13% depending on state and can materially change the result."
-        : "Brackets and standard deduction are exact 2025 IRS figures (OBBB-adjusted). Payroll taxes included (SS 6.2% up to $176,100, Medicare 1.45%, Additional Medicare 0.9% above threshold). State and local taxes are not included — these add 0–13% depending on state.",
+        ? "Brackets and standard deduction are exact 2025 IRS figures (OBBB-adjusted). State and local taxes are not included, these add 0–13% depending on state and can materially change the result."
+        : "Brackets and standard deduction are exact 2025 IRS figures (OBBB-adjusted). Payroll taxes included (SS 6.2% up to $176,100, Medicare 1.45%, Additional Medicare 0.9% above threshold). State and local taxes are not included, these add 0–13% depending on state.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // UNITED KINGDOM — GBP
+  // UNITED KINGDOM, GBP
   // 2024-25 HMRC figures. Personal allowance £12,570.
   // Income tax: 20% basic (up to £50,270), 40% higher (£50,270–£125,140),
   //   45% additional (above £125,140). Personal allowance tapers to zero
   //   between £100,000–£125,140 (effective 60% rate in that band).
   // Employee Class 1 NI (2024-25): 8% on £12,570–£50,270, then 2% above.
   //   (Rate was cut from 12% → 10% Jan 2024, then → 8% Apr 2024.)
-  // No NI on pension income. No joint filing — married = same as single.
+  // No NI on pension income. No joint filing, married = same as single.
   // -------------------------------------------------------------------------
   GB: ({ annualIncome, isRetired }) => {
     const personalAllowance = 12570;
@@ -266,9 +266,9 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   },
 
   // -------------------------------------------------------------------------
-  // PORTUGAL — EUR
+  // PORTUGAL, EUR
   // 2024 IRS brackets (Continente). Conditional: IFICI / NHR special regime.
-  // Key: answers.pt_ifici (note: calculator may also pass pt_nhr — both checked)
+  // Key: answers.pt_ifici (note: calculator may also pass pt_nhr, both checked)
   // -------------------------------------------------------------------------
   PT: ({ annualIncome, isRetired, incomeScenario = isRetired ? "retired" : "local", answers }) => {
     const ificiAnswer = answers?.pt_ifici ?? answers?.pt_nhr;
@@ -280,7 +280,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
         confidence: "partial",
         label: "Portugal IFICI / NHR planning estimate",
         missingFactor: "Income classification (employment vs passive vs pension) changes the treatment.",
-        note: "The IFICI flat rate (20% on qualifying Portuguese-source income) is well-defined in legislation. Main uncertainty: whether your specific income streams qualify — foreign employment, pension, and passive income each have different treatment. Confirm with a Portugal-licensed tax advisor before relying on this number.",
+        note: "The IFICI flat rate (20% on qualifying Portuguese-source income) is well-defined in legislation. Main uncertainty: whether your specific income streams qualify, foreign employment, pension, and passive income each have different treatment. Confirm with a Portugal-licensed tax advisor before relying on this number.",
       };
     }
 
@@ -303,19 +303,19 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "progressive-country",
       confidence: "simplified",
       label: "Portugal IRS estimate (2024 Continente brackets)",
-      missingFactor: "Personal deductions and household splitting not modelled — real rate is often lower.",
+      missingFactor: "Personal deductions and household splitting not modelled, real rate is often lower.",
       note: "National brackets are current (2024 Continente). Not modelled: household income splitting (declaração conjunta), personal deductions (health, education, housing interest), solidarity surcharges above €80k, and Madeira/Azores rates. Real effective rate can be materially lower once deductions are applied.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // SPAIN — EUR
+  // SPAIN, EUR
   // 2024 national (estatal) + autonomous community average overlay.
-  // Conditional: Beckham Law (Régimen de Impatriados) — answers.es_beckham
+  // Conditional: Beckham Law (Régimen de Impatriados), answers.es_beckham
   // -------------------------------------------------------------------------
   ES: ({ annualIncome, filing, incomeScenario = "local", answers }) => {
     if ((incomeScenario === "remote" || incomeScenario === "local") && answers?.es_beckham === "yes") {
-      // Beckham Law: 24% flat up to €600k, 47% flat on the excess (not 30% —
+      // Beckham Law: 24% flat up to €600k, 47% flat on the excess (not 30%,
       // verified against current AEAT/Beckham Law guidance). Blend the two
       // bands into a single effective rate on total income.
       const taxOwed = annualIncome <= 600000
@@ -350,12 +350,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     // Each comunidad autónoma sets its own rates independently.
     // Source: AEAT + regional BOE publications 2024.
     const COMMUNITY_BRACKETS: Record<string, Array<{ upTo: number; rate: number }>> = {
-      MD: [ // Madrid — most competitive
+      MD: [ // Madrid, most competitive
         { upTo: 12450, rate: 0.09 }, { upTo: 17707, rate: 0.12 },
         { upTo: 33007, rate: 0.14 }, { upTo: 53407, rate: 0.175 },
         { upTo: Infinity, rate: 0.205 },
       ],
-      CT: [ // Catalonia — highest overall
+      CT: [ // Catalonia, highest overall
         { upTo: 12450, rate: 0.105 }, { upTo: 17707, rate: 0.12 },
         { upTo: 21000, rate: 0.14 }, { upTo: 33007, rate: 0.175 },
         { upTo: 53407, rate: 0.2175 }, { upTo: 90000, rate: 0.2375 },
@@ -374,13 +374,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
         { upTo: 80000, rate: 0.25 }, { upTo: 120000, rate: 0.255 },
         { upTo: 175000, rate: 0.26 }, { upTo: Infinity, rate: 0.265 },
       ],
-      PV: [ // Basque Country (foral — own system, approximated)
+      PV: [ // Basque Country (foral, own system, approximated)
         { upTo: 15450, rate: 0.07 }, { upTo: 25450, rate: 0.10 },
         { upTo: 35450, rate: 0.15 }, { upTo: 60450, rate: 0.20 },
         { upTo: 90450, rate: 0.22 }, { upTo: 180450, rate: 0.25 },
         { upTo: Infinity, rate: 0.28 },
       ],
-      NC: [ // Navarre (foral — own system, approximated)
+      NC: [ // Navarre (foral, own system, approximated)
         { upTo: 12450, rate: 0.09 }, { upTo: 19800, rate: 0.12 },
         { upTo: 32200, rate: 0.14 }, { upTo: 48600, rate: 0.18 },
         { upTo: 68400, rate: 0.215 }, { upTo: Infinity, rate: 0.235 },
@@ -442,7 +442,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
         { upTo: 33007, rate: 0.14 }, { upTo: 53407, rate: 0.175 },
         { upTo: Infinity, rate: 0.205 },
       ],
-      CE: [ // Ceuta and Melilla (50% general IRPF rebate — modelled as halved community rates)
+      CE: [ // Ceuta and Melilla (50% general IRPF rebate, modelled as halved community rates)
         { upTo: 12450, rate: 0.05 }, { upTo: 20200, rate: 0.06 },
         { upTo: 35200, rate: 0.07 }, { upTo: 60000, rate: 0.09 },
         { upTo: Infinity, rate: 0.11 },
@@ -474,23 +474,23 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "progressive-country",
       confidence: hasRegion ? "partial" : "simplified",
       label: hasRegion
-        ? `Spain IRPF — ${REGION_NAMES[region] ?? region} (2024)`
-        : "Spain IRPF estimate (2024 — select region to improve)",
+        ? `Spain IRPF, ${REGION_NAMES[region] ?? region} (2024)`
+        : "Spain IRPF estimate (2024, select region to improve)",
       missingFactor: hasRegion
         ? (isForalTerritory
-          ? `${REGION_NAMES[region]} has a separate foral system — rates are approximate.`
+          ? `${REGION_NAMES[region]} has a separate foral system, rates are approximate.`
           : "Major personal deductions (pension contributions, mortgage) not modelled.")
-        : "Autonomous region matters — Madrid vs Catalonia can differ by 5–8 pp.",
+        : "Autonomous region matters, Madrid vs Catalonia can differ by 5–8 pp.",
       note: hasRegion
         ? (isForalTerritory
-          ? `${REGION_NAMES[region]} operates under a separate foral tax system with its own administration. These brackets approximate the foral rates — consult a local advisor for accurate figures. Personal deductions not modelled.`
+          ? `${REGION_NAMES[region]} operates under a separate foral tax system with its own administration. These brackets approximate the foral rates, consult a local advisor for accurate figures. Personal deductions not modelled.`
           : `2024 national IRPF combined with ${REGION_NAMES[region]} autonomous community rates. Personal deductions (pension contributions, mortgage interest, childcare) can reduce taxable income and are not modelled. Income must be passed in EUR.`)
-        : "National brackets are 2024 IRPF figures. The autonomous community overlay is a broad average — actual combined rates range from ~19% effective (Madrid) to 47%+ top marginal (Catalonia). Select your region above to significantly improve accuracy. Income must be passed in EUR.",
+        : "National brackets are 2024 IRPF figures. The autonomous community overlay is a broad average, actual combined rates range from ~19% effective (Madrid) to 47%+ top marginal (Catalonia). Select your region above to significantly improve accuracy. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // MEXICO — MXN
+  // MEXICO, MXN
   // 2024 ISR brackets (same structure as prior years, inflation-indexed).
   // No joint filing. Same brackets for all statuses.
   // -------------------------------------------------------------------------
@@ -513,12 +513,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Mexico ISR federal income tax (2024)",
       missingFactor: "IMSS social security and state payroll taxes not included.",
-      note: "ISR brackets are 2024 federal figures. Not modelled: IMSS social security (~2-3% employee share on capped base), INFONAVIT housing fund contributions, or state payroll taxes. The ISR system also has a large employer-side subsidy (subsidio al empleo) at lower incomes that reduces employee liability — not reflected here. Income must be passed in MXN.",
+      note: "ISR brackets are 2024 federal figures. Not modelled: IMSS social security (~2-3% employee share on capped base), INFONAVIT housing fund contributions, or state payroll taxes. The ISR system also has a large employer-side subsidy (subsidio al empleo) at lower incomes that reduces employee liability, not reflected here. Income must be passed in MXN.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // CANADA — CAD
+  // CANADA, CAD
   // 2025 federal brackets (indexed annually).
   // Married: spousal amount credit (~CAD 2,600 tax reduction equivalent).
   // Retired: age amount credit (~CAD 1,900 tax reduction equivalent).
@@ -538,7 +538,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
     // Province-specific marginal rate overlays (2024 combined avg effective additions)
     const PROVINCE_OVERLAY: Record<string, number> = {
-      AB: 0.10,   // Alberta — lowest: no surtax
+      AB: 0.10,   // Alberta, lowest: no surtax
       BC: 0.145,  // British Columbia
       MB: 0.175,  // Manitoba
       NB: 0.195,  // New Brunswick
@@ -548,7 +548,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       NU: 0.115,  // Nunavut
       ON: 0.1316, // Ontario (incl. surtax effect avg)
       PE: 0.185,  // Prince Edward Island
-      QC: 0.2575, // Quebec — highest
+      QC: 0.2575, // Quebec, highest
       SK: 0.145,  // Saskatchewan
       YT: 0.15,   // Yukon
     };
@@ -567,10 +567,10 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: hasProvince ? "partial" : "simplified",
       label: hasProvince
         ? `Canada federal + ${province} provincial estimate (2025)`
-        : "Canada federal + provincial estimate (2025 — select province)",
+        : "Canada federal + provincial estimate (2025, select province)",
       missingFactor: hasProvince
         ? "CPP contributions (~5.95% up to CAD 68,500) not included."
-        : "Province can swing combined rate by 10–15 pp — select province for accuracy.",
+        : "Province can swing combined rate by 10–15 pp, select province for accuracy.",
       note: hasProvince
         ? `Federal brackets are exact 2025 figures. ${province} provincial rate applied. CPP contributions (~5.95% on earnings up to CAD 68,500) are not modelled. Provincial credits and deductions vary and are not fully captured.`
         : "Federal brackets are 2025 figures. Provincial overlay (~13% average) is the dominant source of uncertainty: Alberta ~10%, Ontario ~13.2%, British Columbia ~14.5%, Quebec ~25.75%. The real combined rate can differ by 10–15 pp depending on province. Select your province above to improve accuracy.",
@@ -578,7 +578,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   },
 
   // -------------------------------------------------------------------------
-  // GERMANY — EUR
+  // GERMANY, EUR
   // 2024 Einkommensteuer. Ehegattensplitting for married couples.
   // Solidarity surcharge: 5.5% of income tax where tax > €17,543 (single)
   // or > €35,086 (joint). Church tax not modeled.
@@ -603,7 +603,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const solidarityThresholdTax = filing === "married" ? 35086 : 17543;
     const solidarity = totalTax > solidarityThresholdTax ? baseTaxRate * 0.055 : 0;
 
-    // Church tax conditional (applies to registered members — ~8-9% of income tax)
+    // Church tax conditional (applies to registered members, ~8-9% of income tax)
     const churchTaxApplies = answers?.de_church_tax === "yes";
     const churchTax = churchTaxApplies ? (baseTaxRate + solidarity) * 0.085 : 0;
 
@@ -619,22 +619,22 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
         ? "Germany Einkommensteuer + Soli + Kirchensteuer (2024)"
         : "Germany Einkommensteuer + Soli (2024)",
       missingFactor: isWorker
-        ? "Employee social insurance (~20% combined) not included — major gap for workers."
+        ? "Employee social insurance (~20% combined) not included, major gap for workers."
         : "Church tax (~8-9% of income tax) not included unless selected above.",
       note: isWorker
-        ? "National brackets and Ehegattensplitting are structurally correct. Major omissions: employee social insurance contributions total approximately 20% (health ~7.3%, pension ~9.3%, unemployment ~1.3%, long-term care ~1.7%) — these dramatically increase the real total burden for working residents. This estimate understates total deductions from gross income for an employed person by a wide margin."
-        : `Retirees do not pay social insurance on pension income, so this estimate is more reliable for retired residents. Church tax (${churchTaxApplies ? "included at 8.5% of income tax" : "not included — select above if applicable"}) and investment income (Abgeltungsteuer 25%) are not modelled.`,
+        ? "National brackets and Ehegattensplitting are structurally correct. Major omissions: employee social insurance contributions total approximately 20% (health ~7.3%, pension ~9.3%, unemployment ~1.3%, long-term care ~1.7%), these dramatically increase the real total burden for working residents. This estimate understates total deductions from gross income for an employed person by a wide margin."
+        : `Retirees do not pay social insurance on pension income, so this estimate is more reliable for retired residents. Church tax (${churchTaxApplies ? "included at 8.5% of income tax" : "not included, select above if applicable"}) and investment income (Abgeltungsteuer 25%) are not modelled.`,
     };
   },
 
   // -------------------------------------------------------------------------
-  // NETHERLANDS — EUR
+  // NETHERLANDS, EUR
   // 2024 Box 1 rates. No joint filing.
   // Working: Box 1 has a combined income-tax + national insurance band
   // up to €75,518 at 36.97%, then 49.50% above.
   // Retired (AOW recipients): reduced rate ~19.36% on first ~€38,098
   // (no AOW premium), then 49.50%.
-  // 30% ruling: not modeled here — flagged in notes.
+  // 30% ruling: not modeled here, flagged in notes.
   // -------------------------------------------------------------------------
   NL: ({ annualIncome, isRetired, answers }) => {
     const brackets = isRetired
@@ -663,17 +663,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
         : "Netherlands Box 1 income tax (2024)",
       missingFactor: ruling30
         ? "Box 2/3 taxes and exact ruling cap (€246,000/yr salary limit) not modelled."
-        : "30% ruling not modelled — can reduce effective rate substantially for qualifying expats.",
+        : "30% ruling not modelled, can reduce effective rate substantially for qualifying expats.",
       note: ruling30
         ? "30% ruling applied: 30% of salary treated as tax-free expense allowance, reducing the taxable base to 70%. The ruling has a maximum salary of €246,000/yr (2024) and lasts up to 5 years. Box 2 (substantial interest) and Box 3 (notional return on savings) are not included."
-        : "Box 1 rate structure is correct (combined income tax + national insurance). The 30% ruling for qualifying expats (tax-free allowance on 30% of salary for up to 5 years) can reduce effective rates substantially — select above if you qualify. Box 2 and Box 3 taxes are not included. Income must be passed in EUR.",
+        : "Box 1 rate structure is correct (combined income tax + national insurance). The 30% ruling for qualifying expats (tax-free allowance on 30% of salary for up to 5 years) can reduce effective rates substantially, select above if you qualify. Box 2 and Box 3 taxes are not included. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // AUSTRIA — EUR
+  // AUSTRIA, EUR
   // 2024 Einkommensteuer. Progressive brackets; married filing not available
-  // (joint assessment not used — spouses file individually).
+  // (joint assessment not used, spouses file individually).
   // Employee social insurance: ~18.12% combined (health 3.87%, pension 10.25%,
   // unemployment 3%, accident 1%). Not on pension income.
   // -------------------------------------------------------------------------
@@ -698,12 +698,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Austria Einkommensteuer + social insurance (2024)",
       missingFactor: "Employee social insurance (~18.12%) included; commuter allowance and other deductions not modelled.",
-      note: "Uses 2024 Austrian income tax brackets with employee social insurance (~18.12% combined: health 3.87%, pension 10.25%, unemployment 3%, accident 1%) applied to working income. The traffic tax credit (Verkehrsabsetzbetrag), sole-earner credit, and pension credit are not modelled — effective rates may be somewhat overstated. No joint filing in Austria. Income must be passed in EUR.",
+      note: "Uses 2024 Austrian income tax brackets with employee social insurance (~18.12% combined: health 3.87%, pension 10.25%, unemployment 3%, accident 1%) applied to working income. The traffic tax credit (Verkehrsabsetzbetrag), sole-earner credit, and pension credit are not modelled, effective rates may be somewhat overstated. No joint filing in Austria. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // BELGIUM — EUR
+  // BELGIUM, EUR
   // 2024 personenbelasting / impôt des personnes physiques.
   // Belgium has national + communal surcharges (avg ~7% of national tax).
   // Married / legally cohabiting: income splitting may apply (complex).
@@ -740,12 +740,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Belgium income tax + communal surcharge (2024)",
       missingFactor: "Communal surcharge (0–9%) averaged at 7%; full quotient conjugal not modelled.",
-      note: "Uses 2024 Belgian national brackets with employment income deduction (~30% up to EUR 5,520), average communal surcharge (7% of national tax), and employee social insurance (~13.07%). Married income splitting (quotient conjugal) is simplified — real benefit for couples with unequal incomes is larger. The extensive Belgian tax credit system (tax-free allowance, family credits) is not fully modelled. Income must be passed in EUR.",
+      note: "Uses 2024 Belgian national brackets with employment income deduction (~30% up to EUR 5,520), average communal surcharge (7% of national tax), and employee social insurance (~13.07%). Married income splitting (quotient conjugal) is simplified, real benefit for couples with unequal incomes is larger. The extensive Belgian tax credit system (tax-free allowance, family credits) is not fully modelled. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // COSTA RICA — CRC
+  // COSTA RICA, CRC
   // 2024 Impuesto sobre la Renta brackets (employment income).
   // No joint filing.
   // -------------------------------------------------------------------------
@@ -763,12 +763,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: isRetired ? "partial" : "simplified",
       label: "Costa Rica income tax (2024)",
       missingFactor: isRetired ? "Pension income taxed at same brackets; CCSS not applicable to pension." : "CCSS employee contributions (~9%) not included for local employment.",
-      note: "Income tax brackets are 2024 figures. Key omission: CCSS (Caja Costarricense de Seguro Social) employee contributions are approximately 9% of gross salary on top of income tax. For a remote worker paying foreign social security, this may not apply — but for locally-employed residents it materially increases total deductions. Income must be passed in CRC.",
+      note: "Income tax brackets are 2024 figures. Key omission: CCSS (Caja Costarricense de Seguro Social) employee contributions are approximately 9% of gross salary on top of income tax. For a remote worker paying foreign social security, this may not apply, but for locally-employed residents it materially increases total deductions. Income must be passed in CRC.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // FRANCE — EUR
+  // FRANCE, EUR
   // 2024 IR. Quotient familial: income ÷ parts, tax × parts.
   // Single = 1 part, married/PACS = 2 parts.
   // Social charges: CSG+CRDS 9.7% on earned income; 6.6% (reduced) on pensions.
@@ -794,13 +794,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "progressive-country",
       confidence: "simplified",
       label: "France IR + CSG/CRDS (2024)",
-      missingFactor: "Child parts (quotient familial) and tax credits not modelled — real rate lower for families.",
-      note: "National brackets and 2-part quotient familial for married/PACS filers are structurally correct. Key omissions: child parts (each child adds 0.5 part, significantly reducing tax for families), the large array of tax credits (childcare, energy, home employment), and flat-rate social charges on investment income. The quotient familial system is one of the most family-sensitive in the world — this model understates the benefit for households with children. Income must be passed in EUR.",
+      missingFactor: "Child parts (quotient familial) and tax credits not modelled, real rate lower for families.",
+      note: "National brackets and 2-part quotient familial for married/PACS filers are structurally correct. Key omissions: child parts (each child adds 0.5 part, significantly reducing tax for families), the large array of tax credits (childcare, energy, home employment), and flat-rate social charges on investment income. The quotient familial system is one of the most family-sensitive in the world, this model understates the benefit for households with children. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // ITALY — EUR
+  // ITALY, EUR
   // 2024 IRPEF. No joint filing. Regional (~1.23-3.33%) + municipal (~0-0.9%)
   // surtax modeled at 2% combined average.
   // -------------------------------------------------------------------------
@@ -814,7 +814,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       // Flat Tax for New Residents: €100,000/yr on all foreign-source income (fixed sum, not rate-based)
       // On Italian-source income: standard IRPEF rates apply.
       // Simplified: model as a flat €100k annual tax on foreign income (very high earner regime).
-      const flatTaxAmount = 100000; // EUR — fixed annual substitute tax
+      const flatTaxAmount = 100000; // EUR, fixed annual substitute tax
       const effectiveRate = annualIncome > 0 ? flatTaxAmount / annualIncome : 0;
       return {
         effectiveRate: clampRate(effectiveRate),
@@ -835,27 +835,27 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       CAL: 0.0330, // Calabria (highest mainland)
       CAM: 0.0320, // Campania
       EMR: 0.0133, // Emilia-Romagna
-      FVG: 0.0123, // Friuli-Venezia Giulia (minimum — autonomous)
-      LAZ: 0.0330, // Lazio (Rome — highest)
+      FVG: 0.0123, // Friuli-Venezia Giulia (minimum, autonomous)
+      LAZ: 0.0330, // Lazio (Rome, highest)
       LIG: 0.0173, // Liguria
       LOM: 0.0173, // Lombardy (Milan)
       MAR: 0.0150, // Marche
       MOL: 0.0220, // Molise
-      PAB: 0.0123, // Bolzano / South Tyrol (autonomous — minimum)
-      PAT: 0.0123, // Trento / Trentino (autonomous — minimum)
+      PAB: 0.0123, // Bolzano / South Tyrol (autonomous, minimum)
+      PAT: 0.0123, // Trento / Trentino (autonomous, minimum)
       PIE: 0.0173, // Piedmont
       PUG: 0.0230, // Puglia
       SAR: 0.0173, // Sardinia (autonomous)
       SIC: 0.0250, // Sicily (autonomous)
       TOS: 0.0173, // Tuscany (Florence)
       UMB: 0.0173, // Umbria
-      VDA: 0.0123, // Aosta Valley (autonomous — minimum)
+      VDA: 0.0123, // Aosta Valley (autonomous, minimum)
       VEN: 0.0173, // Veneto (Venice)
     };
 
     const itRegion = answers?.it_region ?? "";
     const hasItRegion = !!IT_REGION_SURTAX[itRegion];
-    // Municipal surtax: average 0.5% (range 0–0.9% — not region-selectable here)
+    // Municipal surtax: average 0.5% (range 0–0.9%, not region-selectable here)
     const municipalSurtax = 0.005;
     const regionalSurtax = IT_REGION_SURTAX[itRegion] ?? 0.020; // fallback avg
 
@@ -874,18 +874,18 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: hasItRegion ? "partial" : "simplified",
       label: hasItRegion
         ? `Italy IRPEF + ${IT_REGION_NAMES[itRegion] ?? itRegion} surtax (2024)`
-        : "Italy IRPEF + regional/municipal surtax (2024 — select region)",
+        : "Italy IRPEF + regional/municipal surtax (2024, select region)",
       missingFactor: hasItRegion
         ? "INPS social contributions (~9.2%) and personal deductions not modelled."
-        : "Regional surtax varies 1.2–3.3% — Lazio/Calabria vs Bolzano can differ by ~2 pp.",
+        : "Regional surtax varies 1.2–3.3%, Lazio/Calabria vs Bolzano can differ by ~2 pp.",
       note: hasItRegion
         ? `2024 IRPEF brackets with ${IT_REGION_NAMES[itRegion] ?? itRegion} regional surtax (${(IT_REGION_SURTAX[itRegion]! * 100).toFixed(2)}%) and average municipal surtax (0.5%). INPS employee social contributions (~9.2%) not included. Personal deductions (healthcare, mortgage interest) not modelled. Income must be passed in EUR.`
-        : "National IRPEF brackets are 2024 figures. Regional surtax ranges from 1.23% (Basilicata, autonomous regions) to 3.33% (Lazio, Calabria). Municipal surtax adds 0–0.9%. Select your region above to use the exact surtax rate. Italy's Flat Tax for New Residents (€100k/yr) is a separate regime — use the question above to model it. Income must be passed in EUR.",
+        : "National IRPEF brackets are 2024 figures. Regional surtax ranges from 1.23% (Basilicata, autonomous regions) to 3.33% (Lazio, Calabria). Municipal surtax adds 0–0.9%. Select your region above to use the exact surtax rate. Italy's Flat Tax for New Residents (€100k/yr) is a separate regime, use the question above to model it. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // IRELAND — EUR
+  // IRELAND, EUR
   // 2025 rates. Married (single-earner): standard rate band widens to €51,000.
   // USC 2025: threshold raised, revised bands.
   // PRSI 4.1% from Oct 2024 (increased from 4%).
@@ -900,7 +900,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       { upTo: Infinity, rate: 0.40 },
     ]) * annualIncome;
 
-    // 2025 tax credits — applied directly against tax liability
+    // 2025 tax credits, applied directly against tax liability
     const personalCredit = 1875;
     const payeCredit = isRetired ? 0 : 1875; // working only
     const marriedCredit = filing === "married" ? 1875 : 0;
@@ -927,17 +927,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "partial",
       label: "Ireland PAYE + USC + PRSI + tax credits (2025)",
       missingFactor: "Home carer credit, rent credit, and other personal reliefs not modelled.",
-      note: "2025 rate structure with key tax credits applied: personal credit (€1,875), PAYE employee credit (€1,875 for workers), married person's credit (€1,875), and age credit (€245 for 65+). USC and PRSI correctly excluded for retirees. Remaining omissions: home carer credit (€1,800), rent tax credit (€1,000), medical/tuition expenses, and pension contribution relief — these reduce tax further for eligible filers. Income must be passed in EUR.",
+      note: "2025 rate structure with key tax credits applied: personal credit (€1,875), PAYE employee credit (€1,875 for workers), married person's credit (€1,875), and age credit (€245 for 65+). USC and PRSI correctly excluded for retirees. Remaining omissions: home carer credit (€1,800), rent tax credit (€1,000), medical/tuition expenses, and pension contribution relief, these reduce tax further for eligible filers. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // AUSTRALIA — AUD
+  // AUSTRALIA, AUD
   // 2024-25 rates (Stage 3 tax cuts enacted from 1 July 2024).
   // No joint filing. Medicare Levy: 2% working, 1% retired.
   // -------------------------------------------------------------------------
   AU: ({ annualIncome, isRetired }) => {
-    // 2024-25 brackets (Stage 3 cuts — new thresholds effective 1 Jul 2024)
+    // 2024-25 brackets (Stage 3 cuts, new thresholds effective 1 Jul 2024)
     const rate = progressiveTax(annualIncome, [
       { upTo: 18200, rate: 0.00 },
       { upTo: 45000, rate: 0.19 },
@@ -952,12 +952,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "partial",
       label: "Australia income tax + Medicare Levy (2024-25)",
       missingFactor: "LITO (low income tax offset) not applied; state/territory taxes not applicable.",
-      note: "2024-25 brackets (Stage 3 tax cuts) and Medicare Levy are correct. Minor omission: the Low Income Tax Offset (LITO, up to $700) and Low and Middle Income Tax Offset (LMITO, now expired) are not modelled — effect is small at planning incomes. Superannuation contributions (11.5% employer-side in 2024-25) are not a deduction from employment income. Income must be passed in AUD.",
+      note: "2024-25 brackets (Stage 3 tax cuts) and Medicare Levy are correct. Minor omission: the Low Income Tax Offset (LITO, up to $700) and Low and Middle Income Tax Offset (LMITO, now expired) are not modelled, effect is small at planning incomes. Superannuation contributions (11.5% employer-side in 2024-25) are not a deduction from employment income. Income must be passed in AUD.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // NEW ZEALAND — NZD
+  // NEW ZEALAND, NZD
   // 2024-25 rates. No joint filing.
   // Budget 2024 increased the 17.5% bracket threshold from NZD 48k to NZD 53.5k
   // and the 30% bracket from NZD 70k to NZD 78.1k (effective 31 Jul 2024).
@@ -976,12 +976,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "partial",
       label: "New Zealand PAYE (2024-25, Budget 2024 thresholds)",
       missingFactor: "ACC levies (~1.6% on employment income) not included.",
-      note: "2024-25 brackets including Budget 2024 threshold increases are correct. ACC levies (~1.6% on employment income up to ~NZD 142,283) are not included — these add approximately 1–1.6 pp to the effective rate for employees. No joint filing. NZ Super is taxable at the same rates. Income must be passed in NZD.",
+      note: "2024-25 brackets including Budget 2024 threshold increases are correct. ACC levies (~1.6% on employment income up to ~NZD 142,283) are not included, these add approximately 1–1.6 pp to the effective rate for employees. No joint filing. NZ Super is taxable at the same rates. Income must be passed in NZD.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // JAPAN — JPY
+  // JAPAN, JPY
   // 2024 national rates + reconstruction surtax 2.1% of income tax.
   // Local inhabitant tax: flat 10% of income.
   // No joint filing.
@@ -1007,12 +1007,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Japan national + surtax + local inhabitant tax (2024)",
       missingFactor: "Employee social insurance (~14–15% combined) not included.",
-      note: "National brackets, reconstruction surtax, and local inhabitant tax (flat 10%) are structurally correct. Major omission: employee social insurance premiums total approximately 14–15% of gross salary (health ~5%, pension ~9.15%, employment ~0.6%) — this is the dominant real-world deduction for employed residents and is not modelled. Employment income deduction (kyuyo shotoku kojo) also not applied, which means this estimate may overstate income tax on employment income. Income must be passed in JPY.",
+      note: "National brackets, reconstruction surtax, and local inhabitant tax (flat 10%) are structurally correct. Major omission: employee social insurance premiums total approximately 14–15% of gross salary (health ~5%, pension ~9.15%, employment ~0.6%), this is the dominant real-world deduction for employed residents and is not modelled. Employment income deduction (kyuyo shotoku kojo) also not applied, which means this estimate may overstate income tax on employment income. Income must be passed in JPY.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // SOUTH KOREA — KRW
+  // SOUTH KOREA, KRW
   // 2024 national brackets. Local income tax = 10% surcharge on national tax.
   // No joint filing.
   // -------------------------------------------------------------------------
@@ -1036,24 +1036,24 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "South Korea national + local surtax (2024)",
       missingFactor: "National Health Insurance and pension contributions (~8% combined) not included.",
-      note: "National brackets and 10% local surtax are correct. Key omissions: National Health Insurance (~3.545% employee) and National Pension (~4.5% employee up to KRW 5,900,000/mo) together add approximately 8% to the total burden for most employees — a material gap. Employment income deduction (near income) also not applied, which overstates income tax on employment income at lower incomes. Income must be passed in KRW.",
+      note: "National brackets and 10% local surtax are correct. Key omissions: National Health Insurance (~3.545% employee) and National Pension (~4.5% employee up to KRW 5,900,000/mo) together add approximately 8% to the total burden for most employees, a material gap. Employment income deduction (near income) also not applied, which overstates income tax on employment income at lower incomes. Income must be passed in KRW.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // UNITED ARAB EMIRATES — AED — No personal income tax
+  // UNITED ARAB EMIRATES, AED, No personal income tax
   // -------------------------------------------------------------------------
   AE: () => ({
     effectiveRate: 0,
     model: "none",
     confidence: "verified",
     label: "No personal income tax",
-    missingFactor: "No personal income tax — this estimate is exact.",
+    missingFactor: "No personal income tax, this estimate is exact.",
     note: "The UAE does not levy personal income tax on employment or investment income. A 9% corporate tax applies to businesses with profits above AED 375,000, but there is no individual income tax.",
   }),
 
   // -------------------------------------------------------------------------
-  // SINGAPORE — SGD
+  // SINGAPORE, SGD
   // 2024 YA rates. No joint filing.
   // Earned Income Relief (EIR): $1,000 below age 55; senior relief modeled
   // as $8,000 for retirees. NSman and other personal reliefs not modeled.
@@ -1085,12 +1085,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Singapore resident progressive (2024 YA)",
       missingFactor: "CPF contributions (~20% employee) not modelled; residency status affects rate.",
-      note: "2024 YA resident rates with basic earned income relief applied. Key gaps: non-residents pay a flat 15% or progressive rates, whichever is higher — this model assumes tax residency which requires ≥183 days in Singapore. CPF contributions (~20% employee up to SGD 6,800/mo) are a significant real deduction but partly a savings mechanism. Various personal reliefs (NSman, parent, spouse) can reduce tax by thousands of dollars. Income must be passed in SGD.",
+      note: "2024 YA resident rates with basic earned income relief applied. Key gaps: non-residents pay a flat 15% or progressive rates, whichever is higher, this model assumes tax residency which requires ≥183 days in Singapore. CPF contributions (~20% employee up to SGD 6,800/mo) are a significant real deduction but partly a savings mechanism. Various personal reliefs (NSman, parent, spouse) can reduce tax by thousands of dollars. Income must be passed in SGD.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // SWITZERLAND — CHF
+  // SWITZERLAND, CHF
   // 2024 federal rates (separate scales for single vs married).
   // Cantonal + municipal overlay: Zurich mid-range benchmark (~13%).
   // Range is wide: Zug ~18% total, Zurich ~27%, Geneva ~37%.
@@ -1132,13 +1132,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "country-plus-province",
       confidence: "simplified",
       label: "Switzerland federal + cantonal estimate (2024 mid-range)",
-      missingFactor: "Rate varies widely by canton — Zug ~18% total, Zurich ~27%, Geneva ~37%.",
-      note: "Federal brackets are exact 2024 Swiss figures (separate single/married scales). Cantonal and municipal rates use a mid-range overlay (~13%) benchmarked to Zurich. Actual combined rates range from ~18% (Zug) to ~37% (Geneva, Vaud) — this estimate can be off by 10+ pp depending on location. Swiss social insurance contributions not included. Income must be passed in CHF.",
+      missingFactor: "Rate varies widely by canton, Zug ~18% total, Zurich ~27%, Geneva ~37%.",
+      note: "Federal brackets are exact 2024 Swiss figures (separate single/married scales). Cantonal and municipal rates use a mid-range overlay (~13%) benchmarked to Zurich. Actual combined rates range from ~18% (Zug) to ~37% (Geneva, Vaud), this estimate can be off by 10+ pp depending on location. Swiss social insurance contributions not included. Income must be passed in CHF.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // DENMARK — DKK
+  // DENMARK, DKK
   // 2024 rates. AM-bidrag (labour market contribution) 8% on gross,
   // deducted before income tax. Not applicable to pension income.
   // Bottom tax + health tax (~12.5%) + top tax (15% above DKK 588,900).
@@ -1171,12 +1171,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: isRetired ? "partial" : "partial",
       label: "Denmark income tax + AM-bidrag + municipal (2024)",
       missingFactor: "Municipal rate varies by kommune (Copenhagen 23.5%+); church tax (~0.7%) not included.",
-      note: "Structure is correct: AM-bidrag (8% on gross, not on pensions), personal allowance (DKK 49,700), bottom tax (12.01%), average municipal (25.1%), top tax (15% above DKK 588,900). Main omissions: church tax (~0.7%, opt-in) and the share-income tax (aktieindkomstskat) on dividends. Municipal rate varies by kommune — Copenhagen is 23.5%, some rural communes are 26%+. Income must be passed in DKK.",
+      note: "Structure is correct: AM-bidrag (8% on gross, not on pensions), personal allowance (DKK 49,700), bottom tax (12.01%), average municipal (25.1%), top tax (15% above DKK 588,900). Main omissions: church tax (~0.7%, opt-in) and the share-income tax (aktieindkomstskat) on dividends. Municipal rate varies by kommune, Copenhagen is 23.5%, some rural communes are 26%+. Income must be passed in DKK.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // SWEDEN — SEK
+  // SWEDEN, SEK
   // 2024 rates. Municipal tax average ~32% on income above threshold.
   // National state tax: 20% on income above ~SEK 598,500 (2024).
   // No joint filing. Social insurance not modeled (employer-side).
@@ -1210,13 +1210,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "progressive-country",
       confidence: "simplified",
       label: "Sweden municipal + national income tax (2024)",
-      missingFactor: "Jobbskatteavdrag (earned income credit) not modelled — may overstate by 3–5 pp.",
-      note: "Municipal average (32.37%) and national threshold (SEK 598,500) are correct for 2024. Key omission: the jobbskatteavdrag (earned income tax credit) reduces income tax for employed residents — it is income-dependent and can be worth SEK 20,000–35,000/yr, meaning this model overstates effective income tax on employment income by roughly 3–5 pp at mid-range incomes. Municipal rates vary: Stockholm 29.83%, Gothenburg 32.35%. Income must be passed in SEK.",
+      missingFactor: "Jobbskatteavdrag (earned income credit) not modelled, may overstate by 3–5 pp.",
+      note: "Municipal average (32.37%) and national threshold (SEK 598,500) are correct for 2024. Key omission: the jobbskatteavdrag (earned income tax credit) reduces income tax for employed residents, it is income-dependent and can be worth SEK 20,000–35,000/yr, meaning this model overstates effective income tax on employment income by roughly 3–5 pp at mid-range incomes. Municipal rates vary: Stockholm 29.83%, Gothenburg 32.35%. Income must be passed in SEK.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // NORWAY — NOK
+  // NORWAY, NOK
   // 2024 rates. Ordinary income tax 22% flat + bracket tax (trinnskatt).
   // No joint filing. Personal deduction (personfradrag): NOK 88,250.
   // -------------------------------------------------------------------------
@@ -1247,13 +1247,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "progressive-country",
       confidence: isRetired ? "partial" : "simplified",
       label: "Norway ordinary income + bracket tax (2024)",
-      missingFactor: isRetired ? "Standard deduction (minstefradrag) not applied — slight overstatement." : "Employee National Insurance (7.9%) not included — adds ~6–7 pp for workers.",
-      note: "Structure is correct: 22% ordinary income tax on income after personal deduction (NOK 88,250) plus bracket tax (trinnskatt) on gross income. Main omission: employee National Insurance contribution (7.9% on income above NOK 69,650) — this adds approximately 6–7 pp to the effective rate for employed residents. Standard deduction (minstefradrag, 46% of income up to NOK 109,950) is not applied here and would reduce income tax somewhat. Income must be passed in NOK.",
+      missingFactor: isRetired ? "Standard deduction (minstefradrag) not applied, slight overstatement." : "Employee National Insurance (7.9%) not included, adds ~6–7 pp for workers.",
+      note: "Structure is correct: 22% ordinary income tax on income after personal deduction (NOK 88,250) plus bracket tax (trinnskatt) on gross income. Main omission: employee National Insurance contribution (7.9% on income above NOK 69,650), this adds approximately 6–7 pp to the effective rate for employed residents. Standard deduction (minstefradrag, 46% of income up to NOK 109,950) is not applied here and would reduce income tax somewhat. Income must be passed in NOK.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // FINLAND — EUR
+  // FINLAND, EUR
   // 2024 state + average municipal tax.
   // State progressive + municipal average ~21.5% + health insurance premium ~1.5%.
   // No joint filing.
@@ -1282,12 +1282,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Finland state + municipal + health insurance (2024)",
       missingFactor: "Municipal rate varies 18–23%; employee pension contributions (~7.15%) not included.",
-      note: "State brackets are 2024 figures. Municipal average (21.5%) and health insurance premium (1.5%) are correctly applied. Key gaps: municipal rates span 18% (Helsinki) to 23%+ in some rural municipalities — a 5 pp spread on a large portion of income. Employee pension (TyEL, ~7.15%) and unemployment (0.79%) contributions are not modelled. The earned income deduction (ansiotulovähennys) and work income tax credit would reduce effective rates for employed residents, meaning this model somewhat overstates income tax on employment income. Income must be passed in EUR.",
+      note: "State brackets are 2024 figures. Municipal average (21.5%) and health insurance premium (1.5%) are correctly applied. Key gaps: municipal rates span 18% (Helsinki) to 23%+ in some rural municipalities, a 5 pp spread on a large portion of income. Employee pension (TyEL, ~7.15%) and unemployment (0.79%) contributions are not modelled. The earned income deduction (ansiotulovähennys) and work income tax credit would reduce effective rates for employed residents, meaning this model somewhat overstates income tax on employment income. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // POLAND — PLN
+  // POLAND, PLN
   // 2024 PIT. Free amount PLN 30,000. Joint income splitting for married.
   // Social/health contributions: ~23% working; not on pension income.
   // -------------------------------------------------------------------------
@@ -1314,13 +1314,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "progressive-country",
       confidence: isRetired ? "partial" : "simplified",
       label: "Poland PIT + social contributions (2024)",
-      missingFactor: isRetired ? "Free amount (PLN 30,000) applied; pension income modelled simply." : "Health contribution (składka zdrowotna, 9%) changed under 2022 reform — complex interaction with income tax.",
-      note: "PIT brackets and PLN 30,000 free amount are correct. The ~23% social/health overlay is a rough composite — the actual breakdown is: ZUS pension 9.76%, disability 1.5%, sickness 2.45%, health contribution (składka zdrowotna) 9% with no cap. The health contribution changed significantly in 2022 (Polski Ład reform) and is no longer deductible from income tax — this is a major source of real-world complexity not captured here. Result could be off by 3–6 pp depending on income level and contribution base. Income must be passed in PLN.",
+      missingFactor: isRetired ? "Free amount (PLN 30,000) applied; pension income modelled simply." : "Health contribution (składka zdrowotna, 9%) changed under 2022 reform, complex interaction with income tax.",
+      note: "PIT brackets and PLN 30,000 free amount are correct. The ~23% social/health overlay is a rough composite, the actual breakdown is: ZUS pension 9.76%, disability 1.5%, sickness 2.45%, health contribution (składka zdrowotna) 9% with no cap. The health contribution changed significantly in 2022 (Polski Ład reform) and is no longer deductible from income tax, this is a major source of real-world complexity not captured here. Result could be off by 3–6 pp depending on income level and contribution base. Income must be passed in PLN.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // CZECH REPUBLIC — CZK
+  // CZECH REPUBLIC, CZK
   // 2024: 15% on income up to 36× average wage (~CZK 1,582,812); 23% above.
   // Social + health contributions: ~11% employee share on working income.
   // -------------------------------------------------------------------------
@@ -1345,7 +1345,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   },
 
   // -------------------------------------------------------------------------
-  // HUNGARY — HUF
+  // HUNGARY, HUF
   // Flat 15% SZJA. No joint filing.
   // Social contributions: 18.5% working; not on pension income.
   // -------------------------------------------------------------------------
@@ -1362,7 +1362,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   },
 
   // -------------------------------------------------------------------------
-  // GREECE — EUR
+  // GREECE, EUR
   // 2024 progressive income tax. Social contributions: ~13.87% working,
   // reduced rates on pension income (~6%).
   // No joint filing.
@@ -1384,13 +1384,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Greece income tax + social contributions (2024)",
       missingFactor: isRetired ? "Pension social contributions (~6%) included; solidarity surcharge not modelled." : "EFKA social contributions (~13.87%) included; solidarity surcharge (2.2–10%) not modelled.",
-      note: "Brackets and social contribution rates are 2024 figures. Key gaps: the special solidarity contribution (εισφορά αλληλεγγύης) on incomes above €12,000 adds 2.2–10% in additional tax — not modelled. EFKA (social insurance) contributions have a monthly cap (~€6,500/mo) and different rates for self-employed vs employed. The 13.87% employee figure is the employed rate; self-employed pay a different graduated amount. Real effective rate for high earners or self-employed can differ significantly. Income must be passed in EUR.",
+      note: "Brackets and social contribution rates are 2024 figures. Key gaps: the special solidarity contribution (εισφορά αλληλεγγύης) on incomes above €12,000 adds 2.2–10% in additional tax, not modelled. EFKA (social insurance) contributions have a monthly cap (~€6,500/mo) and different rates for self-employed vs employed. The 13.87% employee figure is the employed rate; self-employed pay a different graduated amount. Real effective rate for high earners or self-employed can differ significantly. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // TURKEY — TRY
-  // 2024 brackets (revised annually for inflation — verify each year).
+  // TURKEY, TRY
+  // 2024 brackets (revised annually for inflation, verify each year).
   // No joint filing.
   // -------------------------------------------------------------------------
   TR: ({ annualIncome }) => {
@@ -1405,41 +1405,41 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       effectiveRate: clampRate(rate),
       model: "progressive-country",
       confidence: "placeholder",
-      label: "Turkey progressive income tax (2024 — thresholds unstable)",
-      missingFactor: "Brackets revised mid-year for inflation — figure may be significantly outdated.",
+      label: "Turkey progressive income tax (2024, thresholds unstable)",
+      missingFactor: "Brackets revised mid-year for inflation, figure may be significantly outdated.",
       note: "⚠ Turkey's income tax brackets are revised annually and sometimes mid-year due to high inflation. These approximate 2024 thresholds may be significantly outdated. SGK employee social contributions (~14%: pension 9%, health 5%) are not included. Always verify current-year thresholds via the Turkish Revenue Administration (GİB) before using this for planning. This number should be treated as directional only. Income must be passed in TRY.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // CROATIA — EUR
+  // CROATIA, EUR
   // 2024: Two-band national tax (20% / 30%). Surtax abolished Jan 2024.
-  // Previously had local surtax up to 18% — removed from 2024.
+  // Previously had local surtax up to 18%, removed from 2024.
   // -------------------------------------------------------------------------
   HR: ({ annualIncome }) => {
     const rate = progressiveTax(annualIncome, [
       { upTo: 50400, rate: 0.20 },
       { upTo: Infinity, rate: 0.30 },
     ]);
-    // Surtax abolished from 1 January 2024 — rate now national only
+    // Surtax abolished from 1 January 2024, rate now national only
     return {
       effectiveRate: clampRate(rate),
       model: "progressive-country",
       confidence: "partial",
-      label: "Croatia income tax (2024 — surtax abolished)",
+      label: "Croatia income tax (2024, surtax abolished)",
       missingFactor: "Employee social contributions (~20%) not included.",
-      note: "Brackets are correct: the local surtax (prireza) was abolished from 1 January 2024, so the national rate is now the complete income tax. Main omission: employee social contributions (~20% combined — pension pillar I 15%, pension pillar II 5%, health 16.5% — though health is employer-side) are not included. For a planning-level net income figure, the two national brackets are reliable. Income must be passed in EUR.",
+      note: "Brackets are correct: the local surtax (prireza) was abolished from 1 January 2024, so the national rate is now the complete income tax. Main omission: employee social contributions (~20% combined, pension pillar I 15%, pension pillar II 5%, health 16.5%, though health is employer-side) are not included. For a planning-level net income figure, the two national brackets are reliable. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // ESTONIA — EUR
+  // ESTONIA, EUR
   // 2024: Flat 20% income tax. From 2025 rises to 22%.
   // Social contributions: 1.6% unemployment + 2% funded pension (employee).
   // No joint filing.
   // -------------------------------------------------------------------------
   EE: ({ annualIncome, isRetired }) => {
-    // Using 20% for 2024 (22% from Jan 2025 — noted)
+    // Using 20% for 2024 (22% from Jan 2025, noted)
     const flatRate = 0.20;
     // Employee social: ~3.6% (unemployment 1.6% + funded pension 2%)
     const socialOverlay = isRetired ? 0 : 0.036;
@@ -1449,12 +1449,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Estonia flat income tax + contributions (2024/2025)",
       missingFactor: "Rate rises to 22% from Jan 2025; basic exemption not modelled at lower incomes.",
-      note: "The flat rate is 20% for income earned in 2024, rising to 22% from 1 January 2025 — for forward-looking relocation planning the 22% figure is more relevant and should be used. Employee contributions (~3.6% — unemployment 1.6% + funded pension 2%) are correctly excluded for retirees. The basic exemption (up to €7,848/yr, tapering above €25,200) is not modelled — this understates take-home at lower incomes. Income must be passed in EUR.",
+      note: "The flat rate is 20% for income earned in 2024, rising to 22% from 1 January 2025, for forward-looking relocation planning the 22% figure is more relevant and should be used. Employee contributions (~3.6%, unemployment 1.6% + funded pension 2%) are correctly excluded for retirees. The basic exemption (up to €7,848/yr, tapering above €25,200) is not modelled, this understates take-home at lower incomes. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // LATVIA — EUR
+  // LATVIA, EUR
   // 2024 progressive. Employee social: ~10.5% (pension 10% + unemployment 0.5%).
   // No joint filing.
   // -------------------------------------------------------------------------
@@ -1471,12 +1471,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Latvia progressive income tax + contributions (2024)",
       missingFactor: "Untaxed minimum (€3,744/yr) and health contribution (1.8%) not applied.",
-      note: "Brackets are 2024 figures. Employee social contributions (10.5% composite: pension 10% + unemployment 0.5%) are correctly excluded for retirees. Key omission: the differentiated non-taxable minimum (up to €3,744/yr, tapering at higher incomes) is not applied — this understates take-home at lower to mid incomes. Health insurance contribution (1.8% employee) is also excluded. Income must be passed in EUR.",
+      note: "Brackets are 2024 figures. Employee social contributions (10.5% composite: pension 10% + unemployment 0.5%) are correctly excluded for retirees. Key omission: the differentiated non-taxable minimum (up to €3,744/yr, tapering at higher incomes) is not applied, this understates take-home at lower to mid incomes. Health insurance contribution (1.8% employee) is also excluded. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // LITHUANIA — EUR
+  // LITHUANIA, EUR
   // 2024 progressive. Threshold ~EUR 101,094 for standard bracket.
   // Employee social: ~19.5% (GPM +12.5% social), reduced on pension.
   // No joint filing.
@@ -1495,12 +1495,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Lithuania progressive income tax + contributions (2024)",
       missingFactor: "Full social package (~19.5% incl. health) understated at 12.5% here.",
-      note: "Brackets are 2024 figures. The social overlay here uses only 12.5% (pension portion) — the full employee social package is approximately 19.5% including health insurance (6.98%), making this a material understatement of total deductions for employed residents. Non-taxable minimum (~€7,140/yr, income-tested) is also not applied. For a remote worker paying home-country social insurance, the income tax component alone may be the relevant figure. Income must be passed in EUR.",
+      note: "Brackets are 2024 figures. The social overlay here uses only 12.5% (pension portion), the full employee social package is approximately 19.5% including health insurance (6.98%), making this a material understatement of total deductions for employed residents. Non-taxable minimum (~€7,140/yr, income-tested) is also not applied. For a remote worker paying home-country social insurance, the income tax component alone may be the relevant figure. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // ROMANIA — RON
+  // ROMANIA, RON
   // Flat 10% income tax. High social contributions: CAS 25% + CASS 10%
   // on gross (employee). Retired: CASS 10% health only on pension income.
   // No joint filing.
@@ -1514,14 +1514,14 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "flat",
       confidence: "partial",
       label: "Romania 10% flat income tax + social contributions (2024)",
-      missingFactor: "Social contributions (CAS 25% + CASS 10%) are explicitly modelled — main caveat is CASS floors/ceilings.",
-      note: "The 10% flat income tax is exact. Social contributions are explicitly modelled: CAS 25% (pension) + CASS 10% (health) for working income; CASS 10% health only on pension. The combined rate is legislated and relatively stable. Main omission: CASS has a minimum floor (1× minimum wage, ~RON 3,300/yr) and a ceiling (60× minimum wage) — the ceiling affects very high earners only. No joint filing. Income must be passed in RON.",
+      missingFactor: "Social contributions (CAS 25% + CASS 10%) are explicitly modelled, main caveat is CASS floors/ceilings.",
+      note: "The 10% flat income tax is exact. Social contributions are explicitly modelled: CAS 25% (pension) + CASS 10% (health) for working income; CASS 10% health only on pension. The combined rate is legislated and relatively stable. Main omission: CASS has a minimum floor (1× minimum wage, ~RON 3,300/yr) and a ceiling (60× minimum wage), the ceiling affects very high earners only. No joint filing. Income must be passed in RON.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // BULGARIA — BGN
-  // Flat 10% income tax — lowest in EU. Employee social: ~13.78%.
+  // BULGARIA, BGN
+  // Flat 10% income tax, lowest in EU. Employee social: ~13.78%.
   // No joint filing.
   // -------------------------------------------------------------------------
   BG: ({ annualIncome, isRetired }) => {
@@ -1532,12 +1532,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "partial",
       label: "Bulgaria 10% flat income tax + social contributions (2024)",
       missingFactor: "Social contributions (~13.78%) not applied to pension income; ceiling applies.",
-      note: "The 10% flat SZOD rate is legislated and exact. Employee social contributions (~13.78%: pension 12.9%, health 3.2%, unemployment 0.4% — employee share only) are correctly excluded for retirees. Social contributions have a monthly ceiling (~BGN 3,750/mo); above this only income tax applies. Annual revenue tax deduction (10% of gross for self-employed) is not modelled. Income must be passed in BGN.",
+      note: "The 10% flat SZOD rate is legislated and exact. Employee social contributions (~13.78%: pension 12.9%, health 3.2%, unemployment 0.4%, employee share only) are correctly excluded for retirees. Social contributions have a monthly ceiling (~BGN 3,750/mo); above this only income tax applies. Annual revenue tax deduction (10% of gross for self-employed) is not modelled. Income must be passed in BGN.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // SLOVENIA — EUR
+  // SLOVENIA, EUR
   // 2024 Dohodnina progressive. Slovenia introduced a new 6th bracket (50%)
   // above EUR 105,965 from 2024.
   // No joint filing.
@@ -1555,14 +1555,14 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       effectiveRate: clampRate(rate),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Slovenia Dohodnina (2024 — incl. new 50% top bracket)",
+      label: "Slovenia Dohodnina (2024, incl. new 50% top bracket)",
       missingFactor: "Employee social contributions (~22.1%) and general relief not included.",
-      note: "Brackets are 2024 figures including the new 50% top bracket (introduced 2024). Key omission: employee social contributions total approximately 22.1% (pension 15.5%, health 6.36%, unemployment 0.14%, parental care 0.1%) — a major component of total deductions for employed residents, not modelled here. The general tax relief (splošna olajšava, up to €5,000/yr) is also not applied. Income must be passed in EUR.",
+      note: "Brackets are 2024 figures including the new 50% top bracket (introduced 2024). Key omission: employee social contributions total approximately 22.1% (pension 15.5%, health 6.36%, unemployment 0.14%, parental care 0.1%), a major component of total deductions for employed residents, not modelled here. The general tax relief (splošna olajšava, up to €5,000/yr) is also not applied. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // SLOVAKIA — EUR
+  // SLOVAKIA, EUR
   // 2024: 19% up to EUR 47,537.98; 25% above.
   // Employee social + health: ~13.4%.
   // No joint filing.
@@ -1585,7 +1585,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   },
 
   // -------------------------------------------------------------------------
-  // MALTA — EUR
+  // MALTA, EUR
   // 2024: Real legislated separate single and married rate scales.
   // -------------------------------------------------------------------------
   MT: ({ annualIncome, filing }) => {
@@ -1609,14 +1609,14 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       effectiveRate: clampRate(progressiveTax(annualIncome, brackets)),
       model: "progressive-country",
       confidence: "partial",
-      label: "Malta progressive income tax (2024 — separate scales)",
+      label: "Malta progressive income tax (2024, separate scales)",
       missingFactor: "Social security contributions (~10%, capped) not modelled.",
-      note: "Both single and married tax scales are the legislated 2024 Malta IRD figures and are exact. Social security contributions (~10% employee, capped at a weekly maximum of ~€29.70) add a modest fixed amount at most income levels — not modelled. Malta's Global Residence Programme and Nomad Residence Permit do not change the income tax rate; standard scales apply. Income must be passed in EUR.",
+      note: "Both single and married tax scales are the legislated 2024 Malta IRD figures and are exact. Social security contributions (~10% employee, capped at a weekly maximum of ~€29.70) add a modest fixed amount at most income levels, not modelled. Malta's Global Residence Programme and Nomad Residence Permit do not change the income tax rate; standard scales apply. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // CYPRUS — EUR
+  // CYPRUS, EUR
   // 2024 progressive. No joint filing.
   // GHS (GESY) health levy: 2.65% on working income; 1.7% on pension.
   // -------------------------------------------------------------------------
@@ -1636,13 +1636,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Cyprus income tax + GHS contribution (2024)",
       missingFactor: "Special Defence Contribution (SDC) on dividends/interest not included.",
-      note: "Income tax brackets and GHS (GESY) rates are 2024 figures correctly applied. Key omission: the Special Defence Contribution (SDC) applies to Cyprus tax residents on passive income — dividends (17%), interest (30%), rents (2.25% on 75% of gross). For retirees or remote workers with significant investment/rental income this is a material gap. Cyprus non-domicile status (non-dom) exempts SDC on dividends and interest for 17 years — not modelled. Income must be passed in EUR.",
+      note: "Income tax brackets and GHS (GESY) rates are 2024 figures correctly applied. Key omission: the Special Defence Contribution (SDC) applies to Cyprus tax residents on passive income, dividends (17%), interest (30%), rents (2.25% on 75% of gross). For retirees or remote workers with significant investment/rental income this is a material gap. Cyprus non-domicile status (non-dom) exempts SDC on dividends and interest for 17 years, not modelled. Income must be passed in EUR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // PANAMA — USD
-  // 2024 progressive. Territorial system — foreign-source income not taxed.
+  // PANAMA, USD
+  // 2024 progressive. Territorial system, foreign-source income not taxed.
   // No joint filing.
   // -------------------------------------------------------------------------
   PA: ({ annualIncome }) => {
@@ -1655,14 +1655,14 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       effectiveRate: clampRate(rate),
       model: "progressive-country",
       confidence: "partial",
-      label: "Panama income tax (2024 — territorial system)",
-      missingFactor: "Foreign-source income generally not taxed — this estimate may not apply.",
-      note: "Brackets are 2024 figures and simple enough to be reliably modelled. Most important planning note: Panama's territorial system means foreign-sourced income (remote salaries paid by a non-Panamanian employer for work performed outside Panama) is generally not taxed in Panama at all — making this estimate irrelevant for most remote workers. Social security contributions (~9.75% employee up to a monthly ceiling) are not included. Income in USD.",
+      label: "Panama income tax (2024, territorial system)",
+      missingFactor: "Foreign-source income generally not taxed, this estimate may not apply.",
+      note: "Brackets are 2024 figures and simple enough to be reliably modelled. Most important planning note: Panama's territorial system means foreign-sourced income (remote salaries paid by a non-Panamanian employer for work performed outside Panama) is generally not taxed in Panama at all, making this estimate irrelevant for most remote workers. Social security contributions (~9.75% employee up to a monthly ceiling) are not included. Income in USD.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // COLOMBIA — COP
+  // COLOMBIA, COP
   // 2024 UVT-based brackets. UVT value COP 47,065 (2024).
   // No joint filing.
   // -------------------------------------------------------------------------
@@ -1687,13 +1687,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Colombia UVT-based income tax (2024)",
       missingFactor: "Employment income deduction (25% up to 2,880 UVT) not applied.",
-      note: "UVT brackets are 2024 figures (UVT COP 47,065). Key omission: employee health (4%) and pension (4% employee / 12% employer) contributions add approximately 8% to the total burden for locally-employed residents — not modelled. The large personal deduction (25% of net income up to 2,880 UVT) for employment income is also not applied, meaning this model overstates income tax for employees. For remote workers paying foreign social contributions, income tax alone is the relevant figure. Income must be passed in COP.",
+      note: "UVT brackets are 2024 figures (UVT COP 47,065). Key omission: employee health (4%) and pension (4% employee / 12% employer) contributions add approximately 8% to the total burden for locally-employed residents, not modelled. The large personal deduction (25% of net income up to 2,880 UVT) for employment income is also not applied, meaning this model overstates income tax for employees. For remote workers paying foreign social contributions, income tax alone is the relevant figure. Income must be passed in COP.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // BRAZIL — BRL
-  // 2024 IRPF brackets (updated May 2024 — new exemption thresholds).
+  // BRAZIL, BRL
+  // 2024 IRPF brackets (updated May 2024, new exemption thresholds).
   // No joint filing. Pension income deduction for 65+.
   // -------------------------------------------------------------------------
   BR: ({ annualIncome, isRetired }) => {
@@ -1715,19 +1715,19 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       effectiveRate: clampRate(effectiveRate),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Brazil IRPF (2024 — updated May 2024 thresholds)",
+      label: "Brazil IRPF (2024, updated May 2024 thresholds)",
       missingFactor: "INSS contributions (7.5–14% on a progressive schedule) not included.",
-      note: "IRPF brackets are the May 2024 revised figures. Retirees 65+ receive the correct pension deduction (~BRL 33,888/yr). Key omission: INSS (social security) contributions for employed residents range from 7.5% to 14% on a progressive schedule, capped at BRL 908/mo — a significant deduction for mid-income earners not modelled here. Brazil also has a large system of deductions (dependents, education, health expenses) that materially reduce taxable income for many filers. Income must be passed in BRL.",
+      note: "IRPF brackets are the May 2024 revised figures. Retirees 65+ receive the correct pension deduction (~BRL 33,888/yr). Key omission: INSS (social security) contributions for employed residents range from 7.5% to 14% on a progressive schedule, capped at BRL 908/mo, a significant deduction for mid-income earners not modelled here. Brazil also has a large system of deductions (dependents, education, health expenses) that materially reduce taxable income for many filers. Income must be passed in BRL.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // ARGENTINA — ARS
-  // Progressive brackets. Updated frequently due to inflation — approximate 2024.
+  // ARGENTINA, ARS
+  // Progressive brackets. Updated frequently due to inflation, approximate 2024.
   // Retired: approximate pension exemption threshold.
   // -------------------------------------------------------------------------
   AR: ({ annualIncome, isRetired }) => {
-    // 2024 approximate thresholds (highly inflation-adjusted — verify annually)
+    // 2024 approximate thresholds (highly inflation-adjusted, verify annually)
     const pensionExemption = isRetired ? 1800000 : 0;
     const taxable = Math.max(0, annualIncome - pensionExemption);
 
@@ -1749,13 +1749,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "progressive-country",
       confidence: "placeholder",
       label: "Argentina Impuesto a las Ganancias (approx. 2024)",
-      missingFactor: "Brackets updated quarterly for inflation — this figure is likely outdated.",
-      note: "Argentina's tax brackets are updated very frequently due to inflation — these are approximate 2024 figures and will be outdated. Always verify current-year thresholds via AFIP. Retirees: approximate pension exemption threshold applied. Income must be passed in ARS.",
+      missingFactor: "Brackets updated quarterly for inflation, this figure is likely outdated.",
+      note: "Argentina's tax brackets are updated very frequently due to inflation, these are approximate 2024 figures and will be outdated. Always verify current-year thresholds via AFIP. Retirees: approximate pension exemption threshold applied. Income must be passed in ARS.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // CHILE — CLP
+  // CHILE, CLP
   // 2024 UTM-based brackets. UTM value CLP 67,294 (2024).
   // No joint filing.
   // -------------------------------------------------------------------------
@@ -1780,13 +1780,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "progressive-country",
       confidence: "simplified",
       label: "Chile UTM-based income tax (2024)",
-      missingFactor: "Employment income deduction (up to 30%) not applied — overstates employee tax.",
-      note: "UTM brackets are 2024 figures. Key omission: employment income receives a deduction of up to 30% (capped at 8 UTM/mo) — not modelled, meaning this estimate overstates income tax for employees. AFP mandatory pension contributions (~10% employee, treated as a savings mechanism) are separately deducted before the tax base in practice but excluded here. The net result for an employee can be meaningfully lower than shown. Income must be passed in CLP.",
+      missingFactor: "Employment income deduction (up to 30%) not applied, overstates employee tax.",
+      note: "UTM brackets are 2024 figures. Key omission: employment income receives a deduction of up to 30% (capped at 8 UTM/mo), not modelled, meaning this estimate overstates income tax for employees. AFP mandatory pension contributions (~10% employee, treated as a savings mechanism) are separately deducted before the tax base in practice but excluded here. The net result for an employee can be meaningfully lower than shown. Income must be passed in CLP.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // PERU — PEN
+  // PERU, PEN
   // 2024 UIT-based brackets. UIT value PEN 5,150 (2024).
   // No joint filing.
   // -------------------------------------------------------------------------
@@ -1808,13 +1808,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "progressive-country",
       confidence: "simplified",
       label: "Peru UIT-based income tax (2024)",
-      missingFactor: "7 UIT employment deduction (~PEN 36,050) not applied — overstates employee tax.",
-      note: "UIT brackets are 2024 figures (UIT PEN 5,150). Key omission: employment income receives a deduction of 7 UIT (~PEN 36,050/yr) before the progressive scale applies — not modelled, so this estimate overstates income tax for employees, particularly at lower incomes. EsSalud health contributions are employer-only (~9%) and do not reduce employee take-home. Income must be passed in PEN.",
+      missingFactor: "7 UIT employment deduction (~PEN 36,050) not applied, overstates employee tax.",
+      note: "UIT brackets are 2024 figures (UIT PEN 5,150). Key omission: employment income receives a deduction of 7 UIT (~PEN 36,050/yr) before the progressive scale applies, not modelled, so this estimate overstates income tax for employees, particularly at lower incomes. EsSalud health contributions are employer-only (~9%) and do not reduce employee take-home. Income must be passed in PEN.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // THAILAND — THB
+  // THAILAND, THB
   // 2024 progressive PIT. Personal allowance THB 60,000 + earned income
   // deduction (50% of income up to THB 100,000 max). No joint filing.
   // -------------------------------------------------------------------------
@@ -1839,14 +1839,14 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       effectiveRate: clampRate(effectiveRate),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Thailand PIT (2024 — with standard deductions)",
-      missingFactor: "Foreign-income remittance rules changed Jan 2024 — treatment depends on timing.",
-      note: "Brackets and standard deductions are 2024 figures. Critical planning caveat: Thailand shifted to taxing foreign-source income remitted to Thailand from 1 January 2024, regardless of the year it was earned. Previously, income earned in a prior year and remitted later was exempt. This change significantly affects remote workers and investors — the actual tax treatment depends on your specific income type, residency status (≥180 days), and remittance timing in ways this model cannot capture. Income must be passed in THB.",
+      label: "Thailand PIT (2024, with standard deductions)",
+      missingFactor: "Foreign-income remittance rules changed Jan 2024, treatment depends on timing.",
+      note: "Brackets and standard deductions are 2024 figures. Critical planning caveat: Thailand shifted to taxing foreign-source income remitted to Thailand from 1 January 2024, regardless of the year it was earned. Previously, income earned in a prior year and remitted later was exempt. This change significantly affects remote workers and investors, the actual tax treatment depends on your specific income type, residency status (≥180 days), and remittance timing in ways this model cannot capture. Income must be passed in THB.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // VIETNAM — VND
+  // VIETNAM, VND
   // 2024 progressive. Annual personal allowance VND 132M, dependent VND 52.8M.
   // No joint filing.
   // -------------------------------------------------------------------------
@@ -1871,14 +1871,14 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Vietnam PIT (2024)",
       missingFactor: "Social insurance (~10.5% combined) and dependent relief not modelled.",
-      note: "Brackets and personal allowance (VND 132M/yr) are 2024 figures. Key gaps: employee social insurance (~10.5% combined: social 8%, health 1.5%, unemployment 1%) is a significant deduction for locally-employed residents — not modelled. Dependent relief (VND 52.8M per dependent) is also excluded, which understates take-home for families. For remote workers maintaining foreign employment contracts, Vietnam PIT exposure depends on the tax treaty with your home country and actual days of residency. Income must be passed in VND.",
+      note: "Brackets and personal allowance (VND 132M/yr) are 2024 figures. Key gaps: employee social insurance (~10.5% combined: social 8%, health 1.5%, unemployment 1%) is a significant deduction for locally-employed residents, not modelled. Dependent relief (VND 52.8M per dependent) is also excluded, which understates take-home for families. For remote workers maintaining foreign employment contracts, Vietnam PIT exposure depends on the tax treaty with your home country and actual days of residency. Income must be passed in VND.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // MALAYSIA — MYR
-  // 2024 progressive. Each spouse files separately — no joint filing.
-  // Employee EPF: 11% (compulsory, partly savings — not modeled).
+  // MALAYSIA, MYR
+  // 2024 progressive. Each spouse files separately, no joint filing.
+  // Employee EPF: 11% (compulsory, partly savings, not modeled).
   // -------------------------------------------------------------------------
   MY: ({ annualIncome }) => {
     const rate = progressiveTax(annualIncome, [
@@ -1899,12 +1899,12 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "Malaysia income tax (2024)",
       missingFactor: "Personal relief system (potentially MYR 20–30k deductible) not modelled.",
-      note: "Brackets are 2024 figures and structurally correct. Key omission: Malaysia has an extensive personal relief system — individual relief MYR 9,000, lifestyle relief MYR 2,500, EPF contributions relief up to MYR 4,000, medical relief up to MYR 10,000, and others — that can reduce taxable income by MYR 20,000–30,000+ for most residents, potentially dropping the effective rate by 3–6 pp at mid-range incomes. SOCSO (1.75% employee) and EIS (0.4% employee) add modestly but are capped. Income must be passed in MYR.",
+      note: "Brackets are 2024 figures and structurally correct. Key omission: Malaysia has an extensive personal relief system, individual relief MYR 9,000, lifestyle relief MYR 2,500, EPF contributions relief up to MYR 4,000, medical relief up to MYR 10,000, and others, that can reduce taxable income by MYR 20,000–30,000+ for most residents, potentially dropping the effective rate by 3–6 pp at mid-range incomes. SOCSO (1.75% employee) and EIS (0.4% employee) add modestly but are capped. Income must be passed in MYR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // INDONESIA — IDR
+  // INDONESIA, IDR
   // 2024 PPh Orang Pribadi progressive brackets.
   // No joint filing (per-NPWP individual).
   // -------------------------------------------------------------------------
@@ -1921,13 +1921,13 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "progressive-country",
       confidence: "simplified",
       label: "Indonesia PPh income tax (2024)",
-      missingFactor: "PTKP non-taxable threshold (IDR 54M/yr) not applied — overstates at lower incomes.",
-      note: "Brackets are 2024 figures. Key omission: the PTKP (Penghasilan Tidak Kena Pajak) non-taxable threshold of IDR 54M/yr for a single individual is not applied — meaning this model overstates income tax at lower incomes by the equivalent of IDR 54M taxed at the first bracket rate. BPJS health (1% employee) and employment contributions are also excluded. For high incomes where the PTKP is a small fraction, the estimate is reasonably accurate. Income must be passed in IDR.",
+      missingFactor: "PTKP non-taxable threshold (IDR 54M/yr) not applied, overstates at lower incomes.",
+      note: "Brackets are 2024 figures. Key omission: the PTKP (Penghasilan Tidak Kena Pajak) non-taxable threshold of IDR 54M/yr for a single individual is not applied, meaning this model overstates income tax at lower incomes by the equivalent of IDR 54M taxed at the first bracket rate. BPJS health (1% employee) and employment contributions are also excluded. For high incomes where the PTKP is a small fraction, the estimate is reasonably accurate. Income must be passed in IDR.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // SOUTH AFRICA — ZAR
+  // SOUTH AFRICA, ZAR
   // 2024-25 SARS progressive. Primary rebate: ZAR 17,235 (ZAR 26,679 for 65+).
   // No joint filing.
   // -------------------------------------------------------------------------
@@ -1951,7 +1951,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: "South Africa SARS income tax + rebate (2024-25)",
       missingFactor: "Medical scheme credits and retirement fund deduction (up to 27.5%) not included.",
-      note: "Brackets and rebates (primary ZAR 17,235; secondary ZAR 9,444 for 65+) are correct 2024-25 SARS figures — the rebates are a real strength of this model. Key omissions: medical scheme tax credits (MTC) reduce tax by ZAR 364/mo for the primary member, which is meaningful at lower incomes. UIF (1% employee, capped at UIF benefit ceiling) is also excluded. The retirement fund deduction (up to 27.5% of taxable income, max ZAR 350,000/yr) can substantially reduce taxable income for contributing residents. Income must be passed in ZAR.",
+      note: "Brackets and rebates (primary ZAR 17,235; secondary ZAR 9,444 for 65+) are correct 2024-25 SARS figures, the rebates are a real strength of this model. Key omissions: medical scheme tax credits (MTC) reduce tax by ZAR 364/mo for the primary member, which is meaningful at lower incomes. UIF (1% employee, capped at UIF benefit ceiling) is also excluded. The retirement fund deduction (up to 27.5% of taxable income, max ZAR 350,000/yr) can substantially reduce taxable income for contributing residents. Income must be passed in ZAR.",
     };
   },
 EC: ({ annualIncome, isRetired }) => {
@@ -1960,9 +1960,9 @@ EC: ({ annualIncome, isRetired }) => {
       effectiveRate: 0,
       model: "progressive-country",
       confidence: "simplified",
-      label: "Ecuador IR — below taxable threshold",
+      label: "Ecuador IR, below taxable threshold",
       missingFactor: "IESS social security for foreign residents not modelled.",
-      note: "Retirement income below Ecuador's basic deduction threshold (~$11,722/yr). Zero income tax modelled. Ecuador is dollarized — no FX complexity. Verify residency-based tax treatment with a local advisor.",
+      note: "Retirement income below Ecuador's basic deduction threshold (~$11,722/yr). Zero income tax modelled. Ecuador is dollarized, no FX complexity. Verify residency-based tax treatment with a local advisor.",
     };
   }
   const brackets = [
@@ -1981,9 +1981,9 @@ EC: ({ annualIncome, isRetired }) => {
     effectiveRate: clampRate(rate),
     model: "progressive-country",
     confidence: "simplified",
-    label: "Ecuador IR — progressive (simplified, 2024 brackets)",
+    label: "Ecuador IR, progressive (simplified, 2024 brackets)",
     missingFactor: "IESS social security contributions for foreign residents not modelled.",
-    note: `Effective rate ${(clampRate(rate) * 100).toFixed(1)}%. Ecuador is dollarized — no FX conversion needed. 2024 IR brackets applied with basic personal deduction of ~$11,722/yr. IESS social security contributions for foreign residents vary by residency type and are not modelled. Verify with a local tax advisor.`,
+    note: `Effective rate ${(clampRate(rate) * 100).toFixed(1)}%. Ecuador is dollarized, no FX conversion needed. 2024 IR brackets applied with basic personal deduction of ~$11,722/yr. IESS social security contributions for foreign residents vary by residency type and are not modelled. Verify with a local tax advisor.`,
   };
 },
 
@@ -1993,9 +1993,9 @@ UY: ({ annualIncome, isRetired }) => {
       effectiveRate: 0.06,
       model: "flat",
       confidence: "simplified",
-      label: "Uruguay IRPF — retirement income (simplified estimate)",
-      missingFactor: "7-year territorial exemption for new residents not modelled — may reduce rate to 0%.",
-      note: "Simplified flat 6% effective rate applied for retirement income. New tax residents may qualify for a 7-year territorial income exemption on foreign-source income — a major planning consideration. Verify eligibility with a local advisor.",
+      label: "Uruguay IRPF, retirement income (simplified estimate)",
+      missingFactor: "7-year territorial exemption for new residents not modelled, may reduce rate to 0%.",
+      note: "Simplified flat 6% effective rate applied for retirement income. New tax residents may qualify for a 7-year territorial income exemption on foreign-source income, a major planning consideration. Verify eligibility with a local advisor.",
     };
   }
   const brackets = [
@@ -2012,7 +2012,7 @@ UY: ({ annualIncome, isRetired }) => {
     effectiveRate: clampRate(rate),
     model: "progressive-country",
     confidence: "simplified",
-    label: "Uruguay IRPF — progressive (simplified, USD-equivalent brackets)",
+    label: "Uruguay IRPF, progressive (simplified, USD-equivalent brackets)",
     missingFactor: "FONASA/BPS social contributions (~15–18%) not included; 7-year territorial exemption may apply.",
     note: `Effective rate ${(clampRate(rate) * 100).toFixed(1)}%. Brackets converted to approximate USD at 39.5 UYU/USD. FONASA health and BPS social security contributions (~15–18% on employment income) are not modelled. New residents may qualify for a 7-year territorial tax exemption on foreign-source income. Verify with a local advisor.`,
   };
@@ -2024,7 +2024,7 @@ PY: ({ annualIncome, isRetired }) => {
       effectiveRate: 0,
       model: "flat",
       confidence: "simplified",
-      label: "Paraguay IRP — retirement income (territorial system)",
+      label: "Paraguay IRP, retirement income (territorial system)",
       missingFactor: "Territorial system means foreign pension income generally not taxed in Paraguay.",
       note: "Paraguay taxes only Paraguay-source income. Foreign pension and retirement income is generally not subject to IRP for resident individuals. Effective rate modelled as 0%. Verify your specific situation with a local advisor.",
     };
@@ -2035,9 +2035,9 @@ PY: ({ annualIncome, isRetired }) => {
       effectiveRate: 0,
       model: "flat",
       confidence: "simplified",
-      label: "Paraguay IRP — below threshold",
+      label: "Paraguay IRP, below threshold",
       missingFactor: "Territorial system means foreign-source remote salary typically not taxed at all.",
-      note: "Income below Paraguay's IRP personal deduction threshold (~$12,000/yr). Zero tax modelled. Paraguay also taxes only Paraguay-source income — remote workers retaining a foreign salary typically owe zero Paraguayan income tax regardless of income level.",
+      note: "Income below Paraguay's IRP personal deduction threshold (~$12,000/yr). Zero tax modelled. Paraguay also taxes only Paraguay-source income, remote workers retaining a foreign salary typically owe zero Paraguayan income tax regardless of income level.",
     };
   }
   const tax = (annualIncome - THRESHOLD) * 0.10;
@@ -2046,9 +2046,9 @@ PY: ({ annualIncome, isRetired }) => {
     effectiveRate,
     model: "flat",
     confidence: "simplified",
-    label: "Paraguay IRP — flat 10% above threshold (simplified)",
-    missingFactor: "Territorial system: foreign-source remote salary likely not taxed — this models local-source income only.",
-    note: `Effective rate ${(effectiveRate * 100).toFixed(1)}%. Paraguay's IRP is a flat 10% on income above ~$12,000/yr. Critically: Paraguay taxes only Paraguay-source income. If you retain a foreign remote salary, your effective Paraguayan rate is likely 0% — this model assumes local-source income for conservatism. Verify with a local advisor.`,
+    label: "Paraguay IRP, flat 10% above threshold (simplified)",
+    missingFactor: "Territorial system: foreign-source remote salary likely not taxed, this models local-source income only.",
+    note: `Effective rate ${(effectiveRate * 100).toFixed(1)}%. Paraguay's IRP is a flat 10% on income above ~$12,000/yr. Critically: Paraguay taxes only Paraguay-source income. If you retain a foreign remote salary, your effective Paraguayan rate is likely 0%, this model assumes local-source income for conservatism. Verify with a local advisor.`,
   };
 },
 
@@ -2058,9 +2058,9 @@ BO: ({ annualIncome, isRetired }) => {
       effectiveRate: 0.05,
       model: "flat",
       confidence: "placeholder",
-      label: "Bolivia RC-IVA — retirement income (simplified estimate)",
-      missingFactor: "Bolivia's RC-IVA system is non-standard — retirement and foreign income treatment not well-documented.",
-      note: "Simplified 5% effective rate applied for retirement income. Bolivia's tax system is non-standard — RC-IVA applies at 13% on net salary after deductions, but retirement and foreign-source income treatment varies significantly. Verify with a local advisor before planning.",
+      label: "Bolivia RC-IVA, retirement income (simplified estimate)",
+      missingFactor: "Bolivia's RC-IVA system is non-standard, retirement and foreign income treatment not well-documented.",
+      note: "Simplified 5% effective rate applied for retirement income. Bolivia's tax system is non-standard, RC-IVA applies at 13% on net salary after deductions, but retirement and foreign-source income treatment varies significantly. Verify with a local advisor before planning.",
     };
   }
   if (annualIncome < 10000) {
@@ -2068,7 +2068,7 @@ BO: ({ annualIncome, isRetired }) => {
       effectiveRate: 0.05,
       model: "flat",
       confidence: "placeholder",
-      label: "Bolivia RC-IVA — lower income (simplified estimate)",
+      label: "Bolivia RC-IVA, lower income (simplified estimate)",
       missingFactor: "RC-IVA deductions for minimum wages and VAT receipts not modelled.",
       note: "Simplified 5% effective rate applied. Bolivia's RC-IVA is nominally 13% but deductions for minimum wages and VAT receipts significantly reduce effective liability at lower incomes. Foreign-source income treatment varies. Verify with a local advisor.",
     };
@@ -2077,8 +2077,8 @@ BO: ({ annualIncome, isRetired }) => {
     effectiveRate: 0.10,
     model: "flat",
     confidence: "placeholder",
-    label: "Bolivia RC-IVA — simplified planning estimate",
-    missingFactor: "RC-IVA is 13% flat on net salary after deductions — this is a conservative approximation.",
+    label: "Bolivia RC-IVA, simplified planning estimate",
+    missingFactor: "RC-IVA is 13% flat on net salary after deductions, this is a conservative approximation.",
     note: "Simplified 10% effective rate applied. Bolivia uses RC-IVA (flat 13% on net salary after deductions for minimum wages and VAT receipts) rather than a standard progressive income tax. Foreign-source income, self-employment, and business income are treated differently. Verify with a local advisor.",
   };
 },
@@ -2090,7 +2090,7 @@ GY: ({ annualIncome, isRetired }) => {
       effectiveRate: 0,
       model: "progressive-country",
       confidence: "simplified",
-      label: "Guyana income tax — below personal allowance",
+      label: "Guyana income tax, below personal allowance",
       missingFactor: "NIS social insurance (~5.6%) not modelled.",
       note: "Income below Guyana's personal allowance threshold (~$4,593 USD). Zero income tax modelled. NIS social insurance contributions not modelled. Guyana is the only English-speaking country in South America. Verify with a local advisor.",
     };
@@ -2105,7 +2105,7 @@ GY: ({ annualIncome, isRetired }) => {
     effectiveRate,
     model: "progressive-country",
     confidence: "simplified",
-    label: "Guyana income tax — progressive (simplified, USD-equivalent brackets)",
+    label: "Guyana income tax, progressive (simplified, USD-equivalent brackets)",
     missingFactor: "NIS employee contributions (~5.6%) not included.",
     note: `Effective rate ${(effectiveRate * 100).toFixed(1)}%. Two-rate system: 28% up to ~$11,480 USD, 40% above, after personal allowance of ~$4,593 USD. Brackets converted at 209 GYD/USD. NIS employee contributions (~5.6%) not modelled. Verify with a local advisor.`,
   };
@@ -2117,8 +2117,8 @@ SR: ({ annualIncome, isRetired }) => {
       effectiveRate: 0.06,
       model: "flat",
       confidence: "placeholder",
-      label: "Suriname income tax — retirement income (simplified estimate)",
-      missingFactor: "Suriname expat tax rules are not well-documented — treat as rough estimate.",
+      label: "Suriname income tax, retirement income (simplified estimate)",
+      missingFactor: "Suriname expat tax rules are not well-documented, treat as rough estimate.",
       note: "Simplified 6% effective rate applied for retirement income. Suriname's tax rules for foreign residents and retirees are not well-documented in mainstream expat resources. Treat as a rough planning estimate only. Verify with a local advisor.",
     };
   }
@@ -2134,9 +2134,9 @@ SR: ({ annualIncome, isRetired }) => {
     effectiveRate: clampRate(rate),
     model: "progressive-country",
     confidence: "placeholder",
-    label: "Suriname income tax — simplified progressive estimate",
-    missingFactor: "Limited public expat tax data — brackets are approximate and may be outdated.",
-    note: `Effective rate ${(clampRate(rate) * 100).toFixed(1)}%. Simplified brackets converted to approximate USD at 36.5 SRD/USD. Suriname has limited publicly available expat tax data — this is a planning estimate only. Social security contributions not modelled. Verify with a local advisor before making decisions.`,
+    label: "Suriname income tax, simplified progressive estimate",
+    missingFactor: "Limited public expat tax data, brackets are approximate and may be outdated.",
+    note: `Effective rate ${(clampRate(rate) * 100).toFixed(1)}%. Simplified brackets converted to approximate USD at 36.5 SRD/USD. Suriname has limited publicly available expat tax data, this is a planning estimate only. Social security contributions not modelled. Verify with a local advisor before making decisions.`,
   };
 },
 
@@ -2146,7 +2146,7 @@ VE: ({ annualIncome, isRetired }) => {
       effectiveRate: 0.05,
       model: "flat",
       confidence: "placeholder",
-      label: "Venezuela ISLR — simplified planning estimate only",
+      label: "Venezuela ISLR, simplified planning estimate only",
       missingFactor: "FX volatility and inflation make all Venezuelan figures unreliable.",
       note: "Venezuela's tax, FX, and economic environment makes all estimates highly unreliable. Simplified 5% flat rate applied. Exchange rate volatility and inflation can invalidate planning figures quickly. Verify all assumptions with an independent local advisor before making any decisions.",
     };
@@ -2156,7 +2156,7 @@ VE: ({ annualIncome, isRetired }) => {
       effectiveRate: 0.06,
       model: "flat",
       confidence: "placeholder",
-      label: "Venezuela ISLR — simplified planning estimate only",
+      label: "Venezuela ISLR, simplified planning estimate only",
       missingFactor: "FX volatility and inflation make all Venezuelan figures unreliable.",
       note: "Venezuela's tax, FX, and economic environment makes all estimates highly unreliable. Simplified flat rate applied. Do not use this for financial planning without independent local verification.",
     };
@@ -2165,7 +2165,7 @@ VE: ({ annualIncome, isRetired }) => {
     effectiveRate: 0.12,
     model: "flat",
     confidence: "placeholder",
-    label: "Venezuela ISLR — simplified planning estimate only",
+    label: "Venezuela ISLR, simplified planning estimate only",
     missingFactor: "FX volatility and inflation make all Venezuelan figures unreliable.",
     note: "Simplified 12% flat estimate only. Venezuela's ISLR is nominally progressive but the real tax burden, FX situation, and policy environment change rapidly. Exchange rate volatility can make USD purchasing power estimates stale within weeks. Treat all Venezuela figures as illustrative only and verify independently.",
   };
@@ -2186,8 +2186,8 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
         "Portugal's IFICI regime offers a 20% flat rate on qualifying Portuguese-source income and broad exemptions on foreign-source income for eligible new residents.",
       when: { incomeScenario: ["remote"] },
       options: [
-        { value: "yes", label: "Yes — applying for IFICI / NHR" },
-        { value: "no", label: "No — standard progressive rates apply" },
+        { value: "yes", label: "Yes, applying for IFICI / NHR" },
+        { value: "no", label: "No, standard progressive rates apply" },
         { value: "unsure", label: "Not sure yet" },
       ],
     },
@@ -2204,7 +2204,7 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
         { value: "AR", label: "Aragón" },
         { value: "AS", label: "Asturias" },
         { value: "IB", label: "Balearic Islands" },
-        { value: "PV", label: "Basque Country (foral — approx.)" },
+        { value: "PV", label: "Basque Country (foral, approx.)" },
         { value: "CN", label: "Canary Islands" },
         { value: "CB", label: "Cantabria" },
         { value: "CL", label: "Castilla y León" },
@@ -2216,7 +2216,7 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
         { value: "RI", label: "La Rioja" },
         { value: "MD", label: "Madrid" },
         { value: "MC", label: "Murcia" },
-        { value: "NC", label: "Navarre (foral — approx.)" },
+        { value: "NC", label: "Navarre (foral, approx.)" },
         { value: "VC", label: "Valencia" },
       ],
     },
@@ -2227,8 +2227,8 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
         "Spain's Beckham Law applies a 24% flat rate on Spanish-source income up to €600k for qualifying inbound workers who haven't been Spanish residents in the prior 5 years.",
       when: { incomeScenario: ["remote", "local"] },
       options: [
-        { value: "yes", label: "Yes — eligible for Beckham Law" },
-        { value: "no", label: "No — standard progressive rates apply" },
+        { value: "yes", label: "Yes, eligible for Beckham Law" },
+        { value: "no", label: "No, standard progressive rates apply" },
         { value: "unsure", label: "Not sure yet" },
       ],
     },
@@ -2241,8 +2241,8 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
         "The 30% ruling allows qualifying expat employees to receive 30% of their salary as a tax-free allowance for up to 5 years. It requires employer sponsorship, a specific expertise requirement, and a minimum salary (€46,107 in 2024).",
       when: { incomeScenario: ["remote", "local"] },
       options: [
-        { value: "yes", label: "Yes — employer has applied / will apply for the ruling" },
-        { value: "no", label: "No — standard Box 1 rates apply" },
+        { value: "yes", label: "Yes, employer has applied / will apply for the ruling" },
+        { value: "no", label: "No, standard Box 1 rates apply" },
         { value: "unsure", label: "Not sure yet" },
       ],
     },
@@ -2255,14 +2255,14 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
         "Italy's 20 regions each set a regional income surtax (addizionale regionale) ranging from 1.23% (minimum, e.g. Basilicata, South Tyrol) to 3.33% (Lazio/Rome, Calabria). Selecting your region uses the exact rate instead of a 2% average.",
       options: [
         { value: "ABR", label: "Abruzzo (1.73%)" },
-        { value: "BAS", label: "Basilicata (1.23% — minimum)" },
-        { value: "CAL", label: "Calabria (3.33% — highest)" },
+        { value: "BAS", label: "Basilicata (1.23%, minimum)" },
+        { value: "CAL", label: "Calabria (3.33%, highest)" },
         { value: "CAM", label: "Campania (3.20%)" },
         { value: "EMR", label: "Emilia-Romagna (1.33%)" },
         { value: "FVG", label: "Friuli-Venezia Giulia (1.23%)" },
-        { value: "LAZ", label: "Lazio — Rome (3.33% — highest)" },
+        { value: "LAZ", label: "Lazio, Rome (3.33%, highest)" },
         { value: "LIG", label: "Liguria (1.73%)" },
-        { value: "LOM", label: "Lombardy — Milan (1.73%)" },
+        { value: "LOM", label: "Lombardy, Milan (1.73%)" },
         { value: "MAR", label: "Marche (1.50%)" },
         { value: "MOL", label: "Molise (2.20%)" },
         { value: "PAB", label: "Bolzano / South Tyrol (1.23%)" },
@@ -2271,10 +2271,10 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
         { value: "PUG", label: "Puglia (2.30%)" },
         { value: "SAR", label: "Sardinia (1.73%)" },
         { value: "SIC", label: "Sicily (2.50%)" },
-        { value: "TOS", label: "Tuscany — Florence (1.73%)" },
+        { value: "TOS", label: "Tuscany, Florence (1.73%)" },
         { value: "UMB", label: "Umbria (1.73%)" },
         { value: "VDA", label: "Aosta Valley (1.23%)" },
-        { value: "VEN", label: "Veneto — Venice (1.73%)" },
+        { value: "VEN", label: "Veneto, Venice (1.73%)" },
       ],
     },
     {
@@ -2284,8 +2284,8 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
         "Italy's Flat Tax for New Residents substitutes a fixed €100,000/yr tax for all foreign-source income taxes, regardless of amount. Relevant for high earners with significant foreign income moving to Italy.",
       when: { incomeScenario: ["remote"] },
       options: [
-        { value: "yes", label: "Yes — modelling the €100k flat tax regime" },
-        { value: "no", label: "No — standard IRPEF rates apply" },
+        { value: "yes", label: "Yes, modelling the €100k flat tax regime" },
+        { value: "no", label: "No, standard IRPEF rates apply" },
         { value: "unsure", label: "Not sure yet" },
       ],
     },
@@ -2297,8 +2297,8 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
       helpText:
         "Church tax (Kirchensteuer) is ~8–9% of your income tax liability and applies if you are a registered member of the Catholic or Protestant church. It is automatically deducted alongside income tax.",
       options: [
-        { value: "yes", label: "Yes — church tax applies (~8.5% of income tax)" },
-        { value: "no", label: "No — not a registered church member" },
+        { value: "yes", label: "Yes, church tax applies (~8.5% of income tax)" },
+        { value: "no", label: "No, not a registered church member" },
         { value: "unsure", label: "Not sure" },
       ],
     },

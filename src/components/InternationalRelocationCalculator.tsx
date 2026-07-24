@@ -26,7 +26,7 @@ import AdSlot from "./AdSlot";
 import { estimateMortgageMonthly } from "@/lib/mortgage";
 import { estimateHomePriceFromRent, DEFAULT_TAX_INSURANCE_PCT } from "@/lib/compareEngines/homePrice";
 
-// FX_FALLBACK is intentionally empty — all supported country codes should be
+// FX_FALLBACK is intentionally empty, all supported country codes should be
 // in USD_TO_LOCAL in internationalFx.ts. If a code is missing there, add it
 // at the source rather than patching it here.
 const FX_FALLBACK: Record<string, number> = {};
@@ -437,7 +437,7 @@ export default function InternationalRelocationCalculator() {
 
     // ── Destination (to) side ──
     // Inputs are already entered as destination-city estimates, so city multipliers
-    // are NOT applied here — that would double-adjust values that are already city-specific.
+    // are NOT applied here, that would double-adjust values that are already city-specific.
     // Family-size scaling is the only adjustment applied on top of the raw input.
     const groceriesAdj       = destToUsd(nonNegative(groceries))      * familySizeMultGroceries;
     const transportationAdj  = destToUsd(nonNegative(transportation)) * familySizeMultTransport;
@@ -457,12 +457,12 @@ export default function InternationalRelocationCalculator() {
     const housingLine = housingMode === "buy" ? buyMonthlyPI : rentTo;
     const downPaymentUsd = housingMode === "buy" ? estimatedHomePrice * (nonNegative(buyDownPct) / 100) : 0;
 
-    // Car cost applies only to the destination side — we don't know (or assume) the
+    // Car cost applies only to the destination side, we don't know (or assume) the
     // user has the same car expense in their current city, so we zero it on the from side.
     const carCostTo   = needCar === "yes" ? destToUsd(nonNegative(carCostMonthly)) : 0;
     const carCostFrom = 0;
 
-    // ── Origin (from) side — use currentCityDefaults when available ──
+    // ── Origin (from) side, use currentCityDefaults when available ──
     let groceriesFrom: number;
     let transportationFrom: number;
     let utilitiesFrom: number;
@@ -479,7 +479,7 @@ export default function InternationalRelocationCalculator() {
       healthcareFrom    = fromToUsd(currentCityDefaults.monthlyDefaults.healthcare)  * familySizeMultHealthcare;
     } else {
       // Fallback: scale destination inputs by ratio of city multipliers
-      // Scale by the ratio of from/to multipliers — destination inputs already embed
+      // Scale by the ratio of from/to multipliers, destination inputs already embed
       // the to-city cost level, so applying from-city multipliers directly would double-count.
       const groceryRatio   = toCityMultipliers.groceries > 0 ? fromCityMultipliers.groceries / toCityMultipliers.groceries : 1;
       const transitRatio   = toCityMultipliers.transit   > 0 ? fromCityMultipliers.transit   / toCityMultipliers.transit   : 1;
@@ -501,7 +501,7 @@ export default function InternationalRelocationCalculator() {
 
     const monthlyFlexibility = netMonthlyTo - housingTotal - livingCosts;
 
-    // "What income do I need to live here comfortably?" — targets 70% essential cost ratio (Band B)
+    // "What income do I need to live here comfortably?", targets 70% essential cost ratio (Band B)
     const targetComfortRatio = 0.70;
     const requiredNetMonthly = housingTotal + livingCosts > 0
       ? (housingTotal + livingCosts) / targetComfortRatio
@@ -511,7 +511,7 @@ export default function InternationalRelocationCalculator() {
       : 0;
     const requiredAnnualIncome = requiredGrossMonthly * 12;
 
-    // Decision layer — income gap and move readiness verdict
+    // Decision layer, income gap and move readiness verdict
     const incomeGap = requiredAnnualIncome - annualIncome;
 
     const currentMonthlyFlexibility = netMonthlyFrom - housingTotalFrom - livingCostsFrom;
@@ -823,7 +823,7 @@ const readinessRecommendation =
           {/* Dynamic conditional tax questions */}
           {getConditionalQuestionsForCountry(toCountry, incomeScenario).map((q: ConditionalQuestion) => (
             <div key={q.key} className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
-              <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{getCountryByCode(toCountry)?.name ?? toCountry} — Tax Question</div>
+              <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{getCountryByCode(toCountry)?.name ?? toCountry}, Tax Question</div>
               <label className="text-sm">
                 <div className={labelHeadCls}>
                   {q.label}
@@ -924,13 +924,13 @@ const readinessRecommendation =
             {housingMode === "buy" && (
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                 No destination here has a verified home-price dataset, so the price above is estimated from the rent
-                figure (16x annual rent, a standard rule of thumb) — treat it as a rough planning figure, not a real
+                figure (16x annual rent, a standard rule of thumb), treat it as a rough planning figure, not a real
                 listing price.
               </p>
             )}
           </div>
 
-          {/* Fix #2: Estimated Living Costs — now fully editable inputs */}
+          {/* Fix #2: Estimated Living Costs, now fully editable inputs */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
             <div className="mb-1 flex items-center justify-between">
               <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
@@ -977,7 +977,7 @@ const readinessRecommendation =
                 <label className="text-sm sm:col-span-2">
                   <div className={labelHeadCls}>
                     Est. monthly car cost <span className="text-slate-400 dark:text-slate-500">{destCurrLabel}</span>
-                    <InfoTip text="Include loan/lease, insurance, fuel, and parking. Vary this by country — $350 may be too high or too low depending on the market." />
+                    <InfoTip text="Include loan/lease, insurance, fuel, and parking. Vary this by country, $350 may be too high or too low depending on the market." />
                   </div>
                   <input className={inputCls} type="number" min="0" value={carCostMonthly}
                     onChange={(e) => setCarCostMonthly(e.target.value)} placeholder=" " />
@@ -986,8 +986,8 @@ const readinessRecommendation =
             </div>
             <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
               {!!selectedCityDefaults
-                ? "Pre-filled from city-level data. Adjust freely — these are starting points."
-                : "Pre-filled from country-level data. City-level data not available for this city — your own research may be more accurate."}
+                ? "Pre-filled from city-level data. Adjust freely, these are starting points."
+                : "Pre-filled from country-level data. City-level data not available for this city, your own research may be more accurate."}
             </div>
           </div>
 
@@ -1146,10 +1146,10 @@ const readinessRecommendation =
               <div>Results are estimates only. No information entered is stored or shared.</div>
               <div>Tax estimates, rent, immigration costs, and retirement treatment vary by destination and personal circumstances.</div>
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Tip: Your URL updates as you type — copy the page link to share this scenario.</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Tip: Your URL updates as you type, copy the page link to share this scenario.</div>
           </div>
 
-          {/* Move Readiness — top-level decision verdict */}
+          {/* Move Readiness, top-level decision verdict */}
           {results.salaryReady && (
             <div className={`rounded-2xl p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ${
               results.readinessRecommendation.tone === "good"
@@ -1241,7 +1241,7 @@ const readinessRecommendation =
             <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Higher flexibility gives you more room for saving, investing, travel, and unexpected expenses.</div>
           </div>
 
-          {/* Comfortable Income Target — the "decision layer" card */}
+          {/* Comfortable Income Target, the "decision layer" card */}
           {results.salaryReady && (
             <div className="rounded-2xl border border-blue-200 bg-blue-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-blue-900/60 dark:bg-blue-950/20">
               <div className="flex items-start justify-between gap-3">
@@ -1325,7 +1325,7 @@ const readinessRecommendation =
             <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Based on how much of your net monthly income goes toward housing and essential living costs.</div>
           </div>
 
-          {/* Fix #4: How we calculate this — transparent methodology block */}
+          {/* Fix #4: How we calculate this, transparent methodology block */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
             <button
               type="button"
@@ -1373,7 +1373,7 @@ const readinessRecommendation =
                   <p>
                     Tax confidence levels range from <span className="font-medium text-emerald-700 dark:text-emerald-400">Verified</span> (exact
                     or near-exact) to <span className="font-medium text-rose-700 dark:text-rose-400">Directional only</span> (high-level
-                    estimate; verify before planning). US citizens abroad may owe US taxes regardless of residency —
+                    estimate; verify before planning). US citizens abroad may owe US taxes regardless of residency,
                     consult a cross-border tax adviser.
                   </p>
                 </div>

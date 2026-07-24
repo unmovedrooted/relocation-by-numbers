@@ -174,7 +174,7 @@ export default function Page() {
               <div className="mt-4 space-y-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
                 <p>
                   This calculator estimates how a move to South America may affect your monthly
-                  budget — covering income taxes, housing, living costs, and one-time relocation
+                  budget, covering income taxes, housing, living costs, and one-time relocation
                   expenses across major South American countries and cities.
                 </p>
                 <p>

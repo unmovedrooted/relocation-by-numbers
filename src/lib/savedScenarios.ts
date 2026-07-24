@@ -3,7 +3,7 @@
 // on the site. There's no accounts/database system here, so scenarios are
 // saved per-browser/device only. Each saved scenario stores the page path +
 // query string that the calculator already keeps in sync with its own
-// inputs, so "loading" a scenario is just navigating back to that URL — no
+// inputs, so "loading" a scenario is just navigating back to that URL, no
 // separate state-restoration logic needed, as long as the calculator that
 // created it fully syncs its inputs to the URL.
 
@@ -13,7 +13,7 @@ export type SavedScenario = {
   url: string; // relative path + query string, e.g. "/?to=tx&toCity=austin-tx&salary=150000"
   createdAt: number; // epoch ms
   subtitle?: string; // short one-line summary, e.g. "Comfortable · $1,850/mo flexibility"
-  source?: string; // which calculator created it, e.g. "US", "Caribbean", "Asia" — for display only
+  source?: string; // which calculator created it, e.g. "US", "Caribbean", "Asia", for display only
 };
 
 const STORAGE_KEY = "rbn:savedScenarios";
@@ -37,7 +37,7 @@ function writeAll(scenarios: SavedScenario[]): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(scenarios));
   } catch {
-    // Storage full or unavailable (private browsing, etc.) — fail silently.
+    // Storage full or unavailable (private browsing, etc.), fail silently.
   }
 }
 

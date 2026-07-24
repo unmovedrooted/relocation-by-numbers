@@ -80,7 +80,7 @@ function getSalesTaxNote(fromState: string, toState: string): string | null {
   const diff = to - from
   if (Math.abs(diff) < 1.5) return null   // not significant enough to surface
   if (NO_SALES_TAX.has(fromState) && to >= 7) {
-   return `Heads up: you're moving from a 0% sales-tax state to ~${to.toFixed(1)}% combined. Your take-home goes less far than the numbers suggest — factor an extra ~${to.toFixed(0)}% cost on taxable everyday spending.`
+   return `Heads up: you're moving from a 0% sales-tax state to ~${to.toFixed(1)}% combined. Your take-home goes less far than the numbers suggest, factor an extra ~${to.toFixed(0)}% cost on taxable everyday spending.`
   }
   if (diff >= 3) {
     return `Sales tax in the target state (~${to.toFixed(1)}%) is notably higher than your current state (~${from.toFixed(1)}%). Your day-to-day purchasing power is slightly lower than the numbers alone indicate.`
@@ -156,7 +156,7 @@ function estimateCombinedNet(
   }
   if (filing === 'married') {
     // The IRS elective deferral limit (EMPLOYEE_401K_LIMIT) applies per
-    // person, not per return — a couple who each max out their own 401(k)
+    // person, not per return, a couple who each max out their own 401(k)
     // can jointly exclude up to 2x the single-filer limit. Cap each
     // spouse's contribution individually, then pass the summed dollar
     // amount via k401Dollar so tax.ts doesn't re-apply the single-person
@@ -212,7 +212,7 @@ function getPrefillCosts(city: City | undefined, householdType: HouseholdType, c
 
 function cityLabel(c: City): string {
   if (c.id.startsWith('other-')) return 'Other'
-  return c.tier ? `${c.name} — ${c.tier}` : c.name
+  return c.tier ? `${c.name}, ${c.tier}` : c.name
 }
 
 // ─── URL serialise ─────────────────────────────────────────────────────────────
@@ -348,25 +348,25 @@ export default function RelocationIncomeCalculator() {
   const debounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [shouldScroll, setShouldScroll] = useState(false)
 
-  // — Household
+  //, Household
   const [householdType, setHouseholdType] = useState<HouseholdType>('couple')
   const [adults,        setAdults]        = useState(2)
   const [children,      setChildren]      = useState(0)
 
-  // — Income
+  //, Income
   const [income1,  setIncome1]  = useState('')
   const [income2,  setIncome2]  = useState('')
   const [filing,   setFiling]   = useState<FilingStatus>('married')
   const [k401Pct1, setK401Pct1] = useState('6')
   const [k401Pct2, setK401Pct2] = useState('6')
 
-  // — Locations
+  //, Locations
   const [currentState,  setCurrentState]  = useState<StateCode>('ny')
   const [currentCityId, setCurrentCityId] = useState('nyc-ny')
   const [targetState,   setTargetState]   = useState<StateCode>('nc')
   const [targetCityId,  setTargetCityId]  = useState('raleigh-nc')
 
-  // — Housing
+  //, Housing
   const [housingMode,      setHousingMode]      = useState<HousingMode>('rent')
   const [monthlyRent,      setMonthlyRent]      = useState('')
   const [rentersInsurance, setRentersInsurance] = useState('20')
@@ -376,19 +376,19 @@ export default function RelocationIncomeCalculator() {
   const [termYears,        setTermYears]        = useState('30')
   const [hoa,              setHoa]              = useState('0')
 
-  // — NEW: One-time moving costs (FIX 1)
+  //, NEW: One-time moving costs (FIX 1)
   const [movingTruck,      setMovingTruck]      = useState('1500')
   const [securityDeposit,  setSecurityDeposit]  = useState('')
   const [furnitureBudget,  setFurnitureBudget]  = useState('2000')
   const [miscMoving,       setMiscMoving]       = useState('500')
 
-  // — Living costs
+  //, Living costs
   const [costs, setCosts] = useState<LivingCosts>(() =>
     getPrefillCosts(findCity('raleigh-nc'), 'couple', 0)
   )
   const [costsManuallyEdited, setCostsManuallyEdited] = useState(false)
 
-  // — Results / UI state
+  //, Results / UI state
   const [results,    setResults]    = useState<Results | null>(null)
   const [error,      setError]      = useState('')
   const [saveStatus, setSaveStatus] = useState<'idle' | 'copied' | 'shared' | 'error'>('idle')
@@ -444,21 +444,21 @@ export default function RelocationIncomeCalculator() {
     if (p.get('miscMoving'))       setMiscMoving(p.get('miscMoving')!)
   }, [])
 
-  // — Auto-fill rent + home price when target city changes
+  //, Auto-fill rent + home price when target city changes
   useEffect(() => {
     const city = findCity(targetCityId)
     if (city?.defaultRent)     setMonthlyRent(String(city.defaultRent))
     if (city?.medianHomePrice) setHomePrice(String(city.medianHomePrice))
   }, [targetCityId])
 
-  // — Auto-fill security deposit when rent changes (2× rent, unless user has typed something)
+  //, Auto-fill security deposit when rent changes (2× rent, unless user has typed something)
   useEffect(() => {
     if (housingMode !== 'rent' || securityDeposit) return
     const rent = parseMoney(monthlyRent)
     if (rent > 0) setSecurityDeposit(String(rent * 2))
   }, [monthlyRent, housingMode]) // intentionally omits securityDeposit to avoid loop
 
-  // — Auto-prefill living costs unless manually edited
+  //, Auto-prefill living costs unless manually edited
   useEffect(() => {
     if (costsManuallyEdited) return
     const city = findCity(targetCityId)
@@ -519,12 +519,12 @@ export default function RelocationIncomeCalculator() {
 
     const totalLiving = Object.values(costs).reduce((a, b) => a + b, 0)
 
-    // Net monthly — single income
+    // Net monthly, single income
     const annualNetOne  = estimateNetAnnual({ grossAnnual: i1, state: targetState, filing, k401Pct: k1, cityId: targetCityId })
     const netMonthlyOne = annualNetOne / 12
     const grossMonthlyOne = i1 / 12
 
-    // Net monthly — combined
+    // Net monthly, combined
     const annualNetTwo  = estimateCombinedNet(i1, i2, targetState, filing, k1, k2, targetCityId)
     const netMonthlyTwo = annualNetTwo / 12
 
@@ -543,7 +543,7 @@ export default function RelocationIncomeCalculator() {
 
     let taxesTwo: number
     if (i2 > 0 && filing === 'married') {
-      // See estimateCombinedNet above — each spouse's 401(k) is capped
+      // See estimateCombinedNet above, each spouse's 401(k) is capped
       // individually, then the summed dollar amount is passed via
       // k401Dollar so the household total isn't re-capped to a single
       // person's limit.
@@ -588,9 +588,9 @@ export default function RelocationIncomeCalculator() {
     } else if (verdictTwo === 'Safe' && verdictOne === 'Tight') {
       insightMessage = `This move works well on two incomes, but becomes tight if one income disappears. Consider building 6 months of reserves before relocating.`
     } else if (verdictTwo === 'Safe' && verdictOne === 'Stretch') {
-      insightMessage = `This move depends on two incomes. Losing one income would put serious strain on this budget — plan accordingly.`
+      insightMessage = `This move depends on two incomes. Losing one income would put serious strain on this budget, plan accordingly.`
     } else if (verdictTwo === 'Tight') {
-      insightMessage = `This is a stretch even on two incomes. Review your housing or cost assumptions — or consider a higher second income threshold.`
+      insightMessage = `This is a stretch even on two incomes. Review your housing or cost assumptions, or consider a higher second income threshold.`
     } else {
       insightMessage = `This city is a financial stretch. Consider a lower-cost area or a larger combined income before committing to this move.`
     }
@@ -794,7 +794,7 @@ export default function RelocationIncomeCalculator() {
           </div>
 
           <div>
-            <FieldLabel>401(k) contribution — Income 1</FieldLabel>
+            <FieldLabel>401(k) contribution, Income 1</FieldLabel>
             <div className="relative">
               <input type="number" min={0} max={60} step={0.5} value={k401Pct1}
                 onChange={e => setK401Pct1(e.target.value)}
@@ -805,7 +805,7 @@ export default function RelocationIncomeCalculator() {
 
           {showIncome2 && income2 && (
             <div>
-              <FieldLabel>401(k) contribution — Income 2</FieldLabel>
+              <FieldLabel>401(k) contribution, Income 2</FieldLabel>
               <div className="relative">
                 <input type="number" min={0} max={60} step={0.5} value={k401Pct2}
                   onChange={e => setK401Pct2(e.target.value)}
@@ -1011,7 +1011,7 @@ export default function RelocationIncomeCalculator() {
         <div className="flex items-center justify-between mb-3">
           <SectionLabel>Monthly living costs</SectionLabel>
           <span className="text-[11px] text-slate-400 dark:text-slate-500 italic -mt-3">
-            Pre-filled from city averages — edit as needed
+            Pre-filled from city averages, edit as needed
           </span>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -1044,7 +1044,7 @@ export default function RelocationIncomeCalculator() {
           <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
         )}
 
-        {/* CTA — FIX 4: sets shouldScroll flag instead of calling scroll directly */}
+        {/* CTA, FIX 4: sets shouldScroll flag instead of calling scroll directly */}
         <div className="mt-6">
           <button
             onClick={() => { calculate(); setShouldScroll(true) }}
@@ -1062,7 +1062,7 @@ export default function RelocationIncomeCalculator() {
           <div ref={resultsRef} className="space-y-4 scroll-mt-6 mt-6">
 
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-              Results — {results.currentCityName} → {results.targetCityName}
+              Results, {results.currentCityName} → {results.targetCityName}
             </p>
 
             {/* Card 1: Verdict */}
@@ -1114,7 +1114,7 @@ export default function RelocationIncomeCalculator() {
                 </div>
 
                 <p className="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
-                  Based on estimated taxes and average costs — adjust inputs above for your exact situation.
+                  Based on estimated taxes and average costs, adjust inputs above for your exact situation.
                 </p>
               </div>
             </div>
@@ -1192,7 +1192,7 @@ export default function RelocationIncomeCalculator() {
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-2 h-2 rounded-full bg-violet-500" />
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                  Where your money goes — one income
+                  Where your money goes, one income
                 </h3>
               </div>
               <MoneyFlowBar
@@ -1255,7 +1255,7 @@ export default function RelocationIncomeCalculator() {
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-2 h-2 rounded-full bg-violet-500" />
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                  Minimum second income needed — {results.targetCityName}
+                  Minimum second income needed, {results.targetCityName}
                 </h3>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
@@ -1280,7 +1280,7 @@ export default function RelocationIncomeCalculator() {
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-2 h-2 rounded-full bg-violet-500" />
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                  Net income breakdown — {results.targetCityName}
+                  Net income breakdown, {results.targetCityName}
                 </h3>
               </div>
 
@@ -1293,11 +1293,11 @@ export default function RelocationIncomeCalculator() {
               )}
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <StatCard label="Net monthly — one income"  value={fmt(results.netMonthlyOne)}  sub="after tax & 401(k)" />
+                <StatCard label="Net monthly, one income"  value={fmt(results.netMonthlyOne)}  sub="after tax & 401(k)" />
                 {results.hasTwoIncomes && (
-                  <StatCard label="Net monthly — two incomes" value={fmt(results.netMonthlyTwo)} sub="after tax & 401(k)" />
+                  <StatCard label="Net monthly, two incomes" value={fmt(results.netMonthlyTwo)} sub="after tax & 401(k)" />
                 )}
-                <StatCard label="Est. taxes — one income" value={fmt(results.taxesOne / 12)} sub="federal + state / mo" />
+                <StatCard label="Est. taxes, one income" value={fmt(results.taxesOne / 12)} sub="federal + state / mo" />
                 <StatCard label="Housing cost / mo" value={fmt(results.housingCost)} sub={housingMode === 'rent' ? 'rent + insurance' : 'mortgage + tax + ins'} />
                 <StatCard label="Total living costs" value={fmt(results.totalLiving)} sub="groceries, transport, etc." />
                 <StatCard label="Total monthly expenses" value={fmt(results.housingCost + results.totalLiving)} sub="housing + living costs" />

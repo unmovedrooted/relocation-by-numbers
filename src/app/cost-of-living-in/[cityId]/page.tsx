@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!city) return { title: "City not found" };
 
-  const title = `Cost of Living in ${city.name}, ${city.state.toUpperCase()} — Rent, Housing & Taxes`;
+  const title = `Cost of Living in ${city.name}, ${city.state.toUpperCase()}, Rent, Housing & Taxes`;
   const description = `How much does it cost to live in ${city.name}? See average rent, median home prices, property tax rates, and the salary you need to live comfortably in ${city.name}, ${city.state.toUpperCase()}.`;
 
   return {
@@ -86,7 +86,7 @@ export default async function Page({ params }: Props) {
             The cost of living in {city.name} is shaped primarily by housing costs,
             state income taxes, and everyday expenses. This page covers average rent,
             median home prices, property tax rates, and the salary you need to live
-            comfortably — with links to compare {city.name} against other cities.
+            comfortably, with links to compare {city.name} against other cities.
           </p>
 
           <div className="text-xs text-slate-500">Assumptions updated: March 2026</div>
@@ -182,7 +182,7 @@ export default async function Page({ params }: Props) {
               <span className="font-semibold text-white">
                 {rent ? `$${rent.toLocaleString()} per month` : "not available"}
               </span>
-              , with a median home price of{" "}
+, with a median home price of{" "}
               <span className="font-semibold text-white">
                 {homePrice ? `$${homePrice.toLocaleString()}` : "not available"}
               </span>.
@@ -203,7 +203,7 @@ export default async function Page({ params }: Props) {
             <p>
               State income taxes are also a key factor. The{" "}
               {city.state.toUpperCase()} state tax rate affects how much of each paycheck
-              you actually keep — use the relocation calculator to see your estimated
+              you actually keep, use the relocation calculator to see your estimated
               take-home pay in {city.name} based on your income.
             </p>
           </div>

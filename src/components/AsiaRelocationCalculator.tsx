@@ -52,7 +52,7 @@ const ASIA_VISA_CONTEXT: Record<string, {
     icon: "🇯🇵",
     program: "Highly Skilled Professional / Specified Skilled Worker",
     highlight: "Points-Based Skilled Visa",
-    notes: "Japan's Highly Skilled Professional (HSP) visa uses a points system — qualifying faster for permanent residency (1–3 years vs 10). Digital Nomad Visa launched 2024 (6-month stay, ¥10M/yr income). Spouse/dependent visas widely available. Japanese bureaucracy requires patience.",
+    notes: "Japan's Highly Skilled Professional (HSP) visa uses a points system, qualifying faster for permanent residency (1–3 years vs 10). Digital Nomad Visa launched 2024 (6-month stay, ¥10M/yr income). Spouse/dependent visas widely available. Japanese bureaucracy requires patience.",
     estimatedFee: 300,
   },
   KR: {
@@ -66,21 +66,21 @@ const ASIA_VISA_CONTEXT: Record<string, {
     icon: "🇸🇬",
     program: "Employment Pass / ONE Pass / Tech.Pass",
     highlight: "Employment Pass Required",
-    notes: "Singapore has no digital nomad visa. Employment Pass (EP) requires employer sponsorship and SGD 5,000+/mo salary. ONE Pass for top talent (SGD 30k+/mo). Tech.Pass for established tech professionals. EntrePass for entrepreneurs. High bar — Singapore is selective about residency.",
+    notes: "Singapore has no digital nomad visa. Employment Pass (EP) requires employer sponsorship and SGD 5,000+/mo salary. ONE Pass for top talent (SGD 30k+/mo). Tech.Pass for established tech professionals. EntrePass for entrepreneurs. High bar, Singapore is selective about residency.",
     estimatedFee: 350,
   },
   VN: {
     icon: "🇻🇳",
     program: "E-Visa / Business Visa / DL Visa",
     highlight: "90-Day E-Visa",
-    notes: "Vietnam's e-Visa allows 90-day stays, multi-entry. Business visa (DN) available for longer stays with company sponsorship. No official digital nomad visa yet — many expats extend via agencies or border runs. Vietnam does not offer permanent residency to most foreigners.",
+    notes: "Vietnam's e-Visa allows 90-day stays, multi-entry. Business visa (DN) available for longer stays with company sponsorship. No official digital nomad visa yet, many expats extend via agencies or border runs. Vietnam does not offer permanent residency to most foreigners.",
     estimatedFee: 200,
   },
   MY: {
     icon: "🇲🇾",
     program: "DE Rantau / MM2H / Premium Visa",
     highlight: "Digital Nomad Visa Available",
-    notes: "Malaysia's DE Rantau nomad pass: remote workers earning $24k+/yr, 12-month renewable stay. MM2H (Malaysia My Second Home) is a long-term residency program for retirees and self-sufficient individuals — requirements raised significantly in 2021. Premium Visa Programme for high-net-worth individuals.",
+    notes: "Malaysia's DE Rantau nomad pass: remote workers earning $24k+/yr, 12-month renewable stay. MM2H (Malaysia My Second Home) is a long-term residency program for retirees and self-sufficient individuals, requirements raised significantly in 2021. Premium Visa Programme for high-net-worth individuals.",
     estimatedFee: 220,
   },
   ID: {
@@ -101,7 +101,7 @@ const ASIA_VISA_CONTEXT: Record<string, {
     icon: "🇦🇺",
     program: "Skilled Independent (189) / Global Talent / WHV",
     highlight: "Points-Based Skilled Visa",
-    notes: "Australia's Skilled Independent Visa (subclass 189) is points-based — age, English, qualifications, and experience. Global Talent Visa for exceptional candidates. Working Holiday Visa (WHV) for under-35s from eligible countries. High income thresholds and competitive demand.",
+    notes: "Australia's Skilled Independent Visa (subclass 189) is points-based, age, English, qualifications, and experience. Global Talent Visa for exceptional candidates. Working Holiday Visa (WHV) for under-35s from eligible countries. High income thresholds and competitive demand.",
     estimatedFee: 450,
   },
   NZ: {
@@ -122,7 +122,7 @@ const ASIA_VISA_CONTEXT: Record<string, {
     icon: "🇹🇼",
     program: "Gold Card / Employment Gold Card",
     highlight: "Employment Gold Card",
-    notes: "Taiwan's Employment Gold Card combines a work permit, residence visa, alien resident certificate, and re-entry permit in a single document — valid 1–3 years. Aimed at professionals earning NT$160k+/month or with special expertise. Open work rights — no single employer required. No digital nomad visa yet.",
+    notes: "Taiwan's Employment Gold Card combines a work permit, residence visa, alien resident certificate, and re-entry permit in a single document, valid 1–3 years. Aimed at professionals earning NT$160k+/month or with special expertise. Open work rights, no single employer required. No digital nomad visa yet.",
     estimatedFee: 200,
   },
   HK: {
@@ -136,14 +136,14 @@ const ASIA_VISA_CONTEXT: Record<string, {
     icon: "🇮🇳",
     program: "Employment Visa / Business Visa / OCI Card",
     highlight: "Employment Visa",
-    notes: "India's Employment Visa requires a job offer from an Indian company (minimum $25k/yr salary threshold). Business Visa for shorter stays. Overseas Citizenship of India (OCI) card for people of Indian origin — lifetime multiple-entry visa with most rights except voting and agricultural land ownership.",
+    notes: "India's Employment Visa requires a job offer from an Indian company (minimum $25k/yr salary threshold). Business Visa for shorter stays. Overseas Citizenship of India (OCI) card for people of Indian origin, lifetime multiple-entry visa with most rights except voting and agricultural land ownership.",
     estimatedFee: 160,
   },
   CN: {
     icon: "🇨🇳",
     program: "Work Permit / Talent Visa / Business Visa",
     highlight: "Work Permit Required",
-    notes: "China requires a Work Permit (Foreigner's Work Permit) sponsored by an employer. Talent Visa (R visa) for high-level professionals. Business Visa (M) for short-term commercial activities. China's visa requirements have tightened in recent years — working without proper authorization carries significant penalties.",
+    notes: "China requires a Work Permit (Foreigner's Work Permit) sponsored by an employer. Talent Visa (R visa) for high-level professionals. Business Visa (M) for short-term commercial activities. China's visa requirements have tightened in recent years, working without proper authorization carries significant penalties.",
     estimatedFee: 250,
   },
   QA: {
@@ -157,7 +157,7 @@ const ASIA_VISA_CONTEXT: Record<string, {
     icon: "🇸🇦",
     program: "Iqama (Residency) / Premium Residency",
     highlight: "Employer-Sponsored Iqama",
-    notes: "Saudi Arabia's residency permit (Iqama) is employer-sponsored. The Premium Residency (Green Card equivalent) is available for purchase or merit — offering permanent residency and the ability to self-sponsor. No personal income tax on employment income. Vision 2030 is expanding expat-friendly policies.",
+    notes: "Saudi Arabia's residency permit (Iqama) is employer-sponsored. The Premium Residency (Green Card equivalent) is available for purchase or merit, offering permanent residency and the ability to self-sponsor. No personal income tax on employment income. Vision 2030 is expanding expat-friendly policies.",
     estimatedFee: 350,
   },
   OM: {
@@ -203,7 +203,7 @@ type YesNo = "yes" | "no";
 type CurrencyDisplay = "USD" | "CURRENT" | "DESTINATION";
 type HousingMode = "rent" | "buy";
 
-// FIX 3: floating point precision — run toFixed(10) before toLocaleString
+// FIX 3: floating point precision, run toFixed(10) before toLocaleString
 function money(n: number, digits: number = 0, currency: string = "USD") {
   if (!Number.isFinite(n)) return "—";
   return parseFloat(n.toFixed(10)).toLocaleString(undefined, {
@@ -558,9 +558,9 @@ export default function AsiaRelocationCalculator() {
     const familyHealthcare     = nz(healthcare)     * (1 + (adultCount - 1) * 0.7  + childCount * 0.5);
     const familyUtilities      = nz(utilities)      * (1 + (adultCount - 1) * 0.25 + childCount * 0.15);
 
-    // FIX 1: state values are already city-specific defaults — do NOT re-multiply
+    // FIX 1: state values are already city-specific defaults, do NOT re-multiply
     // by toCityMultipliers (that would double-apply the city cost-of-living).
-    // fromCityMultipliers below are still correct — they scale the same lifestyle
+    // fromCityMultipliers below are still correct, they scale the same lifestyle
     // to what it costs in the origin city for comparison purposes.
     const groceriesAdj      = familyGroceries;
     const transportationAdj = familyTransportation;
@@ -742,7 +742,7 @@ export default function AsiaRelocationCalculator() {
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* ── LEFT — INPUTS ── */}
+        {/* ── LEFT, INPUTS ── */}
         <div className="space-y-3">
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">Income &amp; Location</div>
@@ -837,7 +837,7 @@ export default function AsiaRelocationCalculator() {
           {/* Dynamic conditional tax questions */}
           {getAsiaTaxQuestionsForCountry(toCountry, incomeScenario).map((q: ConditionalQuestion) => (
             <div key={q.key} className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
-              <div className="mb-3 text-sm font-semibold">{getCountryByCode(toCountry)?.name ?? toCountry} — Tax Question</div>
+              <div className="mb-3 text-sm font-semibold">{getCountryByCode(toCountry)?.name ?? toCountry}, Tax Question</div>
               <label className="text-sm">
                 <div className={labelHeadCls}>{q.label}{q.helpText && <InfoTip text={q.helpText} />}</div>
                 <select className={selectCls} value={conditionalAnswers[q.key] ?? ""}
@@ -899,7 +899,7 @@ export default function AsiaRelocationCalculator() {
             {housingMode === "buy" && (
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                 No destination here has a verified home-price dataset, so the price above is estimated from the rent
-                figure (16x annual rent, a standard rule of thumb) — treat it as a rough planning figure, not a real
+                figure (16x annual rent, a standard rule of thumb), treat it as a rough planning figure, not a real
                 listing price.
               </p>
             )}
@@ -955,7 +955,7 @@ export default function AsiaRelocationCalculator() {
           </div>
         </div>
 
-        {/* ── RIGHT — RESULTS ── */}
+        {/* ── RIGHT, RESULTS ── */}
         <div className="space-y-3">
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-2 text-sm font-semibold">Results</div>
@@ -1056,7 +1056,7 @@ export default function AsiaRelocationCalculator() {
               <div>Results are estimates only. No information entered is stored or shared.</div>
               <div>Tax estimates, rent, immigration costs, and retirement treatment vary by destination and personal circumstances.</div>
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Tip: Your URL updates as you type — copy the page link to share this scenario.</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Tip: Your URL updates as you type, copy the page link to share this scenario.</div>
           </div>
 
           {/* Monthly Flexibility */}
@@ -1116,12 +1116,12 @@ export default function AsiaRelocationCalculator() {
             {results.salaryReady && (
               <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                 {results.monthlyFlexibility < 0
-                  ? "Your monthly budget breaks — expenses exceed income."
+                  ? "Your monthly budget breaks, expenses exceed income."
                   : results.totalPctOfNet > 80
-                  ? "Your risk is tight cash flow — small changes could break your budget."
+                  ? "Your risk is tight cash flow, small changes could break your budget."
                   : results.upfrontCashNeeded > convertLocalToUsd(nz(currentSavings), fromCountry)
-                  ? "Your risk is upfront cash — you don't have enough saved for the move."
-                  : "You have breathing room — this move looks financially stable based on your inputs."}
+                  ? "Your risk is upfront cash, you don't have enough saved for the move."
+                  : "You have breathing room, this move looks financially stable based on your inputs."}
               </div>
             )}
             <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">This combines income, taxes, housing, living costs, savings, and one-time move costs.</div>

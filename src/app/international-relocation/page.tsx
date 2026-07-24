@@ -202,7 +202,7 @@ export default function Page() {
               </h2>
               <div className="mt-4 space-y-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
                 <p>
-                  This calculator estimates how a move abroad may affect your monthly budget —
+                  This calculator estimates how a move abroad may affect your monthly budget,
                   covering income taxes, housing, living costs, and one-time relocation expenses
                   for destinations across Europe, Asia, the Middle East, and North America.
                 </p>

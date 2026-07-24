@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import remarkGfm from "remark-gfm";
 import { getAllPosts, getPost } from "@/lib/posts";
 
-// MDX component overrides — styled to match the site
+// MDX component overrides, styled to match the site
 const components = {
   h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
     <h2
@@ -172,7 +172,7 @@ export default async function BlogPostPage({ params }: Props) {
           </p>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
             Compare take-home pay, housing costs, and monthly flexibility across
-            any two states — free, no signup required.
+            any two states, free, no signup required.
           </p>
           <div className="mt-4 flex flex-wrap justify-center gap-3">
             <Link

@@ -26,7 +26,7 @@ export default function FireUpsellCard({ fireAge, yearsToFI }: Props) {
             {alreadyFI
               ? "Roth conversion ladders, sequence-of-returns protection, and a withdrawal order optimized for your accounts."
               : fireAge
-              ? `A step-by-step plan to reach FIRE at ${fireAge} — account strategy, contribution order, and tax optimization.`
+              ? `A step-by-step plan to reach FIRE at ${fireAge}, account strategy, contribution order, and tax optimization.`
               : "A step-by-step plan built around your income, accounts, and timeline."}
           </p>
         </div>

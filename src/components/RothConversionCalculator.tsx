@@ -13,7 +13,7 @@ import SavedScenariosPanel from "./SavedScenariosPanel";
 // A Roth conversion moves money from a traditional (pre-tax) 401k/IRA into a
 // Roth: you pay ordinary income tax now, in exchange for tax-free growth and
 // withdrawals later. This calculator compares the after-tax value of two
-// paths at withdrawal — convert now vs. keep it traditional — and the
+// paths at withdrawal, convert now vs. keep it traditional, and the
 // break-even future tax rate. All figures are in today's dollars.
 //
 // Rules reflected: conversions have no income limit, are taxed as ordinary
@@ -224,8 +224,8 @@ export default function RothConversionCalculator() {
       { Metric: "Years until withdrawal", Value: results.years },
       { Metric: "Expected annual return", Value: `${expectedReturnPct}%` },
       { Metric: "Inflation", Value: `${inflationPct}%` },
-      { Metric: "Convert to Roth — after-tax value (today's $)", Value: money(results.rothFinal) },
-      { Metric: "Keep Traditional — after-tax value (today's $)", Value: money(results.tradFinal) },
+      { Metric: "Convert to Roth, after-tax value (today's $)", Value: money(results.rothFinal) },
+      { Metric: "Keep Traditional, after-tax value (today's $)", Value: money(results.tradFinal) },
       { Metric: results.rothWins ? "Converting comes out ahead by" : "Keeping traditional comes out ahead by", Value: money(Math.abs(results.difference)) },
     ];
   }, [results, payTaxFrom, currentIncome, filing, stateName, retirementTaxRatePct, expectedReturnPct, inflationPct]);
@@ -253,7 +253,7 @@ export default function RothConversionCalculator() {
     <div className="text-slate-900 dark:text-slate-100">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* ================================================================
-            LEFT — INPUTS
+            LEFT, INPUTS
         ================================================================ */}
         <div className="space-y-3">
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
@@ -346,7 +346,7 @@ export default function RothConversionCalculator() {
         </div>
 
         {/* ================================================================
-            RIGHT — RESULTS
+            RIGHT, RESULTS
         ================================================================ */}
         <div className="space-y-3">
           {!inputsReady ? (
@@ -361,7 +361,7 @@ export default function RothConversionCalculator() {
                   {results.rothWins ? "Converting" : "Keeping it traditional"} comes out ahead
                 </div>
                 <p className="mt-2 text-sm leading-5 opacity-90">
-                  by <span className="font-semibold">{money(Math.abs(results.difference))}</span> in after-tax value after {results.years} years (today&apos;s dollars). Break-even retirement tax rate: <span className="font-semibold">{(results.breakEvenRate * 100).toFixed(1)}%</span> — convert if you expect to be above it, keep traditional if below.
+                  by <span className="font-semibold">{money(Math.abs(results.difference))}</span> in after-tax value after {results.years} years (today&apos;s dollars). Break-even retirement tax rate: <span className="font-semibold">{(results.breakEvenRate * 100).toFixed(1)}%</span>, convert if you expect to be above it, keep traditional if below.
                 </p>
               </div>
 
@@ -397,11 +397,11 @@ export default function RothConversionCalculator() {
                     <span className="font-semibold text-slate-900 dark:text-slate-100">{(results.effectiveCurrentRate * 100).toFixed(1)}%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Convert to Roth — after-tax value</span>
+                    <span>Convert to Roth, after-tax value</span>
                     <span className="font-semibold text-emerald-600 dark:text-emerald-400">{money(results.rothFinal)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Keep traditional — after-tax value</span>
+                    <span>Keep traditional, after-tax value</span>
                     <span className="font-semibold text-cyan-700 dark:text-cyan-300">{money(results.tradFinal)}</span>
                   </div>
                   {payTaxFrom === "outside" && (
@@ -414,7 +414,7 @@ export default function RothConversionCalculator() {
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                A Roth conversion can&apos;t be undone, and the converted amount is taxed as ordinary income this year — a
+                A Roth conversion can&apos;t be undone, and the converted amount is taxed as ordinary income this year, a
                 large conversion can push you into higher brackets, raise Medicare (IRMAA) premiums, or affect ACA
                 subsidies. The 5-year rule applies to converted amounts before 59½. This assumes the converted balance is
                 fully pre-tax (no after-tax basis / pro-rata blending) and uses a single assumed retirement tax rate.

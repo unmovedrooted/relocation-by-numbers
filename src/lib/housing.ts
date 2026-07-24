@@ -10,8 +10,8 @@
 // ─── Quick monthly P&I helper ─────────────────────────────────────────────────
 
 export type MortgageOptions = {
-  downPct?: number; // percentage  — 20 means 20%
-  rate?: number;    // percentage  — 7 means 7%
+  downPct?: number; // percentage, 20 means 20%
+  rate?: number;    // percentage, 7 means 7%
   years?: number;   // default 30
 };
 
@@ -202,7 +202,7 @@ export function solveMaxHomePrice({
     const tax = (mid * (propertyTaxRate / 100)) / 12;
     const ins = baseHomePrice > 0 ? insuranceMonthly * (mid / baseHomePrice) : insuranceMonthly;
 
-    // Auto PMI — same tiers as the main calculator
+    // Auto PMI, same tiers as the main calculator
     let pmi = 0;
     if (dpFrac < 0.20 && loan > 0) {
       const ltv  = loan / mid;
@@ -223,7 +223,7 @@ export function solveMaxHomePrice({
 // ─── PMI cancellation with optional appreciation ──────────────────────────────
 
 /**
- * Month when LTV first drops to 80% — with optional home appreciation.
+ * Month when LTV first drops to 80%, with optional home appreciation.
  * Without appreciation this matches the existing calcPMIDropOff.
  * With appreciation the home value grows monthly, so cancellation arrives
  * sooner: a lower balance against a higher value crosses 80% LTV earlier.

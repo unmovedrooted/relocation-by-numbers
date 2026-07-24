@@ -8,9 +8,9 @@ const PAGE_PATH = "/roth-conversion-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "Roth Conversion Calculator — Convert Now or Pay Tax Later?",
+  title: "Roth Conversion Calculator, Convert Now or Pay Tax Later?",
   description:
-    "Free Roth conversion calculator. See the tax due now, the after-tax value of converting vs. keeping your traditional 401(k)/IRA, and the break-even future tax rate — with federal and state taxes built in.",
+    "Free Roth conversion calculator. See the tax due now, the after-tax value of converting vs. keeping your traditional 401(k)/IRA, and the break-even future tax rate, with federal and state taxes built in.",
   keywords: [
     "roth conversion calculator",
     "roth ira conversion calculator",
@@ -25,14 +25,14 @@ export const metadata: Metadata = {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "Roth Conversion Calculator — Convert Now or Pay Tax Later?",
+    title: "Roth Conversion Calculator, Convert Now or Pay Tax Later?",
     description:
       "Compare the after-tax value of converting to Roth vs. keeping it traditional, with the break-even future tax rate and federal + state taxes.",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "Roth Conversion Calculator — Convert Now or Pay Tax Later?",
+    title: "Roth Conversion Calculator, Convert Now or Pay Tax Later?",
     description: "Tax due now, convert-vs-keep after-tax comparison, and the break-even future tax rate.",
     site: "@relocationbynumbers",
   },
@@ -88,7 +88,7 @@ const faqSchema = {
       name: "Is there an income limit on Roth conversions?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "No. Unlike direct Roth IRA contributions, Roth conversions have no income limit — anyone can convert any amount. The conversion is taxed as ordinary income and cannot be undone (recharacterization was eliminated in 2018).",
+        text: "No. Unlike direct Roth IRA contributions, Roth conversions have no income limit, anyone can convert any amount. The conversion is taxed as ordinary income and cannot be undone (recharacterization was eliminated in 2018).",
       },
     },
     {
@@ -127,7 +127,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Pay the tax from the conversion or outside savings?",
-    a: "Outside savings usually wins — the full amount stays invested tax-free. Paying from the converted funds shrinks the Roth and can trigger a 10% penalty if you're under 59½.",
+    a: "Outside savings usually wins, the full amount stays invested tax-free. Paying from the converted funds shrinks the Roth and can trigger a 10% penalty if you're under 59½.",
   },
 ];
 
@@ -151,7 +151,7 @@ export default function Page() {
             </p>
 
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-              Federal and state taxes built in — all figures in today&apos;s dollars.
+              Federal and state taxes built in, all figures in today&apos;s dollars.
             </p>
 
             <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">
@@ -188,7 +188,7 @@ export default function Page() {
                   <p>
                     It stacks the amount you&apos;d convert on top of your other income for the year and runs it through
                     the same verified federal + state tax engine as the rest of this site, so the conversion tax
-                    reflects the actual brackets it falls into — not a single flat rate.
+                    reflects the actual brackets it falls into, not a single flat rate.
                   </p>
                   <p>
                     Then it grows both paths forward in today&apos;s dollars and compares the after-tax value at
@@ -215,7 +215,7 @@ export default function Page() {
               <div className="rounded-2xl border border-cyan-200/70 bg-cyan-50 p-5 dark:border-cyan-900/60 dark:bg-cyan-950/30">
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Good to know before you use it</h3>
                 <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                  <p>A conversion is permanent — it can&apos;t be undone once done.</p>
+                  <p>A conversion is permanent, it can&apos;t be undone once done.</p>
                   <p>
                     A large conversion can push you into higher brackets, raise Medicare (IRMAA) premiums, or reduce ACA
                     subsidies in the conversion year. Some people spread conversions over several years to manage this.

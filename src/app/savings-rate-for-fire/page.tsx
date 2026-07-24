@@ -149,7 +149,7 @@ export default async function Page({ searchParams }: PageProps) {
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
           <h2 className="text-xl font-semibold">
-            What this calculator includes — and what it does not
+            What this calculator includes, and what it does not
           </h2>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">

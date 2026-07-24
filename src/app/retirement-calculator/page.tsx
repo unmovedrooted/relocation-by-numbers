@@ -12,9 +12,9 @@ const PAGE_PATH = "/retirement-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "Retirement Calculator — Project Your Savings & Future Income",
+  title: "Retirement Calculator, Project Your Savings & Future Income",
   description:
-    "Free retirement calculator. See what your current savings and contributions grow into by retirement, what income that could support, and how a few small changes move the number — all in today's dollars, no judgment.",
+    "Free retirement calculator. See what your current savings and contributions grow into by retirement, what income that could support, and how a few small changes move the number, all in today's dollars, no judgment.",
   keywords: [
     "retirement calculator",
     "retirement savings calculator",
@@ -31,14 +31,14 @@ export const metadata: Metadata = {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "Retirement Calculator — Project Your Savings & Future Income",
+    title: "Retirement Calculator, Project Your Savings & Future Income",
     description:
-      "See what your savings grow into by retirement, the income it supports, and how small changes move the number — in today's dollars.",
+      "See what your savings grow into by retirement, the income it supports, and how small changes move the number, in today's dollars.",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "Retirement Calculator — Project Your Savings & Future Income",
+    title: "Retirement Calculator, Project Your Savings & Future Income",
     description: "What your savings grow into, the income it supports, and how small changes move the number.",
     site: "@relocationbynumbers",
   },
@@ -59,7 +59,7 @@ const webAppSchema = {
   name: "Retirement Calculator",
   url: CANONICAL,
   description:
-    "Free retirement calculator that projects what your savings and contributions grow into by retirement, breaks the balance into savings, contributions, and growth on a live chart, and estimates the income it could support — all in today's dollars.",
+    "Free retirement calculator that projects what your savings and contributions grow into by retirement, breaks the balance into savings, contributions, and growth on a live chart, and estimates the income it could support, all in today's dollars.",
   applicationCategory: "FinanceApplication",
   operatingSystem: "Any",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -86,7 +86,7 @@ const faqSchema = {
       name: "How does this retirement calculator work?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "It grows your current savings and ongoing contributions to your chosen retirement age using an inflation-adjusted return, then shows the projected balance in today's dollars, breaks it into savings vs. contributions vs. investment growth, and estimates the income it could support with the 4% rule. There's no target to hit and no 'on track / behind' verdict — it simply shows where your current path lands.",
+        text: "It grows your current savings and ongoing contributions to your chosen retirement age using an inflation-adjusted return, then shows the projected balance in today's dollars, breaks it into savings vs. contributions vs. investment growth, and estimates the income it could support with the 4% rule. There's no target to hit and no 'on track / behind' verdict, it simply shows where your current path lands.",
       },
     },
     {
@@ -137,11 +137,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "How much income will it support?",
-    a: "As a reference, the 4% rule — roughly 4% of the balance per year. For a detailed, tax-aware drawdown, use the Retirement Withdrawal Calculator.",
+    a: "As a reference, the 4% rule, roughly 4% of the balance per year. For a detailed, tax-aware drawdown, use the Retirement Withdrawal Calculator.",
   },
   {
     q: "What return should I assume?",
-    a: "There's no single right number. A diversified portfolio has historically returned ~6–8% before inflation over long periods, but the future is uncertain — try a range to test sensitivity.",
+    a: "There's no single right number. A diversified portfolio has historically returned ~6–8% before inflation over long periods, but the future is uncertain, try a range to test sensitivity.",
   },
 ];
 
@@ -180,7 +180,7 @@ export default function Page() {
             </p>
 
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-              All in today&apos;s dollars — no target to hit, no judgment. Just your trajectory.
+              All in today&apos;s dollars, no target to hit, no judgment. Just your trajectory.
             </p>
 
             <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">
@@ -221,14 +221,14 @@ export default function Page() {
                 </h2>
                 <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
                   <p>
-                    Enter where you are today — your age, when you&apos;d like to retire, what you&apos;ve saved, and
+                    Enter where you are today, your age, when you&apos;d like to retire, what you&apos;ve saved, and
                     what you add each month. The calculator grows that forward at an inflation-adjusted return and
                     shows the projected balance in today&apos;s dollars, so the number reflects real buying power
                     rather than an inflated future figure.
                   </p>
                   <p>
-                    The live chart breaks the balance into three parts — what you started with, what you contributed,
-                    and what the market added — so you can see how much of the total is pure compound growth. Below
+                    The live chart breaks the balance into three parts, what you started with, what you contributed,
+                    and what the market added, so you can see how much of the total is pure compound growth. Below
                     it, a 4%-rule estimate translates the balance into supportable monthly income, and the
                     &ldquo;what if&rdquo; cards show how saving a little more, retiring slightly later, or earning a
                     bit more changes things.
@@ -240,7 +240,7 @@ export default function Page() {
                     { title: "Live balance chart", body: "Savings, contributions, and growth, re-proportioning as you type." },
                     { title: "Today's dollars", body: "Inflation-adjusted, so the number reflects real buying power." },
                     { title: "Supportable income", body: "A 4%-rule translation from balance to monthly income." },
-                    { title: "What-if scenarios", body: "See the effect of small changes — no pressure, just options." },
+                    { title: "What-if scenarios", body: "See the effect of small changes, no pressure, just options." },
                   ].map((item) => (
                     <div
                       key={item.title}
@@ -258,7 +258,7 @@ export default function Page() {
                 <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
                   <p>
                     This is a smooth, average-return projection. Real markets are volatile, and the order of returns
-                    matters — a projection is a guide, not a prediction.
+                    matters, a projection is a guide, not a prediction.
                   </p>
                   <p>
                     There&apos;s deliberately no &ldquo;target&rdquo; or &ldquo;you&apos;re behind&rdquo; verdict. What

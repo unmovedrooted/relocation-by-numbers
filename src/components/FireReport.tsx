@@ -4,7 +4,7 @@
 import { useState } from "react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-// Pass whatever you have — the API accepts partial inputs gracefully.
+// Pass whatever you have, the API accepts partial inputs gracefully.
 export type FireReportInputs = {
   age: number;
   state: string;
@@ -134,7 +134,7 @@ export default function FireReport({ inputs }: { inputs: FireReportInputs }) {
             </p>
             <p className="text-sm leading-6 text-slate-400">
               {alreadyFI
-                ? "Account withdrawal order, Roth conversions, tax bracket management, and ACA strategy — built from your exact numbers."
+                ? "Account withdrawal order, Roth conversions, tax bracket management, and ACA strategy, built from your exact numbers."
                 : "Withdrawal order, Roth conversion windows, healthcare bridge, and sequence-of-returns protection for your specific situation."}
             </p>
             <p className="text-xs leading-5 text-slate-500">
@@ -202,7 +202,7 @@ export default function FireReport({ inputs }: { inputs: FireReportInputs }) {
       {status === "error" && (
         <div className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3">
           <p className="text-sm text-red-300">
-            Failed to generate — please try again.
+            Failed to generate, please try again.
           </p>
           <button
             type="button"

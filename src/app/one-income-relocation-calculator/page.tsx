@@ -14,7 +14,7 @@ const CANONICAL = `${SITE_URL}${PAGE_PATH}`
 export const metadata: Metadata = {
   title: 'One Income vs Two Income Relocation Calculator | Can You Afford to Move?',
   description:
-    'Find out if you can afford to relocate on one income. Compare one-income vs two-income housing costs, taxes, monthly flexibility, and minimum second income needed — for any US city.',
+    'Find out if you can afford to relocate on one income. Compare one-income vs two-income housing costs, taxes, monthly flexibility, and minimum second income needed, for any US city.',
   alternates: { canonical: CANONICAL },
   openGraph: {
     type: 'website',
@@ -22,14 +22,14 @@ export const metadata: Metadata = {
     siteName: 'Relocation by Numbers',
     title: 'One Income vs Two Income Relocation Calculator',
     description:
-      'Can you afford to move on one income — or do you need two? Compare housing burden, taxes, monthly flexibility, and minimum second income needed for any US city.',
+      'Can you afford to move on one income, or do you need two? Compare housing burden, taxes, monthly flexibility, and minimum second income needed for any US city.',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary',
     title: 'One Income vs Two Income Relocation Calculator',
     description:
-      'Find out if you can afford to relocate on one income — taxes, housing, and monthly flexibility for any US city.',
+      'Find out if you can afford to relocate on one income, taxes, housing, and monthly flexibility for any US city.',
     site: '@relocationbynumbers',
   },
 }
@@ -121,15 +121,15 @@ const EXAMPLE_PREVIEWS = [
 const FAQ_ITEMS = [
   {
     q: 'Is moving on one income a bad idea?',
-    a: 'Not always — but it depends on how much flexibility you have after housing, taxes, and fixed costs. This calculator shows whether you\'re safely within budget or at risk of financial strain. Many couples move on one income successfully; the key is knowing the numbers first.',
+    a: 'Not always, but it depends on how much flexibility you have after housing, taxes, and fixed costs. This calculator shows whether you\'re safely within budget or at risk of financial strain. Many couples move on one income successfully; the key is knowing the numbers first.',
   },
   {
     q: 'Can a family afford to move on one income?',
-    a: 'It depends on the target city, income level, and housing costs. The calculator shows a Safe, Tight, or Stretch verdict based on housing burden and monthly leftover cash — so you get a clear answer, not a guess.',
+    a: 'It depends on the target city, income level, and housing costs. The calculator shows a Safe, Tight, or Stretch verdict based on housing burden and monthly leftover cash, so you get a clear answer, not a guess.',
   },
   {
     q: 'How much salary do I need to move to a new city?',
-    a: 'It depends on rent, local taxes, and lifestyle costs in that city. This calculator estimates the minimum income needed to cover expenses and stay under a safe housing ratio — customized per city, not national averages.',
+    a: 'It depends on rent, local taxes, and lifestyle costs in that city. This calculator estimates the minimum income needed to cover expenses and stay under a safe housing ratio, customized per city, not national averages.',
   },
   {
     q: 'How much second income do we need to make this move work?',
@@ -149,14 +149,14 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Can I use this as a single person moving for a new job?',
-    a: 'Yes. Choose Solo household and enter one income. The tool calculates your take-home, housing burden, and monthly flexibility in the destination city — and flags whether you\'re in safe or stretched territory.',
+    a: 'Yes. Choose Solo household and enter one income. The tool calculates your take-home, housing burden, and monthly flexibility in the destination city, and flags whether you\'re in safe or stretched territory.',
   },
 ]
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Page() {
-  // Rotates per server render — different example each page load
+  // Rotates per server render, different example each page load
   const example = EXAMPLE_PREVIEWS[new Date().getMinutes() % EXAMPLE_PREVIEWS.length]
 
   return (
@@ -178,7 +178,7 @@ export default function Page() {
 
         {/* ── HERO ───────────────────────────────────────────────────────────── */}
         <header className="relative overflow-hidden py-14 text-center sm:py-20">
-          {/* Subtle radial glow — gives depth without being loud */}
+          {/* Subtle radial glow, gives depth without being loud */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -193,7 +193,7 @@ export default function Page() {
               One Income vs Two Income
             </span>
 
-            {/* Headline — tension + specificity */}
+            {/* Headline, tension + specificity */}
             <h1 className="mt-2 text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-5xl sm:leading-[1.1]">
               Can you actually afford<br className="hidden sm:block" /> this move on one income?
             </h1>
@@ -201,7 +201,7 @@ export default function Page() {
             {/* Emotional hook */}
             <p className="mx-auto mt-4 max-w-xl text-base text-slate-500 dark:text-slate-400 sm:text-lg">
               Most people underestimate how tight a move feels on one income.
-              This calculator shows you the real numbers — before you sign a lease.
+              This calculator shows you the real numbers, before you sign a lease.
             </p>
 
             {/* Trust line */}
@@ -310,20 +310,20 @@ export default function Page() {
                 ↓
               </span>
               <p className="text-sm text-violet-900 dark:text-violet-200">
-                <strong>See instantly:</strong> the exact second income your household needs to make this move work — down to the dollar, after taxes.
+                <strong>See instantly:</strong> the exact second income your household needs to make this move work, down to the dollar, after taxes.
               </p>
             </div>
           </div>
 
-          {/* ── TOP AD SLOT — removed, add back when ready ──────────────────── */}
+          {/* ── TOP AD SLOT, removed, add back when ready ──────────────────── */}
 
           {/* ── PREVIEW RESULT ──────────────────────────────────────────────── */}
-          {/* Rotates across 3 real city scenarios — gives a taste before any input */}
+          {/* Rotates across 3 real city scenarios, gives a taste before any input */}
           <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
             <span className="mr-1.5 font-semibold text-slate-900 dark:text-white">
               Example:
             </span>
-            A {example.income} salary in {example.city} becomes {example.net}/month after taxes — but housing alone can take {example.housing},{' '}
+            A {example.income} salary in {example.city} becomes {example.net}/month after taxes, but housing alone can take {example.housing},{' '}
             {example.note}
           </div>
 
@@ -335,7 +335,7 @@ export default function Page() {
           {/* ── POST-CALCULATOR REASSURANCE + CTA ───────────────────────────── */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center dark:border-slate-800 dark:bg-slate-900">
             <p className="text-xs text-slate-400 dark:text-slate-500">
-              These results include estimated taxes, housing, and baseline living costs — adjust inputs for your exact situation.
+              These results include estimated taxes, housing, and baseline living costs, adjust inputs for your exact situation.
             </p>
             <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
               Want to compare this city with another option?
@@ -350,7 +350,7 @@ export default function Page() {
 
           {/* ── HIGH-STAKES LINE ─────────────────────────────────────────────── */}
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            If this move doesn't work on one income, you need to know before you commit — not after.
+            If this move doesn't work on one income, you need to know before you commit, not after.
           </p>
 
           {/* ── HOW IT WORKS ─────────────────────────────────────────────────  */}
@@ -367,7 +367,7 @@ export default function Page() {
                 {
                   step: '01',
                   title: 'Enter your income',
-                  body: 'Add income, 401(k), and filing status for accurate take-home — one income or two.',
+                  body: 'Add income, 401(k), and filing status for accurate take-home, one income or two.',
                 },
                 {
                   step: '02',
@@ -382,7 +382,7 @@ export default function Page() {
                 {
                   step: '04',
                   title: 'Read your verdict',
-                  body: 'Get Safe, Tight, or Stretch — plus the exact second income needed to make the move work.',
+                  body: 'Get Safe, Tight, or Stretch, plus the exact second income needed to make the move work.',
                 },
               ].map(({ step, title, body }) => (
                 <li key={step} className="flex gap-4">
@@ -398,7 +398,7 @@ export default function Page() {
             </ol>
           </section>
 
-          {/* ── MID AD SLOT — removed, add back when ready ──────────────────── */}
+          {/* ── MID AD SLOT, removed, add back when ready ──────────────────── */}
 
           {/* ── WHAT THIS ANSWERS ────────────────────────────────────────────  */}
           <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
@@ -410,7 +410,7 @@ export default function Page() {
                 This tool is built to answer a practical relocation question: does the move still work if your household has to rely on one income, or if the second income is delayed?
               </p>
               <p>
-                It compares one-income and two-income affordability using real tax estimates, housing burden, monthly flexibility, childcare, and other recurring costs — so you can see whether the move looks safe, tight, or stretched before you commit.
+                It compares one-income and two-income affordability using real tax estimates, housing burden, monthly flexibility, childcare, and other recurring costs, so you can see whether the move looks safe, tight, or stretched before you commit.
               </p>
               <p>
                 It is especially useful for couples relocating for one job, families moving before a second income is secured, and solo movers trying to pressure-test affordability in a new city.
@@ -426,7 +426,7 @@ export default function Page() {
 
           {/* ── FAQ ─────────────────────────────────────────────────────────── */}
           <section aria-labelledby="faq-heading">
-            {/* Fix 7 — pain line keeps emotional tension alive before FAQ */}
+            {/* Fix 7, pain line keeps emotional tension alive before FAQ */}
             <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
               Most relocation mistakes happen because people assume their income stretches further than it actually does.
             </p>

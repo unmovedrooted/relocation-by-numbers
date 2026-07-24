@@ -139,8 +139,8 @@ export default function RentVsBuyCalculator() {
       { Metric: "Down payment", Value: `${downPct}% (${money(sim.downPayment)})` },
       { Metric: "Mortgage rate / term", Value: `${mortgageRatePct}% / ${loanYears} yrs` },
       { Metric: "Upfront cash (down + closing)", Value: money(sim.downPayment + sim.closingCosts) },
-      { Metric: "First-year monthly cost — buy", Value: money(sim.firstMonthBuyCost) },
-      { Metric: "First-year monthly cost — rent", Value: money(sim.firstMonthRentCost) },
+      { Metric: "First-year monthly cost, buy", Value: money(sim.firstMonthBuyCost) },
+      { Metric: "First-year monthly cost, rent", Value: money(sim.firstMonthRentCost) },
       { Metric: "Monthly rent / annual increase", Value: `${money(FIELD(monthlyRent))} / ${rentGrowthPct}%` },
       { Metric: "Home appreciation (annual)", Value: `${appreciationPct}%` },
       { Metric: "Investment return (annual)", Value: `${investmentReturnPct}%` },
@@ -265,8 +265,8 @@ export default function RentVsBuyCalculator() {
               <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
                 <div className="space-y-1.5 text-sm text-slate-700 dark:text-slate-300">
                   <div className="flex justify-between"><span>Upfront cash to buy (down + closing)</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.sim.downPayment + results.sim.closingCosts)}</span></div>
-                  <div className="flex justify-between"><span>Monthly cost, year 1 — buy</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.sim.firstMonthBuyCost)}</span></div>
-                  <div className="flex justify-between"><span>Monthly cost, year 1 — rent</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.sim.firstMonthRentCost)}</span></div>
+                  <div className="flex justify-between"><span>Monthly cost, year 1, buy</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.sim.firstMonthBuyCost)}</span></div>
+                  <div className="flex justify-between"><span>Monthly cost, year 1, rent</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.sim.firstMonthRentCost)}</span></div>
                   <div className="flex justify-between"><span>Home value in {yearsN} years</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.sim.finalHomeValue)}</span></div>
                   <div className="flex justify-between"><span>Mortgage balance left</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(results.sim.finalLoanBalance)}</span></div>
                 </div>

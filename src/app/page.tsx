@@ -37,7 +37,7 @@ const EXAMPLES = [
   {
     title: "NYC to Charlotte",
     body:
-      "A move like New York City to Charlotte often improves affordability through lower housing costs more than salary alone. For many households, the biggest shift is not just taxes — it is how much monthly pressure drops once rent or mortgage costs come down.",
+      "A move like New York City to Charlotte often improves affordability through lower housing costs more than salary alone. For many households, the biggest shift is not just taxes, it is how much monthly pressure drops once rent or mortgage costs come down.",
     href: "/compare/nyc-ny/charlotte-nc",
   },
   {
@@ -69,7 +69,7 @@ export default function Page() {
 
           <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
             See how far your salary really goes after state income taxes, housing costs,
-            and everyday expenses — before you move.
+            and everyday expenses, before you move.
           </p>
 
           <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm">
@@ -230,7 +230,7 @@ export default function Page() {
         {/* What this tool includes */}
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
           <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white sm:text-xl">
-            What this tool includes — and what it does not
+            What this tool includes, and what it does not
           </h2>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">

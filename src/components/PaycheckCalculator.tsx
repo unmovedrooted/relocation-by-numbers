@@ -260,7 +260,7 @@ export default function PaycheckCalculator() {
                 <label className="text-sm sm:col-span-2">
                   <div className={labelHeadCls}>
                     City (local income tax)
-                    <InfoTip text="Some cities levy their own income tax on top of state tax — e.g. New York City (~3.1–3.9%), Philadelphia (3.75%), Detroit (2.4%). Select yours if it applies." />
+                    <InfoTip text="Some cities levy their own income tax on top of state tax, e.g. New York City (~3.1–3.9%), Philadelphia (3.75%), Detroit (2.4%). Select yours if it applies." />
                   </div>
                   <select className={selectCls} value={cityId} onChange={(e) => setCityId(e.target.value)}>
                     <option value="">None / elsewhere in state</option>
@@ -291,7 +291,7 @@ export default function PaycheckCalculator() {
                   {money(results.per(results.b.net))}<span className="ml-1 text-base font-medium opacity-70">/{eachLabel}</span>
                 </div>
                 <p className="mt-2 text-sm leading-5 opacity-90">
-                  {money(results.b.net)}/yr net — you keep {(results.takeHomePct * 100).toFixed(0)}% of gross, at a {(results.effectiveTaxRate * 100).toFixed(1)}% effective tax rate in {stateName}.
+                  {money(results.b.net)}/yr net, you keep {(results.takeHomePct * 100).toFixed(0)}% of gross, at a {(results.effectiveTaxRate * 100).toFixed(1)}% effective tax rate in {stateName}.
                 </p>
               </div>
 

@@ -4,13 +4,13 @@
  *
  * Each of those five regional calculators (Caribbean/Asia/Europe/South
  * America/InternationalRelocationCalculator.tsx) has its own results
- * useMemo, and three of them (Caribbean, Asia, and — for some countries —
+ * useMemo, and three of them (Caribbean, Asia, and, for some countries,
  * others) layer a dedicated per-country tax engine with conditional
  * follow-up questions on top of a shared fallback: estimateInternationalTax.
  * That fallback is what every regional component itself calls when a
  * country lacks a dedicated engine or the user hasn't answered the
  * conditional questions yet, so it's a real, already-shipped estimation
- * path — not a new approximation invented for this tool.
+ * path, not a new approximation invented for this tool.
  *
  * For the compare view (which needs 2-3 results at once, side by side,
  * without a multi-step conditional-question form per country) this engine
@@ -18,7 +18,7 @@
  * each region's dedicated engine + conditional-question UI. Housing and
  * living costs reuse the exact same city/country default data as every
  * regional calculator (getCityDefaultsByCode, getCityCostMultipliers), so
- * only the *tax* precision is simplified — for an exact scenario with a
+ * only the *tax* precision is simplified, for an exact scenario with a
  * country-specific tax engine and follow-up questions, the page links back
  * to the matching full regional calculator.
  */
@@ -66,7 +66,7 @@ export type IntlCompareResult = {
   housingLabel: string;
   monthlyFlexibility: number;
   pctOfIncome: number;
-  /** Only set when housingMode === "buy". Rough estimate — see homePrice.ts. */
+  /** Only set when housingMode === "buy". Rough estimate, see homePrice.ts. */
   estimatedHomePrice?: number;
 };
 
@@ -107,11 +107,11 @@ export function computeIntlCityResult(input: IntlCompareInput): IntlCompareResul
   let healthcare: number;
 
   if (cityDefaults) {
-    // City-level defaults are already calibrated — no extra multiplier.
+    // City-level defaults are already calibrated, no extra multiplier.
     const d = cityDefaults.monthlyDefaults;
     rent = d.rent; groceries = d.groceries; utilities = d.utilities; transport = d.transport; healthcare = d.healthcare;
   } else {
-    // No city-specific data — fall back to country-level single-adult
+    // No city-specific data, fall back to country-level single-adult
     // defaults, scaled by city multipliers when available.
     const baseRent = country?.defaultRentSingle ?? 1_200;
     const mult = multipliers ?? { housing: 1, transit: 1, groceries: 1, utilities: 1 };

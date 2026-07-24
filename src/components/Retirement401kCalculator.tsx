@@ -180,9 +180,9 @@ export default function Retirement401kCalculator() {
       { Metric: "Net cost to your paycheck", Value: money(r.netPaycheckCost) },
       { Metric: "Years to retirement", Value: r.years },
       { Metric: `Projected balance${dollarsNote}`, Value: money(r.proj.finalBalance) },
-      { Metric: "— your contributions", Value: money(r.totalYourContributed) },
-      { Metric: "— employer match", Value: money(r.totalEmployerContributed) },
-      { Metric: "— investment growth", Value: money(r.growth) },
+      { Metric: "your contributions", Value: money(r.totalYourContributed) },
+      { Metric: "employer match", Value: money(r.totalEmployerContributed) },
+      { Metric: "investment growth", Value: money(r.growth) },
     ];
     if (r.mc) rows.push(
       { Metric: `MC range worst 10%${dollarsNote}`, Value: money(r.mc.p10) },
@@ -224,7 +224,7 @@ export default function Retirement401kCalculator() {
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm"><div className={labelHeadCls}>Annual salary</div><input className={inputCls} type="number" min="0" value={salary} onChange={(e) => setSalary(e.target.value)} placeholder=" " /></label>
               <label className="text-sm"><div className={labelHeadCls}>Your contribution (%)<InfoTip text={`Percent of salary you defer. 2025 employee limit is ${money(results.limit)} at your age.`} /></div><input className={inputCls} type="number" min="0" step="0.5" value={yourContribPct} onChange={(e) => setYourContribPct(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Employer match (%)<InfoTip text="How much of your contribution the employer matches — e.g. 50% means 50¢ per $1 you contribute." /></div><input className={inputCls} type="number" min="0" step="1" value={employerMatchPct} onChange={(e) => setEmployerMatchPct(e.target.value)} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Employer match (%)<InfoTip text="How much of your contribution the employer matches, e.g. 50% means 50¢ per $1 you contribute." /></div><input className={inputCls} type="number" min="0" step="1" value={employerMatchPct} onChange={(e) => setEmployerMatchPct(e.target.value)} placeholder=" " /></label>
               <label className="text-sm"><div className={labelHeadCls}>…up to (% of salary)<InfoTip text="The match applies only to the first X% of salary you contribute. A common plan is '50% up to 6%.'" /></div><input className={inputCls} type="number" min="0" step="0.5" value={employerCapPct} onChange={(e) => setEmployerCapPct(e.target.value)} placeholder=" " /></label>
               <label className="text-sm"><div className={labelHeadCls}>Current 401(k) balance</div><input className={inputCls} type="number" min="0" value={currentBalance} onChange={(e) => setCurrentBalance(e.target.value)} placeholder=" " /></label>
               <label className="text-sm"><div className={labelHeadCls}>Your age</div><input className={inputCls} type="number" min="0" value={age} onChange={(e) => setAge(e.target.value)} placeholder=" " /></label>
@@ -237,7 +237,7 @@ export default function Retirement401kCalculator() {
             )}
             {results.missedMatchAnnual > 0.5 && (
               <div className="mt-3 rounded-xl border border-rose-300 bg-rose-100 px-3 py-2 text-xs leading-5 text-rose-800 dark:border-rose-700 dark:bg-rose-900/40 dark:text-rose-200">
-                You&apos;re leaving about {money(results.missedMatchAnnual)}/yr of free employer match on the table — contributing at least {employerCapPct}% would capture the full match.
+                You&apos;re leaving about {money(results.missedMatchAnnual)}/yr of free employer match on the table, contributing at least {employerCapPct}% would capture the full match.
               </div>
             )}
           </div>
@@ -280,7 +280,7 @@ export default function Retirement401kCalculator() {
                 <div className="rounded-2xl border border-violet-200 bg-violet-50/70 p-4 text-violet-800 dark:border-violet-900/60 dark:bg-violet-950/20 dark:text-violet-300">
                   <div className="text-xs font-semibold uppercase tracking-[0.12em] opacity-80">Employer match / yr</div>
                   <div className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{money(results.employerContrib)}</div>
-                  <p className="mt-1 text-xs opacity-90">Free money — {money(results.totalEmployerContributed)} over {results.years} years before growth.</p>
+                  <p className="mt-1 text-xs opacity-90">Free money, {money(results.totalEmployerContributed)} over {results.years} years before growth.</p>
                 </div>
               </div>
 
@@ -311,7 +311,7 @@ export default function Retirement401kCalculator() {
               <div className="rounded-2xl border border-cyan-200 bg-cyan-50/70 p-5 text-cyan-800 shadow-[0_10px_30px_rgba(15,23,42,0.06)] dark:border-cyan-900/60 dark:bg-cyan-950/20 dark:text-cyan-300">
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] opacity-80">Likely range at retirement{dollarsNote}</div>
                 <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">{money(results.mc.p10)} – {money(results.mc.p90)}</div>
-                <p className="mt-2 text-sm leading-5 opacity-90">Across 5,000 simulated markets at {(volatility * 100).toFixed(0)}% volatility, most outcomes land here (10th–90th percentile). Median <span className="font-semibold">{money(results.mc.p50)}</span> — vs. the average view&apos;s {money(results.proj.finalBalance)}.</p>
+                <p className="mt-2 text-sm leading-5 opacity-90">Across 5,000 simulated markets at {(volatility * 100).toFixed(0)}% volatility, most outcomes land here (10th–90th percentile). Median <span className="font-semibold">{money(results.mc.p50)}</span>, vs. the average view&apos;s {money(results.proj.finalBalance)}.</p>
               </div>
               <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
                 <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Range of outcomes over time{dollarsNote}</div>

@@ -124,7 +124,7 @@ function disclaimerResult(
 // ---------------------------------------------------------------------------
 // ZERO TAX RESULT BUILDER
 // Used by kind: "none" and territorial scenarios with no applicable rate.
-// isDisclaimer: false — the engine is confident the tax is zero.
+// isDisclaimer: false, the engine is confident the tax is zero.
 // ---------------------------------------------------------------------------
 function zeroTaxResult(
   config: CountryTaxConfig,
@@ -356,7 +356,7 @@ export function estimateScenarioTax(input: {
       }
     }
 
-    // No brackets and no foreignSourceRate — full exemption on this income.
+    // No brackets and no foreignSourceRate, full exemption on this income.
     return zeroTaxResult(config, scenario, scenarioKey, grossIncome)
   }
   // --- custom --------------------------------------------------------------

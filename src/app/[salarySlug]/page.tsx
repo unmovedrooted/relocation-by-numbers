@@ -58,10 +58,10 @@ function getSalaryPageCopy(label: string, income: number) {
   if (band === "lower") {
     return {
       subheading: `FIRE Number, Timeline & Strategy for a ${label} Income`,
-      intro: `Reaching financial independence on a ${label} salary is possible, but this income leaves less room for error than higher salaries do. Housing, taxes, and everyday fixed costs can take up a large share of take-home pay, which means your path to FIRE depends heavily on keeping expenses low and protecting your savings rate. On a ${label} income, location is not a small optimization — it can completely change whether early financial independence feels realistic or distant.`,
+      intro: `Reaching financial independence on a ${label} salary is possible, but this income leaves less room for error than higher salaries do. Housing, taxes, and everyday fixed costs can take up a large share of take-home pay, which means your path to FIRE depends heavily on keeping expenses low and protecting your savings rate. On a ${label} income, location is not a small optimization, it can completely change whether early financial independence feels realistic or distant.`,
       realisticTitle: `Is FIRE realistic on a ${label} salary?`,
       realisticParagraphs: [
-        `Yes — FIRE can be realistic on a ${label} salary, but usually only if your spending stays disciplined. At this income level, there is not much slack in the math. A rent payment that is a few hundred dollars too high, a high-tax location, or inconsistent saving can delay FIRE by many years.`,
+        `Yes, FIRE can be realistic on a ${label} salary, but usually only if your spending stays disciplined. At this income level, there is not much slack in the math. A rent payment that is a few hundred dollars too high, a high-tax location, or inconsistent saving can delay FIRE by many years.`,
         `That is why the answer at ${label} is less about earning more and more about avoiding cost traps. Someone earning ${label} in an expensive city may struggle to save enough for meaningful momentum, while someone with the same income in a cheaper area may be able to build a solid savings rate and make steady progress.`,
         `In other words, FIRE on ${label} is usually not about perfection. It is about keeping core expenses under control, staying consistent, and being realistic about where your income can stretch the furthest.`,
       ],
@@ -79,7 +79,7 @@ function getSalaryPageCopy(label: string, income: number) {
       intro: `A ${label} salary can put FIRE within reach for many people, but it is not high enough to ignore the basics. Housing costs, state taxes, and lifestyle inflation still have the power to slow progress if too much income gets absorbed before it is invested. At this level, the opportunity is real: done well, a ${label} income can build strong momentum toward financial independence, but bad cost decisions can still push the timeline out much further than expected.`,
       realisticTitle: `Is FIRE realistic on a ${label} salary?`,
       realisticParagraphs: [
-        `Yes — FIRE is realistic on a ${label} salary for many households, especially if saving is intentional. This income usually provides enough room to make steady progress, but not enough to fully absorb expensive housing, rising lifestyle expectations, or weak saving habits.`,
+        `Yes, FIRE is realistic on a ${label} salary for many households, especially if saving is intentional. This income usually provides enough room to make steady progress, but not enough to fully absorb expensive housing, rising lifestyle expectations, or weak saving habits.`,
         `That makes ${label} a middle ground income for FIRE. In a lower-cost area, it can support a strong savings rate and a meaningful long-term investing plan. In a more expensive market, the same salary can feel surprisingly average once rent, taxes, and everyday spending start stacking up.`,
         `At this level, success usually comes from directing income efficiently rather than chasing tiny optimizations. A solid savings rate, controlled lifestyle inflation, and a location that does not consume too much of your paycheck can make FIRE much more achievable.`,
       ],
@@ -96,9 +96,9 @@ function getSalaryPageCopy(label: string, income: number) {
     intro: `A ${label} salary gives you real power to accelerate FIRE, but high income alone does not guarantee a fast timeline. At this level, the biggest threats are usually taxes, housing choices, and lifestyle inflation rather than simple affordability. A strong income can create major investing capacity, but only if enough of it is preserved. On a ${label} salary, FIRE becomes less about whether it is possible and more about how efficiently you convert income into long-term wealth.`,
     realisticTitle: `Is FIRE realistic on a ${label} salary?`,
     realisticParagraphs: [
-      `Yes — FIRE is highly realistic on a ${label} salary in many scenarios, but the timeline still depends on execution. The main risk at this income level is usually not earning too little. It is allowing fixed costs, tax drag, and lifestyle creep to absorb income that could have been compounding instead.`,
+      `Yes, FIRE is highly realistic on a ${label} salary in many scenarios, but the timeline still depends on execution. The main risk at this income level is usually not earning too little. It is allowing fixed costs, tax drag, and lifestyle creep to absorb income that could have been compounding instead.`,
       `Someone earning ${label} while keeping housing and recurring spending controlled can often build wealth much faster than lower income households. Someone earning the same amount while scaling up every part of their lifestyle may still make progress, but far more slowly than the salary suggests.`,
-      `At this level, FIRE is often a question of discipline, tax awareness, and intentional spending. The upside is large — but so is the ability to waste it.`,
+      `At this level, FIRE is often a question of discipline, tax awareness, and intentional spending. The upside is large, but so is the ability to waste it.`,
     ],
     locationTitle: `Why location changes the FIRE answer on a ${label} salary`,
     locationParagraphs: [
@@ -335,7 +335,7 @@ export default async function FireWithSalaryPage({
                 of about ${conservative.fireTarget.toLocaleString()}. At a 50% savings rate,
                 annual expenses drop to about ${aggressive.annualExpenses.toLocaleString()},
                 with a FIRE number of about ${aggressive.fireTarget.toLocaleString()}. These
-                are pre-tax estimates — the calculator above applies state-specific tax adjustments.
+                are pre-tax estimates, the calculator above applies state-specific tax adjustments.
               </dd>
             </div>
             <div>
@@ -354,7 +354,7 @@ export default async function FireWithSalaryPage({
                 Can you reach FIRE faster by moving to a cheaper city on a {label} salary?
               </dt>
               <dd className="mt-1">
-                Yes — and for remote workers this is often the highest-impact move available.
+                Yes, and for remote workers this is often the highest-impact move available.
                 Moving from a high-cost city to a lower-cost one while keeping a {label} salary
                 simultaneously increases your monthly savings and reduces your FIRE number. Use
                 the Move Impact tab in the calculator above to model this for your situation.

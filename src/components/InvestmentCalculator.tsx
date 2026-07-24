@@ -158,9 +158,9 @@ export default function InvestmentCalculator() {
     if (results.mc) {
       rows.push(
         { Metric: "Monte Carlo volatility", Value: `${(volatility * 100).toFixed(0)}%` },
-        { Metric: `Range — worst 10%${dollarsNote}`, Value: money(results.mc.p10) },
-        { Metric: `Range — median${dollarsNote}`, Value: money(results.mc.p50) },
-        { Metric: `Range — best 10%${dollarsNote}`, Value: money(results.mc.p90) },
+        { Metric: `Range, worst 10%${dollarsNote}`, Value: money(results.mc.p10) },
+        { Metric: `Range, median${dollarsNote}`, Value: money(results.mc.p50) },
+        { Metric: `Range, best 10%${dollarsNote}`, Value: money(results.mc.p90) },
       );
     }
     return rows;
@@ -248,7 +248,7 @@ export default function InvestmentCalculator() {
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] opacity-80">Balance in {results.yrs} years{dollarsNote}</div>
                 <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">{money(results.finalBalance)}</div>
                 <p className="mt-2 text-sm leading-5 opacity-90">
-                  {money(results.start)} start + {money(results.contributed)} contributed + <span className="font-semibold">{money(results.totalGrowth)}</span> growth — about {growthPct.toFixed(0)}% of the total is compound growth.
+                  {money(results.start)} start + {money(results.contributed)} contributed + <span className="font-semibold">{money(results.totalGrowth)}</span> growth, about {growthPct.toFixed(0)}% of the total is compound growth.
                 </p>
               </div>
               <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
@@ -274,7 +274,7 @@ export default function InvestmentCalculator() {
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] opacity-80">Likely range in {results.yrs} years{dollarsNote}</div>
                 <div className="mt-2 text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">{money(results.mc.p10)} – {money(results.mc.p90)}</div>
                 <p className="mt-2 text-sm leading-5 opacity-90">
-                  Across 5,000 simulated markets at {(volatility * 100).toFixed(0)}% volatility, most outcomes land here (10th–90th percentile). Median <span className="font-semibold">{money(results.mc.p50)}</span> — vs. the average view&apos;s {money(results.finalBalance)}.
+                  Across 5,000 simulated markets at {(volatility * 100).toFixed(0)}% volatility, most outcomes land here (10th–90th percentile). Median <span className="font-semibold">{money(results.mc.p50)}</span>, vs. the average view&apos;s {money(results.finalBalance)}.
                 </p>
               </div>
               <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
@@ -294,7 +294,7 @@ export default function InvestmentCalculator() {
                 </div>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                The median usually lands below the average-view number — that&apos;s volatility drag, and it&apos;s why a single average line tends to look optimistic. Runs 5,000 seeded lognormal simulations; a model of market risk, not a prediction.
+                The median usually lands below the average-view number, that&apos;s volatility drag, and it&apos;s why a single average line tends to look optimistic. Runs 5,000 seeded lognormal simulations; a model of market risk, not a prediction.
               </div>
             </>
           ) : null}

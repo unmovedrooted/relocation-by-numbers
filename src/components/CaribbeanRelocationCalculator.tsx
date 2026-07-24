@@ -98,7 +98,7 @@ type HousingMode     = "rent" | "buy";
 
 // ---------------------------------------------------------------------------
 // FX HELPERS
-// NOTE: Static FX rates — for estimation only, not real-time.
+// NOTE: Static FX rates, for estimation only, not real-time.
 // Volatile currencies (JPY, ARS, TRY, etc.) can move 10–30%+ between updates.
 // ---------------------------------------------------------------------------
 function convertLocalToUsd(amount: number, countryCode: string): number {
@@ -177,7 +177,7 @@ function InfoTip({ text, align = "left" }: { text: string; align?: "left" | "rig
 }
 
 // ---------------------------------------------------------------------------
-// VISA CONTEXT CARD — three variants
+// VISA CONTEXT CARD, three variants
 // ---------------------------------------------------------------------------
 function VisaContextCard({ countryCode }: { countryCode: string }) {
   const ctx = getVisaContext(countryCode);
@@ -250,7 +250,7 @@ function RelocationVerdict({ results, toCityLabel, displayAmount }: {
     monthsCovered >= 6 ? "strong" : monthsCovered >= 3 ? "adequate" : "thin";
 
   const taxSentence = targetIsDisclaimer
-    ? "Tax impact for this scenario is not yet modeled — consult a local advisor."
+    ? "Tax impact for this scenario is not yet modeled, consult a local advisor."
     : targetTaxRate < currentTaxRate
       ? `Your estimated tax rate drops from ${(currentTaxRate * 100).toFixed(0)}% to ${(targetTaxRate * 100).toFixed(0)}%, improving monthly take-home.`
       : targetTaxRate > currentTaxRate
@@ -273,11 +273,11 @@ function RelocationVerdict({ results, toCityLabel, displayAmount }: {
       <div className="text-xs font-semibold uppercase tracking-[0.14em] mb-2">Decision Summary</div>
       <p className="text-sm leading-6">
         Moving to <strong>{toCityLabel}</strong>, housing takes up{" "}
-        <strong>{pct.toFixed(0)}%</strong> of estimated net income — rated{" "}
+        <strong>{pct.toFixed(0)}%</strong> of estimated net income, rated{" "}
         <strong>{comfort.label}</strong>. {taxSentence} You have{" "}
         <strong>{displayAmount(monthlyFlexibility, 0)}</strong>/mo left after core expenses.
         Your savings cover roughly <strong>{monthsCovered.toFixed(1)} months</strong> of
-        expenses (upfront costs: <strong>{displayAmount(upfrontCashNeeded, 0)}</strong>) —
+        expenses (upfront costs: <strong>{displayAmount(upfrontCashNeeded, 0)}</strong>),
         savings runway is <strong>{savingsReadiness}</strong>.
       </p>
       {savingsReadiness === "thin" && (
@@ -385,7 +385,7 @@ export default function CaribbeanRelocationCalculator() {
   const targetCityDefaults   = useMemo(() => getCityDefaultsByCode(toCityCode), [toCityCode]);
 
   // Only apply city multipliers when falling back from country-level defaults.
-  // City-specific defaults are already calibrated — multiplying again inflates costs.
+  // City-specific defaults are already calibrated, multiplying again inflates costs.
   const hasCityDefaults   = !!selectedCityDefaults;
   const toCityMultipliers = useMemo(
     () => hasCityDefaults ? null : getCityCostMultipliers(toCityCode),
@@ -741,7 +741,7 @@ const utilitiesFrom = applyMult(
   fromCityMultipliers?.utilities
 );
 
-    // FIX 2: clean car cost logic — user-entered carCost state takes priority,
+    // FIX 2: clean car cost logic, user-entered carCost state takes priority,
     // falls back to city default, then global fallback constant.
     const monthlyCarCost =
   needCar === "yes"
@@ -1029,7 +1029,7 @@ const relativeDifference =
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
 
         {/* ================================================================
-            LEFT — INPUTS
+            LEFT, INPUTS
         ================================================================ */}
         <div className="space-y-3">
 
@@ -1142,7 +1142,7 @@ const relativeDifference =
           {/* Dominican Republic residency question */}
           {toCountry === "DO" && incomeScenario === "remote" && (
             <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
-              <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Dominican Republic — Residency</div>
+              <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Dominican Republic, Residency</div>
               <label className="text-sm">
                 <div className={labelHeadCls}>
                   How long have you been a tax resident in the Dominican Republic?
@@ -1237,7 +1237,7 @@ const relativeDifference =
             {housingMode === "buy" && (
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                 No destination here has a verified home-price dataset, so the price above is estimated from the rent
-                figure (16x annual rent, a standard rule of thumb) — treat it as a rough planning figure, not a real
+                figure (16x annual rent, a standard rule of thumb), treat it as a rough planning figure, not a real
                 listing price.
               </p>
             )}
@@ -1246,7 +1246,7 @@ const relativeDifference =
                 <div className={labelHeadCls}>Will you need a car?</div>
                 <select className={selectCls} value={needCar} onChange={e => setNeedCar(e.target.value as YesNo)}>
                   <option value="no">No</option>
-                  <option value="yes">Yes — add monthly car estimate</option>
+                  <option value="yes">Yes, add monthly car estimate</option>
                 </select>
               </label>
               {/* FIX 3: visible editable input for car cost */}
@@ -1331,7 +1331,7 @@ const relativeDifference =
         </div>
 
         {/* ================================================================
-            RIGHT — RESULTS
+            RIGHT, RESULTS
         ================================================================ */}
         <div className="space-y-3">
 
@@ -1406,7 +1406,7 @@ const relativeDifference =
               <div>Results are estimates only. No information entered is stored or shared.</div>
               <div>Tax estimates, rent, immigration costs, and retirement treatment vary by destination and personal circumstances.</div>
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Tip: Your URL updates as you type — copy the page link to share this scenario.</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Tip: Your URL updates as you type, copy the page link to share this scenario.</div>
           </div>
 
           {/* Monthly Flexibility */}

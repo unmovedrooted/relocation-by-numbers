@@ -320,7 +320,7 @@ export default function CompareHubPage() {
                 What is the equivalent salary when moving from one city to another?
               </dt>
               <dd className="mt-1">
-                Each comparison page estimates a comparable salary — the gross income you may
+                Each comparison page estimates a comparable salary, the gross income you may
                 need in the destination city to maintain a similar monthly budget once taxes,
                 housing costs, and core living costs are considered.
               </dd>

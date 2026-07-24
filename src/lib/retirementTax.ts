@@ -5,7 +5,7 @@ import type { StateCode } from "./states";
 // TAX TREATMENT OF RETIREMENT-ACCOUNT WITHDRAWALS
 //
 // Withdrawals from traditional (pre-tax) 401(k)/IRA accounts are taxed as
-// ordinary income — federal + state only. FICA (Social Security/Medicare
+// ordinary income, federal + state only. FICA (Social Security/Medicare
 // payroll tax) does NOT apply to retirement-account distributions, and local
 // wage taxes generally don't either. Roth withdrawals are entirely tax-free.
 //
@@ -41,7 +41,7 @@ export function withdrawalIncomeTax(
 
 // Representative income used to read a state's marginal rate for the taxable
 // brokerage annual tax drag (an accumulator's typical bracket). Approximate by
-// design — the true drag depends on income, holdings, and turnover.
+// design, the true drag depends on income, holdings, and turnover.
 const REPRESENTATIVE_INCOME: Record<FilingStatus, number> = {
   single: 120_000,
   married: 180_000,

@@ -198,7 +198,7 @@ export default function HousingAffordabilityCalculator() {
     const frontEndPrice = solveMaxHomePrice({ ...solverInputs, targetDTI: 28 });
 
     // Lenders apply both ratios and use whichever is more restrictive, so the
-    // "real" max always uses the lower of the two — debts can only tighten
+    // "real" max always uses the lower of the two, debts can only tighten
     // affordability, never loosen it beyond the 28% front-end ceiling.
     const debtsPctOfIncome = grossMonthly > 0 ? (debts / grossMonthly) * 100 : 0;
     const backEndTargetDTI = Math.max(0, 36 - debtsPctOfIncome);
@@ -310,7 +310,7 @@ export default function HousingAffordabilityCalculator() {
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* ================================================================
-            LEFT — INPUTS
+            LEFT, INPUTS
         ================================================================ */}
         <div className="space-y-3">
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
@@ -329,7 +329,7 @@ export default function HousingAffordabilityCalculator() {
               <label className="text-sm">
                 <div className={labelHeadCls}>
                   Other monthly debts
-                  <InfoTip text="Car loans, student loans, credit card minimums, personal loans — anything that shows up on a lender's back-end DTI calculation." />
+                  <InfoTip text="Car loans, student loans, credit card minimums, personal loans, anything that shows up on a lender's back-end DTI calculation." />
                 </div>
                 <input
                   className={inputCls}
@@ -353,10 +353,10 @@ export default function HousingAffordabilityCalculator() {
                 <label className="text-sm sm:col-span-2">
                   <div className={labelHeadCls}>
                     State
-                    <InfoTip text="Optional — fills in typical property tax and insurance for that state. You can still edit both manually." />
+                    <InfoTip text="Optional, fills in typical property tax and insurance for that state. You can still edit both manually." />
                   </div>
                   <select className={selectCls} value={stateCode} onChange={(e) => applyStateDefaults(e.target.value)}>
-                    <option value="">— Use manual estimates —</option>
+                    <option value="">Use manual estimates</option>
                     {STATE_OPTIONS.map((s) => (
                       <option key={s.code} value={s.code}>{s.name}</option>
                     ))}
@@ -396,7 +396,7 @@ export default function HousingAffordabilityCalculator() {
         </div>
 
         {/* ================================================================
-            RIGHT — RESULTS
+            RIGHT, RESULTS
         ================================================================ */}
         <div className="space-y-3">
           {!salaryReady ? (
@@ -410,7 +410,7 @@ export default function HousingAffordabilityCalculator() {
                 amount={rentResults.comfortable}
                 suffix="/mo"
                 tone="emerald"
-                note="25% of gross income — leaves the most room for savings and surprises."
+                note="25% of gross income, leaves the most room for savings and surprises."
               />
               <TierCard
                 label="Recommended (30% rule)"
@@ -426,7 +426,7 @@ export default function HousingAffordabilityCalculator() {
                 tone="amber"
                 note={
                   rentResults.debts > 0
-                    ? `Keeps rent + ${money(rentResults.debts)}/mo in other debts at or below 36% of gross income — the same back-end ratio lenders use.`
+                    ? `Keeps rent + ${money(rentResults.debts)}/mo in other debts at or below 36% of gross income, the same back-end ratio lenders use.`
                     : "No other monthly debts entered, so this matches the 30% rule."
                 }
               />
@@ -443,7 +443,7 @@ export default function HousingAffordabilityCalculator() {
                 amount={buyResults.frontEndPrice}
                 suffix="max home price"
                 tone="emerald"
-                note="Keeps housing costs (P&I, tax, insurance, HOA, PMI) at or below 28% of gross income — ignoring other debts."
+                note="Keeps housing costs (P&I, tax, insurance, HOA, PMI) at or below 28% of gross income, ignoring other debts."
               />
               <TierCard
                 label="Realistic, with your other debts"
@@ -453,7 +453,7 @@ export default function HousingAffordabilityCalculator() {
                 note={
                   buyResults.backEndTargetDTI <= 0
                     ? "Your other monthly debts already meet or exceed the 36% back-end guideline, leaving little to no room for housing costs at standard lender guidelines."
-                    : `Keeps housing + your other debts at or below 36% of gross income — the standard back-end DTI lenders use.`
+                    : `Keeps housing + your other debts at or below 36% of gross income, the standard back-end DTI lenders use.`
                 }
               />
               {buyResults.breakdown && buyResults.backEndPrice > 0 && (
@@ -479,7 +479,7 @@ export default function HousingAffordabilityCalculator() {
                 </div>
               )}
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                PMI is estimated automatically when your down payment is below 20%. These are planning estimates —
+                PMI is estimated automatically when your down payment is below 20%. These are planning estimates,
                 actual loan approval depends on credit score, employment history, cash reserves, and individual
                 lender requirements. Not financial or lending advice.
               </div>

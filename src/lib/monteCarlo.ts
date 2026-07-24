@@ -65,9 +65,9 @@ function percentileSorted(sorted: Float64Array, p: number): number {
 // deterministic view; the preset only sets how much the market swings. ──
 export type RiskLevel = "conservative" | "balanced" | "aggressive" | "custom";
 export const RISK_PRESETS: Record<Exclude<RiskLevel, "custom">, { label: string; volatilityPct: number; blurb: string }> = {
-  conservative: { label: "Conservative", volatilityPct: 8, blurb: "Bond-heavy — smaller swings" },
+  conservative: { label: "Conservative", volatilityPct: 8, blurb: "Bond-heavy, smaller swings" },
   balanced: { label: "Balanced", volatilityPct: 13, blurb: "Mixed stocks & bonds" },
-  aggressive: { label: "Aggressive", volatilityPct: 18, blurb: "Mostly stocks — bigger swings" },
+  aggressive: { label: "Aggressive", volatilityPct: 18, blurb: "Mostly stocks, bigger swings" },
 };
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -167,7 +167,7 @@ export function withdrawalPaths(opts: {
           if (balance < 0) balance = 0;
         }
       } else {
-        // keep drawing so every path consumes the same number of randoms —
+        // keep drawing so every path consumes the same number of randoms,
         // preserves reproducibility/independence across the grid.
         nextNormal(rng);
       }

@@ -212,7 +212,7 @@ export default async function CityFirePage({ params }: PageProps) {
           </h1>
 
           <p className="text-lg font-semibold text-slate-200">
-            {city.name}, {city.state.toUpperCase()} — Cost of Living, Housing &amp; Early Retirement Guide
+            {city.name}, {city.state.toUpperCase()}, Cost of Living, Housing &amp; Early Retirement Guide
           </p>
 
           <p className="max-w-3xl text-sm leading-7 text-slate-300">

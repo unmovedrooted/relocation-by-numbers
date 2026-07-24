@@ -29,19 +29,19 @@ export type TaxModelKind =
 
 // Confidence rubric:
 //
-//  "verified"    — Zero-tax or trivially exact.
+//  "verified", Zero-tax or trivially exact.
 //                  Countries: AE, QA, SA, OM.
 //
-//  "partial"     — Core brackets correct and current. Dominant structural
+//  "partial", Core brackets correct and current. Dominant structural
 //                  components modelled. Gap bounded and unlikely to exceed
 //                  ~3–4 pp for most planning incomes.
 //                  Countries: AU, NZ.
 //
-//  "simplified"  — Structurally believable but at least one significant
+//  "simplified", Structurally believable but at least one significant
 //                  source of variation is unmodelled. Gap may be 5–10 pp.
 //                  Countries: JP, KR, MY, VN, ID.
 //
-//  "placeholder" — Thresholds unstable or model too simplified for reliable
+//  "placeholder", Thresholds unstable or model too simplified for reliable
 //                  planning. Use directional only.
 //                  Not currently assigned, but structure preserved.
 //
@@ -146,7 +146,7 @@ function combineRates(incomeTaxRate: number, socialContributionRate = 0): {
 const ASIA_TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
   // -------------------------------------------------------------------------
-  // JAPAN — JPY
+  // JAPAN, JPY
   // 2024 national rates + reconstruction surtax 2.1% of income tax.
   // Local inhabitant tax: flat 10% of income.
   // No joint filing. incomeScenario: remote workers are still taxed as
@@ -184,7 +184,7 @@ const rates = combineRates(incomeTaxRate, socialContributionRate);
     model: "country-plus-local",
     confidence: "simplified",
     label: "Japan national + surtax + local inhabitant tax (2024)",
-    missingFactor: "Employment income deduction not applied — may overstate income tax.",
+    missingFactor: "Employment income deduction not applied, may overstate income tax.",
     note: "National brackets, reconstruction surtax (2.1% of income tax), and local inhabitant tax (flat 10%) are included. Employee social insurance is estimated at ~14.5% for working individuals. Employment income deduction is not applied, so this may overstate income tax at some incomes. Income must be passed in JPY.",
   };
 },
@@ -212,12 +212,12 @@ const rates = combineRates(incomeTaxRate, socialContributionRate);
     model: "country-plus-local",
     confidence: "simplified",
     label: "South Korea national + local surtax (2024)",
-    missingFactor: "Employment income deduction not applied — may overstate income tax at lower incomes.",
+    missingFactor: "Employment income deduction not applied, may overstate income tax at lower incomes.",
     note: "National brackets and 10% local surtax are included. Social contributions are estimated at ~8% for working individuals. Employment income deduction is not applied, so this may overstate income tax at lower incomes. Income must be passed in KRW.",
   };
 },
   // -------------------------------------------------------------------------
-  // SINGAPORE — SGD
+  // SINGAPORE, SGD
   // 2024 YA rates.
   // Resident (≥183 days): progressive rates with earned income relief.
   // Non-resident: 15% flat on employment income OR progressive, whichever
@@ -237,7 +237,7 @@ const rates = combineRates(incomeTaxRate, socialContributionRate);
       effectiveRate: 0,
       model: "none",
       confidence: "partial",
-      label: "Singapore — non-resident remote worker (foreign-source income not taxed)",
+      label: "Singapore, non-resident remote worker (foreign-source income not taxed)",
       missingFactor: "Assumes all work performed outside Singapore; any SG-source days trigger withholding.",
       note: "Singapore does not tax foreign-source income for non-residents not working in Singapore.",
     };
@@ -271,7 +271,7 @@ if (isNonResident && !isRetired) {
     ...rates,
     model: "progressive-country",
     confidence: "partial",
-    label: "Singapore non-resident Salaries Tax (2024 YA — higher of 15%/progressive)",
+    label: "Singapore non-resident Salaries Tax (2024 YA, higher of 15%/progressive)",
     missingFactor: "CPF contributions not applicable to non-residents; director's fees taxed at 24%.",
     note: "Non-resident employees pay the higher of: 15% flat rate OR progressive resident rates. CPF contributions are not required from non-residents. Director's fees are taxed at a flat 24% for non-residents (not modelled here). Income must be passed in SGD.",
   };
@@ -308,16 +308,16 @@ return {
   confidence: hasResidencyAnswer ? "partial" : "simplified",
   label: hasResidencyAnswer
     ? "Singapore resident Salaries Tax (2024 YA)"
-    : "Singapore Salaries Tax (2024 YA — select residency status)",
+    : "Singapore Salaries Tax (2024 YA, select residency status)",
   missingFactor: hasResidencyAnswer
     ? "CPF contributions (~20% employee) not modelled; personal reliefs not applied."
-    : "Residency status matters — non-residents on foreign-source income may owe nothing.",
+    : "Residency status matters, non-residents on foreign-source income may owe nothing.",
   note: "2024 YA resident rates with earned income relief. CPF contributions (~20% employee up to SGD 6,800/mo) are a significant real deduction. Various personal reliefs can reduce tax further. Singapore taxes residents on Singapore-source income; foreign-source income remitted is generally exempt for individuals. Income must be passed in SGD.",
 };
 }, 
 
   // -------------------------------------------------------------------------
-  // THAILAND — THB
+  // THAILAND, THB
   // -------------------------------------------------------------------------
   TH: ({ annualIncome, incomeScenario = "local", answers }) => {
     const residency = answers?.th_residency ?? "";
@@ -334,8 +334,8 @@ return {
         confidence: "partial",
         label:
           residency === "non_resident"
-            ? "Thailand — non-resident (foreign-source income not taxed)"
-            : "Thailand — resident, foreign income kept outside Thailand",
+            ? "Thailand, non-resident (foreign-source income not taxed)"
+            : "Thailand, resident, foreign income kept outside Thailand",
         missingFactor:
           "Assumes foreign income earned and kept abroad; remittance to Thailand triggers tax.",
         note:
@@ -368,17 +368,17 @@ return {
       model: "progressive-country",
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
-        ? "Thailand PIT — resident, taxable income (2024)"
-        : "Thailand PIT (2024 — select residency/remittance status)",
+        ? "Thailand PIT, resident, taxable income (2024)"
+        : "Thailand PIT (2024, select residency/remittance status)",
       missingFactor: hasAnswer
         ? "Social security contributions are not included."
-        : "Foreign-income remittance/residency rules changed Jan 2024 — treatment depends on your situation.",
+        : "Foreign-income remittance/residency rules changed Jan 2024, treatment depends on your situation.",
       note: "Brackets and standard deductions are 2024 figures. Income must be passed in THB.",
     };
   },
 
   // -------------------------------------------------------------------------
-  // VIETNAM — VND
+  // VIETNAM, VND
   // -------------------------------------------------------------------------
   VN: ({ annualIncome, incomeScenario = "local", answers }) => {
     const residency = answers?.vn_residency ?? "";
@@ -391,7 +391,7 @@ return {
         effectiveRate: 0,
         model: "none",
         confidence: "partial",
-        label: "Vietnam — non-resident remote worker",
+        label: "Vietnam, non-resident remote worker",
         missingFactor:
           "Assumes foreign-source income and no Vietnam-source employment income.",
         note: "Non-residents are generally taxed only on Vietnam-source income. Income must be passed in VND.",
@@ -405,7 +405,7 @@ return {
         ...rates,
         model: "flat",
         confidence: "partial",
-        label: "Vietnam — non-resident income tax (20% flat, 2024)",
+        label: "Vietnam, non-resident income tax (20% flat, 2024)",
         missingFactor:
           "Applies to Vietnam-source income only; no personal allowance available.",
         note: "Non-residents pay a flat 20% tax on Vietnam-source income. Income must be passed in VND.",
@@ -434,8 +434,8 @@ return {
       model: "progressive-country",
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
-        ? "Vietnam PIT — resident (2024)"
-        : "Vietnam PIT (2024 — select residency status)",
+        ? "Vietnam PIT, resident (2024)"
+        : "Vietnam PIT (2024, select residency status)",
       missingFactor: hasAnswer
         ? "Social insurance and dependent relief not modelled."
         : "Non-residents on foreign-source remote income may owe nothing.",
@@ -444,7 +444,7 @@ return {
   },
 
   // -------------------------------------------------------------------------
-  // MALAYSIA — MYR
+  // MALAYSIA, MYR
   // -------------------------------------------------------------------------
   MY: ({ annualIncome, incomeScenario = "local" }) => {
     if (incomeScenario === "remote") {
@@ -454,7 +454,7 @@ return {
         effectiveRate: 0,
         model: "none",
         confidence: "simplified",
-        label: "Malaysia — remote worker",
+        label: "Malaysia, remote worker",
         missingFactor:
           "Foreign-source income exemption should be verified before planning.",
         note: "Malaysia generally uses territorial taxation for individuals. Income must be passed in MYR.",
@@ -482,14 +482,14 @@ const rates = combineRates(incomeTaxRate, socialContributionRate);
   ...rates,
   model: "progressive-country",
   confidence: "simplified",
-  label: "Malaysia income tax (2024 — local employment)",
+  label: "Malaysia income tax (2024, local employment)",
   missingFactor: "Personal relief system not modelled.",
   note: "Brackets are 2024 figures. EPF employee contribution is estimated at 11%. Personal reliefs are not modelled. Income must be passed in MYR.",
 };
   },
 
   // -------------------------------------------------------------------------
-  // INDONESIA — IDR
+  // INDONESIA, IDR
   // -------------------------------------------------------------------------
   ID: ({ annualIncome }) => {
     const ptkp = 54000000; // single
@@ -517,7 +517,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
   },
 
   // -------------------------------------------------------------------------
-  // UNITED ARAB EMIRATES — AED
+  // UNITED ARAB EMIRATES, AED
   // -------------------------------------------------------------------------
   AE: () => ({
     incomeTaxRate: 0,
@@ -526,12 +526,12 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
     model: "none",
     confidence: "verified",
     label: "No personal income tax",
-    missingFactor: "No personal income tax — this estimate is exact.",
+    missingFactor: "No personal income tax, this estimate is exact.",
     note: "The UAE does not levy personal income tax on employment or investment income.",
   }),
 
   // -------------------------------------------------------------------------
-  // PHILIPPINES — PHP
+  // PHILIPPINES, PHP
   // -------------------------------------------------------------------------
   PH: ({ annualIncome, isRetired, answers }) => {
     const residency = answers?.ph_residency ?? "";
@@ -544,7 +544,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
         model: "flat",
         confidence: "partial",
         label:
-          "Philippines — non-resident alien, not engaged in trade/business (25% flat)",
+          "Philippines, non-resident alien, not engaged in trade/business (25% flat)",
         missingFactor:
           "Applies only to Philippines-source income.",
         note: "Foreign-source income is generally not taxable for non-resident aliens. Income must be passed in PHP.",
@@ -570,8 +570,8 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
       model: "progressive-country",
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
-        ? "Philippines TRAIN Law + contributions — citizen/resident alien (2024)"
-        : "Philippines TRAIN Law + contributions (2024 — select residency status)",
+        ? "Philippines TRAIN Law + contributions, citizen/resident alien (2024)"
+        : "Philippines TRAIN Law + contributions (2024, select residency status)",
       missingFactor:
         "13th-month pay exemption not modelled.",
       note: "2024 TRAIN Law brackets. Income must be passed in PHP.",
@@ -579,7 +579,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
   },
 
   // -------------------------------------------------------------------------
-  // TAIWAN — TWD
+  // TAIWAN, TWD
   // -------------------------------------------------------------------------
   TW: ({ annualIncome, filing, isRetired, incomeScenario = "local", answers }) => {
     const residency = answers?.tw_residency ?? "";
@@ -592,7 +592,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
         effectiveRate: 0,
         model: "none",
         confidence: "partial",
-        label: "Taiwan — non-resident remote worker",
+        label: "Taiwan, non-resident remote worker",
         missingFactor:
           "Assumes foreign-source income and no Taiwan-source work.",
         note: "Non-residents are generally taxed only on Taiwan-source income. Income must be passed in TWD.",
@@ -606,7 +606,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
         ...rates,
         model: "flat",
         confidence: "partial",
-        label: "Taiwan — non-resident income tax (18% flat, 2024)",
+        label: "Taiwan, non-resident income tax (18% flat, 2024)",
         missingFactor:
           "Applies to Taiwan-source income only.",
         note: "Non-residents pay 18% flat tax on Taiwan-source income. Income must be passed in TWD.",
@@ -642,8 +642,8 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
       model: "progressive-country",
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
-        ? "Taiwan individual income tax — resident (2024)"
-        : "Taiwan individual income tax (2024 — select residency status)",
+        ? "Taiwan individual income tax, resident (2024)"
+        : "Taiwan individual income tax (2024, select residency status)",
       missingFactor:
         "Special deductions not modelled.",
       note: "2024 brackets with standard deduction, personal exemption, and employment income deduction applied. Income must be passed in TWD.",
@@ -651,7 +651,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
   },
 
   // -------------------------------------------------------------------------
-  // HONG KONG — HKD
+  // HONG KONG, HKD
   // -------------------------------------------------------------------------
   HK: ({ annualIncome, filing, isRetired, answers }) => {
     const workLocation = answers?.hk_work_location ?? "";
@@ -684,7 +684,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
         effectiveRate: 0,
         model: "none",
         confidence: "partial",
-        label: "Hong Kong — no Salaries Tax",
+        label: "Hong Kong, no Salaries Tax",
         missingFactor:
           "Any days physically working in Hong Kong create a proportional HK tax liability.",
         note: "Hong Kong Salaries Tax applies only to Hong Kong-source income. Income must be passed in HKD.",
@@ -702,7 +702,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
         model: "progressive-country",
         confidence: "simplified",
         label:
-          "Hong Kong Salaries Tax — mixed work location (50% HK-source estimate)",
+          "Hong Kong Salaries Tax, mixed work location (50% HK-source estimate)",
         missingFactor:
           "Actual HK tax depends on HK-worked days as a percentage of total work days.",
         note: "Mixed work location is estimated using a 50% HK-source split. Income must be passed in HKD.",
@@ -720,7 +720,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
         ? "Hong Kong Salaries Tax (2024-25)"
-        : "Hong Kong Salaries Tax (2024-25 — select work location)",
+        : "Hong Kong Salaries Tax (2024-25, select work location)",
       missingFactor:
         "MPF mandatory pension contributions not included.",
       note: "Salaries Tax is the lower of progressive rates or 15% standard rate. Income must be passed in HKD.",
@@ -728,7 +728,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
   },
 
   // -------------------------------------------------------------------------
-  // INDIA — INR
+  // INDIA, INR
   // -------------------------------------------------------------------------
   IN: ({ annualIncome, isRetired, answers }) => {
     const regime = answers?.in_regime ?? "new_regime";
@@ -806,7 +806,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
         ? "India New Tax Regime + EPF + Cess (2024-25)"
-        : "India New Tax Regime + EPF + Cess (2024-25 — select regime)",
+        : "India New Tax Regime + EPF + Cess (2024-25, select regime)",
       missingFactor:
         "EPF estimated at ~6% of gross; actual depends on salary structure.",
       note: "New Tax Regime with standard deduction, cess, and EPF estimate. Income must be passed in INR.",
@@ -814,7 +814,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
   },
 
   // -------------------------------------------------------------------------
-  // CHINA — CNY
+  // CHINA, CNY
   // -------------------------------------------------------------------------
   CN: ({ annualIncome, isRetired, incomeScenario = "local", answers }) => {
     const residency = answers?.cn_residency ?? "";
@@ -827,7 +827,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
         effectiveRate: 0,
         model: "none",
         confidence: "partial",
-        label: "China — non-resident remote worker",
+        label: "China, non-resident remote worker",
         missingFactor:
           "Assumes work entirely performed outside China.",
         note: "China taxes non-residents only on China-source income. Income must be passed in CNY.",
@@ -862,7 +862,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
         ? "China IIT + social insurance (2024)"
-        : "China IIT + social insurance (2024 — select residency status)",
+        : "China IIT + social insurance (2024, select residency status)",
       missingFactor:
         "Housing fund and regional social base variations not fully captured.",
       note: "2024 comprehensive income brackets with standard deduction and simplified deductions. Income must be passed in CNY.",
@@ -870,7 +870,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
   },
 
   // -------------------------------------------------------------------------
-  // QATAR — QAR
+  // QATAR, QAR
   // -------------------------------------------------------------------------
   QA: () => ({
     incomeTaxRate: 0,
@@ -879,12 +879,12 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
     model: "none",
     confidence: "verified",
     label: "No personal income tax",
-    missingFactor: "No personal income tax on employment income — this estimate is exact.",
+    missingFactor: "No personal income tax on employment income, this estimate is exact.",
     note: "Qatar does not levy personal income tax on salaries and wages.",
   }),
 
   // -------------------------------------------------------------------------
-  // SAUDI ARABIA — SAR
+  // SAUDI ARABIA, SAR
   // -------------------------------------------------------------------------
   SA: () => ({
     incomeTaxRate: 0,
@@ -893,12 +893,12 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
     model: "none",
     confidence: "verified",
     label: "No personal income tax on employment income",
-    missingFactor: "No personal income tax — expatriates pay no income tax in Saudi Arabia.",
+    missingFactor: "No personal income tax, expatriates pay no income tax in Saudi Arabia.",
     note: "Saudi Arabia does not levy personal income tax on employment income.",
   }),
 
   // -------------------------------------------------------------------------
-  // OMAN — OMR
+  // OMAN, OMR
   // -------------------------------------------------------------------------
   OM: () => ({
     incomeTaxRate: 0,
@@ -907,12 +907,12 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
     model: "none",
     confidence: "verified",
     label: "No personal income tax",
-    missingFactor: "No personal income tax on employment income — this estimate is exact.",
+    missingFactor: "No personal income tax on employment income, this estimate is exact.",
     note: "Oman does not levy personal income tax on salaries and wages.",
   }),
 
   // -------------------------------------------------------------------------
-  // AUSTRALIA — AUD
+  // AUSTRALIA, AUD
   // -------------------------------------------------------------------------
   AU: ({ annualIncome, isRetired }) => {
     const taxAmount = progressiveTaxAmount(annualIncome, [
@@ -939,7 +939,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
   },
 
   // -------------------------------------------------------------------------
-  // NEW ZEALAND — NZD
+  // NEW ZEALAND, NZD
   // -------------------------------------------------------------------------
   NZ: ({ annualIncome }) => {
     const taxAmount = progressiveTaxAmount(annualIncome, [
@@ -981,8 +981,8 @@ const ASIA_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
       helpText:
         "Singapore tax residents (≥183 days/year) pay progressive rates. Non-residents pay the higher of 15% flat or progressive rates on Singapore-source income. Remote workers for foreign employers not physically working in Singapore generally owe no Singapore tax.",
       options: [
-        { value: "resident",     label: "Resident — ≥183 days in Singapore per year" },
-        { value: "non_resident", label: "Non-resident — fewer than 183 days in Singapore" },
+        { value: "resident",     label: "Resident, ≥183 days in Singapore per year" },
+        { value: "non_resident", label: "Non-resident, fewer than 183 days in Singapore" },
       ],
     },
   ],
@@ -995,15 +995,15 @@ const ASIA_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
     options: [
       {
         value: "resident_remits",
-        label: "Resident — 180+ days and I remit foreign income to Thailand",
+        label: "Resident, 180+ days and I remit foreign income to Thailand",
       },
       {
         value: "resident_no_remit",
-        label: "Resident — 180+ days but I keep foreign income outside Thailand",
+        label: "Resident, 180+ days but I keep foreign income outside Thailand",
       },
       {
         value: "non_resident",
-        label: "Non-resident — fewer than 180 days in Thailand",
+        label: "Non-resident, fewer than 180 days in Thailand",
       },
     ],
   },
@@ -1015,8 +1015,8 @@ const ASIA_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
       helpText:
         "Vietnam tax residents (≥183 days/year) are taxed on worldwide income at progressive rates (5–35%). Non-residents pay a flat 20% on Vietnam-source income only. Remote workers for foreign employers not working in Vietnam owe no Vietnam PIT.",
       options: [
-        { value: "resident",     label: "Resident — ≥183 days in Vietnam per year" },
-        { value: "non_resident", label: "Non-resident — fewer than 183 days in Vietnam" },
+        { value: "resident",     label: "Resident, ≥183 days in Vietnam per year" },
+        { value: "non_resident", label: "Non-resident, fewer than 183 days in Vietnam" },
       ],
     },
   ],
@@ -1027,8 +1027,8 @@ const ASIA_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
       helpText:
         "Taiwan tax residents (≥183 days/year) are taxed on worldwide income at progressive rates with full deductions. Non-residents pay 18% flat on Taiwan-source income only. Remote workers for foreign employers outside Taiwan generally owe no Taiwan tax.",
       options: [
-        { value: "resident",     label: "Resident — ≥183 days in Taiwan per year" },
-        { value: "non_resident", label: "Non-resident — fewer than 183 days in Taiwan" },
+        { value: "resident",     label: "Resident, ≥183 days in Taiwan per year" },
+        { value: "non_resident", label: "Non-resident, fewer than 183 days in Taiwan" },
       ],
     },
   ],
@@ -1039,7 +1039,7 @@ const ASIA_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
       helpText:
         "Filipino citizens and resident aliens are taxed on worldwide income. Non-resident aliens engaged in business pay TRAIN rates on Philippine-source income. Non-resident aliens not engaged pay 25% flat on Philippine-source income only.",
       options: [
-        { value: "citizen_resident",   label: "Filipino citizen or resident alien — worldwide income" },
+        { value: "citizen_resident",   label: "Filipino citizen or resident alien, worldwide income" },
         { value: "non_resident_etb",   label: "Non-resident alien, engaged in business in PH" },
         { value: "non_resident_netb",  label: "Non-resident alien, NOT engaged in business in PH (25% flat)" },
       ],
@@ -1050,11 +1050,11 @@ const ASIA_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
       key: "hk_work_location",
       label: "Where will your work services be performed?",
       helpText:
-        "Hong Kong Salaries Tax applies only to Hong Kong-source income — income from services physically rendered in Hong Kong. If all your work is performed outside HK, no Salaries Tax is due. Mixed situations are apportioned by HK working days.",
+        "Hong Kong Salaries Tax applies only to Hong Kong-source income, income from services physically rendered in Hong Kong. If all your work is performed outside HK, no Salaries Tax is due. Mixed situations are apportioned by HK working days.",
       options: [
         { value: "in_hk",      label: "All work performed in Hong Kong" },
         { value: "outside_hk", label: "All work performed outside Hong Kong" },
-        { value: "mixed",      label: "Mixed — work partly in HK, partly outside (50% split estimated)" },
+        { value: "mixed",      label: "Mixed, work partly in HK, partly outside (50% split estimated)" },
       ],
     },
   ],
@@ -1063,10 +1063,10 @@ const ASIA_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
       key: "in_regime",
       label: "Which India income tax regime applies to you?",
       helpText:
-        "India's New Tax Regime (default since FY2023-24) has lower rates but fewer deductions. The Old Regime has higher rates but allows 80C investments, HRA, and home loan interest deductions — often better for those with significant eligible deductions.",
+        "India's New Tax Regime (default since FY2023-24) has lower rates but fewer deductions. The Old Regime has higher rates but allows 80C investments, HRA, and home loan interest deductions, often better for those with significant eligible deductions.",
       options: [
-        { value: "new_regime", label: "New Tax Regime — lower rates, fewer deductions (default)" },
-        { value: "old_regime", label: "Old Tax Regime — higher rates, with 80C/HRA/home loan deductions" },
+        { value: "new_regime", label: "New Tax Regime, lower rates, fewer deductions (default)" },
+        { value: "old_regime", label: "Old Tax Regime, higher rates, with 80C/HRA/home loan deductions" },
       ],
     },
   ],
@@ -1077,8 +1077,8 @@ const ASIA_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
       helpText:
         "China taxes residents (≥183 days/year) on worldwide income. Non-residents are taxed only on China-source income. Foreigners resident fewer than 6 consecutive years may apply for exemption on overseas income not remitted to China.",
       options: [
-        { value: "resident",     label: "Resident — ≥183 days in China per year" },
-        { value: "non_resident", label: "Non-resident — fewer than 183 days in China" },
+        { value: "resident",     label: "Resident, ≥183 days in China per year" },
+        { value: "non_resident", label: "Non-resident, fewer than 183 days in China" },
       ],
     },
   ],
@@ -1136,15 +1136,15 @@ const SAMPLE_INCOME_BY_COUNTRY: Record<string, number> = {
   VN:  1960000000,// ~$80k at ₫24,500/USD
   MY:  376000,    // ~$80k at RM 4.70/USD
   ID:  1256000000,// ~$80k at Rp 15,700/USD
-  AE:  293600,    // ~$80k at AED 3.67/USD (irrelevant — zero tax)
+  AE:  293600,    // ~$80k at AED 3.67/USD (irrelevant, zero tax)
   PH:  4480000,   // ~$80k at ₱56/USD
   TW:  2600000,   // ~$80k at NT$32.5/USD
   HK:  624000,    // ~$80k at HK$7.8/USD
   IN:  6680000,   // ~$80k at ₹83.5/USD
   CN:  576000,    // ~$80k at ¥7.2/USD
-  QA:  291200,    // ~$80k at QAR 3.64/USD (irrelevant — zero tax)
-  SA:  300000,    // ~$80k at SAR 3.75/USD (irrelevant — zero tax)
-  OM:  30800,     // ~$80k at OMR 0.385/USD (irrelevant — zero tax)
+  QA:  291200,    // ~$80k at QAR 3.64/USD (irrelevant, zero tax)
+  SA:  300000,    // ~$80k at SAR 3.75/USD (irrelevant, zero tax)
+  OM:  30800,     // ~$80k at OMR 0.385/USD (irrelevant, zero tax)
   AU:  123200,    // ~$80k at A$1.54/USD
   NZ:  131200,    // ~$80k at NZ$1.64/USD
 };

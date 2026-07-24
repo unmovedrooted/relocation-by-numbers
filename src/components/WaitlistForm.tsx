@@ -64,7 +64,7 @@ export default function WaitlistForm() {
       </div>
 
       {status === "error" && (
-        <p className="text-xs text-red-400">Something went wrong — please try again.</p>
+        <p className="text-xs text-red-400">Something went wrong, please try again.</p>
       )}
     </div>
   );

@@ -31,7 +31,7 @@ export async function generateMetadata({
   const yearsNum = Number(data.years);
   const title =
     yearsNum > 0
-      ? `FIRE at ${data.fireAge} — ${data.years} years earlier by moving`
+      ? `FIRE at ${data.fireAge}, ${data.years} years earlier by moving`
       : `FIRE at age ${data.fireAge}`;
 
   const description =
@@ -98,7 +98,7 @@ export default async function FireSharePage({ searchParams }: SharePageProps) {
 
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
             {hasMove
-              ? `FIRE at ${data.fireAge} — ${data.years} ${yearsNum === 1 ? "year" : "years"} earlier`
+              ? `FIRE at ${data.fireAge}, ${data.years} ${yearsNum === 1 ? "year" : "years"} earlier`
               : `FIRE at age ${data.fireAge}`}
           </h1>
 
@@ -154,7 +154,7 @@ export default async function FireSharePage({ searchParams }: SharePageProps) {
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-300">
             Enter your income, spending, and location to see your projected FIRE
-            age — and how a move could change your timeline.
+            age, and how a move could change your timeline.
           </p>
 
           <div className="mt-5 flex flex-wrap gap-3">

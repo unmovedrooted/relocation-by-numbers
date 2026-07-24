@@ -8,9 +8,9 @@ const PAGE_PATH = "/income-tax-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "Income Tax Calculator — Federal Tax, Brackets & Effective Rate (2025)",
+  title: "Income Tax Calculator, Federal Tax, Brackets & Effective Rate (2025)",
   description:
-    "Free federal income tax calculator. See your 2025 federal tax, effective and marginal rates, and a bracket-by-bracket breakdown of how your income is taxed — with an optional state add-on.",
+    "Free federal income tax calculator. See your 2025 federal tax, effective and marginal rates, and a bracket-by-bracket breakdown of how your income is taxed, with an optional state add-on.",
   keywords: [
     "income tax calculator",
     "federal income tax calculator",
@@ -24,11 +24,11 @@ export const metadata: Metadata = {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "Income Tax Calculator — Federal Tax, Brackets & Effective Rate (2025)",
+    title: "Income Tax Calculator, Federal Tax, Brackets & Effective Rate (2025)",
     description: "Your 2025 federal tax, effective and marginal rates, and a bracket-by-bracket breakdown.",
     locale: "en_US",
   },
-  twitter: { card: "summary", title: "Income Tax Calculator — Federal Tax, Brackets & Effective Rate (2025)", description: "Federal tax, effective/marginal rates, and a bracket breakdown.", site: "@relocationbynumbers" },
+  twitter: { card: "summary", title: "Income Tax Calculator, Federal Tax, Brackets & Effective Rate (2025)", description: "Federal tax, effective/marginal rates, and a bracket breakdown.", site: "@relocationbynumbers" },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" } },
 };
 
@@ -56,7 +56,7 @@ const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
   mainEntity: [
-    { "@type": "Question", name: "What's the difference between marginal and effective tax rates?", acceptedAnswer: { "@type": "Answer", text: "Your marginal rate is the rate applied to your last dollar of taxable income — the top bracket you reach. Your effective rate is your total tax divided by your income. The effective rate is always lower, because the first portions of your income are taxed at lower bracket rates before you reach the top one." } },
+    { "@type": "Question", name: "What's the difference between marginal and effective tax rates?", acceptedAnswer: { "@type": "Answer", text: "Your marginal rate is the rate applied to your last dollar of taxable income, the top bracket you reach. Your effective rate is your total tax divided by your income. The effective rate is always lower, because the first portions of your income are taxed at lower bracket rates before you reach the top one." } },
     { "@type": "Question", name: "How do federal tax brackets work?", acceptedAnswer: { "@type": "Answer", text: "The U.S. uses a progressive system: income is taxed in tiers. Only the income that falls within each bracket is taxed at that bracket's rate. So moving into a higher bracket only raises the tax on the income above that threshold, not your whole income." } },
     { "@type": "Question", name: "What is the 2025 standard deduction?", acceptedAnswer: { "@type": "Answer", text: "For 2025 the federal standard deduction is $15,750 for single filers and $31,500 for married filing jointly. Your taxable income is your income minus pre-tax deductions and either the standard deduction or your itemized deductions, whichever is larger." } },
     { "@type": "Question", name: "Does this include Social Security and Medicare?", acceptedAnswer: { "@type": "Answer", text: "No. This is income tax only. Social Security and Medicare (FICA) are separate payroll taxes. To see your full take-home pay including FICA and state tax, use the paycheck calculator." } },
@@ -77,7 +77,7 @@ const FAQ_ITEMS = [
   { q: "Marginal vs. effective rate?", a: "Marginal is the rate on your last dollar (your top bracket); effective is total tax ÷ income. Effective is always lower because earlier dollars are taxed at lower rates." },
   { q: "How do brackets work?", a: "Progressive tiers: only the income within each bracket is taxed at that rate, so a higher bracket only raises tax on the income above its threshold." },
   { q: "2025 standard deduction?", a: "$15,750 single, $31,500 married filing jointly. Taxable income = income − pre-tax deductions − the larger of the standard or itemized deduction." },
-  { q: "Does it include FICA?", a: "No — income tax only. For full take-home including Social Security, Medicare, and state tax, use the paycheck calculator." },
+  { q: "Does it include FICA?", a: "No, income tax only. For full take-home including Social Security, Medicare, and state tax, use the paycheck calculator." },
 ];
 
 export default function Page() {
@@ -118,13 +118,13 @@ export default function Page() {
                 <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
                   <p>
                     It subtracts your pre-tax deductions and either the standard or your itemized deduction to find your
-                    taxable income, then runs it through the 2025 federal brackets — taxing each tier of income at its
+                    taxable income, then runs it through the 2025 federal brackets, taxing each tier of income at its
                     own rate. The result is your federal tax, your marginal rate (the rate on your last dollar), and
                     your effective rate (total tax over income).
                   </p>
                   <p>
                     The bracket bar shows exactly how your income fills each tier, which makes it clear why moving into
-                    a higher bracket doesn&apos;t raise the tax on your whole income — only the part above the threshold.
+                    a higher bracket doesn&apos;t raise the tax on your whole income, only the part above the threshold.
                   </p>
                 </div>
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -144,7 +144,7 @@ export default function Page() {
               <div className="rounded-2xl border border-cyan-200/70 bg-cyan-50 p-5 dark:border-cyan-900/60 dark:bg-cyan-950/30">
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Good to know</h3>
                 <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                  <p>This is income tax only — it doesn&apos;t include Social Security or Medicare (FICA). For full take-home, use the paycheck calculator.</p>
+                  <p>This is income tax only, it doesn&apos;t include Social Security or Medicare (FICA). For full take-home, use the paycheck calculator.</p>
                   <p>It uses the standard deduction unless your itemized total is higher, and doesn&apos;t model tax credits, the QBI deduction, AMT, or capital-gains rates.</p>
                   <p>Comparing a move? The optional state add-on shows how your combined rate changes by state.</p>
                   <p>It&apos;s an estimate, not tax advice.</p>

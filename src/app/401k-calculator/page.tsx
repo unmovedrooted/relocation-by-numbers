@@ -8,9 +8,9 @@ const PAGE_PATH = "/401k-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "401(k) Calculator — Employer Match, Tax Savings & Growth",
+  title: "401(k) Calculator, Employer Match, Tax Savings & Growth",
   description:
-    "Free 401(k) calculator. See your employer match, this year's tax savings, and your projected balance at retirement — with 2025 contribution limits and a Monte Carlo range of outcomes.",
+    "Free 401(k) calculator. See your employer match, this year's tax savings, and your projected balance at retirement, with 2025 contribution limits and a Monte Carlo range of outcomes.",
   keywords: [
     "401k calculator",
     "401k employer match calculator",
@@ -24,11 +24,11 @@ export const metadata: Metadata = {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "401(k) Calculator — Employer Match, Tax Savings & Growth",
+    title: "401(k) Calculator, Employer Match, Tax Savings & Growth",
     description: "Employer match, this year's tax savings, and your projected 401(k) balance with a Monte Carlo range.",
     locale: "en_US",
   },
-  twitter: { card: "summary", title: "401(k) Calculator — Employer Match, Tax Savings & Growth", description: "Employer match, tax savings, and projected 401(k) balance.", site: "@relocationbynumbers" },
+  twitter: { card: "summary", title: "401(k) Calculator, Employer Match, Tax Savings & Growth", description: "Employer match, tax savings, and projected 401(k) balance.", site: "@relocationbynumbers" },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" } },
 };
 
@@ -56,9 +56,9 @@ const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
   mainEntity: [
-    { "@type": "Question", name: "How does employer 401(k) matching work?", acceptedAnswer: { "@type": "Answer", text: "Many employers match a percentage of what you contribute, up to a limit. A common formula is '50% up to 6% of salary,' meaning the employer adds 50 cents per dollar you contribute on the first 6% of your pay. Contributing at least up to the cap captures the full match — it's effectively free money." } },
+    { "@type": "Question", name: "How does employer 401(k) matching work?", acceptedAnswer: { "@type": "Answer", text: "Many employers match a percentage of what you contribute, up to a limit. A common formula is '50% up to 6% of salary,' meaning the employer adds 50 cents per dollar you contribute on the first 6% of your pay. Contributing at least up to the cap captures the full match, it's effectively free money." } },
     { "@type": "Question", name: "What is the 401(k) contribution limit for 2025?", acceptedAnswer: { "@type": "Answer", text: "For 2025, employees can defer up to $23,500. Those age 50-59 or 64+ can add a $7,500 catch-up (up to $31,000), and ages 60-63 can add an enhanced $11,250 catch-up (up to $34,750). The combined employee-plus-employer limit is $70,000." } },
-    { "@type": "Question", name: "How much does a 401(k) reduce my taxes?", acceptedAnswer: { "@type": "Answer", text: "Pre-tax (traditional) 401(k) contributions lower your taxable income, cutting federal and, in most states, state income tax now — though not Social Security or Medicare. This calculator estimates your exact savings and the net effect on your paycheck. Withdrawals are taxed later as ordinary income." } },
+    { "@type": "Question", name: "How much does a 401(k) reduce my taxes?", acceptedAnswer: { "@type": "Answer", text: "Pre-tax (traditional) 401(k) contributions lower your taxable income, cutting federal and, in most states, state income tax now, though not Social Security or Medicare. This calculator estimates your exact savings and the net effect on your paycheck. Withdrawals are taxed later as ordinary income." } },
     { "@type": "Question", name: "Do all states give 401(k) contributions a tax break?", acceptedAnswer: { "@type": "Answer", text: "Most do, matching the federal treatment, but California and Pennsylvania tax 401(k) contributions at the state level, so you don't get a state tax break there." } },
   ],
 };
@@ -74,9 +74,9 @@ const breadcrumbSchema = {
 };
 
 const FAQ_ITEMS = [
-  { q: "How does employer matching work?", a: "Employers often match a percent of your contribution up to a cap — e.g. '50% up to 6%' means 50¢ per $1 on the first 6% of salary. Contributing at least to the cap captures the full match (free money)." },
+  { q: "How does employer matching work?", a: "Employers often match a percent of your contribution up to a cap, e.g. '50% up to 6%' means 50¢ per $1 on the first 6% of salary. Contributing at least to the cap captures the full match (free money)." },
   { q: "What's the 2025 contribution limit?", a: "$23,500 for employees; +$7,500 catch-up at 50-59/64+, +$11,250 at 60-63. The combined employee + employer limit is $70,000." },
-  { q: "How much does a 401(k) cut my taxes?", a: "Pre-tax contributions lower federal and (in most states) state income tax now — not FICA. The calculator shows your savings and the net paycheck effect; withdrawals are taxed later." },
+  { q: "How much does a 401(k) cut my taxes?", a: "Pre-tax contributions lower federal and (in most states) state income tax now, not FICA. The calculator shows your savings and the net paycheck effect; withdrawals are taxed later." },
   { q: "Do all states give the tax break?", a: "Most match the federal treatment, but California and Pennsylvania tax 401(k) contributions at the state level." },
 ];
 
@@ -92,7 +92,7 @@ export default function Page() {
           <div className="mx-auto max-w-4xl px-4 sm:px-6">
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">401(k) Calculator</h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              See your employer match, this year&apos;s tax savings, and how your 401(k) could grow by retirement — with
+              See your employer match, this year&apos;s tax savings, and how your 401(k) could grow by retirement, with
               2025 limits and a realistic range of market outcomes.
             </p>
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Employer match · pre-tax savings · Monte Carlo range.</p>
@@ -143,7 +143,7 @@ export default function Page() {
               <div className="rounded-2xl border border-cyan-200/70 bg-cyan-50 p-5 dark:border-cyan-900/60 dark:bg-cyan-950/30">
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Good to know</h3>
                 <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                  <p>Always contribute at least enough to get the full employer match — it&apos;s an immediate, guaranteed return.</p>
+                  <p>Always contribute at least enough to get the full employer match, it&apos;s an immediate, guaranteed return.</p>
                   <p>Pre-tax contributions cut your taxes now; you pay ordinary income tax when you withdraw in retirement.</p>
                   <p>This doesn&apos;t model vesting schedules, Roth 401(k) contributions, loans, or fees.</p>
                   <p>It&apos;s a planning estimate, not tax or investment advice.</p>

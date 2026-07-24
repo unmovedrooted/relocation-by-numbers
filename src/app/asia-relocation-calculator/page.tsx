@@ -40,7 +40,7 @@ export default function Page() {
 
           <p className="mx-auto mt-3 max-w-4xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
             Compare taxes, rent, living costs, take-home pay, and one-time moving expenses
-            across Southeast Asia, East Asia, South Asia, and the Gulf — including Bangkok,
+            across Southeast Asia, East Asia, South Asia, and the Gulf, including Bangkok,
             Tokyo, Singapore, Manila, Taipei, Hong Kong, Bangalore, Shanghai, Dubai, Doha,
             Riyadh, and Muscat.
           </p>
@@ -159,7 +159,7 @@ export default function Page() {
               <div className="mt-4 space-y-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
                 <p>
                   This calculator estimates how a move to Asia or the Middle East may affect your monthly
-                  budget — covering income taxes, housing, living costs, and one-time relocation expenses
+                  budget, covering income taxes, housing, living costs, and one-time relocation expenses
                   across 18 countries and 30+ cities.
                 </p>
                 <p>

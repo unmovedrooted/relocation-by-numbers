@@ -99,7 +99,7 @@ function ficaTax(grossWages: number, filing: FilingStatus): number {
  * Most states have their own standard deduction (or personal exemption) that
  * differs from the federal amount. Critically, several high-population states
  * do NOT exclude traditional 401(k) employee contributions from state taxable
- * income — meaning state tax must be calculated from gross, not after-401k wages.
+ * income, meaning state tax must be calculated from gross, not after-401k wages.
  *
  * allows401k: true  → state starts from after-401k wages (same treatment as federal)
  * allows401k: false → state taxes the 401k contribution (start from gross wages)
@@ -112,8 +112,8 @@ type StateDeductConfig = {
 
 const STATE_DEDUCT_CONFIG: Partial<Record<StateCode, StateDeductConfig>> = {
   // ── States that genuinely tax traditional 401(k) employee contributions ───
-  // Verified against each state's own tax authority: CA (FTB — CA does not
-  // conform to federal deferred-comp exclusion) and PA (PA DOR — 401k
+  // Verified against each state's own tax authority: CA (FTB, CA does not
+  // conform to federal deferred-comp exclusion) and PA (PA DOR, 401k
   // elective deferrals are taxable PA compensation). These are the only two
   // states in this list where wages must be computed from gross, not
   // after-401k pay.
@@ -123,7 +123,7 @@ const STATE_DEDUCT_CONFIG: Partial<Record<StateCode, StateDeductConfig>> = {
   // ── States with 401k exclusion and their own standard deductions ──────────
   // NY, NJ, MA, and IL all exclude standard employee elective 401(k)
   // deferrals from state wages for W-2 employees (confirmed via NY DTF, NJ
-  // Division of Taxation, Mass.gov, and IL DOR guidance) — despite each
+  // Division of Taxation, Mass.gov, and IL DOR guidance), despite each
   // having other retirement-plan quirks (e.g. NJ taxes IRA/403(b)
   // contributions, MA taxes self-employed/partner 401k contributions).
   ny: { single: 8_000,  married: 16_050, allows401k: true  },
@@ -182,7 +182,7 @@ const STATE_NONE = new Set<StateCode>([
 
 // Flat-rate states (rate applied to state taxable income after state deduction)
 const STATE_FLAT: Partial<Record<StateCode, number>> = {
-  ga:  0.0519, // 2025 flat rate (down from 5.39% in 2024 under HB 1015; verified vs. GA DOR, further reduced to 4.99% for 2026 under HB 463 — update when this calculator's base tax year advances)
+  ga:  0.0519, // 2025 flat rate (down from 5.39% in 2024 under HB 1015; verified vs. GA DOR, further reduced to 4.99% for 2026 under HB 463, update when this calculator's base tax year advances)
   nc:  0.0425,
   ma:  0.05,
   pa:  0.0307,
@@ -393,7 +393,7 @@ function estimateStateTax(
       // CA Mental Health Services Tax (Prop 63): flat 1% surtax on CA taxable
       // income above $1,000,000. Applied as a separate add-on rather than a
       // bracket tier because the $1M threshold is identical across filing
-      // statuses — it is NOT doubled for married filers the way CA's other
+      // statuses, it is NOT doubled for married filers the way CA's other
       // brackets are, and it has never been inflation-indexed since 2004.
       if (state === "ca") {
         tax += Math.max(0, taxableState - 1_000_000) * 0.01;
@@ -488,7 +488,7 @@ export type TaxOpts = {
    * so a couple who each max out their own 401(k) can jointly exclude up to
    * 2x the single-filer limit. Callers combining two incomes into one
    * grossAnnual figure should compute each spouse's capped 401(k) dollar
-   * amount separately, sum them, and pass the sum here — otherwise the
+   * amount separately, sum them, and pass the sum here, otherwise the
    * k401Pct path below re-applies the single-person cap to the household
    * total and understates the exclusion.
    */
@@ -561,7 +561,7 @@ return {
 
 /**
  * Returns annual net take-home only.
- * Unchanged signature — all existing callers (including binary-search in Calculator) work without modification.
+ * Unchanged signature, all existing callers (including binary-search in Calculator) work without modification.
  */
 export function estimateNetAnnual(opts: TaxOpts): number {
   return compute(opts).net;
