@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import AdSlot from "@/components/AdSlot";
 import USMapPreview from "@/components/USMapPreview";
+import ExploreCalculatorGrid from "@/components/ExploreCalculatorGrid";
+import ExploreSavedScenarios from "@/components/ExploreSavedScenarios";
 
 export const metadata: Metadata = {
   title: "Relocation & FIRE Tools Hub | Cost of Living, Salary, Tax & Mortgage Calculators",
@@ -39,55 +41,6 @@ type HubSection = {
   ctaHref?: string;
   ctaLabel?: string;
 };
-
-const quickLinks: HubLink[] = [
-  {
-    href: "/compare/nyc-ny/charlotte-nc",
-    title: "NYC → Charlotte",
-    description: "Compare affordability, taxes, and monthly costs.",
-  },
-  {
-    href: "/compare/nyc-ny/austin-tx",
-    title: "NYC → Austin",
-    description: "See how a move could change your FIRE path.",
-  },
-  {
-    href: "/one-income-relocation-calculator",
-    title: "One Income Relocation Calculator",
-    description:
-      "Can you afford to move there on one income? Compare housing burden, taxes, and monthly flexibility.",
-  },
-  {
-    href: "/fire-calculator",
-    title: "FIRE Calculator",
-    description:
-      "Estimate your FIRE age and financial independence number.",
-  },
-  {
-    href: "/housing-affordability-calculator",
-    title: "Housing Affordability Calculator",
-    description:
-      "How much rent or house can you afford, based on your income?",
-  },
-  {
-    href: "/compare-cities",
-    title: "Compare Cities Side by Side",
-    description:
-      "One income, up to 3 destinations. Net pay, taxes, housing, and flexibility at once.",
-  },
-  {
-    href: "/mortgage-calculator",
-    title: "Mortgage Calculator",
-    description:
-      "Monthly payments, cash to close, rent vs buy, DTI, and refinance.",
-  },
-  {
-    href: "/international-relocation",
-    title: "International Relocation Calculator",
-    description:
-      "Compare taxes, rent, living costs, and moving expenses across countries.",
-  },
-];
 
 const sections: HubSection[] = [
   {
@@ -399,29 +352,17 @@ export default function ExplorePage() {
               </p>
 
               <div className="flex flex-wrap gap-3 pt-2">
-                <Link
-                  href="/compare/nyc-ny/charlotte-nc"
+                <a
+                  href="#calculators"
                   className="inline-flex items-center rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:opacity-90"
                 >
-                  Explore Comparisons
-                </Link>
+                  Browse all calculators
+                </a>
                 <Link
-                  href="/one-income-relocation-calculator"
-                  className="inline-flex items-center rounded-full border border-violet-400/30 bg-violet-400/10 px-5 py-3 text-sm font-semibold text-violet-200 transition hover:bg-violet-400/20"
-                >
-                  One Income Calculator
-                </Link>
-                <Link
-                  href="/fire-calculator"
+                  href="/compare-cities"
                   className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
                 >
-                  Open FIRE Tools
-                </Link>
-                <Link
-                  href="/mortgage-calculator"
-                  className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                >
-                  Mortgage Calculator
+                  Compare Cities
                 </Link>
                 <a
                   href="#map"
@@ -440,35 +381,9 @@ export default function ExplorePage() {
             </section>
           ) : null}
 
-          <section className="space-y-4">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-white">
-                Start Here
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
-                Jump into the most popular tools and strongest pages on the site.
-              </p>
-            </div>
+          <ExploreSavedScenarios />
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {quickLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:-translate-y-0.5 hover:border-emerald-300/40 hover:bg-white/[0.05]"
-                >
-                  <div className="text-lg font-semibold text-white group-hover:text-emerald-200">
-                    {link.title}
-                  </div>
-                  {link.description ? (
-                    <p className="mt-2 text-sm leading-6 text-slate-400">
-                      {link.description}
-                    </p>
-                  ) : null}
-                </Link>
-              ))}
-            </div>
-          </section>
+          <ExploreCalculatorGrid />
 
           <section id="map" className="scroll-mt-24">
             <USMapPreview />

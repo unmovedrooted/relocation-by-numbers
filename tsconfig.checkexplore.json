@@ -1,0 +1,2 @@
+{ "extends": "./tsconfig.json", "compilerOptions": { "noEmit": true },
+  "include": ["src/app/explore/page.tsx","src/components/ExploreCalculatorGrid.tsx","src/components/ExploreSavedScenarios.tsx","src/lib/savedScenarios.ts","src/components/AdSlot.tsx","src/components/USMapPreview.tsx","next-env.d.ts"] }
