@@ -137,6 +137,7 @@ const STATE_DEDUCT_CONFIG: Partial<Record<StateCode, StateDeductConfig>> = {
   sc: { single: 15_750, married: 31_500, allows401k: true  }, // SC mirrors federal std deduction
   co: { single: 15_750, married: 31_500, allows401k: true  }, // CO uses federal AGI as starting point
   az: { single: 14_600, married: 29_200, allows401k: true  },
+  ri: { single: 10_900, married: 21_800, allows401k: true  }, // RI 2025 standard deduction (RI Div. of Taxation inflation adjustments)
 
   // ── No income tax states (deduction config still needed for fallback logic) ─
   fl: { single: 0, married: 0, allows401k: true },
@@ -298,6 +299,22 @@ const STATE_BRACKETS: Partial<Record<StateCode, StateBracketSet>> = {
       { upTo: 5_000,                    rate: 0.03   },
       { upTo: 17_000,                   rate: 0.05   },
       { upTo: Number.POSITIVE_INFINITY, rate: 0.0575 },
+    ],
+  },
+
+  // RI: 3 brackets, identical thresholds for single and MFJ (RI does not
+  // double brackets for joint filers). 2025 thresholds per RI Division of
+  // Taxation inflation adjustments: 3.75% ≤ $79,900, 4.75% to $181,650, 5.99% above.
+  ri: {
+    single: [
+      { upTo: 79_900,                   rate: 0.0375 },
+      { upTo: 181_650,                  rate: 0.0475 },
+      { upTo: Number.POSITIVE_INFINITY, rate: 0.0599 },
+    ],
+    married: [
+      { upTo: 79_900,                   rate: 0.0375 },
+      { upTo: 181_650,                  rate: 0.0475 },
+      { upTo: Number.POSITIVE_INFINITY, rate: 0.0599 },
     ],
   },
 

@@ -1,0 +1,2 @@
+{ "extends": "./tsconfig.json", "compilerOptions": { "noEmit": true },
+  "include": ["src/components/USMapPreview.tsx","src/lib/states.ts","src/lib/tax.ts","next-env.d.ts"] }

@@ -3,339 +3,158 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  ComposableMap,
-  Geographies,
-  Geography,
-} from "@vnedyalk0v/react19-simple-maps";
+import { ComposableMap, Geographies, Geography } from "@vnedyalk0v/react19-simple-maps";
 import usStates from "@/data/us-states.json";
+import { STATES, type StateCode } from "@/lib/states";
+import { estimateNetBreakdown, type FilingStatus } from "@/lib/tax";
 
-type FeaturedState = {
-  id: string;
-  name: string;
-  href: string;
-  notes: {
-    fire: string;
-    affordability: string;
-    taxes: string;
-    cost: string;
-  };
-};
+const SALARIES = [75000, 100000, 150000, 250000];
+const NO_DATA = "#182235";
 
-type FilterKey = "fire" | "affordability" | "taxes" | "cost";
+function money(n: number, digits = 0) {
+  if (!Number.isFinite(n)) return "—";
+  return n.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: digits, minimumFractionDigits: digits });
+}
 
-const allStatesById: Record<string, FeaturedState> = {
-  "06": {
-    id: "06",
-    name: "California",
-    href: "/best-states-for-fire/california",
-    notes: {
-      fire: "Explore a high-cost, high-income state with major FIRE tradeoffs.",
-      affordability: "California is less affordability-driven, but useful as a comparison baseline.",
-      taxes: "California stands out more for high-tax comparison than low-tax appeal.",
-      cost: "A strong benchmark for high housing and higher overall living costs.",
-    },
-  },
-  "08": {
-    id: "08",
-    name: "Colorado",
-    href: "/best-states-for-fire/colorado",
-    notes: {
-      fire: "Colorado blends lifestyle appeal with solid long-term FIRE interest.",
-      affordability: "Colorado is more balanced than cheap, with some cities still under pressure.",
-      taxes: "Colorado can be useful in tax comparisons without being a no-tax state.",
-      cost: "A good middle-ground state when comparing cost pressure and quality of life.",
-    },
-  },
-  "12": {
-    id: "12",
-    name: "Florida",
-    href: "/best-states-for-fire/florida",
-    notes: {
-      fire: "Florida remains a major retirement and FIRE destination.",
-      affordability: "Some areas are rising in cost, but the state remains important in relocation planning.",
-      taxes: "Florida is a major no-state-income-tax destination.",
-      cost: "Florida offers mixed cost-of-living outcomes depending on metro and housing trends.",
-    },
-  },
-  "13": {
-    id: "13",
-    name: "Georgia",
-    href: "/best-states-for-fire/georgia",
-    notes: {
-      fire: "Georgia is a strong Southeast option for FIRE-focused movers.",
-      affordability: "Georgia stands out for relatively accessible living costs in key metros.",
-      taxes: "Georgia is more moderate on taxes than headline low-tax states.",
-      cost: "Useful for comparing Southeast city costs against larger coastal metros.",
-    },
-  },
-  "36": {
-    id: "36",
-    name: "New York",
-    href: "/best-states-for-fire/new-york",
-    notes: {
-      fire: "New York is a strong high-cost benchmark for relocation and FIRE tradeoff analysis.",
-      affordability: "New York is typically a baseline for higher cost pressure.",
-      taxes: "New York is better used as a higher-tax comparison state.",
-      cost: "A strong benchmark for expensive housing, taxes, and living costs.",
-    },
-  },
-  "37": {
-    id: "37",
-    name: "North Carolina",
-    href: "/best-states-for-fire/north-carolina",
-    notes: {
-      fire: "North Carolina stands out for affordability, taxes, and FIRE-focused movers.",
-      affordability: "One of the strongest affordability-oriented relocation targets on the site.",
-      taxes: "North Carolina is often attractive for moderate tax comparisons.",
-      cost: "A strong cost-of-living option compared with many larger coastal markets.",
-    },
-  },
-  "48": {
-    id: "48",
-    name: "Texas",
-    href: "/best-states-for-fire/texas",
-    notes: {
-      fire: "Texas is one of the most popular relocation targets for higher earners and FIRE planners.",
-      affordability: "Texas remains a major affordability and income-tradeoff destination.",
-      taxes: "Texas stands out for no state income tax.",
-      cost: "Texas often compares well on cost versus income, depending on city and property taxes.",
-    },
-  },
-  "53": {
-    id: "53",
-    name: "Washington",
-    href: "/best-states-for-fire/washington",
-    notes: {
-      fire: "Washington is important for high-salary FIRE planning and relocation tradeoffs.",
-      affordability: "Washington is less affordability-led, but still useful in west coast comparisons.",
-      taxes: "Washington stands out for no state income tax.",
-      cost: "Washington offers a strong high-income versus high-cost comparison dynamic.",
-    },
-  },
-};
+const NAME_TO_CODE = new Map<string, StateCode>(STATES.map((s) => [s.name, s.code]));
+const CODE_TO_NAME = new Map<StateCode, string>(STATES.map((s) => [s.code, s.name]));
 
-const filterConfig: Record<
-  FilterKey,
-  {
-    label: string;
-    helperTitle: string;
-    helperBody: string;
-    stateIds: string[];
-  }
-> = {
-  fire: {
-    label: "FIRE",
-    helperTitle: "Viewing: FIRE",
-    helperBody:
-      "Highlighted states currently stand out for FIRE-focused relocation, retirement flexibility, or long-term financial independence planning.",
-    stateIds: ["37", "48", "12", "13", "08", "53"],
-  },
-  affordability: {
-    label: "Affordability",
-    helperTitle: "Viewing: Affordability",
-    helperBody:
-      "Highlighted states currently stand out for relative affordability, lower living costs, or better income-to-expense tradeoffs.",
-    stateIds: ["37", "48", "13", "12", "08"],
-  },
-  taxes: {
-    label: "Taxes",
-    helperTitle: "Viewing: Taxes",
-    helperBody:
-      "Highlighted states currently stand out for lower state tax burden or no state income tax.",
-    stateIds: ["48", "12", "53", "37"],
-  },
-  cost: {
-    label: "Cost of Living",
-    helperTitle: "Viewing: Cost of Living",
-    helperBody:
-      "Highlighted states currently stand out in cost-of-living comparisons, whether as lower-cost destinations or important high-cost benchmarks.",
-    stateIds: ["37", "48", "13", "12", "06", "36"],
-  },
-};
-
-const featuredCities = [
-  { name: "Charlotte", href: "/cost-of-living/charlotte-nc" },
-  { name: "Raleigh", href: "/fire-in/raleigh-nc" },
-  { name: "Austin", href: "/fire-in/austin-tx" },
-  { name: "Denver", href: "/fire-in/denver-co" },
-];
+type StateStat = { code: StateCode; name: string; stateTax: number; effRate: number; takeHome: number };
 
 export default function USMapPreview() {
   const router = useRouter();
-  const [activeFilter, setActiveFilter] = useState<FilterKey>("fire");
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [salary, setSalary] = useState(100000);
+  const [filing, setFiling] = useState<FilingStatus>("single");
+  const [hovered, setHovered] = useState<StateCode | null>(null);
 
-  const activeConfig = filterConfig[activeFilter];
-  const activeStateIds = new Set(activeConfig.stateIds);
+  const { byCode, maxRate, lowest, highest } = useMemo(() => {
+    const byCode = new Map<StateCode, StateStat>();
+    for (const s of STATES) {
+      const b = estimateNetBreakdown({ grossAnnual: salary, state: s.code, filing, k401Pct: 0 });
+      const effRate = salary > 0 ? b.state / salary : 0;
+      byCode.set(s.code, { code: s.code, name: s.name, stateTax: b.state, effRate, takeHome: salary - b.totalTax });
+    }
+    const all = [...byCode.values()];
+    const maxRate = Math.max(0.0001, ...all.map((s) => s.effRate));
+    const sorted = [...all].sort((a, b) => a.effRate - b.effRate);
+    return { byCode, maxRate, lowest: sorted.slice(0, 5), highest: sorted.slice(-5).reverse() };
+  }, [salary, filing]);
 
-  const visibleStates = useMemo(
-    () =>
-      activeConfig.stateIds
-        .map((id) => allStatesById[id])
-        .filter(Boolean),
-    [activeConfig.stateIds]
-  );
+  function colorFor(code: StateCode | undefined) {
+    if (!code) return NO_DATA;
+    const stat = byCode.get(code);
+    if (!stat) return NO_DATA;
+    const t = Math.max(0, Math.min(1, stat.effRate / maxRate));
+    // Single-hue blue sequential: pale (low tax) -> deep navy (high tax).
+    const light = 88 - 56 * t;
+    const sat = 55 + 12 * t;
+    return `hsl(212, ${sat}%, ${light}%)`;
+  }
 
-  const hoveredState = useMemo(() => {
-    if (!hoveredId) return null;
-    return allStatesById[hoveredId] ?? null;
-  }, [hoveredId]);
+  const hoveredStat = hovered ? byCode.get(hovered) : null;
+  const openPaycheck = (code: StateCode) => router.push(`/paycheck-calculator?salary=${salary}&state=${code}`);
 
   return (
     <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]">
       <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
         <div>
           <div className="space-y-3">
-            <h2 className="text-2xl font-semibold tracking-tight text-white">
-              Explore by Map
-            </h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-white">Take-home pay by state</h2>
             <p className="max-w-2xl text-sm leading-6 text-slate-300">
-              Switch views to explore featured states by FIRE potential,
-              affordability, taxes, and cost-of-living tradeoffs.
+              State income tax on a {money(salary)} {filing === "married" ? "married" : "single"}-filer salary, computed live for all 50 states. Deeper blue means more tax; click a state to open it in the paycheck calculator.
             </p>
           </div>
 
-          {/* Filter pills */}
-          <div className="mt-5 flex flex-wrap gap-3">
-            {(Object.keys(filterConfig) as FilterKey[]).map((filter) => {
-              const isActive = activeFilter === filter;
-              return (
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <div className="inline-flex overflow-hidden rounded-full border border-white/10 bg-white/[0.04]">
+              {SALARIES.map((s) => (
                 <button
-                  key={filter}
+                  key={s}
                   type="button"
-                  onClick={() => {
-                    setActiveFilter(filter);
-                    setHoveredId(null);
-                  }}
-                  className={[
-                    "inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium transition",
-                    isActive
-                      ? "border-emerald-400/30 bg-emerald-400/15 text-emerald-200"
-                      : "border-white/10 bg-white/[0.04] text-slate-300 hover:bg-white/[0.08]",
-                  ].join(" ")}
+                  onClick={() => setSalary(s)}
+                  className={`px-3.5 py-2 text-sm font-medium transition ${salary === s ? "bg-emerald-400 text-slate-950" : "text-slate-300 hover:bg-white/[0.08]"}`}
                 >
-                  {filterConfig[filter].label}
+                  ${s / 1000}k
                 </button>
-              );
-            })}
+              ))}
+            </div>
+            <div className="inline-flex overflow-hidden rounded-full border border-white/10 bg-white/[0.04]">
+              {(["single", "married"] as FilingStatus[]).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFiling(f)}
+                  className={`px-3.5 py-2 text-sm font-medium capitalize transition ${filing === f ? "bg-emerald-400 text-slate-950" : "text-slate-300 hover:bg-white/[0.08]"}`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/80 p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="text-sm font-medium text-slate-300">
-                Explore featured states on the map
-              </div>
-              <div className="text-xs text-slate-500">
-                {filterConfig[activeFilter].label} view
-              </div>
-            </div>
-
             <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900 to-slate-950 p-4">
               <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl">
-                <ComposableMap
-                  projection="geoAlbersUsa"
-                  projectionConfig={{ scale: 1000 }}
-                  width={980}
-                  height={600}
-                  className="h-auto w-full"
-                >
-                  <Geographies geography={usStates as any}>
-  {({ geographies }) =>
-    geographies.map((geo, index) => {
-      const stateId = String(geo.id).padStart(2, "0");
-      const stateName = String(geo.properties?.name ?? "");
-      const state = allStatesById[stateId];
-      const isHighlighted = activeStateIds.has(stateId);
-      const isHovered = hoveredId === stateId;
-
-      return (
-        <Geography
-          key={`${geo.rsmKey}-${stateId}-${index}`}
-          geography={geo}
-          onMouseEnter={() => setHoveredId(stateId)}
-          onMouseLeave={() => setHoveredId(null)}
-          onFocus={() => setHoveredId(stateId)}
-          onBlur={() => setHoveredId(null)}
-          onClick={() => {
-            if (state && isHighlighted) router.push(state.href);
-          }}
-          tabIndex={0}
-          style={{
-            default: {
-              fill: isHighlighted ? "#10b981" : "#182235",
-              stroke: isHighlighted ? "#d1fae5" : "#334155",
-              strokeWidth: isHovered ? 1.5 : 0.8,
-              outline: "none",
-              cursor: state && isHighlighted ? "pointer" : "default",
-              opacity: isHighlighted ? 1 : 0.9,
-            },
-            hover: {
-              fill: isHighlighted ? "#2dd4bf" : "#22304a",
-              stroke: isHighlighted ? "#f0fdf4" : "#475569",
-              strokeWidth: isHighlighted ? 1.8 : 1,
-              outline: "none",
-              cursor: state && isHighlighted ? "pointer" : "default",
-              opacity: 1,
-            },
-            pressed: {
-              fill: isHighlighted ? "#6ee7b7" : "#22304a",
-              stroke: isHighlighted ? "#f0fdf4" : "#475569",
-              strokeWidth: 1.8,
-              outline: "none",
-            },
-          }}
-          aria-label={state ? `Explore ${state.name}` : stateName || "State"}
-        />
-      );
-    })
-  }
-</Geographies>
+                <ComposableMap projection="geoAlbersUsa" projectionConfig={{ scale: 1000 }} width={980} height={560} className="h-auto w-full">
+                  <Geographies geography={usStates as unknown as object}>
+                    {({ geographies }: { geographies: Array<{ rsmKey: string; id: string | number; properties?: { name?: string } }> }) =>
+                      geographies.map((geo, index) => {
+                        const name = String(geo.properties?.name ?? "");
+                        const code = NAME_TO_CODE.get(name);
+                        const isHovered = code != null && hovered === code;
+                        return (
+                          <Geography
+                            key={`${geo.rsmKey}-${index}`}
+                            geography={geo}
+                            onMouseEnter={() => code && setHovered(code)}
+                            onMouseLeave={() => setHovered(null)}
+                            onFocus={() => code && setHovered(code)}
+                            onBlur={() => setHovered(null)}
+                            onClick={() => code && openPaycheck(code)}
+                            tabIndex={code ? 0 : -1}
+                            aria-label={code ? `${name} state income tax` : name}
+                            style={{
+                              default: { fill: colorFor(code), stroke: "#0f172a", strokeWidth: isHovered ? 1.6 : 0.6, outline: "none", cursor: code ? "pointer" : "default" },
+                              hover: { fill: colorFor(code), stroke: "#f8fafc", strokeWidth: 1.6, outline: "none", cursor: code ? "pointer" : "default", opacity: 0.92 },
+                              pressed: { fill: colorFor(code), stroke: "#f8fafc", strokeWidth: 1.6, outline: "none" },
+                            }}
+                          />
+                        );
+                      })
+                    }
+                  </Geographies>
                 </ComposableMap>
 
-                <div className="mt-4 flex flex-wrap gap-3 text-xs">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-slate-300">
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                    Highlighted in this view
-                  </div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-slate-300">
-                    <span className="h-2.5 w-2.5 rounded-full bg-slate-700" />
-                    Not highlighted in this view
-                  </div>
+                {/* Legend */}
+                <div className="mt-4 flex items-center gap-3 text-xs text-slate-400">
+                  <span>Less tax</span>
+                  <span className="h-2.5 flex-1 rounded-full" style={{ background: "linear-gradient(90deg, hsl(212,55%,88%), hsl(212,61%,60%), hsl(212,67%,32%))" }} />
+                  <span>More tax</span>
+                  <span className="ml-2 text-slate-500">up to {(maxRate * 100).toFixed(1)}%</span>
                 </div>
 
-                <div className="mt-4 min-h-[120px] rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                  {hoveredState && activeStateIds.has(hoveredState.id) ? (
+                {/* Hover detail */}
+                <div className="mt-4 min-h-[104px] rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                  {hoveredStat ? (
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                       <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <div className="text-base font-semibold text-white">
-                            {hoveredState.name}
-                          </div>
-                          <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-200">
-                            {filterConfig[activeFilter].label}
-                          </span>
-                        </div>
-
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-                          {hoveredState.notes[activeFilter]}
+                        <div className="text-base font-semibold text-white">{hoveredStat.name}</div>
+                        <p className="mt-2 text-sm leading-6 text-slate-300">
+                          State income tax: <span className="font-semibold text-white">{money(hoveredStat.stateTax)}</span> ({(hoveredStat.effRate * 100).toFixed(2)}% of salary) · take-home after all taxes: <span className="font-semibold text-white">{money(hoveredStat.takeHome)}</span>
                         </p>
                       </div>
-
                       <Link
-                        href={hoveredState.href}
-                        className="inline-flex items-center rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:bg-emerald-400/20"
+                        href={`/paycheck-calculator?salary=${salary}&state=${hoveredStat.code}`}
+                        className="inline-flex flex-shrink-0 items-center rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:bg-emerald-400/20"
                       >
-                        Explore {hoveredState.name} →
+                        Open in paycheck calculator →
                       </Link>
                     </div>
                   ) : (
                     <div>
-                      <div className="text-base font-semibold text-white">
-                        {activeConfig.helperTitle}
-                      </div>
+                      <div className="text-base font-semibold text-white">Hover a state</div>
                       <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-                        {activeConfig.helperBody}
+                        See its state income tax and take-home on a {money(salary)} salary. The nine palest states have no state income tax.
                       </p>
                     </div>
                   )}
@@ -347,74 +166,34 @@ export default function USMapPreview() {
 
         <div className="space-y-6">
           <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-5">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-white">
-                Featured States
-              </h3>
-              <p className="mt-1 text-sm leading-6 text-slate-400">
-                States currently highlighted in the selected map view.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              {visibleStates.map((state) => (
-                <Link
-                  key={state.href}
-                  href={state.href}
-                  className="block rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-emerald-300/40 hover:bg-white/[0.05]"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="font-semibold text-white">{state.name}</div>
-                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-200">
-                      {filterConfig[activeFilter].label}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">
-                    {state.notes[activeFilter]}
-                  </p>
-                </Link>
+            <h3 className="text-lg font-semibold text-white">Lowest state income tax</h3>
+            <p className="mt-1 text-sm leading-6 text-slate-400">On a {money(salary)} {filing} salary.</p>
+            <div className="mt-4 space-y-2">
+              {lowest.map((s) => (
+                <button key={s.code} type="button" onClick={() => openPaycheck(s.code)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-left transition hover:border-sky-300/40 hover:bg-white/[0.06]">
+                  <span className="font-medium text-white">{s.name}</span>
+                  <span className="text-sm font-semibold text-sky-300">{s.stateTax <= 0.5 ? "No income tax" : `${money(s.stateTax)} · ${(s.effRate * 100).toFixed(1)}%`}</span>
+                </button>
               ))}
             </div>
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-5">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-white">
-                Featured Cities
-              </h3>
-              <p className="mt-1 text-sm leading-6 text-slate-400">
-                Quick-entry city pages for cost of living and FIRE planning.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              {featuredCities.map((city) => (
-                <Link
-                  key={city.href}
-                  href={city.href}
-                  className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:border-emerald-300/40 hover:bg-white/[0.07]"
-                >
-                  {city.name}
-                </Link>
+            <h3 className="text-lg font-semibold text-white">Highest state income tax</h3>
+            <p className="mt-1 text-sm leading-6 text-slate-400">On a {money(salary)} {filing} salary.</p>
+            <div className="mt-4 space-y-2">
+              {highest.map((s) => (
+                <button key={s.code} type="button" onClick={() => openPaycheck(s.code)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-left transition hover:border-rose-300/40 hover:bg-white/[0.06]">
+                  <span className="font-medium text-white">{s.name}</span>
+                  <span className="text-sm font-semibold text-rose-300">{money(s.stateTax)} · {(s.effRate * 100).toFixed(1)}%</span>
+                </button>
               ))}
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-            <h3 className="text-lg font-semibold text-white">
-              Explore everything
-            </h3>
-            <p className="mt-2 text-sm leading-6 text-slate-400">
-              Browse calculators, city guides, comparisons, and FIRE tools from
-              the main hub.
-            </p>
-            <Link
-              href="/explore"
-              className="mt-4 inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]"
-            >
-              Open Explore Hub →
-            </Link>
-          </div>
+          <p className="px-1 text-xs leading-5 text-slate-500">
+            Estimates use 2025 state income tax and the standard deduction, single or married filing jointly. They don&apos;t include local city taxes, credits, or deductions. Not tax advice.
+          </p>
         </div>
       </div>
     </section>
