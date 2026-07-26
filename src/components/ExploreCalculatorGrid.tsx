@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 type Category = "Relocation" | "Housing" | "Taxes" | "FIRE" | "Retirement" | "International";
-type Calc = { href: string; title: string; desc: string; cat: Category; isNew?: boolean };
+type Calc = { href: string; title: string; desc: string; cat: Category };
 
 const CAT_COLOR: Record<Category, string> = {
   Relocation: "#34d399",
@@ -23,28 +23,28 @@ const CALCULATORS: Calc[] = [
   { href: "/one-income-relocation-calculator", title: "One vs Two Income Relocation", desc: "Can you afford the move on one income? Housing burden, taxes, and the second income needed.", cat: "Relocation" },
   // Housing
   { href: "/mortgage-calculator", title: "Mortgage Calculator", desc: "Monthly payment, cash to close, DTI, rent-vs-buy break-even, and amortization.", cat: "Housing" },
-  { href: "/rent-vs-buy-calculator", title: "Rent vs. Buy Calculator", desc: "Compare buying vs. renting-and-investing by net worth, with a break-even year.", cat: "Housing", isNew: true },
+  { href: "/rent-vs-buy-calculator", title: "Rent vs. Buy Calculator", desc: "Compare buying vs. renting-and-investing by net worth, with a break-even year.", cat: "Housing" },
   { href: "/housing-affordability-calculator", title: "Housing Affordability", desc: "How much rent or house can you afford? 30% rent rule and 28/36 DTI guidelines.", cat: "Housing" },
   // Taxes
-  { href: "/paycheck-calculator", title: "Paycheck Calculator", desc: "Take-home pay after federal, Social Security, Medicare, and state (and city) taxes.", cat: "Taxes", isNew: true },
-  { href: "/income-tax-calculator", title: "Income Tax Calculator", desc: "Federal tax, effective and marginal rates, and a bracket-by-bracket breakdown.", cat: "Taxes", isNew: true },
+  { href: "/paycheck-calculator", title: "Paycheck Calculator", desc: "Take-home pay after federal, Social Security, Medicare, and state (and city) taxes.", cat: "Taxes" },
+  { href: "/income-tax-calculator", title: "Income Tax Calculator", desc: "Federal tax, effective and marginal rates, and a bracket-by-bracket breakdown.", cat: "Taxes" },
   // FIRE
   { href: "/fire-calculator", title: "FIRE Calculator", desc: "Estimate your FIRE age and financial-independence number.", cat: "FIRE" },
   { href: "/fire-number-calculator", title: "FIRE Number Calculator", desc: "The portfolio you need to retire early, from your spending and withdrawal rate.", cat: "FIRE" },
   { href: "/lean-fire-calculator", title: "Lean FIRE Calculator", desc: "Retire early on a smaller budget and a lower target portfolio.", cat: "FIRE" },
   { href: "/barista-fire-calculator", title: "Barista FIRE Calculator", desc: "Semi-retire with part-time income covering part of your spending.", cat: "FIRE" },
   { href: "/coast-fire-calculator", title: "Coast FIRE Calculator", desc: "The amount that grows into your FIRE number with no further contributions.", cat: "FIRE" },
-  { href: "/chubby-fire-calculator", title: "Chubby FIRE Calculator", desc: "A comfortable early retirement (roughly $100k–$150k/yr).", cat: "FIRE", isNew: true },
-  { href: "/fat-fire-calculator", title: "Fat FIRE Calculator", desc: "Retire early with a luxury budget ($200k+/yr).", cat: "FIRE", isNew: true },
+  { href: "/chubby-fire-calculator", title: "Chubby FIRE Calculator", desc: "A comfortable early retirement (roughly $100k–$150k/yr).", cat: "FIRE" },
+  { href: "/fat-fire-calculator", title: "Fat FIRE Calculator", desc: "Retire early with a luxury budget ($200k+/yr).", cat: "FIRE" },
   { href: "/savings-rate-for-fire", title: "Savings Rate for FIRE", desc: "How your savings rate maps to years until financial independence.", cat: "FIRE" },
   // Retirement
-  { href: "/retirement-calculator", title: "Retirement Calculator", desc: "Project your savings with a live balance chart and a Monte Carlo range.", cat: "Retirement", isNew: true },
-  { href: "/401k-calculator", title: "401(k) Calculator", desc: "Employer match, this year's tax savings, and projected balance with 2025 limits.", cat: "Retirement", isNew: true },
-  { href: "/hsa-calculator", title: "HSA Calculator", desc: "2025 limits, real federal + FICA + state tax savings, and tax-free growth.", cat: "Retirement", isNew: true },
-  { href: "/retirement-withdrawal-calculator", title: "Retirement Withdrawal", desc: "How long will your money last, or your safe withdrawal, with sequence-of-returns risk.", cat: "Retirement", isNew: true },
-  { href: "/rmd-calculator", title: "RMD Calculator", desc: "Your required minimum distribution from the IRS Uniform Lifetime Table.", cat: "Retirement", isNew: true },
-  { href: "/roth-conversion-calculator", title: "Roth Conversion Calculator", desc: "Convert now or pay tax later? Tax due, both paths, and break-even rate.", cat: "Retirement", isNew: true },
-  { href: "/investment-calculator", title: "Investment Calculator", desc: "Compound growth from a lump sum plus contributions, with a Monte Carlo range.", cat: "Retirement", isNew: true },
+  { href: "/retirement-calculator", title: "Retirement Calculator", desc: "Project your savings with a live balance chart and a Monte Carlo range.", cat: "Retirement" },
+  { href: "/401k-calculator", title: "401(k) Calculator", desc: "Employer match, this year's tax savings, and projected balance with 2025 limits.", cat: "Retirement" },
+  { href: "/hsa-calculator", title: "HSA Calculator", desc: "2025 limits, real federal + FICA + state tax savings, and tax-free growth.", cat: "Retirement" },
+  { href: "/retirement-withdrawal-calculator", title: "Retirement Withdrawal", desc: "How long will your money last, or your safe withdrawal, with sequence-of-returns risk.", cat: "Retirement" },
+  { href: "/rmd-calculator", title: "RMD Calculator", desc: "Your required minimum distribution from the IRS Uniform Lifetime Table.", cat: "Retirement" },
+  { href: "/roth-conversion-calculator", title: "Roth Conversion Calculator", desc: "Convert now or pay tax later? Tax due, both paths, and break-even rate.", cat: "Retirement" },
+  { href: "/investment-calculator", title: "Investment Calculator", desc: "Compound growth from a lump sum plus contributions, with a Monte Carlo range.", cat: "Retirement" },
   // International
   { href: "/international-relocation", title: "International Relocation", desc: "Compare taxes, rent, and living costs across countries.", cat: "International" },
   { href: "/europe-relocation-calculator", title: "Europe Relocation", desc: "Compare Lisbon, Porto, London, and more.", cat: "International" },
@@ -135,11 +135,6 @@ export default function ExploreCalculatorGrid() {
                   <span className="mt-0.5 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full" style={{ background: CAT_COLOR[c.cat] }} />
                   <span className="text-base font-semibold text-white transition group-hover:text-emerald-200">{c.title}</span>
                 </div>
-                {c.isNew && (
-                  <span className="flex-shrink-0 rounded-full bg-emerald-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-300 ring-1 ring-emerald-400/30">
-                    New
-                  </span>
-                )}
               </div>
               <p className="mt-2 text-sm leading-6 text-slate-400">{c.desc}</p>
               <span className="mt-auto pt-3 text-xs font-medium text-slate-500">{c.cat}</span>
