@@ -53,7 +53,7 @@ const CALCULATORS: Calc[] = [
   { href: "/south-america-relocation-calculator", title: "South America Relocation", desc: "Compare Medellín, Bogotá, Buenos Aires, Santiago, and more.", cat: "International" },
 ];
 
-const CATEGORIES: (Category | "All")[] = ["All", "Relocation", "Housing", "Taxes", "FIRE", "Retirement", "International"];
+const CATEGORIES: (Category | "All")[] = ["All", "FIRE", "Housing", "International", "Relocation", "Retirement", "Taxes"];
 
 export default function ExploreCalculatorGrid() {
   const [query, setQuery] = useState("");
@@ -65,7 +65,7 @@ export default function ExploreCalculatorGrid() {
       (c) =>
         (cat === "All" || c.cat === cat) &&
         (!s || c.title.toLowerCase().includes(s) || c.desc.toLowerCase().includes(s) || c.cat.toLowerCase().includes(s)),
-    );
+    ).sort((a, b) => a.title.localeCompare(b.title));
   }, [query, cat]);
 
   return (

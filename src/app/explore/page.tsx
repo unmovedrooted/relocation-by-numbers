@@ -42,7 +42,7 @@ type HubSection = {
   ctaLabel?: string;
 };
 
-const sections: HubSection[] = [
+export const sections: HubSection[] = [
   {
     title: "Relocation Budget Calculators",
     description:
@@ -279,57 +279,6 @@ const sections: HubSection[] = [
   },
 ];
 
-function SectionCard({ section }: { section: HubSection }) {
-  return (
-    <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-semibold tracking-tight text-white">
-            {section.title}
-          </h2>
-          {section.description ? (
-            <p className="max-w-3xl text-sm leading-6 text-slate-300">
-              {section.description}
-            </p>
-          ) : null}
-        </div>
-
-        {section.ctaHref && section.ctaLabel ? (
-          <Link
-            href={section.ctaHref}
-            className="inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:bg-emerald-400/20"
-          >
-            {section.ctaLabel} →
-          </Link>
-        ) : null}
-      </div>
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {section.links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="group rounded-2xl border border-white/10 bg-slate-900/70 p-4 transition hover:-translate-y-0.5 hover:border-emerald-300/40 hover:bg-slate-900"
-          >
-            <div className="text-base font-semibold text-white transition group-hover:text-emerald-200">
-              {link.title}
-            </div>
-            {link.description ? (
-              <p className="mt-2 text-sm leading-6 text-slate-400">
-                {link.description}
-              </p>
-            ) : (
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                Open this page →
-              </p>
-            )}
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export default function ExplorePage() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -397,12 +346,6 @@ export default function ExplorePage() {
               />
             </section>
           ) : null}
-
-          <div className="space-y-8">
-            {sections.map((section) => (
-              <SectionCard key={section.title} section={section} />
-            ))}
-          </div>
 
           <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
             <div className="max-w-4xl space-y-4">
