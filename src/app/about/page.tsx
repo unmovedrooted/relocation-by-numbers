@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "Learn about Relocation by Numbers and its planning tools for comparing taxes, housing, cost of living, relocation, and financial independence.",
+  alternates: {
+    canonical: "https://www.relocationbynumbers.com/about",
+  },
+};
 
 export default function AboutPage() {
   return (

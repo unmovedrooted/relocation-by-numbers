@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description:
+    "Learn how Relocation by Numbers handles calculator inputs, shared URLs, analytics, advertising, and optional AI-generated FIRE reports.",
+  alternates: {
+    canonical: "https://www.relocationbynumbers.com/privacy",
+  },
+};
 
 export default function PrivacyPage() {
   return (

@@ -8,13 +8,13 @@ export const metadata: Metadata = {
   description:
     "Compare taxes, rent, living costs, and take-home pay across 20+ cities worldwide. Estimate your moving budget for Lisbon, London, Tokyo, Dubai, Bangkok, Singapore, and more.",
   alternates: {
-    canonical: "https://www.relocationbynumbers.com/international-relocation-calculator",
+    canonical: "https://www.relocationbynumbers.com/international-relocation",
   },
   openGraph: {
     title: "International Relocation Calculator | Cost, Taxes, Rent & Budget by City",
     description:
       "Compare taxes, rent, living costs, and take-home pay across 20+ cities worldwide. Estimate your moving budget for Lisbon, London, Tokyo, Dubai, Bangkok, Singapore, and more.",
-    url: "https://www.relocationbynumbers.com/international-relocation-calculator",
+    url: "https://www.relocationbynumbers.com/international-relocation",
     siteName: "Relocation by Numbers",
     type: "website",
   },

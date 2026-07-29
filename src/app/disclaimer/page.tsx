@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Disclaimer",
+  description:
+    "Review the limitations and planning assumptions for the calculators and educational content on Relocation by Numbers.",
+  alternates: {
+    canonical: "https://www.relocationbynumbers.com/disclaimer",
+  },
+};
 
 export default function DisclaimerPage() {
   return (

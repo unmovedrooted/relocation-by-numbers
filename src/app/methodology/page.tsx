@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Methodology & Data Sources | Relocation by Numbers",
+  title: "Methodology & Data Sources",
   description:
     "Learn how Relocation by Numbers estimates taxes, housing, cost of living, affordability, relocation budgets, and FIRE timelines across cities, states, and international destinations.",
+  alternates: {
+    canonical: "https://www.relocationbynumbers.com/methodology",
+  },
 };
 
 export default function MethodologyPage() {

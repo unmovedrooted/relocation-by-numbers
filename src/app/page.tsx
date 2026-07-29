@@ -8,13 +8,13 @@ export const metadata: Metadata = {
   description:
     "Compare take-home pay, income taxes, housing costs, and real affordability across all 50 states. See how far your salary goes before you move.",
   alternates: {
-    canonical: "https://www.relocationbynumbers.com/relocation-calculator",
+    canonical: "https://www.relocationbynumbers.com/",
   },
   openGraph: {
     title: "Relocation Calculator by State | Compare Salary, Taxes & Cost of Living",
     description:
       "Compare take-home pay, income taxes, housing costs, and real affordability across all 50 states. See how far your salary goes before you move.",
-    url: "https://www.relocationbynumbers.com/relocation-calculator",
+    url: "https://www.relocationbynumbers.com/",
     siteName: "Relocation by Numbers",
     type: "website",
   },

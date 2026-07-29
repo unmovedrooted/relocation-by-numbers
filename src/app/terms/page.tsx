@@ -1,5 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
+
+export const metadata: Metadata = {
+  title: "Terms of Use",
+  description:
+    "Review the terms governing use of the calculators, comparisons, and educational content on Relocation by Numbers.",
+  alternates: {
+    canonical: "https://www.relocationbynumbers.com/terms",
+  },
+};
 
 export default function TermsPage() {
   return (

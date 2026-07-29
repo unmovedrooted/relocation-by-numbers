@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { findCity } from "@/lib/cities";
 import { STATES } from "@/lib/states";
+import { getAllPosts } from "@/lib/posts";
 import {
   ALLOWED_FIRE_CITY_PAGES,
   ALLOWED_CITY_DETAIL_PAGES,
@@ -20,6 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/disclaimer`, priority: 0.4, changeFrequency: "yearly" as const },
     { url: `${baseUrl}/privacy`, priority: 0.4, changeFrequency: "yearly" as const },
     { url: `${baseUrl}/terms`, priority: 0.4, changeFrequency: "yearly" as const },
+    { url: `${baseUrl}/methodology`, priority: 0.5, changeFrequency: "monthly" as const },
   ].map((page) => ({
     ...page,
     lastModified: now,
@@ -152,6 +154,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }));
 
 
+  const moveToPages = STATES
+    .filter((state) => ALLOWED_STATE_CODES.includes(state.code))
+    .map((state) => ({
+      url: `${baseUrl}/move-to/${state.code}`,
+      lastModified: now,
+      priority: 0.6,
+      changeFrequency: "monthly" as const,
+    }));
+
+  const salaryNeededPages = detailCities.map((city) => ({
+    url: `${baseUrl}/salary-needed-in/${city.id}`,
+    lastModified: now,
+    priority: 0.6,
+    changeFrequency: "monthly" as const,
+  }));
+
+  const blogPages = getAllPosts().map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: post.date ? new Date(post.date) : now,
+    priority: 0.6,
+    changeFrequency: "monthly" as const,
+  }));
+
   return [
     ...corePages,
     ...calculatorPages,
@@ -163,6 +188,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...costOfLivingPages,
     ...bestCitiesFirePages,
     ...bestStatesFirePages,
-  
+    ...moveToPages,
+    ...salaryNeededPages,
+    ...blogPages,
   ];
 }
