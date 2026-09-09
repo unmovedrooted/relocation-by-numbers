@@ -126,7 +126,7 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <PwaRegistration />
-          {GA_MEASUREMENT_ID ? (
+          {process.env.NODE_ENV === "production" && GA_MEASUREMENT_ID ? (
             <>
               <Script
                 src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
@@ -144,12 +144,12 @@ export default function RootLayout({
             </>
           ) : null}
 
-          <Script
+          {process.env.NODE_ENV === "production" && <Script
             async
             src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5257549146198249"
             crossOrigin="anonymous"
             strategy="beforeInteractive"
-          />
+          />}
 
           <div className="flex min-h-screen flex-col">
             <header className="relative z-[60] border-b border-slate-200 bg-white backdrop-blur dark:border-slate-800 dark:bg-slate-950">

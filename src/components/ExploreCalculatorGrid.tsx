@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
+import { isLocalRetirementPreview } from "@/lib/retirementPlan/preview";
 
 type Category = "Relocation" | "Housing" | "Taxes" | "FIRE" | "Retirement" | "International";
 type Calc = { href: string; title: string; desc: string; cat: Category };
@@ -53,20 +54,42 @@ const CALCULATORS: Calc[] = [
   { href: "/south-america-relocation-calculator", title: "South America Relocation", desc: "Compare Medellín, Bogotá, Buenos Aires, Santiago, and more.", cat: "International" },
 ];
 
+// Local-dev-only entries: pages gated behind isLocalRetirementPreview (404 in
+// production), so they must never appear for real visitors on the live site.
+const DEV_ONLY_CALCULATORS: Calc[] = [
+  {
+    href: "/complete-retirement-plan",
+    title: "Complete Retirement Plan (dev preview)",
+    desc: "Local-only preview: RMDs, Social Security, IRA/Roth basis, ESPP sales, and year-by-year cash-flow projections for one or two people.",
+    cat: "Retirement",
+  },
+];
+
 const CATEGORIES: (Category | "All")[] = ["All", "FIRE", "Housing", "International", "Relocation", "Retirement", "Taxes"];
+
+// Host is stable for this document; the server snapshot keeps hydration aligned.
+const subscribeToHost = () => () => {};
+const clientPreviewSnapshot = () => isLocalRetirementPreview(process.env.NODE_ENV, window.location.host);
+const serverPreviewSnapshot = () => false;
 
 export default function ExploreCalculatorGrid() {
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Category | "All">("All");
+  const showDevOnly = useSyncExternalStore(subscribeToHost, clientPreviewSnapshot, serverPreviewSnapshot);
+
+  const allCalculators = useMemo(
+    () => (showDevOnly ? [...CALCULATORS, ...DEV_ONLY_CALCULATORS] : CALCULATORS),
+    [showDevOnly],
+  );
 
   const filtered = useMemo(() => {
     const s = query.trim().toLowerCase();
-    return CALCULATORS.filter(
+    return allCalculators.filter(
       (c) =>
         (cat === "All" || c.cat === cat) &&
         (!s || c.title.toLowerCase().includes(s) || c.desc.toLowerCase().includes(s) || c.cat.toLowerCase().includes(s)),
     ).sort((a, b) => a.title.localeCompare(b.title));
-  }, [query, cat]);
+  }, [query, cat, allCalculators]);
 
   return (
     <section id="calculators" aria-labelledby="all-calcs-heading" className="scroll-mt-24 space-y-5">
@@ -75,7 +98,7 @@ export default function ExploreCalculatorGrid() {
           Find your calculator
         </h2>
         <p className="text-sm leading-6 text-slate-300">
-          {CALCULATORS.length} free calculators, no sign-up. Search or filter by category.
+          {allCalculators.length} free calculators, no sign-up. Search or filter by category.
         </p>
       </div>
 

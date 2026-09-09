@@ -28,7 +28,8 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function sumBrackets(taxable: number, brackets: Bracket[]) {
+// Also used by the retirement planner's explicitly versioned tax-rule adapter.
+export function sumBrackets(taxable: number, brackets: Bracket[]) {
   if (!Number.isFinite(taxable) || taxable <= 0) return 0;
   let tax = 0;
   let prev = 0;
