@@ -7,10 +7,40 @@ import { runRetirementTimeline } from "./timeline";
 
 function input(overrides: Partial<HouseholdTaxInput> = {}): HouseholdTaxInput {
   return { year: 2026, filing: "single", state: "ny", cityId: "nyc-ny", stateTreatment: "verified-resident-location",
-    newYorkContract: "fixed-2026-precredit", people: [{ id: "one", birthDate: "1960-01-01", blind: false, eligibleForSeniorDeduction: true }],
+    newYorkContract: "enacted-law-precredit", people: [{ id: "one", birthDate: "1960-01-01", blind: false, eligibleForSeniorDeduction: true }],
     income: [], accountIncome: taxCharacter(), retirementIncome: [], lossCarryover: { shortTerm: 0, longTerm: 0 }, ...overrides };
 }
 describe("restricted New York annual settlement", () => {
+  it("selects the 2027 rate reduction while preserving NYC tax", () => {
+    expect(newYorkTax(input({ year: 2026 }), 80000, 0).stateTax).toBeCloseTo(3723, 6);
+    for (const year of [2027, 2032, 2033, 2060]) {
+      const result = newYorkTax(input({ year }), 80000, 0);
+      expect(result.stateTax).toBeCloseTo(3651, 6);
+      expect(result.localTax).toBeCloseTo(2665.89, 6);
+    }
+  });
+  it("uses revised recapture amounts from 2027 for both filing statuses", () => {
+    // Single: 2026 base 6039.75 minus .001 * 112000, plus 568 * .247.
+    expect(newYorkTax(input({ year: 2027 }), 120000, 0).stateTax).toBeCloseTo(6068.046, 6);
+    // Married: 2026 tax less .001 * 103950; first recapture increment stays 333.
+    expect(newYorkTax(input({ year: 2027, filing: "married" }), 120000, 0).stateTax).toBeCloseTo(5259.101, 6);
+  });
+  it.each(["single", "married"] as const)("removes the temporary high-income schedule in 2033 for %s", filing => {
+    const before = newYorkTax(input({ year: 2032, filing }), 30000000, 0);
+    const after = newYorkTax(input({ year: 2033, filing }), 30000000, 0);
+    expect(before.stateTax).toBeCloseTo((30000000 - (filing === "single" ? 8000 : 16050)) * .109, 6);
+    expect(after.stateTax).toBeLessThan(before.stateTax);
+    expect(newYorkTax(input({ year: 2033, filing }), 31000000, 0).stateTax - after.stateTax).toBeCloseTo(88200, 6);
+    expect(newYorkTax(input({ year: 2033, filing }), 25000001, 0).stateTax - newYorkTax(input({ year: 2033, filing }), 25000000, 0).stateTax).toBeCloseTo(.0882, 6);
+  });
+  it("keeps exclusions nominal and identifies the enacted schedule", () => {
+    for (const year of [2026, 2027, 2032, 2033, 2126]) {
+      const terms = input({ year, income: [{ ownerId: "one", kind: "pension", pensionType: "private", amount: 30000 }] });
+      expect(newYorkTax(terms, 30000, 0).pensionExclusion).toBe(20000);
+      expect(newYorkTax(terms, 30000, 0).warning).toContain(year >= 2033 ? "2033 onward" : year >= 2027 ? "2027–2032" : "2026");
+    }
+    expect(() => newYorkTax(input({ year: 2025 }), 0, 0)).toThrow(/year/);
+  });
   it("independently computes $80k wages, including NYC in total exactly once", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 80000 }] });
     const ny = estimateHouseholdTax(terms), fl = estimateHouseholdTax({ ...terms, state: "fl", cityId: "" });

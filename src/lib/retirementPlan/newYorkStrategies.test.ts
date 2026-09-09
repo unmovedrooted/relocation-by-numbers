@@ -28,6 +28,8 @@ it("settles and exports each NY strategy with candidate-specific taxes and limit
   }
   const rows = strategyCsvRows(result, { input, request, completedAt: "2026-09-08T00:00:00Z" });
   expect(rows.some(row => row.section === "limitation" && String(row.value).includes("New York/NYC pre-credit"))).toBe(true);
+  expect(rows.some(row => row.field === "input.newYorkContract" && row.value === "enacted-law-precredit")).toBe(true);
+  expect(rows.some(row => row.section === "limitation" && String(row.value).includes("2027–2032"))).toBe(true);
   expect(rows.some(row => String(row.value).includes("State tax remains the existing proxy"))).toBe(false);
   for (const candidate of result.candidates) {
     const name = candidate.target ? `Fill to ${candidate.target}%` : "No conversions";

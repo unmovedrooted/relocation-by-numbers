@@ -54,7 +54,7 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
     taxProjection: { kind: "project-2026-law", annualBracketGrowth: thresholdGrowth,
       annualPayrollCapGrowth: thresholdGrowth, statePolicy: "freeze-2025-proxy" },
     filing: values.household, state: location.state, cityId: location.cityId, stateTreatment: "verified-resident-location",
-    ...(location.state === "ny" ? { newYorkContract: "fixed-2026-precredit" as const } : {}),
+    ...(location.state === "ny" ? { newYorkContract: "enacted-law-precredit" as const } : {}),
     people: ids.map(id => ({ id, birthDate: date(`${id}-birth`), blind: false, eligibleForSeniorDeduction: true,
       iraBasis: 0, iraAdditionalTaxExceptionAmount: 0, rothAdditionalTaxExceptionAmount: 0,
       roth: { firstContributionYear: null, regularContributionBasis: 0, conversions: [] } })),

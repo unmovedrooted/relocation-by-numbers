@@ -79,7 +79,7 @@ export type HouseholdTaxInput = Readonly<{
   state: StateCode;
   stateTreatment: "existing-2025-proxy" | "verified-resident-location";
   cityId?: string;
-  newYorkContract?: "fixed-2026-precredit";
+  newYorkContract?: "enacted-law-precredit";
   projection?: TaxProjectionPolicy;
   /** Employee traditional 401(k) deferrals: reduce income-tax wages, not FICA. */
   pretax401k?: readonly Readonly<{ ownerId: string; amount: number }>[];
