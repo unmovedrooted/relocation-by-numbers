@@ -1,6 +1,7 @@
 import { runHouseholdYear, type HouseholdYearInput, type YearAccount, type YearContribution, type YearPerson } from "./householdYear";
 import { finiteDollars, taxProjectionFactors, validatedDate, type HouseholdIncome, type TaxProjectionPolicy } from "./householdTax";
 import { ageAtYearEnd } from "./rules";
+import { pensionEligibilityDate } from "./pensionEligibilityDate";
 import type { RothTransfer } from "./cashFlow";
 import type { EmployerMatchPlan } from "./employerMatchLedger";
 import { runEligibleContributions, type IraOwnerPolicy } from "./eligibleContributions2026";
@@ -195,6 +196,10 @@ export function runRetirementTimeline(input: TimelineInput) {
     };
     const income = input.income.map(schedule => ({ ownerId: schedule.ownerId, kind: schedule.kind,
       pensionType: schedule.pensionType,
+      ...(input.state === "ny" && schedule.kind === "pension" ? {
+        pensionAfter59Half: annualAmount({ ...schedule, startDate: [schedule.startDate,
+          pensionEligibilityDate(input.people.find(person => person.id === schedule.ownerId)!.birthDate)].sort().at(-1)! }, schedule.endDate),
+      } : {}),
       amount: annualAmount(schedule, schedule.kind === "wages" ? earlier(schedule.endDate, input.retirementDates[schedule.ownerId]) : schedule.endDate) }));
     const desired = input.contributions.map(schedule => {
       const account = accountsById.get(schedule.accountId)!;

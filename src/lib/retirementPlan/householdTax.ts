@@ -53,6 +53,9 @@ export type HouseholdIncome = Readonly<{
   ownerId: string;
   /** Explicit classification for state rules; does not alter federal character. */
   pensionType?: "unspecified" | "private" | "ny-government" | "federal-government" | "other-government";
+  /** Portion on/after age 59½, using the timeline's daily proration assumption.
+   * Subset of amount, never additional federal income. */
+  pensionAfter59Half?: number;
   /** Wages: gross employment cash before tax/deferrals; pretax401k is separate.
    * Pension/other: fully taxable cash. Special exclusions need a separate path.
    */

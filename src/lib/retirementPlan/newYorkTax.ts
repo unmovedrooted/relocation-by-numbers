@@ -1,4 +1,5 @@
 import type { HouseholdTaxInput } from "./householdTax";
+import { pensionEligibilityDate } from "./pensionEligibilityDate";
 
 /** Restricted full-year, standard-deduction, PRE-CREDIT planning estimate.
  * Enacted schedules reviewed 2026-09-09: TAX 601(a)/(c)(1)(B)(vii)-(ix),
@@ -21,11 +22,7 @@ export function newYorkTax(input: HouseholdTaxInput, federalAgi: number, taxable
   function ageDate(ownerId: string) {
     const person = input.people.find(person => person.id === ownerId);
     if (!person) throw new RangeError("Unknown New York income owner.");
-    const [y, m, d] = person.birthDate.split("-").map(Number);
-    const first = new Date(Date.UTC(y + 59, m - 1 + 6, 1));
-    const last = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();
-    first.setUTCDate(Math.min(d, last));
-    return first.toISOString().slice(0, 10);
+    return pensionEligibilityDate(person.birthDate);
   }
   for (const item of input.income) {
     if (!item.amount) continue;
@@ -35,8 +32,12 @@ export function newYorkTax(input: HouseholdTaxInput, federalAgi: number, taxable
       government += item.amount;
     } else if (item.pensionType === "private" || item.pensionType === "other-government") {
       const date = ageDate(item.ownerId);
-      if (date > `${input.year}-01-01` && date <= `${input.year}-12-31`) throw new RangeError("New York pension income in the year you turn 59½ needs payment-date allocation; unsupported.");
-      if (date <= `${input.year}-01-01`) eligible.set(item.ownerId, eligible.get(item.ownerId)! + item.amount);
+      if (item.pensionAfter59Half !== undefined && (!Number.isFinite(item.pensionAfter59Half)
+        || item.pensionAfter59Half < 0 || item.pensionAfter59Half > item.amount)) throw new RangeError("Invalid pension payment-date allocation.");
+      const birthdayYear = date > `${input.year}-01-01` && date <= `${input.year}-12-31`;
+      if (birthdayYear && item.pensionAfter59Half === undefined) throw new RangeError("New York pension income in the year you turn 59½ needs payment-date allocation.");
+      const qualifying = date <= `${input.year}-01-01` ? item.amount : birthdayYear ? item.pensionAfter59Half! : 0;
+      eligible.set(item.ownerId, eligible.get(item.ownerId)! + qualifying);
     } else throw new RangeError("Specify each nonzero pension's type for New York.");
   }
   let attributed = 0;
