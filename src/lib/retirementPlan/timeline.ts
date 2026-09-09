@@ -45,6 +45,8 @@ export type TimelineInput = Readonly<{
   people: readonly YearPerson[];
   retirementDates: Readonly<Record<string, string>>;
   accounts: readonly YearAccount[];
+  /** Optional complete nominal return path. Every year/account must be supplied. */
+  annualReturnsByYear?: Readonly<Record<number, Readonly<Record<string, number>>>>;
   income: readonly TimelineIncome[];
   contributions: readonly TimelineContribution[];
   contributionCapacities: readonly ContributionCapacity[];
@@ -108,6 +110,18 @@ export function runRetirementTimeline(input: TimelineInput) {
   }
   const accountsById = new Map(input.accounts.map(account => [account.id, account]));
   if (accountsById.size !== input.accounts.length) throw new RangeError("Duplicate account IDs.");
+  if (input.annualReturnsByYear !== undefined) {
+    const path = input.annualReturnsByYear;
+    if (Object.keys(path).length !== input.endYear - input.startYear + 1) throw new RangeError("Return path must cover every year exactly.");
+    for (let year = input.startYear; year <= input.endYear; year++) {
+      const values = path[year];
+      if (!values || Object.keys(values).length !== accountsById.size
+        || [...accountsById.keys()].some(id => !Object.hasOwn(values, id))) throw new RangeError("Return path must cover every account exactly.");
+      for (const value of Object.values(values)) {
+        if (!Number.isFinite(value) || value < -1 || value > 10) throw new RangeError("Return path values must be decimals between -1 and 10.");
+      }
+    }
+  }
   for (const account of input.accounts) {
     if (!owners.has(account.ownerId)) throw new RangeError("Unknown account owner.");
     if ("additionalTaxExceptionAmount" in account && account.additionalTaxExceptionAmount !== 0) throw new RangeError("Account exception allowances need a dated schedule.");
@@ -232,7 +246,9 @@ export function runRetirementTimeline(input: TimelineInput) {
       return { accountId: schedule.accountId, amount: allowed, taxTreatment: schedule.taxTreatment, eligibility: schedule.eligibility,
         ...(account.kind === "taxable" && allowed > 0 ? { purchaseLot: { id: `contribution:${schedule.id}:${year}`, price: price! } } : {}) };
     }).filter(item => item.amount > 0);
-    const yearAccounts = accounts.map(account => {
+    const accountsWithReturns = input.annualReturnsByYear
+      ? accounts.map(account => ({ ...account, annualReturn: input.annualReturnsByYear![year][account.id] })) : accounts;
+    const yearAccounts = accountsWithReturns.map(account => {
       if (account.kind !== "traditional-ira" && account.kind !== "401k") return account;
       const rmd = account.rmd.table === "joint-life"
         ? { ...account.rmd, divisor: input.jointLifeDivisors?.[account.id]?.[year] ?? NaN } : account.rmd;

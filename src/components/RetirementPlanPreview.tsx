@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import styles from "./RetirementPlanPreview.module.css";
 import { STATES } from "@/lib/states";
 import { CITIES } from "@/lib/cities";
 import { VERIFIED_RETIREMENT_STATES } from "@/lib/retirementPlan/verifiedLocation";
@@ -9,7 +10,8 @@ import NumberField from "@/components/calculator-form/CalculatorImmediateNumberF
 import InfoTip from "@/components/calculator-form/InfoTip";
 import RetirementPlanError from "./RetirementPlanError";
 import { buildPreviewInput, calculatePreview, PREVIEW_DEFAULTS } from "@/lib/retirementPlan/preview";
-import { comparePreviewConversions, initialConversionEditor } from "@/lib/retirementPlan/previewConversions";
+import { addPreviewConversions, comparePreviewConversions, initialConversionEditor } from "@/lib/retirementPlan/previewConversions";
+import RetirementSimulation from "./RetirementSimulation";
 import RetirementConversionEditor from "@/components/RetirementConversionEditor";
 import RetirementConversionResults from "@/components/RetirementConversionResults";
 import RetirementStrategyComparison from "@/components/RetirementStrategyComparison";
@@ -33,6 +35,7 @@ const primaryAction = "inline-flex items-center justify-center whitespace-nowrap
 const secondaryAction = "inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-sky-300 bg-white px-3 py-2 text-sm font-semibold text-sky-700 transition hover:bg-sky-50 dark:border-sky-800 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-slate-950";
 const stubAction = "inline-flex cursor-not-allowed items-center justify-center whitespace-nowrap rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-400 opacity-70 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-500";
 const money = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
+const pensionTypeHelp = "Required for nonzero New York pensions. Enter the federally taxable pension amount above. Do not classify IRA withdrawals or rollovers here.";
 
 const VERDICT_STYLES = {
   funded: {
@@ -150,7 +153,7 @@ export default function RetirementPlanPreview() {
     });
   };
 
-  return <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+  return <div className={`${styles.planner} min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100`}>
   <div className="mx-auto w-full min-w-0 max-w-7xl space-y-6 px-4 py-8 sm:py-12">
     <header className="mx-auto max-w-3xl space-y-3 text-center">
       <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Local development preview</p>
@@ -213,7 +216,10 @@ export default function RetirementPlanPreview() {
               {numeric(`${id}-salary`, "Gross annual salary (USD)")}
               {numeric(`${id}-pension`, "Taxable pension (USD)")}{date(`${id}-pensionStart`, "Pension starts")}
               <div className="min-w-0">
-                <label htmlFor={`plan-${id}-pension-type`} className="mb-1 block text-sm font-medium">Pension type</label>
+                <div className="mb-1 flex items-center">
+                  <label htmlFor={`plan-${id}-pension-type`} className="text-sm font-medium">Pension type</label>
+                  <InfoTip text={pensionTypeHelp} />
+                </div>
                 <select id={`plan-${id}-pension-type`} className="w-full min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
                   value={values[`${id}-pensionType`] ?? "unspecified"} onChange={event => change(`${id}-pensionType`, event.target.value)}
                   aria-describedby={`plan-${id}-pension-type-help`}>
@@ -223,7 +229,7 @@ export default function RetirementPlanPreview() {
                   <option value="federal-government">Federal government pension</option>
                   <option value="other-government">Other government pension</option>
                 </select>
-                <p id={`plan-${id}-pension-type-help`} className="mt-1 text-xs text-slate-500 dark:text-slate-400">Required for nonzero New York pensions. Enter the federally taxable pension amount above. Do not classify IRA withdrawals or rollovers here.</p>
+                <span id={`plan-${id}-pension-type-help`} className="sr-only">{pensionTypeHelp}</span>
               </div>
               {numeric(`${id}-benefit`, "Social Security (USD)")}{date(`${id}-benefitStart`, "Social Security starts")}
             </div>
@@ -299,6 +305,9 @@ export default function RetirementPlanPreview() {
     </form>
 
     {/* ══════════════════════════ BALANCE OVER TIME ══════════════════════════ */}
+    <RetirementSimulation key={JSON.stringify([values, accounts, saving, medicare, conversions, runVersion])}
+      getInput={() => addPreviewConversions(buildPreviewInput(values, accounts, saving, medicare), conversions)}
+      investedAccounts={accounts.accounts.filter(a => (a.ownerId === "one" || values.household === "married") && a.kind !== "cash" && a.kind !== "annuity").map(a => ({ id: a.id, name: a.name }))}>
     {result && last && (
       <section className={resultCard}>
         <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Balance over time</div>
@@ -316,11 +325,12 @@ export default function RetirementPlanPreview() {
         </div>
       </section>
     )}
+    </RetirementSimulation>
 
     {/* ══════════════════════════ YEAR-BY-YEAR TABLE ══════════════════════════ */}
     {result && last && (
       <section className={resultCard}>
-        <div className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Year-by-year</div>
+        <div className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Year-by-year · fixed-return projection</div>
         <p id="plan-table-help" className="mb-2 text-xs text-slate-500 dark:text-slate-400">Scroll sideways on small screens. Shaded bands mark 5-year spans; the flagged row is the first year RMDs are required.</p>
         <div role="region" aria-label="Year-by-year results" aria-describedby="plan-table-help" tabIndex={0} className="max-w-full overflow-x-auto rounded-xl border border-slate-200 focus-visible:outline-2 focus-visible:outline-emerald-500 dark:border-slate-800">
           <table className="w-full min-w-[56rem] text-right text-sm">
