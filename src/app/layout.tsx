@@ -89,6 +89,7 @@ const TOOLS_NAV_LINKS = [
 ];
 
 const RETIREMENT_NAV_LINKS = [
+  { href: "/complete-retirement-plan", label: "Complete Retirement Plan" },
   { href: "/401k-calculator", label: "401(k) Calculator" },
   { href: "/hsa-calculator", label: "HSA Calculator" },
   { href: "/retirement-calculator", label: "Retirement Calculator" },
