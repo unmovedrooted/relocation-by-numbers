@@ -15,6 +15,7 @@ import RetirementSimulation from "./RetirementSimulation";
 import RetirementConversionEditor from "@/components/RetirementConversionEditor";
 import RetirementConversionResults from "@/components/RetirementConversionResults";
 import RetirementStrategyComparison from "@/components/RetirementStrategyComparison";
+import RetirementSpendingSearch from "@/components/RetirementSpendingSearch";
 import { initialAccountEditor, type AccountEditorState } from "@/lib/retirementPlan/previewAccounts";
 import RetirementAccountEditor from "@/components/RetirementAccountEditor";
 import RetirementContributionEditor from "@/components/RetirementContributionEditor";
@@ -36,6 +37,11 @@ const secondaryAction = "inline-flex items-center justify-center whitespace-nowr
 const stubAction = "inline-flex cursor-not-allowed items-center justify-center whitespace-nowrap rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-400 opacity-70 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-500";
 const money = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
 const pensionTypeHelp = "Required for nonzero New York pensions. Enter the federally taxable pension amount above. Do not classify IRA withdrawals or rollovers here.";
+// States where local tax could vary by city/county, so the location field is worth showing.
+// Maryland and Indiana levy their local tax as a share of the state's own tax base (like NYC),
+// unlike Ohio/Pennsylvania/Michigan/Missouri's earned-income-only local taxes, which simply
+// exclude Social Security regardless of city.
+const CITY_FIELD_STATES = ["ny", "md", "in"];
 
 const VERDICT_STYLES = {
   funded: {
@@ -163,7 +169,7 @@ export default function RetirementPlanPreview() {
         required minimum distributions, IRA and Roth basis, ESPP sales, and the taxes and withdrawals that settle each year’s cash flow —
         projected year by year across your household’s modeled horizon, for one or two people with independent retirement dates.
       </p>
-      <p className="text-sm text-slate-500 dark:text-slate-400">Unreleased development preview. Uses a fictional example scenario. Florida, Texas and restricted New York resident scenarios are enabled. See “How this preview works” below for full limitations.</p>
+      <p className="text-sm text-slate-500 dark:text-slate-400">Unreleased development preview. Uses a fictional example scenario. Florida, Texas, restricted New York, restricted Maryland, restricted Indiana and restricted DC resident scenarios are enabled. See “How this preview works” below for full limitations.</p>
     </header>
 
     <form onSubmit={submit} className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_440px] lg:items-start">
@@ -172,21 +178,37 @@ export default function RetirementPlanPreview() {
         <section className={panel} aria-labelledby="plan-household-heading">
           <h2 id="plan-household-heading" className="mb-4 text-lg font-semibold">Household &amp; assumptions</h2>
           <div className="mb-4 grid min-w-0 gap-4 sm:grid-cols-2">
-            <div className="min-w-0"><label htmlFor="plan-state" className="mb-1 block text-sm">Resident state</label>
+            <div className={`min-w-0 ${CITY_FIELD_STATES.includes(values.state) ? "" : "sm:col-span-2"}`}><label htmlFor="plan-state" className="mb-1 block text-sm">Resident state</label>
               <select id="plan-state" className={control} value={values.state} aria-describedby="plan-location-help" onChange={event => { setValues(previous => ({ ...previous, state: event.target.value, cityId: "" })); setDirty(true); }}>
                 {STATES.map(state => <option key={state.code} value={state.code}>{state.name}{VERIFIED_RETIREMENT_STATES.includes(state.code) ? "" : " — not yet supported"}</option>)}
               </select></div>
-            <div className="min-w-0"><label htmlFor="plan-city" className="mb-1 block text-sm">Resident city</label>
+            {CITY_FIELD_STATES.includes(values.state) && <div className="min-w-0"><label htmlFor="plan-city" className="mb-1 block text-sm">{values.state === "ny" ? "Resident city" : "Resident county"}</label>
               <select id="plan-city" className={control} value={values.cityId} aria-describedby="plan-location-help" onChange={event => change("cityId", event.target.value)}>
-                <option value="">{values.state === "ny" ? "Choose a New York location" : "Outside listed cities"}</option>
+                <option value="">{values.state === "ny" ? "Choose a New York location" : values.state === "md" ? "Choose a Maryland location" : "Choose an Indiana location"}</option>
                 {values.state === "ny" && <option value="ny-outside-nyc-yonkers">Outside NYC and Yonkers</option>}
-                {CITIES.filter(city => city.state === values.state).sort((a,b) => a.name.localeCompare(b.name)).map(city => <option key={city.id} value={city.id}>{city.name}</option>)}
-              </select></div>
+                {CITIES.filter(city => values.state === "ny" ? city.id === "nyc-ny"
+                    : values.state === "md" ? ["baltimore-md", "frederick-md", "rockville-md"].includes(city.id)
+                    : values.state === "in" ? ["indianapolis-in", "fort-wayne-in", "evansville-in"].includes(city.id)
+                    : city.state === values.state)
+                  .sort((a, b) => a.name.localeCompare(b.name)).map(city => <option key={city.id} value={city.id}>{city.name}</option>)}
+              </select></div>}
           </div>
-          <p id="plan-location-help" className="mb-4 text-sm">Assumes full-year residence throughout the projection and no income taxable by another state or city. Florida, Texas and restricted New York only. Location does not change your spending assumptions.</p>
+          <p id="plan-location-help" className="mb-4 text-sm">Assumes full-year residence throughout the projection and no income taxable by another state or city. Florida, Texas, restricted New York, restricted Maryland, restricted Indiana and restricted DC only. Location does not change your spending assumptions.</p>
           {values.state === "ny" && <label className="mb-4 flex items-start gap-2 text-sm" htmlFor="plan-ny-contract">
             <input id="plan-ny-contract" type="checkbox" checked={values.nyContract === "confirmed"} onChange={event => change("nyContract", event.target.checked ? "confirmed" : "")} />
             <span>I accept a New York/NYC pre-credit estimate using enacted schedules for 2026, 2027–2032 and 2033 onward, not a prediction of future legislation. NY thresholds and exclusions are not grown with inflation. It excludes credits, itemization and other NY adjustments. My IRA funds were contributed before retirement; private pensions are qualifying periodic pensions; government pensions are fully eligible for the selected exemption; investment income is fully NY taxable. Yonkers, inherited funds and cross-border income are not supported. Workplace-plan/nonqualified Roth distributions may block calculation. Pension eligibility in the year of turning 59½ is estimated by calendar-day proration; actual eligible payments received on or after that date may differ.</span>
+          </label>}
+          {values.state === "md" && <label className="mb-4 flex items-start gap-2 text-sm" htmlFor="plan-md-contract">
+            <input id="plan-md-contract" type="checkbox" checked={values.mdContract === "confirmed"} onChange={event => change("mdContract", event.target.checked ? "confirmed" : "")} />
+            <span>I accept a Maryland pre-credit estimate using enacted 2026 state brackets and local rates, not a prediction of future legislation. Maryland thresholds, the pension exclusion cap and standard deduction are not grown with inflation. Only Baltimore City, Frederick County and Montgomery County are rated; every other Maryland county is unsupported. Social Security is fully excluded. The pension exclusion applies only to income entered as annual pension for an owner 65 or older by year end, capped and reduced by that owner’s own Social Security; disability-based eligibility and 401(k)/IRA account withdrawals do not qualify here. The 2% net-capital-gains surtax above $350,000 FAGI, itemized deductions and credits are excluded.</span>
+          </label>}
+          {values.state === "in" && <label className="mb-4 flex items-start gap-2 text-sm" htmlFor="plan-in-contract">
+            <input id="plan-in-contract" type="checkbox" checked={values.inContract === "confirmed"} onChange={event => change("inContract", event.target.checked ? "confirmed" : "")} />
+            <span>I accept an Indiana pre-credit estimate using the enacted 2026 flat 2.95% state rate and flat county rates, not a prediction of future legislation. Indiana exemption amounts and the civil service annuity deduction cap are not grown with inflation. Only Marion, Allen and Vanderburgh counties are rated; every other Indiana county is unsupported. Social Security is fully excluded. The civil service annuity deduction applies only to income entered as annual pension for an owner 62 or older, capped at $16,000 and reduced by that owner’s own Social Security; this planner cannot verify the pension is actually a nonmilitary civil service annuity, and Indiana’s separate, fully-excluding military retirement pay deduction is not modeled. Dependent exemptions, itemized deductions and credits are excluded.</span>
+          </label>}
+          {values.state === "dc" && <label className="mb-4 flex items-start gap-2 text-sm" htmlFor="plan-dc-contract">
+            <input id="plan-dc-contract" type="checkbox" checked={values.dcContract === "confirmed"} onChange={event => change("dcContract", event.target.checked ? "confirmed" : "")} />
+            <span>I accept a DC pre-credit estimate using the enacted tax brackets (unchanged for 2026), not a prediction of future legislation. DC’s standard deduction and bracket thresholds are not grown with inflation. DC has no local income tax. Social Security is fully excluded. DC’s $3,000 government pension exclusion expired before 2015 and is correctly not applied here, so pension, IRA and annuity income are fully taxable. DC’s separate, uncapped exclusion for a DC/federal government survivor age 62 or older is not modeled, since this planner cannot distinguish a survivor annuity from an owner’s own pension. Itemized deductions and credits are excluded.</span>
           </label>}
           {!VERIFIED_RETIREMENT_STATES.includes(values.state) && <p role="status" className="mb-4 text-sm text-red-700 dark:text-red-300">This location is not yet supported. No retirement tax estimate will be generated.</p>}
           <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -244,6 +266,10 @@ export default function RetirementPlanPreview() {
           startYear={Number(values.startYear)} endYear={Number(values.endYear)} />
         <RetirementConversionEditor value={conversions} onChange={next => { setConversions(next); setDirty(true); }} accounts={accounts} married={values.household === "married"} />
         <RetirementStrategyComparison key={strategyReset} accounts={accounts} married={values.household === "married"} scenarioKey={JSON.stringify([values,accounts,saving,medicare])} buildInput={()=>buildPreviewInput(values,accounts,saving,medicare)} />
+        <RetirementSpendingSearch
+          investedAccounts={accounts.accounts.filter(a => (a.ownerId === "one" || values.household === "married") && a.kind !== "cash" && a.kind !== "annuity").map(a => ({ id: a.id, name: a.name }))}
+          scenarioKey={JSON.stringify([values, accounts, saving, medicare, conversions])}
+          buildInput={() => addPreviewConversions(buildPreviewInput(values, accounts, saving, medicare), conversions)} />
         <div className="flex flex-wrap items-center gap-3">
           <button type="submit" className="rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500">Run projection</button>
           <button type="button" onClick={resetExample} className="rounded-xl border border-slate-300 px-5 py-3 text-sm dark:border-slate-700">Reset example</button>
@@ -368,7 +394,7 @@ export default function RetirementPlanPreview() {
           <div className="mt-4 space-y-4 text-sm leading-6 text-slate-600 dark:text-slate-400">
             <div>
               <h3 className="font-semibold text-slate-900 dark:text-slate-100">Preview limitations</h3>
-              <p className="mt-1">This screen models Florida, Texas or restricted New York scenarios and the supported account contracts described in the account editor. New York requires explicit acceptance of an enacted-law pre-credit scenario, including scheduled 2027 and 2033 changes; future legislation is not predicted. Workplace contributions use verified scenario limits. IRA contributions use the restricted annual eligibility model with explicit coverage and deduction choices. Unsupported account or tax cases are blocked rather than approximated. Do not use these results to make financial decisions.</p>
+              <p className="mt-1">This screen models Florida, Texas, restricted New York, restricted Maryland, restricted Indiana or restricted DC scenarios and the supported account contracts described in the account editor. New York, Maryland, Indiana and DC each require explicit acceptance of an enacted-law pre-credit scenario, including New York’s scheduled 2027 and 2033 changes; future legislation is not predicted for any of the four. Maryland rates only Baltimore City, Frederick County and Montgomery County, and its pension exclusion covers only entered pension income for owners 65 or older. Indiana rates only Marion, Allen and Vanderburgh counties, and its civil service annuity deduction covers only entered pension income for owners 62 or older. DC has no local income tax and no working pension exclusion (its $3,000 exclusion expired before 2015), so entered pension income is fully taxable there. Workplace contributions use verified scenario limits. IRA contributions use the restricted annual eligibility model with explicit coverage and deduction choices. Unsupported account or tax cases are blocked rather than approximated. Do not use these results to make financial decisions.</p>
               <p className="mt-2">Inputs stay in this tab’s memory only. This preview does not save them, put them in the URL, or submit them to an API. Reloading the page restores the fictional example.</p>
             </div>
             <div>

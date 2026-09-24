@@ -13,7 +13,7 @@ export type COL = {
 // 1) State baselines (100 = national avg)
 // These are “reasonable” baselines. Not perfect. Consistent.
 export const STATE_BASE: Record<StateCode, number> = {
-  al: 90, ak: 125, az: 103, ar: 88, ca: 140, co: 118, ct: 122, de: 105,
+  al: 90, ak: 125, az: 103, ar: 88, ca: 140, co: 118, ct: 122, dc: 145, de: 105,
   fl: 110, ga: 102, hi: 165, id: 98, il: 110, in: 95, ia: 92, ks: 92,
   ky: 93, la: 95, me: 108, md: 120, ma: 135, mi: 100, mn: 108, ms: 86,
   mo: 96, mt: 100, ne: 94, nv: 112, nh: 118, nj: 130, nm: 95, ny: 128,

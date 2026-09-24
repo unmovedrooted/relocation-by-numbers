@@ -346,6 +346,7 @@ const STATE_EFFECTIVE_FALLBACK: Partial<Record<StateCode, RateBands>> = {
   mn: [{ upTo: 75_000, rate: 5.5 }, { upTo: Infinity, rate: 7.8  }],
   or: [{ upTo: 125_000, rate: 7.0 }, { upTo: Infinity, rate: 9.0 }],
   md: [{ upTo: 100_000, rate: 5.0 }, { upTo: Infinity, rate: 5.75 }],
+  dc: [{ upTo: 60_000, rate: 6.5 }, { upTo: Infinity, rate: 8.5 }],
   wi: [{ upTo: 100_000, rate: 4.5 }, { upTo: Infinity, rate: 5.3  }],
   in: [{ upTo: Infinity, rate: 3.15 }],
   oh: [

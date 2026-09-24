@@ -6,7 +6,7 @@ const base={state:"ny" as const,year:2026,federalAgi:75500,grossBenefits:30000,f
 describe("50-state benefits-only coverage",()=>{
   it("classifies every state exactly once",()=>{
     expect(Object.keys(STATE_SS_CLASSIFICATION).sort()).toEqual(STATES.map(state=>state.code).sort());
-    expect(Object.values(STATE_SS_CLASSIFICATION).filter(value=>value==="exempt")).toHaveLength(42);
+    expect(Object.values(STATE_SS_CLASSIFICATION).filter(value=>value==="exempt")).toHaveLength(43);
     expect(Object.values(STATE_SS_CLASSIFICATION).filter(value=>value==="conditional")).toHaveLength(7);
   });
   it.each(STATES.filter(state=>STATE_SS_CLASSIFICATION[state.code]==="exempt"))("exempts benefits in $name, not all income",({code})=>{

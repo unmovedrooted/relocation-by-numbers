@@ -1,5 +1,5 @@
 export type StateCode =
-  | "al" | "ak" | "az" | "ar" | "ca" | "co" | "ct" | "de" | "fl" | "ga"
+  | "al" | "ak" | "az" | "ar" | "ca" | "co" | "ct" | "dc" | "de" | "fl" | "ga"
   | "hi" | "id" | "il" | "in" | "ia" | "ks" | "ky" | "la" | "me" | "md"
   | "ma" | "mi" | "mn" | "ms" | "mo" | "mt" | "ne" | "nv" | "nh" | "nj"
   | "nm" | "ny" | "nc" | "nd" | "oh" | "ok" | "or" | "pa" | "ri" | "sc"
@@ -13,6 +13,7 @@ export const STATES: Array<{ code: StateCode; name: string }> = [
   { code: "ca", name: "California" },
   { code: "co", name: "Colorado" },
   { code: "ct", name: "Connecticut" },
+  { code: "dc", name: "District of Columbia" },
   { code: "de", name: "Delaware" },
   { code: "fl", name: "Florida" },
   { code: "ga", name: "Georgia" },

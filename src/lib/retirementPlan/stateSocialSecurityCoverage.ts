@@ -7,7 +7,7 @@ export const STATE_SS_COVERAGE_SOURCE = "https://www.cga.ct.gov/2026/rpt/pdf/202
 type Classification = "exempt" | "conditional" | "federal-inclusion";
 export const STATE_SS_CLASSIFICATION = {
   al:"exempt", ak:"exempt", az:"exempt", ar:"exempt", ca:"exempt",
-  co:"conditional", ct:"conditional", de:"exempt", fl:"exempt", ga:"exempt",
+  co:"conditional", ct:"conditional", dc:"exempt", de:"exempt", fl:"exempt", ga:"exempt",
   hi:"exempt", id:"exempt", il:"exempt", in:"exempt", ia:"exempt",
   ks:"exempt", ky:"exempt", la:"exempt", me:"exempt", md:"exempt",
   ma:"exempt", mi:"exempt", mn:"conditional", ms:"exempt", mo:"exempt",

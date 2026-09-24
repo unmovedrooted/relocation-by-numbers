@@ -47,6 +47,7 @@ function makeOther(state: StateCode): City {
 
 const STATE_PROPERTY_TAX_PCT: Record<StateCode, number> = {
   al: 0.38, ak: 1.14, az: 0.52, ar: 0.57, ca: 0.71, co: 0.49, ct: 1.92, de: 0.53,
+  dc: 0.85,
   fl: 0.79, ga: 0.81, hi: 0.27, id: 0.53, il: 2.07, in: 0.74, ia: 1.43, ks: 1.30,
   ky: 0.77, la: 0.55, me: 1.10, md: 1.00, ma: 1.11, mi: 1.28, mn: 1.04, ms: 0.74,
   mo: 0.88, mt: 0.75, ne: 1.50, nv: 0.49, nh: 1.77, nj: 2.23, nm: 0.72, ny: 1.60,
@@ -108,6 +109,10 @@ makeOther("ct"),
 { id: "dover-de", name: "Dover", state: "de", defaultRent: 1500, medianHomePrice: 290000 },
 { id: "newark-de", name: "Newark", state: "de", defaultRent: 1600, medianHomePrice: 360000 },
 makeOther("de"),
+
+// DC
+{ id: "washington-dc", name: "Washington", state: "dc", defaultRent: 2400, medianHomePrice: 620000, tier: "major" },
+makeOther("dc"),
 
 // FL
 { id: "miami-fl", name: "Miami", state: "fl", defaultRent: 2600, medianHomePrice: 600000, tier: "major" },

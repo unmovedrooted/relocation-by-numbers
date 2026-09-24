@@ -24,6 +24,9 @@ export function isLocalRetirementPreview(environment: string | undefined, host: 
 export function buildPreviewInput(values: Record<string, string>, editor?: AccountEditorState, saving?: ContributionEditorState, medicare?: MedicareEditorState): TimelineInput {
   const location = verifiedRetirementLocation(values.state ?? "fl", values.cityId ?? "");
   if (location.state === "ny" && values.nyContract !== "confirmed") throw new RangeError("Confirm the restricted New York planning assumptions.");
+  if (location.state === "md" && values.mdContract !== "confirmed") throw new RangeError("Confirm the restricted Maryland planning assumptions.");
+  if (location.state === "dc" && values.dcContract !== "confirmed") throw new RangeError("Confirm the restricted DC planning assumptions.");
+  if (location.state === "in" && values.inContract !== "confirmed") throw new RangeError("Confirm the restricted Indiana planning assumptions.");
   const number = (key: string, min = 0, max = 1e9) => {
     const raw = values[key];
     if (typeof raw !== "string" || !raw.trim()) throw new RangeError(`Please enter ${key.replaceAll("-", " ")}.`);
@@ -55,6 +58,9 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
       annualPayrollCapGrowth: thresholdGrowth, statePolicy: "freeze-2025-proxy" },
     filing: values.household, state: location.state, cityId: location.cityId, stateTreatment: "verified-resident-location",
     ...(location.state === "ny" ? { newYorkContract: "enacted-law-precredit" as const } : {}),
+    ...(location.state === "md" ? { marylandContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "dc" ? { dcContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "in" ? { indianaContract: "verified-law-precredit" as const } : {}),
     people: ids.map(id => ({ id, birthDate: date(`${id}-birth`), blind: false, eligibleForSeniorDeduction: true,
       iraBasis: 0, iraAdditionalTaxExceptionAmount: 0, rothAdditionalTaxExceptionAmount: 0,
       roth: { firstContributionYear: null, regularContributionBasis: 0, conversions: [] } })),
