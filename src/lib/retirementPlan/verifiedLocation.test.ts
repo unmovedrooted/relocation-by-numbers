@@ -40,7 +40,7 @@ describe("restricted retirement locations",()=>{
     expect(tx.total).toBe(estimateHouseholdTax({...input,state:"fl"}).total);
     expect(tx.total).toBeGreaterThan(0);
   });
-  it.each(STATES.filter(state=>!["fl","tx","ny","md","in","dc","il","nj","pa","co","nm","mn","ut","ct","vt","mt"].includes(state.code)))("blocks $name without silently using a proxy",({code})=>{
+  it.each(STATES.filter(state=>!["fl","tx","ny","md","in","dc","il","nj","pa","co","nm","mn","ut","ct","vt","mt","ri"].includes(state.code)))("blocks $name without silently using a proxy",({code})=>{
     expect(()=>buildPreviewInput({...PREVIEW_DEFAULTS,state:code})).toThrow(/not yet verified/);
   });
   it("validates city ownership and unknown codes",()=>{
@@ -59,7 +59,7 @@ describe("restricted retirement locations",()=>{
   });
   it("enforces the restriction in the engine, not just in the form",()=>{
     const input=buildPreviewInput(PREVIEW_DEFAULTS);
-    expect(()=>runRetirementTimeline({...input,state:"ri"})).toThrow(/not yet verified/);
+    expect(()=>runRetirementTimeline({...input,state:"wi"})).toThrow(/not yet verified/);
     expect(()=>runRetirementTimeline({...input,cityId:"unknown"})).toThrow(/city/);
   });
   it("keeps existing Florida numerical results unchanged",()=>{

@@ -20,6 +20,7 @@ export const STATE_SS_CLASSIFICATION = {
 
 const CT_SOURCE = "https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-7.pdf";
 const CO_SOURCE = "https://tax.colorado.gov/sites/tax/files/documents/ITT_Social_Security_Pensions_and_Annuities_Jan_2025.pdf";
+const RI_SOURCE = "https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-11/ADV_2025_22_Inflation_Adjustments.pdf";
 export type StateSocialSecurityInput = SocialSecurityLocationInput & {
   filing?: "single" | "married-joint" | "married-separate" | "head-of-household" | "surviving-spouse";
   /** CT worksheet line B: federal Pub. 505 worksheet 2-2 line 10.
@@ -46,6 +47,11 @@ export type StateSocialSecurityInput = SocialSecurityLocationInput & {
     remainingTaxLiability:number;
     competingRetirementCreditClaimed:boolean;
   };
+  /** Rhode Island excludes a qualifying owner's own share of benefits only if
+   * that owner has reached SSA full retirement age; ownership is allocated by
+   * gross benefits, mirroring Colorado's owners field.
+   */
+  ri?: { owners: readonly {reachedFullRetirementAge:boolean; grossBenefits:number}[] };
 };
 
 /** Benefits-only inclusion, for full-year residents. Never a state/local tax
@@ -77,6 +83,16 @@ export function stateSocialSecurityInclusion(input: StateSocialSecurityInput) {
       throw new RangeError("Invalid Social Security benefit owners.");
     }
     if (Math.abs(input.owners.reduce((sum,owner)=>sum+owner.grossBenefits,0)-input.grossBenefits)>0.000001) {
+      throw new RangeError("Owner benefits must equal household benefits.");
+    }
+  }
+  if (input.ri!==undefined) {
+    if (input.ri.owners.length<1 || input.ri.owners.length>2 || input.ri.owners.some(owner=>
+      typeof owner.reachedFullRetirementAge!=="boolean"||
+      !Number.isFinite(owner.grossBenefits)||owner.grossBenefits<0||owner.grossBenefits>1e12)) {
+      throw new RangeError("Invalid Rhode Island benefit owners.");
+    }
+    if (Math.abs(input.ri.owners.reduce((sum,owner)=>sum+owner.grossBenefits,0)-input.grossBenefits)>0.000001) {
       throw new RangeError("Owner benefits must equal household benefits.");
     }
   }
@@ -149,5 +165,16 @@ export function stateSocialSecurityInclusion(input: StateSocialSecurityInput) {
     },0);
     return supported(included,CO_SOURCE);
   }
-  return unsupported("Rhode Island tax-year 2026 Social Security limits have not been verified. The 2026 inflation advisory's SS table is explicitly for 2025. Do not reuse those limits or substitute zero.");
+  if (input.state==="ri") {
+    if (!input.filing || !input.ri) return unsupported("Rhode Island requires filing status and per-owner full-retirement-age status.");
+    if (input.grossBenefits===0) return supported(0,RI_SOURCE);
+    const threshold=input.filing==="married-joint"?133750:107000;
+    if (input.federalAgi>=threshold) return supported(input.federallyTaxableBenefits,RI_SOURCE);
+    // Only a qualifying owner's own share (by gross benefits) is excluded;
+    // a spouse who has not reached full retirement age stays fully taxable.
+    const included=input.ri.owners.reduce((sum,owner)=>sum+(owner.reachedFullRetirementAge?0:
+      input.federallyTaxableBenefits*(owner.grossBenefits/input.grossBenefits)),0);
+    return supported(included,RI_SOURCE);
+  }
+  return unsupported("Unknown Social Security treatment for this state.");
 }

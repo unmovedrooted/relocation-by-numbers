@@ -33,6 +33,7 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
   if (location.state === "ct" && values.ctContract !== "confirmed") throw new RangeError("Confirm the restricted Connecticut planning assumptions.");
   if (location.state === "vt" && values.vtContract !== "confirmed") throw new RangeError("Confirm the restricted Vermont planning assumptions.");
   if (location.state === "mt" && values.mtContract !== "confirmed") throw new RangeError("Confirm the restricted Montana planning assumptions.");
+  if (location.state === "ri" && values.riContract !== "confirmed") throw new RangeError("Confirm the restricted Rhode Island planning assumptions.");
   const number = (key: string, min = 0, max = 1e9) => {
     const raw = values[key];
     if (typeof raw !== "string" || !raw.trim()) throw new RangeError(`Please enter ${key.replaceAll("-", " ")}.`);
@@ -77,6 +78,7 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
     ...(location.state === "ct" ? { connecticutContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "vt" ? { vermontContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "mt" ? { montanaContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "ri" ? { rhodeIslandContract: "verified-law-precredit" as const } : {}),
     people: ids.map(id => ({ id, birthDate: date(`${id}-birth`), blind: false, eligibleForSeniorDeduction: true,
       iraBasis: 0, iraAdditionalTaxExceptionAmount: 0, rothAdditionalTaxExceptionAmount: 0,
       roth: { firstContributionYear: null, regularContributionBasis: 0, conversions: [] } })),

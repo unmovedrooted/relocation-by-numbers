@@ -94,8 +94,27 @@ describe("remaining conditional state rules",()=>{
     for(const amount of [-1,NaN,Infinity,1e13]) expect(()=>stateSocialSecurityInclusion({...input,utah:{...utah,remainingTaxLiability:amount}})).toThrow();
     expect(()=>stateSocialSecurityInclusion({...input,utah:{...utah,benefitsIncludedInStateIncome:25501}})).toThrow();
   });
-  it("keeps Rhode Island blocked rather than relabeling 2025 limits as 2026",()=>{
+  it("keeps Rhode Island blocked without explicit filing status and per-owner full-retirement-age input",()=>{
     expect(stateSocialSecurityInclusion({...base,state:"ri",filing:"single"})).toMatchObject({status:"unsupported",taxableBenefits:null});
+  });
+  it("Rhode Island excludes only a qualifying owner's own proportional share below the AGI threshold",()=>{
+    const owners=[{reachedFullRetirementAge:true,grossBenefits:20000},{reachedFullRetirementAge:false,grossBenefits:10000}];
+    const input={...base,state:"ri" as const,filing:"married-joint" as const,federalAgi:133749,ri:{owners}};
+    // Only the non-qualifying owner's 1/3 share (10000/30000) of taxable benefits remains taxable: 25500/3 = 8500.
+    expect(stateSocialSecurityInclusion(input).taxableBenefits).toBeCloseTo(8500,6);
+    expect(stateSocialSecurityInclusion({...input,ri:{owners:owners.map(o=>({...o,reachedFullRetirementAge:true}))}}).taxableBenefits).toBe(0);
+  });
+  it("Rhode Island fully taxes benefits at or above the married-joint AGI threshold",()=>{
+    const owners=[{reachedFullRetirementAge:true,grossBenefits:30000}];
+    const input={...base,state:"ri" as const,filing:"married-joint" as const,ri:{owners}};
+    expect(stateSocialSecurityInclusion({...input,federalAgi:133749.99}).taxableBenefits).toBe(0);
+    expect(stateSocialSecurityInclusion({...input,federalAgi:133750}).taxableBenefits).toBe(25500);
+  });
+  it("Rhode Island uses the single/HOH/MFS $107,000 threshold, not the married one",()=>{
+    const owners=[{reachedFullRetirementAge:true,grossBenefits:30000}];
+    const input={...base,state:"ri" as const,filing:"single" as const,ri:{owners}};
+    expect(stateSocialSecurityInclusion({...input,federalAgi:106999.99}).taxableBenefits).toBe(0);
+    expect(stateSocialSecurityInclusion({...input,federalAgi:107000}).taxableBenefits).toBe(25500);
   });
 });
 
