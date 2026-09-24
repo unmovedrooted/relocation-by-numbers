@@ -30,13 +30,13 @@ describe("Local retirement preview", () => {
       expect(() => calculatePreview({ ...PREVIEW_DEFAULTS, ...patch })).toThrow();
     }
   });
-  it("is not in the sitemap or navigation and has a server-side production gate", () => {
+  it("is reachable in production but stays out of the sitemap, navigation and search indexing", () => {
     const read = (path: string) => readFileSync(path, "utf8");
     expect(read("src/app/sitemap.ts")).not.toContain("/complete-retirement-plan");
     expect(read("src/app/layout.tsx")).not.toContain('href: "/complete-retirement-plan"');
+    expect(read("src/components/ExploreCalculatorGrid.tsx")).toContain("isLocalRetirementPreview");
     const page = read("src/app/complete-retirement-plan/page.tsx");
-    expect(page).toContain('isLocalRetirementPreview(process.env.NODE_ENV');
-    expect(page).toContain("notFound()");
+    expect(page).not.toContain("notFound()");
     expect(page).toContain("index: false");
   });
 });
