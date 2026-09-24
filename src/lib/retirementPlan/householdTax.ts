@@ -7,6 +7,9 @@ import { newYorkTax } from "./newYorkTax";
 import { marylandTax } from "./marylandTax";
 import { indianaTax } from "./indianaTax";
 import { dcTax } from "./dcTax";
+import { illinoisTax } from "./illinoisTax";
+import { newJerseyTax } from "./newJerseyTax";
+import { pennsylvaniaTax } from "./pennsylvaniaTax";
 
 /** 2026 federal values: Rev. Proc. 2025-32, published in IRB 2025-45.
  * State estimates deliberately retain the existing 2025 proxy, not new rules.
@@ -89,6 +92,9 @@ export type HouseholdTaxInput = Readonly<{
   marylandContract?: "verified-law-precredit";
   indianaContract?: "verified-law-precredit";
   dcContract?: "verified-law-precredit";
+  illinoisContract?: "verified-law-precredit";
+  newJerseyContract?: "verified-law-precredit";
+  pennsylvaniaContract?: "verified-law-precredit";
   projection?: TaxProjectionPolicy;
   /** Employee traditional 401(k) deferrals: reduce income-tax wages, not FICA. */
   pretax401k?: readonly Readonly<{ ownerId: string; amount: number }>[];
@@ -263,8 +269,11 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const md = location && input.state === "md" ? marylandTax(input, agi, taxableBenefits) : null;
   const inTax = location && input.state === "in" ? indianaTax(input, agi, taxableBenefits) : null;
   const dc = location && input.state === "dc" ? dcTax(input, agi, taxableBenefits) : null;
-  const localTax = ny ? ny.localTax : md ? md.localTax : inTax ? inTax.localTax : dc ? dc.localTax : location ? 0 : null;
-  const stateTax = ny ? ny.stateTax : md ? md.stateTax : inTax ? inTax.stateTax : dc ? dc.stateTax : location ? location.stateTax : estimateNetBreakdown({ grossAnnual: Math.max(0, agi), state: input.state,
+  const il = location && input.state === "il" ? illinoisTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
+  const nj = location && input.state === "nj" ? newJerseyTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
+  const pa = location && input.state === "pa" ? pennsylvaniaTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase, wages) : null;
+  const localTax = ny ? ny.localTax : md ? md.localTax : inTax ? inTax.localTax : dc ? dc.localTax : il ? il.localTax : nj ? nj.localTax : pa ? pa.localTax : location ? 0 : null;
+  const stateTax = ny ? ny.stateTax : md ? md.stateTax : inTax ? inTax.stateTax : dc ? dc.stateTax : il ? il.stateTax : nj ? nj.stateTax : pa ? pa.stateTax : location ? location.stateTax : estimateNetBreakdown({ grossAnnual: Math.max(0, agi), state: input.state,
     filing: input.filing, k401Pct: 0 }).state;
   const total = finiteDollars(regularFederal + alternativeMinimumTax + socialSecurityPayroll + medicarePayroll
     + additionalMedicare + niit + earlyDistributionTax + stateTax + (localTax ?? 0), "Total annual tax");
@@ -276,7 +285,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
     netInvestmentIncome, niit, earlyDistributionTax, stateTax, total,
     nextLossCarryover: capitalLossCarryover(st, lt, capitalDeduction, unflooredTaxable),
     warnings: Object.freeze([
-      ny ? ny.warning : md ? md.warning : inTax ? inTax.warning : dc ? dc.warning : location ? location.warning : "State tax uses the existing 2025 wage-based proxy on federal AGI, not verified retirement-specific state rules; local taxes are excluded.",
+      ny ? ny.warning : md ? md.warning : inTax ? inTax.warning : dc ? dc.warning : il ? il.warning : nj ? nj.warning : pa ? pa.warning : location ? location.warning : "State tax uses the existing 2025 wage-based proxy on federal AGI, not verified retirement-specific state rules; local taxes are excluded.",
       "Standard-deduction U.S. resident estimate: IRA deductions require verified funded amounts; no IRA/Social Security worksheet interaction, itemization, credits, self-employment, foreign exclusions or AMT preference adjustments.",
       ...(input.year > 2026 ? ["Future tax values project 2026 law using explicit bracket/payroll growth, not published future tables. Statutory fixed thresholds remain nominal; the senior deduction expires after 2028."] : []),
       "Capital carryovers are household totals; survivor/filing-status changes require owner attribution before using this state.",

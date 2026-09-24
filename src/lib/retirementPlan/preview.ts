@@ -26,6 +26,9 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
   if (location.state === "ny" && values.nyContract !== "confirmed") throw new RangeError("Confirm the restricted New York planning assumptions.");
   if (location.state === "md" && values.mdContract !== "confirmed") throw new RangeError("Confirm the restricted Maryland planning assumptions.");
   if (location.state === "dc" && values.dcContract !== "confirmed") throw new RangeError("Confirm the restricted DC planning assumptions.");
+  if (location.state === "il" && values.ilContract !== "confirmed") throw new RangeError("Confirm the restricted Illinois planning assumptions.");
+  if (location.state === "nj" && values.njContract !== "confirmed") throw new RangeError("Confirm the restricted New Jersey planning assumptions.");
+  if (location.state === "pa" && values.paContract !== "confirmed") throw new RangeError("Confirm the restricted Pennsylvania planning assumptions.");
   if (location.state === "in" && values.inContract !== "confirmed") throw new RangeError("Confirm the restricted Indiana planning assumptions.");
   const number = (key: string, min = 0, max = 1e9) => {
     const raw = values[key];
@@ -60,6 +63,9 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
     ...(location.state === "ny" ? { newYorkContract: "enacted-law-precredit" as const } : {}),
     ...(location.state === "md" ? { marylandContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "dc" ? { dcContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "il" ? { illinoisContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "nj" ? { newJerseyContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "pa" ? { pennsylvaniaContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "in" ? { indianaContract: "verified-law-precredit" as const } : {}),
     people: ids.map(id => ({ id, birthDate: date(`${id}-birth`), blind: false, eligibleForSeniorDeduction: true,
       iraBasis: 0, iraAdditionalTaxExceptionAmount: 0, rothAdditionalTaxExceptionAmount: 0,
