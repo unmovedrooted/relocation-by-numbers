@@ -1,7 +1,6 @@
 import { MetadataRoute } from "next";
 import { findCity } from "@/lib/cities";
 import { STATES } from "@/lib/states";
-import { getAllPosts } from "@/lib/posts";
 import {
   ALLOWED_FIRE_CITY_PAGES,
   ALLOWED_CITY_DETAIL_PAGES,
@@ -35,7 +34,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/housing-affordability-calculator",
     "/compare-cities",
     "/one-income-relocation-calculator",
-     "/blog",
     "/fire-calculator",
     "/fire-number-calculator",
     "/coast-fire-calculator",
@@ -170,13 +168,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
   }));
 
-  const blogPages = getAllPosts().map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: post.date ? new Date(post.date) : now,
-    priority: 0.6,
-    changeFrequency: "monthly" as const,
-  }));
-
   return [
     ...corePages,
     ...calculatorPages,
@@ -190,6 +181,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...bestStatesFirePages,
     ...moveToPages,
     ...salaryNeededPages,
-    ...blogPages,
   ];
 }

@@ -59,7 +59,6 @@ export const viewport = {
 };
 
 const EXPLORE_LINK = { href: "/explore", label: "Explore" };
-const BLOG_LINK = { href: "/blog", label: "Blogs" };
 
 const FIRE_NAV_LINKS = [
   { href: "/barista-fire-calculator", label: "Barista FIRE" },
@@ -111,7 +110,6 @@ const NAV_LINKS = [
   ...INTERNATIONAL_NAV_LINKS,
   ...TOOLS_NAV_LINKS,
   ...RETIREMENT_NAV_LINKS,
-  BLOG_LINK,
 ];
 
 export default function RootLayout({
@@ -175,9 +173,6 @@ export default function RootLayout({
                     <NavToolsDropdown label="International" links={INTERNATIONAL_NAV_LINKS} />
                     <NavToolsDropdown label="Tools" links={TOOLS_NAV_LINKS} />
                     <NavToolsDropdown label="Retirement" links={RETIREMENT_NAV_LINKS} />
-                    <Link href="/blog" className="transition hover:text-slate-900 dark:hover:text-white">
-                      Blogs
-                    </Link>
                   </nav>
                   <ThemeToggle />
                   <MobileNavigation links={NAV_LINKS} />
