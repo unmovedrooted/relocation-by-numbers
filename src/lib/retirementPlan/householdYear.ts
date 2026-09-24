@@ -60,6 +60,7 @@ export type HouseholdYearInput = Readonly<{
   illinoisContract?: HouseholdTaxInput["illinoisContract"];
   newJerseyContract?: HouseholdTaxInput["newJerseyContract"];
   pennsylvaniaContract?: HouseholdTaxInput["pennsylvaniaContract"];
+  coloradoContract?: HouseholdTaxInput["coloradoContract"];
   people: readonly YearPerson[];
   accounts: readonly YearAccount[];
   income: readonly HouseholdIncome[];

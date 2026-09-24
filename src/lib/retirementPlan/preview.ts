@@ -29,6 +29,7 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
   if (location.state === "il" && values.ilContract !== "confirmed") throw new RangeError("Confirm the restricted Illinois planning assumptions.");
   if (location.state === "nj" && values.njContract !== "confirmed") throw new RangeError("Confirm the restricted New Jersey planning assumptions.");
   if (location.state === "pa" && values.paContract !== "confirmed") throw new RangeError("Confirm the restricted Pennsylvania planning assumptions.");
+  if (location.state === "co" && values.coContract !== "confirmed") throw new RangeError("Confirm the restricted Colorado planning assumptions.");
   if (location.state === "in" && values.inContract !== "confirmed") throw new RangeError("Confirm the restricted Indiana planning assumptions.");
   const number = (key: string, min = 0, max = 1e9) => {
     const raw = values[key];
@@ -66,6 +67,7 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
     ...(location.state === "il" ? { illinoisContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "nj" ? { newJerseyContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "pa" ? { pennsylvaniaContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "co" ? { coloradoContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "in" ? { indianaContract: "verified-law-precredit" as const } : {}),
     people: ids.map(id => ({ id, birthDate: date(`${id}-birth`), blind: false, eligibleForSeniorDeduction: true,
       iraBasis: 0, iraAdditionalTaxExceptionAmount: 0, rothAdditionalTaxExceptionAmount: 0,
