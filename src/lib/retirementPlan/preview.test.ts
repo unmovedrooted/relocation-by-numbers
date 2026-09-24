@@ -1,13 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { buildPreviewInput, calculatePreview, isLocalRetirementPreview, PREVIEW_DEFAULTS } from "./preview";
+import { buildPreviewInput, calculatePreview, PREVIEW_DEFAULTS } from "./preview";
 
 describe("Local retirement preview", () => {
-  it("allows only development on loopback hosts, never production", () => {
-    for (const host of ["localhost:3000", "127.0.0.1:3001", "[::1]:3000"]) expect(isLocalRetirementPreview("development", host)).toBe(true);
-    for (const host of ["localhost:3000", "www.relocationbynumbers.com", null]) expect(isLocalRetirementPreview("production", host)).toBe(false);
-    for (const host of ["localhost.evil.com", "192.168.1.10:3000", "example.com", null]) expect(isLocalRetirementPreview("development", host)).toBe(false);
-  });
   it("uses the actual engine and preserves nominal input precision", () => {
     const values = { ...PREVIEW_DEFAULTS, spending: "50000.123400" };
     expect(buildPreviewInput(values).spendingAnnual).toBe(50000.1234);
@@ -30,11 +25,10 @@ describe("Local retirement preview", () => {
       expect(() => calculatePreview({ ...PREVIEW_DEFAULTS, ...patch })).toThrow();
     }
   });
-  it("is reachable in production but stays out of the sitemap, navigation and search indexing", () => {
+  it("is live in production and listed in the explore grid, but stays out of the sitemap and search indexing", () => {
     const read = (path: string) => readFileSync(path, "utf8");
     expect(read("src/app/sitemap.ts")).not.toContain("/complete-retirement-plan");
-    expect(read("src/app/layout.tsx")).not.toContain('href: "/complete-retirement-plan"');
-    expect(read("src/components/ExploreCalculatorGrid.tsx")).toContain("isLocalRetirementPreview");
+    expect(read("src/components/ExploreCalculatorGrid.tsx")).toContain('href: "/complete-retirement-plan"');
     const page = read("src/app/complete-retirement-plan/page.tsx");
     expect(page).not.toContain("notFound()");
     expect(page).toContain("index: false");

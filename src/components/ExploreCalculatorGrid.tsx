@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useSyncExternalStore } from "react";
-import { isLocalRetirementPreview } from "@/lib/retirementPlan/preview";
+import { useMemo, useState } from "react";
 
 type Category = "Relocation" | "Housing" | "Taxes" | "FIRE" | "Retirement" | "International";
 type Calc = { href: string; title: string; desc: string; cat: Category };
@@ -39,6 +38,7 @@ const CALCULATORS: Calc[] = [
   { href: "/fat-fire-calculator", title: "Fat FIRE Calculator", desc: "Retire early with a luxury budget ($200k+/yr).", cat: "FIRE" },
   { href: "/savings-rate-for-fire", title: "Savings Rate for FIRE", desc: "How your savings rate maps to years until financial independence.", cat: "FIRE" },
   // Retirement
+  { href: "/complete-retirement-plan", title: "Complete Retirement Plan (preview)", desc: "Full household retirement timeline: RMDs, Social Security, pensions, IRA/Roth basis, and year-by-year cash flow, with verified state tax treatment for 13 states.", cat: "Retirement" },
   { href: "/retirement-calculator", title: "Retirement Calculator", desc: "Project your savings with a live balance chart and a Monte Carlo range.", cat: "Retirement" },
   { href: "/401k-calculator", title: "401(k) Calculator", desc: "Employer match, this year's tax savings, and projected balance with 2025 limits.", cat: "Retirement" },
   { href: "/hsa-calculator", title: "HSA Calculator", desc: "2025 limits, real federal + FICA + state tax savings, and tax-free growth.", cat: "Retirement" },
@@ -54,33 +54,12 @@ const CALCULATORS: Calc[] = [
   { href: "/south-america-relocation-calculator", title: "South America Relocation", desc: "Compare Medellín, Bogotá, Buenos Aires, Santiago, and more.", cat: "International" },
 ];
 
-// Local-dev-only entries: pages gated behind isLocalRetirementPreview (404 in
-// production), so they must never appear for real visitors on the live site.
-const DEV_ONLY_CALCULATORS: Calc[] = [
-  {
-    href: "/complete-retirement-plan",
-    title: "Complete Retirement Plan (dev preview)",
-    desc: "Local-only preview: RMDs, Social Security, IRA/Roth basis, ESPP sales, and year-by-year cash-flow projections for one or two people.",
-    cat: "Retirement",
-  },
-];
-
 const CATEGORIES: (Category | "All")[] = ["All", "FIRE", "Housing", "International", "Relocation", "Retirement", "Taxes"];
-
-// Host is stable for this document; the server snapshot keeps hydration aligned.
-const subscribeToHost = () => () => {};
-const clientPreviewSnapshot = () => isLocalRetirementPreview(process.env.NODE_ENV, window.location.host);
-const serverPreviewSnapshot = () => false;
 
 export default function ExploreCalculatorGrid() {
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Category | "All">("All");
-  const showDevOnly = useSyncExternalStore(subscribeToHost, clientPreviewSnapshot, serverPreviewSnapshot);
-
-  const allCalculators = useMemo(
-    () => (showDevOnly ? [...CALCULATORS, ...DEV_ONLY_CALCULATORS] : CALCULATORS),
-    [showDevOnly],
-  );
+  const allCalculators = CALCULATORS;
 
   const filtered = useMemo(() => {
     const s = query.trim().toLowerCase();

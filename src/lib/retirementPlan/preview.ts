@@ -17,10 +17,6 @@ export const PREVIEW_DEFAULTS: Record<string, string> = {
   "two-pension": "0", "two-pensionStart": "2032-01-01", "two-benefit": "20000", "two-benefitStart": "2034-01-01",
 };
 
-export function isLocalRetirementPreview(environment: string | undefined, host: string | null) {
-  return environment === "development" && /^(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(host ?? "");
-}
-
 export function buildPreviewInput(values: Record<string, string>, editor?: AccountEditorState, saving?: ContributionEditorState, medicare?: MedicareEditorState): TimelineInput {
   const location = verifiedRetirementLocation(values.state ?? "fl", values.cityId ?? "");
   if (location.state === "ny" && values.nyContract !== "confirmed") throw new RangeError("Confirm the restricted New York planning assumptions.");
