@@ -63,6 +63,7 @@ export type TimelineInput = Readonly<{
   northCarolinaContract?: HouseholdYearInput["northCarolinaContract"];
   southCarolinaContract?: HouseholdYearInput["southCarolinaContract"];
   ohioContract?: HouseholdYearInput["ohioContract"];
+  massachusettsContract?: HouseholdYearInput["massachusettsContract"];
   people: readonly YearPerson[];
   retirementDates: Readonly<Record<string, string>>;
   accounts: readonly YearAccount[];
@@ -279,7 +280,7 @@ export function runRetirementTimeline(input: TimelineInput) {
         : { ...account, rmd };
     });
     const yearInput: HouseholdYearInput = { year, distributionDate: `${year}-12-31`, filing: input.filing, state: input.state,
-      stateTreatment: input.stateTreatment, cityId: input.cityId, newYorkContract: input.newYorkContract, marylandContract: input.marylandContract, indianaContract: input.indianaContract, dcContract: input.dcContract, illinoisContract: input.illinoisContract, newJerseyContract: input.newJerseyContract, pennsylvaniaContract: input.pennsylvaniaContract, coloradoContract: input.coloradoContract, newMexicoContract: input.newMexicoContract, minnesotaContract: input.minnesotaContract, utahContract: input.utahContract, connecticutContract: input.connecticutContract, vermontContract: input.vermontContract, montanaContract: input.montanaContract, rhodeIslandContract: input.rhodeIslandContract, californiaContract: input.californiaContract, virginiaContract: input.virginiaContract, arizonaContract: input.arizonaContract, georgiaContract: input.georgiaContract, northCarolinaContract: input.northCarolinaContract, southCarolinaContract: input.southCarolinaContract, ohioContract: input.ohioContract, projection: input.taxProjection, people, accounts: yearAccounts, income,
+      stateTreatment: input.stateTreatment, cityId: input.cityId, newYorkContract: input.newYorkContract, marylandContract: input.marylandContract, indianaContract: input.indianaContract, dcContract: input.dcContract, illinoisContract: input.illinoisContract, newJerseyContract: input.newJerseyContract, pennsylvaniaContract: input.pennsylvaniaContract, coloradoContract: input.coloradoContract, newMexicoContract: input.newMexicoContract, minnesotaContract: input.minnesotaContract, utahContract: input.utahContract, connecticutContract: input.connecticutContract, vermontContract: input.vermontContract, montanaContract: input.montanaContract, rhodeIslandContract: input.rhodeIslandContract, californiaContract: input.californiaContract, virginiaContract: input.virginiaContract, arizonaContract: input.arizonaContract, georgiaContract: input.georgiaContract, northCarolinaContract: input.northCarolinaContract, southCarolinaContract: input.southCarolinaContract, ohioContract: input.ohioContract, massachusettsContract: input.massachusettsContract, projection: input.taxProjection, people, accounts: yearAccounts, income,
       spending, contributions, conversions: input.conversionsByYear?.[year] ?? [], withdrawalOrder: input.withdrawalOrder,
       surplusAccountId: input.surplusAccountId, lossCarryover, employerMatchPlans: input.employerMatchesByYear?.[year] };
     const activeIraPolicies = annualIraPolicies.filter(policy => desired.some(item => item.account.ownerId === policy.ownerId
