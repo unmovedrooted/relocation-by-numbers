@@ -49,7 +49,7 @@ describe("restricted retirement locations",()=>{
     expect(result.years.every(row=>row.result.tax.stateTax===0&&row.result.tax.localTax===0)).toBe(true);
     expect(result.warnings.some(warning=>warning.includes("full-year resident individual income-tax treatment"))).toBe(true);
   });
-  it.each(STATES.filter(state=>!["fl","tx","ny","md","in","dc","il","nj","pa","co","nm","mn","ut","ct","vt","mt","ri","ca","va","az","ga","nc","sc","oh","ma","ia","ms","mo","ak","nv","sd","tn","wy","nh","wa","al","ar","de"].includes(state.code)))("blocks $name without silently using a proxy",({code})=>{
+  it.each(STATES.filter(state=>!["fl","tx","ny","md","in","dc","il","nj","pa","co","nm","mn","ut","ct","vt","mt","ri","ca","va","az","ga","nc","sc","oh","ma","ia","ms","mo","ak","nv","sd","tn","wy","nh","wa","al","ar","de","ks","ky","ne","wv"].includes(state.code)))("blocks $name without silently using a proxy",({code})=>{
     expect(()=>buildPreviewInput({...PREVIEW_DEFAULTS,state:code})).toThrow(/not yet verified/);
   });
   it("validates city ownership and unknown codes",()=>{

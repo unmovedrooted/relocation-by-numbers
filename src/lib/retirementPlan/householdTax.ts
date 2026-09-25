@@ -33,6 +33,10 @@ import { washingtonTax } from "./washingtonTax";
 import { alabamaTax } from "./alabamaTax";
 import { arkansasTax } from "./arkansasTax";
 import { delawareTax } from "./delawareTax";
+import { kansasTax } from "./kansasTax";
+import { kentuckyTax } from "./kentuckyTax";
+import { nebraskaTax } from "./nebraskaTax";
+import { westVirginiaTax } from "./westVirginiaTax";
 
 /** 2026 federal values: Rev. Proc. 2025-32, published in IRB 2025-45.
  * State estimates deliberately retain the existing 2025 proxy, not new rules.
@@ -141,6 +145,10 @@ export type HouseholdTaxInput = Readonly<{
   alabamaContract?: "verified-law-precredit";
   arkansasContract?: "verified-law-precredit";
   delawareContract?: "verified-law-precredit";
+  kansasContract?: "verified-law-precredit";
+  kentuckyContract?: "verified-law-precredit";
+  nebraskaContract?: "verified-law-precredit";
+  westVirginiaContract?: "verified-law-precredit";
   projection?: TaxProjectionPolicy;
   /** Employee traditional 401(k) deferrals: reduce income-tax wages, not FICA. */
   pretax401k?: readonly Readonly<{ ownerId: string; amount: number }>[];
@@ -341,8 +349,12 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const al = location && input.state === "al" ? alabamaTax(input, agi, taxableBenefits, regularFederal, alternativeMinimumTax, niit) : null;
   const ar = location && input.state === "ar" ? arkansasTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase) : null;
   const de = location && input.state === "de" ? delawareTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
-  const localTax = ny ? ny.localTax : md ? md.localTax : inTax ? inTax.localTax : dc ? dc.localTax : il ? il.localTax : nj ? nj.localTax : pa ? pa.localTax : co ? co.localTax : nm ? nm.localTax : mn ? mn.localTax : ut ? ut.localTax : ct ? ct.localTax : vt ? vt.localTax : mt ? mt.localTax : ri ? ri.localTax : ca ? ca.localTax : va ? va.localTax : az ? az.localTax : ga ? ga.localTax : nc ? nc.localTax : sc ? sc.localTax : oh ? oh.localTax : ma ? ma.localTax : ia ? ia.localTax : ms ? ms.localTax : mo ? mo.localTax : wa ? wa.localTax : al ? al.localTax : ar ? ar.localTax : de ? de.localTax : location ? 0 : null;
-  const stateTax = ny ? ny.stateTax : md ? md.stateTax : inTax ? inTax.stateTax : dc ? dc.stateTax : il ? il.stateTax : nj ? nj.stateTax : pa ? pa.stateTax : co ? co.stateTax : nm ? nm.stateTax : mn ? mn.stateTax : ut ? ut.stateTax : ct ? ct.stateTax : vt ? vt.stateTax : mt ? mt.stateTax : ri ? ri.stateTax : ca ? ca.stateTax : va ? va.stateTax : az ? az.stateTax : ga ? ga.stateTax : nc ? nc.stateTax : sc ? sc.stateTax : oh ? oh.stateTax : ma ? ma.stateTax : ia ? ia.stateTax : ms ? ms.stateTax : mo ? mo.stateTax : wa ? wa.stateTax : al ? al.stateTax : ar ? ar.stateTax : de ? de.stateTax : location ? location.stateTax : estimateNetBreakdown({ grossAnnual: Math.max(0, agi), state: input.state,
+  const ks = location && input.state === "ks" ? kansasTax(input, agi, taxableBenefits) : null;
+  const ky = location && input.state === "ky" ? kentuckyTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
+  const ne = location && input.state === "ne" ? nebraskaTax(input, agi, taxableBenefits) : null;
+  const wv = location && input.state === "wv" ? westVirginiaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
+  const localTax = ny ? ny.localTax : md ? md.localTax : inTax ? inTax.localTax : dc ? dc.localTax : il ? il.localTax : nj ? nj.localTax : pa ? pa.localTax : co ? co.localTax : nm ? nm.localTax : mn ? mn.localTax : ut ? ut.localTax : ct ? ct.localTax : vt ? vt.localTax : mt ? mt.localTax : ri ? ri.localTax : ca ? ca.localTax : va ? va.localTax : az ? az.localTax : ga ? ga.localTax : nc ? nc.localTax : sc ? sc.localTax : oh ? oh.localTax : ma ? ma.localTax : ia ? ia.localTax : ms ? ms.localTax : mo ? mo.localTax : wa ? wa.localTax : al ? al.localTax : ar ? ar.localTax : de ? de.localTax : ks ? ks.localTax : ky ? ky.localTax : ne ? ne.localTax : wv ? wv.localTax : location ? 0 : null;
+  const stateTax = ny ? ny.stateTax : md ? md.stateTax : inTax ? inTax.stateTax : dc ? dc.stateTax : il ? il.stateTax : nj ? nj.stateTax : pa ? pa.stateTax : co ? co.stateTax : nm ? nm.stateTax : mn ? mn.stateTax : ut ? ut.stateTax : ct ? ct.stateTax : vt ? vt.stateTax : mt ? mt.stateTax : ri ? ri.stateTax : ca ? ca.stateTax : va ? va.stateTax : az ? az.stateTax : ga ? ga.stateTax : nc ? nc.stateTax : sc ? sc.stateTax : oh ? oh.stateTax : ma ? ma.stateTax : ia ? ia.stateTax : ms ? ms.stateTax : mo ? mo.stateTax : wa ? wa.stateTax : al ? al.stateTax : ar ? ar.stateTax : de ? de.stateTax : ks ? ks.stateTax : ky ? ky.stateTax : ne ? ne.stateTax : wv ? wv.stateTax : location ? location.stateTax : estimateNetBreakdown({ grossAnnual: Math.max(0, agi), state: input.state,
     filing: input.filing, k401Pct: 0 }).state;
   const total = finiteDollars(regularFederal + alternativeMinimumTax + socialSecurityPayroll + medicarePayroll
     + additionalMedicare + niit + earlyDistributionTax + stateTax + (localTax ?? 0), "Total annual tax");
@@ -354,7 +366,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
     netInvestmentIncome, niit, earlyDistributionTax, stateTax, total,
     nextLossCarryover: capitalLossCarryover(st, lt, capitalDeduction, unflooredTaxable),
     warnings: Object.freeze([
-      ny ? ny.warning : md ? md.warning : inTax ? inTax.warning : dc ? dc.warning : il ? il.warning : nj ? nj.warning : pa ? pa.warning : co ? co.warning : nm ? nm.warning : mn ? mn.warning : ut ? ut.warning : ct ? ct.warning : vt ? vt.warning : mt ? mt.warning : ri ? ri.warning : ca ? ca.warning : va ? va.warning : az ? az.warning : ga ? ga.warning : nc ? nc.warning : sc ? sc.warning : oh ? oh.warning : ma ? ma.warning : ia ? ia.warning : ms ? ms.warning : mo ? mo.warning : wa ? wa.warning : al ? al.warning : ar ? ar.warning : de ? de.warning : location ? location.warning : "State tax uses the existing 2025 wage-based proxy on federal AGI, not verified retirement-specific state rules; local taxes are excluded.",
+      ny ? ny.warning : md ? md.warning : inTax ? inTax.warning : dc ? dc.warning : il ? il.warning : nj ? nj.warning : pa ? pa.warning : co ? co.warning : nm ? nm.warning : mn ? mn.warning : ut ? ut.warning : ct ? ct.warning : vt ? vt.warning : mt ? mt.warning : ri ? ri.warning : ca ? ca.warning : va ? va.warning : az ? az.warning : ga ? ga.warning : nc ? nc.warning : sc ? sc.warning : oh ? oh.warning : ma ? ma.warning : ia ? ia.warning : ms ? ms.warning : mo ? mo.warning : wa ? wa.warning : al ? al.warning : ar ? ar.warning : de ? de.warning : ks ? ks.warning : ky ? ky.warning : ne ? ne.warning : wv ? wv.warning : location ? location.warning : "State tax uses the existing 2025 wage-based proxy on federal AGI, not verified retirement-specific state rules; local taxes are excluded.",
       "Standard-deduction U.S. resident estimate: IRA deductions require verified funded amounts; no IRA/Social Security worksheet interaction, itemization, credits, self-employment, foreign exclusions or AMT preference adjustments.",
       ...(input.year > 2026 ? ["Future tax values project 2026 law using explicit bracket/payroll growth, not published future tables. Statutory fixed thresholds remain nominal; the senior deduction expires after 2028."] : []),
       "Capital carryovers are household totals; survivor/filing-status changes require owner attribution before using this state.",
