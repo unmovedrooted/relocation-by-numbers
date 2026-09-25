@@ -40,7 +40,16 @@ describe("restricted retirement locations",()=>{
     expect(tx.total).toBe(estimateHouseholdTax({...input,state:"fl"}).total);
     expect(tx.total).toBeGreaterThan(0);
   });
-  it.each(STATES.filter(state=>!["fl","tx","ny","md","in","dc","il","nj","pa","co","nm","mn","ut","ct","vt","mt","ri","ca","va","az","ga","nc","sc","oh","ma","ia","ms","mo"].includes(state.code)))("blocks $name without silently using a proxy",({code})=>{
+  it.each(["ak","nv","sd","tn","wy","nh"] as const)("treats %s as a full-year zero-tax state, matching Florida",code=>{
+    const florida=calculatePreview(PREVIEW_DEFAULTS);
+    const input=buildPreviewInput({...PREVIEW_DEFAULTS,state:code});
+    expect(input).toMatchObject({state:code,cityId:"",stateTreatment:"verified-resident-location"});
+    const result=runRetirementTimeline(input);
+    expect(result.years.map(row=>[row.result.tax.total,row.result.cash.voluntaryWithdrawals,row.endingPortfolio])).toEqual(florida.years.map(row=>[row.result.tax.total,row.result.cash.voluntaryWithdrawals,row.endingPortfolio]));
+    expect(result.years.every(row=>row.result.tax.stateTax===0&&row.result.tax.localTax===0)).toBe(true);
+    expect(result.warnings.some(warning=>warning.includes("full-year resident individual income-tax treatment"))).toBe(true);
+  });
+  it.each(STATES.filter(state=>!["fl","tx","ny","md","in","dc","il","nj","pa","co","nm","mn","ut","ct","vt","mt","ri","ca","va","az","ga","nc","sc","oh","ma","ia","ms","mo","ak","nv","sd","tn","wy","nh"].includes(state.code)))("blocks $name without silently using a proxy",({code})=>{
     expect(()=>buildPreviewInput({...PREVIEW_DEFAULTS,state:code})).toThrow(/not yet verified/);
   });
   it("validates city ownership and unknown codes",()=>{
