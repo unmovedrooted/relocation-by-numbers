@@ -53,6 +53,11 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
   if (location.state === "ky" && values.kyContract !== "confirmed") throw new RangeError("Confirm the restricted Kentucky planning assumptions.");
   if (location.state === "ne" && values.neContract !== "confirmed") throw new RangeError("Confirm the restricted Nebraska planning assumptions.");
   if (location.state === "wv" && values.wvContract !== "confirmed") throw new RangeError("Confirm the restricted West Virginia planning assumptions.");
+  if (location.state === "id" && values.idContract !== "confirmed") throw new RangeError("Confirm the restricted Idaho planning assumptions.");
+  if (location.state === "la" && values.laContract !== "confirmed") throw new RangeError("Confirm the restricted Louisiana planning assumptions.");
+  if (location.state === "mi" && values.miContract !== "confirmed") throw new RangeError("Confirm the restricted Michigan planning assumptions.");
+  if (location.state === "ok" && values.okContract !== "confirmed") throw new RangeError("Confirm the restricted Oklahoma planning assumptions.");
+  if (location.state === "wi" && values.wiContract !== "confirmed") throw new RangeError("Confirm the restricted Wisconsin planning assumptions.");
   const number = (key: string, min = 0, max = 1e9) => {
     const raw = values[key];
     if (typeof raw !== "string" || !raw.trim()) throw new RangeError(`Please enter ${key.replaceAll("-", " ")}.`);
@@ -117,6 +122,11 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
     ...(location.state === "ky" ? { kentuckyContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "ne" ? { nebraskaContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "wv" ? { westVirginiaContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "id" ? { idahoContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "la" ? { louisianaContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "mi" ? { michiganContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "ok" ? { oklahomaContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "wi" ? { wisconsinContract: "verified-law-precredit" as const } : {}),
     people: ids.map(id => ({ id, birthDate: date(`${id}-birth`), blind: false, eligibleForSeniorDeduction: true,
       iraBasis: 0, iraAdditionalTaxExceptionAmount: 0, rothAdditionalTaxExceptionAmount: 0,
       roth: { firstContributionYear: null, regularContributionBasis: 0, conversions: [] } })),
