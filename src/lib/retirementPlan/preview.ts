@@ -42,6 +42,9 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
   if (location.state === "sc" && values.scContract !== "confirmed") throw new RangeError("Confirm the restricted South Carolina planning assumptions.");
   if (location.state === "oh" && values.ohContract !== "confirmed") throw new RangeError("Confirm the restricted Ohio planning assumptions.");
   if (location.state === "ma" && values.maContract !== "confirmed") throw new RangeError("Confirm the restricted Massachusetts planning assumptions.");
+  if (location.state === "ia" && values.iaContract !== "confirmed") throw new RangeError("Confirm the restricted Iowa planning assumptions.");
+  if (location.state === "ms" && values.msContract !== "confirmed") throw new RangeError("Confirm the restricted Mississippi planning assumptions.");
+  if (location.state === "mo" && values.moContract !== "confirmed") throw new RangeError("Confirm the restricted Missouri planning assumptions.");
   const number = (key: string, min = 0, max = 1e9) => {
     const raw = values[key];
     if (typeof raw !== "string" || !raw.trim()) throw new RangeError(`Please enter ${key.replaceAll("-", " ")}.`);
@@ -95,6 +98,9 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
     ...(location.state === "sc" ? { southCarolinaContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "oh" ? { ohioContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "ma" ? { massachusettsContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "ia" ? { iowaContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "ms" ? { mississippiContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "mo" ? { missouriContract: "verified-law-precredit" as const } : {}),
     people: ids.map(id => ({ id, birthDate: date(`${id}-birth`), blind: false, eligibleForSeniorDeduction: true,
       iraBasis: 0, iraAdditionalTaxExceptionAmount: 0, rothAdditionalTaxExceptionAmount: 0,
       roth: { firstContributionYear: null, regularContributionBasis: 0, conversions: [] } })),
