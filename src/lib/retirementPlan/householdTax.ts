@@ -95,6 +95,7 @@ export type HouseholdIncome = Readonly<{
   ownerId: string;
   /** Explicit classification for state rules; does not alter federal character. */
   pensionType?: "unspecified" | "private" | "ny-government" | "federal-government" | "other-government";
+  hawaiiPensionTreatment?: "unknown" | "exempt" | "taxable";
   /** Portion on/after age 59½, using the timeline's daily proration assumption.
    * Subset of amount, never additional federal income. */
   pensionAfter59Half?: number;
@@ -112,6 +113,9 @@ export type RetirementIncomeItem = Readonly<{
   date: string;
   source: "traditional-ira" | "ira-conversion" | "401k" | "plan-conversion" | "roth-401k" | "roth-ira" | "annuity";
   amount: number;
+  /** Portion of this taxable income subject to federal early-distribution tax.
+   * Excludes Roth conversion-principal recapture (not current taxable income). */
+  earlyDistributionTaxable?: number;
 }>;
 export type HouseholdTaxInput = Readonly<{
   year: number;
@@ -378,7 +382,8 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const wi = location && input.state === "wi" ? wisconsinTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const hi = location && input.state === "hi" ? hawaiiTax(input, agi, taxableBenefits) : null;
   const me = location && input.state === "me" ? maineTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
-  const nd = location && input.state === "nd" ? northDakotaTax(input, taxableIncome, taxableBenefits, preferentialIncome) : null;
+  // ND uses eligible Schedule D gain plus qualified dividends before federal deductions cap preferential income.
+  const nd = location && input.state === "nd" ? northDakotaTax(input, taxableIncome, taxableBenefits, qualifiedDividends + preferredCapital) : null;
   const orTax = location && input.state === "or" ? oregonTax(input, agi, taxableBenefits, regularFederal) : null;
   const localTax = ny ? ny.localTax : md ? md.localTax : inTax ? inTax.localTax : dc ? dc.localTax : il ? il.localTax : nj ? nj.localTax : pa ? pa.localTax : co ? co.localTax : nm ? nm.localTax : mn ? mn.localTax : ut ? ut.localTax : ct ? ct.localTax : vt ? vt.localTax : mt ? mt.localTax : ri ? ri.localTax : ca ? ca.localTax : va ? va.localTax : az ? az.localTax : ga ? ga.localTax : nc ? nc.localTax : sc ? sc.localTax : oh ? oh.localTax : ma ? ma.localTax : ia ? ia.localTax : ms ? ms.localTax : mo ? mo.localTax : wa ? wa.localTax : al ? al.localTax : ar ? ar.localTax : de ? de.localTax : ks ? ks.localTax : ky ? ky.localTax : ne ? ne.localTax : wv ? wv.localTax : id ? id.localTax : la ? la.localTax : mi ? mi.localTax : ok ? ok.localTax : wi ? wi.localTax : hi ? hi.localTax : me ? me.localTax : nd ? nd.localTax : orTax ? orTax.localTax : location ? 0 : null;
   const stateTax = ny ? ny.stateTax : md ? md.stateTax : inTax ? inTax.stateTax : dc ? dc.stateTax : il ? il.stateTax : nj ? nj.stateTax : pa ? pa.stateTax : co ? co.stateTax : nm ? nm.stateTax : mn ? mn.stateTax : ut ? ut.stateTax : ct ? ct.stateTax : vt ? vt.stateTax : mt ? mt.stateTax : ri ? ri.stateTax : ca ? ca.stateTax : va ? va.stateTax : az ? az.stateTax : ga ? ga.stateTax : nc ? nc.stateTax : sc ? sc.stateTax : oh ? oh.stateTax : ma ? ma.stateTax : ia ? ia.stateTax : ms ? ms.stateTax : mo ? mo.stateTax : wa ? wa.stateTax : al ? al.stateTax : ar ? ar.stateTax : de ? de.stateTax : ks ? ks.stateTax : ky ? ky.stateTax : ne ? ne.stateTax : wv ? wv.stateTax : id ? id.stateTax : la ? la.stateTax : mi ? mi.stateTax : ok ? ok.stateTax : wi ? wi.stateTax : hi ? hi.stateTax : me ? me.stateTax : nd ? nd.stateTax : orTax ? orTax.stateTax : location ? location.stateTax : estimateNetBreakdown({ grossAnnual: Math.max(0, agi), state: input.state,

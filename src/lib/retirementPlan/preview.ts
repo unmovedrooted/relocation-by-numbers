@@ -9,6 +9,7 @@ import { verifiedRetirementLocation } from "./verifiedLocation";
 export const PREVIEW_DEFAULTS: Record<string, string> = {
   state: "fl", cityId: "",
   "one-pensionType": "unspecified", "two-pensionType": "unspecified",
+  "one-hawaiiPensionTreatment": "unknown", "two-hawaiiPensionTreatment": "unknown",
   household: "single", startYear: "2026", endYear: "2060", spending: "50000", cash: "50000",
   inflation: "2.5", returns: "5", taxGrowth: "2", payrollGrowth: "2", thresholdGrowthMode: "linked",
   "one-birth": "1965-01-01", "one-retirement": "2030-01-01", "one-salary": "70000", "one-ira": "500000",
@@ -78,6 +79,15 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
     return value as HouseholdIncome["pensionType"];
   };
   const startYear = number("startYear", 2026, 2126);
+  const hawaiiPensionTreatment = (id: string): HouseholdIncome["hawaiiPensionTreatment"] => {
+    if (location.state !== "hi") return undefined;
+    const value = values[`${id}-hawaiiPensionTreatment`] ?? "unknown";
+    if (!["unknown", "exempt", "taxable"].includes(value)) throw new RangeError("Choose a valid Hawaii pension treatment.");
+    if (number(`${id}-pension`) > 0 && value === "unknown") {
+      throw new RangeError(`Confirm Hawaii pension treatment for ${id === "one" ? "Person 1" : "Person 2"}. Mixed or unknown pensions require an exclusion-ratio calculation not supported by this preview.`);
+    }
+    return value as HouseholdIncome["hawaiiPensionTreatment"];
+  };
   const endYear = number("endYear", startYear, 2126);
   if (!Number.isInteger(startYear) || !Number.isInteger(endYear)) throw new RangeError("Years must be whole numbers.");
   if (values.household !== "single" && values.household !== "married") throw new RangeError("Choose one or two people.");
@@ -144,7 +154,7 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
         rmd: { table: "uniform" as const, priorDecemberBalance: number(`${id}-ira`) } }))],
     income: ids.flatMap(id => [
       { id: `${id}-salary`, ownerId: id, kind: "wages" as const, annualAmount: number(`${id}-salary`), annualGrowth: inflation, startDate: `${startYear}-01-01`, endDate: null },
-      { id: `${id}-pension`, ownerId: id, kind: "pension" as const, pensionType: pensionType(id), annualAmount: number(`${id}-pension`), annualGrowth: 0, startDate: date(`${id}-pensionStart`), endDate: null },
+      { id: `${id}-pension`, ownerId: id, kind: "pension" as const, pensionType: pensionType(id), hawaiiPensionTreatment: hawaiiPensionTreatment(id), annualAmount: number(`${id}-pension`), annualGrowth: 0, startDate: date(`${id}-pensionStart`), endDate: null },
       { id: `${id}-benefit`, ownerId: id, kind: "social-security" as const, annualAmount: number(`${id}-benefit`), annualGrowth: inflation, startDate: date(`${id}-benefitStart`), endDate: null },
     ]),
     contributions: [], contributionCapacities: [], withdrawalOrder: ["cash", ...ids.map(id => `${id}-ira`)], surplusAccountId: "cash",

@@ -33,7 +33,7 @@ describe("Connected annual household: independent cash and tax answers", () => {
       accounts: [reserve, ira, roth, { ...ira, id: "two-ira", ownerId: "two" }],
       conversions: [{ sourceId: "ira", destinationId: "roth", amount: 10000 }],
       withdrawalOrder: ["ira", "two-ira"] }));
-    expect(result.retirementIncome).toContainEqual({ ownerId: "one", source: "ira-conversion", date: "2026-07-01", amount: 10000 });
+    expect(result.retirementIncome).toContainEqual({ ownerId: "one", source: "ira-conversion", date: "2026-07-01", amount: 10000, earlyDistributionTaxable: 0 });
     expect(result.retirementIncome.find(item => item.ownerId === "one" && item.source === "traditional-ira")?.amount).toBe(90000);
     expect(result.retirementIncome.find(item => item.ownerId === "two" && item.source === "traditional-ira")?.amount).toBeGreaterThan(60000);
     reconciled(result);

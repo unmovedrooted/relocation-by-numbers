@@ -20,10 +20,9 @@ import { ageAtYearEnd } from "./rules";
  *
  * Social Security and tier 1 Railroad Retirement Board benefits included in
  * federal income are fully subtracted. The 2025 federal tax liability
- * subtraction (capped at $8,500 for both filing statuses) is approximated
- * as a linear phase-out from the full cap to $0 over Table 4's federal-AGI
- * range ($125,000-$145,000 single, $250,000-$290,000 married filing
- * jointly), rather than the actual $5,000-wide discrete steps. The $256-
+ * subtraction follows Table 4's discrete caps ($5,000 single AGI bands,
+ * $10,000 married-filing-jointly bands). These are 2025 parameters held
+ * constant for projections, not verified 2026 or future indexed values. The $256-
  * per-exemption credit phases to $0 above $100,000 (single) or $200,000
  * (married filing jointly) federal AGI. Oregon's federal pension income
  * subtraction (for federal service before October 1, 1991), Retirement
@@ -37,9 +36,9 @@ const AGE_OR_BLIND_ADDITION: Record<FilingStatus, number> = { single: 1200, marr
 const EXEMPTION_CREDIT_PER_PERSON = 256;
 const EXEMPTION_CREDIT_AGI_LIMIT: Record<FilingStatus, number> = { single: 100000, married: 200000 };
 const FEDERAL_TAX_SUBTRACTION_CAP = 8500;
-const FEDERAL_TAX_SUBTRACTION_PHASEOUT: Record<FilingStatus, { start: number; end: number }> = {
-  single: { start: 125000, end: 145000 },
-  married: { start: 250000, end: 290000 },
+const FEDERAL_TAX_SUBTRACTION_PHASEOUT: Record<FilingStatus, { start: number; step: number }> = {
+  single: { start: 125000, step: 5000 },
+  married: { start: 250000, step: 10000 },
 };
 const BRACKET_CEILINGS: Record<FilingStatus, number[]> = {
   single: [4400, 11050, 125000, Infinity],
@@ -60,8 +59,9 @@ export function oregonTax(input: HouseholdTaxInput, federalAgi: number, taxableB
   if (input.oregonContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Oregon planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Oregon projection year.");
   const phaseout = FEDERAL_TAX_SUBTRACTION_PHASEOUT[input.filing];
-  const subtractionCap = Math.max(0, Math.min(FEDERAL_TAX_SUBTRACTION_CAP,
-    FEDERAL_TAX_SUBTRACTION_CAP * (1 - Math.max(0, federalAgi - phaseout.start) / (phaseout.end - phaseout.start))));
+  const reductionSteps = federalAgi < phaseout.start ? 0
+    : Math.min(5, 1 + Math.floor((federalAgi - phaseout.start) / phaseout.step));
+  const subtractionCap = FEDERAL_TAX_SUBTRACTION_CAP - reductionSteps * 1700;
   const federalTaxSubtraction = Math.min(regularFederal, subtractionCap);
   const orAgi = Math.max(0, federalAgi - taxableBenefits - federalTaxSubtraction);
   const ageOrBlindConditions = input.people.reduce((sum, person) =>
@@ -78,8 +78,10 @@ export function oregonTax(input: HouseholdTaxInput, federalAgi: number, taxableB
       + "single/$5,670 married filing jointly, plus $1,200 single or $1,000 married per person per age-65-or-blind "
       + "condition) and a $256-per-exemption credit that phases to $0 above $100,000 (single) or $200,000 (married "
       + "filing jointly) federal AGI. Social Security and tier 1 Railroad Retirement Board benefits are fully exempt. "
-      + "The federal tax liability subtraction (capped at $8,500) is approximated as a linear phase-out over its "
-      + "federal-AGI range, rather than the actual discrete $5,000-wide steps. Oregon's federal pension income "
+      + "The federal tax liability subtraction uses the exact 2025 discrete caps ($5,000 single AGI bands; "
+      + "$10,000 married bands). All Oregon parameters are held at 2025 values, not verified 2026 or future "
+      + "indexed amounts. Federal liability uses modeled regular income tax, not the complete Oregon worksheet "
+      + "with federal credits and other adjustments. Oregon's federal pension income "
       + "subtraction for service before October 1, 1991, Retirement Income Credit and one-time kicker credit are not "
       + "modeled. Only single and married-filing-jointly are supported. Itemized deductions and other credits are "
       + "excluded.",

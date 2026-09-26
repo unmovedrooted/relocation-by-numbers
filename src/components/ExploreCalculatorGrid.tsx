@@ -38,7 +38,7 @@ const CALCULATORS: Calc[] = [
   { href: "/fat-fire-calculator", title: "Fat FIRE Calculator", desc: "Retire early with a luxury budget ($200k+/yr).", cat: "FIRE" },
   { href: "/savings-rate-for-fire", title: "Savings Rate for FIRE", desc: "How your savings rate maps to years until financial independence.", cat: "FIRE" },
   // Retirement
-  { href: "/complete-retirement-plan", title: "Complete Retirement Plan (preview)", desc: "Full household retirement timeline: RMDs, Social Security, pensions, IRA/Roth basis, and year-by-year cash flow, with verified state tax treatment for 13 states.", cat: "Retirement" },
+  { href: "/complete-retirement-plan", title: "Complete Retirement Plan (preview)", desc: "Full household retirement timeline: RMDs, Social Security, pensions, IRA/Roth basis, and year-by-year cash flow, with state tax estimates and disclosed modeling limitations.", cat: "Retirement" },
   { href: "/retirement-calculator", title: "Retirement Calculator", desc: "Project your savings with a live balance chart and a Monte Carlo range.", cat: "Retirement" },
   { href: "/401k-calculator", title: "401(k) Calculator", desc: "Employer match, this year's tax savings, and projected balance with 2025 limits.", cat: "Retirement" },
   { href: "/hsa-calculator", title: "HSA Calculator", desc: "2025 limits, real federal + FICA + state tax savings, and tax-free growth.", cat: "Retirement" },

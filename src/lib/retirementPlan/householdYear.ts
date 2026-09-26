@@ -213,8 +213,8 @@ export function runHouseholdYear(input: HouseholdYearInput) {
     const deposited = new Map((context.contributions ?? []).map(item => [item.accountId, item.amount]));
     const characters: TaxCharacter[] = [];
     const retirementIncome: RetirementIncomeItem[] = [];
-    const recordRetirement = (ownerId: string, source: RetirementIncomeItem["source"], amount: number) => {
-      if (amount > 0) retirementIncome.push({ ownerId, source, date: input.distributionDate, amount });
+    const recordRetirement = (ownerId: string, source: RetirementIncomeItem["source"], amount: number, earlyDistributionTaxable = 0) => {
+      if (amount > 0) retirementIncome.push({ ownerId, source, date: input.distributionDate, amount, earlyDistributionTaxable });
     };
     const nextAccounts: YearAccount[] = [];
     for (const account of input.accounts) {
@@ -263,7 +263,7 @@ export function runHouseholdYear(input: HouseholdYearInput) {
           const result = qualifiedPlanWithdrawal({ ...early, balance: account.balance - converted,
             withdrawal: amount, afterTaxBasis: account.afterTaxBasis, additionalTaxExceptionAmount: account.additionalTaxExceptionAmount });
           characters.push(result.character, taxCharacter({ retirementOrdinary: converted }));
-          recordRetirement(account.ownerId, "401k", result.character.retirementOrdinary);
+          recordRetirement(account.ownerId, "401k", result.character.retirementOrdinary, result.character.additionalTaxBase);
           recordRetirement(account.ownerId, "plan-conversion", converted);
           nextAccounts.push({ ...account, balance: next.balance, afterTaxBasis: result.remainingBasis,
             rmd: { ...account.rmd, priorDecemberBalance: next.balance } });
@@ -272,7 +272,7 @@ export function runHouseholdYear(input: HouseholdYearInput) {
         case "roth-401k": {
           const result = rothPlanWithdrawal({ ...early, ...account, withdrawal: amount });
           characters.push(result.character);
-          recordRetirement(account.ownerId, "roth-401k", result.character.retirementOrdinary);
+          recordRetirement(account.ownerId, "roth-401k", result.character.retirementOrdinary, result.character.additionalTaxBase);
           nextAccounts.push({ ...account, balance: next.balance, contributionBasis: result.remainingBasis + deposit });
           break;
         }
@@ -282,7 +282,7 @@ export function runHouseholdYear(input: HouseholdYearInput) {
             ? deferredAnnuitySurrender(terms) : deferredAnnuityWithdrawal(terms);
           if ("requiresLossReview" in result && result.requiresLossReview) throw new RangeError("Annuity loss cannot be silently ignored.");
           characters.push(result.character);
-          recordRetirement(account.ownerId, "annuity", result.character.retirementOrdinary);
+          recordRetirement(account.ownerId, "annuity", result.character.retirementOrdinary, result.character.additionalTaxBase);
           nextAccounts.push({ ...account, balance: next.balance, investmentInContract: result.remainingBasis + deposit });
           break;
         }
@@ -301,7 +301,9 @@ export function runHouseholdYear(input: HouseholdYearInput) {
           distributions: withdrawn.get(account.id)!, conversions: conversionOut(account.id) })) });
       characters.push(ira.character, taxCharacter({ additionalTaxBase: additionalTaxBase(ira.taxableDistributions,
         { birthDate: person.birthDate, distributionDate: input.distributionDate, additionalTaxExceptionAmount: person.iraAdditionalTaxExceptionAmount }) }));
-      recordRetirement(person.id, "traditional-ira", ira.taxableDistributions);
+      recordRetirement(person.id, "traditional-ira", ira.taxableDistributions,
+        additionalTaxBase(ira.taxableDistributions, { birthDate: person.birthDate,
+          distributionDate: input.distributionDate, additionalTaxExceptionAmount: person.iraAdditionalTaxExceptionAmount }));
       recordRetirement(person.id, "ira-conversion", ira.taxableConversions);
       const roths = input.accounts.filter(account => account.ownerId === person.id && account.kind === "roth-ira");
       const convertedPlan = input.accounts.filter(account => account.ownerId === person.id && account.kind === "401k")
@@ -333,7 +335,8 @@ export function runHouseholdYear(input: HouseholdYearInput) {
           conversions: [...person.roth.conversions, ...(converted > 0
             ? [{ year: input.year, taxablePrincipal: taxableConversion, nontaxablePrincipal: nontaxableConversion }] : [])] });
         characters.push(result.character);
-        recordRetirement(person.id, "roth-ira", result.character.retirementOrdinary);
+        recordRetirement(person.id, "roth-ira", result.character.retirementOrdinary,
+          Math.min(result.character.retirementOrdinary, result.character.additionalTaxBase));
         nextRoth = { firstContributionYear: firstYear, regularContributionBasis: result.remainingContributionBasis,
           conversions: result.remainingConversions };
       }

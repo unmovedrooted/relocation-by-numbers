@@ -48,9 +48,21 @@ describe("restricted Oregon annual settlement", () => {
 
   it("phases the federal tax liability subtraction to zero as federal AGI rises through the single range", () => {
     const midway = oregonTax(input(), 135000, 0, 20000);
-    expect(midway.federalTaxSubtraction).toBeCloseTo(4250, 6);
+    expect(midway.federalTaxSubtraction).toBe(3400);
     const above = oregonTax(input(), 150000, 0, 20000);
     expect(above.federalTaxSubtraction).toBe(0);
+  });
+
+  it.each(["single", "married"] as const)("matches every 2025 subtraction boundary for %s", filing => {
+    const scale = filing === "single" ? 1 : 2;
+    const bands = [[125000, 6800], [130000, 5100], [135000, 3400], [140000, 1700], [145000, 0]];
+    for (const [boundary, cap] of bands) {
+      expect(oregonTax(input({ filing }), boundary * scale - .01, 0, 20000).federalTaxSubtraction).toBe(cap + 1700);
+      expect(oregonTax(input({ filing }), boundary * scale, 0, 20000).federalTaxSubtraction).toBe(cap);
+      expect(oregonTax(input({ filing }), boundary * scale + .01, 0, 20000).federalTaxSubtraction).toBe(cap);
+      expect(oregonTax(input({ filing }), boundary * scale, 0, 500).federalTaxSubtraction).toBe(Math.min(cap, 500));
+      expect(oregonTax(input({ filing }), boundary * scale, 0, 0).federalTaxSubtraction).toBe(0);
+    }
   });
 
   it("excludes Social Security and tier 1 Railroad Retirement from the Oregon tax base", () => {

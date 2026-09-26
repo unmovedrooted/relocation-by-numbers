@@ -16,7 +16,7 @@ type DatedAmount = Readonly<{
   /** Exclusive; null means through the horizon (wages still stop at retirement). */
   endDate: string | null;
 }>;
-export type TimelineIncome = DatedAmount & Pick<HouseholdIncome, "ownerId" | "kind" | "pensionType">;
+export type TimelineIncome = DatedAmount & Pick<HouseholdIncome, "ownerId" | "kind" | "pensionType" | "hawaiiPensionTreatment">;
 export type TimelineContribution = DatedAmount & Omit<YearContribution, "amount" | "purchaseLot"> & Readonly<{
   /** Brokerage purchase prices are explicit, not guessed from unrelated lots. */
   purchasePrices?: Readonly<Record<number, number>>;
@@ -252,6 +252,7 @@ export function runRetirementTimeline(input: TimelineInput) {
     };
     const income = input.income.map(schedule => ({ ownerId: schedule.ownerId, kind: schedule.kind,
       pensionType: schedule.pensionType,
+      hawaiiPensionTreatment: schedule.hawaiiPensionTreatment,
       ...(input.state === "ny" && schedule.kind === "pension" ? {
         pensionAfter59Half: annualAmount({ ...schedule, startDate: [schedule.startDate,
           pensionEligibilityDate(input.people.find(person => person.id === schedule.ownerId)!.birthDate)].sort().at(-1)! }, schedule.endDate),

@@ -22,6 +22,101 @@ function bracketTax(taxable: number, ceilings: number[]) {
 }
 
 describe("restricted Maine annual settlement", () => {
+  it.each([[125000, 40000], [175000, 20000], [225000, 0], [250000, 0]])(
+    "applies the disclosed temporary pension phaseout at federal AGI %i", (agi, expected) => {
+      const terms = input({ income: [], retirementIncome: [
+        { ownerId: "one", date: "2026-12-31", source: "ira-conversion", amount: 40000 },
+      ] });
+      const result = maineTax(terms, agi, 0, 40000);
+      expect(result.pensionDeduction).toBe(expected);
+      expect(result.warning).toContain("NOT verified 2026");
+    });
+
+  it("excludes only the early-tax-subject portion, not all younger IRA income", () => {
+    const terms = input({ retirementIncome: [
+      { ownerId: "one", date: "2026-12-31", source: "traditional-ira", amount: 20000, earlyDistributionTaxable: 15000 },
+    ] });
+    expect(maineTax(terms, 20000, 0, 20000).pensionDeduction).toBe(5000);
+  });
+
+  it("does not exclude personally purchased annuity income", () => {
+    const terms = input({ retirementIncome: [
+      { ownerId: "one", date: "2026-12-31", source: "annuity", amount: 20000, earlyDistributionTaxable: 0 },
+    ] });
+    expect(maineTax(terms, 20000, 0, 20000).pensionDeduction).toBe(0);
+  });
+
+  it("blocks unsupported early workplace exceptions and young pension classification", () => {
+    expect(() => maineTax(input({ retirementIncome: [
+      { ownerId: "one", date: "2026-12-31", source: "401k", amount: 20000, earlyDistributionTaxable: 0 },
+    ] }), 20000, 0, 20000)).toThrow(/periodic-payment/);
+    expect(() => maineTax(input({ income: [
+      { ownerId: "one", kind: "pension", amount: 20000 },
+    ] }), 20000, 0, 0)).toThrow(/payment and penalty/);
+  });
+
+  it("projects indexed amounts but keeps the pension phaseout width at 100,000", () => {
+    const terms = input({ year: 2027, projection: { kind: "project-2026-law", annualBracketGrowth: .1,
+      annualPayrollCapGrowth: .1, statePolicy: "freeze-2025-proxy" }, retirementIncome: [
+      { ownerId: "one", date: "2027-12-31", source: "ira-conversion", amount: 40000 },
+    ] });
+    const result = maineTax(terms, 187500, 0, 40000);
+    expect(result.pensionPhaseoutStart).toBe(137500);
+    expect(result.pensionDeduction).toBe(20000);
+    expect(maineTax({ ...terms, retirementIncome: [] }, 0, 0, 0).standardDeduction).toBe(17250);
+    expect(maineTax({ ...terms, retirementIncome: [] }, 0, 0, 0).exemption).toBe(5800);
+  });
+
+  it("requires an explicit growth assumption for future Maine years", () => {
+    expect(() => maineTax(input({ year: 2027 }), 0, 0, 0)).toThrow(/explicit tax growth/);
+  });
+
+  it("does not transfer an unused spouse exclusion to the account owner", () => {
+    const terms = input({ filing: "married", people: [
+      { id: "one", birthDate: "1960-01-01", blind: false, eligibleForSeniorDeduction: true },
+      { id: "two", birthDate: "1960-01-01", blind: false, eligibleForSeniorDeduction: true },
+    ], accountIncome: taxCharacter({ retirementOrdinary: 80000 }), retirementIncome: [
+      { ownerId: "one", source: "traditional-ira", date: "2026-12-31", amount: 80000 },
+    ] });
+    expect(maineTax(terms, 80000, 0, 80000).pensionDeduction).toBe(49824);
+    const split = { ...terms, retirementIncome: terms.people.map(person =>
+      ({ ownerId: person.id, source: "traditional-ira" as const, date: "2026-12-31", amount: 40000 })) };
+    expect(maineTax(split, 80000, 0, 80000).pensionDeduction).toBe(80000);
+    const income = [{ ownerId: "one", kind: "wages" as const, amount: 50000 }];
+    expect(estimateHouseholdTax({ ...terms, income }).stateTax)
+      .toBeGreaterThan(estimateHouseholdTax({ ...split, income }).stateTax);
+  });
+
+  it("rejects missing or unknown-owner retirement attribution", () => {
+    expect(() => maineTax(input(), 80000, 0, 80000)).toThrow(/owner-level/);
+    expect(() => maineTax(input({ retirementIncome: [
+      { ownerId: "unknown", source: "traditional-ira", date: "2026-12-31", amount: 80000 },
+    ] }), 80000, 0, 80000)).toThrow(/attribution/);
+  });
+
+  it.each([[102250, 15700], [139750, 7850], [177250, 0], [200000, 0]])(
+    "phases the single standard deduction at Maine AGI %i", (agi, expected) => {
+      expect(maineTax(input(), agi, 0, 0).standardDeduction).toBe(expected);
+    });
+
+  it.each([[341000, 5300], [403500, 2650], [466000, 0], [500000, 0]])(
+    "phases the single personal exemption at Maine AGI %i", (agi, expected) => {
+      expect(maineTax(input(), agi, 0, 0).exemption).toBe(expected);
+    });
+
+  it("uses post-subtraction Maine AGI for deduction phaseouts", () => {
+    expect(maineTax(input(), 122250, 20000, 0).standardDeduction).toBe(15700);
+  });
+
+  it("uses distinct married phaseout thresholds and widths", () => {
+    const terms = input({ filing: "married", people: [
+      { id: "one", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
+      { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
+    ] });
+    expect(maineTax(terms, 279550, 0, 0).standardDeduction).toBe(15700);
+    expect(maineTax(terms, 471650, 0, 0).exemption).toBe(5300);
+  });
+
   it("applies the graduated schedule after the standard deduction and $5,300 personal exemption", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const me = estimateHouseholdTax(terms);
@@ -43,7 +138,7 @@ describe("restricted Maine annual settlement", () => {
   it("adds the enacted 2% surcharge above $1,000,000 taxable income single", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 1100000 }] });
     const me = maineTax(terms, 1100000, 0, 0);
-    const taxable = 1100000 - 15700 - 5300;
+    const taxable = 1100000; // Both deductions are fully phased out.
     const expected = bracketTax(taxable, [27400, 64850, Infinity]) + (taxable - 1000000) * .02;
     expect(me.stateTax).toBeCloseTo(expected, 6);
   });
@@ -65,14 +160,16 @@ describe("restricted Maine annual settlement", () => {
   });
 
   it("caps the per-owner pension income deduction at $49,824, reduced by that owner's own Social Security", () => {
-    const terms = input({ income: [{ ownerId: "one", kind: "pension", amount: 60000, pensionType: "private" },
+    const terms = input({ people: [{ id: "one", birthDate: "1960-01-01", blind: false, eligibleForSeniorDeduction: true }], income: [{ ownerId: "one", kind: "pension", amount: 60000, pensionType: "private" },
       { ownerId: "one", kind: "social-security", amount: 10000 }] });
-    const me = maineTax(terms, 60000, 0, 20000);
+    const me = maineTax({ ...terms, retirementIncome: [
+      { ownerId: "one", source: "traditional-ira", date: "2026-12-31", amount: 20000 },
+    ] }, 60000, 0, 20000);
     expect(me.pensionDeduction).toBe(49824 - 10000);
   });
 
   it("does not require the owner to be 65 or older for the pension deduction", () => {
-    const terms = input({ people: [{ id: "one", birthDate: "1995-01-01", blind: false, eligibleForSeniorDeduction: false }],
+    const terms = input({ people: [{ id: "one", birthDate: "1965-01-01", blind: false, eligibleForSeniorDeduction: false }],
       income: [{ ownerId: "one", kind: "pension", amount: 20000, pensionType: "private" }] });
     const me = maineTax(terms, 20000, 0, 0);
     expect(me.pensionDeduction).toBe(20000);

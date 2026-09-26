@@ -49,6 +49,20 @@ describe("restricted North Dakota annual settlement", () => {
     expect(nd.ndTaxableIncome).toBe(88000);
   });
 
+  it("does not cap qualified dividends at federal taxable income before the state exclusion", () => {
+    const nd = estimateHouseholdTax(input({ accountIncome: { ...taxCharacter(), qualifiedDividends: 120000 } }));
+    expect(nd.taxableIncome).toBe(103900);
+    // (120000 - 16100 - 40% * 120000 - 48475) * 1.95% = 144.7875.
+    expect(nd.stateTax).toBeCloseTo(144.7875, 8);
+  });
+
+  it.each([[-20000, 50000, 30000], [20000, 50000, 50000], [-60000, 50000, 0]])(
+    "nets short-term %s and long-term %s before the exclusion", (shortTermGain, longTermGain, eligibleGain) => {
+      const nd = estimateHouseholdTax(input({ income: [{ ownerId: "one", kind: "wages", amount: 120000 }],
+        accountIncome: { ...taxCharacter(), shortTermGain, longTermGain, qualifiedDividends: 10000 } }));
+      expect(nd.stateTax).toBeCloseTo(bracketTax(Math.max(0, nd.taxableIncome - .4 * (eligibleGain + 10000)), [48475, 244825, Infinity]), 8);
+    });
+
   it("requires explicit confirmation of the restricted North Dakota assumptions", () => {
     expect(() => northDakotaTax(input({ northDakotaContract: undefined }), 0, 0, 0)).toThrow(/Confirm/);
   });
