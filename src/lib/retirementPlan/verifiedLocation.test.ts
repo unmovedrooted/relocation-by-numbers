@@ -49,7 +49,7 @@ describe("restricted retirement locations",()=>{
     expect(result.years.every(row=>row.result.tax.stateTax===0&&row.result.tax.localTax===0)).toBe(true);
     expect(result.warnings.some(warning=>warning.includes("full-year resident individual income-tax treatment"))).toBe(true);
   });
-  it.each(STATES.filter(state=>!["fl","tx","ny","md","in","dc","il","nj","pa","co","nm","mn","ut","ct","vt","mt","ri","ca","va","az","ga","nc","sc","oh","ma","ia","ms","mo","ak","nv","sd","tn","wy","nh","wa","al","ar","de","ks","ky","ne","wv","id","la","mi","ok","wi"].includes(state.code)))("blocks $name without silently using a proxy",({code})=>{
+  it.each(STATES.filter(state=>!["fl","tx","ny","md","in","dc","il","nj","pa","co","nm","mn","ut","ct","vt","mt","ri","ca","va","az","ga","nc","sc","oh","ma","ia","ms","mo","ak","nv","sd","tn","wy","nh","wa","al","ar","de","ks","ky","ne","wv","id","la","mi","ok","wi","hi","me","nd","or"].includes(state.code)))("blocks $name without silently using a proxy",({code})=>{
     expect(()=>buildPreviewInput({...PREVIEW_DEFAULTS,state:code})).toThrow(/not yet verified/);
   });
   it("validates city ownership and unknown codes",()=>{
@@ -68,7 +68,7 @@ describe("restricted retirement locations",()=>{
   });
   it("enforces the restriction in the engine, not just in the form",()=>{
     const input=buildPreviewInput(PREVIEW_DEFAULTS);
-    expect(()=>runRetirementTimeline({...input,state:"hi"})).toThrow(/not yet verified/);
+    expect(()=>runRetirementTimeline({...input,state:"zz" as typeof input.state})).toThrow(/explicit supported state-proxy selection/);
     expect(()=>runRetirementTimeline({...input,cityId:"unknown"})).toThrow(/city/);
   });
   it("keeps existing Florida numerical results unchanged",()=>{
