@@ -62,13 +62,13 @@ describe("restricted Wisconsin annual settlement", () => {
   it("excludes an owner 67 or older's own pension plus a share of the retirement-ordinary aggregate up to $24,000", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1955-01-01", blind: false, eligibleForSeniorDeduction: true }],
       income: [{ ownerId: "one", kind: "pension", amount: 30000 }] });
-    const wi = wisconsinTax(terms, 50000, 0, 20000);
+    const wi = wisconsinTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 20000 }] }, 50000, 0, 20000);
     expect(wi.retirementSubtraction).toBe(24000);
   });
 
   it("does not extend the retirement subtraction to an owner under 67", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", amount: 30000 }] });
-    const wi = wisconsinTax(terms, 50000, 0, 20000);
+    const wi = wisconsinTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 20000 }] }, 50000, 0, 20000);
     expect(wi.retirementSubtraction).toBe(0);
   });
 

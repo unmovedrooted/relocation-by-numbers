@@ -1,4 +1,5 @@
 import type { HouseholdTaxInput } from "./householdTax";
+import { ownerRetirementIncome } from "./ownerRetirementIncome";
 import { ageAtYearEnd } from "./rules";
 
 /**
@@ -67,14 +68,14 @@ function marginal(amount: number, ceilings: number[], rates: number[]) {
 export function wisconsinTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
   if (input.wisconsinContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Wisconsin planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Wisconsin projection year.");
-  const perOwnerOrdinary = retirementOrdinary / input.people.length;
+  const ownerRetirement = ownerRetirementIncome(input, retirementOrdinary, "Wisconsin");
   let retirementSubtraction = 0;
   let personalExemption = 0;
   for (const person of input.people) {
     personalExemption += PERSONAL_EXEMPTION_PER_PERSON;
     if (ageAtYearEnd(person.birthDate, input.year) >= 67) {
       const ownPension = input.income.filter(item => item.ownerId === person.id && item.kind === "pension").reduce((sum, item) => sum + item.amount, 0);
-      retirementSubtraction += Math.min(RETIREMENT_SUBTRACTION_CAP_PER_PERSON, ownPension + perOwnerOrdinary);
+      retirementSubtraction += Math.min(RETIREMENT_SUBTRACTION_CAP_PER_PERSON, ownPension + ownerRetirement.get(person.id)!);
     }
     if (ageAtYearEnd(person.birthDate, input.year) >= 65) personalExemption += SENIOR_EXEMPTION_PER_PERSON;
   }
@@ -91,8 +92,8 @@ export function wisconsinTax(input: HouseholdTaxInput, federalAgi: number, taxab
       + "Wisconsin's own income-phased standard deduction table (which may differ from the official table by a small "
       + "amount in some income ranges) and a $700 personal exemption per person plus $250 per person 65 or older. "
       + "Social Security and military retirement pay are fully exempt. An owner 67 or older excludes up to $24,000 of "
-      + "that owner's own pension income plus a share of this planner's aggregate 401(k)/IRA/annuity distribution "
-      + "figure, but Wisconsin's separate low-income age-65 $5,000 subtraction and its exemption for pre-1964 "
+      + "that owner's own pension income plus that owner's own attributed 401(k)/IRA/annuity distributions, "
+      + "but Wisconsin's separate low-income age-65 $5,000 subtraction and its exemption for pre-1964 "
       + "government pension accounts are not modeled. Only single and married-filing-jointly are supported. Itemized "
       + "deductions and credits are excluded.",
   };

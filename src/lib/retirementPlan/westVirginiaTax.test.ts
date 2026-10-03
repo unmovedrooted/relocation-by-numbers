@@ -76,20 +76,20 @@ describe("restricted West Virginia annual settlement", () => {
 
   it("gives an owner 65 or older up to $8,000 of further exclusion against other income", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1955-01-01", blind: false, eligibleForSeniorDeduction: true }] });
-    const wv = westVirginiaTax(terms, 20000, 0, 20000);
+    const wv = westVirginiaTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 20000 }] }, 20000, 0, 20000);
     expect(wv.seniorDeduction).toBe(8000);
   });
 
   it("nets the senior deduction against Social Security and government-pension exclusions already claimed", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1955-01-01", blind: false, eligibleForSeniorDeduction: true }],
       income: [{ ownerId: "one", kind: "social-security", amount: 3000 }, { ownerId: "one", kind: "pension", amount: 1000, pensionType: "federal-government" }] });
-    const wv = westVirginiaTax(terms, 30000, 3000, 20000);
+    const wv = westVirginiaTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 20000 }] }, 30000, 3000, 20000);
     expect(wv.seniorDeduction).toBeCloseTo(8000 - 3000 - 1000, 6);
   });
 
   it("does not extend the senior deduction to an owner under 65", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true }] });
-    const wv = westVirginiaTax(terms, 20000, 0, 20000);
+    const wv = westVirginiaTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 20000 }] }, 20000, 0, 20000);
     expect(wv.seniorDeduction).toBe(0);
   });
 

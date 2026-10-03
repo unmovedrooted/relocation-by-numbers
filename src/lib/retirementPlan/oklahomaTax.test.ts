@@ -62,7 +62,7 @@ describe("restricted Oklahoma annual settlement", () => {
 
   it("caps a combined pension and retirement-ordinary exclusion at $10,000 per owner, at any age", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", amount: 5000, pensionType: "private" }] });
-    const ok = oklahomaTax(terms, 30000, 0, 20000);
+    const ok = oklahomaTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 20000 }] }, 30000, 0, 20000);
     expect(ok.retirementExclusion).toBe(10000);
   });
 

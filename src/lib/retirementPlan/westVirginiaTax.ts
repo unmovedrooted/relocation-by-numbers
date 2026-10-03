@@ -1,4 +1,5 @@
 import type { HouseholdTaxInput } from "./householdTax";
+import { ownerRetirementIncome } from "./ownerRetirementIncome";
 import { ageAtYearEnd } from "./rules";
 
 /**
@@ -74,7 +75,7 @@ export function westVirginiaTax(input: HouseholdTaxInput, federalAgi: number, ta
   const ssThreshold = input.filing === "married" ? SS_FULL_EXEMPTION_THRESHOLD_MARRIED : SS_FULL_EXEMPTION_THRESHOLD_SINGLE;
   const ssExemptionRate = federalAgi <= ssThreshold ? 1 : SS_PARTIAL_EXEMPTION_RATE;
   const ssExemption = taxableBenefits * ssExemptionRate;
-  const perOwnerOrdinary = retirementOrdinary / input.people.length;
+  const ownerRetirement = ownerRetirementIncome(input, retirementOrdinary, "West Virginia");
   let governmentPensionExclusion = 0;
   let seniorDeduction = 0;
   for (const person of input.people) {
@@ -86,7 +87,7 @@ export function westVirginiaTax(input: HouseholdTaxInput, federalAgi: number, ta
       const ownWages = ownIncome.filter(item => item.kind === "wages").reduce((sum, item) => sum + item.amount, 0);
       const ownPrivatePension = ownIncome.filter(item => item.kind === "pension" && !isGovernmentPension(item.pensionType)).reduce((sum, item) => sum + item.amount, 0);
       const ownSocialSecurity = ownIncome.filter(item => item.kind === "social-security").reduce((sum, item) => sum + item.amount, 0);
-      const ownOtherIncome = ownWages + ownPrivatePension + perOwnerOrdinary;
+      const ownOtherIncome = ownWages + ownPrivatePension + ownerRetirement.get(person.id)!;
       const ownExcludedSoFar = ownSocialSecurity * ssExemptionRate + ownGovernmentPensionExcluded;
       seniorDeduction += Math.max(0, Math.min(SENIOR_DEDUCTION_CAP, ownOtherIncome) - ownExcludedSoFar);
     }
@@ -105,8 +106,8 @@ export function westVirginiaTax(input: HouseholdTaxInput, federalAgi: number, ta
       + "pension with a federal-government, other-government or ny-government pensionType is excluded up to $2,000 per "
       + "owner, but West Virginia's separate, uncapped exemptions for police, firefighter, federal law enforcement and "
       + "military retirement systems are not modeled. An owner 65 or older further excludes up to $8,000 of that owner's "
-      + "own wages, private pension income and a share of this planner's aggregate 401(k)/IRA/annuity distribution "
-      + "figure, net of that owner's own Social Security and government-pension exclusions; investment income is not "
+      + "own wages, private pension income and own attributed 401(k)/IRA/annuity distributions, "
+      + "net of that owner's own Social Security and government-pension exclusions; investment income is not "
       + "attributed per owner and is excluded from that base. West Virginia's disability deduction, Family Tax Credit "
       + "and property-tax credits are not modeled. Only single and married-filing-jointly are supported.",
   };

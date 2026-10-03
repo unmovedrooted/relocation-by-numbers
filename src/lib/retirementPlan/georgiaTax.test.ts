@@ -63,13 +63,13 @@ describe("restricted Georgia annual settlement", () => {
     expect(ga.retirementIncomeExclusion).toBe(15000);
   });
 
-  it("splits the aggregate 401(k)/IRA/annuity figure 50/50 between two qualifying spouses", () => {
+  it("counts each qualifying spouse's own attributed 401(k)/IRA/annuity distributions", () => {
     const terms = input({ filing: "married", people: [
       { id: "one", birthDate: "1958-01-01", blind: false, eligibleForSeniorDeduction: true },
       { id: "two", birthDate: "1958-01-01", blind: false, eligibleForSeniorDeduction: true },
     ] });
-    const ga = georgiaTax(terms, 60000, 0, 60000);
-    // Each spouse gets 30000 (half of retirementOrdinary), both under the 65000 cap.
+    const ga = georgiaTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 30000 }, { ownerId: "two", source: "traditional-ira", date: "2026-07-01", amount: 30000 }] }, 60000, 0, 60000);
+    // Each spouse withdrew 30000, both under the 65000 cap.
     expect(ga.retirementIncomeExclusion).toBe(60000);
   });
 
@@ -78,9 +78,9 @@ describe("restricted Georgia annual settlement", () => {
       { id: "one", birthDate: "1958-01-01", blind: false, eligibleForSeniorDeduction: true },
       { id: "two", birthDate: "1963-01-01", blind: false, eligibleForSeniorDeduction: true },
     ] });
-    // Each spouse gets 50000 (half of 100000); the 65+ spouse stays under 65000, but the
+    // Each spouse withdrew 50000; the 65+ spouse stays under 65000, but the
     // 62-64 spouse is capped at 35000. Total = 50000 + 35000 = 85000.
-    const ga = georgiaTax(terms, 100000, 0, 100000);
+    const ga = georgiaTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 50000 }, { ownerId: "two", source: "traditional-ira", date: "2026-07-01", amount: 50000 }] }, 100000, 0, 100000);
     expect(ga.retirementIncomeExclusion).toBe(85000);
   });
 

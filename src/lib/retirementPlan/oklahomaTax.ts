@@ -1,5 +1,6 @@
 import type { FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
+import { ownerRetirementIncome } from "./ownerRetirementIncome";
 import { ageAtYearEnd } from "./rules";
 
 /**
@@ -29,8 +30,8 @@ import { ageAtYearEnd } from "./rules";
  * qualifying pension, annuity, IRA, 401(k), 403(b) or deferred
  * compensation income at any age, so this planner applies it to a
  * combined pool of that owner's own pension income (any pensionType)
- * plus a share of this planner's aggregate 401(k)/IRA/annuity
- * distribution figure. Oklahoma's separate, fully uncapped exclusions
+ * plus that owner's own attributed 401(k)/IRA/annuity
+ * distributions. Oklahoma's separate, fully uncapped exclusions
  * for military retired pay and CSRS-in-lieu-of-Social-Security federal
  * annuities are not modeled, since this planner cannot identify either.
  */
@@ -57,12 +58,12 @@ function marginal(amount: number, ceilings: number[], rates: number[]) {
 export function oklahomaTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
   if (input.oklahomaContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Oklahoma planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Oklahoma projection year.");
-  const perOwnerOrdinary = retirementOrdinary / input.people.length;
+  const ownerRetirement = ownerRetirementIncome(input, retirementOrdinary, "Oklahoma");
   let retirementExclusion = 0;
   let specialExemption = 0;
   for (const person of input.people) {
     const ownPension = input.income.filter(item => item.ownerId === person.id && item.kind === "pension").reduce((sum, item) => sum + item.amount, 0);
-    retirementExclusion += Math.min(RETIREMENT_EXCLUSION_CAP, ownPension + perOwnerOrdinary);
+    retirementExclusion += Math.min(RETIREMENT_EXCLUSION_CAP, ownPension + ownerRetirement.get(person.id)!);
     if (ageAtYearEnd(person.birthDate, input.year) >= 65 && federalAgi <= SPECIAL_EXEMPTION_AGI_LIMIT[input.filing]) specialExemption += PERSONAL_EXEMPTION_PER_PERSON;
   }
   const okAgi = Math.max(0, federalAgi - taxableBenefits - retirementExclusion);
@@ -75,8 +76,8 @@ export function oklahomaTax(input: HouseholdTaxInput, federalAgi: number, taxabl
       + "$3,750/$4,900/$7,200 single, doubled for married filing jointly) applied after the standard deduction ($6,350 "
       + "single/$12,700 married filing jointly) and a $1,000 personal exemption per person, plus a further $1,000 per "
       + "person 65 or older when household Federal AGI is $15,000 or less (single) or $25,000 or less (married filing "
-      + "jointly). Social Security is fully exempt. Each owner's own pension income of any pensionType, plus a share "
-      + "of this planner's aggregate 401(k)/IRA/annuity distribution figure, is excluded up to a combined $10,000 per "
+      + "jointly). Social Security is fully exempt. Each owner's own pension income of any pensionType, plus that owner's "
+      + "own attributed 401(k)/IRA/annuity distributions, is excluded up to a combined $10,000 per "
       + "owner, but Oklahoma's separate, uncapped exclusions for military retired pay and CSRS-in-lieu-of-Social-"
       + "Security federal annuities are not modeled. Only single and married-filing-jointly are supported. Itemized "
       + "deductions and other credits are excluded.",

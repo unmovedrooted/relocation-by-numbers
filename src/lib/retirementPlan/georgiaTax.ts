@@ -1,5 +1,6 @@
 import type { FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
+import { ownerRetirementIncome } from "./ownerRetirementIncome";
 import { ageAtYearEnd } from "./rules";
 
 /** Restricted, flat-rate, PRE-CREDIT planning estimate. Rates and thresholds
@@ -29,10 +30,8 @@ import { ageAtYearEnd } from "./rules";
  * local income tax; localTax is always zero. This planner's Retirement
  * Income Exclusion pool includes, per qualifying owner, only that owner's
  * own income entered as "pension" plus up to $5,000 of that owner's own
- * wages; this planner's aggregate 401(k)/IRA/annuity distribution figure is
- * not tracked per owner, so for a married household it is split 50/50
- * between spouses, mirroring Georgia's own instruction to allocate jointly
- * owned retirement-income property at 50% to each taxpayer. Taxable
+ * wages; each owner's own attributed 401(k)/IRA/annuity distributions are
+ * counted for that owner. Taxable
  * interest, dividends, capital gains and rental/royalty/partnership income
  * are not included in the exclusion pool at all, since this planner does
  * not track them per owner; this understates the exclusion, and therefore
@@ -59,14 +58,14 @@ function retirementIncomeExclusionCap(age: number) {
 }
 
 function retirementIncomeExclusion(input: HouseholdTaxInput, year: number, retirementOrdinary: number) {
-  const perOwnerOrdinary = retirementOrdinary / input.people.length;
+  const ownerRetirement = ownerRetirementIncome(input, retirementOrdinary, "Georgia");
   return input.people.reduce((sum, person) => {
     const cap = retirementIncomeExclusionCap(ageAtYearEnd(person.birthDate, year));
     if (cap === 0) return sum;
     const pension = input.income.filter(item => item.kind === "pension" && item.ownerId === person.id).reduce((s, item) => s + item.amount, 0);
     const wages = input.income.filter(item => item.kind === "wages" && item.ownerId === person.id).reduce((s, item) => s + item.amount, 0);
     const earnedPortion = Math.min(wages, EARNED_INCOME_CAP_PER_PERSON);
-    const unearnedPortion = pension + perOwnerOrdinary;
+    const unearnedPortion = pension + ownerRetirement.get(person.id)!;
     return sum + Math.min(cap, earnedPortion + unearnedPortion);
   }, 0);
 }
@@ -83,9 +82,8 @@ export function georgiaTax(input: HouseholdTaxInput, federalAgi: number, taxable
     warning: "Georgia pre-credit estimate: the enacted flat 5.19% rate (reviewed 2026-09-24) and Georgia's own standard "
       + "deduction ($12,000 single/$24,000 married; Georgia has no personal exemption for the taxpayer or spouse). Social "
       + "Security is fully excluded. The Retirement Income Exclusion gives each spouse who is 62-64 up to $35,000, or 65 or "
-      + "older up to $65,000, of their own income entered as \"pension,\" up to $5,000 of their own wages, and a 50/50 share "
-      + "of this planner's aggregate 401(k)/IRA/annuity distribution figure (mirroring Georgia's own joint-property "
-      + "allocation rule, since that figure is not tracked per owner). Taxable interest, dividends, capital gains and rental "
+      + "older up to $65,000, of their own income entered as \"pension,\" up to $5,000 of their own wages, and that "
+      + "owner's own attributed 401(k)/IRA/annuity distributions. Taxable interest, dividends, capital gains and rental "
       + "income are not included in the exclusion pool, since this planner does not track them per owner, understating the "
       + "exclusion for a household with meaningful taxable investment income. The disability-based under-62 exclusion and "
       + "Georgia's separate military retirement income exclusion are not modeled. Georgia has no local income tax. Only "

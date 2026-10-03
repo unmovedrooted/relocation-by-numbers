@@ -56,12 +56,12 @@ describe("restricted Arkansas annual settlement", () => {
 
   it("caps the combined pension and retirement-ordinary exclusion at $6,000 per owner", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", amount: 3000 }] });
-    const ar = arkansasTax(terms, 30000, 0, 6000, 0);
+    const ar = arkansasTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 6000 }] }, 30000, 0, 6000, 0);
     expect(ar.retirementExclusion).toBe(6000);
   });
 
   it("excludes the retirement-ordinary figure except the early-distribution-penalty base", () => {
-    const ar = arkansasTax(input(), 30000, 0, 8000, 2000);
+    const ar = arkansasTax(input({ retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 8000, earlyDistributionTaxable: 2000 }] }), 30000, 0, 8000, 2000);
     expect(ar.retirementExclusion).toBe(6000);
   });
 

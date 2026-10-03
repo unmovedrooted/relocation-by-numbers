@@ -71,7 +71,7 @@ describe("restricted Missouri annual settlement", () => {
 
   it("caps the private pension exemption at $6,000 per owner, including a share of the retirement-ordinary figure", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", pensionType: "private", amount: 3000 }] });
-    const mo = missouriTax(terms, 20000, 0, 16100, 6000);
+    const mo = missouriTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 6000 }] }, 20000, 0, 16100, 6000);
     expect(mo.privatePensionSubtraction).toBe(6000);
   });
 

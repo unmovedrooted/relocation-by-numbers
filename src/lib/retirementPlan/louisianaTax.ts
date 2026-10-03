@@ -1,5 +1,6 @@
 import type { FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
+import { ownerRetirementIncome } from "./ownerRetirementIncome";
 import { ageAtYearEnd } from "./rules";
 
 /**
@@ -46,13 +47,13 @@ function isExemptSystemPension(pensionType: HouseholdTaxInput["income"][number][
 export function louisianaTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
   if (input.louisianaContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Louisiana planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Louisiana projection year.");
-  const perOwnerOrdinary = retirementOrdinary / input.people.length;
+  const ownerRetirement = ownerRetirementIncome(input, retirementOrdinary, "Louisiana");
   const exemptSystemPension = input.income.filter(item => item.kind === "pension" && isExemptSystemPension(item.pensionType)).reduce((sum, item) => sum + item.amount, 0);
   let retirementExemption = 0;
   for (const person of input.people) {
     if (ageAtYearEnd(person.birthDate, input.year) < 65) continue;
     const ownOtherPension = input.income.filter(item => item.ownerId === person.id && item.kind === "pension" && !isExemptSystemPension(item.pensionType)).reduce((sum, item) => sum + item.amount, 0);
-    retirementExemption += Math.min(RETIREMENT_EXEMPTION_CAP, ownOtherPension + perOwnerOrdinary);
+    retirementExemption += Math.min(RETIREMENT_EXEMPTION_CAP, ownOtherPension + ownerRetirement.get(person.id)!);
   }
   const laAgi = Math.max(0, federalAgi - taxableBenefits - exemptSystemPension - retirementExemption);
   const taxable = Math.max(0, laAgi - STANDARD_DEDUCTION[input.filing]);
@@ -64,8 +65,8 @@ export function louisianaTax(input: HouseholdTaxInput, federalAgi: number, taxab
       + "adjustment), not a prediction of future legislation; Louisiana has no personal exemption. Social Security is "
       + "fully exempt. Income entered as annual pension with a federal-government, other-government or ny-government "
       + "pensionType is treated as an exempt state, local or federal retirement system benefit and fully excluded at "
-      + "any age; a private or unspecified pension, and a share of this planner's aggregate 401(k)/IRA/annuity "
-      + "distribution figure, are excluded up to $12,000 per owner 65 or older only. Only single and "
+      + "any age; a private or unspecified pension, and that owner's own attributed 401(k)/IRA/annuity "
+      + "distributions, are excluded up to $12,000 per owner 65 or older only. Only single and "
       + "married-filing-jointly are supported. Itemized deductions and credits are excluded.",
   };
 }

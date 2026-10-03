@@ -1,5 +1,6 @@
 import type { FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
+import { ownerRetirementIncome } from "./ownerRetirementIncome";
 import { ageAtYearEnd } from "./rules";
 
 /** Restricted, standard-deduction, PRE-CREDIT planning estimate. Rates and
@@ -26,9 +27,9 @@ import { ageAtYearEnd } from "./rules";
  *   spouse.
  *   https://revenuefiles.delaware.gov/2025/PITForms_Instructions/Instructions/PIT-RES_Instructions_2025-01.pdf
  *
- * Uses enacted law, not a prediction of future legislation. This planner's
- * aggregate 401(k)/IRA/annuity distribution figure is split evenly between
- * spouses and, for an owner 60 or older, combined with that owner's own
+ * Uses enacted law, not a prediction of future legislation. Each owner's own
+ * attributed 401(k)/IRA/annuity distributions are, for an owner 60 or older,
+ * combined with that owner's own
  * pension income toward the $12,500 cap; the interest, dividend and
  * capital-gain components of "eligible retirement income" are not included,
  * since this planner does not track them per owner, understating the
@@ -63,14 +64,14 @@ function marginal(amount: number, ceilings: number[], rates: number[]) {
 export function delawareTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
   if (input.delawareContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Delaware planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Delaware projection year.");
-  const perOwnerOrdinary = retirementOrdinary / input.people.length;
+  const ownerRetirement = ownerRetirementIncome(input, retirementOrdinary, "Delaware");
   let pensionExclusion = 0;
   let standardDeduction = 0;
   let personalCredit = 0;
   for (const person of input.people) {
     const age = ageAtYearEnd(person.birthDate, input.year);
     const ownPension = input.income.filter(item => item.ownerId === person.id && item.kind === "pension").reduce((sum, item) => sum + item.amount, 0);
-    pensionExclusion += age >= 60 ? Math.min(AGE_60_PLUS_CAP, ownPension + perOwnerOrdinary) : Math.min(UNDER_60_NON_MILITARY_CAP, ownPension);
+    pensionExclusion += age >= 60 ? Math.min(AGE_60_PLUS_CAP, ownPension + ownerRetirement.get(person.id)!) : Math.min(UNDER_60_NON_MILITARY_CAP, ownPension);
     standardDeduction += ((age >= 65 ? 1 : 0) + (person.blind ? 1 : 0)) * ADDITIONAL_STANDARD_DEDUCTION_PER_CONDITION;
     personalCredit += PERSONAL_CREDIT_PER_PERSON + (age >= 60 ? AGE_60_CREDIT_PER_PERSON : 0);
   }
@@ -86,8 +87,8 @@ export function delawareTax(input: HouseholdTaxInput, federalAgi: number, taxabl
       + "deduction ($3,250 single/$6,500 married) adds $2,500 per taxpayer or spouse 65 or older and a separate $2,500 per "
       + "taxpayer or spouse legally blind. A $110 personal credit per taxpayer and spouse, plus a separate $110 per "
       + "taxpayer or spouse 60 or older, applies against computed tax. Social Security is fully excluded. For an owner 60 "
-      + "or older, that owner's own pension income plus a share of this planner's aggregate 401(k)/IRA/annuity "
-      + "distribution figure (split evenly between spouses) is excluded up to $12,500, unused capacity not shared with a "
+      + "or older, that owner's own pension income plus that owner's own attributed 401(k)/IRA/annuity "
+      + "distributions is excluded up to $12,500, unused capacity not shared with a "
       + "spouse; the interest, dividend, capital-gain and rental components of Delaware's broader \"eligible retirement "
       + "income\" definition are not included, understating the exclusion for a household with meaningful taxable "
       + "investment income. For an owner under 60, only that owner's own pension income is excluded, capped at $2,000, "

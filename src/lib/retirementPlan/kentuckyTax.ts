@@ -1,4 +1,5 @@
 import type { HouseholdTaxInput } from "./householdTax";
+import { ownerRetirementIncome } from "./ownerRetirementIncome";
 
 /**
  * Restricted, verified Kentucky resident annual settlement.
@@ -41,11 +42,11 @@ const PENSION_EXCLUSION_CAP = 31110;
 export function kentuckyTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
   if (input.kentuckyContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Kentucky planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Kentucky projection year.");
-  const perOwnerOrdinary = retirementOrdinary / input.people.length;
+  const ownerRetirement = ownerRetirementIncome(input, retirementOrdinary, "Kentucky");
   let pensionExclusion = 0;
   for (const person of input.people) {
     const ownPension = input.income.filter(item => item.ownerId === person.id && item.kind === "pension").reduce((sum, item) => sum + item.amount, 0);
-    pensionExclusion += Math.min(PENSION_EXCLUSION_CAP, ownPension + perOwnerOrdinary);
+    pensionExclusion += Math.min(PENSION_EXCLUSION_CAP, ownPension + ownerRetirement.get(person.id)!);
   }
   const standardDeduction = STANDARD_DEDUCTION_PER_PERSON * input.people.length;
   const kyAgi = Math.max(0, federalAgi - taxableBenefits - pensionExclusion);
@@ -55,8 +56,8 @@ export function kentuckyTax(input: HouseholdTaxInput, federalAgi: number, taxabl
     stateTax, localTax: 0, kyAgi, pensionExclusion,
     warning: "Kentucky pre-credit estimate using the enacted, unconditionally scheduled flat 3.5% rate for 2026, applied "
       + "after a $3,360 standard deduction per taxpayer, not a prediction of future legislation. Social Security is fully "
-      + "exempt. Each owner's own pension income plus a share of this planner's aggregate 401(k)/IRA/annuity distribution "
-      + "figure is excluded up to $31,110 per owner, but Schedule P's separate, larger exclusion for qualifying government "
+      + "exempt. Each owner's own pension income plus that owner's own attributed 401(k)/IRA/annuity distributions "
+      + "is excluded up to $31,110 per owner, but Schedule P's separate, larger exclusion for qualifying government "
       + "pension service credit earned before January 1, 1998 is not modeled. Only single and married-filing-jointly are "
       + "supported. Itemized deductions and credits are excluded.",
   };

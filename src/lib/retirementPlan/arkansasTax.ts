@@ -1,5 +1,6 @@
 import type { FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
+import { ownerRetirementIncome } from "./ownerRetirementIncome";
 
 /** Restricted, standard-deduction, PRE-CREDIT planning estimate. Rates and
  * thresholds reviewed 2026-09-25 against Arkansas's enacted 2026 schedule
@@ -23,8 +24,8 @@ import type { HouseholdTaxInput } from "./householdTax";
  *
  * Uses enacted law, not a prediction of future legislation. Income entered
  * as annual pension is attributed to its own owner and capped at $6,000 per
- * owner; this planner's aggregate 401(k)/IRA/annuity distribution figure is
- * split evenly between spouses and excluded, up to each owner's remaining
+ * owner; that owner's own attributed 401(k)/IRA/annuity distributions are
+ * excluded, up to that owner's remaining
  * $6,000 capacity, except the portion that triggers the federal
  * early-distribution penalty, used as a proxy for Arkansas's own age-59 1/2
  * test on IRA distributions (this proxy does not distinguish an
@@ -59,12 +60,12 @@ function marginal(amount: number, ceilings: number[], rates: number[]) {
 export function arkansasTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number, earlyDistributionBase: number) {
   if (input.arkansasContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Arkansas planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Arkansas projection year.");
-  const perOwnerOrdinary = Math.max(0, retirementOrdinary - earlyDistributionBase) / input.people.length;
+  const ownerRetirement = ownerRetirementIncome(input, retirementOrdinary, "Arkansas", earlyDistributionBase);
   let retirementExclusion = 0;
   let personalCredit = 0;
   for (const person of input.people) {
     const ownPension = input.income.filter(item => item.ownerId === person.id && item.kind === "pension").reduce((sum, item) => sum + item.amount, 0);
-    retirementExclusion += Math.min(RETIREMENT_CAP_PER_PERSON, ownPension + perOwnerOrdinary);
+    retirementExclusion += Math.min(RETIREMENT_CAP_PER_PERSON, ownPension + ownerRetirement.get(person.id)!);
     personalCredit += PERSONAL_CREDIT_PER_PERSON + (person.blind ? PERSONAL_CREDIT_PER_PERSON : 0);
   }
   const arAgi = Math.max(0, federalAgi - taxableBenefits - retirementExclusion);
@@ -77,7 +78,7 @@ export function arkansasTax(input: HouseholdTaxInput, federalAgi: number, taxabl
       + "3.7% above), the same brackets for every filing status, applied after the $2,470 single/$4,940 married standard "
       + "deduction, reviewed 2026-09-25. A $29 personal credit per taxpayer and spouse, plus $29 per taxpayer or spouse "
       + "legally blind, applies against computed tax. Social Security is fully exempt. Income entered as annual pension, "
-      + "and this planner's aggregate 401(k)/IRA/annuity distribution figure (split evenly between spouses), is excluded "
+      + "and that owner's own attributed 401(k)/IRA/annuity distributions, is excluded "
       + "up to $6,000 per owner, except the portion of the distribution figure that triggers the federal "
       + "early-distribution penalty, used as a proxy for Arkansas's own age-59 1/2 test on IRA distributions (a proxy "
       + "that does not distinguish an employer-plan distribution, which needs no age test, from an IRA distribution, "

@@ -63,13 +63,13 @@ describe("restricted Delaware annual settlement", () => {
   it("excludes up to $12,500 of pension plus retirement-ordinary for an owner 60 or older", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1960-01-01", blind: false, eligibleForSeniorDeduction: true }],
       income: [{ ownerId: "one", kind: "pension", amount: 5000 }] });
-    const de = delawareTax(terms, 20000, 0, 20000);
+    const de = delawareTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 20000 }] }, 20000, 0, 20000);
     expect(de.pensionExclusion).toBe(12500);
   });
 
   it("caps an under-60 owner's exclusion at $2,000 of their own pension only", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", amount: 5000 }] });
-    const de = delawareTax(terms, 20000, 0, 20000);
+    const de = delawareTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 20000 }] }, 20000, 0, 20000);
     expect(de.pensionExclusion).toBe(2000);
   });
 

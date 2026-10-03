@@ -1,5 +1,6 @@
 import type { FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
+import { ownerRetirementIncome } from "./ownerRetirementIncome";
 import { ageAtYearEnd } from "./rules";
 
 /** Restricted, two-bracket, PRE-CREDIT planning estimate. Rates and
@@ -33,9 +34,8 @@ import { ageAtYearEnd } from "./rules";
  * Uses enacted law, not a prediction of future legislation. South Carolina
  * has no local income tax; localTax is always zero. The General Retirement
  * Income Deduction pool is, per owner, that owner's own income entered as
- * "pension" plus a 50/50 share (for a married household) of this planner's
- * aggregate 401(k)/IRA/annuity distribution figure, since that figure is
- * not tracked per owner. South Carolina's separate, more generous military
+ * "pension" plus that owner's own attributed 401(k)/IRA/annuity
+ * distributions. South Carolina's separate, more generous military
  * retirement deductions under Section 12-6-1171 (up to $17,500 of earned
  * income at any age, or $30,000 of military retirement income at 65+) are
  * not modeled, since this planner cannot identify military retirement
@@ -64,11 +64,11 @@ function sciad(input: HouseholdTaxInput, federalAgi: number) {
 }
 
 function generalRetirementDeduction(input: HouseholdTaxInput, retirementOrdinary: number) {
-  const perOwnerOrdinary = retirementOrdinary / input.people.length;
+  const ownerRetirement = ownerRetirementIncome(input, retirementOrdinary, "South Carolina");
   return input.people.map(person => {
     const pension = input.income.filter(item => item.kind === "pension" && item.ownerId === person.id).reduce((s, item) => s + item.amount, 0);
     const cap = ageAtYearEnd(person.birthDate, input.year) >= 65 ? GENERAL_RETIREMENT_CAP.over65 : GENERAL_RETIREMENT_CAP.under65;
-    return Math.min(pension + perOwnerOrdinary, cap);
+    return Math.min(pension + ownerRetirement.get(person.id)!, cap);
   });
 }
 
@@ -100,8 +100,7 @@ export function southCarolinaTax(input: HouseholdTaxInput, federalAgi: number, t
       + "$15,000 single/$30,000 married) phases out on a straight fraction of federal AGI over $40,000 (single) or $80,000 "
       + "(married), reaching $0 at $95,000/$190,000. Social Security is fully excluded. The General Retirement Income "
       + "Deduction gives each owner up to $3,000 (under 65) or $10,000 (65+) of their own income entered as \"pension\" plus "
-      + "a 50/50 share of this planner's aggregate 401(k)/IRA/annuity distribution figure (that figure is not tracked per "
-      + "owner). The Age 65 and Older Deduction adds up to $15,000 per spouse 65 or older against any income, reduced by "
+      + "that owner's own attributed 401(k)/IRA/annuity distributions. The Age 65 and Older Deduction adds up to $15,000 per spouse 65 or older against any income, reduced by "
       + "that spouse's own general retirement deduction. South Carolina's separate, more generous military retirement "
       + "deductions (up to $17,500 of earned income at any age, or $30,000 of military retirement income at 65+) are not "
       + "modeled, since this planner cannot identify military retirement income, understating the benefit for a household "

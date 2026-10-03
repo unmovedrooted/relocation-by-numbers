@@ -39,7 +39,7 @@ describe("restricted Kentucky annual settlement", () => {
 
   it("caps the combined pension and retirement-ordinary exclusion at $31,110 per owner", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", amount: 20000 }] });
-    const ky = kentuckyTax(terms, 50000, 0, 20000);
+    const ky = kentuckyTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 20000 }] }, 50000, 0, 20000);
     expect(ky.pensionExclusion).toBe(31110);
   });
 

@@ -1,5 +1,6 @@
 import type { FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
+import { ownerRetirementIncome } from "./ownerRetirementIncome";
 import { ageAtYearEnd } from "./rules";
 
 /** Restricted, federal-standard-deduction, PRE-CREDIT planning estimate.
@@ -38,9 +39,9 @@ import { ageAtYearEnd } from "./rules";
  * ny-government pensionType is treated as a public pension; a private or
  * unspecified pensionType is treated as a private pension, the more
  * restrictive, income-tested treatment, since this planner cannot otherwise
- * verify a private source. This planner's aggregate 401(k)/IRA/annuity
- * distribution figure is treated entirely as private-source retirement
- * income (split evenly between spouses), since this planner does not track
+ * verify a private source. Each owner's own attributed 401(k)/IRA/annuity
+ * distributions are treated entirely as private-source retirement
+ * income for that owner, since this planner does not track
  * whether an account is government-sponsored. Missouri's separate, full
  * military retirement pay exemption is not modeled, since this planner
  * cannot identify military retirement income. Only single and
@@ -87,7 +88,7 @@ function incomeByOwner(input: HouseholdTaxInput, kind: "social-security") {
 export function missouriTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, standardDeduction: number, retirementOrdinary: number) {
   if (input.missouriContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Missouri planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Missouri projection year.");
-  const perOwnerOrdinary = retirementOrdinary / input.people.length;
+  const ownerRetirement = ownerRetirementIncome(input, retirementOrdinary, "Missouri");
   const ssGrossByOwner = incomeByOwner(input, "social-security");
   const totalGrossSs = [...ssGrossByOwner.values()].reduce((sum, value) => sum + value, 0);
   const ssByOwner = new Map<string, number>();
@@ -103,7 +104,7 @@ export function missouriTax(input: HouseholdTaxInput, federalAgi: number, taxabl
   for (const person of input.people) {
     const capped = Math.min(ownPension(input, person.id, "public"), MAX_PUBLIC_PENSION_CAP);
     publicPensionSubtraction += Math.max(0, capped - ssByOwner.get(person.id)!);
-    const ownPrivate = ownPension(input, person.id, "private") + perOwnerOrdinary;
+    const ownPrivate = ownPension(input, person.id, "private") + ownerRetirement.get(person.id)!;
     privatePensionTotal += Math.min(ownPrivate, PRIVATE_PENSION_CAP_PER_PERSON);
   }
   const excess = Math.max(0, federalAgi - taxableBenefits - PRIVATE_PENSION_THRESHOLD[input.filing]);
@@ -120,8 +121,8 @@ export function missouriTax(input: HouseholdTaxInput, federalAgi: number, taxabl
       + "disability-based deduction for a younger owner. Income entered as annual pension with a federal-government, "
       + "other-government or ny-government pensionType is a public pension, capped at $47,633 per owner (the latest "
       + "published maximum Social Security benefit, for tax year 2025, held here pending Missouri's 2026 update) and "
-      + "reduced by that owner's own Social Security deduction; a private or unspecified pensionType, and this planner's "
-      + "aggregate 401(k)/IRA/annuity distribution figure (split evenly between spouses), is a private pension, capped at "
+      + "reduced by that owner's own Social Security deduction; a private or unspecified pensionType, and that owner's "
+      + "own attributed 401(k)/IRA/annuity distributions, is a private pension, capped at "
       + "$6,000 per owner and then reduced, in total, dollar-for-dollar by the excess of household AGI less Social Security "
       + "over $25,000 (single) or $32,000 (married). Missouri's separate, full military retirement pay exemption is not "
       + "modeled, since this planner cannot identify military retirement income. Only single and married-filing-jointly are "

@@ -46,13 +46,13 @@ describe("restricted Louisiana annual settlement", () => {
   it("excludes a private pension and retirement-ordinary aggregate up to $12,000 for an owner 65 or older", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1955-01-01", blind: false, eligibleForSeniorDeduction: true }],
       income: [{ ownerId: "one", kind: "pension", amount: 5000, pensionType: "private" }] });
-    const la = louisianaTax(terms, 25000, 0, 20000);
+    const la = louisianaTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 20000 }] }, 25000, 0, 20000);
     expect(la.retirementExemption).toBe(12000);
   });
 
   it("does not extend the private pension exemption to an owner under 65", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", amount: 5000, pensionType: "private" }] });
-    const la = louisianaTax(terms, 25000, 0, 20000);
+    const la = louisianaTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 20000 }] }, 25000, 0, 20000);
     expect(la.retirementExemption).toBe(0);
   });
 
