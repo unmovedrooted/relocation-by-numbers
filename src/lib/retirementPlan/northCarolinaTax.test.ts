@@ -12,10 +12,15 @@ function input(overrides: Partial<HouseholdTaxInput> = {}): HouseholdTaxInput {
 }
 
 describe("restricted North Carolina annual settlement", () => {
-  it("applies the flat 4.25% rate net of the standard deduction, with no local tax", () => {
+  it("uses the enacted post-2025 rate without assuming future revenue triggers", () => {
+    for (const year of [2026, 2027, 2060]) {
+      expect(northCarolinaTax(input({ year }), 112750, 0).stateTax).toBeCloseTo(3990, 8);
+    }
+  });
+  it("applies the flat 3.99% rate net of the standard deduction, with no local tax", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 40000 }] });
     const nc = estimateHouseholdTax(terms);
-    expect(nc.stateTax).toBeCloseTo((40000 - 12750) * 0.0425, 6);
+    expect(nc.stateTax).toBeCloseTo((40000 - 12750) * 0.0399, 6);
     expect(nc.localTax).toBe(0);
   });
 
@@ -25,7 +30,7 @@ describe("restricted North Carolina annual settlement", () => {
       { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
     ], income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const nc = estimateHouseholdTax(terms);
-    expect(nc.stateTax).toBeCloseTo((60000 - 25500) * 0.0425, 6);
+    expect(nc.stateTax).toBeCloseTo((60000 - 25500) * 0.0399, 6);
   });
 
   it("excludes Social Security from the North Carolina tax base", () => {
@@ -40,7 +45,7 @@ describe("restricted North Carolina annual settlement", () => {
       income: [{ ownerId: "one", kind: "pension", amount: 20000, pensionType: "federal-government" }] });
     const nc = northCarolinaTax(terms, 20000, 0);
     // Not excluded: taxable = 20000 - 12750 = 7250.
-    expect(nc.stateTax).toBeCloseTo((20000 - 12750) * 0.0425, 6);
+    expect(nc.stateTax).toBeCloseTo((20000 - 12750) * 0.0399, 6);
   });
 
   it("requires explicit confirmation of the restricted North Carolina assumptions", () => {

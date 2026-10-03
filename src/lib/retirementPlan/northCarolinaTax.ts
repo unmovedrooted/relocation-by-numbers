@@ -2,9 +2,12 @@ import type { FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
 
 /** Restricted, flat-rate, PRE-CREDIT planning estimate. Rates and thresholds
- * reviewed 2026-09-24 against the North Carolina Department of Revenue's
+ * reviewed 2026-09-26 against the North Carolina Department of Revenue's
  * 2025 D-401 Individual Income Tax Instructions:
- * - The flat 4.25% rate (Form D-400, Line 15) and the standard deduction
+ * Rate updated from NCDOR's Tax Rate Schedules for years after 2025:
+ * https://www.ncdor.gov/taxes-forms/individual-income-tax/tax-rate-schedules
+ * Future conditional reductions are not assumed.
+ * - The flat 3.99% rate (Form D-400, Line 15) and the standard deduction
  *   ($12,750 single/MFS-not-itemizing, $25,500 married filing jointly).
  *   North Carolina gives no additional standard deduction for a taxpayer 65
  *   or older or blind.
@@ -44,7 +47,7 @@ import type { HouseholdTaxInput } from "./householdTax";
  * California, Virginia, Arizona and Georgia estimates' convention.
  */
 
-const STATE_RATE = .0425;
+const STATE_RATE = .0399;
 const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 12750, married: 25500 };
 
 export function northCarolinaTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number) {
@@ -54,7 +57,7 @@ export function northCarolinaTax(input: HouseholdTaxInput, federalAgi: number, t
   const stateTax = taxable * STATE_RATE;
   return {
     stateTax, localTax: 0,
-    warning: "North Carolina pre-credit estimate: the enacted flat 4.25% rate (reviewed 2026-09-24) and North Carolina's own "
+    warning: "North Carolina pre-credit estimate: the enacted flat 3.99% rate (reviewed 2026-09-24) and North Carolina's own "
       + "standard deduction ($12,750 single/$25,500 married; no additional amount for age 65 or blindness). Social Security "
       + "is fully excluded. North Carolina's Bailey settlement exclusion (full exemption for certain NC state/local/federal "
       + "government retirement benefits, but only for a retiree vested with 5+ years of service as of August 12, 1989) and "

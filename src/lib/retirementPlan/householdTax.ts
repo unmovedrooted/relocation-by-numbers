@@ -124,6 +124,8 @@ export type HouseholdTaxInput = Readonly<{
   income: readonly HouseholdIncome[];
   accountIncome: TaxCharacter;
   retirementIncome?: readonly RetirementIncomeItem[];
+  /** Confirmed single-source exempt withdrawals, already included in federal retirement income. */
+  hawaiiAccountExclusion?: number;
   lossCarryover: CapitalLossCarryover;
   state: StateCode;
   stateTreatment: "existing-2025-proxy" | "verified-resident-location";

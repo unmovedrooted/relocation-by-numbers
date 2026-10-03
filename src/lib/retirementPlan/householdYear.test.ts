@@ -27,6 +27,38 @@ function reconciled(result: ReturnType<typeof runHouseholdYear>) {
 }
 
 describe("Connected annual household: independent cash and tax answers", () => {
+  it("settles confirmed Hawaii rollover IRA withdrawals without state tax, retaining federal tax", () => {
+    const base = input({ state: "hi", stateTreatment: "verified-resident-location", hawaiiContract: "verified-law-precredit",
+      accounts: [reserve, { ...ira, hawaiiSource: "exempt-rollover" }, roth] });
+    const exempt = runHouseholdYear(base);
+    const taxable = runHouseholdYear({ ...base, accounts: [reserve, { ...ira, hawaiiSource: "taxable" }, roth] });
+    expect(exempt.tax.stateTax).toBe(0);
+    expect(exempt.tax.total).toBeGreaterThan(0);
+    expect(taxable.tax.stateTax).toBeGreaterThan(0);
+    expect(exempt.nextState.accounts.find(a => a.id === "ira")?.hawaiiSource).toBe("exempt-rollover");
+    reconciled(exempt);
+  });
+
+  it("excludes confirmed employer-funded 401k RMDs while retaining federal tax", () => {
+    const plan: YearAccount = { id: "plan", ownerId: "one", kind: "401k", balance: 246000, annualReturn: 0,
+      rmd: { table: "uniform", priorDecemberBalance: 246000 }, afterTaxBasis: 0, additionalTaxExceptionAmount: 0,
+      deferRmdWhileWorking: false, hawaiiSource: "exempt-employer" };
+    const result = runHouseholdYear(input({ state: "hi", stateTreatment: "verified-resident-location", hawaiiContract: "verified-law-precredit",
+      people: [{ ...person, birthDate: "1951-01-01" }], accounts: [reserve, plan], withdrawalOrder: ["reserve", "plan"], spending: 40000 }));
+    expect(result.tax.stateTax).toBe(0);
+    expect(result.tax.total).toBeGreaterThan(0);
+    expect(result.cash.accounts.find(a => a.accountId === "plan")?.requiredWithdrawal).toBe(10000);
+    reconciled(result);
+  });
+
+  it("blocks unknown Hawaii sources, exempt conversions and exempt after-tax basis", () => {
+    const base = input({ state: "hi", stateTreatment: "verified-resident-location", hawaiiContract: "verified-law-precredit" });
+    expect(() => runHouseholdYear(base)).toThrow(/funding source/);
+    const accounts = [reserve, { ...ira, hawaiiSource: "exempt-rollover" as const }, roth];
+    expect(() => runHouseholdYear({ ...base, accounts, conversions: [{ sourceId: "ira", destinationId: "roth", amount: 1000 }] })).toThrow(/conversions/);
+    expect(() => runHouseholdYear({ ...base, accounts, people: [{ ...person, iraBasis: 1000 }] })).toThrow(/after-tax basis/);
+    expect(() => runHouseholdYear({ ...base, accounts, contributions: [{ accountId: "ira", amount: 1000, taxTreatment: "after-tax", eligibility: "externally-validated" }] })).toThrow(/contributions/);
+  });
   it("retains each IRA owner's taxable distribution and conversion separately", () => {
     const result = runHouseholdYear(input({ filing: "married", spending: 150000,
       people: [person, { ...person, id: "two" }],

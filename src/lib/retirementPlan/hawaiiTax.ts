@@ -18,9 +18,10 @@ import type { HouseholdTaxInput } from "./householdTax";
  * compensation plans (401(k), 403(b), SARSEP, 457(b)) and self-funded IRA or
  * annuity distributions, subject to funding-source exceptions. Entered
  * pensions require explicit fully-exempt or fully-taxable classification;
- * mixed or unknown treatment is blocked. Account distributions still use
- * the restricted fully-taxable assumption; employer-funded account portions
- * and rollover-source tracing are not modeled.
+ * mixed or unknown treatment is blocked. Traditional IRA/401(k) sources
+ * must be confirmed taxable or single-source exempt employer/rollover.
+ * Exempt accounts with federal basis, contributions or conversions are blocked.
+ * Other account types retain their existing taxable-income treatment.
  * https://files.hawaii.gov/tax/legal/tir/1990_09/tir96-5.pdf
  */
 
@@ -58,7 +59,11 @@ export function hawaiiTax(input: HouseholdTaxInput, federalAgi: number, taxableB
     }
     return sum + (item.hawaiiPensionTreatment === "exempt" ? item.amount : 0);
   }, 0);
-  const hiAgi = Math.max(0, federalAgi - taxableBenefits - pensionExclusion);
+  const accountExclusion = input.hawaiiAccountExclusion ?? 0;
+  if (!Number.isFinite(accountExclusion) || accountExclusion < 0 || accountExclusion > input.accountIncome.retirementOrdinary + 1e-5) {
+    throw new RangeError("Invalid Hawaii account exclusion attribution.");
+  }
+  const hiAgi = Math.max(0, federalAgi - taxableBenefits - pensionExclusion - accountExclusion);
   const exemption = PERSONAL_EXEMPTION_PER_PERSON * input.people.length;
   const taxable = Math.max(0, hiAgi - standardDeduction(input.year, input.filing) - exemption);
   const futureCeilings = input.year >= 2029
@@ -71,16 +76,17 @@ export function hawaiiTax(input: HouseholdTaxInput, federalAgi: number, taxableB
     ? marginal(taxable, BRACKET_CEILINGS[input.filing], BRACKET_RATES)
     : marginal(taxable, futureCeilings.map(value => value * (input.filing === "married" ? 2 : 1)), futureRates);
   return {
-    stateTax, localTax: 0, hiAgi, pensionExclusion,
+    stateTax, localTax: 0, hiAgi, pensionExclusion, accountExclusion,
     warning: "Hawaii pre-credit estimate using year-specific enacted brackets: 1.40% to 11% in 2026, "
       + "and Act 24 (2026) schedules for 2027 and 2029 onward, topping out at 13%. "
       + "Act 46 standard deductions are $8,000 single in 2026, $9,000 in 2028, $10,000 in 2030, "
       + "and $12,000 from 2031, doubled for married filing jointly, without additional inflation indexing, "
       + "and a $1,144 personal exemption per person. Social Security and Railroad Retirement Tier 1 benefits are fully "
       + "exempt. Entered pensions require explicit fully-exempt or fully-taxable Hawaii treatment; mixed or unknown "
-      + "treatment is blocked, not inferred from pension type. Account distributions remain fully taxable under the "
-      + "restricted assumption: employer-funded account portions and rollover-source exemptions are not modeled, "
-      + "which can overstate tax. Only single and married-filing-jointly are supported. Itemized deductions and credits are "
+      + "treatment is blocked, not inferred from pension type. Traditional IRA/401(k) accounts require confirmed taxable "
+      + "or single-source exempt employer/rollover treatment. Exempt accounts with federal basis, contributions, matches "
+      + "or conversions are unsupported; mixed/unknown funding is blocked. Other account types retain existing taxable-income "
+      + "treatment. Only single and married-filing-jointly are supported. Itemized deductions and credits are "
       + "excluded.",
   };
 }

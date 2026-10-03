@@ -41,7 +41,7 @@ describe("restricted Hawaii annual settlement", () => {
   it("preserves separate owners' classifications through annual projection", () => {
     const plan = buildPreviewInput({ ...PREVIEW_DEFAULTS, state: "hi", hiContract: "confirmed", household: "married", endYear: "2033",
       "one-hawaiiPensionTreatment": "exempt", "two-hawaiiPensionTreatment": "taxable", "two-pension": "15000" });
-    const year = runRetirementTimeline(plan).years.find(row => row.year === 2033)!;
+    const year = runRetirementTimeline({ ...plan, accounts: plan.accounts.map(a => ({ ...a, hawaiiSource: "taxable" as const })) }).years.find(row => row.year === 2033)!;
     expect(year.income.filter(row => row.kind === "pension").map(row => [row.ownerId, row.hawaiiPensionTreatment]))
       .toEqual([["one", "exempt"], ["two", "taxable"]]);
     expect(() => buildPreviewInput({ ...PREVIEW_DEFAULTS, state: "hi", hiContract: "confirmed", household: "married",
@@ -145,7 +145,8 @@ describe("restricted Hawaii annual settlement", () => {
 
   it("independently reconciles a complete household projection through the preview adapter", () => {
     const values = { ...PREVIEW_DEFAULTS, state: "hi", hiContract: "confirmed", "one-hawaiiPensionTreatment": "exempt" };
-    const hi = runRetirementTimeline(buildPreviewInput(values));
+    const plan = buildPreviewInput(values);
+    const hi = runRetirementTimeline({ ...plan, accounts: plan.accounts.map(a => ({ ...a, hawaiiSource: "taxable" as const })) });
     const florida = runRetirementTimeline(buildPreviewInput({ ...PREVIEW_DEFAULTS }));
     expect(hi.years[0].result.tax.stateTax).toBeGreaterThan(0);
     expect(hi.years[0].result.tax.localTax).toBe(0);

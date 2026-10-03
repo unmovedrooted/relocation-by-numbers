@@ -22,24 +22,24 @@ function bracketTax(taxable: number, ceilings: number[]) {
 }
 
 describe("restricted Oregon annual settlement", () => {
-  it("reconciles exactly against the instructions' own Tax Rate Chart at $50,000 and $125,000 taxable income", () => {
-    const single50k = bracketTax(50000, [4400, 11050, 125000, Infinity]);
-    expect(single50k).toBeCloseTo(4065, -1);
-    const single125k = bracketTax(125000, [4400, 11050, 125000, Infinity]);
-    expect(single125k).toBeCloseTo(10627, -1);
-    const married50k = bracketTax(50000, [8800, 22100, 250000, Infinity]);
-    expect(married50k).toBeCloseTo(3756, -1);
+  it("checks unrounded marginal integration at $50,000 and $125,000 taxable income", () => {
+    const single50k = bracketTax(50000, [4550, 11400, 125000, Infinity]);
+    expect(single50k).toBeCloseTo(4056, 6);
+    const single125k = bracketTax(125000, [4550, 11400, 125000, Infinity]);
+    expect(single125k).toBeCloseTo(10618.5, 6);
+    const married50k = bracketTax(50000, [9100, 22800, 250000, Infinity]);
+    expect(married50k).toBeCloseTo(3737, 6);
   });
 
-  it("applies the graduated schedule after the standard deduction and $256 exemption credit, with no federal tax liability to subtract", () => {
+  it("applies the graduated schedule after the standard deduction and $260 exemption credit, with no federal tax liability to subtract", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const or = oregonTax(terms, 60000, 0, 0);
-    const taxable = 60000 - 2835;
-    expect(or.stateTax).toBeCloseTo(bracketTax(taxable, [4400, 11050, 125000, Infinity]) - 256, 4);
+    const taxable = 60000 - 2900;
+    expect(or.stateTax).toBeCloseTo(bracketTax(taxable, [4550, 11400, 125000, Infinity]) - 260, 4);
     expect(or.localTax).toBe(0);
   });
 
-  it("subtracts the federal tax liability up to the $8,500 cap below the phaseout", () => {
+  it("subtracts the federal tax liability up to the $8,750 cap below the phaseout", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const or = oregonTax(terms, 60000, 0, 5000);
     expect(or.federalTaxSubtraction).toBe(5000);
@@ -48,16 +48,16 @@ describe("restricted Oregon annual settlement", () => {
 
   it("phases the federal tax liability subtraction to zero as federal AGI rises through the single range", () => {
     const midway = oregonTax(input(), 135000, 0, 20000);
-    expect(midway.federalTaxSubtraction).toBe(3400);
+    expect(midway.federalTaxSubtraction).toBe(3500);
     const above = oregonTax(input(), 150000, 0, 20000);
     expect(above.federalTaxSubtraction).toBe(0);
   });
 
-  it.each(["single", "married"] as const)("matches every 2025 subtraction boundary for %s", filing => {
+  it.each(["single", "married"] as const)("matches every 2026 estimated subtraction boundary for %s", filing => {
     const scale = filing === "single" ? 1 : 2;
-    const bands = [[125000, 6800], [130000, 5100], [135000, 3400], [140000, 1700], [145000, 0]];
+    const bands = [[125000, 7000], [130000, 5250], [135000, 3500], [140000, 1750], [145000, 0]];
     for (const [boundary, cap] of bands) {
-      expect(oregonTax(input({ filing }), boundary * scale - .01, 0, 20000).federalTaxSubtraction).toBe(cap + 1700);
+      expect(oregonTax(input({ filing }), boundary * scale - .01, 0, 20000).federalTaxSubtraction).toBe(cap + 1750);
       expect(oregonTax(input({ filing }), boundary * scale, 0, 20000).federalTaxSubtraction).toBe(cap);
       expect(oregonTax(input({ filing }), boundary * scale + .01, 0, 20000).federalTaxSubtraction).toBe(cap);
       expect(oregonTax(input({ filing }), boundary * scale, 0, 500).federalTaxSubtraction).toBe(Math.min(cap, 500));
@@ -77,15 +77,15 @@ describe("restricted Oregon annual settlement", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1955-01-01", blind: true, eligibleForSeniorDeduction: true }],
       income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const or = oregonTax(terms, 60000, 0, 0);
-    const taxable = 60000 - (2835 + 2 * 1200);
-    expect(or.stateTax).toBeCloseTo(bracketTax(taxable, [4400, 11050, 125000, Infinity]) - 256, 4);
+    const taxable = 60000 - (2900 + 2 * 1200);
+    expect(or.stateTax).toBeCloseTo(bracketTax(taxable, [4550, 11400, 125000, Infinity]) - 260, 4);
   });
 
-  it("credits $256 per person below the exemption-credit AGI limit", () => {
+  it("credits $260 per person below the exemption-credit AGI limit", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 40000 }] });
     const or = oregonTax(terms, 40000, 0, 0);
-    const taxable = 40000 - 2835;
-    expect(or.stateTax).toBeCloseTo(bracketTax(taxable, [4400, 11050, 125000, Infinity]) - 256, 4);
+    const taxable = 40000 - 2900;
+    expect(or.stateTax).toBeCloseTo(bracketTax(taxable, [4550, 11400, 125000, Infinity]) - 260, 4);
   });
 
   it("requires explicit confirmation of the restricted Oregon assumptions", () => {

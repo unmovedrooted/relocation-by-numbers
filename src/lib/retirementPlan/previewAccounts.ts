@@ -1,4 +1,4 @@
-import type { YearAccount, YearPerson } from "./householdYear";
+import type { YearAccount, YearPerson, HawaiiAccountSource } from "./householdYear";
 import { capitalLotSale, esppLotSale, rothIraWithdrawal, rothPlanWithdrawal } from "./accountTax";
 import { validatedDate } from "./householdTax";
 
@@ -18,7 +18,7 @@ export type AccountEditorState = { accounts: AccountDraft[]; owners: Record<"one
 export function newAccountDraft(id: string, kind: AccountKind, ownerId: "one" | "two" = "one"): AccountDraft {
   return { id, name: ACCOUNT_TYPES.find(item => item[0] === kind)![1], kind, ownerId,
     fields: { balance: "0", returns: kind === "cash" ? "0" : "5", priorBalance: "0", planBasis: "0", firstYear: "",
-      rmdTable: "uniform", deferRmd: "no", inPlanRollover: "no", contractBasis: "0", charge: "0", annuityTreatment: "supported",
+      rmdTable: "uniform", deferRmd: "no", hawaiiSource: "unknown", inPlanRollover: "no", contractBasis: "0", charge: "0", annuityTreatment: "supported",
       shares: "0", price: "0", purchasePrice: "0", offeringValue: "0", purchaseValue: "0", optionPrice: "0", offeringDate: "", purchaseDate: "" },
     lots: [] };
 }
@@ -65,7 +65,8 @@ export function assemblePreviewAccounts(editor: AccountEditorState, people: read
     if (!label || label.length > 80) throw new RangeError("Account names must contain 1–80 characters.");
     const get = (key: string, name: string, min = 0, max = 1e9) => amount(draft.fields[key], `${label} · ${name}`, min, max);
     const annualReturn = get("returns", "annual return", draft.kind === "cash" || draft.kind === "annuity" ? 0 : -100, 1000) / 100;
-    const common = { id: draft.id, ownerId: draft.ownerId, annualReturn };
+    const common = { id: draft.id, ownerId: draft.ownerId, annualReturn,
+      ...(draft.fields.hawaiiSource && draft.fields.hawaiiSource !== "unknown" ? { hawaiiSource: draft.fields.hawaiiSource as HawaiiAccountSource } : {}) };
     const balance = () => get("balance", "balance");
     const owner = people.find(person => person.id === draft.ownerId)!;
     switch (draft.kind) {

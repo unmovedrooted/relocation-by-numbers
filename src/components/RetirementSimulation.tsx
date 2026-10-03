@@ -77,7 +77,7 @@ export default function RetirementSimulation({ children, getInput, investedAccou
         <p role="status" className="text-lg font-semibold">{(result.successRate * 100).toFixed(1)}% of paths funded every year ({result.successfulPaths} of {result.paths}).</p>
         <p className="text-sm">Spending, taxes and RMDs must be satisfied in every year. Seed: {result.seed}. All paths, including failed paths, remain in the ranges below.</p>
         <div className="h-[280px] w-full min-w-0" aria-label="Nominal balance percentiles">
-          <ResponsiveContainer width="100%" height="100%"><LineChart data={result.byYear} margin={{ top: 10, right: 8, left: 8, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={280} minWidth={0}><LineChart data={result.byYear} margin={{ top: 10, right: 8, left: 8, bottom: 0 }}>
             <XAxis dataKey="year" /><YAxis width={65} tickFormatter={v => `$${Math.round(Number(v) / 1000)}k`} />
             <Tooltip formatter={(v: number) => money(Number(v))} />
             <Line dataKey="nominal.p10" name="10th percentile" stroke="#0284c7" dot={false} isAnimationActive={false} />

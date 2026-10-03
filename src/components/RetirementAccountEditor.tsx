@@ -7,9 +7,9 @@ import { ACCOUNT_TYPES, newAccountDraft, type AccountDraft, type AccountEditorSt
 
 const control = "w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100";
 const button = "rounded-lg border border-slate-300 px-3 py-2 text-sm hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-emerald-500 disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800";
-type Props = { value: AccountEditorState; onChange: (value: AccountEditorState) => void; married: boolean; startYear: number };
+type Props = { value: AccountEditorState; onChange: (value: AccountEditorState) => void; married: boolean; startYear: number; hawaii?: boolean };
 
-export default function RetirementAccountEditor({ value, onChange, married, startYear }: Props) {
+export default function RetirementAccountEditor({ value, onChange, married, startYear, hawaii = false }: Props) {
   const [newKind, setNewKind] = useState<AccountKind>("traditional-ira");
   const sequence = useRef(1);
   const nextId = (prefix: string) => {
@@ -76,6 +76,10 @@ export default function RetirementAccountEditor({ value, onChange, married, star
               min: account.kind === "cash" || account.kind === "annuity" ? 0 : -100, max: 1000,
               help: account.kind === "taxable" || account.kind === "espp" ? "Excludes dividends and trading fees. Do not enter total return." : account.kind === "annuity" ? "Negative-return / underwater annuity paths are not supported in this preview." : undefined })}
             {(account.kind === "traditional-ira" || account.kind === "401k") && <>
+              {hawaii && <div className="min-w-0">
+                {choice(account, "hawaiiSource", "Hawaii account funding source", [["unknown", "Mixed or unknown — unsupported"], ["taxable", "Confirmed fully taxable"], ["exempt-employer", "Confirmed exempt employer-funded"], ["exempt-rollover", "Confirmed exempt rollover source"]])}
+                <p className="mt-1 text-xs text-slate-500">Confirm with your administrator or tax adviser. Rollover status alone does not establish exemption. Mixed sources, exempt-account after-tax basis, new contributions/matches and conversions involving exempt accounts are unsupported.</p>
+              </div>}
               {field(account, "priorBalance", "Prior December 31 balance (USD)", { help: "Used for the first modeled RMD; enter the actual prior-year value." })}
               {choice(account, "rmdTable", "Owner-lifetime RMD table", [["uniform", "Uniform Lifetime"], ["other", "Joint-life / inherited (unsupported)"]])}
             </>}

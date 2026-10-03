@@ -11,7 +11,8 @@ type RmdPolicy = Readonly<{ priorDecemberBalance: number } & (
   { table: "uniform" } | { table: "joint-life"; divisor: number }
 )>;
 type PricedLot = Readonly<{ id: string; lot: CapitalLot; price: number }>;
-export type YearAccount = CashAccount & (
+export type HawaiiAccountSource = "unknown" | "taxable" | "exempt-employer" | "exempt-rollover";
+export type YearAccount = CashAccount & { hawaiiSource?: HawaiiAccountSource } & (
   | { kind: "cash"; interestTreatment: "none" | "taxable" }
   | { kind: "taxable"; lots: readonly PricedLot[]; returnTreatment: "price-only"; transactionFees: 0 }
   | { kind: "espp"; lot: EsppLot; price: number; returnTreatment: "price-only"; transactionFees: 0 }
@@ -121,6 +122,24 @@ function closeEnough(actual: number, expected: number, label: string) {
  * Not a survivor, monthly-timing or full-lifecycle model.
  */
 export function runHouseholdYear(input: HouseholdYearInput) {
+  if (input.state === "hi" && input.stateTreatment === "verified-resident-location") {
+    for (const account of input.accounts.filter(a => a.kind === "traditional-ira" || a.kind === "401k")) {
+      if (!account.hawaiiSource || !["taxable", "exempt-employer", "exempt-rollover"].includes(account.hawaiiSource)) {
+        throw new RangeError(`Confirm Hawaii funding source for account ${account.id}; mixed/unknown sources are unsupported.`);
+      }
+      if (account.hawaiiSource !== "taxable") {
+        const owner = input.people.find(p => p.id === account.ownerId)!;
+        if ((account.kind === "traditional-ira" && owner.iraBasis > 0) || (account.kind === "401k" && account.afterTaxBasis > 0)) {
+          throw new RangeError("Hawaii exempt accounts with federal after-tax basis require separate source allocation; unsupported.");
+        }
+        if (input.conversions.some(c => c.sourceId === account.id || c.destinationId === account.id)
+          || (input.contributions ?? []).some(c => c.accountId === account.id && c.amount > 0)
+          || (input.employerMatchPlans ?? []).length > 0) {
+          throw new RangeError("Hawaii exempt accounts cannot be combined with contributions, employer matches or conversions in this preview.");
+        }
+      }
+    }
+  }
   const distributionDate = validatedDate(input.distributionDate);
   if (distributionDate.getUTCFullYear() !== input.year) throw new RangeError("Distribution date must be in the modeled year.");
   const people = new Map(input.people.map(person => [person.id, person]));
@@ -350,7 +369,10 @@ export function runHouseholdYear(input: HouseholdYearInput) {
       ownerId: input.accounts.find(account => account.id === item.accountId)!.ownerId,
       amount: Math.min(deposited.get(item.accountId) ?? 0, item.iraDeductionLimit!),
     }));
-    const tax = estimateHouseholdTax({ ...input, accountIncome, retirementIncome, pretax401k, deductibleIra });
+    const hawaiiAccountExclusion = input.state === "hi" ? input.accounts
+      .filter(a => (a.kind === "traditional-ira" || a.kind === "401k") && (a.hawaiiSource === "exempt-employer" || a.hawaiiSource === "exempt-rollover"))
+      .reduce((sum, a) => sum + (withdrawn.get(a.id) ?? 0), 0) : 0;
+    const tax = estimateHouseholdTax({ ...input, accountIncome, retirementIncome, pretax401k, deductibleIra, hawaiiAccountExclusion });
     return { tax, accountIncome, retirementIncome, nextAccounts, nextPeople, conversionTax };
   };
 
