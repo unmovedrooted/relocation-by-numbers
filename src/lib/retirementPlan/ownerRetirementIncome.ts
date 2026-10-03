@@ -1,4 +1,4 @@
-import type { HouseholdTaxInput } from "./householdTax";
+import type { HouseholdTaxInput, RetirementIncomeItem } from "./householdTax";
 
 /**
  * Per-owner taxable retirement-account income, from the annual engine's owner-level records.
@@ -29,4 +29,11 @@ export function ownerRetirementIncome(input: HouseholdTaxInput, retirementOrdina
   }
   if (earlyDistributionBase === undefined) return totals;
   return new Map([...totals].map(([id, amount]) => [id, Math.max(0, amount - early.get(id)!)]));
+}
+
+/** Total of the reconciled owner-level records whose source qualifies; fails closed if the records do not reconcile. */
+export function retirementIncomeFromSources(input: HouseholdTaxInput, retirementOrdinary: number, stateName: string,
+  sources: readonly RetirementIncomeItem["source"][]) {
+  ownerRetirementIncome(input, retirementOrdinary, stateName);
+  return (input.retirementIncome ?? []).filter(item => sources.includes(item.source)).reduce((sum, item) => sum + item.amount, 0);
 }

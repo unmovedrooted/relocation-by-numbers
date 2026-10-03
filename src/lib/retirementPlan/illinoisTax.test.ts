@@ -42,11 +42,26 @@ describe("restricted Illinois annual settlement", () => {
     expect(il.stateTax).toBe(0);
   });
 
-  it("fully excludes retirement-account (401k/IRA/annuity) distributions", () => {
-    const terms = input({});
+  it("fully excludes qualified-plan and IRA distributions", () => {
+    const terms = input({ retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 40000 }] });
     const il = illinoisTax(terms, 40000, 0, 40000);
     expect(il.ilAgi).toBe(0);
     expect(il.stateTax).toBe(0);
+  });
+
+  it("keeps nonqualified annuity withdrawals taxable while excluding IRA income in the same year", () => {
+    const terms = input({ retirementIncome: [
+      { ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 10000 },
+      { ownerId: "one", source: "annuity", date: "2026-07-01", amount: 15000 }] });
+    const il = illinoisTax(terms, 25000, 0, 25000);
+    expect(il.ilAgi).toBe(15000);
+    expect(il.stateTax).toBeCloseTo((15000 - 2925) * .0495, 6);
+  });
+
+  it("fails closed when owner-level retirement records do not reconcile", () => {
+    const partial = input({ retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 10000 }] });
+    expect(() => illinoisTax(partial, 40000, 0, 40000)).toThrow(/reconciled/);
+    expect(() => illinoisTax(input(), 40000, 0, 40000)).toThrow(/reconciled/);
   });
 
   it("grants an additional $1,000 exemption for age 65 or blindness, stacking both", () => {

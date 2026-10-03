@@ -1,5 +1,6 @@
 import { sumBrackets, type FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
+import { retirementIncomeFromSources } from "./ownerRetirementIncome";
 import { stateSocialSecurityInclusion } from "./stateSocialSecurityCoverage";
 
 /** Restricted, step-exemption, PRE-CREDIT planning estimate. Rates and
@@ -36,11 +37,12 @@ import { stateSocialSecurityInclusion } from "./stateSocialSecurityCoverage";
  * Uses enacted law, not a prediction of future legislation. Connecticut has
  * no local income tax; localTax is always zero. The pension/annuity
  * subtraction phase-out is applied to income entered as "pension" plus this
- * planner's aggregate 401(k)/IRA/annuity distribution figure, both at the
- * full percentage; real law caps IRA distributions at 75% of that
- * percentage and excludes military retired pay, Railroad Retirement, and
- * Connecticut teachers' retirement pay, none of which this planner can
- * identify separately, so this overstates the subtraction for such income.
+ * planner's owner-attributed 401(k)/IRA/annuity distributions, both at the
+ * same percentage (IRA distributions are 100% from tax year 2026); taxable
+ * Roth IRA distributions are excluded. Real law also excludes military
+ * retired pay, Railroad Retirement, and Connecticut teachers' retirement
+ * pay, none of which this planner can identify separately, so this
+ * overstates the subtraction for such income.
  * The exemption phase-out tests federal AGI, not Connecticut AGI. Only
  * single and married-filing-jointly are supported. No itemized deductions
  * or credits are modeled. Connecticut parameters are not inflation-indexed
@@ -95,10 +97,13 @@ function personalExemption(input: HouseholdTaxInput, federalAgi: number) {
   return EXEMPTION_TABLE[input.filing].find(row => federalAgi <= row.upTo)!.amount;
 }
 
+// CGS 12-701(a)(20)(B): pensions/annuities and, from tax year 2026, IRA distributions at 100%; Roth IRA distributions are excluded.
+const ELIGIBLE_SOURCES = ["traditional-ira", "ira-conversion", "401k", "plan-conversion", "roth-401k", "annuity"] as const;
+
 function pensionSubtraction(input: HouseholdTaxInput, federalAgi: number, retirementOrdinary: number) {
   const fraction = PENSION_PHASE_OUT[input.filing].find(row => federalAgi <= row.upTo)!.fraction;
   const pensionIncome = input.income.filter(item => item.kind === "pension").reduce((sum, item) => sum + item.amount, 0);
-  return (pensionIncome + retirementOrdinary) * fraction;
+  return (pensionIncome + retirementIncomeFromSources(input, retirementOrdinary, "Connecticut", ELIGIBLE_SOURCES)) * fraction;
 }
 
 export function connecticutTax(
@@ -125,10 +130,11 @@ export function connecticutTax(
       + "table), a step-down personal exemption ($15,000 single/$24,000 married, phased out by $44,001/$71,001 federal "
       + "AGI), and the Social Security Benefit Adjustment (full exclusion below $75,000/$100,000 federal AGI, else a "
       + "25%-of-worksheet-amount formula whose federal worksheet input this planner approximates rather than reads "
-      + "directly). Pension/annuity income (entered as annual pension) and this planner's combined 401(k)/IRA/annuity "
-      + "distribution figure share a single phase-out by federal AGI (100% below $75,000/$100,000, 0% at $100,000/"
-      + "$150,000); real law caps IRA distributions at 75% of that percentage and excludes military, Railroad Retirement "
-      + "and CT teachers' pay, none of which this planner can identify, so the subtraction is overstated for such income. "
+      + "directly). Pension/annuity income (entered as annual pension) and this planner's owner-attributed 401(k)/IRA/annuity "
+      + "distributions share a single phase-out by federal AGI (100% below $75,000/$100,000, 0% at $100,000/"
+      + "$150,000); from tax year 2026 IRA distributions qualify at 100% of that percentage (75% applied only to 2025), while "
+      + "taxable Roth IRA distributions are kept taxable. Military, Railroad Retirement and CT teachers' pay are excluded from "
+      + "the subtraction in real law but cannot be identified by this planner, so the subtraction is overstated for such income. "
       + "Connecticut has no local income tax. Only single and married-filing-jointly are supported. Itemized deductions "
       + "and credits are excluded. Connecticut parameters are not inflation-indexed in this model. Future legislation is "
       + "not predicted. Not a tax return.",

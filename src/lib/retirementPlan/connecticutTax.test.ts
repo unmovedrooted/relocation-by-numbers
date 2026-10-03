@@ -74,7 +74,8 @@ describe("restricted Connecticut annual settlement", () => {
   });
 
   it("combines entered pension income with the modeled 401(k)/IRA/annuity distribution figure for the phase-out", () => {
-    const terms = input({ income: [{ ownerId: "one", kind: "pension", amount: 10000 }] });
+    const terms = input({ income: [{ ownerId: "one", kind: "pension", amount: 10000 }],
+      retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 20000 }] });
     const ct = connecticutTax(terms, 50000, 0, 0, 20000);
     // AGI 50000 < 74999: fraction 1. Subtraction = (10000+20000)*1 = 30000.
     expect(ct.pensionSubtraction).toBe(30000);
@@ -94,6 +95,19 @@ describe("restricted Connecticut annual settlement", () => {
     expect(ct.pensionSubtraction).toBe(10000);
     const ctPhased = connecticutTax(terms, 150000, 0, 0, 0);
     expect(ctPhased.pensionSubtraction).toBe(0);
+  });
+
+  it("keeps taxable Roth IRA distributions out of the subtraction but allows IRA, conversion and annuity income at 100%", () => {
+    const terms = input({ retirementIncome: [
+      { ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 10000 },
+      { ownerId: "one", source: "ira-conversion", date: "2026-07-01", amount: 5000 },
+      { ownerId: "one", source: "annuity", date: "2026-07-01", amount: 3000 },
+      { ownerId: "one", source: "roth-ira", date: "2026-07-01", amount: 4000 }] });
+    expect(connecticutTax(terms, 50000, 0, 0, 22000).pensionSubtraction).toBe(18000);
+  });
+
+  it("fails closed when owner-level retirement records do not reconcile", () => {
+    expect(() => connecticutTax(input(), 50000, 0, 0, 20000)).toThrow(/reconciled/);
   });
 
   it("requires explicit confirmation of the restricted Connecticut assumptions", () => {

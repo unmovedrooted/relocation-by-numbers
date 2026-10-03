@@ -1,4 +1,5 @@
 import type { HouseholdTaxInput } from "./householdTax";
+import { retirementIncomeFromSources } from "./ownerRetirementIncome";
 
 /** Restricted, exemption-allowance, PRE-CREDIT planning estimate. Rates and
  * thresholds reviewed 2026-09-23 against:
@@ -28,11 +29,9 @@ import type { HouseholdTaxInput } from "./householdTax";
  * local income tax; localTax is always zero. The pension subtraction applies
  * to any income entered as "pension," at any owner age (Illinois imposes no
  * age test, unlike Maryland or Indiana), and to this planner's aggregate
- * retirement-account distribution figure (401(k)/IRA/annuity withdrawals).
- * That aggregate figure cannot be split from a nonqualified annuity
- * withdrawal, which Illinois's subtraction does not reach; this planner
- * exempts it anyway, overstating the benefit for a household holding a
- * nonqualified annuity. Government/military pension income reported as
+ * owner-attributed 401(k)/IRA distributions (including taxable conversions).
+ * Nonqualified annuity withdrawals, which Illinois's subtraction does not
+ * reach, are kept taxable. Government/military pension income reported as
  * federal wages, state/local deferred-compensation plans, and the lump-sum
  * employer-securities capital-gain subtraction are not modeled: this
  * planner's "wages" and "other" income kinds are always fully taxed. No
@@ -43,6 +42,8 @@ import type { HouseholdTaxInput } from "./householdTax";
  */
 
 const STATE_RATE = .0495;
+// Illinois subtracts qualified-plan and IRA income; nonqualified annuity withdrawals are not eligible.
+const QUALIFYING_SOURCES = ["traditional-ira", "ira-conversion", "401k", "plan-conversion", "roth-401k", "roth-ira"] as const;
 const BASE_EXEMPTION: Record<"single" | "married", number> = { single: 2925, married: 5850 };
 const AGE_OR_BLIND_EXEMPTION = 1000;
 const ELIMINATION_AGI: Record<"single" | "married", number> = { single: 250000, married: 500000 };
@@ -68,7 +69,7 @@ function exemptionAllowance(input: HouseholdTaxInput, year: number, federalAgi: 
 export function illinoisTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
   if (input.illinoisContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Illinois planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Illinois projection year.");
-  const subtraction = pensionSubtraction(input) + retirementOrdinary;
+  const subtraction = pensionSubtraction(input) + retirementIncomeFromSources(input, retirementOrdinary, "Illinois", QUALIFYING_SOURCES);
   const ilAgi = federalAgi - taxableBenefits - subtraction;
   const taxable = Math.max(0, ilAgi - exemptionAllowance(input, input.year, federalAgi));
   const stateTax = taxable * STATE_RATE;
@@ -77,8 +78,7 @@ export function illinoisTax(input: HouseholdTaxInput, federalAgi: number, taxabl
     warning: "Illinois pre-credit estimate: enacted flat 4.95% rate, a 2026 exemption allowance ($2,925 single/$5,850 married, "
       + "plus $1,000 per age-65-or-blind box, entirely eliminated above $250,000/$500,000 federal AGI), and Social Security "
       + "fully excluded. Income entered as \"pension,\" at any owner age, and this planner's aggregate 401(k)/IRA/annuity "
-      + "distribution figure are both fully subtracted; the aggregate figure cannot be separated from a nonqualified annuity "
-      + "withdrawal, which is not actually eligible, overstating the benefit for such a household. Government pension income "
+      + "distribution figure are both fully subtracted; nonqualified annuity withdrawals are not eligible and stay taxable. Government pension income "
       + "reported as wages and deferred-compensation plans are not modeled. Illinois has no local income tax. Itemized "
       + "deductions and credits are excluded. Illinois parameters are not inflation-indexed in this model. Future legislation "
       + "is not predicted. Not a tax return.",
