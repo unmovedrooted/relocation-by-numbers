@@ -15,12 +15,14 @@ import { ageAtYearEnd } from "./rules";
  * - Line 6: a $5,660 subtraction (the 2025 figure; Montana adjusts it
  *   annually for inflation, not modeled here) for each spouse who is 65 or
  *   older by year end.
- * - The enacted two-bracket ordinary-income schedule for tax year 2026
- *   (House Bill 337): 4.7% up to $47,500 (single/MFS) or $95,000 (married
- *   filing jointly), 5.65% above. HB 337 enacts a further reduction (5.4%,
- *   wider brackets) beginning tax year 2027; that already-enacted future
- *   schedule is not modeled, matching this project's single-base-year
- *   convention for every other state.
+ * - The enacted two-bracket ordinary-income schedules (House Bill 337, per
+ *   the Department of Revenue's "HB337: 2026-2027 Montana Individual Income
+ *   Tax Changes", https://revenue.mt.gov/news/recent-news/HB-337): tax year
+ *   2026 is 4.7% up to $47,500 (single/MFS) or $95,000 (married filing
+ *   jointly) and 5.65% above; tax year 2027 and later is 4.7% up to
+ *   $65,000 (single/MFS) or $130,000 (married filing jointly) and 5.4%
+ *   above. HB 337 enacts nothing beyond 2027, so the 2027 schedule is held
+ *   for later years; further legislation is not predicted.
  * - Social Security is federal-inclusion in Montana (no state-level
  *   exemption or credit), so it is already reflected in federal AGI with no
  *   Montana-specific adjustment needed.
@@ -47,9 +49,13 @@ import { ageAtYearEnd } from "./rules";
 
 const AGE_SUBTRACTION_PER_PERSON = 5660;
 
-const STATE_BRACKETS: Record<FilingStatus, { upTo: number; rate: number }[]> = {
+const STATE_BRACKETS_2026: Record<FilingStatus, { upTo: number; rate: number }[]> = {
   single: [{ upTo: 47500, rate: .047 }, { upTo: Infinity, rate: .0565 }],
   married: [{ upTo: 95000, rate: .047 }, { upTo: Infinity, rate: .0565 }],
+};
+const STATE_BRACKETS_2027: Record<FilingStatus, { upTo: number; rate: number }[]> = {
+  single: [{ upTo: 65000, rate: .047 }, { upTo: Infinity, rate: .054 }],
+  married: [{ upTo: 130000, rate: .047 }, { upTo: Infinity, rate: .054 }],
 };
 
 export function montanaTax(input: HouseholdTaxInput, agi: number, standardDeduction: number, seniorDeduction: number) {
@@ -57,14 +63,15 @@ export function montanaTax(input: HouseholdTaxInput, agi: number, standardDeduct
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Montana projection year.");
   const ageSubtraction = input.people.filter(person => ageAtYearEnd(person.birthDate, input.year) >= 65).length * AGE_SUBTRACTION_PER_PERSON;
   const taxable = Math.max(0, agi - standardDeduction - seniorDeduction - ageSubtraction);
-  const stateTax = sumBrackets(taxable, STATE_BRACKETS[input.filing]);
+  const stateTax = sumBrackets(taxable, (input.year >= 2027 ? STATE_BRACKETS_2027 : STATE_BRACKETS_2026)[input.filing]);
   return {
     stateTax, localTax: 0, ageSubtraction,
     warning: "Montana pre-credit estimate: starts from federal taxable income (federal AGI less the federal standard/"
       + "itemized deduction and Schedule 1-A additional deductions, excluding the QBI deduction), since Montana has no "
       + "separate state standard deduction or personal exemption. A $5,660 subtraction applies for each spouse 65 or "
-      + "older by year end (the 2025 figure; Montana's annual inflation adjustment is not modeled). The enacted 2026 "
-      + "two-bracket schedule applies (4.7%/5.65%); the already-enacted, lower 2027 schedule is not modeled. Social "
+      + "older by year end (the 2025 figure; Montana's annual inflation adjustment is not modeled). The enacted two-"
+      + "bracket schedule applies (4.7%/5.65% for 2026; the already-enacted 4.7%/5.4% schedule with wider brackets from "
+      + "2027, held for later years). Social "
       + "Security is fully taxable in Montana with no state-level exemption or credit. Montana's preferential net "
       + "long-term capital gains rate (3%/4.1%, well under the ordinary rates) is not modeled, so all taxable income is "
       + "taxed at ordinary rates, overstating tax for a household with taxable net long-term capital gains. The working-"

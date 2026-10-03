@@ -36,6 +36,19 @@ describe("restricted Montana annual settlement", () => {
     expect(mt.stateTax).toBeCloseTo(95000 * 0.047, 6);
   });
 
+  it("applies the enacted HB 337 2027 schedule (4.7% to $65,000 single / $130,000 married, then 5.4%) from 2027", () => {
+    // Single, taxable 100,000: 65,000*4.7% + 35,000*5.4% = 3,055 + 1,890 = 4,945.
+    expect(montanaTax(input({ year: 2027 }), 100000, 0, 0).stateTax).toBeCloseTo(4945, 6);
+    // The same income under the 2026 schedule: 47,500*4.7% + 52,500*5.65% = 2,232.50 + 2,966.25 = 5,198.75.
+    expect(montanaTax(input({ year: 2026 }), 100000, 0, 0).stateTax).toBeCloseTo(5198.75, 6);
+    const married = input({ year: 2028, filing: "married", people: [
+      { id: "one", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
+      { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
+    ] });
+    // Married, taxable 200,000 (2027 schedule held): 130,000*4.7% + 70,000*5.4% = 6,110 + 3,780 = 9,890.
+    expect(montanaTax(married, 200000, 0, 0).stateTax).toBeCloseTo(9890, 6);
+  });
+
   it("subtracts $5,660 for a spouse 65 or older by year end", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1955-01-01", blind: false, eligibleForSeniorDeduction: true }] });
     const mt = montanaTax(terms, 30000, 0, 0);
