@@ -21,10 +21,33 @@ function bracketTax(taxable: number, ceilings: number[]) {
   return total;
 }
 
+const youngInput = (year: number) => input({ year, people: [{ id: "one", birthDate: `${year - 50}-01-01`, blind: false, eligibleForSeniorDeduction: true }] });
 const SINGLE_CEILINGS = [9600, 14400, 19200, 24000, 36000, 48000, 125000, 175000, 225000, 275000, 325000, Infinity];
 const MARRIED_CEILINGS = [19200, 28800, 38400, 48000, 72000, 96000, 250000, 350000, 450000, 550000, 650000, Infinity];
 
 describe("restricted Hawaii annual settlement", () => {
+  it.each([-1, NaN, Infinity, 10001])("rejects invalid account exemption %s", hawaiiAccountExclusion => {
+    expect(() => hawaiiTax(input({ accountIncome: taxCharacter({ retirementOrdinary: 10000 }), hawaiiAccountExclusion }), 10000, 0))
+      .toThrow(/exclusion attribution/);
+  });
+
+  it("subtracts only the confirmed exempt portion once", () => {
+    const result = hawaiiTax(input({ accountIncome: taxCharacter({ retirementOrdinary: 60000 }), hawaiiAccountExclusion: 20000 }), 60000, 0);
+    expect(result.hiAgi).toBe(40000);
+    expect(result.accountExclusion).toBe(20000);
+    // 40,000 - 8,000 standard deduction - 1,144 exemption = 30,856.
+    // First four bands: 134.4 + 153.6 + 264 + 307.2; remaining 6,856 at 6.8%.
+    expect(result.stateTax).toBeCloseTo(1325.408, 6);
+  });
+  it("gives each taxpayer 65 or older on the next January 1 one additional ,144 exemption", () => {
+    const base = hawaiiTax(input({ year: 2026 }), 60000, 0).stateTax;
+    const older = (birthDate: string) => hawaiiTax(input({ year: 2026, people: [{ id: "one", birthDate, blind: false, eligibleForSeniorDeduction: true }] }), 60000, 0).stateTax;
+    const rate = .076;
+    expect(base - older("1960-06-30")).toBeCloseTo(1144 * rate, 6);
+    expect(older("1962-01-01")).toBeCloseTo(older("1960-06-30"), 6);
+    expect(older("1962-01-02")).toBeCloseTo(base, 6);
+  });
+
   it("does not infer exemption from a government pension type", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", amount: 30000, pensionType: "federal-government", hawaiiPensionTreatment: "taxable" }] });
     expect(hawaiiTax(terms, 30000, 0).pensionExclusion).toBe(0);
@@ -56,8 +79,8 @@ describe("restricted Hawaii annual settlement", () => {
 
   it.each([[2026, 8000], [2027, 8000], [2028, 9000], [2029, 9000], [2030, 10000], [2031, 12000], [2060, 12000]])(
     "uses the enacted deduction in %i", (year, deduction) => {
-      expect(hawaiiTax(input({ year }), deduction + 1144, 0).stateTax).toBe(0);
-      expect(hawaiiTax(input({ year }), deduction + 2144, 0).stateTax).toBe(14);
+      expect(hawaiiTax(youngInput(year), deduction + 1144, 0).stateTax).toBe(0);
+      expect(hawaiiTax(youngInput(year), deduction + 2144, 0).stateTax).toBe(14);
     });
 
   // Sum of complete lower bands plus the remaining taxable income:

@@ -33,9 +33,10 @@ import { ageAtYearEnd } from "./rules";
  * fully taxable here, understating the benefit for that household. The
  * disability-based exclusion for an owner under 55 is not modeled, since
  * this planner has no disability field. The retirement income exclusion is
- * evaluated per owner: this planner's aggregate 401(k)/IRA/annuity
- * distribution figure is split evenly between spouses and excluded only for
- * a qualifying (55+) owner's own share. Only single and
+ * evaluated using reconciled owner-level taxable distributions, including
+ * Roth conversions but excluding this planner's nonqualified annuities.
+ * Only a qualifying (55+) owner's eligible income is excluded. Disability,
+ * survivor and military-specific eligibility remain unsupported. Only single and
  * married-filing-jointly are supported. Itemized deductions and all other
  * credits are excluded. Iowa's dollar figures are not further
  * inflation-indexed in this model, matching the restricted New York,
@@ -52,12 +53,26 @@ const AGE_OR_BLIND_CREDIT_PER_PERSON = 20;
 export function iowaTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, federalTaxableIncome: number, retirementOrdinary: number) {
   if (input.iowaContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Iowa planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Iowa projection year.");
-  const perOwnerShare = retirementOrdinary / input.people.length;
+  const retirementByOwner = new Map(input.people.map(person => [person.id, 0]));
+  let attributed = 0;
+  for (const item of input.retirementIncome ?? []) {
+    if (!retirementByOwner.has(item.ownerId) || !Number.isFinite(item.amount) || item.amount < 0
+      || !["traditional-ira", "ira-conversion", "401k", "plan-conversion", "roth-401k", "roth-ira", "annuity"].includes(item.source)) {
+      throw new RangeError("Invalid Iowa retirement income attribution.");
+    }
+    attributed += item.amount;
+    if (item.source !== "annuity") {
+      retirementByOwner.set(item.ownerId, retirementByOwner.get(item.ownerId)! + item.amount);
+    }
+  }
+  if (!Number.isFinite(retirementOrdinary) || retirementOrdinary < 0 || Math.abs(attributed - retirementOrdinary) > 1e-5) {
+    throw new RangeError("Iowa requires reconciled owner-level retirement income.");
+  }
   let retirementExclusion = 0;
   for (const person of input.people) {
     if (ageAtYearEnd(person.birthDate, input.year) < 55) continue;
     const ownPension = input.income.filter(item => item.ownerId === person.id && item.kind === "pension").reduce((sum, item) => sum + item.amount, 0);
-    retirementExclusion += ownPension + perOwnerShare;
+    retirementExclusion += ownPension + retirementByOwner.get(person.id)!;
   }
   const taxable = Math.max(0, federalTaxableIncome - taxableBenefits - retirementExclusion);
   const grossTax = taxable * STATE_RATE;
@@ -71,8 +86,9 @@ export function iowaTax(input: HouseholdTaxInput, federalAgi: number, taxableBen
       + "(after the federal standard/itemized deduction), with no separate Iowa standard deduction. Social Security is fully "
       + "subtracted. A $40 Personal Credit ($80 married filing jointly) plus $20 per taxpayer 65 or older and a separate $20 "
       + "per taxpayer legally blind (both can apply to the same taxpayer) is applied against computed tax. Income entered as "
-      + "annual pension, and this planner's aggregate 401(k)/IRA/annuity "
-      + "distribution figure (split evenly between spouses), is excluded for each owner who is 55 or older by year end; a "
+      + "qualifying annual pension and owner-attributed taxable IRA/workplace distributions, including Roth conversions, "
+      + "are excluded for each owner who is 55 or older by year end. Nonqualified annuity income is not excluded. Missing or "
+      + "unreconciled owner attribution is blocked. Disability, survivor and military-specific eligibility are not modeled; a "
       + "younger owner's retirement income remains fully taxable, including Iowa's separate, unconditional military "
       + "retirement pay exclusion and its disability-based exclusion for an owner under 55, neither of which this planner "
       + "can identify. Only single and married-filing-jointly are supported. Itemized deductions and other credits are "

@@ -128,7 +128,8 @@ export function runHouseholdYear(input: HouseholdYearInput) {
         throw new RangeError(`Confirm Hawaii funding source for account ${account.id}; mixed/unknown sources are unsupported.`);
       }
       if (account.hawaiiSource !== "taxable") {
-        const owner = input.people.find(p => p.id === account.ownerId)!;
+        const owner = input.people.find(p => p.id === account.ownerId);
+        if (!owner) throw new RangeError("Account has an unknown owner.");
         if ((account.kind === "traditional-ira" && owner.iraBasis > 0) || (account.kind === "401k" && account.afterTaxBasis > 0)) {
           throw new RangeError("Hawaii exempt accounts with federal after-tax basis require separate source allocation; unsupported.");
         }

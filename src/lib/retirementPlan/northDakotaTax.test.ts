@@ -25,7 +25,7 @@ describe("restricted North Dakota annual settlement", () => {
   it("applies the three-tier schedule directly to federal taxable income, with no state standard deduction", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 300000 }] });
     const nd = estimateHouseholdTax(terms);
-    expect(nd.stateTax).toBeCloseTo(bracketTax(nd.taxableIncome, [48475, 244825, Infinity]), 4);
+    expect(nd.stateTax).toBeCloseTo(bracketTax(nd.taxableIncome, [49575, 250400, Infinity]), 4);
     expect(nd.localTax).toBe(0);
   });
 
@@ -35,7 +35,7 @@ describe("restricted North Dakota annual settlement", () => {
       { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
     ], income: [{ ownerId: "one", kind: "wages", amount: 90000 }] });
     const nd = estimateHouseholdTax(terms);
-    expect(nd.stateTax).toBeCloseTo(bracketTax(nd.taxableIncome, [80975, 298075, Infinity]), 4);
+    expect(nd.stateTax).toBeCloseTo(bracketTax(nd.taxableIncome, [82800, 304850, Infinity]), 4);
   });
 
   it("excludes Social Security and Tier 1 Railroad Retirement from the North Dakota tax base", () => {
@@ -52,15 +52,15 @@ describe("restricted North Dakota annual settlement", () => {
   it("does not cap qualified dividends at federal taxable income before the state exclusion", () => {
     const nd = estimateHouseholdTax(input({ accountIncome: { ...taxCharacter(), qualifiedDividends: 120000 } }));
     expect(nd.taxableIncome).toBe(103900);
-    // (120000 - 16100 - 40% * 120000 - 48475) * 1.95% = 144.7875.
-    expect(nd.stateTax).toBeCloseTo(144.7875, 8);
+    // (120000 - 16100 - 40% * 120000 - 49575) * 1.95% = 123.3375.
+    expect(nd.stateTax).toBeCloseTo(123.3375, 8);
   });
 
   it.each([[-20000, 50000, 30000], [20000, 50000, 50000], [-60000, 50000, 0]])(
     "nets short-term %s and long-term %s before the exclusion", (shortTermGain, longTermGain, eligibleGain) => {
       const nd = estimateHouseholdTax(input({ income: [{ ownerId: "one", kind: "wages", amount: 120000 }],
         accountIncome: { ...taxCharacter(), shortTermGain, longTermGain, qualifiedDividends: 10000 } }));
-      expect(nd.stateTax).toBeCloseTo(bracketTax(Math.max(0, nd.taxableIncome - .4 * (eligibleGain + 10000)), [48475, 244825, Infinity]), 8);
+      expect(nd.stateTax).toBeCloseTo(bracketTax(Math.max(0, nd.taxableIncome - .4 * (eligibleGain + 10000)), [49575, 250400, Infinity]), 8);
     });
 
   it("requires explicit confirmation of the restricted North Dakota assumptions", () => {

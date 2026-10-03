@@ -6,7 +6,7 @@ import type { HouseholdTaxInput } from "./householdTax";
  *
  * Uses the 2026 schedule and Act 24 (2026) brackets effective 2027/2029,
  * plus Act 46 (2024) standard deductions effective 2026/2028/2030/2031.
- * Personal exemption remains $1,144 per person. Marginal tax is calculated
+ * Personal exemption remains $1,144 per person, plus one more for each taxpayer 65 or older. Marginal tax is calculated
  * without intermediate whole-dollar rounding (small tax-table differences).
  *
  * Social Security and Railroad Retirement Act (Tier 1) benefits included in
@@ -34,6 +34,13 @@ function standardDeduction(year: number, filing: FilingStatus) {
   return single * (filing === "married" ? 2 : 1);
 }
 const PERSONAL_EXEMPTION_PER_PERSON = 1144;
+// Form N-11 lines 6a/6b: each taxpayer who is 65 or older on January 1 after the tax year claims one additional
+// exemption (Form N-11 instructions, Exemptions and Line 25). The disability exemption is not modeled.
+function isAge65OnNextJanuary1(birthDate: string, year: number) {
+  const [y, m, d] = birthDate.split("-").map(Number);
+  const turned65 = y + 65;
+  return turned65 < year + 1 || (turned65 === year + 1 && m === 1 && d === 1);
+}
 const BRACKET_CEILINGS: Record<FilingStatus, number[]> = {
   single: [9600, 14400, 19200, 24000, 36000, 48000, 125000, 175000, 225000, 275000, 325000, Infinity],
   married: [19200, 28800, 38400, 48000, 72000, 96000, 250000, 350000, 450000, 550000, 650000, Infinity],
@@ -64,7 +71,8 @@ export function hawaiiTax(input: HouseholdTaxInput, federalAgi: number, taxableB
     throw new RangeError("Invalid Hawaii account exclusion attribution.");
   }
   const hiAgi = Math.max(0, federalAgi - taxableBenefits - pensionExclusion - accountExclusion);
-  const exemption = PERSONAL_EXEMPTION_PER_PERSON * input.people.length;
+  const exemptions = input.people.length + input.people.filter(person => isAge65OnNextJanuary1(person.birthDate, input.year)).length;
+  const exemption = PERSONAL_EXEMPTION_PER_PERSON * exemptions;
   const taxable = Math.max(0, hiAgi - standardDeduction(input.year, input.filing) - exemption);
   const futureCeilings = input.year >= 2029
     ? [19200, 24000, 36000, 48000, 125000, 175000, 225000, 275000, 325000, 500000, Infinity]
@@ -81,7 +89,7 @@ export function hawaiiTax(input: HouseholdTaxInput, federalAgi: number, taxableB
       + "and Act 24 (2026) schedules for 2027 and 2029 onward, topping out at 13%. "
       + "Act 46 standard deductions are $8,000 single in 2026, $9,000 in 2028, $10,000 in 2030, "
       + "and $12,000 from 2031, doubled for married filing jointly, without additional inflation indexing, "
-      + "and a $1,144 personal exemption per person. Social Security and Railroad Retirement Tier 1 benefits are fully "
+      + "and a $1,144 personal exemption per person plus one additional $1,144 exemption for each taxpayer 65 or older on January 1 after the tax year (the separate disability exemption and Hawaii's 7.25% maximum rate on net long-term capital gains are not modeled, which can overstate tax for high-income households with large gains). Social Security and Railroad Retirement Tier 1 benefits are fully "
       + "exempt. Entered pensions require explicit fully-exempt or fully-taxable Hawaii treatment; mixed or unknown "
       + "treatment is blocked, not inferred from pension type. Traditional IRA/401(k) accounts require confirmed taxable "
       + "or single-source exempt employer/rollover treatment. Exempt accounts with federal basis, contributions, matches "
