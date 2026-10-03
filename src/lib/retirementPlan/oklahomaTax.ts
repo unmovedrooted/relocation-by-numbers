@@ -6,16 +6,25 @@ import { ageAtYearEnd } from "./rules";
 /**
  * Restricted, verified Oklahoma resident annual settlement.
  *
- * Verified against the Oklahoma Tax Commission's own 2025 Form 511
- * packet: the graduated schedule (0.25%/0.75%/1.75%/2.75%/3.75%/4.75% at
- * $1,000/$2,500/$3,750/$4,900/$7,200 single or married filing separate,
- * with married filing jointly, head of household and qualifying
- * surviving spouse using exactly doubled thresholds) is reconciled
- * exactly against the packet's own $100,000-and-over tax computation
- * worksheet constants ($4,562 plus 4.75% single/MFS, $4,373 plus 4.75%
- * MFJ/HOH/QSS), and the standard deduction ($6,350 single/married filing
- * separate, $12,700 married filing jointly/qualifying surviving spouse,
- * $9,350 head of household) and $1,000 per-exemption personal exemption.
+ * Graduated schedule for tax year 2026 and later, read from the enrolled
+ * text of House Bill 2764 (2025), 68 O.S. 2355(D), effective November 1,
+ * 2025: 0% on the first $3,750, 2.5% on the next $1,150, 3.5% on the next
+ * $2,300 and 4.5% on the remainder for single and married-filing-separate
+ * filers (ceilings $3,750/$4,900/$7,200), with married filing jointly, head
+ * of household and qualifying surviving spouse at exactly doubled
+ * thresholds ($7,500/$9,800/$14,400). Section 2355(E) lowers every rate by
+ * a further 0.25 percentage point after each State Board of Equalization
+ * certification that revenue growth exceeds the statutory threshold, first
+ * possible for tax years beginning after the February 2027 certification;
+ * those revenue-contingent reductions are not predicted, so the 2026
+ * schedule is held for later years.
+ * https://www.oklegislature.gov/cf_pdf/2025-26%20ENR/hB/HB2764%20ENR.PDF
+ *
+ * The standard deduction ($6,350 single/married filing separate, $12,700
+ * married filing jointly/qualifying surviving spouse, $9,350 head of
+ * household) and $1,000 per-exemption personal exemption are fixed
+ * statutory amounts, reconciled against the Oklahoma Tax Commission's 2025
+ * Form 511 packet; HB 2764 does not change them.
  * https://oklahoma.gov/content/dam/ok/en/tax/documents/forms/individuals/current/511-Pkt.pdf
  *
  * A further $1,000 Special Exemption applies for each taxpayer or spouse
@@ -41,10 +50,10 @@ const PERSONAL_EXEMPTION_PER_PERSON = 1000;
 const SPECIAL_EXEMPTION_AGI_LIMIT: Record<FilingStatus, number> = { single: 15000, married: 25000 };
 const RETIREMENT_EXCLUSION_CAP = 10000;
 const BRACKET_CEILINGS: Record<FilingStatus, number[]> = {
-  single: [1000, 2500, 3750, 4900, 7200, Infinity],
-  married: [2000, 5000, 7500, 9800, 14400, Infinity],
+  single: [3750, 4900, 7200, Infinity],
+  married: [7500, 9800, 14400, Infinity],
 };
-const BRACKET_RATES = [.0025, .0075, .0175, .0275, .0375, .0475];
+const BRACKET_RATES = [0, .025, .035, .045];
 
 function marginal(amount: number, ceilings: number[], rates: number[]) {
   let total = 0, floor = 0;
@@ -72,8 +81,9 @@ export function oklahomaTax(input: HouseholdTaxInput, federalAgi: number, taxabl
   const stateTax = marginal(taxable, BRACKET_CEILINGS[input.filing], BRACKET_RATES);
   return {
     stateTax, localTax: 0, okAgi, retirementExclusion,
-    warning: "Oklahoma pre-credit estimate using the enacted graduated schedule (0.25% to 4.75% at $1,000/$2,500/"
-      + "$3,750/$4,900/$7,200 single, doubled for married filing jointly) applied after the standard deduction ($6,350 "
+    warning: "Oklahoma pre-credit estimate using the enacted 2026 graduated schedule (HB 2764: 0% to $3,750, "
+      + "then 2.5%/3.5%/4.5% at $4,900/$7,200 single, doubled for married filing jointly; later revenue-triggered "
+      + "0.25-point cuts are not predicted) applied after the standard deduction ($6,350 "
       + "single/$12,700 married filing jointly) and a $1,000 personal exemption per person, plus a further $1,000 per "
       + "person 65 or older when household Federal AGI is $15,000 or less (single) or $25,000 or less (married filing "
       + "jointly). Social Security is fully exempt. Each owner's own pension income of any pensionType, plus that owner's "

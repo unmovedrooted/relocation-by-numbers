@@ -12,7 +12,7 @@ function input(overrides: Partial<HouseholdTaxInput> = {}): HouseholdTaxInput {
 }
 
 function bracketTax(taxable: number, ceilings: number[]) {
-  const rates = [.0025, .0075, .0175, .0275, .0375, .0475];
+  const rates = [0, .025, .035, .045];
   let total = 0, floor = 0;
   for (let i = 0; i < ceilings.length; i++) {
     total += Math.max(0, Math.min(taxable, ceilings[i]) - floor) * rates[i];
@@ -26,7 +26,7 @@ describe("restricted Oklahoma annual settlement", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const ok = estimateHouseholdTax(terms);
     const taxable = 60000 - 6350 - 1000;
-    expect(ok.stateTax).toBeCloseTo(bracketTax(taxable, [1000, 2500, 3750, 4900, 7200, Infinity]), 6);
+    expect(ok.stateTax).toBeCloseTo(bracketTax(taxable, [3750, 4900, 7200, Infinity]), 6);
     expect(ok.localTax).toBe(0);
   });
 
@@ -37,18 +37,20 @@ describe("restricted Oklahoma annual settlement", () => {
     ], income: [{ ownerId: "one", kind: "wages", amount: 90000 }] });
     const ok = estimateHouseholdTax(terms);
     const taxable = 90000 - 12700 - 2000;
-    expect(ok.stateTax).toBeCloseTo(bracketTax(taxable, [2000, 5000, 7500, 9800, 14400, Infinity]), 6);
+    expect(ok.stateTax).toBeCloseTo(bracketTax(taxable, [7500, 9800, 14400, Infinity]), 6);
   });
 
-  it("exactly reconciles the packet's own $100,000-and-over tax computation worksheet constants", () => {
+  it("reproduces the HB 2764 schedule: hand-computed totals at $100,000 of taxable income", () => {
+    // Single: 0% on 3,750; 2.5% on 1,150 = 28.75; 3.5% on 2,300 = 80.50; 4.5% on (100,000-7,200) = 4,176.00 -> 4,285.25.
     const single = oklahomaTax(input(), 100000 + 6350 + 1000, 0, 0);
-    expect(single.stateTax).toBeCloseTo(4562, -1);
+    expect(single.stateTax).toBeCloseTo(4285.25, 6);
     const marriedTerms = input({ filing: "married", people: [
       { id: "one", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
       { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
     ] });
     const married = oklahomaTax(marriedTerms, 100000 + 12700 + 2000, 0, 0);
-    expect(married.stateTax).toBeCloseTo(4373, 0);
+    // Married: 0% on 7,500; 2.5% on 2,300 = 57.50; 3.5% on 4,600 = 161.00; 4.5% on (100,000-14,400) = 3,852.00 -> 4,070.50.
+    expect(married.stateTax).toBeCloseTo(4070.5, 6);
   });
 
   it("excludes Social Security from the Oklahoma tax base", () => {
@@ -69,9 +71,9 @@ describe("restricted Oklahoma annual settlement", () => {
   it("adds a further $1,000 special exemption per owner 65 or older when household Federal AGI is low enough", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1955-01-01", blind: false, eligibleForSeniorDeduction: true }] });
     const low = oklahomaTax(terms, 14000, 0, 0);
-    expect(low.stateTax).toBeCloseTo(bracketTax(14000 - 6350 - 2000, [1000, 2500, 3750, 4900, 7200, Infinity]), 6);
+    expect(low.stateTax).toBeCloseTo(bracketTax(14000 - 6350 - 2000, [3750, 4900, 7200, Infinity]), 6);
     const high = oklahomaTax(terms, 20000, 0, 0);
-    expect(high.stateTax).toBeCloseTo(bracketTax(20000 - 6350 - 1000, [1000, 2500, 3750, 4900, 7200, Infinity]), 6);
+    expect(high.stateTax).toBeCloseTo(bracketTax(20000 - 6350 - 1000, [3750, 4900, 7200, Infinity]), 6);
   });
 
   it("requires explicit confirmation of the restricted Oklahoma assumptions", () => {
