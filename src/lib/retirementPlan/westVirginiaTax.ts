@@ -38,10 +38,10 @@ import { ageAtYearEnd } from "./rules";
  * An owner who is 65 or older by year end may claim a further deduction
  * of up to $8,000 of income not already excluded above (this planner
  * counts that owner's own wages, non-government pension income and a
- * share of the aggregate 401(k)/IRA/annuity distribution figure), net of
+ * own attributed 401(k)/IRA/annuity distributions), net of
  * that owner's own Social Security and government-pension exclusions
  * already claimed; interest, dividends and capital gains are not
- * attributed per owner in this planner and are excluded from that base,
+ * attributed to individual owners in this planner's annual tax input and are excluded from that base,
  * understating the deduction for a household with such income. West
  * Virginia's disability-based alternative to the age-65 deduction, and
  * its Family Tax Credit and property-tax credits, are not modeled.
@@ -108,7 +108,7 @@ export function westVirginiaTax(input: HouseholdTaxInput, federalAgi: number, ta
       + "military retirement systems are not modeled. An owner 65 or older further excludes up to $8,000 of that owner's "
       + "own wages, private pension income and own attributed 401(k)/IRA/annuity distributions, "
       + "net of that owner's own Social Security and government-pension exclusions; investment income is not "
-      + "attributed per owner and is excluded from that base. West Virginia's disability deduction, Family Tax Credit "
+      + "attributed to individual owners and is excluded from that base. West Virginia's disability deduction, Family Tax Credit "
       + "and property-tax credits are not modeled. Only single and married-filing-jointly are supported.",
   };
 }

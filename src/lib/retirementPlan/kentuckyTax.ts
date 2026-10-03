@@ -26,8 +26,8 @@ import { ownerRetirementIncome } from "./ownerRetirementIncome";
  *
  * Because the tax is flat, the excluded amount is what matters, not which
  * spouse's income it comes from, so this planner applies the $31,110 cap
- * per owner to that owner's own pension income plus an even share of the
- * household's aggregate 401(k)/IRA/annuity distribution figure. Schedule
+ * per owner to that owner's own pension income plus that owner's own
+ * attributed 401(k)/IRA/annuity distributions. Schedule
  * P's separate, larger exemption for government pension income
  * attributable to service credit earned before January 1, 1998 is not
  * modeled, since this planner cannot verify a modeled owner's date of

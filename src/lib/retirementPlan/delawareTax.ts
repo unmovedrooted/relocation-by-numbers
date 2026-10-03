@@ -32,7 +32,7 @@ import { ageAtYearEnd } from "./rules";
  * combined with that owner's own
  * pension income toward the $12,500 cap; the interest, dividend and
  * capital-gain components of "eligible retirement income" are not included,
- * since this planner does not track them per owner, understating the
+ * since this planner's annual tax input does not attribute them to individual owners, understating the
  * exclusion for a household with meaningful taxable investment income. For
  * an owner under 60, only that owner's own pension income (not this
  * planner's 401(k)/IRA/annuity figure) is excluded, capped at $2,000, since

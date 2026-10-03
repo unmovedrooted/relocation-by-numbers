@@ -33,8 +33,8 @@ import { ageAtYearEnd } from "./rules";
  * wages; each owner's own attributed 401(k)/IRA/annuity distributions are
  * counted for that owner. Taxable
  * interest, dividends, capital gains and rental/royalty/partnership income
- * are not included in the exclusion pool at all, since this planner does
- * not track them per owner; this understates the exclusion, and therefore
+ * are not included in the exclusion pool at all, since this planner's annual
+ * tax input does not attribute them to individual owners; this understates the exclusion, and therefore
  * overstates tax, for a household with meaningful taxable investment
  * income outside a traditional IRA or 401(k). The disability-based
  * under-62 exclusion and Georgia's separate military retirement income
@@ -84,7 +84,7 @@ export function georgiaTax(input: HouseholdTaxInput, federalAgi: number, taxable
       + "Security is fully excluded. The Retirement Income Exclusion gives each spouse who is 62-64 up to $35,000, or 65 or "
       + "older up to $65,000, of their own income entered as \"pension,\" up to $5,000 of their own wages, and that "
       + "owner's own attributed 401(k)/IRA/annuity distributions. Taxable interest, dividends, capital gains and rental "
-      + "income are not included in the exclusion pool, since this planner does not track them per owner, understating the "
+      + "income are not included in the exclusion pool, since this planner's annual tax input does not attribute them to individual owners, understating the "
       + "exclusion for a household with meaningful taxable investment income. The disability-based under-62 exclusion and "
       + "Georgia's separate military retirement income exclusion are not modeled. Georgia has no local income tax. Only "
       + "single and married-filing-jointly are supported. Itemized deductions and credits are excluded. Georgia's dollar "

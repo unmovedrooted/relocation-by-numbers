@@ -39,9 +39,9 @@ import type { HouseholdTaxInput } from "./householdTax";
  * income, not to each owner's own income separately (unlike Maryland or
  * Indiana's per-owner worksheets). Eligible income combines income entered
  * as "pension" with this planner's aggregate 401(k)/IRA/annuity distribution
- * figure; the latter cannot be separated from a nonqualified annuity
- * withdrawal, so this planner cannot confirm every dollar actually qualifies
- * under GIT-1. No itemized deductions, credits or dependent exemptions are
+ * figure; the latter includes nonqualified annuity withdrawals, which this
+ * planner does not yet filter out although its owner-level records identify
+ * them, so it cannot confirm every dollar actually qualifies under GIT-1. No itemized deductions, credits or dependent exemptions are
  * modeled. New Jersey parameters remain nominal; the household's
  * inflation/threshold-growth assumption does not index them, matching the
  * restricted New York, Maryland, Indiana, DC and Illinois estimates'
@@ -102,8 +102,8 @@ export function newJerseyTax(input: HouseholdTaxInput, federalAgi: number, taxab
       + "Exclusion applies only if an owner is 62 or older by year end (disability-based eligibility is unsupported) and the "
       + "household's total income (federal AGI less Social Security) is $150,000 or less, combining income entered as "
       + "\"pension\" with this planner's aggregate 401(k)/IRA/annuity distribution figure, capped and phased down by filing "
-      + "status; that aggregate figure cannot be separated from a nonqualified annuity withdrawal that may not actually "
-      + "qualify. Only single and married-filing-jointly tiers are supported. New Jersey has no local income tax. Itemized "
+      + "status; that aggregate figure includes nonqualified annuity withdrawals, which are not yet filtered out and may "
+      + "not actually qualify. Only single and married-filing-jointly tiers are supported. New Jersey has no local income tax. Itemized "
       + "deductions, credits and dependent exemptions are excluded. New Jersey parameters are not inflation-indexed in this "
       + "model. Future legislation is not predicted. Not a tax return.",
   };

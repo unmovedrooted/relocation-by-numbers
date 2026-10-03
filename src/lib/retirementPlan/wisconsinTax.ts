@@ -38,8 +38,8 @@ import { ageAtYearEnd } from "./rules";
  * year, an owner 67 or older may subtract up to $24,000 of qualifying
  * retirement-plan or IRA income ($48,000 for a married couple filing
  * jointly if both spouses are 67 or older); this planner applies the cap
- * per owner 67 or older to that owner's own pension income plus a share
- * of this planner's aggregate 401(k)/IRA/annuity distribution figure.
+ * per owner 67 or older to that owner's own pension income plus that
+ * owner's own attributed 401(k)/IRA/annuity distributions.
  * Wisconsin's separate $5,000 low-income (federal AGI under $15,000
  * single/$30,000 married) age-65 retirement subtraction is not modeled.
  * https://www.revenue.wi.gov/DOR%20Publications/pb126.pdf
