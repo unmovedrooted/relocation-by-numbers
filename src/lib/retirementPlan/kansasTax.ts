@@ -14,8 +14,17 @@ import { ageAtYearEnd } from "./rules";
  * single/$8,240 married, plus $850 per condition -- 65+ or blind -- for
  * single filers and $700 per condition for married filers), and the
  * consolidated exemption allowance ($9,160 single/$18,320 married).
- * https://www.ksrevenue.gov/pdf/ip25.pdf (2025 booklet; 2026 figures not
- * yet published, so 2025's are held here).
+ * https://www.ksrevenue.gov/pdf/ip25.pdf
+ *
+ * Re-verified 2026-10-02 against the 2026 Kansas Statutes
+ * (kslegislature.gov, b2025_26): K.S.A. 79-32,110 (rates for tax years 2024
+ * and later: 5.2% to $23,000 single/$46,000 married, then 5.58%), 79-32,119
+ * (standard deduction $3,605 single/$8,240 married/$6,180 head of
+ * household for 2024 and thereafter, plus the $850/$700 additional amount)
+ * and 79-32,121 (exemption $9,160 single/$18,320 married for 2025 and
+ * thereafter). These are fixed statutory amounts with no inflation
+ * indexing, so they are current for 2026 and later rather than stale 2025
+ * figures; only new legislation could change them.
  *
  * Social Security is fully exempt for all filers regardless of income
  * (line A10 of Schedule S: only the federally taxable amount is

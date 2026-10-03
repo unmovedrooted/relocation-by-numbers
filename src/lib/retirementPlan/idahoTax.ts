@@ -14,6 +14,13 @@ import { ageAtYearEnd } from "./rules";
  * standard deduction, passed in from this planner's federal computation.
  * https://tax.idaho.gov/document-mngr/forms_EFO00088/
  *
+ * Re-checked 2026-10-02: the Idaho State Tax Commission's 2026 withholding
+ * computation still applies 5.3% (and states the Idaho Child Tax Credit has
+ * sunset), so the flat rate is confirmed for 2026. Idaho has not published
+ * its 2026 indexed zero-bracket threshold or Retirement Benefits Deduction
+ * cap, so the 2025 amounts remain the latest verified and are disclosed.
+ * https://tax.idaho.gov/taxes/income-tax/withholding/computing/
+ *
  * Social Security and Railroad Retirement benefits included in federal
  * income are fully subtracted (Form 39R, Part B, line 7).
  *
