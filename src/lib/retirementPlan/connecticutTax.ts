@@ -3,7 +3,11 @@ import type { HouseholdTaxInput } from "./householdTax";
 import { retirementIncomeFromSources } from "./ownerRetirementIncome";
 import { stateSocialSecurityInclusion } from "./stateSocialSecurityCoverage";
 
-/** Restricted, step-exemption, PRE-CREDIT planning estimate. Rates and
+/** Restricted planning estimate (step exemption, 2% add-back, recapture and
+ * personal tax credit; property-tax and other credits excluded).
+ * Tables A-E were read from the 2025 Form CT-1040 return instructions (Rev.
+ * 12/25), https://portal.ct.gov/DRS/Individuals/Resident-Income-Tax/Tax-Information,
+ * and the single/married bracket schedule (Table B) from the same document. Rates and
  * thresholds reviewed 2026-09-24 against:
  * - Connecticut DRS, Informational Publication 2026(7), "Is My Connecticut
  *   Withholding Correct?": the single/MFS bracket schedule (Table B,
@@ -43,7 +47,10 @@ import { stateSocialSecurityInclusion } from "./stateSocialSecurityCoverage";
  * retired pay, Railroad Retirement, and Connecticut teachers' retirement
  * pay, none of which this planner can identify separately, so this
  * overstates the subtraction for such income.
- * The exemption phase-out tests federal AGI, not Connecticut AGI. Only
+ * The exemption, 2% add-back, recapture and personal-tax-credit tables test
+ * Connecticut AGI (federal AGI less the Social Security and pension
+ * subtractions; additions such as non-Connecticut municipal interest are not
+ * modeled). Only
  * single and married-filing-jointly are supported. No itemized deductions
  * or credits are modeled. Connecticut parameters are not inflation-indexed
  * in this model, matching the restricted New York, Maryland, Indiana, DC,
@@ -93,8 +100,47 @@ const PENSION_PHASE_OUT: Record<FilingStatus, { upTo: number; fraction: number }
   ],
 };
 
-function personalExemption(input: HouseholdTaxInput, federalAgi: number) {
-  return EXEMPTION_TABLE[input.filing].find(row => federalAgi <= row.upTo)!.amount;
+type StepTable = { upTo: number; value: number }[];
+const range = (count: number, build: (index: number) => { upTo: number; value: number }) => Array.from({ length: count }, (_, index) => build(index));
+
+// Tables C, D and E of the 2025 Form CT-1040 instructions (Tax Calculation Schedule, lines 5, 6 and 8), all keyed on Connecticut AGI.
+const PHASE_OUT_ADD_BACK: Record<FilingStatus, StepTable> = {
+  single: [{ upTo: 56500, value: 0 }, ...range(9, i => ({ upTo: 61500 + 5000 * i, value: 25 * (i + 1) })), { upTo: Infinity, value: 250 }],
+  married: [{ upTo: 100500, value: 0 }, ...range(9, i => ({ upTo: 105500 + 5000 * i, value: 50 * (i + 1) })), { upTo: Infinity, value: 500 }],
+};
+
+const RECAPTURE: Record<FilingStatus, StepTable> = {
+  single: [
+    { upTo: 105000, value: 0 }, ...range(9, i => ({ upTo: 110000 + 5000 * i, value: 25 * (i + 1) })), { upTo: 200000, value: 250 },
+    ...range(29, j => ({ upTo: 205000 + 5000 * j, value: 340 + 90 * j })), { upTo: 500000, value: 2950 },
+    ...range(8, k => ({ upTo: 505000 + 5000 * k, value: 3000 + 50 * k })), { upTo: Infinity, value: 3400 },
+  ],
+  married: [
+    { upTo: 210000, value: 0 }, ...range(9, i => ({ upTo: 220000 + 10000 * i, value: 50 * (i + 1) })), { upTo: 400000, value: 500 },
+    ...range(29, j => ({ upTo: 410000 + 10000 * j, value: 680 + 180 * j })), { upTo: 1000000, value: 5900 },
+    ...range(8, k => ({ upTo: 1010000 + 10000 * k, value: 6000 + 100 * k })), { upTo: Infinity, value: 6800 },
+  ],
+};
+
+const PERSONAL_CREDIT: Record<FilingStatus, StepTable> = {
+  single: [
+    [18800, .75], [19300, .70], [19800, .65], [20300, .60], [20800, .55], [21300, .50], [21800, .45], [22300, .40], [25000, .35],
+    [25500, .30], [26000, .25], [26500, .20], [31300, .15], [31800, .14], [32300, .13], [32800, .12], [33300, .11], [60000, .10],
+    [60500, .09], [61000, .08], [61500, .07], [62000, .06], [62500, .05], [63000, .04], [63500, .03], [64000, .02], [64500, .01],
+    [Infinity, 0],
+  ].map(([upTo, value]) => ({ upTo, value })),
+  married: [
+    [30000, .75], [30500, .70], [31000, .65], [31500, .60], [32000, .55], [32500, .50], [33000, .45], [33500, .40], [40000, .35],
+    [40500, .30], [41000, .25], [41500, .20], [50000, .15], [50500, .14], [51000, .13], [51500, .12], [52000, .11], [96000, .10],
+    [96500, .09], [97000, .08], [97500, .07], [98000, .06], [98500, .05], [99000, .04], [99500, .03], [100000, .02], [100500, .01],
+    [Infinity, 0],
+  ].map(([upTo, value]) => ({ upTo, value })),
+};
+
+const stepValue = (table: StepTable, agi: number) => table.find(row => agi <= row.upTo)!.value;
+
+function personalExemption(input: HouseholdTaxInput, connecticutAgi: number) {
+  return EXEMPTION_TABLE[input.filing].find(row => connecticutAgi <= row.upTo)!.amount;
 }
 
 // CGS 12-701(a)(20)(B): pensions/annuities and, from tax year 2026, IRA distributions at 100%; Roth IRA distributions are excluded.
@@ -120,15 +166,23 @@ export function connecticutTax(
   });
   const socialSecuritySubtraction = taxableBenefits - ssResult.taxableBenefits!;
   const pension = pensionSubtraction(input, federalAgi, retirementOrdinary);
-  const exemption = personalExemption(input, federalAgi);
-  const taxable = Math.max(0, federalAgi - socialSecuritySubtraction - pension - exemption);
-  const stateTax = sumBrackets(taxable, STATE_BRACKETS[input.filing]);
+  const connecticutAgi = federalAgi - socialSecuritySubtraction - pension;
+  const exemption = personalExemption(input, connecticutAgi);
+  const taxable = Math.max(0, connecticutAgi - exemption);
+  const initialTax = sumBrackets(taxable, STATE_BRACKETS[input.filing]);
+  const phaseOutAddBack = taxable > 0 ? stepValue(PHASE_OUT_ADD_BACK[input.filing], connecticutAgi) : 0;
+  const recapture = taxable > 0 ? stepValue(RECAPTURE[input.filing], connecticutAgi) : 0;
+  const preCreditTax = initialTax + phaseOutAddBack + recapture;
+  const personalCredit = preCreditTax * stepValue(PERSONAL_CREDIT[input.filing], connecticutAgi);
+  const stateTax = preCreditTax - personalCredit;
   return {
     stateTax, localTax: 0, socialSecuritySubtraction, pensionSubtraction: pension, personalExemption: exemption,
-    warning: "Connecticut pre-credit estimate: enacted brackets (reviewed 2026-09-24; the married schedule is the "
-      + "well-corroborated doubling of the single thresholds, not independently read from a primary return-instructions "
-      + "table), a step-down personal exemption ($15,000 single/$24,000 married, phased out by $44,001/$71,001 federal "
-      + "AGI), and the Social Security Benefit Adjustment (full exclusion below $75,000/$100,000 federal AGI, else a "
+    connecticutAgi, phaseOutAddBack, recapture, personalCredit,
+    warning: "Connecticut pre-credit estimate: enacted brackets (reviewed 2026-10-02 against the 2025 Form CT-1040 "
+      + "instructions, Tables A-E, held constant for later years), a step-down personal exemption ($15,000 single/$24,000 "
+      + "married, phased out by $44,001/$71,001 Connecticut AGI), the 2% rate phase-out add-back (up to $250/$500), the "
+      + "high-income tax recapture (up to $3,400/$6,800), the personal tax credit that phases out by $64,500/$100,500 "
+      + "Connecticut AGI, and the Social Security Benefit Adjustment (full exclusion below $75,000/$100,000 federal AGI, else a "
       + "25%-of-worksheet-amount formula whose federal worksheet input this planner approximates rather than reads "
       + "directly). Pension/annuity income (entered as annual pension) and this planner's owner-attributed 401(k)/IRA/annuity "
       + "distributions share a single phase-out by federal AGI (100% below $75,000/$100,000, 0% at $100,000/"
