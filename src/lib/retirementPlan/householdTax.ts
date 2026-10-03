@@ -1,5 +1,6 @@
 import { estimateNetBreakdown, sumBrackets, type FilingStatus } from "../tax";
 import { STATES, type StateCode } from "../states";
+import { stateDataVintage } from "./stateDataVintage";
 import { taxCharacter, type TaxCharacter } from "./accountTax";
 import { taxableSocialSecurity } from "./rules";
 import { verifiedRetirementLocation } from "./verifiedLocation";
@@ -353,7 +354,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const co = location && input.state === "co" ? coloradoTax(input, agi, taxableBenefits, taxableIncome) : null;
   const nm = location && input.state === "nm" ? newMexicoTax(input, agi, taxableBenefits, standardDeduction) : null;
   const mn = location && input.state === "mn" ? minnesotaTax(input, agi, taxableBenefits, taxExemptInterest) : null;
-  const ut = location && input.state === "ut" ? utahTax(input, agi, taxableBenefits, taxExemptInterest) : null;
+  const ut = location && input.state === "ut" ? utahTax(input, agi, taxableBenefits, taxExemptInterest, standardDeduction) : null;
   const ct = location && input.state === "ct" ? connecticutTax(input, agi, taxableBenefits, taxExemptInterest, account.retirementOrdinary) : null;
   const vt = location && input.state === "vt" ? vermontTax(input, agi, taxableBenefits, taxExemptInterest) : null;
   const mt = location && input.state === "mt" ? montanaTax(input, agi, standardDeduction, seniorDeduction) : null;
@@ -392,8 +393,9 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
     filing: input.filing, k401Pct: 0 }).state;
   const total = finiteDollars(regularFederal + alternativeMinimumTax + socialSecurityPayroll + medicarePayroll
     + additionalMedicare + niit + earlyDistributionTax + stateTax + (localTax ?? 0), "Total annual tax");
+  const stateVintage = stateDataVintage(input.state);
   return Object.freeze({ taxYear: input.year, federalBaseYear: HOUSEHOLD_TAX_YEAR, isProjection: input.year !== 2026,
-    bracketFactor: factors.bracket, payrollCapFactor: factors.payroll, pretaxDeferrals, iraDeduction, stateDataYear: location ? 2026 : 2025, localTax, agi, taxableBenefits,
+    bracketFactor: factors.bracket, payrollCapFactor: factors.payroll, pretaxDeferrals, iraDeduction, stateDataYear: location ? stateVintage.year : 2025, stateDataBasis: location ? stateVintage.basis : "legacy-proxy-2025" as const, stateDataNote: location ? stateVintage.note : null, localTax, agi, taxableBenefits,
     netShortTerm: st, netLongTerm: lt, capitalDeduction, standardDeduction, seniorDeduction,
     taxableIncome, ordinaryTaxable, preferentialIncome, ordinaryTax, capitalAndDividendTax,
     regularFederal, alternativeMinimumTax, socialSecurityPayroll, medicarePayroll, additionalMedicare,
@@ -403,7 +405,8 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
       ny ? ny.warning : md ? md.warning : inTax ? inTax.warning : dc ? dc.warning : il ? il.warning : nj ? nj.warning : pa ? pa.warning : co ? co.warning : nm ? nm.warning : mn ? mn.warning : ut ? ut.warning : ct ? ct.warning : vt ? vt.warning : mt ? mt.warning : ri ? ri.warning : ca ? ca.warning : va ? va.warning : az ? az.warning : ga ? ga.warning : nc ? nc.warning : sc ? sc.warning : oh ? oh.warning : ma ? ma.warning : ia ? ia.warning : ms ? ms.warning : mo ? mo.warning : wa ? wa.warning : al ? al.warning : ar ? ar.warning : de ? de.warning : ks ? ks.warning : ky ? ky.warning : ne ? ne.warning : wv ? wv.warning : id ? id.warning : la ? la.warning : mi ? mi.warning : ok ? ok.warning : wi ? wi.warning : hi ? hi.warning : me ? me.warning : nd ? nd.warning : orTax ? orTax.warning : location ? location.warning : "State tax uses the existing 2025 wage-based proxy on federal AGI, not verified retirement-specific state rules; local taxes are excluded.",
       "Standard-deduction U.S. resident estimate: IRA deductions require verified funded amounts; no IRA/Social Security worksheet interaction, itemization, credits, self-employment, foreign exclusions or AMT preference adjustments.",
       ...(input.year > 2026 ? ["Future tax values project 2026 law using explicit bracket/payroll growth, not published future tables. Statutory fixed thresholds remain nominal; the senior deduction expires after 2028."] : []),
-      "Capital carryovers are household totals; survivor/filing-status changes require owner attribution before using this state.",
+      ...(location && stateVintage.note ? [`State parameter vintage: mixed 2025/2026 data. ${stateVintage.note}`] : []),
+    "Capital carryovers are household totals; survivor/filing-status changes require owner attribution before using this state.",
       "AMT assumes regular and AMT asset basis and loss carryovers are identical; separate AMT carryovers and credits are not modeled.",
     ]),
   });
