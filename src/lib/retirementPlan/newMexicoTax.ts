@@ -31,6 +31,14 @@ import { ageAtYearEnd } from "./rules";
  *   $28,500 (single). Only one such exemption per person (not both age and
  *   blind).
  *   https://klvg4oyd4j.execute-api.us-west-2.amazonaws.com/prod/PublicFiles/34821a9573ca43e7b06dfad20f5183fd/61f8c5b0-b391-49b5-9d66-6605ef1f0c13/2025pit-adj-ins.pdf
+ * - NMSA 7-2-34 as amended by HB 37 (2024), effective for tax years beginning
+ *   on or after January 1, 2025 (2025 PIT-ADJ instructions, capital gains
+ *   deduction): the greater of the net capital gain (IRC 1222(11): net
+ *   long-term gain in excess of net short-term loss) up to $2,500, or 40% of
+ *   up to $1,000,000 of net capital gain from the sale of a business
+ *   allocated to New Mexico. The former broad 40% deduction no longer
+ *   applies. This planner models only the general $2,500 deduction.
+ *   https://law.justia.com/codes/new-mexico/chapter-7/article-2/section-7-2-34/
  * - The same instructions confirm the Social Security income exemption
  *   (PIT-1 line 25 / PIT-ADJ line 25) thresholds already verified and coded
  *   in stateSocialSecurityInclusion, reused unchanged here.
@@ -38,10 +46,10 @@ import { ageAtYearEnd } from "./rules";
  * Uses enacted law, not a prediction of future legislation. New Mexico has
  * no local income tax; localTax is always zero. Only single and married-
  * filing-jointly are supported. The armed forces retirement pay exemption,
- * the dependent deduction, the medical care expense exemption and the net
- * capital gains deduction are not modeled: this planner has no military-
- * pension, dependent, itemized-medical or capital-gains-specific income
- * kinds distinct enough to support them. New Mexico parameters are not
+ * the dependent deduction, the medical care expense exemption and the
+ * business-sale track of the net capital gains deduction are not modeled:
+ * this planner has no military-pension, dependent, itemized-medical or
+ * business-sale income kinds distinct enough to support them. New Mexico parameters are not
  * inflation-indexed in this model, matching the restricted New York,
  * Maryland, Indiana, DC, Illinois, New Jersey, Pennsylvania and Colorado
  * estimates' convention.
@@ -88,7 +96,9 @@ function lowMiddleIncomeExemption(input: HouseholdTaxInput, federalAgi: number) 
   return perExemption * input.people.length;
 }
 
-export function newMexicoTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, federalStandardDeduction: number) {
+const CAPITAL_GAIN_DEDUCTION_CAP = 2500;
+
+export function newMexicoTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, federalStandardDeduction: number, netCapitalGain = 0) {
   if (input.newMexicoContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted New Mexico planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported New Mexico projection year.");
   const ssResult = stateSocialSecurityInclusion({
@@ -100,17 +110,20 @@ export function newMexicoTax(input: HouseholdTaxInput, federalAgi: number, taxab
   const socialSecurityExemption = taxableBenefits - ssResult.taxableBenefits!;
   const ageBlind = ageBlindExemption(input, federalAgi);
   const lowMiddleIncome = lowMiddleIncomeExemption(input, federalAgi);
-  const taxable = Math.max(0, federalAgi - federalStandardDeduction - socialSecurityExemption - ageBlind - lowMiddleIncome);
+  if (!Number.isFinite(netCapitalGain) || netCapitalGain < 0) throw new RangeError("Invalid New Mexico net capital gain.");
+  const capitalGainsDeduction = Math.min(netCapitalGain, CAPITAL_GAIN_DEDUCTION_CAP);
+  const taxable = Math.max(0, federalAgi - federalStandardDeduction - socialSecurityExemption - ageBlind - lowMiddleIncome - capitalGainsDeduction);
   const stateTax = sumBrackets(taxable, STATE_BRACKETS[input.filing]);
   return {
-    stateTax, localTax: 0, socialSecurityExemption, ageBlindExemption: ageBlind, lowMiddleIncomeExemption: lowMiddleIncome,
+    stateTax, localTax: 0, socialSecurityExemption, ageBlindExemption: ageBlind, lowMiddleIncomeExemption: lowMiddleIncome, capitalGainsDeduction,
     warning: "New Mexico pre-credit estimate: enacted 2025-and-after brackets (six brackets, 1.5% to 5.9%; not independently "
       + "confirmed from a fetched primary rate table this review), starting from federal AGI less the household's own "
       + "federal standard deduction (New Mexico's personal exemption remains at $0, matching the federal suspension). "
       + "Social Security is excluded per the income-tested exemption; a graduated age-65-or-blind exemption (up to $8,000 "
       + "per qualifying person) and a Low- and Middle-Income Tax Exemption (up to $2,500 per person, phased and "
       + "income-limited) are also applied. The armed forces retirement exemption, dependent deduction, medical care "
-      + "expense exemption and net capital gains deduction are not modeled. New Mexico has no local income tax. Only "
+      + "expense exemption and the business-sale track of the net capital gains deduction are not modeled. The general net "
+      + "capital gains deduction (net capital gain up to $2,500, effective 2025) is applied. New Mexico has no local income tax. Only "
       + "single and married-filing-jointly are supported. New Mexico parameters are not inflation-indexed in this model. "
       + "Future legislation is not predicted. Not a tax return.",
   };

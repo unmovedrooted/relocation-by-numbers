@@ -123,3 +123,33 @@ describe("restricted Vermont annual settlement", () => {
     expect(() => buildPreviewInput({ ...PREVIEW_DEFAULTS, state: "vt" })).toThrow(/Confirm/);
   });
 });
+
+describe("Vermont flat capital gains exclusion (Schedule IN-153)", () => {
+  it("requires taxable income when gains exist but preserves no-gain callers", () => {
+    expect(() => vermontTax(input(), 40000, 0, 0, 1000)).toThrow(/federal taxable income/);
+    expect(vermontTax(input(), 40000, 0, 0).capitalGainsExclusion).toBe(0);
+    expect(vermontTax(input(), 40000, 0, 0, 1000, 0).capitalGainsExclusion).toBe(0);
+  });
+  it.each([NaN, Infinity, -Infinity, -1])("rejects invalid federal taxable income %s", value => {
+    expect(() => vermontTax(input(), 40000, 0, 0, 1000, value)).toThrow(/federal taxable income/);
+    expect(() => vermontTax(input(), 40000, 0, 0, 0, value)).toThrow(/federal taxable income/);
+  });
+  it("excludes the lesser of $5,000, the net capital gain and 40% of federal taxable income", () => {
+    // AGI 40,000, gain 10,000, federal taxable 30,000: exclusion 5,000 -> modified AGI 35,000 - 7,650 - 5,300 = 22,050 at 3.35%.
+    const vt = vermontTax(input(), 40000, 0, 0, 10000, 30000);
+    expect(vt.capitalGainsExclusion).toBe(5000);
+    expect(vt.stateTax).toBeCloseTo(22050 * .0335, 6);
+    expect(vermontTax(input(), 40000, 0, 0, 1200, 30000).capitalGainsExclusion).toBe(1200);
+    expect(vermontTax(input(), 40000, 0, 0, 10000, 8000).capitalGainsExclusion).toBeCloseTo(3200, 6);
+    expect(vermontTax(input(), 40000, 0, 0).capitalGainsExclusion).toBe(0);
+  });
+
+  it("flows the net long-term gain and federal taxable income from the household computation", () => {
+    const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 30000 }], accountIncome: taxCharacter({ longTermGain: 10000 }) });
+    expect(estimateHouseholdTax(terms).stateTax).toBeCloseTo(22050 * .0335, 6);
+  });
+
+  it("rejects an invalid gain", () => {
+    expect(() => vermontTax(input(), 40000, 0, 0, -1)).toThrow(/net capital gain/);
+  });
+});

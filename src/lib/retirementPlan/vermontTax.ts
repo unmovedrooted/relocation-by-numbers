@@ -27,6 +27,16 @@ import { ageAtYearEnd } from "./rules";
  *   Security side and assumes a taxpayer elects whichever side gives the
  *   larger subtraction.
  * https://tax.vermont.gov/sites/tax/files/documents/Income-Booklet-2025.pdf
+ * - 2025 Schedule IN-153 instructions (Capital Gains Exclusion, Rev. 10/25,
+ *   https://tax.vermont.gov/sites/tax/files/documents/IN-153-Instr-2025.pdf):
+ *   the Flat Exclusion is $5,000 or the net adjusted capital gain, whichever is
+ *   less, and no more than 40% of federal taxable income; qualified dividends
+ *   do not qualify and no exclusion exists when the federal return shows a
+ *   net capital loss. The $5,000 is the 2025 amount, held. The Percentage
+ *   Exclusion (40% of gains from assets held over three years, up to
+ *   $350,000) excludes publicly traded stocks, bonds and homes, which this
+ *   planner cannot distinguish from other assets, so only the Flat Exclusion
+ *   is modeled.
  *
  * Uses enacted law, not a prediction of future legislation. Vermont has no
  * local income tax; localTax is always zero. All modeled tax-exempt interest
@@ -41,7 +51,7 @@ import { ageAtYearEnd } from "./rules";
  * type; Vermont's separate, uncapped Military Retirement Income Exemption
  * (enacted 2025) is not modeled, since this planner cannot identify military
  * retirement pay, understating the benefit for such households. Railroad
- * retirement, the capital gains exclusion, the medical expense deduction, and
+ * retirement, the Percentage Exclusion on capital gains, the medical expense deduction, and
  * the student loan interest subtraction are not modeled. Only single and
  * married-filing-jointly are supported. No credits are modeled. Vermont
  * parameters are not inflation-indexed in this model, matching the restricted
@@ -71,7 +81,9 @@ function additionalDeductionBoxes(input: HouseholdTaxInput) {
   return boxes;
 }
 
-export function vermontTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, taxExemptInterest: number) {
+const FLAT_CAPITAL_GAIN_EXCLUSION = 5000;
+
+export function vermontTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, taxExemptInterest: number, netCapitalGain = 0, federalTaxableIncome?: number) {
   if (input.vermontContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Vermont planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Vermont projection year.");
   const lower = input.filing === "married" ? 70000 : 55000;
@@ -90,13 +102,19 @@ export function vermontTax(input: HouseholdTaxInput, federalAgi: number, taxable
   });
   const socialSecuritySubtraction = taxableBenefits - ssResult.taxableBenefits!;
   const otherRetirementSubtraction = election === "other-retirement" ? otherRetirementIfElected : 0;
-  const modifiedAgi = federalAgi + taxExemptInterest - socialSecuritySubtraction - otherRetirementSubtraction;
+  if (!Number.isFinite(netCapitalGain) || netCapitalGain < 0) throw new RangeError("Invalid Vermont net capital gain.");
+  if ((netCapitalGain > 0 && federalTaxableIncome === undefined)
+    || (federalTaxableIncome !== undefined && (!Number.isFinite(federalTaxableIncome) || federalTaxableIncome < 0))) {
+    throw new RangeError("Vermont requires finite nonnegative federal taxable income when gains are present.");
+  }
+  const capitalGainsExclusion = Math.min(FLAT_CAPITAL_GAIN_EXCLUSION, netCapitalGain, 0.4 * (federalTaxableIncome ?? 0));
+  const modifiedAgi = federalAgi + taxExemptInterest - socialSecuritySubtraction - otherRetirementSubtraction - capitalGainsExclusion;
   const deduction = STANDARD_DEDUCTION[input.filing] + additionalDeductionBoxes(input) * ADDITIONAL_PER_BOX
     + PERSONAL_EXEMPTION * (input.filing === "married" ? 2 : 1);
   const taxable = Math.max(0, modifiedAgi - deduction);
   const stateTax = Math.max(sumBrackets(taxable, STATE_BRACKETS[input.filing]), federalAgi > 150000 ? federalAgi * 0.03 : 0);
   return {
-    stateTax, localTax: 0, socialSecuritySubtraction, otherRetirementSubtraction,
+    stateTax, localTax: 0, socialSecuritySubtraction, otherRetirementSubtraction, capitalGainsExclusion,
     warning: "Vermont pre-credit estimate: enacted 2025 brackets (reviewed 2026-09-24), Vermont's own standard deduction "
       + "($7,650 single/$15,300 married, plus $1,250 per age-65-or-blind condition) and $5,300-per-person personal "
       + "exemption, and the Retirement Income Exemption election between excluding Social Security benefits or up to "
@@ -106,7 +124,7 @@ export function vermontTax(input: HouseholdTaxInput, federalAgi: number, taxable
       + "added back as Vermont-taxable, since this planner cannot identify Vermont-specific municipal bonds, and interest "
       + "from U.S. obligations is not separately tracked or subtracted. Vermont's separate, uncapped Military Retirement "
       + "Income Exemption is not modeled, since this planner cannot identify military retirement pay. Railroad retirement, "
-      + "the capital gains exclusion, the medical expense deduction and the student loan interest subtraction are excluded. "
+      + "the Percentage Exclusion on capital gains (publicly traded stock and homes do not qualify, and this planner cannot tell them apart), the medical expense deduction and the student loan interest subtraction are excluded. The $5,000 Flat Capital Gains Exclusion (limited to net capital gain and 40% of federal taxable income; the 2025 amount, held) is applied. "
       + "Vermont has no local income tax. Only single and married-filing-jointly are supported. No credits are modeled. "
       + "Vermont parameters are not inflation-indexed in this model. Future legislation is not predicted. Not a tax return.",
   };

@@ -109,3 +109,43 @@ describe("restricted Montana annual settlement", () => {
     expect(() => buildPreviewInput({ ...PREVIEW_DEFAULTS, state: "mt" })).toThrow(/Confirm/);
   });
 });
+
+describe("Montana net long-term capital gains tax (MCA 15-30-2103(2))", () => {
+  it("taxes gains at 4.1% when ordinary income already exceeds the first-bracket threshold", () => {
+    // Taxable 70,000 with 20,000 gain: ordinary 50,000 = 47,500*4.7% + 2,500*5.65% = 2,373.75; gains 20,000*4.1% = 820.
+    const mt = montanaTax(input(), 70000, 0, 0, 20000);
+    expect(mt.stateTax).toBeCloseTo(3193.75, 6);
+    expect(mt.capitalGainsTax).toBeCloseTo(820, 6);
+  });
+
+  it("taxes the gain at 3% up to the threshold less ordinary income, then 4.1%", () => {
+    // Taxable 60,000 with 40,000 gain: ordinary 20,000*4.7% = 940; 27,500 at 3% = 825; 12,500 at 4.1% = 512.5.
+    expect(montanaTax(input(), 60000, 0, 0, 40000).stateTax).toBeCloseTo(940 + 825 + 512.5, 6);
+  });
+
+  it("uses the 2027 thresholds (and married doubling) from 2027", () => {
+    const married = input({ year: 2027, filing: "married", people: [
+      { id: "one", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
+      { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
+    ] });
+    // Taxable 150,000 with 50,000 gain: ordinary 100,000*4.7% = 4,700; 30,000 at 3% = 900; 20,000 at 4.1% = 820.
+    expect(montanaTax(married, 150000, 0, 0, 50000).stateTax).toBeCloseTo(4700 + 900 + 820, 6);
+  });
+
+  it("limits the gain to taxable income", () => {
+    // Taxable 10,000, gain 50,000 -> gain 10,000 entirely at 3%.
+    expect(montanaTax(input(), 10000, 0, 0, 50000).stateTax).toBeCloseTo(300, 6);
+  });
+
+  it("is unchanged with no gain and flows net long-term gain from the household computation", () => {
+    expect(montanaTax(input(), 70000, 0, 0).stateTax).toBeCloseTo(3503.75, 6);
+    const terms = input({ accountIncome: taxCharacter({ longTermGain: 100000 }) });
+    const mt = estimateHouseholdTax(terms);
+    // AGI 100,000, federal standard deduction 16,100 -> taxable 83,900, all gain: 47,500 at 3% + 36,400 at 4.1%.
+    expect(mt.stateTax).toBeCloseTo(47500 * .03 + 36400 * .041, 6);
+  });
+
+  it("rejects an invalid gain", () => {
+    expect(() => montanaTax(input(), 50000, 0, 0, -5)).toThrow(/net long-term capital gain/);
+  });
+});

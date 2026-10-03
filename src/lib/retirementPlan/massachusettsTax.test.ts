@@ -86,3 +86,92 @@ describe("restricted Massachusetts annual settlement", () => {
     expect(() => buildPreviewInput({ ...PREVIEW_DEFAULTS, state: "ma" })).toThrow(/Confirm/);
   });
 });
+
+describe("Massachusetts capital gains (8.5% short-term, 5% long-term)", () => {
+  it("retains a state loss used federally and offsets a gain in the following year", () => {
+    const base = input({ income: [{ ownerId: "one", kind: "wages", amount: 50000 }],
+      projection: { kind: "project-2026-law", annualBracketGrowth: 0, annualPayrollCapGrowth: 0, statePolicy: "freeze-2025-proxy" } });
+    const first = estimateHouseholdTax({ ...base, accountIncome: taxCharacter({ longTermGain: -3000 }) });
+    expect(first.nextLossCarryover).toEqual({ shortTerm: 0, longTerm: 0 });
+    expect(first.nextMassachusettsLossCarryover).toEqual({ shortTerm: 0, longTerm: 3000 });
+    const second = estimateHouseholdTax({ ...base, year: 2027, accountIncome: taxCharacter({ longTermGain: 3000 }),
+      lossCarryover: first.nextLossCarryover, massachusettsLossCarryover: first.nextMassachusettsLossCarryover });
+    expect(second.stateTax).toBeCloseTo(2280, 6); // (50,000 wages - 4,400 exemption) * 5%.
+    expect(second.nextMassachusettsLossCarryover).toEqual({ shortTerm: 0, longTerm: 0 });
+    const withoutStateLoss = estimateHouseholdTax({ ...base, year: 2027, accountIncome: taxCharacter({ longTermGain: 3000 }) });
+    expect(withoutStateLoss.stateTax - second.stateTax).toBeCloseTo(150, 6);
+    expect(second.regularFederal).toBe(withoutStateLoss.regularFederal);
+  });
+
+  it("uses the state loss against interest even after the federal balance is exhausted", () => {
+    const result = estimateHouseholdTax(input({ income: [
+      { ownerId: "one", kind: "wages", amount: 50000 }, { ownerId: "one", kind: "interest", amount: 1000 },
+    ], massachusettsLossCarryover: { shortTerm: 3000, longTerm: 0 } }));
+    expect(result.stateTax).toBeCloseTo(2280, 6);
+    expect(result.nextMassachusettsLossCarryover).toEqual({ shortTerm: 2000, longTerm: 0 });
+  });
+
+  it("limits combined state losses to $2,000 against interest, consuming short-term first", () => {
+    const result = massachusettsTax(input(), 57000, 0, -1000, -5000, 10000, 3000);
+    expect(result.nextLossCarryover).toEqual({ shortTerm: 0, longTerm: 4000 });
+    expect(result.capitalLossAddBack).toBe(1000);
+  });
+
+  it("requires separate valid opening state losses instead of copying federal balances", () => {
+    expect(() => estimateHouseholdTax(input({ lossCarryover: { shortTerm: 3000, longTerm: 0 } }))).toThrow(/separately/);
+    for (const bad of [-1, NaN, Infinity]) {
+      expect(() => estimateHouseholdTax(input({ massachusettsLossCarryover: { shortTerm: bad, longTerm: 0 } }))).toThrow(/Massachusetts/);
+    }
+  });
+
+  it("preserves the independent balance through the timeline and final state", () => {
+    const plan = buildPreviewInput({ ...PREVIEW_DEFAULTS, state: "ma", maContract: "confirmed", endYear: "2027" });
+    const result = runRetirementTimeline({ ...plan, lossCarryover: { shortTerm: 3000, longTerm: 0 },
+      massachusettsLossCarryover: { shortTerm: 3000, longTerm: 0 } });
+    expect(result.years[0].result.nextState.lossCarryover.shortTerm).toBe(0);
+    expect(result.nextState.massachusettsLossCarryover).toEqual({ shortTerm: 3000, longTerm: 0 });
+    expect(result.years.every(row => Math.abs(row.reconciliationResidual) < 1e-5)).toBe(true);
+  });
+  it("taxes net short-term gains at 8.5% when 5% income absorbs the exemptions", () => {
+    // AGI 100,000 including 20,000 short-term gain; exemptions 4,400 -> taxable 95,600 at 5% = 4,780, plus 3.5% * 20,000 = 700.
+    const ma = massachusettsTax(input(), 100000, 0, 20000, 0);
+    expect(ma.stateTax).toBeCloseTo(4780 + 700, 6);
+    expect(ma.shortTermTaxable).toBe(20000);
+  });
+
+  it("applies excess exemptions to short-term gains before long-term gains", () => {
+    // Only income is a 10,000 short-term gain: 4,400 of exemptions reduce it to 5,600 taxed at 8.5% = 476.
+    expect(massachusettsTax(input(), 10000, 0, 10000, 0).stateTax).toBeCloseTo(5600 * .085, 6);
+  });
+
+  it("leaves long-term gains and dividends at 5%", () => {
+    expect(massachusettsTax(input(), 100000, 0, 0, 20000).stateTax).toBeCloseTo(95600 * .05, 6);
+  });
+
+  it("nets a long-term loss against short-term gains", () => {
+    // Short-term 10,000, long-term -4,000: 6,000 of net short-term gain (net capital gain 6,000 is in AGI 66,000).
+    expect(massachusettsTax(input(), 66000, 0, 10000, -4000).stateTax).toBeCloseTo(61600 * .05 + 6000 * .035, 6);
+  });
+
+  it("allows a net capital loss only up to $2,000 against interest and dividends", () => {
+    // Federal AGI 47,000 already deducts a 3,000 loss; only min(3,000, 2,000, 500) = 500 is allowed in Massachusetts.
+    const ma = massachusettsTax(input(), 47000, 0, -3000, 0, 500, 3000);
+    expect(ma.capitalLossAddBack).toBe(2500);
+    expect(ma.stateTax).toBeCloseTo((49500 - 4400) * .05, 6);
+    // With 5,000 of interest and dividends the full $2,000 applies.
+    expect(massachusettsTax(input(), 47000, 0, -3000, 0, 5000, 3000).capitalLossAddBack).toBe(1000);
+  });
+
+  it("flows short-term gains and the loss limit from the household computation", () => {
+    const gain = input({ income: [{ ownerId: "one", kind: "wages", amount: 80000 }], accountIncome: taxCharacter({ shortTermGain: 20000 }) });
+    expect(estimateHouseholdTax(gain).stateTax).toBeCloseTo(4780 + 700, 6);
+    const loss = input({ income: [{ ownerId: "one", kind: "wages", amount: 50000 }], accountIncome: taxCharacter({ longTermGain: -3000 }) });
+    // No interest or dividends, so Massachusetts allows none of the federal deduction: taxable 50,000 - 4,400.
+    expect(estimateHouseholdTax(loss).stateTax).toBeCloseTo(45600 * .05, 6);
+  });
+
+  it("rejects invalid inputs", () => {
+    expect(() => massachusettsTax(input(), 50000, 0, NaN, 0)).toThrow(/capital gain/);
+    expect(() => massachusettsTax(input(), 50000, 0, 0, 0, -1, 0)).toThrow(/capital gain/);
+  });
+});

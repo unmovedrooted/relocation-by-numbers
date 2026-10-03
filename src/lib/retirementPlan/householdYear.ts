@@ -105,6 +105,7 @@ export type HouseholdYearInput = Readonly<{
   withdrawalOrder: readonly string[];
   surplusAccountId: string;
   lossCarryover: CapitalLossCarryover;
+  massachusettsLossCarryover?: CapitalLossCarryover;
   projection?: HouseholdTaxInput["projection"];
   contributions?: readonly YearContribution[];
   employerMatchPlans?: readonly EmployerMatchPlan[];
@@ -399,7 +400,8 @@ export function runHouseholdYear(input: HouseholdYearInput) {
     retirementIncome: Object.freeze(final.retirementIncome.map(item => Object.freeze(item))),
     conversionTax: Object.freeze(final.conversionTax.map(item => Object.freeze(item))),
     nextState: Object.freeze({ accounts: Object.freeze(final.nextAccounts.map(account => Object.freeze(account))),
-      people: Object.freeze(final.nextPeople), lossCarryover: final.tax.nextLossCarryover }),
+      people: Object.freeze(final.nextPeople), lossCarryover: final.tax.nextLossCarryover,
+      ...(final.tax.nextMassachusettsLossCarryover ? { massachusettsLossCarryover: final.tax.nextMassachusettsLossCarryover } : {}) }),
     warnings: Object.freeze([...final.tax.warnings,
       "Annual transactions precede growth; pensions are fully taxable. Only explicit traditional 401k employee deferrals reduce wage income tax; contribution eligibility/limits require separate validation.",
       "Stock/ESPP returns are price-only and sales use supplied lot order with zero fees. Dividend cash must be supplied separately; reinvestment is not generated.",

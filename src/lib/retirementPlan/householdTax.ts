@@ -128,6 +128,8 @@ export type HouseholdTaxInput = Readonly<{
   /** Confirmed single-source exempt withdrawals, already included in federal retirement income. */
   hawaiiAccountExclusion?: number;
   lossCarryover: CapitalLossCarryover;
+  /** Separate Massachusetts balances; never inferred from federal losses. */
+  massachusettsLossCarryover?: CapitalLossCarryover;
   state: StateCode;
   stateTreatment: "existing-2025-proxy" | "verified-resident-location";
   cityId?: string;
@@ -352,12 +354,12 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const nj = location && input.state === "nj" ? newJerseyTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const pa = location && input.state === "pa" ? pennsylvaniaTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase, wages) : null;
   const co = location && input.state === "co" ? coloradoTax(input, agi, taxableBenefits, taxableIncome) : null;
-  const nm = location && input.state === "nm" ? newMexicoTax(input, agi, taxableBenefits, standardDeduction) : null;
+  const nm = location && input.state === "nm" ? newMexicoTax(input, agi, taxableBenefits, standardDeduction, preferredCapital) : null;
   const mn = location && input.state === "mn" ? minnesotaTax(input, agi, taxableBenefits, taxExemptInterest) : null;
   const ut = location && input.state === "ut" ? utahTax(input, agi, taxableBenefits, taxExemptInterest, standardDeduction) : null;
   const ct = location && input.state === "ct" ? connecticutTax(input, agi, taxableBenefits, taxExemptInterest, account.retirementOrdinary) : null;
-  const vt = location && input.state === "vt" ? vermontTax(input, agi, taxableBenefits, taxExemptInterest) : null;
-  const mt = location && input.state === "mt" ? montanaTax(input, agi, standardDeduction, seniorDeduction) : null;
+  const vt = location && input.state === "vt" ? vermontTax(input, agi, taxableBenefits, taxExemptInterest, preferredCapital, taxableIncome) : null;
+  const mt = location && input.state === "mt" ? montanaTax(input, agi, standardDeduction, seniorDeduction, preferredCapital) : null;
   const ri = location && input.state === "ri" ? rhodeIslandTax(input, agi, taxableBenefits, taxExemptInterest) : null;
   const ca = location && input.state === "ca" ? californiaTax(input, agi, taxableBenefits) : null;
   const va = location && input.state === "va" ? virginiaTax(input, agi, taxableBenefits) : null;
@@ -366,7 +368,17 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const nc = location && input.state === "nc" ? northCarolinaTax(input, agi, taxableBenefits) : null;
   const sc = location && input.state === "sc" ? southCarolinaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const oh = location && input.state === "oh" ? ohioTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
-  const ma = location && input.state === "ma" ? massachusettsTax(input, agi, taxableBenefits) : null;
+  let ma = null;
+  if (location && input.state === "ma") {
+    if (!input.massachusettsLossCarryover && (input.lossCarryover.shortTerm > 0 || input.lossCarryover.longTerm > 0)) {
+      throw new RangeError("Specify Massachusetts loss carryovers separately from federal losses.");
+    }
+    const stateLoss = input.massachusettsLossCarryover ?? { shortTerm: 0, longTerm: 0 };
+    finiteDollars(stateLoss.shortTerm, "Massachusetts short-term carryover");
+    finiteDollars(stateLoss.longTerm, "Massachusetts long-term carryover");
+    ma = massachusettsTax(input, agi, taxableBenefits, account.shortTermGain - stateLoss.shortTerm,
+      account.longTermGain - stateLoss.longTerm, investmentOrdinary + qualifiedDividends, capitalDeduction, capitalIncome);
+  }
   const ia = location && input.state === "ia" ? iowaTax(input, agi, taxableBenefits, taxableIncome, account.retirementOrdinary) : null;
   const ms = location && input.state === "ms" ? mississippiTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase) : null;
   const mo = location && input.state === "mo" ? missouriTax(input, agi, taxableBenefits, standardDeduction, account.retirementOrdinary) : null;
@@ -383,7 +395,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const mi = location && input.state === "mi" ? michiganTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const ok = location && input.state === "ok" ? oklahomaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const wi = location && input.state === "wi" ? wisconsinTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
-  const hi = location && input.state === "hi" ? hawaiiTax(input, agi, taxableBenefits) : null;
+  const hi = location && input.state === "hi" ? hawaiiTax(input, agi, taxableBenefits, preferredCapital) : null;
   const me = location && input.state === "me" ? maineTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   // ND uses eligible Schedule D gain plus qualified dividends before federal deductions cap preferential income.
   const nd = location && input.state === "nd" ? northDakotaTax(input, taxableIncome, taxableBenefits, qualifiedDividends + preferredCapital) : null;
@@ -401,6 +413,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
     regularFederal, alternativeMinimumTax, socialSecurityPayroll, medicarePayroll, additionalMedicare,
     netInvestmentIncome, niit, earlyDistributionTax, stateTax, total,
     nextLossCarryover: capitalLossCarryover(st, lt, capitalDeduction, unflooredTaxable),
+    ...(ma ? { nextMassachusettsLossCarryover: ma.nextLossCarryover } : {}),
     warnings: Object.freeze([
       ny ? ny.warning : md ? md.warning : inTax ? inTax.warning : dc ? dc.warning : il ? il.warning : nj ? nj.warning : pa ? pa.warning : co ? co.warning : nm ? nm.warning : mn ? mn.warning : ut ? ut.warning : ct ? ct.warning : vt ? vt.warning : mt ? mt.warning : ri ? ri.warning : ca ? ca.warning : va ? va.warning : az ? az.warning : ga ? ga.warning : nc ? nc.warning : sc ? sc.warning : oh ? oh.warning : ma ? ma.warning : ia ? ia.warning : ms ? ms.warning : mo ? mo.warning : wa ? wa.warning : al ? al.warning : ar ? ar.warning : de ? de.warning : ks ? ks.warning : ky ? ky.warning : ne ? ne.warning : wv ? wv.warning : id ? id.warning : la ? la.warning : mi ? mi.warning : ok ? ok.warning : wi ? wi.warning : hi ? hi.warning : me ? me.warning : nd ? nd.warning : orTax ? orTax.warning : location ? location.warning : "State tax uses the existing 2025 wage-based proxy on federal AGI, not verified retirement-specific state rules; local taxes are excluded.",
       "Standard-deduction U.S. resident estimate: IRA deductions require verified funded amounts; no IRA/Social Security worksheet interaction, itemization, credits, self-employment, foreign exclusions or AMT preference adjustments.",

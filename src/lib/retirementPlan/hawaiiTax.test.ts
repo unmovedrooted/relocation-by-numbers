@@ -181,3 +181,53 @@ describe("restricted Hawaii annual settlement", () => {
     expect(() => buildPreviewInput({ ...PREVIEW_DEFAULTS, state: "hi" })).toThrow(/Confirm/);
   });
 });
+
+describe("Hawaii alternative tax on net capital gains (Tax on Capital Gains Worksheet)", () => {
+  // Single, 2026: Hawaii AGI = taxable income + 8,000 standard deduction + 1,144 exemption.
+  const agiFor = (taxable: number) => taxable + 8000 + 1144;
+
+  it("caps the tax on the gain at 7.25% when that is lower than the regular schedule", () => {
+    // Taxable 150,000 with 100,000 of net long-term gain. Regular tax: 8,391.20 + 25,000*7.9% = 10,366.20.
+    // Alternative: tax on max(50,000, 24,000) = 2,539.20 + 2,000*7.6% = 2,691.20, plus 7.25% * 100,000 = 7,250 -> 9,941.20.
+    const result = hawaiiTax(input(), agiFor(150000), 0, 100000);
+    expect(result.stateTax).toBeCloseTo(9941.2, 6);
+    expect(result.eligibleGain).toBe(100000);
+  });
+
+  it("keeps the regular tax when the 7.25% alternative is higher (worksheet line 19 takes the smaller)", () => {
+    // Taxable 30,000 with 20,000 gain. Alternative: tax(24,000)=859.20 + 6,000*7.25% = 1,294.20; regular 859.20 + 6,000*6.8% = 1,267.20.
+    expect(hawaiiTax(input(), agiFor(30000), 0, 20000).stateTax).toBeCloseTo(1267.2, 6);
+  });
+
+  it("does not use the worksheet at or below $24,000 single / $48,000 married taxable income", () => {
+    const withGain = hawaiiTax(input(), agiFor(24000), 0, 24000);
+    expect(withGain.eligibleGain).toBe(0);
+    expect(withGain.stateTax).toBeCloseTo(hawaiiTax(input(), agiFor(24000), 0).stateTax, 6);
+  });
+
+  it("uses the $48,000 threshold for married filing jointly", () => {
+    const married = input({ filing: "married", people: [
+      { id: "one", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
+      { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
+    ] });
+    // Taxable 400,000, gain 300,000 -> base 100,000 (> 48,000). Regular tax(100,000) = 5,078.40 + 4,000*7.6% = 5,382.40; plus 21,750 = 27,132.40.
+    // Regular tax(400,000) = 24,682.40 + 50,000*8.25% = 28,807.40, so the alternative is smaller.
+    const result = hawaiiTax(married, 400000 + 16000 + 2288, 0, 300000);
+    expect(result.stateTax).toBeCloseTo(27132.4, 6);
+    expect(result.eligibleGain).toBe(300000);
+  });
+
+  it("flows the net long-term gain from the household computation", () => {
+    const terms = input({ accountIncome: taxCharacter({ longTermGain: 200000 }) });
+    const hi = estimateHouseholdTax(terms);
+    // Taxable 200,000 - 8,000 - 1,144 = 190,856; regular 12,341 + 15,856*8.25% = 13,649.12.
+    // Alternative: tax(24,000)=859.20 + 166,856*7.25% = 12,956.26 (gain exceeds the room above $24,000).
+    expect(hi.stateTax).toBeCloseTo(859.2 + 166856 * .0725, 4);
+    expect(hi.stateTax).toBeLessThan(12341.2 + 15856 * .0825);
+  });
+
+  it("rejects a negative or non-finite gain", () => {
+    expect(() => hawaiiTax(input(), 50000, 0, -1)).toThrow(/net capital gain/);
+    expect(() => hawaiiTax(input(), 50000, 0, NaN)).toThrow(/net capital gain/);
+  });
+});

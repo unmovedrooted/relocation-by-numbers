@@ -104,3 +104,25 @@ describe("restricted New Mexico annual settlement", () => {
     expect(() => buildPreviewInput({ ...PREVIEW_DEFAULTS, state: "nm" })).toThrow(/Confirm/);
   });
 });
+
+describe("New Mexico net capital gains deduction (NMSA 7-2-34, tax years 2025 and later)", () => {
+  it("deducts the net capital gain up to $2,500", () => {
+    // AGI 80,000, federal standard deduction 16,100, no exemptions: taxable 63,900 less the deduction.
+    const base = newMexicoTax(input(), 80000, 0, 16100).stateTax;
+    expect(base).toBeCloseTo(2594.3, 6);
+    const capped = newMexicoTax(input(), 80000, 0, 16100, 10000);
+    expect(capped.capitalGainsDeduction).toBe(2500);
+    // Taxable 61,400: 82.5 + 352 + 731 + 27,900*4.7% = 2,476.8.
+    expect(capped.stateTax).toBeCloseTo(2476.8, 6);
+    expect(newMexicoTax(input(), 80000, 0, 16100, 1000).stateTax).toBeCloseTo(base - 1000 * .047, 6);
+  });
+
+  it("flows the net long-term gain from the household computation", () => {
+    const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 70000 }], accountIncome: taxCharacter({ longTermGain: 10000 }) });
+    expect(estimateHouseholdTax(terms).stateTax).toBeCloseTo(2476.8, 6);
+  });
+
+  it("rejects an invalid gain", () => {
+    expect(() => newMexicoTax(input(), 80000, 0, 16100, -1)).toThrow(/net capital gain/);
+  });
+});
