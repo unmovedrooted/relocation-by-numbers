@@ -11,12 +11,20 @@ import { ageAtYearEnd } from "./rules";
  * Extraordinary Legislative Session set a flat 3% tax rate and the
  * standard deduction at $12,500 single/married filing separate, $25,000
  * married filing jointly/head of household/qualifying surviving spouse
- * (2025 figures, not yet inflation-indexed for 2026 as of this publication
- * cycle, held here pending Louisiana's 2026 update), replacing the prior
+ * (2025 figures), replacing the prior
  * personal-exemption system entirely -- Louisiana no longer has a
  * personal exemption, and the former additional exemption for age 65 or
  * blindness was repealed effective December 31, 2024.
  * https://dam.ldr.la.gov/taxforms/IT540i-WEB-2025.pdf
+ *
+ * The standard deduction is inflation-indexed from 2026. The Department of
+ * Revenue's 2026 withholding publication R-1306 (1/26) states the 2026
+ * standard deduction as $12,875 single/married filing separate and
+ * $25,750 married filing jointly/qualifying surviving spouse/head of
+ * household, which this planner uses for 2026 and holds for later years
+ * rather than predicting the annual adjustment. The flat income tax rate
+ * itself is the enacted 3% (R-1306's 3.09% is only a withholding rate).
+ * https://dam.ldr.la.gov/taxforms/1306-1-26.pdf
  *
  * Social Security included in federal AGI is fully subtracted (code
  * 07E). Retirement benefits from the Louisiana State Employees'
@@ -37,7 +45,7 @@ import { ageAtYearEnd } from "./rules";
  */
 
 const FLAT_RATE = .03;
-const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 12500, married: 25000 };
+const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 12875, married: 25750 };
 const RETIREMENT_EXEMPTION_CAP = 12000;
 
 function isExemptSystemPension(pensionType: HouseholdTaxInput["income"][number]["pensionType"]) {
@@ -60,9 +68,9 @@ export function louisianaTax(input: HouseholdTaxInput, federalAgi: number, taxab
   const stateTax = taxable * FLAT_RATE;
   return {
     stateTax, localTax: 0, laAgi, retirementExemption,
-    warning: "Louisiana pre-credit estimate using the enacted flat 3% rate applied after the latest published (2025) "
-      + "standard deduction ($12,500 single/$25,000 married filing jointly, held pending Louisiana's 2026 inflation "
-      + "adjustment), not a prediction of future legislation; Louisiana has no personal exemption. Social Security is "
+    warning: "Louisiana pre-credit estimate using the enacted flat 3% rate applied after the published 2026 "
+      + "standard deduction ($12,875 single/$25,750 married filing jointly, held for later years without predicting "
+      + "Louisiana's annual inflation adjustment), not a prediction of future legislation; Louisiana has no personal exemption. Social Security is "
       + "fully exempt. Income entered as annual pension with a federal-government, other-government or ny-government "
       + "pensionType is treated as an exempt state, local or federal retirement system benefit and fully excluded at "
       + "any age; a private or unspecified pension, and that owner's own attributed 401(k)/IRA/annuity "

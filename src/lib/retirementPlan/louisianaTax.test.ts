@@ -15,7 +15,7 @@ describe("restricted Louisiana annual settlement", () => {
   it("applies the flat 3% rate net of the standard deduction", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const la = estimateHouseholdTax(terms);
-    expect(la.stateTax).toBeCloseTo((60000 - 12500) * 0.03, 6);
+    expect(la.stateTax).toBeCloseTo((60000 - 12875) * 0.03, 6);
     expect(la.localTax).toBe(0);
   });
 
@@ -25,7 +25,7 @@ describe("restricted Louisiana annual settlement", () => {
       { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
     ], income: [{ ownerId: "one", kind: "wages", amount: 90000 }] });
     const la = estimateHouseholdTax(terms);
-    expect(la.stateTax).toBeCloseTo((90000 - 25000) * 0.03, 6);
+    expect(la.stateTax).toBeCloseTo((90000 - 25750) * 0.03, 6);
   });
 
   it("excludes Social Security from the Louisiana tax base", () => {
