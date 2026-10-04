@@ -6,8 +6,9 @@ import { VERIFIED_RETIREMENT_STATES } from "./verifiedLocation";
 
 describe("state data vintage", () => {
   it("labels states that hold 2025 parameters as mixed instead of stamping 2026", () => {
-    expect(stateDataVintage("ne")).toMatchObject({ year: 2025, basis: "mixed-2025-2026" });
-    expect(stateDataVintage("ne").note).toMatch(/2025/);
+    expect(stateDataVintage("vt")).toMatchObject({ year: 2025, basis: "mixed-2025-2026" });
+    expect(stateDataVintage("vt").note).toMatch(/2025/);
+    expect(stateDataVintage("ne")).toEqual({ year: 2026, basis: "published-2026", note: null });
     expect(stateDataVintage("ok")).toEqual({ year: 2026, basis: "published-2026", note: null });
     expect(stateDataVintage("fl")).toEqual({ year: 2026, basis: "published-2026", note: null });
     expect(stateDataVintage("or")).toEqual({ year: 2026, basis: "published-2026", note: null });
@@ -21,10 +22,10 @@ describe("state data vintage", () => {
     const base = { year: 2026, filing: "single", stateTreatment: "verified-resident-location",
       people: [{ id: "one", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true }],
       income: [{ ownerId: "one", kind: "wages", amount: 50000 }], accountIncome: taxCharacter(), lossCarryover: { shortTerm: 0, longTerm: 0 } };
-    const ut = estimateHouseholdTax({ ...base, state: "ut", utahContract: "verified-law-precredit" } as HouseholdTaxInput);
-    expect(ut.stateDataYear).toBe(2025);
-    expect(ut.stateDataBasis).toBe("mixed-2025-2026");
-    expect(ut.warnings.join(" ")).toMatch(/State parameter vintage: mixed 2025\/2026 data/);
+    const vt = estimateHouseholdTax({ ...base, state: "vt", vermontContract: "verified-law-precredit" } as HouseholdTaxInput);
+    expect(vt.stateDataYear).toBe(2025);
+    expect(vt.stateDataBasis).toBe("mixed-2025-2026");
+    expect(vt.warnings.join(" ")).toMatch(/State parameter vintage: mixed 2025\/2026 data/);
     const fl = estimateHouseholdTax({ ...base, state: "fl" } as HouseholdTaxInput);
     expect(fl.stateDataYear).toBe(2026);
     expect(fl.stateDataBasis).toBe("published-2026");

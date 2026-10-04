@@ -104,6 +104,16 @@ describe("restricted Indiana annual settlement", () => {
     expect(() => indianaTax(input({ indianaContract: undefined }), 0, 0)).toThrow(/Confirm/);
   });
 
+  it("steps the flat state rate from 2.95% in 2026 to 2.90% from 2027 without assuming the 2030 conditional cuts", () => {
+    const young = [{ id: "one", birthDate: "1980-01-01", blind: false, eligibleForSeniorDeduction: true }];
+    const state = (year: number) => indianaTax(input({ year, people: young }), 51000, 0).stateTax;
+    // Taxable = 51000 - 1000 = 50000.
+    expect(state(2026)).toBeCloseTo(50000 * .0295, 6);
+    expect(state(2027)).toBeCloseTo(50000 * .029, 6);
+    expect(state(2031)).toBeCloseTo(50000 * .029, 6);
+    expect(state(2044)).toBeCloseTo(50000 * .029, 6);
+  });
+
   it("rejects an unsupported projection year", () => {
     expect(() => indianaTax(input({ year: 2025 }), 0, 0)).toThrow(/year/);
   });

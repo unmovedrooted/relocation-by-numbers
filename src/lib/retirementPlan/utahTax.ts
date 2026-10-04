@@ -28,13 +28,19 @@ import { stateSocialSecurityInclusion } from "./stateSocialSecurityCoverage";
  *   https://files.tax.utah.gov/tax/forms/current/tc-40inst.pdf pages 8-9):
  *   6% of (the federal standard deduction plus $2,111 per qualifying
  *   dependent), reduced by 1.3% of Utah taxable income above a base amount
- *   ($18,213 single, $36,426 married filing jointly), never below zero. It
+ *   (2026: $18,696 single, $37,392 married filing jointly), never below zero. It
  *   is applied first, before the Social Security Benefits Credit, which can
- *   then only reduce the remaining tax. The $18,213/$36,426 base and $2,111
- *   exemption are the 2025 indexed amounts, held here because the 2026
- *   amounts are not yet published. This planner has no dependents, so the
- *   exemption part is zero, and it assumes the standard deduction rather than
- *   itemizing.
+ *   then only reduce the remaining tax. The statutory bases are $15,095 single and
+ *   $30,190 joint (UCA 59-10-1018(4)), increased annually by the CPI-U ratio of the
+ *   preceding calendar year to 2020 (59-10-1018(5), computed as IRC 1(f)(4): the
+ *   12-month average ending August 31), rounded to a whole dollar with the joint base
+ *   twice the single base. That method reproduces the published 2025 base exactly
+ *   (15,095 x 1.20656 = $18,213) and gives $15,095 x 1.23849 = $18,696 for 2026
+ *   (BLS CPI-U, series CUUR0000SA0). The Tax Commission had not published its 2026
+ *   TC-40 instructions in any document available on 2026-10-04, so the 2026 bases are
+ *   statute-derived; replace them with the published amounts when released. Later
+ *   years hold the 2026 bases. The $2,111 dependent exemption is not used: this planner
+ *   has no dependents, and it assumes the standard deduction rather than itemizing.
  *
  * Uses enacted law, not a prediction of future legislation. Utah's separate
  * Retirement Credit
@@ -50,7 +56,7 @@ import { stateSocialSecurityInclusion } from "./stateSocialSecurityCoverage";
 const STATE_RATE = .0445;
 const TAXPAYER_CREDIT_RATE = .06;
 const TAXPAYER_CREDIT_PHASE_OUT_RATE = .013;
-const TAXPAYER_CREDIT_PHASE_OUT_BASE: Record<"single" | "married", number> = { single: 18213, married: 36426 };
+const TAXPAYER_CREDIT_PHASE_OUT_BASE: Record<"single" | "married", number> = { single: 18696, married: 37392 };
 
 export function utahTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, taxExemptInterest: number, standardDeduction: number) {
   if (input.utahContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Utah planning assumptions.");
@@ -79,8 +85,8 @@ export function utahTax(input: HouseholdTaxInput, federalAgi: number, taxableBen
       + "standard deduction (reviewed 2026-09-23). Social Security receives a nonrefundable credit equal to 4.45% of "
       + "taxable benefits, phased out above $54,000 (single) or $90,000 (married) modified AGI and capped at the Utah tax "
       + "otherwise due; Utah does not exclude Social Security from its own income base at all. Utah's general Taxpayer Tax "
-      + "Credit (6% of the federal standard deduction, phased out by 1.3% of income above $18,213 single/$36,426 married; "
-      + "2025 base amounts held because 2026 amounts are unpublished) is applied before the Social Security credit; no "
+      + "Credit (6% of the federal standard deduction, phased out by 1.3% of income above $18,696 single/$37,392 married; "
+      + "2026 base amounts computed from the statutory CPI formula because the Tax Commission had not yet published them; the published 2025 bases were $18,213/$36,426) is applied before the Social Security credit; no "
       + "dependents are modeled. The separate birth-year-gated Retirement Credit is not modeled. Utah has no local "
       + "income tax. Itemized deductions and other credits are excluded. Utah parameters are not inflation-indexed in this "
       + "model. Future legislation is not predicted. Not a tax return.",

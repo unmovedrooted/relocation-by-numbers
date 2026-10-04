@@ -22,14 +22,14 @@ function bracketTax(taxable: number, ceilings: number[]) {
 }
 
 describe("restricted Maine annual settlement", () => {
-  it.each([[125000, 40000], [175000, 20000], [225000, 0], [250000, 0]])(
-    "applies the disclosed temporary pension phaseout at federal AGI %i", (agi, expected) => {
+  it.each([[127950, 40000], [177950, 20000], [227950, 0], [255900, 0]])(
+    "applies the statute-derived 2026 pension phaseout at federal AGI %i", (agi, expected) => {
       const terms = input({ income: [], retirementIncome: [
         { ownerId: "one", date: "2026-12-31", source: "ira-conversion", amount: 40000 },
       ] });
       const result = maineTax(terms, agi, 0, 40000);
       expect(result.pensionDeduction).toBe(expected);
-      expect(result.warning).toContain("NOT verified 2026");
+      expect(result.warning).toContain("127,950 single");
     });
 
   it("excludes only the early-tax-subject portion, not all younger IRA income", () => {
@@ -61,8 +61,9 @@ describe("restricted Maine annual settlement", () => {
       { ownerId: "one", date: "2027-12-31", source: "ira-conversion", amount: 40000 },
     ] });
     const result = maineTax(terms, 187500, 0, 40000);
-    expect(result.pensionPhaseoutStart).toBe(137500);
-    expect(result.pensionDeduction).toBe(20000);
+    // 127,950 * 1.1 = 140,745, rounded down to a multiple of $50.
+    expect(result.pensionPhaseoutStart).toBe(140700);
+    expect(result.pensionDeduction).toBeCloseTo(40000 * (1 - (187500 - 140700) / 100000), 6);
     expect(maineTax({ ...terms, retirementIncome: [] }, 0, 0, 0).standardDeduction).toBe(17250);
     expect(maineTax({ ...terms, retirementIncome: [] }, 0, 0, 0).exemption).toBe(5800);
   });

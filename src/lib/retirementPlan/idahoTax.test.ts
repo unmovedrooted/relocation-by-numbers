@@ -16,7 +16,7 @@ describe("restricted Idaho annual settlement", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const id = estimateHouseholdTax(terms);
     const taxable = 60000 - 16100;
-    expect(id.stateTax).toBeCloseTo(Math.max(0, taxable - 4811) * 0.053, 6);
+    expect(id.stateTax).toBeCloseTo(Math.max(0, taxable - 4938) * 0.053, 6);
     expect(id.localTax).toBe(0);
   });
 
@@ -27,7 +27,7 @@ describe("restricted Idaho annual settlement", () => {
     ], income: [{ ownerId: "one", kind: "wages", amount: 90000 }] });
     const id = estimateHouseholdTax(terms);
     const taxable = 90000 - 32200;
-    expect(id.stateTax).toBeCloseTo(Math.max(0, taxable - 9622) * 0.053, 6);
+    expect(id.stateTax).toBeCloseTo(Math.max(0, taxable - 9876) * 0.053, 6);
   });
 
   it("excludes Social Security and Railroad Retirement benefits", () => {
@@ -44,7 +44,7 @@ describe("restricted Idaho annual settlement", () => {
       income: [{ ownerId: "one", kind: "pension", amount: 30000, pensionType: "federal-government" },
         { ownerId: "one", kind: "social-security", amount: 20000 }] });
     const id = idahoTax(terms, 50000, 18000, 16100);
-    expect(id.retirementDeduction).toBe(48216 - 20000);
+    expect(id.retirementDeduction).toBe(49824 - 20000);
   });
 
   it("does not extend the retirement benefits deduction to an owner under 65", () => {

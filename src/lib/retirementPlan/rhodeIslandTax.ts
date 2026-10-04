@@ -30,6 +30,18 @@ import { stateSocialSecurityInclusion } from "./stateSocialSecurityCoverage";
  *   who individually qualify.
  *   https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-12/2025%201040R%20Instructions%20122025.pdf
  *
+ * 2026 session (checked 2026-10-04): Article 6 of the FY2027 budget, 2026-H 7127 Substitute A as amended
+ * (signed 2026-06-12; text read from
+ * https://webserver.rilegislature.gov/BillText/BillText26/HouseText26/H7127Aaa.pdf, with the Senate Fiscal Office
+ * as-enacted analysis) changes two things modeled here:
+ * - A high-income surtax (RIGL 44-30-2.6(c)(3)(A)(I)(2)) on Rhode Island taxable income over $1,000,000:
+ *   1% for tax year 2027, 2% for 2028, 3% from 2029 on, so the top rate reaches 8.99%. From 2028 the
+ *   $1,000,000 is inflation-adjusted from a 2026 base; that adjustment is not forecast, so $1,000,000 is held.
+ * - From tax year 2027 the Social Security modification (44-30-12(c)(8)(ii)) no longer requires the taxpayer
+ *   to have reached full retirement age; it keeps the same indexed $80,000/$100,000 (base) income limits.
+ *   The pension/annuity modification (c)(9) keeps its full-retirement-age requirement.
+ * The article also adds a $330-per-child refundable credit and a tax amnesty, which are not modeled.
+ *
  * Uses enacted law, not a prediction of future legislation. Rhode Island has
  * no local income tax; localTax is always zero. Full retirement age is
  * computed from the SSA's birth-year schedule (65 for 1937 or earlier,
@@ -55,6 +67,13 @@ const PHASE_LOWER = 261000;
 const PHASE_INCREMENT = 7450;
 const MODIFICATION_THRESHOLD: Record<FilingStatus, number> = { single: 107000, married: 133750 };
 const PENSION_CAP_PER_PERSON = 50000;
+const SURTAX_THRESHOLD = 1000000;
+
+/** 44-30-2.6(c)(3)(A)(I)(2): 1% for 2027, 2% for 2028, 3% from 2029; none before 2027. */
+function surtaxRate(year: number) {
+  if (year < 2027) return 0;
+  return year === 2027 ? .01 : year === 2028 ? .02 : .03;
+}
 
 const STATE_BRACKETS: { upTo: number; rate: number }[] = [
   { upTo: 82050, rate: .0375 }, { upTo: 186450, rate: .0475 }, { upTo: Infinity, rate: .0599 },
@@ -85,7 +104,8 @@ export function rhodeIslandTax(input: HouseholdTaxInput, federalAgi: number, tax
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Rhode Island projection year.");
   const grossBenefits = input.income.filter(item => item.kind === "social-security").reduce((sum, item) => sum + item.amount, 0);
   const owners = input.people.map(person => ({
-    reachedFullRetirementAge: reachedFullRetirementAge(person.birthDate, input.year),
+    // From 2027 the Social Security modification has no full-retirement-age requirement (the pension one still does).
+    reachedFullRetirementAge: input.year >= 2027 || reachedFullRetirementAge(person.birthDate, input.year),
     grossBenefits: input.income.filter(item => item.kind === "social-security" && item.ownerId === person.id).reduce((sum, item) => sum + item.amount, 0),
   }));
   const ssResult = stateSocialSecurityInclusion({
@@ -105,20 +125,23 @@ export function rhodeIslandTax(input: HouseholdTaxInput, federalAgi: number, tax
   const modifiedAgi = federalAgi + taxExemptInterest - socialSecuritySubtraction - pensionSubtraction;
   const deduction = (STANDARD_DEDUCTION[input.filing] + PERSONAL_EXEMPTION * (input.filing === "married" ? 2 : 1)) * phaseFraction(modifiedAgi);
   const taxable = Math.max(0, modifiedAgi - deduction);
-  const stateTax = sumBrackets(taxable, STATE_BRACKETS);
+  const highIncomeSurtax = Math.max(0, taxable - SURTAX_THRESHOLD) * surtaxRate(input.year);
+  const stateTax = sumBrackets(taxable, STATE_BRACKETS) + highIncomeSurtax;
   return {
-    stateTax, localTax: 0, socialSecuritySubtraction, pensionSubtraction, deductionUsed: deduction,
+    stateTax, localTax: 0, socialSecuritySubtraction, pensionSubtraction, deductionUsed: deduction, highIncomeSurtax,
     warning: "Rhode Island pre-credit estimate: the uniform 2026 bracket schedule (3.75%/4.75%/5.99%, reviewed 2026-09-24), "
       + "Rhode Island's own standard deduction ($11,200 single/$22,400 married) and $5,250-per-person exemption, phased out "
       + "by 25% per $7,450 of modified federal AGI over $261,000 (inferred from the published range/increment, not read "
-      + "directly from the phase-out worksheet). Social Security and pension/401(k)/annuity income (entered as annual "
-      + "pension, capped at $50,000 per owner) are each excluded only for an owner who has reached SSA full retirement age "
-      + "(computed from birth year, not day-precise) while household federal AGI stays under $107,000 (single/MFS/HOH) or "
+      + "directly from the phase-out worksheet). Pension/401(k)/annuity income (entered as annual "
+      + "pension, capped at $50,000 per owner) is excluded only for an owner who has reached SSA full retirement age "
+      + "(computed from birth year, not day-precise), and Social Security is excluded likewise through 2026 and without the age "
+      + "requirement from 2027 (2026 budget), in each case while household federal AGI stays under $107,000 (single/MFS/HOH) or "
       + "$133,750 (married-joint); these dollar thresholds are Rhode Island's most recently published (2025) figures, since "
       + "2026 figures were not yet published as of this review. All entered tax-exempt interest is added back as Rhode "
       + "Island-taxable, since this planner cannot identify Rhode Island-specific municipal bonds. Railroad retirement and "
-      + "the separate military service pension modification are not modeled. Rhode Island has no local income tax. Only "
-      + "single and married-filing-jointly are supported. No credits are modeled. Rhode Island's dollar figures are not "
+      + "the separate military service pension modification are not modeled. A high-income surtax of 1% (2027), 2% (2028) and 3% (2029 on) applies to taxable income over $1,000,000, held at "
+      + "$1,000,000 although it is inflation-adjusted from 2028. Rhode Island has no local income tax. Only "
+      + "single and married-filing-jointly are supported. No credits are modeled, including the new child tax credit. Rhode Island's dollar figures are not "
       + "further inflation-indexed in this model. Future legislation is not predicted. Not a tax return.",
   };
 }

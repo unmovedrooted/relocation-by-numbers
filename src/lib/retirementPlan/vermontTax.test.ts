@@ -15,16 +15,16 @@ describe("restricted Vermont annual settlement", () => {
   it("applies the graduated single brackets net of the standard deduction and personal exemption, with no local tax", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 40000 }] });
     const vt = estimateHouseholdTax(terms);
-    // Taxable = 40000 - 7650 - 5300 = 27050. Tax = 27050 * 3.35% = 906.175.
-    expect(vt.stateTax).toBeCloseTo(906.175, 3);
+    // Taxable = 40000 - 7850 - 5400 = 26750. Tax = 26750 * 3.35% = 896.125.
+    expect(vt.stateTax).toBeCloseTo(896.125, 3);
     expect(vt.localTax).toBe(0);
   });
 
   it("adds $1,250 per age-65-or-blind condition to the standard deduction", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1950-01-01", blind: true, eligibleForSeniorDeduction: true }] });
     const vt = vermontTax(terms, 40000, 0, 0);
-    // Taxable = 40000 - (7650 + 2*1250) - 5300 = 40000-10150-5300 = 24550. Tax = 24550*3.35% = 822.425.
-    expect(vt.stateTax).toBeCloseTo(822.425, 3);
+    // Taxable = 40000 - (7850 + 2*1250) - 5400 = 40000-10350-5400 = 24250. Tax = 24250*3.35% = 812.375.
+    expect(vt.stateTax).toBeCloseTo(812.375, 3);
   });
 
   it("doubles the personal exemption and widens the 3.35% bracket for married filing jointly", () => {
@@ -33,8 +33,8 @@ describe("restricted Vermont annual settlement", () => {
       { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
     ] });
     const vt = vermontTax(terms, 90000, 0, 0);
-    // Taxable = 90000 - 15300 - 2*5300 = 90000-15300-10600 = 64100, entirely inside the 0-82500 3.35% band.
-    expect(vt.stateTax).toBeCloseTo(64100 * 0.0335, 6);
+    // Taxable = 90000 - 15700 - 2*5400 = 90000-15700-10800 = 63500, entirely inside the 0-84700 3.35% band.
+    expect(vt.stateTax).toBeCloseTo(63500 * 0.0335, 6);
   });
 
   it("fully excludes Social Security benefits when federal AGI is at or below the single threshold", () => {
@@ -95,10 +95,10 @@ describe("restricted Vermont annual settlement", () => {
   it("does not apply the minimum-tax floor at or below $150,000 federal AGI", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 150000 }] });
     const vt = vermontTax(terms, 150000, 0, 0);
-    // Taxable = 150000-12950 = 137050. Precise bracket tax = 49400*3.35% + 70300*6.6% + 17350*7.6% = 7613.3,
+    // Taxable = 150000-13250 = 136750. Precise bracket tax = 50750*3.35% + 72100*6.6% + 13900*7.6% = 7515.125,
     // well above 3%*150000=4500, so this alone doesn't distinguish the floor -- it only confirms the schedule
     // result is used, not overridden.
-    expect(vt.stateTax).toBeCloseTo(7613.3, 6);
+    expect(vt.stateTax).toBeCloseTo(7515.125, 6);
   });
 
   it("requires explicit confirmation of the restricted Vermont assumptions", () => {
@@ -138,7 +138,7 @@ describe("Vermont flat capital gains exclusion (Schedule IN-153)", () => {
     // AGI 40,000, gain 10,000, federal taxable 30,000: exclusion 5,000 -> modified AGI 35,000 - 7,650 - 5,300 = 22,050 at 3.35%.
     const vt = vermontTax(input(), 40000, 0, 0, 10000, 30000);
     expect(vt.capitalGainsExclusion).toBe(5000);
-    expect(vt.stateTax).toBeCloseTo(22050 * .0335, 6);
+    expect(vt.stateTax).toBeCloseTo(21750 * .0335, 6);
     expect(vermontTax(input(), 40000, 0, 0, 1200, 30000).capitalGainsExclusion).toBe(1200);
     expect(vermontTax(input(), 40000, 0, 0, 10000, 8000).capitalGainsExclusion).toBeCloseTo(3200, 6);
     expect(vermontTax(input(), 40000, 0, 0).capitalGainsExclusion).toBe(0);
@@ -146,7 +146,7 @@ describe("Vermont flat capital gains exclusion (Schedule IN-153)", () => {
 
   it("flows the net long-term gain and federal taxable income from the household computation", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 30000 }], accountIncome: taxCharacter({ longTermGain: 10000 }) });
-    expect(estimateHouseholdTax(terms).stateTax).toBeCloseTo(22050 * .0335, 6);
+    expect(estimateHouseholdTax(terms).stateTax).toBeCloseTo(21750 * .0335, 6);
   });
 
   it("rejects an invalid gain", () => {

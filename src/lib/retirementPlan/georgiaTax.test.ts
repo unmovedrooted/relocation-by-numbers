@@ -12,10 +12,10 @@ function input(overrides: Partial<HouseholdTaxInput> = {}): HouseholdTaxInput {
 }
 
 describe("restricted Georgia annual settlement", () => {
-  it("applies the flat 5.19% rate net of the standard deduction, with no local tax", () => {
+  it("applies the flat 4.99% rate net of the standard deduction, with no local tax", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 40000 }] });
     const ga = estimateHouseholdTax(terms);
-    expect(ga.stateTax).toBeCloseTo((40000 - 12000) * 0.0519, 6);
+    expect(ga.stateTax).toBeCloseTo((40000 - 15000) * 0.0499, 6);
     expect(ga.localTax).toBe(0);
   });
 
@@ -25,7 +25,7 @@ describe("restricted Georgia annual settlement", () => {
       { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
     ], income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const ga = estimateHouseholdTax(terms);
-    expect(ga.stateTax).toBeCloseTo((60000 - 24000) * 0.0519, 6);
+    expect(ga.stateTax).toBeCloseTo((60000 - 30000) * 0.0499, 6);
   });
 
   it("excludes Social Security from the Georgia tax base", () => {
@@ -42,7 +42,16 @@ describe("restricted Georgia annual settlement", () => {
     expect(ga.retirementIncomeExclusion).toBe(35000);
   });
 
-  it("excludes up to $65,000 of pension income for a spouse aged 65 or older", () => {
+  it("raises the 65-or-older exclusion to $70,000 from 2027 but leaves the 62-64 tier at $35,000", () => {
+    const older = input({ year: 2027, people: [{ id: "one", birthDate: "1958-01-01", blind: false, eligibleForSeniorDeduction: true }],
+      income: [{ ownerId: "one", kind: "pension", amount: 80000 }] });
+    expect(georgiaTax(older, 80000, 0, 0).retirementIncomeExclusion).toBe(70000);
+    const younger = input({ year: 2027, people: [{ id: "one", birthDate: "1964-01-01", blind: false, eligibleForSeniorDeduction: true }],
+      income: [{ ownerId: "one", kind: "pension", amount: 80000 }] });
+    expect(georgiaTax(younger, 80000, 0, 0).retirementIncomeExclusion).toBe(35000);
+  });
+
+  it("excludes up to $65,000 of pension income for a spouse aged 65 or older in 2026", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1958-01-01", blind: false, eligibleForSeniorDeduction: true }],
       income: [{ ownerId: "one", kind: "pension", amount: 80000 }] });
     const ga = georgiaTax(terms, 80000, 0, 0);

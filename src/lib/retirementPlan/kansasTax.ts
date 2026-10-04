@@ -26,6 +26,13 @@ import { ageAtYearEnd } from "./rules";
  * indexing, so they are current for 2026 and later rather than stale 2025
  * figures; only new legislation could change them.
  *
+ * Contingent rate cuts (checked 2026-10-04): S.B. 269 (2025, enacted over a veto on 2025-04-10) provides
+ * for future income tax rate decreases only when revenue exceeds an inflation-adjusted base and the Budget
+ * Stabilization Fund meets its threshold. Kansas Department of Revenue Notice 25-06 (2025-10-02) announced
+ * no reduction for tax year 2026. No announcement for 2027 was found at this review, and such cuts are
+ * contingent, so they are not assumed.
+ * https://ksrevenue.gov/taxnotices/notice25-06.pdf
+ *
  * Social Security is fully exempt for all filers regardless of income
  * (line A10 of Schedule S: only the federally taxable amount is
  * subtracted, since a benefit not subject to federal tax was never in
@@ -66,7 +73,8 @@ export function kansasTax(input: HouseholdTaxInput, federalAgi: number, taxableB
     warning: "Kansas pre-credit estimate using the enacted graduated schedule (5.2% to $23,000 single/$46,000 married, "
       + "5.58% above) applied after the Kansas standard deduction ($3,605 single/$8,240 married, plus $850 per condition "
       + "-- 65 or older or blind -- for single filers and $700 per condition for married filers) and the consolidated "
-      + "exemption allowance ($9,160 single/$18,320 married), not a prediction of future legislation. Social Security is "
+      + "exemption allowance ($9,160 single/$18,320 married), not a prediction of future legislation. Senate Bill 269 of 2025 would cut these rates only if revenue and "
+      + "reserve conditions are met (none for 2026); such contingent cuts are not assumed. Social Security is "
       + "fully exempt. Income entered as annual pension with a federal-government, other-government or ny-government "
       + "pensionType is treated as a specifically-exempt retirement benefit and fully excluded; a private or unspecified "
       + "pension, and this planner's aggregate 401(k)/IRA/annuity distribution figure, remain fully taxable. Only single "

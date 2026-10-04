@@ -10,23 +10,27 @@ import type { StateCode } from "../states";
  * statutory parameters, or have no individual income tax. This replaces a
  * single flag that stamped 2026 on every verified state.
  *
- * Reviewed 2026-10-02 against each module's own limitations text.
+ * Reviewed 2026-10-04 against each module's own limitations text and re-checked against
+ * primary sources. Each remaining entry is a parameter its agency had not yet published for
+ * 2026 on that date (not an assumption to be inflated); replace it when the agency publishes:
+ * - California: the FTB's 2026 Form 540-ES still uses the 2025 amounts; the indexed 2026
+ *   brackets, deduction and credit phase-out are published with the 2026 booklet (about December).
+ * - Rhode Island: the Division of Taxation announces the indexed 2026 thresholds in its annual
+ *   advisory, issued in the fall (the 2025 advisory is ADV 2025-22).
+ * - Vermont: the age-65/blind additional deduction is statutorily indexed (32 V.S.A.
+ *   5811(21)(D)) and the Department of Taxes has not published the 2026 amount; its other 2026
+ *   amounts come from the published 2026 withholding tables.
+ * - Washington: RCW 82.87.150 has the Department of Revenue announce the indexed standard
+ *   deduction by October 31 of the preceding year; the 2026 announcement was not yet out.
+ * States verified against 2026 publications and removed from this list on 2026-10-04: Maine,
+ * Missouri, Montana, Utah, Idaho, Nebraska, Georgia, Arizona (dollar figures updated); Alabama
+ * and Connecticut (fixed statutory amounts, confirmed unchanged for 2026).
  */
 export const STATE_PARAMETERS_HELD_FROM_2025: Readonly<Partial<Record<StateCode, string>>> = Object.freeze({
-  al: "Alabama Form 40 amounts are the 2025 booklet figures.",
-  az: "The Arizona standard deduction is the 2025 figure.",
-  ca: "The California brackets, deduction and credit phase-out are the 2025 figures.",
-  ct: "The Connecticut tables are read from the 2025 return instructions and held for 2026 and later.",
-  ga: "Georgia amounts were checked against the 2025 booklet.",
-  id: "The Idaho zero-bracket threshold and retirement deduction cap are the 2025 indexed amounts.",
-  me: "Maine pension-deduction phase-out thresholds are the approved provisional 2025 figures.",
-  mo: "The Missouri public-pension cap is the 2025 figure.",
-  mt: "The Montana age-65 subtraction is the 2025 figure.",
-  ne: "The Nebraska 2026 age-65/blind additional deduction is the 2025 figure.",
-  ri: "The Rhode Island eligibility thresholds are the 2025 figures.",
-  ut: "The Utah Taxpayer Tax Credit base amounts are the 2025 figures.",
-  vt: "The Vermont amounts are the 2025 figures.",
-  wa: "The Washington capital-gains standard deduction is the 2025 figure.",
+  ca: "The California brackets, deduction and credit phase-out are the 2025 figures; the 2026 indexed amounts are not yet published.",
+  ri: "The Rhode Island eligibility thresholds are the 2025 figures; the 2026 indexed amounts are not yet published.",
+  vt: "The Vermont age-65/blind additional deduction is the 2025 figure; the 2026 amount is not yet published.",
+  wa: "The Washington capital-gains standard deduction is the 2025 figure; the 2026 amount is not yet announced.",
 });
 
 export interface StateDataVintage {

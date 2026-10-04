@@ -30,11 +30,13 @@ import { ageAtYearEnd } from "./rules";
  * rather than predicting the inflation adjustment.
  * https://revenue.nebraska.gov/sites/default/files/doc/tax-forms/drafts/f_1040n-es.pdf
  *
- * The additional 65-or-older/blind deduction for tax year 2026 ($2,000
- * per condition single, $1,650 married) is the 2025 booklet figure: the
- * 2026 amount is not shown on the 2026 Form 1040N draft and is not yet
- * verified, so it is disclosed as a 2025 value.
- * https://revenue.nebraska.gov/sites/default/files/doc/tax-forms/2025/f_Individual_Income_Tax_Booklet.pdf
+ * The additional 65-or-older/blind deduction for tax year 2026 ($2,050 per
+ * condition unmarried, $1,700 per condition married or surviving spouse) is
+ * printed on page 5 of the 2026 Form 1040N-ES (8-014-2025 Rev. 11-2025),
+ * alongside the $8,850/$17,700 standard deduction, the 2.46%/3.51%/4.55%
+ * schedule and the $176 credit already used here. (The 2025 amounts were
+ * $2,000/$1,650.)
+ * https://revenue.nebraska.gov/sites/default/files/doc/tax-forms/2025/f_1040N-ES.pdf
  *
  * Social Security is fully excluded from federal AGI for Nebraska
  * purposes for all filers, with no income threshold (Schedule I, line
@@ -57,7 +59,7 @@ interface NebraskaYearParameters {
 
 const PARAMETERS_2026: NebraskaYearParameters = {
   standardDeduction: { single: 8850, married: 17700 },
-  standardDeductionStep: { single: 2000, married: 1650 },
+  standardDeductionStep: { single: 2050, married: 1700 },
   personalExemptionCredit: 176,
   ceilings: { single: [4130, 24760, Infinity], married: [8260, 49520, Infinity] },
   rates: [.0246, .0351, .0455],
@@ -100,8 +102,8 @@ export function nebraskaTax(input: HouseholdTaxInput, federalAgi: number, taxabl
       + "$17,700 married) and $176 personal exemption credit per person; from 2027 the published 2027 schedule "
       + "(2.46%/3.51%/3.99% at $4,270/$25,570 single, $8,520/$51,150 married), standard deduction ($9,100/$18,200) "
       + "and $181 credit, held for later years without predicting Nebraska's annual inflation adjustment. The 2026 "
-      + "additional deduction for age 65 or older or blind ($2,000 per condition single, $1,650 married) is the 2025 "
-      + "value because the 2026 amount is not yet published; from 2027 it is $2,150/$1,750. Both schedules come from "
+      + "additional deduction for age 65 or older or blind is $2,050 per condition unmarried and $1,700 married, from the "
+      + "published 2026 Form 1040N-ES; from 2027 it is $2,150/$1,750. Both schedules come from "
       + "draft Department of Revenue forms that may still change. Social Security is fully exempt; income entered as "
       + "annual pension and this planner's aggregate 401(k)/IRA/annuity distribution figure remain fully taxable, "
       + "since this planner cannot identify military retirement pay or distinguish CSRS from FERS federal civil "

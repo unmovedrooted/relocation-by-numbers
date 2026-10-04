@@ -52,8 +52,8 @@ describe("restricted Nebraska annual settlement", () => {
 
   it("adds the additional deduction per condition -- 65 or older or blind -- to the standard deduction", () => {
     const people = [{ id: "one", birthDate: "1955-01-01", blind: true, eligibleForSeniorDeduction: true }];
-    // 2026 uses the disclosed 2025 additional amount ($2,000 per condition single); 2027 uses the published $2,150.
-    expect(nebraskaTax(input({ people }), 0, 0).standardDeduction).toBe(8850 + 2000 + 2000);
+    // 2026 uses the published 2026 Form 1040N-ES amount ($2,050 per condition unmarried); 2027 uses the published $2,150.
+    expect(nebraskaTax(input({ people }), 0, 0).standardDeduction).toBe(8850 + 2050 + 2050);
     expect(nebraskaTax(input({ people, year: 2027 }), 0, 0).standardDeduction).toBe(9100 + 2150 + 2150);
   });
 

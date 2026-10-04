@@ -12,6 +12,24 @@ function input(overrides: Partial<HouseholdTaxInput> = {}): HouseholdTaxInput {
 }
 
 describe("restricted Virginia annual settlement", () => {
+  it("follows the 2026 Appropriation Act standard deduction schedule, including the 2030 sunset", () => {
+    const person = { id: "one", birthDate: "1980-01-01", blind: false, eligibleForSeniorDeduction: true };
+    const two = [person, { ...person, id: "two" }];
+    // Taxable income of 40,000 at every step bracket-wise: 60 + 60 + 600 + (taxable - 17,000) x 5.75% above $17,000.
+    const tax = (taxable: number) => 720 + (taxable - 17000) * .0575;
+    const single = (year: number) => virginiaTax(input({ year, people: [person] }), 40000, 0).stateTax;
+    const married = (year: number) => virginiaTax(input({ year, filing: "married", people: two }), 80000, 0).stateTax;
+    expect(single(2026)).toBeCloseTo(tax(40000 - 8750), 6);
+    expect(single(2027)).toBeCloseTo(tax(40000 - 9200), 6);
+    expect(single(2028)).toBeCloseTo(tax(40000 - 9300), 6);
+    expect(single(2029)).toBeCloseTo(tax(40000 - 9300), 6);
+    expect(single(2030)).toBeCloseTo(tax(40000 - 3000), 6);
+    expect(single(2044)).toBeCloseTo(tax(40000 - 3000), 6);
+    expect(married(2027)).toBeCloseTo(tax(80000 - 18400), 6);
+    expect(married(2028)).toBeCloseTo(tax(80000 - 18600), 6);
+    expect(married(2030)).toBeCloseTo(tax(80000 - 6000), 6);
+  });
+
   it("applies the four-bracket schedule net of the standard deduction, with no local tax", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 15000 }] });
     const va = estimateHouseholdTax(terms);

@@ -27,6 +27,14 @@ import type { HouseholdTaxInput } from "./householdTax";
  *   are fully taxable.
  *   https://www.revenue.alabama.gov/wp-content/uploads/2026/01/25f40bk.pdf
  *
+ * 2026 status (checked 2026-10-04): these are fixed statutory dollar amounts, not indexed. The
+ * Alabama Department of Revenue lists no 2026 change to them; the one 2026 individual income
+ * tax change it publishes is the overtime premium deduction (Act 2026-604: the lesser of the
+ * overtime premium or $1,000 per taxpayer, tax years 2026-2028), which is not modeled because
+ * this planner has no overtime income. (House Bill 163, 2022 session, is what set the current
+ * standard-deduction schedule.)
+ * https://www.revenue.alabama.gov/individual-corporate/overtime-premium-deduction-act-2026-604/
+ *
  * Uses enacted law, not a prediction of future legislation. Income entered
  * as annual pension is treated as a qualifying defined-benefit pension and
  * fully excluded, regardless of pensionType, since this planner's "pension"
@@ -82,8 +90,8 @@ export function alabamaTax(input: HouseholdTaxInput, federalAgi: number, taxable
       + "exempt government systems) and fully excluded regardless of pensionType; this planner's aggregate 401(k)/IRA/"
       + "annuity distribution figure remains fully taxable, without Alabama's separate pre-1982 basis recovery. Alabama's "
       + "local occupational and municipal income taxes, levied in some cities, are not modeled. Only single and "
-      + "married-filing-jointly are supported. Itemized deductions, the dependent exemption and other credits are "
-      + "excluded. Alabama's dollar figures are not further inflation-indexed in this model. Future legislation is not "
+      + "married-filing-jointly are supported. Itemized deductions, the dependent exemption, the new 2026-2028 overtime premium deduction (up to $1,000 per taxpayer) "
+      + "and other credits are excluded. Alabama's dollar figures are fixed in statute and not inflation-indexed. Future legislation is not "
       + "predicted. Not a tax return.",
   };
 }

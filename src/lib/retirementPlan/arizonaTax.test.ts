@@ -12,10 +12,26 @@ function input(overrides: Partial<HouseholdTaxInput> = {}): HouseholdTaxInput {
 }
 
 describe("restricted Arizona annual settlement", () => {
+  it("subtracts the federal senior deduction as enacted by HB 4168 (2026)", () => {
+    const terms = input();
+    const without = arizonaTax(terms, 100000, 0, 0);
+    const withSenior = arizonaTax(terms, 100000, 0, 6000);
+    expect(without.stateTax - withSenior.stateTax).toBeCloseTo(6000 * .025, 6);
+    expect(withSenior.seniorDeduction).toBe(6000);
+    expect(() => arizonaTax(terms, 100000, 0, -1)).toThrow(/Invalid Arizona/);
+  });
+
+  it("carries the household's federal senior deduction into Arizona tax", () => {
+    const person = { id: "one", birthDate: "1955-01-01", blind: false, eligibleForSeniorDeduction: true };
+    const result = estimateHouseholdTax(input({ people: [person], income: [{ ownerId: "one", kind: "pension", amount: 60000, pensionType: "private" }] }));
+    expect(result.seniorDeduction).toBeGreaterThan(0);
+    expect(result.stateTax).toBeCloseTo(Math.max(0, result.agi - result.taxableBenefits - 16100 - result.seniorDeduction) * .025, 6);
+  });
+
   it("applies the flat 2.5% rate net of the standard deduction, with no local tax", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 40000 }] });
     const az = estimateHouseholdTax(terms);
-    expect(az.stateTax).toBeCloseTo((40000 - 15750) * 0.025, 6);
+    expect(az.stateTax).toBeCloseTo((40000 - 16100) * 0.025, 6);
     expect(az.localTax).toBe(0);
   });
 
@@ -25,7 +41,7 @@ describe("restricted Arizona annual settlement", () => {
       { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
     ], income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const az = estimateHouseholdTax(terms);
-    expect(az.stateTax).toBeCloseTo((60000 - 31500) * 0.025, 6);
+    expect(az.stateTax).toBeCloseTo((60000 - 32200) * 0.025, 6);
   });
 
   it("excludes Social Security from the Arizona tax base", () => {

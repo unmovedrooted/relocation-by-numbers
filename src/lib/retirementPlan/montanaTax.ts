@@ -12,9 +12,15 @@ import { ageAtYearEnd } from "./rules";
  *   that deduction from AGI -- explicitly excluding the federal qualified
  *   business income deduction, which this planner never computes anyway.
  *   Montana has no separate state standard deduction or personal exemption.
- * - Line 6: a $5,660 subtraction (the 2025 figure; Montana adjusts it
- *   annually for inflation, not modeled here) for each spouse who is 65 or
- *   older by year end.
+ * - Line 6: an age-65 subtraction for each spouse 65 or older by year end,
+ *   $5,500 in statute (MCA 15-30-2120(3)(g)) multiplied each year by the inflation
+ *   factor (June CPI of the previous year over June 2023 CPI, MCA 15-30-2101(12);
+ *   BLS CPI-U US city average, not seasonally adjusted) and rounded to the nearest
+ *   $10 (15-30-2120(7)). That formula reproduces the published 2025 figure (,500 x
+ *   314.175/305.109 = 5,663 -> $5,660, Form 2 instructions line 6). For 2026 it gives
+ *   $5,500 x 322.561/305.109 = 5,814.60 -> $5,810. The Department had not published the
+ *   2026 amount in any document available on 2026-10-04, so $5,810 is statute-derived;
+ *   replace it with the published figure when released. Later years hold $5,810.
  * - The enacted two-bracket ordinary-income schedules (House Bill 337, per
  *   the Department of Revenue's "HB337: 2026-2027 Montana Individual Income
  *   Tax Changes", https://revenue.mt.gov/news/recent-news/HB-337): tax year
@@ -56,7 +62,8 @@ import { ageAtYearEnd } from "./rules";
  * Mexico, Minnesota, Utah, Connecticut and Vermont estimates' convention.
  */
 
-const AGE_SUBTRACTION_PER_PERSON = 5660;
+// Statute-derived 2026 amount (see header); later years are held, not forecast.
+const AGE_SUBTRACTION_PER_PERSON = 5810;
 const CAPITAL_GAIN_LOW_RATE = .03;
 const CAPITAL_GAIN_HIGH_RATE = .041;
 
@@ -86,8 +93,9 @@ export function montanaTax(input: HouseholdTaxInput, agi: number, standardDeduct
     stateTax, localTax: 0, ageSubtraction, capitalGainsTax,
     warning: "Montana pre-credit estimate: starts from federal taxable income (federal AGI less the federal standard/"
       + "itemized deduction and Schedule 1-A additional deductions, excluding the QBI deduction), since Montana has no "
-      + "separate state standard deduction or personal exemption. A $5,660 subtraction applies for each spouse 65 or "
-      + "older by year end (the 2025 figure; Montana's annual inflation adjustment is not modeled). The enacted two-"
+      + "separate state standard deduction or personal exemption. A $5,810 subtraction applies for each spouse 65 or "
+      + "older by year end (computed from the statutory inflation formula because the Department had not yet published "
+      + "the 2026 amount; the published 2025 amount was $5,660, and later years hold $5,810). The enacted two-"
       + "bracket schedule applies (4.7%/5.65% for 2026; the already-enacted 4.7%/5.4% schedule with wider brackets from "
       + "2027, held for later years without the annual inflation indexing that starts in 2028). Net long-term capital "
       + "gains are taxed separately at 3% up to the first-bracket threshold less ordinary income and 4.1% above it; "

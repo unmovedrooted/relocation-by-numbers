@@ -49,12 +49,12 @@ describe("restricted Montana annual settlement", () => {
     expect(montanaTax(married, 200000, 0, 0).stateTax).toBeCloseTo(9890, 6);
   });
 
-  it("subtracts $5,660 for a spouse 65 or older by year end", () => {
+  it("subtracts $5,810 for a spouse 65 or older by year end", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1955-01-01", blind: false, eligibleForSeniorDeduction: true }] });
     const mt = montanaTax(terms, 30000, 0, 0);
-    expect(mt.ageSubtraction).toBe(5660);
-    // Taxable = 30000-5660 = 24340.
-    expect(mt.stateTax).toBeCloseTo(24340 * 0.047, 6);
+    expect(mt.ageSubtraction).toBe(5810);
+    // Taxable = 30000-5810 = 24190.
+    expect(mt.stateTax).toBeCloseTo(24190 * 0.047, 6);
   });
 
   it("doubles the age-65 subtraction when both spouses qualify", () => {
@@ -63,7 +63,7 @@ describe("restricted Montana annual settlement", () => {
       { id: "two", birthDate: "1958-01-01", blind: false, eligibleForSeniorDeduction: true },
     ] });
     const mt = montanaTax(terms, 30000, 0, 0);
-    expect(mt.ageSubtraction).toBe(11320);
+    expect(mt.ageSubtraction).toBe(11620);
   });
 
   it("does not apply the age-65 subtraction to a spouse under 65", () => {

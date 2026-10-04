@@ -8,7 +8,12 @@ import { ageAtYearEnd } from "./rules";
  *   does not double thresholds for married filers): 2% to $3,000, 3% to
  *   $5,000, 5% to $17,000, 5.75% above.
  *   https://www.individual.tax.virginia.gov/income-tax-calculator
- * - The standard deduction: $8,750 single/$17,500 married.
+ * - The standard deduction: $8,750 single/$17,500 married for 2026. The 2026 Appropriation Act
+ *   (HB 30, Special Session I, Chapter 1, third enactment clause; Virginia Tax 2026 Legislative Summary,
+ *   read 2026-10-04) sets $9,200/$18,400 for taxable year 2027 and $9,300/$18,600 for 2028 and 2029, and the
+ *   increased amounts sunset after 2029, reverting to $3,000/$6,000 for 2030 and later. The sunset is
+ *   modeled as enacted (no extension is assumed, though the legislature has extended these amounts before).
+ *   https://www.tax.virginia.gov/sites/default/files/inline-files/2026-legislative-summary.pdf
  *   https://www.tax.virginia.gov/deductions
  * - The Age Deduction for Taxpayers Age 65 and Over: up to $12,000 per
  *   qualifying spouse, reduced dollar-for-dollar once household "adjusted
@@ -40,7 +45,11 @@ import { ageAtYearEnd } from "./rules";
  * convention.
  */
 
-const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 8750, married: 17500 };
+/** 2026 Appropriation Act: 2026 $8,750/$17,500; 2027 $9,200/$18,400; 2028-2029 $9,300/$18,600; reverts to $3,000/$6,000 from 2030. */
+function standardDeduction(year: number, filing: FilingStatus) {
+  const [single, married] = year <= 2026 ? [8750, 17500] : year === 2027 ? [9200, 18400] : year <= 2029 ? [9300, 18600] : [3000, 6000];
+  return filing === "married" ? married : single;
+}
 const AGE_DEDUCTION_MAX = 12000;
 const AGE_DEDUCTION_THRESHOLD: Record<FilingStatus, number> = { single: 50000, married: 75000 };
 const GRANDFATHER_BIRTH_YEAR = 1939;
@@ -64,12 +73,13 @@ export function virginiaTax(input: HouseholdTaxInput, federalAgi: number, taxabl
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Virginia projection year.");
   const adjustedFederalAgi = federalAgi - taxableBenefits;
   const deduction = ageDeduction(input, adjustedFederalAgi);
-  const taxable = Math.max(0, adjustedFederalAgi - STANDARD_DEDUCTION[input.filing] - deduction);
+  const taxable = Math.max(0, adjustedFederalAgi - standardDeduction(input.year, input.filing) - deduction);
   const stateTax = sumBrackets(taxable, STATE_BRACKETS);
   return {
     stateTax, localTax: 0, ageDeduction: deduction,
     warning: "Virginia pre-credit estimate: the enacted four-bracket schedule (2%/3%/5%/5.75%, identical for every filing "
-      + "status), Virginia's own standard deduction ($8,750 single/$17,500 married), and the Age Deduction for taxpayers 65 "
+      + "status), Virginia's own standard deduction ($8,750 single/$17,500 married in 2026, $9,200/$18,400 in 2027, $9,300/$18,600 in 2028-2029, "
+      + "and reverting to $3,000/$6,000 from 2030 because the increase is scheduled to sunset; no extension is assumed), and the Age Deduction for taxpayers 65 "
       + "or older by year end (up to $12,000 per qualifying spouse, reduced dollar-for-dollar once household federal AGI "
       + "less taxable Social Security exceeds $50,000/$75,000; a spouse born on or before January 1, 1939 keeps the full "
       + "$12,000 regardless of income, a fixed 2004 grandfather date). Social Security is fully excluded. Virginia's growing "

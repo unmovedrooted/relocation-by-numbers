@@ -22,11 +22,12 @@ import { ageAtYearEnd } from "./rules";
  *   eligibility for a younger owner.
  * - Public pension (from any federal, state or local government, excluding
  *   military retirement pay, which is separately and fully exempt): capped
- *   at the maximum Social Security benefit per taxpayer ($47,633 for tax
- *   year 2025, the latest published figure -- Missouri has not yet
- *   published its 2026-indexed cap at this review, so this planner holds
- *   the 2025 amount, understating the cap for 2026 and later), reduced by
- *   that same taxpayer's own Social Security/disability deduction.
+ *   at the maximum Social Security benefit per taxpayer ($48,967 for tax
+ *   year 2026, per the Department of Revenue's maximum-benefit table at
+ *   https://dor.mo.gov/faq/taxation/individual/pension.html, checked
+ *   2026-10-04; $47,633 for 2025). Later years hold the 2026 amount until
+ *   Missouri publishes them), reduced by that same taxpayer's own Social
+ *   Security/disability deduction.
  * - Private pension (annuities, pensions, IRAs and 401(k) plans funded by a
  *   private source): capped at $6,000 per taxpayer, then the household's
  *   combined capped amount is reduced dollar-for-dollar by the excess of
@@ -55,7 +56,7 @@ import { ageAtYearEnd } from "./rules";
  * Massachusetts, Iowa and Mississippi estimates' convention.
  */
 
-const MAX_PUBLIC_PENSION_CAP = 47633;
+const MAX_PUBLIC_PENSION_CAP = 48967;
 const PRIVATE_PENSION_CAP_PER_PERSON = 6000;
 const PRIVATE_PENSION_THRESHOLD: Record<FilingStatus, number> = { single: 25000, married: 32000 };
 const BRACKET_CEILINGS = [1348, 2696, 4044, 5392, 6740, 8088, 9436, Infinity];
@@ -119,8 +120,8 @@ export function missouriTax(input: HouseholdTaxInput, federalAgi: number, taxabl
       + "$1,348, then six 0.5-point steps to 4.5% at $8,088, then 4.7% above $9,436 -- the same brackets for every filing "
       + "status. Social Security is fully deducted for an owner 62 or older; this planner does not model the separate "
       + "disability-based deduction for a younger owner. Income entered as annual pension with a federal-government, "
-      + "other-government or ny-government pensionType is a public pension, capped at $47,633 per owner (the latest "
-      + "published maximum Social Security benefit, for tax year 2025, held here pending Missouri's 2026 update) and "
+      + "other-government or ny-government pensionType is a public pension, capped at $48,967 per owner (the "
+      + "published 2026 maximum Social Security benefit, held for later years until Missouri publishes them) and "
       + "reduced by that owner's own Social Security deduction; a private or unspecified pensionType, and that owner's "
       + "own attributed 401(k)/IRA/annuity distributions, is a private pension, capped at "
       + "$6,000 per owner and then reduced, in total, dollar-for-dollar by the excess of household AGI less Social Security "

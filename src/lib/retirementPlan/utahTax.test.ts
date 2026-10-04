@@ -15,30 +15,30 @@ describe("restricted Utah annual settlement", () => {
   it("applies the flat 4.45% rate directly to federal AGI, less the Taxpayer Tax Credit, with no local tax", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 80000 }] });
     const ut = estimateHouseholdTax(terms);
-    // Tax 80000*4.45% = 3,560. Taxpayer Tax Credit = 6%*16,100 - 1.3%*(80,000-18,213) = 966 - 803.231 = 162.769.
-    expect(ut.stateTax).toBeCloseTo(3560 - 162.769, 6);
+    // Tax 80000*4.45% = 3,560. Taxpayer Tax Credit = 6%*16,100 - 1.3%*(80,000-18,696) = 966 - 796.952 = 169.048.
+    expect(ut.stateTax).toBeCloseTo(3560 - 169.048, 6);
     expect(ut.localTax).toBe(0);
   });
 
   it("computes the Taxpayer Tax Credit from the TC-40 worksheet: 6% of the standard deduction, phased out 1.3% above the base", () => {
-    // Single: base 18,213. At AGI 18,213 the full 6%*16,100 = 966 applies but is capped at the 4.45% tax (810.52).
-    expect(utahTax(input(), 18213, 0, 0, 16100).taxpayerTaxCredit).toBeCloseTo(18213 * .0445, 6);
-    // At AGI 50,000: 966 - 1.3%*31,787 = 552.769.
-    expect(utahTax(input(), 50000, 0, 0, 16100).taxpayerTaxCredit).toBeCloseTo(552.769, 6);
-    // The credit is exhausted at 18,213 + 966/.013 = 92,521.
-    expect(utahTax(input(), 92522, 0, 0, 16100).taxpayerTaxCredit).toBe(0);
-    // Married: base 36,426 and 6%*32,200 = 1,932; at AGI 100,000 the phase-out is 1.3%*63,574 = 826.462.
+    // Single: base 18,696. At AGI 18,696 the full 6%*16,100 = 966 applies but is capped at the 4.45% tax (831.97).
+    expect(utahTax(input(), 18696, 0, 0, 16100).taxpayerTaxCredit).toBeCloseTo(18696 * .0445, 6);
+    // At AGI 50,000: 966 - 1.3%*31,304 = 559.048.
+    expect(utahTax(input(), 50000, 0, 0, 16100).taxpayerTaxCredit).toBeCloseTo(559.048, 6);
+    // The credit is exhausted at 18,696 + 966/.013 = 93,003.69.
+    expect(utahTax(input(), 93004, 0, 0, 16100).taxpayerTaxCredit).toBe(0);
+    // Married: base 37,392 and 6%*32,200 = 1,932; at AGI 100,000 the phase-out is 1.3%*62,608 = 813.904.
     const married = input({ filing: "married", people: [...input().people, { ...input().people[0], id: "two" }] });
-    expect(utahTax(married, 100000, 0, 0, 32200).taxpayerTaxCredit).toBeCloseTo(1932 - 826.462, 6);
+    expect(utahTax(married, 100000, 0, 0, 32200).taxpayerTaxCredit).toBeCloseTo(1932 - 813.904, 6);
   });
 
   it("applies the Taxpayer Tax Credit before the Social Security credit, which can only reduce the remaining tax", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "social-security", amount: 20000 }] });
-    // AGI 30,000 with 15,000 of taxable benefits: tax 1,335; taxpayer credit 966-.013*11,787 = 812.769; remaining 522.231.
-    // Social Security credit calculated 667.5 is capped at the remaining 522.231, leaving zero tax.
+    // AGI 30,000 with 15,000 of taxable benefits: tax 1,335; taxpayer credit 966-.013*11,304 = 819.048; remaining 515.952.
+    // Social Security credit calculated 667.5 is capped at the remaining 515.952, leaving zero tax.
     const ut = utahTax(terms, 30000, 15000, 0, 16100);
-    expect(ut.taxpayerTaxCredit).toBeCloseTo(812.769, 6);
-    expect(ut.socialSecurityCredit).toBeCloseTo(522.231, 6);
+    expect(ut.taxpayerTaxCredit).toBeCloseTo(819.048, 6);
+    expect(ut.socialSecurityCredit).toBeCloseTo(515.952, 6);
     expect(ut.stateTax).toBeCloseTo(0, 6);
   });
 
@@ -51,8 +51,8 @@ describe("restricted Utah annual settlement", () => {
     // federalAgi 50000 <= 54000 single cap: no phase-out. Credit = .0445*15000 = 667.5.
     const ut = utahTax(terms, 50000, 15000, 0, 16100);
     expect(ut.socialSecurityCredit).toBeCloseTo(667.5, 6);
-    // Tax 2,225 less taxpayer credit 552.769 less Social Security credit 667.5.
-    expect(ut.stateTax).toBeCloseTo(2225 - 552.769 - 667.5, 6);
+    // Tax 2,225 less taxpayer credit 559.048 less Social Security credit 667.5.
+    expect(ut.stateTax).toBeCloseTo(2225 - 559.048 - 667.5, 6);
   });
 
   it("phases the Social Security credit down by 2.5 cents per dollar of modified AGI above the threshold", () => {

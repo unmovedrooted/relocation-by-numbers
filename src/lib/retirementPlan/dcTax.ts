@@ -19,6 +19,17 @@ import type { HouseholdTaxInput } from "./householdTax";
  *   years beginning on or after January 1, 2015 and so does not apply here.
  *   https://code.dccouncil.gov/us/dc/council/code/sections/47-1803.02
  *
+ * Unsettled federal-conformity status (checked 2026-10-04): the Council decoupled DC from the federal OBBBA
+ * standard deduction (keeping the TCJA amounts with a cost-of-living adjustment), repealed the personal
+ * exemption and coupled with the $6,000 enhanced senior deduction from 2026, first by emergency and temporary
+ * acts and then in Subtitle VII(I) of the FY2027 Budget Support Act of 2026 (CFO fiscal impact statement for the
+ * 2026-07-06 substitute). Congress disapproved the temporary act (P.L. 119-78, 2026-02-18), DC's Attorney General
+ * disputes that the disapproval took effect, the temporary act expired 2026-09-25, and no 2026 OTR figures reflecting
+ * the decoupling were found. This module keeps the standard deduction OTR printed in its March 2026 D-40ES (the
+ * federal-conforming amounts); a decoupled TCJA-based amount would be somewhat lower, and the $6,000 senior
+ * deduction is not modeled. Revisit when OTR publishes tax year 2026 guidance.
+ * https://app.cfo.dc.gov/services/fiscal_impact/pdf/spring09/FIS%20Fiscal%20Year%202027%20Budget%20Support%20Act%20of%202026.pdf
+ *
  * Uses enacted law, not a prediction of future legislation. DC has no
  * county-equivalent local income tax layer, so every DC location shares the
  * same calculation; localTax is always zero. DC's bracket schedule does not
@@ -62,7 +73,9 @@ export function dcTax(input: HouseholdTaxInput, federalAgi: number, taxableBenef
     stateTax, localTax: 0, dcAgi,
     warning: "DC pre-credit estimate: enacted 2026 tax brackets (reviewed 2026-09-23, unchanged from the 2025 schedule per "
       + "the 2026 D-40ES booklet), a standard deduction matching the household's federal 2026 figures, and Social Security "
-      + "fully excluded. DC's expired $3,000 government pension exclusion (sunset before 2015) is correctly not applied: "
+      + "fully excluded. DC's 2026 conformity is unsettled: the Council decoupled from the federal standard deduction increase and "
+      + "adopted a $6,000 senior deduction, but Congress disapproved the first law, DC disputes that, and no 2026 guidance was "
+      + "found, so this estimate keeps the conforming amounts and omits the senior deduction. DC's expired $3,000 government pension exclusion (sunset before 2015) is correctly not applied: "
       + "pension, IRA and annuity income are fully taxable here. DC's separate, uncapped survivor-benefit exclusion for a "
       + "DC/federal government survivor age 62 or older is not modeled, since this planner cannot distinguish a survivor "
       + "annuity from an owner's own pension. DC has no local income tax; localTax is always zero. Itemized deductions and "

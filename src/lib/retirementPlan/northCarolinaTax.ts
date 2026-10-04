@@ -6,7 +6,13 @@ import type { HouseholdTaxInput } from "./householdTax";
  * 2025 D-401 Individual Income Tax Instructions:
  * Rate updated from NCDOR's Tax Rate Schedules for years after 2025:
  * https://www.ncdor.gov/taxes-forms/individual-income-tax/tax-rate-schedules
- * Future conditional reductions are not assumed.
+ * Rates for 2027 and later are from Section 44.1 of Senate Bill 257 (Session 2025, ratified 2026,
+ * signed 2026-07-07; ratified text read 2026-10-04, G.S. 105-153.7(a)):
+ * 3.99% for 2026, 3.49% for 2027-2029, 3.24% for 2030-2032 and 2.99% after 2032. The act repealed the
+ * old revenue-triggered reductions for those years and kept a separate General Fund revenue trigger
+ * (G.S. 105-153.7(a1), a further 0.25-point cut, floor 2.49%) and authority for further cuts after 2034;
+ * those contingent reductions are not assumed. The act leaves the standard deduction unchanged.
+ * https://www.ncleg.gov/Sessions/2025/Bills/Senate/PDF/S257v7.pdf
  * - The flat 3.99% rate (Form D-400, Line 15) and the standard deduction
  *   ($12,750 single/MFS-not-itemizing, $25,500 married filing jointly).
  *   North Carolina gives no additional standard deduction for a taxpayer 65
@@ -47,18 +53,25 @@ import type { HouseholdTaxInput } from "./householdTax";
  * California, Virginia, Arizona and Georgia estimates' convention.
  */
 
-const STATE_RATE = .0399;
+/** G.S. 105-153.7(a) as rewritten by S.B. 257 (2026): the unconditional schedule, without the (a1) revenue triggers. */
+function stateRate(year: number) {
+  if (year <= 2026) return .0399;
+  if (year <= 2029) return .0349;
+  if (year <= 2032) return .0324;
+  return .0299;
+}
 const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 12750, married: 25500 };
 
 export function northCarolinaTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number) {
   if (input.northCarolinaContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted North Carolina planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported North Carolina projection year.");
   const taxable = Math.max(0, federalAgi - taxableBenefits - STANDARD_DEDUCTION[input.filing]);
-  const stateTax = taxable * STATE_RATE;
+  const stateTax = taxable * stateRate(input.year);
   return {
     stateTax, localTax: 0,
-    warning: "North Carolina pre-credit estimate: the enacted flat 3.99% rate (reviewed 2026-09-24) and North Carolina's own "
-      + "standard deduction ($12,750 single/$25,500 married; no additional amount for age 65 or blindness). Social Security "
+    warning: "North Carolina pre-credit estimate: the enacted rate schedule (3.99% for 2026, 3.49% for 2027-2029, 3.24% for 2030-2032 and 2.99% "
+      + "after 2032 under Senate Bill 257 of 2026, reviewed 2026-10-04; its separate revenue-triggered further cuts are not assumed) "
+      + "and North Carolina's own standard deduction ($12,750 single/$25,500 married; no additional amount for age 65 or blindness). Social Security "
       + "is fully excluded. North Carolina's Bailey settlement exclusion (full exemption for certain NC state/local/federal "
       + "government retirement benefits, but only for a retiree vested with 5+ years of service as of August 12, 1989) and "
       + "its separate Uniformed Services retirement deduction (20+ years of service or medical retirement) are not modeled, "

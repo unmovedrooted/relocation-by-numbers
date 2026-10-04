@@ -26,6 +26,12 @@ import type { HouseholdTaxInput } from "./householdTax";
  *   pay deduction.
  *   https://www.in.gov/dor/i-am-a/individual/deductions/
  *
+ * - Rate for 2027 and later (checked 2026-10-04): the Department of Revenue's "Rates, Fees & Penalties"
+ *   page states the Indiana individual adjusted gross income tax rate is 2.95% for 2026 and "will adjust
+ *   in 2027 to 2.90%" (the schedule enacted by HB 1001 of 2023). S.B. 451 of 2025 makes only further
+ *   cuts from 2030 (2.85% and lower) conditional on revenue growth; those are not assumed, so 2.90% is held.
+ *   https://www.in.gov/dor/resources/tax-rates-and-reports/rates-fees-and-penalties/
+ *
  * Uses enacted law, not a prediction of future legislation. Only Marion
  * County (Indianapolis), Allen County (Fort Wayne) and Vanderburgh County
  * (Evansville) are rated; every other Indiana county is unsupported. Because
@@ -45,7 +51,8 @@ import type { HouseholdTaxInput } from "./householdTax";
  * Maryland estimates' convention.
  */
 
-const STATE_RATE = .0295;
+/** 2.95% for 2026, 2.90% from 2027 (Department of Revenue); conditional cuts from 2030 are not assumed. */
+const stateRate = (year: number) => year <= 2026 ? .0295 : .029;
 const CIVIL_SERVICE_ANNUITY_MAX = 16000;
 const BASE_EXEMPTION = 1000;
 const AGE_EXEMPTION = 1000;
@@ -109,11 +116,11 @@ export function indianaTax(input: HouseholdTaxInput, federalAgi: number, taxable
   const deduction = civilServiceAnnuityDeduction(input, input.year);
   const inAgi = federalAgi - taxableBenefits - deduction;
   const taxable = Math.max(0, inAgi - exemptions(input, input.year, federalAgi));
-  const stateTax = taxable * STATE_RATE;
+  const stateTax = taxable * stateRate(input.year);
   const localTax = localTaxAmount(input.cityId ?? "", taxable);
   return {
     stateTax, localTax, inAgi, civilServiceAnnuityDeduction: deduction,
-    warning: "Indiana pre-credit estimate: enacted 2026 flat 2.95% state rate and flat county rates (reviewed 2026-09-09), "
+    warning: "Indiana pre-credit estimate: enacted flat state rate (2.95% for 2026, 2.90% from 2027; further cuts from 2030 depend on revenue and are not assumed) and flat county rates (reviewed 2026-10-04), "
       + "personal exemptions ($1,000 per person, plus $1,000 each for age 65+ or blind, plus $500 per qualifying senior when "
       + "federal AGI is under $40,000), and Social Security fully excluded. The civil service annuity deduction is applied "
       + "to income entered as \"pension\" for an owner 62 or older, capped at $16,000 and reduced by that owner's own Social "

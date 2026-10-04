@@ -12,9 +12,10 @@ function input(overrides: Partial<HouseholdTaxInput> = {}): HouseholdTaxInput {
 }
 
 describe("restricted North Carolina annual settlement", () => {
-  it("uses the enacted post-2025 rate without assuming future revenue triggers", () => {
-    for (const year of [2026, 2027, 2060]) {
-      expect(northCarolinaTax(input({ year }), 112750, 0).stateTax).toBeCloseTo(3990, 8);
+  it("follows the unconditional S.B. 257 (2026) rate schedule without assuming the revenue triggers", () => {
+    const rates: [number, number][] = [[2026, 3990], [2027, 3490], [2029, 3490], [2030, 3240], [2032, 3240], [2033, 2990], [2060, 2990]];
+    for (const [year, expected] of rates) {
+      expect(northCarolinaTax(input({ year }), 112750, 0).stateTax).toBeCloseTo(expected, 8);
     }
   });
   it("applies the flat 3.99% rate net of the standard deduction, with no local tax", () => {

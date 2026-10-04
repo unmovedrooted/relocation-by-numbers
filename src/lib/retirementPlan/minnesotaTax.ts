@@ -26,6 +26,12 @@ import { ageAtYearEnd } from "./rules";
  *   worksheet uses.
  *   https://www.revenue.state.mn.us/social-security-benefit-subtraction
  *
+ * 2026 session (checked 2026-10-04): H.F. 2438 (signed 2026-05-27) updates federal conformity to May 1, 2026 and
+ * makes business and pass-through changes; no change to the rates, standard deduction or Social Security
+ * subtraction used here was found. Minnesota's 1% tax on net investment income over $1,000,000 (Minn. Stat. 290.033,
+ * enacted 2023 for tax years from 2024) is not modeled; it applies only to households with over $1,000,000 of
+ * interest, dividends, gains and rents, and would understate tax for them.
+ *
  * Uses enacted law, not a prediction of future legislation. Minnesota has no
  * local income tax; localTax is always zero. Minnesota's Qualified Public
  * Pension Subtraction (up to $25,000 married / $12,500 other filers) is NOT
@@ -79,7 +85,7 @@ export function minnesotaTax(input: HouseholdTaxInput, federalAgi: number, taxab
       + "standard deduction (plus $1,850/$1,450 per age-65-or-blind condition), and the larger of the simplified or "
       + "alternate-method Social Security subtraction. The Qualified Public Pension Subtraction is not modeled: it applies "
       + "only to specific public pension plans not coordinated with Social Security, which this planner cannot identify, so "
-      + "pension income is fully taxable here. Minnesota has no local income tax. Only single and married-filing-jointly are "
+      + "pension income is fully taxable here. Minnesota's 1% tax on net investment income over $1,000,000 is not modeled. Minnesota has no local income tax. Only single and married-filing-jointly are "
       + "supported. Itemized deductions and credits are excluded. Minnesota parameters are not inflation-indexed in this "
       + "model. Future legislation is not predicted. Not a tax return.",
   };

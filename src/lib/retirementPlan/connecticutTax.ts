@@ -38,6 +38,19 @@ import { stateSocialSecurityInclusion } from "./stateSocialSecurityCoverage";
  *   the standard "all other income" figure every such federal worksheet
  *   uses ahead of adding back half of Social Security.
  *
+ * 2026 status (checked 2026-10-04): Connecticut DRS TPG-211, "2026 Withholding Calculation
+ * Rules" (Rev. 12/25), states the 2026 rules and tables are unchanged from 2025, and its
+ * Tables A-E reproduce the figures used here, including the married ("Code C") brackets
+ * (a doubling of the single thresholds), exemption ($24,000 to $48,000, gone by $71,001),
+ * 2% add-back, recapture and personal-credit steps.
+ * https://portal.ct.gov/-/media/drs/forms/2025/wth/tpg-211_1225.pdf
+ * These are fixed statutory dollar amounts, not indexed. No change to them appears in Public Act 25-168 (the 2025
+ * budget; the personal-income-tax sections found are a family child care home credit, an
+ * EITC change and a farmer provision, none modeled). House Bill 5444
+ * (2026 session), which would index the brackets, exemption and thresholds from tax year
+ * 2028, was tabled for the House calendar on 2026-04-16 and not enacted, so nothing is
+ * indexed here.
+ *
  * Uses enacted law, not a prediction of future legislation. Connecticut has
  * no local income tax; localTax is always zero. The pension/annuity
  * subtraction phase-out is applied to income entered as "pension" plus this
@@ -178,8 +191,9 @@ export function connecticutTax(
   return {
     stateTax, localTax: 0, socialSecuritySubtraction, pensionSubtraction: pension, personalExemption: exemption,
     connecticutAgi, phaseOutAddBack, recapture, personalCredit,
-    warning: "Connecticut pre-credit estimate: enacted brackets (reviewed 2026-10-02 against the 2025 Form CT-1040 "
-      + "instructions, Tables A-E, held constant for later years), a step-down personal exemption ($15,000 single/$24,000 "
+    warning: "Connecticut pre-credit estimate: enacted brackets (reviewed 2026-10-04 against the 2025 Form CT-1040 "
+      + "instructions and the Department of Revenue Services' 2026 withholding tables, which it states are unchanged from 2025; "
+      + "the amounts are fixed in statute and held constant for later years, since the 2026 bill that would index them from 2028 was not enacted), a step-down personal exemption ($15,000 single/$24,000 "
       + "married, phased out by $44,001/$71,001 Connecticut AGI), the 2% rate phase-out add-back (up to $250/$500), the "
       + "high-income tax recapture (up to $3,400/$6,800), the personal tax credit that phases out by $64,500/$100,500 "
       + "Connecticut AGI, and the Social Security Benefit Adjustment (full exclusion below $75,000/$100,000 federal AGI, else a "

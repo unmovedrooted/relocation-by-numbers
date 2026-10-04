@@ -23,6 +23,24 @@ function bracketTax(taxable: number) {
 }
 
 describe("restricted Arkansas annual settlement", () => {
+  it("applies the Act 1 (2026S1) upper table and bracket adjustment above $94,700 net income", () => {
+    const gross = (taxable: number) => arkansasTax(input(), taxable + 2470, 0, 0, 0).stateTax + 29;
+    const upper = (taxable: number) => 94 + .037 * (taxable - 4700);
+    expect(gross(94700)).toBeCloseTo(bracketTax(94700), 6);
+    expect(gross(94701)).toBeCloseTo(upper(94701) - 290, 6);
+    expect(gross(94800)).toBeCloseTo(upper(94800) - 290, 6);
+    expect(gross(94801)).toBeCloseTo(upper(94801) - 280, 6);
+    expect(gross(96000)).toBeCloseTo(upper(96000) - 170, 6);
+    expect(gross(97600)).toBeCloseTo(upper(97600) - 10, 6);
+    expect(gross(97601)).toBeCloseTo(upper(97601), 6);
+    expect(gross(250000)).toBeCloseTo(94 + .037 * 245300, 6);
+    // The upper table recaptures the lower-bracket benefit: $287.30 more than the graduated schedule at the same income.
+    expect(gross(250000) - bracketTax(250000)).toBeCloseTo(287.3, 6);
+    // The adjustment steps down $10 per $100 band, so tax rises $10.037 across the last band edge and the first.
+    expect(gross(97601) - gross(97600)).toBeCloseTo(10.037, 6);
+    expect(gross(94801) - gross(94800)).toBeCloseTo(10.037, 6);
+  });
+
   it("applies the graduated schedule after the standard deduction and $29 personal credit", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const ar = estimateHouseholdTax(terms);

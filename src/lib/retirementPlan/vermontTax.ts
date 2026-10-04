@@ -32,11 +32,34 @@ import { ageAtYearEnd } from "./rules";
  *   the Flat Exclusion is $5,000 or the net adjusted capital gain, whichever is
  *   less, and no more than 40% of federal taxable income; qualified dividends
  *   do not qualify and no exclusion exists when the federal return shows a
- *   net capital loss. The $5,000 is the 2025 amount, held. The Percentage
+ *   net capital loss. The $5,000 is fixed in 32 V.S.A. 5811(21)(B)(ii) and, unlike the exemption and
+ *   deductions, is not inflation-indexed. The Percentage
  *   Exclusion (40% of gains from assets held over three years, up to
  *   $350,000) excludes publicly traded stocks, bonds and homes, which this
  *   planner cannot distinguish from other assets, so only the Flat Exclusion
  *   is modeled.
+ *
+ * 2026 amounts (checked 2026-10-04): 32 V.S.A. 5811(21)(D) indexes the personal exemption, standard
+ * deduction and age-65/blind additional deduction annually with the federal 1(f)(3) method, and the
+ * Department of Taxes had not yet published its 2026 return booklet or rate schedule. Its 2026
+ * Income Tax Withholding Instructions, Tables, and Charts (GB-1210-2026, effective 2026-01-01) are
+ * built on the same parameters: the 2025 edition (GB-1210-2025) reproduces the 2025 return exactly
+ * (annual single table starts at $3,825 = half the $7,650 standard deduction; its 3.35% band ends at
+ * $53,225 = $3,825 + $49,400; married starts at $11,475 = $15,300 - $3,825 and ends at $93,975 =
+ * $11,475 + $82,500), so the 2026 edition gives: single first threshold $3,925, bands ending
+ * $54,675/$126,775/$260,225 (standard deduction $7,850; brackets $50,750/$122,850/$256,300);
+ * married first threshold $11,775, bands ending $96,475/$216,525/$323,825 (standard deduction
+ * $15,700; brackets $84,700/$204,750/$312,050); one allowance $5,400 (personal exemption). These
+ * are the 2026 constants below. The 2026 age-65/blind additional deduction is not shown there, so
+ * $1,250 is the 2025 amount, held and disclosed.
+ * https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2026.pdf
+ * 2026 session: Act 164 (miscellaneous tax act) conforms to federal law as of 2025-12-31 and adds
+ * a QSBS addback, an apportionment change and a 2027 R&D credit increase, and the Department of
+ * Taxes' 2026 legislation page lists no change to the deduction, exemption, brackets, retirement or
+ * Social Security exemptions, or the capital gains exclusion; the bracket and investment-income
+ * proposals (DR 26-0804) did not pass. Act 71 of 2025 (S.51, the $55,000/$70,000 thresholds and the
+ * military retirement exemption) was already in effect for 2025.
+ * https://tax.vermont.gov/tax-law-and-guidance/tax-legislation/2026
  *
  * Uses enacted law, not a prediction of future legislation. Vermont has no
  * local income tax; localTax is always zero. All modeled tax-exempt interest
@@ -54,21 +77,22 @@ import { ageAtYearEnd } from "./rules";
  * retirement, the Percentage Exclusion on capital gains, the medical expense deduction, and
  * the student loan interest subtraction are not modeled. Only single and
  * married-filing-jointly are supported. No credits are modeled. Vermont
- * parameters are not inflation-indexed in this model, matching the restricted
+ * parameters are not inflation-indexed beyond 2026 in this model, matching the restricted
  * New York, Maryland, Indiana, DC, Illinois, New Jersey, Pennsylvania,
  * Colorado, New Mexico, Minnesota, Utah and Connecticut estimates' convention.
  */
 
-const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 7650, married: 15300 };
+// 2026 amounts derived from the Department's 2026 withholding tables (see header); the additional deduction is the 2025 amount.
+const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 7850, married: 15700 };
 const ADDITIONAL_PER_BOX = 1250;
-const PERSONAL_EXEMPTION = 5300;
+const PERSONAL_EXEMPTION = 5400;
 
 const STATE_BRACKETS: Record<FilingStatus, { upTo: number; rate: number }[]> = {
   single: [
-    { upTo: 49400, rate: .0335 }, { upTo: 119700, rate: .066 }, { upTo: 249700, rate: .076 }, { upTo: Infinity, rate: .0875 },
+    { upTo: 50750, rate: .0335 }, { upTo: 122850, rate: .066 }, { upTo: 256300, rate: .076 }, { upTo: Infinity, rate: .0875 },
   ],
   married: [
-    { upTo: 82500, rate: .0335 }, { upTo: 199450, rate: .066 }, { upTo: 304000, rate: .076 }, { upTo: Infinity, rate: .0875 },
+    { upTo: 84700, rate: .0335 }, { upTo: 204750, rate: .066 }, { upTo: 312050, rate: .076 }, { upTo: Infinity, rate: .0875 },
   ],
 };
 
@@ -115,8 +139,10 @@ export function vermontTax(input: HouseholdTaxInput, federalAgi: number, taxable
   const stateTax = Math.max(sumBrackets(taxable, STATE_BRACKETS[input.filing]), federalAgi > 150000 ? federalAgi * 0.03 : 0);
   return {
     stateTax, localTax: 0, socialSecuritySubtraction, otherRetirementSubtraction, capitalGainsExclusion,
-    warning: "Vermont pre-credit estimate: enacted 2025 brackets (reviewed 2026-09-24), Vermont's own standard deduction "
-      + "($7,650 single/$15,300 married, plus $1,250 per age-65-or-blind condition) and $5,300-per-person personal "
+    warning: "Vermont pre-credit estimate: enacted 2026 brackets (the 2025 brackets indexed, taken from the Department of Taxes' 2026 withholding tables because "
+      + "its 2026 return booklet is not yet published; reviewed 2026-10-04), Vermont's own standard deduction "
+      + "($7,850 single/$15,700 married, from the same tables, plus $1,250 per age-65-or-blind condition, the 2025 amount held "
+      + "because the 2026 figure is not yet published) and $5,400-per-person personal "
       + "exemption, and the Retirement Income Exemption election between excluding Social Security benefits or up to "
       + "$10,000 of federal/other-government pension income (assumed to be whichever gives the larger subtraction), both "
       + "phased out between $55,000-$65,000 (single) or $70,000-$80,000 (married) federal AGI. Once federal AGI exceeds "
@@ -124,8 +150,8 @@ export function vermontTax(input: HouseholdTaxInput, federalAgi: number, taxable
       + "added back as Vermont-taxable, since this planner cannot identify Vermont-specific municipal bonds, and interest "
       + "from U.S. obligations is not separately tracked or subtracted. Vermont's separate, uncapped Military Retirement "
       + "Income Exemption is not modeled, since this planner cannot identify military retirement pay. Railroad retirement, "
-      + "the Percentage Exclusion on capital gains (publicly traded stock and homes do not qualify, and this planner cannot tell them apart), the medical expense deduction and the student loan interest subtraction are excluded. The $5,000 Flat Capital Gains Exclusion (limited to net capital gain and 40% of federal taxable income; the 2025 amount, held) is applied. "
+      + "the Percentage Exclusion on capital gains (publicly traded stock and homes do not qualify, and this planner cannot tell them apart), the medical expense deduction and the student loan interest subtraction are excluded. The $5,000 Flat Capital Gains Exclusion (limited to net capital gain and 40% of federal taxable income; fixed in statute and not indexed) is applied. "
       + "Vermont has no local income tax. Only single and married-filing-jointly are supported. No credits are modeled. "
-      + "Vermont parameters are not inflation-indexed in this model. Future legislation is not predicted. Not a tax return.",
+      + "Vermont's 2026 amounts are held for later years rather than inflation-indexed. Future legislation is not predicted. Not a tax return.",
   };
 }

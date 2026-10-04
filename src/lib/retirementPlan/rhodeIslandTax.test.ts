@@ -12,6 +12,30 @@ function input(overrides: Partial<HouseholdTaxInput> = {}): HouseholdTaxInput {
 }
 
 describe("restricted Rhode Island annual settlement", () => {
+  it("adds the phased high-income surtax over $1,000,000 of taxable income (2026-H 7127 Art. 6)", () => {
+    // Above $261,000 + 4 x $7,450 the deduction and exemption are fully phased out, so taxable income is AGI.
+    const surtax = (year: number, agi: number) => rhodeIslandTax(input({ year }), agi, 0, 0).highIncomeSurtax;
+    expect(surtax(2026, 2000000)).toBe(0);
+    expect(surtax(2027, 2000000)).toBeCloseTo(10000, 6);
+    expect(surtax(2028, 2000000)).toBeCloseTo(20000, 6);
+    expect(surtax(2029, 2000000)).toBeCloseTo(30000, 6);
+    expect(surtax(2060, 2000000)).toBeCloseTo(30000, 6);
+    expect(surtax(2029, 1000000)).toBe(0);
+    const total = rhodeIslandTax(input({ year: 2029 }), 2000000, 0, 0).stateTax;
+    expect(total).toBeCloseTo(3076.875 + (186450 - 82050) * .0475 + (2000000 - 186450) * .0599 + 30000, 6);
+  });
+
+  it("drops the full-retirement-age test for Social Security (not pensions) from 2027", () => {
+    const person = { id: "one", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true };
+    const terms = (year: number) => input({ year, people: [person], income: [
+      { ownerId: "one", kind: "social-security", amount: 30000 }, { ownerId: "one", kind: "pension", amount: 20000 }] });
+    expect(rhodeIslandTax(terms(2026), 40000, 25500, 0).socialSecuritySubtraction).toBe(0);
+    expect(rhodeIslandTax(terms(2027), 40000, 25500, 0).socialSecuritySubtraction).toBe(25500);
+    // Still limited by the income threshold, and the pension modification keeps its age test.
+    expect(rhodeIslandTax(terms(2027), 120000, 25500, 0).socialSecuritySubtraction).toBe(0);
+    expect(rhodeIslandTax(terms(2027), 40000, 25500, 0).pensionSubtraction).toBe(0);
+  });
+
   it("applies the uniform bracket schedule to income net of the standard deduction and exemption, with no local tax", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 40000 }] });
     const ri = estimateHouseholdTax(terms);

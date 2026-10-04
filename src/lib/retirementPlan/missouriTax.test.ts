@@ -57,7 +57,7 @@ describe("restricted Missouri annual settlement", () => {
   it("caps the public pension exemption at the maximum Social Security benefit per owner", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", pensionType: "other-government", amount: 60000 }] });
     const mo = missouriTax(terms, 60000, 0, 16100, 0);
-    expect(mo.publicPensionSubtraction).toBe(47633);
+    expect(mo.publicPensionSubtraction).toBe(48967);
   });
 
   it("reduces the public pension exemption by that owner's own Social Security deduction", () => {

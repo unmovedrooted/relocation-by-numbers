@@ -364,7 +364,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const ri = location && input.state === "ri" ? rhodeIslandTax(input, agi, taxableBenefits, taxExemptInterest) : null;
   const ca = location && input.state === "ca" ? californiaTax(input, agi, taxableBenefits) : null;
   const va = location && input.state === "va" ? virginiaTax(input, agi, taxableBenefits) : null;
-  const az = location && input.state === "az" ? arizonaTax(input, agi, taxableBenefits) : null;
+  const az = location && input.state === "az" ? arizonaTax(input, agi, taxableBenefits, seniorDeduction) : null;
   const ga = location && input.state === "ga" ? georgiaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const nc = location && input.state === "nc" ? northCarolinaTax(input, agi, taxableBenefits) : null;
   const sc = location && input.state === "sc" ? southCarolinaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
@@ -383,7 +383,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const ia = location && input.state === "ia" ? iowaTax(input, agi, taxableBenefits, taxableIncome, account.retirementOrdinary) : null;
   const ms = location && input.state === "ms" ? mississippiTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase) : null;
   const mo = location && input.state === "mo" ? missouriTax(input, agi, taxableBenefits, standardDeduction, account.retirementOrdinary) : null;
-  const wa = location && input.state === "wa" ? washingtonTax(input, lt) : null;
+  const wa = location && input.state === "wa" ? washingtonTax(input, lt, agi, st, capitalDeduction) : null;
   const al = location && input.state === "al" ? alabamaTax(input, agi, taxableBenefits, regularFederal, alternativeMinimumTax, niit) : null;
   const ar = location && input.state === "ar" ? arkansasTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase) : null;
   const de = location && input.state === "de" ? delawareTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;

@@ -7,8 +7,23 @@ import { pensionEligibilityDate } from "./pensionEligibilityDate";
  * 2026 published amounts: https://www.maine.gov/revenue/tax-return-forms/individual-income-tax-2026
  * Eligibility/phaseout: https://legislature.maine.gov/statutes/36/title36sec5122.html
  * Indexing: https://legislature.maine.gov/statutes/36/title36sec5403.html
- * TEMPORARY: approved 2025 pension phaseout baseline pending verification of
- * the 2026 threshold. Future parameters are explicit projections, not tax tables.
+ * Verified against Maine Revenue Services 2026 Individual Income Tax Rates (revised
+ * 2026-05-20) and the 2026 Form 1040ES-ME worksheet (revised July 2026): brackets,
+ * standard deduction, personal exemption, surcharge thresholds, the $49,824 pension
+ * cap and the $102,250/$341,000 deduction and exemption phaseout starts.
+ *
+ * Pension-deduction phaseout start (36 MRSA 5122(2)(M-3)): the statutory applicable
+ * amounts are $125,000 single, $187,500 head of household and $250,000 married joint
+ * (RR 2025 c.1 Pt.A s.55), indexed from 2025 under 36 MRSA 5403(11) by the ratio of the
+ * 12-month average Chained CPI-U ending June 30 of the preceding year to the 12-month
+ * average ending June 30, 2024, rounded down to a multiple of $50. Maine Revenue
+ * Services had not published the 2026 amounts in any document available on
+ * 2026-10-04, so the 2026 values below are computed from that statutory formula with
+ * BLS Chained CPI-U (series SUUR0000SA0): July 2024-June 2025 average 176.4166 over
+ * July 2023-June 2024 average 172.3449 = 1.02363, giving $127,950 single and $255,900
+ * married (head of household $191,900, unsupported). Replace with the published figures
+ * when Maine releases the 2026 pension worksheet. Future parameters are explicit
+ * projections, not tax tables.
  */
 
 const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 15700, married: 31400 };
@@ -42,9 +57,9 @@ export function maineTax(input: HouseholdTaxInput, federalAgi: number, taxableBe
   // Future parameters are estimates, not published tables. Maine indexes
   // these dollar amounts down to $50; phaseout widths remain statutory.
   const indexed = (value: number) => input.year === 2026 ? value : Math.floor((value * factor + 1e-8) / 50) * 50;
-  // Approved temporary 2025 baseline, NOT a verified 2026 threshold.
-  // 36 MRS 5122(2)(M-3): federal AGI; $100,000 width for both supported statuses.
-  const pensionPhaseoutStart = indexed(input.filing === "married" ? 250000 : 125000);
+  // 36 MRS 5122(2)(M-3): federal AGI; $100,000 width for both supported statuses. 2026 start is
+  // statute-derived (see header), not yet a published Maine Revenue Services figure.
+  const pensionPhaseoutStart = indexed(input.filing === "married" ? 255900 : 127950);
   const pensionFraction = 1 - Math.min(1, Math.max(0, (federalAgi - pensionPhaseoutStart) / 100000));
   const retirementByOwner = new Map(input.people.map(person => [person.id, 0]));
   let attributed = 0;
@@ -108,6 +123,6 @@ export function maineTax(input: HouseholdTaxInput, federalAgi: number, taxableBe
   const stateTax = baseTax + surcharge;
   return {
     stateTax, localTax: 0, meAgi, pensionDeduction, standardDeduction, exemption, pensionPhaseoutStart, projectionFactor: factor,
-    warning: "Maine planning estimate: 2026 rates and deductions, with owner-specific eligible retirement income. Federal early-distribution-tax-subject income and personally purchased annuities do not qualify. Workplace income before age 55 without verified periodic-payment eligibility and pensions before age 59½ without payment/exception detail are unsupported and blocked. Temporary pension phaseout uses 2025 federal-AGI thresholds ($125,000 single/$250,000 married), NOT verified 2026 thresholds, over a fixed $100,000 range. Future indexed tax parameters use the editable tax-growth assumption, rounded down to $50; phaseout widths stay fixed. The SSA-linked pension cap is projected from $49,824 with that same growth assumption, not a published future SSA maximum. Social Security taxability thresholds remain fixed. Military pension exemptions, itemized deductions and credits are not modeled.",
+    warning: "Maine planning estimate: 2026 rates and deductions, with owner-specific eligible retirement income. Federal early-distribution-tax-subject income and personally purchased annuities do not qualify. Workplace income before age 55 without verified periodic-payment eligibility and pensions before age 59½ without payment/exception detail are unsupported and blocked. The pension-deduction phaseout starts at federal AGI of $127,950 single/$255,900 married for 2026, computed from the 36 MRSA 5403(11) inflation formula and BLS Chained CPI-U because Maine Revenue Services had not yet published the 2026 amounts (the statutory 2025 amounts were $125,000/$250,000), over a fixed $100,000 range. Future indexed tax parameters use the editable tax-growth assumption, rounded down to $50; phaseout widths stay fixed. The SSA-linked pension cap is projected from $49,824 with that same growth assumption, not a published future SSA maximum. Social Security taxability thresholds remain fixed. Military pension exemptions, itemized deductions and credits are not modeled.",
   };
 }
