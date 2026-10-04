@@ -5,27 +5,23 @@ import { ageAtYearEnd } from "./rules";
 /**
  * Restricted, verified Wisconsin resident annual settlement.
  *
- * Verified against the Wisconsin Department of Revenue's own 2025 tax
- * rate guidance (Guidance Document 100047, interpreting law as of
- * January 16, 2026) for the graduated schedule -- 3.50%/4.40%/5.30%/
- * 7.65% at $14,680/$50,480/$323,290 single or head of household and
- * $19,580/$67,300/$431,060 married filing jointly -- reconciled exactly
- * against the 2025 Form 1 instructions' own $100,000-and-over tax
- * computation worksheet constants for both filing statuses.
- * https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx
- * https://www.revenue.wi.gov/TaxForms2025/2025-Form1-Inst.pdf
+ * Verified against the Wisconsin Department of Revenue's 2026 Form 1-ES
+ * instructions (D-101A, January 2026, read 2026-10-04): the 2026 schedule
+ * 3.50%/4.40%/5.30%/7.65% at $15,110/$51,950/$332,720 single or head of
+ * household and $20,150/$69,260/$443,630 married filing jointly. (The 2025
+ * schedule was $14,680/$50,480/$323,290 and $19,580/$67,300/$431,060; earlier
+ * versions of this module used it for 2026.) Later years hold the 2026
+ * amounts, which Wisconsin indexes annually.
+ * https://www.revenue.wi.gov/TaxForms2026/2026-Form1-ES-Inst.pdf
  *
  * Wisconsin's standard deduction phases out under a statutory formula
  * (sec. 71.05(22), Wis. Stats.) of 12% of Wisconsin AGI above a
  * threshold for single/head of household and 19.778% for married filing
- * jointly; this planner reconstructs the current (2025) inflation-
- * indexed threshold and maximum for each filing status from the 2025
- * Standard Deduction Table (max $13,560 single/$25,110 married filing
- * jointly, phasing to $0 at $132,500 single/$155,169 married filing
- * jointly) as a continuous linear formula, which may differ from
- * Wisconsin's own published table by a small amount (observed up to
- * roughly $100) in some income ranges due to the state's own table-based
- * rounding. A $700 personal exemption per person (self and spouse, not
+ * jointly. The 2026 Standard Deduction schedules in the same instructions
+ * give $13,960 less 12% of income over $20,120 (zero above $136,453) for
+ * single filers and $25,840 less 19.778% of income over $29,040 (zero above
+ * $159,690) for married filing jointly, applied here as a continuous linear
+ * formula. A $700 personal exemption per person (self and spouse, not
  * claimed as a dependent), plus a separate $250 exemption per person 65
  * or older, is added on top.
  *
@@ -46,12 +42,12 @@ import { ageAtYearEnd } from "./rules";
  */
 
 const BRACKETS = {
-  single: { ceilings: [14680, 50480, 323290, Infinity], rates: [.035, .044, .053, .0765] },
-  married: { ceilings: [19580, 67300, 431060, Infinity], rates: [.035, .044, .053, .0765] },
+  single: { ceilings: [15110, 51950, 332720, Infinity], rates: [.035, .044, .053, .0765] },
+  married: { ceilings: [20150, 69260, 443630, Infinity], rates: [.035, .044, .053, .0765] },
 };
-const STANDARD_DEDUCTION_MAX = { single: 13560, married: 25110 };
+const STANDARD_DEDUCTION_MAX = { single: 13960, married: 25840 };
 const STANDARD_DEDUCTION_PHASEOUT_RATE = { single: .12, married: .19778 };
-const STANDARD_DEDUCTION_PHASEOUT_THRESHOLD = { single: 19300, married: 28204 };
+const STANDARD_DEDUCTION_PHASEOUT_THRESHOLD = { single: 20120, married: 29040 };
 const PERSONAL_EXEMPTION_PER_PERSON = 700;
 const SENIOR_EXEMPTION_PER_PERSON = 250;
 const RETIREMENT_SUBTRACTION_CAP_PER_PERSON = 24000;
@@ -87,10 +83,10 @@ export function wisconsinTax(input: HouseholdTaxInput, federalAgi: number, taxab
   const stateTax = marginal(taxable, ceilings, rates);
   return {
     stateTax, localTax: 0, wiAgi, standardDeduction, retirementSubtraction,
-    warning: "Wisconsin pre-credit estimate using the enacted graduated schedule (3.50% to 7.65% at $14,680/$50,480/"
-      + "$323,290 single, $19,580/$67,300/$431,060 married filing jointly) applied after a linear reconstruction of "
-      + "Wisconsin's own income-phased standard deduction table (which may differ from the official table by a small "
-      + "amount in some income ranges) and a $700 personal exemption per person plus $250 per person 65 or older. "
+    warning: "Wisconsin pre-credit estimate using the enacted graduated schedule (3.50% to 7.65% at $15,110/$51,950/"
+      + "$332,720 single, $20,150/$69,260/$443,630 married filing jointly, Wisconsin's 2026 amounts held for later years) "
+      + "applied after Wisconsin's own income-phased standard deduction ($13,960 less 12% of income over $20,120 single; "
+      + "$25,840 less 19.778% of income over $29,040 married) and a $700 personal exemption per person plus $250 per person 65 or older. "
       + "Social Security and military retirement pay are fully exempt. An owner 67 or older excludes up to $24,000 of "
       + "that owner's own pension income plus that owner's own attributed 401(k)/IRA/annuity distributions, "
       + "but Wisconsin's separate low-income age-65 $5,000 subtraction and its exemption for pre-1964 "

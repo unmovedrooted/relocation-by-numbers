@@ -29,9 +29,9 @@ describe("restricted Wisconsin annual settlement", () => {
   it("applies the graduated schedule after the phased standard deduction and $700 personal exemption", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const wi = estimateHouseholdTax(terms);
-    const deduction = standardDeduction(60000, 13560, 0.12, 19300);
+    const deduction = standardDeduction(60000, 13960, 0.12, 20120);
     const taxable = 60000 - deduction - 700;
-    expect(wi.stateTax).toBeCloseTo(bracketTax(taxable, [14680, 50480, 323290, Infinity]), 4);
+    expect(wi.stateTax).toBeCloseTo(bracketTax(taxable, [15110, 51950, 332720, Infinity]), 4);
     expect(wi.localTax).toBe(0);
   });
 
@@ -41,14 +41,14 @@ describe("restricted Wisconsin annual settlement", () => {
       { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
     ], income: [{ ownerId: "one", kind: "wages", amount: 90000 }] });
     const wi = estimateHouseholdTax(terms);
-    const deduction = standardDeduction(90000, 25110, 0.19778, 28204);
+    const deduction = standardDeduction(90000, 25840, 0.19778, 29040);
     const taxable = 90000 - deduction - 1400;
-    expect(wi.stateTax).toBeCloseTo(bracketTax(taxable, [19580, 67300, 431060, Infinity]), 4);
+    expect(wi.stateTax).toBeCloseTo(bracketTax(taxable, [20150, 69260, 443630, Infinity]), 4);
   });
 
   it("gives the maximum standard deduction below the phase-out threshold", () => {
     const wi = wisconsinTax(input({ income: [{ ownerId: "one", kind: "wages", amount: 15000 }] }), 15000, 0, 0);
-    expect(wi.standardDeduction).toBe(13560);
+    expect(wi.standardDeduction).toBe(13960);
   });
 
   it("excludes Social Security at any income level", () => {
