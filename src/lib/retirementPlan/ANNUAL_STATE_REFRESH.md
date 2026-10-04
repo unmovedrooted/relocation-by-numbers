@@ -54,6 +54,8 @@ agency's own worksheet instead of a summary:
 | Maryland | No personal exemptions at all: missed the $3,200 per taxpayer and spouse (stepped down above $100,000 single / $150,000 joint federal AGI), the $1,000 age/blind exemption, and the $1,200 two-income married subtraction | 2025 Resident Tax Booklet, Instruction 10 chart 10A and Worksheet 13D |
 | Virginia | No personal exemptions ($930 each, $800 more for age 65/blind); married age deduction reduced each spouse separately instead of sharing one limit; treated anyone born in 1939 as grandfathered; used year-end age instead of the January 1 cutoff | 2025 Form 760 instructions, line 12 and the Age 65 and Older Deduction Worksheet |
 | Indiana | Applied the $16,000 civil service annuity deduction to every pension; Indiana allows it only for a nonmilitary federal civil service annuity, so it now needs the federal-government pension type | Department of Revenue, Deductions |
+| South Carolina | Omitted the 44% net capital gain deduction (S.C. Code 12-6-1150, unchanged by Act 110) | 2025 SC1040 instructions |
+| Wisconsin | Omitted the 30% exclusion of net capital gain from assets held over one year | 2025 Schedule WD instructions |
 | Missouri | Omitted the 100% capital gains subtraction (RSMo 143.121, effective for tax years from 2025), which also lowers the AGI that tests the private pension deduction | MO-A line 18; Department of Revenue year-changes page and FAQ |
 
 Lesson: a module header that says "corroborated by secondary sources" or "inferred" is a to-do, not a finding. Search the
@@ -62,6 +64,8 @@ resolve each against a primary document. All such caveats present on 2026-10-04 
 joint standard deduction ($6,800, exactly twice the confirmed single figure).
 
 Federal-AGI starting points deserve a check in every state: a state that does not follow a federal adjustment (401(k) deferrals, IRA deduction, capital loss deduction) needs an add-back, as Pennsylvania and New Jersey do. Not yet checked for the remaining states.
+
+Capital-gain preferences: most modules ignored them. Modeled now: Massachusetts, Vermont, Montana, New Mexico, North Dakota, Hawaii, Missouri (100% subtraction), South Carolina (44%) and Wisconsin (30%). Disclosed but not modeled: Arizona (25% of long-term gains on assets acquired after 2011, needs acquisition dates) and Arkansas (50% of net capital gain, and 100% above $10 million; Ark. Code 26-51-815 as summarized by a 2018 legislative task force, so confirm the 2026 text on the AR1000D before modeling). A planner with per-lot acquisition dates could add Arizona.
 
 Likewise check every module for personal exemptions and for each age rule's exact cutoff date: Maryland and Virginia had no exemptions at all. A keyword scan of the modules on 2026-10-04 plus spot checks (Arkansas, Delaware, Kentucky, Montana, New York, South Carolina) found no other module missing an exemption it should model, but amounts in the other modules were not re-derived.
 

@@ -31,6 +31,10 @@ import { ageAtYearEnd } from "./rules";
  *   under Code Section 12-6-1120(4).
  *   https://dor.sc.gov/sites/dor/files/policies/RR21-13.pdf
  *
+ * - S.C. Code Ann. Section 12-6-1150 (not amended by Act 110; 2025 SC1040 instructions, read 2026-10-04): a
+ *   deduction of 44% of net capital gain, the excess of net long-term capital gain over net short-term capital loss.
+ *   The SCIAD phase-out still uses federal AGI before this deduction.
+ *
  * Uses enacted law, not a prediction of future legislation. South Carolina
  * has no local income tax; localTax is always zero. The General Retirement
  * Income Deduction pool is, per owner, that owner's own income entered as
@@ -55,6 +59,7 @@ const SCIAD_THRESHOLD: Record<FilingStatus, number> = { single: 40000, married: 
 const SCIAD_WIDTH: Record<FilingStatus, number> = { single: 55000, married: 110000 };
 const GENERAL_RETIREMENT_CAP: { under65: number; over65: number } = { under65: 3000, over65: 10000 };
 const AGE_65_CAP_PER_PERSON = 15000;
+const CAPITAL_GAIN_DEDUCTION_RATE = .44;
 
 function sciad(input: HouseholdTaxInput, federalAgi: number) {
   const base = SCIAD_BASE[input.filing];
@@ -83,22 +88,24 @@ function age65Deduction(input: HouseholdTaxInput, deductionsByPerson: number[]) 
   return Math.max(0, cap - reduction);
 }
 
-export function southCarolinaTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
+export function southCarolinaTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number, netCapitalGain = 0) {
   if (input.southCarolinaContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted South Carolina planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported South Carolina projection year.");
   const generalDeductions = generalRetirementDeduction(input, retirementOrdinary);
   const generalRetirement = generalDeductions.reduce((a, b) => a + b, 0);
   const age65 = age65Deduction(input, generalDeductions);
+  if (!Number.isFinite(netCapitalGain) || netCapitalGain < 0) throw new RangeError("Invalid South Carolina net capital gain.");
+  const capitalGainDeduction = CAPITAL_GAIN_DEDUCTION_RATE * netCapitalGain;
   const scAgi = federalAgi - taxableBenefits;
-  const taxable = Math.max(0, scAgi - generalRetirement - age65 - sciad(input, federalAgi));
+  const taxable = Math.max(0, scAgi - capitalGainDeduction - generalRetirement - age65 - sciad(input, federalAgi));
   const stateTax = taxable < 30000 ? taxable * 0.0199 : taxable * 0.0521 - 966;
   return {
-    stateTax: Math.max(0, stateTax), localTax: 0, generalRetirementDeduction: generalRetirement, age65Deduction: age65,
+    stateTax: Math.max(0, stateTax), localTax: 0, generalRetirementDeduction: generalRetirement, age65Deduction: age65, capitalGainDeduction,
     warning: "South Carolina pre-credit estimate: Act 110 of 2026's enacted two-bracket schedule (1.99% to $29,999; 5.21% "
       + "times taxable income minus $966 at $30,000 or more, reviewed 2026-09-24), computed on federal AGI directly (South "
       + "Carolina decoupled from the federal standard deduction). The new South Carolina Income Adjusted Deduction (SCIAD, "
       + "$15,000 single/$30,000 married) phases out on a straight fraction of federal AGI over $40,000 (single) or $80,000 "
-      + "(married), reaching $0 at $95,000/$190,000. Social Security is fully excluded. The General Retirement Income "
+      + "(married), reaching $0 at $95,000/$190,000. Social Security is fully excluded. " + "South Carolina also deducts 44% of net capital gain (the excess of net long-term capital gain over net short-term capital loss) under Code Section 12-6-1150, which Act 110 of 2026 left in place; the deduction does not reduce the federal AGI that sets the Income Adjusted Deduction." + " The General Retirement Income "
       + "Deduction gives each owner up to $3,000 (under 65) or $10,000 (65+) of their own income entered as \"pension\" plus "
       + "that owner's own attributed 401(k)/IRA/annuity distributions. The Age 65 and Older Deduction adds up to $15,000 per spouse 65 or older against any income, reduced by "
       + "that spouse's own general retirement deduction. South Carolina's separate, more generous military retirement "

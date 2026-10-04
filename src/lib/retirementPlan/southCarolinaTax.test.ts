@@ -85,6 +85,27 @@ describe("restricted South Carolina annual settlement", () => {
     expect(southCarolinaTax(terms, 0, 0, 0).age65Deduction).toBe(30000);
   });
 
+  it("deducts 44% of net capital gain without lowering the AGI that sets the SCIAD", () => {
+    // AGI 120000 (>= 95000), so no SCIAD. Gain 50000 gives a deduction of 22000: taxable 98000, tax = 98000*.0521 - 966.
+    const sc = southCarolinaTax(input(), 120000, 0, 0, 50000);
+    expect(sc.capitalGainDeduction).toBe(22000);
+    expect(sc.stateTax).toBeCloseTo(98000 * .0521 - 966, 6);
+    // At AGI 40000 the SCIAD is still the full 15000: taxable = 40000 - 4400 - 15000 = 20600 in the 1.99% band.
+    expect(southCarolinaTax(input(), 40000, 0, 0, 10000).stateTax).toBeCloseTo(20600 * .0199, 6);
+    expect(() => southCarolinaTax(input(), 0, 0, 0, -1)).toThrow(/capital gain/);
+  });
+
+  it("applies the deduction to net capital gain from the household engine, not to a net loss", () => {
+    const gain = estimateHouseholdTax(input({ income: [{ ownerId: "one", kind: "wages", amount: 100000 }],
+      accountIncome: taxCharacter({ longTermGain: 50000 }) }));
+    const noGain = estimateHouseholdTax(input({ income: [{ ownerId: "one", kind: "wages", amount: 100000 }] }));
+    expect(gain.stateTax - noGain.stateTax).toBeCloseTo(.56 * 50000 * .0521, 6);
+    const loss = estimateHouseholdTax(input({ income: [{ ownerId: "one", kind: "wages", amount: 100000 }],
+      accountIncome: taxCharacter({ longTermGain: -20000 }) }));
+    // A net loss reduces AGI by the federal 3000 limit and gets no capital gain deduction.
+    expect(loss.stateTax).toBeCloseTo(noGain.stateTax - 3000 * .0521, 6);
+  });
+
   it("requires explicit confirmation of the restricted South Carolina assumptions", () => {
     expect(() => southCarolinaTax(input({ southCarolinaContract: undefined }), 0, 0, 0)).toThrow(/Confirm/);
   });

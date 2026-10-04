@@ -53,6 +53,10 @@ import type { HouseholdTaxInput } from "./householdTax";
  * the restricted New York, Maryland, Indiana, DC, Illinois, New Jersey,
  * Pennsylvania, Colorado, New Mexico, Minnesota, Utah, Connecticut, Vermont,
  * Montana, Rhode Island, California and Virginia estimates' convention.
+ *
+ * Not modeled (checked 2026-10-04): the 25% subtraction of net long-term capital gain from assets acquired after
+ * December 31, 2011 (A.R.S. 43-1022; Form 140 instructions, which treat an asset whose acquisition date cannot be
+ * verified as acquired before 2012). The planner has no acquisition dates, so gains are taxed in full.
  */
 
 const STATE_RATE = .025;
@@ -84,7 +88,7 @@ export function arizonaTax(input: HouseholdTaxInput, federalAgi: number, taxable
       + "excluded. Up to $2,500 per owner of income entered as annual pension with a federal-government or other-government "
       + "pension type is excluded; a private or unspecified pension, and this planner's aggregate 401(k)/IRA/annuity "
       + "distribution figure, remain fully taxable. Arizona also subtracts the federal enhanced senior deduction (up to $6,000 per qualifying owner, through 2028) as "
-      + "enacted in 2026; its tips, overtime and vehicle-loan-interest subtractions are not modeled. Arizona's separate, uncapped military retirement pay subtraction is not "
+      + "enacted in 2026; its tips, overtime and vehicle-loan-interest subtractions are not modeled. " + "Arizona subtracts 25% of net long-term capital gain from assets acquired after December 31, 2011 (A.R.S. 43-1022; Form 140 instructions treat an asset of unknown acquisition date as acquired before 2012); this planner has no acquisition dates, so the subtraction is not modeled and tax on such gains is overstated." + " Arizona's separate, uncapped military retirement pay subtraction is not "
       + "modeled, since this planner cannot identify military retirement income. Arizona has no local income tax. Only "
       + "single and married-filing-jointly are supported. Itemized deductions and credits are excluded. Arizona's dollar "
       + "figures are not further inflation-indexed in this model. Future legislation is not predicted. Not a tax return.",

@@ -375,7 +375,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const az = location && input.state === "az" ? arizonaTax(input, agi, taxableBenefits, seniorDeduction) : null;
   const ga = location && input.state === "ga" ? georgiaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const nc = location && input.state === "nc" ? northCarolinaTax(input, agi, taxableBenefits) : null;
-  const sc = location && input.state === "sc" ? southCarolinaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
+  const sc = location && input.state === "sc" ? southCarolinaTax(input, agi, taxableBenefits, account.retirementOrdinary, preferredCapital) : null;
   const oh = location && input.state === "oh" ? ohioTax(input, agi, taxableBenefits, account.retirementOrdinary, cityBase) : null;
   let ma = null;
   if (location && input.state === "ma") {
@@ -403,7 +403,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const la = location && input.state === "la" ? louisianaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const mi = location && input.state === "mi" ? michiganTax(input, agi, taxableBenefits, account.retirementOrdinary, cityBase) : null;
   const ok = location && input.state === "ok" ? oklahomaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
-  const wi = location && input.state === "wi" ? wisconsinTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
+  const wi = location && input.state === "wi" ? wisconsinTax(input, agi, taxableBenefits, account.retirementOrdinary, preferredCapital) : null;
   const hi = location && input.state === "hi" ? hawaiiTax(input, agi, taxableBenefits, preferredCapital) : null;
   const me = location && input.state === "me" ? maineTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   // ND uses eligible Schedule D gain plus qualified dividends before federal deductions cap preferential income.

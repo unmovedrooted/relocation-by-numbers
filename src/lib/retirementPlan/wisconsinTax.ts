@@ -39,6 +39,11 @@ import { ageAtYearEnd } from "./rules";
  * Wisconsin's separate $5,000 low-income (federal AGI under $15,000
  * single/$30,000 married) age-65 retirement subtraction is not modeled.
  * https://www.revenue.wi.gov/DOR%20Publications/pb126.pdf
+ *
+ * Capital gains: 2025 Schedule WD instructions (read 2026-10-04) exclude 30% of the net capital gain from
+ * assets held more than one year (60% for farm assets, not modeled). The exclusion is a Schedule AD
+ * adjustment, so it lowers Wisconsin income before the standard deduction phase-out.
+ * https://www.revenue.wi.gov/TaxForms2025/2025-ScheduleWD-Inst.pdf
  */
 
 const BRACKETS = {
@@ -51,6 +56,7 @@ const STANDARD_DEDUCTION_PHASEOUT_THRESHOLD = { single: 20120, married: 29040 };
 const PERSONAL_EXEMPTION_PER_PERSON = 700;
 const SENIOR_EXEMPTION_PER_PERSON = 250;
 const RETIREMENT_SUBTRACTION_CAP_PER_PERSON = 24000;
+const CAPITAL_GAIN_EXCLUSION_RATE = .3;
 
 function marginal(amount: number, ceilings: number[], rates: number[]) {
   let total = 0, floor = 0;
@@ -61,7 +67,7 @@ function marginal(amount: number, ceilings: number[], rates: number[]) {
   return total;
 }
 
-export function wisconsinTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
+export function wisconsinTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number, netCapitalGain = 0) {
   if (input.wisconsinContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Wisconsin planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Wisconsin projection year.");
   const ownerRetirement = ownerRetirementIncome(input, retirementOrdinary, "Wisconsin");
@@ -75,19 +81,21 @@ export function wisconsinTax(input: HouseholdTaxInput, federalAgi: number, taxab
     }
     if (ageAtYearEnd(person.birthDate, input.year) >= 65) personalExemption += SENIOR_EXEMPTION_PER_PERSON;
   }
-  const wiAgi = Math.max(0, federalAgi - taxableBenefits - retirementSubtraction);
+  if (!Number.isFinite(netCapitalGain) || netCapitalGain < 0) throw new RangeError("Invalid Wisconsin net capital gain.");
+  const capitalGainExclusion = CAPITAL_GAIN_EXCLUSION_RATE * netCapitalGain;
+  const wiAgi = Math.max(0, federalAgi - taxableBenefits - retirementSubtraction - capitalGainExclusion);
   const standardDeduction = Math.min(STANDARD_DEDUCTION_MAX[input.filing],
     Math.max(0, STANDARD_DEDUCTION_MAX[input.filing] - STANDARD_DEDUCTION_PHASEOUT_RATE[input.filing] * Math.max(0, wiAgi - STANDARD_DEDUCTION_PHASEOUT_THRESHOLD[input.filing])));
   const taxable = Math.max(0, wiAgi - standardDeduction - personalExemption);
   const { ceilings, rates } = BRACKETS[input.filing];
   const stateTax = marginal(taxable, ceilings, rates);
   return {
-    stateTax, localTax: 0, wiAgi, standardDeduction, retirementSubtraction,
+    stateTax, localTax: 0, wiAgi, standardDeduction, retirementSubtraction, capitalGainExclusion,
     warning: "Wisconsin pre-credit estimate using the enacted graduated schedule (3.50% to 7.65% at $15,110/$51,950/"
       + "$332,720 single, $20,150/$69,260/$443,630 married filing jointly, Wisconsin's 2026 amounts held for later years) "
       + "applied after Wisconsin's own income-phased standard deduction ($13,960 less 12% of income over $20,120 single; "
       + "$25,840 less 19.778% of income over $29,040 married) and a $700 personal exemption per person plus $250 per person 65 or older. "
-      + "Social Security and military retirement pay are fully exempt. An owner 67 or older excludes up to $24,000 of "
+      + "Social Security and military retirement pay are fully exempt. " + "Wisconsin excludes 30% of net capital gain from assets held more than one year (Schedule WD instructions, 2025); the 60% rate for farm assets is not modeled, and the exclusion lowers the Wisconsin income that phases out the standard deduction." + " An owner 67 or older excludes up to $24,000 of "
       + "that owner's own pension income plus that owner's own attributed 401(k)/IRA/annuity distributions, "
       + "but Wisconsin's separate low-income age-65 $5,000 subtraction and its exemption for pre-1964 "
       + "government pension accounts are not modeled. Only single and married-filing-jointly are supported. Itemized "

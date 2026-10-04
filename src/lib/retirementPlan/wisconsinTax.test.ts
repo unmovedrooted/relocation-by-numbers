@@ -72,6 +72,26 @@ describe("restricted Wisconsin annual settlement", () => {
     expect(wi.retirementSubtraction).toBe(0);
   });
 
+  it("excludes 30% of net capital gain before the standard deduction phase-out", () => {
+    const terms = input();
+    const wi = wisconsinTax(terms, 60000, 0, 0, 10000);
+    // Exclusion 3000, Wisconsin income 57000.
+    expect(wi.capitalGainExclusion).toBe(3000);
+    expect(wi.wiAgi).toBe(57000);
+    const deduction = standardDeduction(57000, 13960, 0.12, 20120);
+    expect(wi.stateTax).toBeCloseTo(bracketTax(57000 - deduction - 700, [15110, 51950, 332720, Infinity]), 4);
+    expect(() => wisconsinTax(terms, 0, 0, 0, -1)).toThrow(/capital gain/);
+  });
+
+  it("wires the exclusion to net capital gain in the household engine, not to a net loss", () => {
+    const wages = [{ ownerId: "one", kind: "wages" as const, amount: 80000 }];
+    const withGain = estimateHouseholdTax(input({ income: wages, accountIncome: taxCharacter({ longTermGain: 20000 }) }));
+    const manual = wisconsinTax(input({ income: wages }), 100000, 0, 0, 20000);
+    expect(withGain.stateTax).toBeCloseTo(manual.stateTax, 6);
+    const withLoss = estimateHouseholdTax(input({ income: wages, accountIncome: taxCharacter({ longTermGain: -20000 }) }));
+    expect(withLoss.stateTax).toBeCloseTo(wisconsinTax(input({ income: wages }), 77000, 0, 0, 0).stateTax, 6);
+  });
+
   it("requires explicit confirmation of the restricted Wisconsin assumptions", () => {
     expect(() => wisconsinTax(input({ wisconsinContract: undefined }), 0, 0, 0)).toThrow(/Confirm/);
   });
