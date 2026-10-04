@@ -12,13 +12,25 @@ function input(overrides: Partial<HouseholdTaxInput> = {}): HouseholdTaxInput {
 }
 
 describe("restricted Ohio annual settlement", () => {
-  it("applies the flat 2.75% rate above $26,050 net of the exemption, with no local tax", () => {
+  it("applies the 2026 R.C. 5747.02 tax of $332 plus 2.75% above $26,050 net of the exemption, with no local tax", () => {
     // AGI 60000, one exemption of 2400 (MAGI 60000 <= 80000 tier is actually 2150; MAGI here is 60000 which is >40000 so tier=2150).
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const oh = estimateHouseholdTax(terms);
     const taxable = 60000 - 2150;
-    expect(oh.stateTax).toBeCloseTo((taxable - 26050) * 0.0275, 6);
+    expect(oh.stateTax).toBeCloseTo(332 + (taxable - 26050) * 0.0275, 6);
     expect(oh.localTax).toBe(0);
+  });
+
+  it("charges the $332 base only once taxable income exceeds $26,050", () => {
+    // Single filer in the 2,400 tier (MAGI up to 40,000): AGI 28,450 gives taxable income of exactly 26,050 (no tax); a dollar more starts the base.
+    expect(ohioTax(input(), 28450, 0, 0).stateTax).toBe(0);
+    expect(ohioTax(input(), 28451, 0, 0).stateTax).toBeCloseTo(332.0275, 4);
+  });
+
+  it("removes the personal exemption above $500,000 of MAGI for 2026 and later", () => {
+    // 1,900 exemption at exactly $500,000; none above it.
+    expect(ohioTax(input(), 500000, 0, 0).stateTax).toBeCloseTo(332 + (500000 - 1900 - 26050) * .0275, 6);
+    expect(ohioTax(input(), 500001, 0, 0).stateTax).toBeCloseTo(332 + (500001 - 26050) * .0275, 6);
   });
 
   it("taxes nothing below the $26,050 threshold", () => {

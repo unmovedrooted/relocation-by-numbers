@@ -15,7 +15,7 @@ describe("restricted Michigan annual settlement", () => {
   it("applies the flat 4.25% rate net of the personal exemption", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const mi = estimateHouseholdTax(terms);
-    expect(mi.stateTax).toBeCloseTo((60000 - 5600) * 0.0425, 6);
+    expect(mi.stateTax).toBeCloseTo((60000 - 5900) * 0.0425, 6);
     expect(mi.localTax).toBe(0);
   });
 
@@ -25,7 +25,7 @@ describe("restricted Michigan annual settlement", () => {
       { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true },
     ], income: [{ ownerId: "one", kind: "wages", amount: 100000 }] });
     const mi = estimateHouseholdTax(terms);
-    expect(mi.stateTax).toBeCloseTo((100000 - 5600 * 2) * 0.0425, 6);
+    expect(mi.stateTax).toBeCloseTo((100000 - 5900 * 2) * 0.0425, 6);
   });
 
   it("excludes Social Security at any income level", () => {

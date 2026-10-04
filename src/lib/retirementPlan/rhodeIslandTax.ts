@@ -11,9 +11,13 @@ import { stateSocialSecurityInclusion } from "./stateSocialSecurityCoverage";
  *   deduction ($11,200 single/$22,400 married), the $5,250 personal/
  *   dependency exemption, and the standard-deduction-and-exemption phase-out
  *   range ($261,000-$290,800 modified federal AGI, in a $7,450 increment).
- *   This planner infers the phase-out is four 25%-of-combined-amount steps
- *   from that increment (exactly a quarter of the $29,800 range), since the
- *   worksheet computing it was not independently read.
+ *   The Division's 2025 Tax Rate and Worksheets (read 2026-10-04,
+ *   https://tax.ri.gov/sites/g/files/xkgbur541/files/2026-01/2025%20Tax%20Rate%20and%20Worksheets.pdf)
+ *   gives the mechanic: subtract the threshold from modified federal AGI; if the
+ *   result is more than four increments the amount is zero; otherwise divide by
+ *   the increment, round up to 1-4 and keep 0.8000, 0.6000, 0.4000 or 0.2000 of
+ *   the amount. That is 20% steps, not the 25% steps an earlier version of this
+ *   module inferred; the same fraction applies to the deduction and the exemption.
  *   https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-11/ADV_2025_22_Inflation_Adjustments.pdf
  * - The 2025 RI-1040 Resident instructions (Schedule M, lines 1s/1t): the
  *   Social Security and pension/401(k)/annuity modifications, both gated on
@@ -96,7 +100,8 @@ function reachedFullRetirementAge(birthDate: string, year: number) {
 function phaseFraction(modifiedAgi: number) {
   if (modifiedAgi <= PHASE_LOWER) return 1;
   const steps = Math.ceil((modifiedAgi - PHASE_LOWER) / PHASE_INCREMENT);
-  return Math.max(0, 1 - steps * 0.25);
+  // RI worksheet chart: 1 -> 0.8, 2 -> 0.6, 3 -> 0.4, 4 -> 0.2; more than four increments -> 0.
+  return steps > 4 ? 0 : 1 - steps * 0.2;
 }
 
 export function rhodeIslandTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, taxExemptInterest: number) {
@@ -131,8 +136,8 @@ export function rhodeIslandTax(input: HouseholdTaxInput, federalAgi: number, tax
     stateTax, localTax: 0, socialSecuritySubtraction, pensionSubtraction, deductionUsed: deduction, highIncomeSurtax,
     warning: "Rhode Island pre-credit estimate: the uniform 2026 bracket schedule (3.75%/4.75%/5.99%, reviewed 2026-09-24), "
       + "Rhode Island's own standard deduction ($11,200 single/$22,400 married) and $5,250-per-person exemption, phased out "
-      + "by 25% per $7,450 of modified federal AGI over $261,000 (inferred from the published range/increment, not read "
-      + "directly from the phase-out worksheet). Pension/401(k)/annuity income (entered as annual "
+      + "by 20% for each $7,450 (or part) of modified federal AGI over $261,000, and to zero above $290,800, as the Division's "
+      + "phase-out worksheet specifies). Pension/401(k)/annuity income (entered as annual "
       + "pension, capped at $50,000 per owner) is excluded only for an owner who has reached SSA full retirement age "
       + "(computed from birth year, not day-precise), and Social Security is excluded likewise through 2026 and without the age "
       + "requirement from 2027 (2026 budget), in each case while household federal AGI stays under $107,000 (single/MFS/HOH) or "

@@ -28,7 +28,7 @@ describe("restricted Colorado annual settlement", () => {
     expect(co.stateTax).toBeCloseTo((co.taxableIncome - co.taxableBenefits) * .044, 6);
   });
 
-  it("caps the pension subtraction at $24,000 for an owner 65 or older, independent of Social Security", () => {
+  it("caps the pension subtraction at $24,000 for an owner 65 or older with no Social Security", () => {
     const terms = input({ people: [{ ...input().people[0], birthDate: "1955-01-01" }],
       income: [{ ownerId: "one", kind: "pension", amount: 30000 }] });
     const co = coloradoTax(terms, 30000, 0, 20000);
@@ -55,13 +55,25 @@ describe("restricted Colorado annual settlement", () => {
     expect(co.stateTax).toBeCloseTo((70000 - 12000 - 8000) * .044, 6);
   });
 
-  it("keeps the pension cap untouched when a 55-64 owner qualifies for the income-tested Social Security exemption", () => {
+  it("still reduces the pension cap by the Social Security subtraction when a 55-64 owner qualifies for the income-tested exemption", () => {
     const terms = input({ people: [{ ...input().people[0], birthDate: "1966-01-01" }],
       income: [{ ownerId: "one", kind: "social-security", amount: 15000 }, { ownerId: "one", kind: "pension", amount: 25000 }] });
-    // federalAgi 60000 <= 75000 single threshold: fully exempt from the shared cap.
+    // federalAgi 60000 <= 75000 single threshold: all 12000 of taxable Social Security is subtracted (DR 0104 line 3),
+    // and line 4 is the 20000 cap minus line 3.
     const co = coloradoTax(terms, 60000, 12000, 50000);
     expect(co.socialSecuritySubtraction).toBe(12000);
-    expect(co.pensionSubtraction).toBe(20000);
+    expect(co.pensionSubtraction).toBe(8000);
+  });
+
+  it("reduces the $24,000 pension cap of an owner 65 or older by their Social Security subtraction, to zero at the cap", () => {
+    const older = { ...input().people[0], birthDate: "1955-01-01" };
+    const base = { people: [older], income: [{ ownerId: "one", kind: "social-security" as const, amount: 30000 }, { ownerId: "one", kind: "pension" as const, amount: 30000 }] };
+    const partial = coloradoTax(input(base), 90000, 20000, 60000);
+    expect(partial.socialSecuritySubtraction).toBe(20000);
+    expect(partial.pensionSubtraction).toBe(4000);
+    const exhausted = coloradoTax(input(base), 90000, 25500, 60000);
+    expect(exhausted.socialSecuritySubtraction).toBe(25500);
+    expect(exhausted.pensionSubtraction).toBe(0);
   });
 
   it("gives each spouse an independent $20,000 pension cap under married filing", () => {

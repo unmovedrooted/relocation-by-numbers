@@ -12,11 +12,11 @@ import { retirementIncomeFromSources } from "./ownerRetirementIncome";
  *   or $500,000 (MFJ).
  *   https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/incometax/documents/currentyear/individual/il-1040-instr.pdf
  * - Illinois Department of Revenue, Informational Bulletin FY 2026-15: the
- *   2026 personal exemption amount of $2,925 (single). The 2026 MFJ figure
- *   ($5,850) is not independently confirmed in a fetched primary source; it
- *   is inferred from the exact 2x relationship the confirmed 2025 figures
- *   establish ($2,850 single / $5,700 MFJ), applied to the confirmed 2026
- *   single figure.
+ *   2026 personal exemption amount of $2,925. The exemption allowance is a
+ *   per-person amount (35 ILCS 5/204: the exemption is multiplied by the number
+ *   of exemptions), so a married couple filing jointly gets two, $5,850 -- the
+ *   same 2x relationship the confirmed 2025 figures show ($2,850 per person,
+ *   $5,700 for a couple).
  *   https://tax.illinois.gov/research/publications/bulletins/fy-2026-15.html
  * - Illinois Department of Revenue, Publication 120, Retirement Income, and
  *   the IL-1040 instructions' Line 5: comprehensively subtracts federally

@@ -21,10 +21,9 @@ import type { HouseholdTaxInput } from "./householdTax";
  *   resident Earned Income Tax rate of 1.975% for Allentown.
  *   https://www.allentownsd.org/offices/financial-operational-services/taxes
  * - Pittsburgh's combined resident Earned Income Tax rate of 3.00% (1% city
- *   + 2% school district) is corroborated across multiple secondary payroll/
- *   tax-guide sources; a direct fetch of the City of Pittsburgh's own
- *   Finance Department rate bulletin was blocked (connection refused) and
- *   so is not independently confirmed from a primary document this review.
+ *   + 2% school district), stated on the City of Pittsburgh Finance Department's
+ *   "Taxes" page (read 2026-10-04).
+ *   https://pittsburghpa.gov/finance/tax-descriptions
  *
  * Uses enacted law, not a prediction of future legislation. Only
  * Philadelphia, Pittsburgh and Allentown are rated; every other Pennsylvania
@@ -85,8 +84,8 @@ export function pennsylvaniaTax(
       + "the federal early-distribution penalty, used as a proxy for Pennsylvania's own age-59½ test; this can incorrectly "
       + "exclude a distribution that avoids the federal penalty for another reason. Only Philadelphia, Pittsburgh and "
       + "Allentown are rated, and unlike every other verified state here, Pennsylvania's local Earned Income Tax applies "
-      + "only to wages, never to retirement income. Pittsburgh's local rate is corroborated across secondary sources, not "
-      + "independently confirmed from the city's own primary rate bulletin. Tax Forgiveness and other credits are excluded. "
+      + "only to wages, never to retirement income. Pittsburgh's 3% rate (1% city, 2% school district) is from the "
+      + "city's Finance Department. Tax Forgiveness and other credits are excluded. "
       + "Pennsylvania parameters are not inflation-indexed in this model. Future legislation is not predicted. Not a tax "
       + "return.",
   };

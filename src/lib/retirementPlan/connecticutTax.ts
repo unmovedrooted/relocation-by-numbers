@@ -17,15 +17,13 @@ import { stateSocialSecurityInclusion } from "./stateSocialSecurityCoverage";
  *   down $1,000 per $1,000 to $0 at $44,001+), and the Pension and Annuity
  *   Phase-Out Table (100% below $75,000 single/$100,000 married federal
  *   AGI, phasing to 0% by $100,000/$150,000). The married-filing-jointly
- *   bracket schedule is NOT read from this withholding-focused document
- *   (its own "Code B"/"Code C" tables are withholding-election variants,
- *   not directly the return's MFJ schedule); it is instead the well-
- *   corroborated, exact doubling of the single thresholds at the same
- *   rates, consistent with CT's long-standing bracket structure. The
- *   married personal-exemption step table (Withholding Code C: $24,000 at
+ *   bracket schedule is not in this withholding-focused document's return form;
+ *   it is the exact doubling of the single thresholds at the same rates, which
+ *   the 2026 withholding rules (TPG-211, "Code C", read 2026-10-04, see below)
+ *   and the Office of Legislative Research analysis of HB 5444 (current-law tables) both show.
+ *   The married personal-exemption step table (Withholding Code C: $24,000 at
  *   $0-$48,000, phasing to $0 by $71,001) is read from the same document's
- *   Table A and is a reasonable but not independently return-confirmed
- *   match for the actual joint-filer exemption schedule.
+ *   Table A, matching the joint-filer exemption in current law.
  *   https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-7.pdf
  * - This planner reuses the already-verified stateSocialSecurityInclusion
  *   Connecticut branch for the Social Security Benefit Adjustment: full

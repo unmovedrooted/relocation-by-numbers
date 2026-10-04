@@ -5,11 +5,15 @@ import { ageAtYearEnd } from "./rules";
  * reviewed 2026-09-24 against the Ohio Department of Taxation's 2025 IT
  * 1040/SD 100 Instructions and Ohio's HB 96 (2025) budget act:
  * - HB 96 collapsed Ohio's remaining two nonzero brackets into a single
- *   flat 2.75% rate on Ohio taxable nonbusiness income above $26,050 for
- *   tax year 2026 and after (income up to $26,050 remains taxed at 0%),
- *   confirmed by multiple independent secondary sources describing the
- *   enacted law, since the 2025 booklet itself still shows the prior
- *   two-nonzero-bracket (2.75%/3.125%) schedule for tax year 2025.
+ *   rate for tax year 2026 and after: R.C. 5747.02 reads "For taxable years
+ *   beginning in 2026 and thereafter, $332.00 plus 2.75% of the amount in
+ *   excess of $26,050" (income up to $26,050 is taxed at 0%). Read 2026-10-04
+ *   from https://codes.ohio.gov/ohio-revised-code/section-5747.02 and the LSC
+ *   final analysis of HB 96 (https://www.lsc.ohio.gov/assets/legislation/136/hb96/en0/files/hb96-tax-bill-analysis-as-enacted-136th-general-assembly.pdf),
+ *   which also shows the personal and dependent exemptions and the joint filing
+ *   credit limited to MAGI of $500,000 or less from 2026 ($750,000 for 2025) and
+ *   suspends the 2025 and 2026 inflation indexing. Earlier versions of this module
+ *   omitted the $332 base and kept the 2025 $749,999 exemption cutoff.
  *   https://tax.ohio.gov/forms/ohio_individual/individual/2025/it1040-booklet.pdf
  * - Ohio has no standard deduction; instead a Personal and Dependent
  *   Exemption of $2,400/$2,150/$1,900/$0 per person (self, spouse, each
@@ -46,14 +50,16 @@ import { ageAtYearEnd } from "./rules";
  */
 
 const BRACKET_THRESHOLD = 26050;
+const BASE_TAX = 332;
 const STATE_RATE = .0275;
+const EXEMPTION_MAGI_LIMIT = 500000;
 const CREDIT_MAGI_LIMIT = 100000;
 const SENIOR_CREDIT = 50;
 
 function exemptionPerPerson(magi: number) {
   if (magi <= 40000) return 2400;
   if (magi <= 80000) return 2150;
-  if (magi <= 749999) return 1900;
+  if (magi <= EXEMPTION_MAGI_LIMIT) return 1900;
   return 0;
 }
 
@@ -74,7 +80,7 @@ export function ohioTax(input: HouseholdTaxInput, federalAgi: number, taxableBen
   const exemption = input.people.length * exemptionPerPerson(magi);
   const magiLessExemptions = magi - exemption;
   const taxable = Math.max(0, ohioAgi - exemption);
-  const bracketTax = Math.max(0, taxable - BRACKET_THRESHOLD) * STATE_RATE;
+  const bracketTax = taxable > BRACKET_THRESHOLD ? BASE_TAX + (taxable - BRACKET_THRESHOLD) * STATE_RATE : 0;
   const pensionIncome = input.income.filter(item => item.kind === "pension").reduce((s, item) => s + item.amount, 0);
   const eligibleForCredits = magiLessExemptions < CREDIT_MAGI_LIMIT;
   const retirementCredit = eligibleForCredits ? retirementIncomeCredit(pensionIncome + retirementOrdinary) : 0;
@@ -83,10 +89,10 @@ export function ohioTax(input: HouseholdTaxInput, federalAgi: number, taxableBen
   const stateTax = Math.max(0, bracketTax - retirementCredit - seniorCredit);
   return {
     stateTax, localTax: 0, retirementIncomeCredit: retirementCredit, seniorCitizenCredit: seniorCredit,
-    warning: "Ohio pre-credit estimate: the enacted flat 2.75% rate on Ohio taxable nonbusiness income above $26,050 "
-      + "(reviewed 2026-09-24, income up to $26,050 remains taxed at 0%). Ohio has no standard deduction; instead a "
+    warning: "Ohio pre-credit estimate: the enacted 2026 tax of $332 plus 2.75% of Ohio taxable nonbusiness income above "
+      + "$26,050 (R.C. 5747.02, reviewed 2026-10-04; income up to $26,050 is taxed at 0%). Ohio has no standard deduction; instead a "
       + "Personal and Dependent Exemption of $2,400/$2,150/$1,900/$0 per person, tiered by modified adjusted gross income "
-      + "at $40,000/$80,000/$749,999, applies regardless of filing status. Social Security is fully excluded. The "
+      + "at $40,000/$80,000/$500,000 (no exemption above $500,000), applies regardless of filing status. Social Security is fully excluded. The "
       + "Retirement Income Credit (up to $200 per return, based on combined pension/IRA/401(k) income) and the Senior "
       + "Citizen Credit ($50 per return if any owner is 65 or older) both require modified adjusted gross income less "
       + "exemptions under $100,000. The Joint Filing Credit (up to $650) and the alternative lump-sum retirement and "

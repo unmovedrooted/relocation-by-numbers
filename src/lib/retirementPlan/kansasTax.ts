@@ -29,8 +29,9 @@ import { ageAtYearEnd } from "./rules";
  * Contingent rate cuts (checked 2026-10-04): S.B. 269 (2025, enacted over a veto on 2025-04-10) provides
  * for future income tax rate decreases only when revenue exceeds an inflation-adjusted base and the Budget
  * Stabilization Fund meets its threshold. Kansas Department of Revenue Notice 25-06 (2025-10-02) announced
- * no reduction for tax year 2026. No announcement for 2027 was found at this review, and such cuts are
- * contingent, so they are not assumed.
+ * no reduction for tax year 2026. No announcement for 2027 was found at this review (Notices 26-01 through 26-10,
+ * covering the 2026 session, were also read: they add or repeal credits and niche subtractions and change no rate,
+ * deduction or retirement rule used here), and such cuts are contingent, so they are not assumed.
  * https://ksrevenue.gov/taxnotices/notice25-06.pdf
  *
  * Social Security is fully exempt for all filers regardless of income

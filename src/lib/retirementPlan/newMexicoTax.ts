@@ -5,13 +5,12 @@ import { ageAtYearEnd } from "./rules";
 
 /** Restricted, federal-standard-deduction-based, PRE-CREDIT planning estimate.
  * Rates and thresholds reviewed 2026-09-23 against:
- * - Tax Foundation's published New Mexico 2025 bracket table (enacted by
- *   HB252 for tax years beginning on or after Jan. 1, 2025, so also
- *   controlling 2026): six brackets from 1.5% to 5.9%. Direct extraction of
- *   the equivalent table from the NM PIT-1 instructions' own rate-table
- *   pages was not achieved this review; this is a secondary citation, not a
- *   directly read primary table.
- *   https://taxfoundation.org/data/all/state/state-income-tax-rates/
+ * - New Mexico HB 252 (2024), amending NMSA 7-2-7 for tax years beginning on or
+ *   after Jan. 1, 2025, so also controlling 2026: six brackets from 1.5% to 5.9%.
+ *   The single table (to $5,500/$16,500/$33,500/$66,500/$210,000) and the married
+ *   joint table (to $8,000/$25,000/$50,000/$100,000/$315,000) were read from the
+ *   bill text on 2026-10-04 and match the figures used here.
+ *   https://nmlegis.gov/sessions/24%20Regular/bills/house/HB0252.PDF
  * - NM Taxation and Revenue Department, Instructions for 2025 PIT-1: New
  *   Mexico taxable income starts from federal AGI (PIT-1 line 9) minus the
  *   FEDERAL standard deduction amount (line 12, taken verbatim from the
@@ -116,8 +115,7 @@ export function newMexicoTax(input: HouseholdTaxInput, federalAgi: number, taxab
   const stateTax = sumBrackets(taxable, STATE_BRACKETS[input.filing]);
   return {
     stateTax, localTax: 0, socialSecurityExemption, ageBlindExemption: ageBlind, lowMiddleIncomeExemption: lowMiddleIncome, capitalGainsDeduction,
-    warning: "New Mexico pre-credit estimate: enacted 2025-and-after brackets (six brackets, 1.5% to 5.9%; not independently "
-      + "confirmed from a fetched primary rate table this review), starting from federal AGI less the household's own "
+    warning: "New Mexico pre-credit estimate: enacted 2025-and-after brackets (six brackets, 1.5% to 5.9%, per HB 252 of 2024), starting from federal AGI less the household's own "
       + "federal standard deduction (New Mexico's personal exemption remains at $0, matching the federal suspension). "
       + "Social Security is excluded per the income-tested exemption; a graduated age-65-or-blind exemption (up to $8,000 "
       + "per qualifying person) and a Low- and Middle-Income Tax Exemption (up to $2,500 per person, phased and "

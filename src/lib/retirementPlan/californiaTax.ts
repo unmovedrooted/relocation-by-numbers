@@ -14,11 +14,11 @@ import { ageAtYearEnd } from "./rules";
  *   https://www.ftb.ca.gov/forms/2025/2025-540-booklet.html
  * - The 2025 standard deduction ($5,706 single/$11,412 married) and the
  *   personal/blind/senior exemption CREDITS -- $153 per credit (subtracted
- *   from computed tax, not from income), confirmed the same figure for
- *   personal, blind and senior exemptions by the AGI Limitation Worksheet's
- *   shared treatment of Form 540 lines 7-9; the exact $153 figure itself is
- *   corroborated by secondary sources, not independently read from the
- *   primary form's pre-printed dollar amount. Exemption credits phase out
+ *   from computed tax, not from income); Form 540 lines 7, 8 and 9 each print
+ *   "X $153" for personal, blind and senior (read 2026-10-04 in FTB's 2025
+ *   Form 540 booklet, https://www.ftb.ca.gov/forms/2025/2025-540-booklet.pdf, which
+ *   also prints the $5,706/$11,412 standard deduction and the $252,203/$504,411
+ *   exemption-credit phase-out thresholds). Exemption credits phase out
  *   by $6 per credit for each $2,500 (or part) of federal AGI over $252,203
  *   (single) or $504,411 (married), reaching zero at $65,000 above that
  *   threshold.

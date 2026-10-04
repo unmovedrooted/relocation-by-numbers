@@ -30,7 +30,8 @@ import type { HouseholdTaxInput } from "./householdTax";
  * 2026 session (checked 2026-10-04): H.B. 4168, the 2026-2027 omnibus (signed 2026-06-13, effective
  * 2026-09-12; House engrossed text read from https://www.azleg.gov/legtext/57leg/2R/bills/HB4168H.pdf), resets the
  * ARS 43-1041 base amounts to $15,750/$23,625/$31,500 for taxable years from 2025 (still indexed under subsection H,
- * which is how the $16,100/$32,200 above arises), adds to ARS 43-1022 a subtraction of the federal
+ * which is how the $16,100/$32,200 above arises; the legislature's own summary dates the new base from 2026 and the bill's retroactivity clause from 2025, so
+ * Arizona's published 2026 amount could be $15,750 instead, a difference of under $10 of tax), adds to ARS 43-1022 a subtraction of the federal
  * enhanced senior deduction (IRC 151(d)(5)(C)) for taxable years from 2025, which is modeled here using the
  * planner's own federal senior deduction (so it ends when the federal deduction does, after 2028), also
  * subtractions for qualified tips, overtime and vehicle loan interest (not modeled: this planner has no such income

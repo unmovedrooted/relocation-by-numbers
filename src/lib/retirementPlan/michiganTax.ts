@@ -11,14 +11,14 @@ import type { HouseholdTaxInput } from "./householdTax";
  * birth-year restriction -- unlike the tiered rules that applied for
  * 2023-2025. https://www.michigan.gov/taxes/iit/tax-guidance/tax-situations/retirement-and-pension-benefits
  * The flat 4.25% tax rate is Michigan's ongoing statutory rate (the
- * 2023-only 4.05% reduction expired after one year). The subtraction cap
- * itself -- the annually-inflation-adjusted "private pension limit,"
- * reported by secondary sources at $67,610 single/married filing
- * separately and $135,220 married filing jointly for 2026 -- is held here
- * pending Michigan's own official publication of the exact 2026 figure.
- * The $5,600 per-exemption personal exemption for 2026 is likewise a
- * widely-reported, not yet independently primary-source-confirmed,
- * figure.
+ * 2023-only 4.05% reduction expired after one year). Michigan Treasury's 2026
+ * Income Tax Withholding Guide (Form 446, Rev. 02-26, read 2026-10-04) states the
+ * 2026 personal exemption is $5,900 and that qualifying private pension and
+ * retirement benefits may be subtracted up to $67,610 single/married filing
+ * separately or $135,220 married filing jointly. Earlier versions of this module
+ * used $5,600 from a secondary source; the guide corrects it. Both amounts are
+ * indexed and held at their 2026 values for later years.
+ * https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/SUW/TY2026/446_Withholding-Guide_2026.pdf
  *
  * Social Security is fully exempt at any income level. The retirement
  * and pension subtraction covers "most income reported on Form 1099-R,"
@@ -35,7 +35,7 @@ import type { HouseholdTaxInput } from "./householdTax";
 
 const FLAT_RATE = .0425;
 const RETIREMENT_SUBTRACTION_CAP: Record<FilingStatus, number> = { single: 67610, married: 135220 };
-const PERSONAL_EXEMPTION_PER_PERSON = 5600;
+const PERSONAL_EXEMPTION_PER_PERSON = 5900;
 
 export function michiganTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
   if (input.michiganContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Michigan planning assumptions.");
@@ -48,13 +48,12 @@ export function michiganTax(input: HouseholdTaxInput, federalAgi: number, taxabl
   const stateTax = taxable * FLAT_RATE;
   return {
     stateTax, localTax: 0, miAgi, retirementSubtraction,
-    warning: "Michigan pre-credit estimate using the enacted, ongoing flat 4.25% rate applied after a $5,600 personal "
-      + "exemption per person (a widely-reported, not independently primary-source-confirmed, 2026 figure). Social "
+    warning: "Michigan pre-credit estimate using the enacted, ongoing flat 4.25% rate applied after a $5,900 personal "
+      + "exemption per person (Michigan Treasury's 2026 figure, held for later years). Social "
       + "Security is fully exempt at any income level. Pension income of any pensionType, plus this planner's "
       + "aggregate 401(k)/IRA/annuity distribution figure, are excluded up to a combined household cap of $67,610 "
       + "single/married filing separately or $135,220 married filing jointly (2026's fully phased-in, age-independent "
-      + "retirement and pension subtraction; the exact inflation-adjusted cap is likewise not independently "
-      + "primary-source-confirmed for 2026). Michigan's separate, income-tested standard-deduction alternative for a "
+      + "retirement and pension subtraction, from Michigan Treasury's 2026 withholding guide and held for later years). Michigan's separate, income-tested standard-deduction alternative for a "
       + "taxpayer 67 or older is not modeled. Only single and married-filing-jointly are supported. Itemized "
       + "deductions and credits are excluded.",
   };

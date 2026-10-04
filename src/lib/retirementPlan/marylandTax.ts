@@ -23,8 +23,11 @@ import type { HouseholdTaxInput } from "./householdTax";
  * confirmed in a fetched source; it is inferred from the exact 2x relationship
  * the enacted 2025 figures ($3,350 single / $6,700 MFJ) establish, applied to
  * the confirmed 2026 single figure ($3,400). The 2026 pension exclusion cap
- * ($40,600) is corroborated across secondary sources citing the Comptroller's
- * published 2025/2026 figures, not read directly from a fetched primary PDF.
+ * ($40,600, down from $41,200 for 2025 because it tracks the Social Security maximum) is stated on the
+ * Comptroller's own "Maryland Pension Exclusion" guidance page (read 2026-10-04):
+ * https://services.marylandcomptroller.gov/taxes?id=kb_article_view&sysparm_article=KB0010012
+ * The 2026 session bills that would have changed the standard deduction (HB 411) and the exclusion (HB 707)
+ * did not leave committee.
  *
  * Uses enacted law, not a prediction of future legislation. Only Baltimore
  * City, Frederick County and Montgomery County (Rockville) are rated; every

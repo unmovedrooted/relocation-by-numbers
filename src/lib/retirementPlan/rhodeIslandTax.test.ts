@@ -61,13 +61,15 @@ describe("restricted Rhode Island annual settlement", () => {
     expect(ri.stateTax).toBeCloseTo(27100 * 0.0375, 6);
   });
 
-  it("phases the standard deduction and exemption down by 25% per $7,450 of modified AGI above $261,000", () => {
+  it("phases the standard deduction and exemption down by 20% per $7,450 of modified AGI above $261,000 (RI worksheet)", () => {
     const single = 11200 + 5250;
     expect(rhodeIslandTax(input(), 261000, 0, 0).deductionUsed).toBeCloseTo(single, 6);
-    expect(rhodeIslandTax(input(), 261000 + 1, 0, 0).deductionUsed).toBeCloseTo(single * 0.75, 6);
-    expect(rhodeIslandTax(input(), 261000 + 7450, 0, 0).deductionUsed).toBeCloseTo(single * 0.75, 6);
-    expect(rhodeIslandTax(input(), 261000 + 7450 + 1, 0, 0).deductionUsed).toBeCloseTo(single * 0.5, 6);
-    expect(rhodeIslandTax(input(), 261000 + 4 * 7450, 0, 0).deductionUsed).toBe(0);
+    expect(rhodeIslandTax(input(), 261000 + 1, 0, 0).deductionUsed).toBeCloseTo(single * 0.8, 6);
+    expect(rhodeIslandTax(input(), 261000 + 7450, 0, 0).deductionUsed).toBeCloseTo(single * 0.8, 6);
+    expect(rhodeIslandTax(input(), 261000 + 7450 + 1, 0, 0).deductionUsed).toBeCloseTo(single * 0.6, 6);
+    expect(rhodeIslandTax(input(), 261000 + 3 * 7450 + 1, 0, 0).deductionUsed).toBeCloseTo(single * 0.2, 6);
+    expect(rhodeIslandTax(input(), 261000 + 4 * 7450, 0, 0).deductionUsed).toBeCloseTo(single * 0.2, 6);
+    expect(rhodeIslandTax(input(), 261000 + 4 * 7450 + 1, 0, 0).deductionUsed).toBe(0);
   });
 
   it("excludes Social Security only for a spouse who has reached full retirement age, below the AGI threshold", () => {
