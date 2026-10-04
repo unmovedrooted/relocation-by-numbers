@@ -10,6 +10,7 @@ describe("state data vintage", () => {
     expect(stateDataVintage("ne").note).toMatch(/2025/);
     expect(stateDataVintage("ok")).toEqual({ year: 2026, basis: "published-2026", note: null });
     expect(stateDataVintage("fl")).toEqual({ year: 2026, basis: "published-2026", note: null });
+    expect(stateDataVintage("or")).toEqual({ year: 2026, basis: "published-2026", note: null });
   });
 
   it("lists only verified states", () => {

@@ -1,18 +1,22 @@
 import type { FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
-import { ageAtYearEnd } from "./rules";
 
 /** Restricted Oregon planning estimate.
- * 2026 OR-ESTIMATE published planning amounts (not final return tables):
- * https://www.oregon.gov/dor/forms/FormsPubs/publication-or-estimate_101-026_2026.pdf
+ * 2026 DOR inflation-adjusted amounts supersede early OR-ESTIMATE amounts:
+ * https://www.oregon.gov/dor/forms/FormsPubs/withholding-tax-formulas_206-436_2026.pdf
+ * https://www.oregon.gov/dor/forms/FormsPubs/combined-payroll_211-155-2_2026.pdf
+ * Age/blind amounts confirmed in 2026 OR-W-4 instructions:
+ * https://www.oregon.gov/dor/forms/FormsPubs/form-or-W-4-instr_101-402-1_2026.pdf
+ * January 1 age cutoff: OR-40 instructions, standard deduction, line 17.
+ * https://www.oregon.gov/dor/forms/FormsPubs/form-or-40-inst_101-040-1_2025.pdf
  * ORS 316.695 provides the stepped federal-tax subtraction.
- * Age/blind additions retain the disclosed 2025 baseline. Future years freeze
+ * Future years freeze
  * these parameters. Marginal integration retains cents instead of rounded chart bases.
  */
 
-const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 2900, married: 5800 };
+const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 2910, married: 5820 };
 const AGE_OR_BLIND_ADDITION: Record<FilingStatus, number> = { single: 1200, married: 1000 };
-const EXEMPTION_CREDIT_PER_PERSON = 260;
+const EXEMPTION_CREDIT_PER_PERSON = 263;
 const EXEMPTION_CREDIT_AGI_LIMIT: Record<FilingStatus, number> = { single: 100000, married: 200000 };
 const FEDERAL_TAX_SUBTRACTION_CAP = 8750;
 const FEDERAL_TAX_SUBTRACTION_PHASEOUT: Record<FilingStatus, { start: number; step: number }> = {
@@ -44,7 +48,8 @@ export function oregonTax(input: HouseholdTaxInput, federalAgi: number, taxableB
   const federalTaxSubtraction = Math.min(regularFederal, subtractionCap);
   const orAgi = Math.max(0, federalAgi - taxableBenefits - federalTaxSubtraction);
   const ageOrBlindConditions = input.people.reduce((sum, person) =>
-    sum + (ageAtYearEnd(person.birthDate, input.year) >= 65 ? 1 : 0) + (person.blind ? 1 : 0), 0);
+    // Oregon includes a 65th birthday on January 1 following the tax year.
+    sum + (person.birthDate <= `${input.year - 64}-01-01` ? 1 : 0) + (person.blind ? 1 : 0), 0);
   const standardDeduction = STANDARD_DEDUCTION[input.filing] + ageOrBlindConditions * AGE_OR_BLIND_ADDITION[input.filing];
   const taxable = Math.max(0, orAgi - standardDeduction);
   const baseTax = marginal(taxable, BRACKET_CEILINGS[input.filing], BRACKET_RATES);
@@ -52,13 +57,13 @@ export function oregonTax(input: HouseholdTaxInput, federalAgi: number, taxableB
   const stateTax = Math.max(0, baseTax - exemptionCredit);
   return {
     stateTax, localTax: 0, orAgi, federalTaxSubtraction,
-    warning: "Oregon pre-credit estimate using the enacted graduated schedule (4.75% to 9.9% at $4,550/$11,400/"
-      + "$125,000 single, doubled for married filing jointly) applied after the 2026 estimated standard deduction ($2,900 "
-      + "single/$5,800 married filing jointly, plus $1,200 single or $1,000 married per person per age-65-or-blind "
-      + "condition) and a $260-per-exemption credit that phases to $0 above $100,000 (single) or $200,000 (married "
+    warning: "Oregon planning estimate using the enacted graduated schedule (4.75% to 9.9% at $4,550/$11,400/"
+      + "$125,000 single, doubled for married filing jointly) applied after the 2026 standard deduction ($2,910 "
+      + "single/$5,820 married filing jointly, plus $1,200 single or $1,000 married per person per age-65-or-blind "
+      + "condition; age 65 by January 1 following the tax year) and a $263-per-exemption credit that phases to $0 above $100,000 (single) or $200,000 (married "
       + "filing jointly) federal AGI. Social Security and tier 1 Railroad Retirement Board benefits are fully exempt. "
-      + "The federal tax liability subtraction uses stepped caps with the 2026 estimated maximum ($5,000 single AGI bands; "
-      + "$10,000 married bands). Parameters use 2026 OR-ESTIMATE planning values, not final return tables; age/blind additions retain 2025 values. Future years do not use "
+      + "The federal tax liability subtraction uses stepped caps with the 2026 $8,750 maximum ($5,000 single AGI bands; "
+      + "$10,000 married bands). Parameters use published 2026 DOR amounts, including updated deduction and credit amounts from the withholding publication, not a complete final-return calculation. Age/blind additions are confirmed in 2026 guidance. Future years do not use "
       + "indexed amounts. Federal liability uses modeled regular income tax, not the complete Oregon worksheet "
       + "with federal credits and other adjustments. Oregon's federal pension income "
       + "subtraction for service before October 1, 1991, Retirement Income Credit and one-time kicker credit are not "
