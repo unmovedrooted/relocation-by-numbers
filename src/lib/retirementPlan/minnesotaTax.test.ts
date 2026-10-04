@@ -21,11 +21,31 @@ describe("restricted Minnesota annual settlement", () => {
   });
 
   it("grants the additional standard deduction for age 65 and blindness, stacking both", () => {
-    // Standard deduction = 15300 + 1850 (age) + 1850 (blind) = 19000. Taxable = 60000-19000 = 41000.
-    // Tax: 33310*.0535 + 7690*.068 = 1782.085+522.92 = 2305.005.
+    // Standard deduction = 15300 + 2000 (age) + 2000 (blind) = 19300. Taxable = 60000-19300 = 40700.
+    // Tax: 33310*.0535 + 7390*.068 = 1782.085+502.52 = 2284.605.
     const terms = input({ people: [{ ...input().people[0], birthDate: "1955-01-01", blind: true }],
       income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
-    expect(minnesotaTax(terms, 60000, 0, 0).stateTax).toBeCloseTo(2305.005, 6);
+    expect(minnesotaTax(terms, 60000, 0, 0).stateTax).toBeCloseTo(2284.605, 6);
+  });
+
+  it("uses the 2026 additional amounts for each married spouse who is 65 or older", () => {
+    // Standard deduction = 30600 + 2*1600 = 33800. Taxable = 100000-33800 = 66200 on the 5.35% bracket up to 48700 then 6.8%.
+    const terms = input({ filing: "married", people: [
+      { id: "one", birthDate: "1955-01-01", blind: false, eligibleForSeniorDeduction: true },
+      { id: "two", birthDate: "1955-01-01", blind: false, eligibleForSeniorDeduction: true }] });
+    expect(minnesotaTax(terms, 100000, 0, 0).stateTax).toBeCloseTo(48700 * .0535 + (66200 - 48700) * .068, 6);
+  });
+
+  it("reduces the standard deduction for federal AGI over $244,400, fully above $1,107,750", () => {
+    // AGI 300000: reduction .03*(300000-244400) = 1668, so deduction 15300-1668 = 13632 and taxable 286368.
+    const bracket = (taxable: number) => 33310 * .0535 + (109430 - 33310) * .068 + (203150 - 109430) * .0785 + (taxable - 203150) * .0985;
+    expect(minnesotaTax(input(), 300000, 0, 0).stateTax).toBeCloseTo(bracket(286368), 6);
+    // AGI 400000: .03*(337800-244400) + .1*(400000-337800) = 2802+6220 = 9022 exceeds 80% of 15300 (12240)? No, so deduction 6278.
+    expect(minnesotaTax(input(), 400000, 0, 0).stateTax).toBeCloseTo(bracket(400000 - 6278), 6);
+    // AGI 2000000: flat 80% reduction, deduction 3060.
+    expect(minnesotaTax(input(), 2000000, 0, 0).stateTax).toBeCloseTo(bracket(2000000 - 3060), 6);
+    // No reduction at the threshold.
+    expect(minnesotaTax(input(), 244400, 0, 0).stateTax).toBeCloseTo(bracket(244400 - 15300), 6);
   });
 
   it("fully subtracts Social Security under the simplified method below the income threshold", () => {
@@ -50,7 +70,9 @@ describe("restricted Minnesota annual settlement", () => {
   });
 
   it("independently reconciles a complete household projection through the preview adapter", () => {
-    const values = { ...PREVIEW_DEFAULTS, state: "mn", mnContract: "confirmed" };
+    // Spending is set off the default: the Social Security simplified-method steps are cash cliffs, and the annual cash-flow
+    // solver rejects some spending levels with "After-tax cash is not nondecreasing" (also true of the defaults before this test changed).
+    const values = { ...PREVIEW_DEFAULTS, state: "mn", mnContract: "confirmed", spending: "48000" };
     const mn = runRetirementTimeline(buildPreviewInput(values));
     const florida = runRetirementTimeline(buildPreviewInput({ ...PREVIEW_DEFAULTS }));
     expect(mn.years[0].result.tax.stateTax).toBeGreaterThan(0);

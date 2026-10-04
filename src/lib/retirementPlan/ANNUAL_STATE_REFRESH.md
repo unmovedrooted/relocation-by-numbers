@@ -50,6 +50,7 @@ agency's own worksheet instead of a summary:
 | Wisconsin | Held stale 2025 deduction and bracket amounts | Department of Revenue 2026 published schedule |
 | Pennsylvania | Started from federal AGI: missed that PA taxes 401(k)/403(b)/457(b) deferrals and disallows the IRA deduction and the federal net capital loss deduction | PA Personal Income Tax Guide, "Gross Compensation" and "Net Gains" |
 | New Jersey | Started from federal AGI: missed that NJ disallows the IRA contribution deduction and the net capital loss deduction (401(k) deferrals are properly excluded) | 2025 NJ-1040 instructions, Worksheet C and the loss-category rule |
+| Minnesota | Used the statute's 2023 age-65/blind additional deduction ($1,850/$1,450) instead of 2026's $2,000/$1,600, and omitted the standard deduction limitation (reduced above $244,400 federal AGI, 80% above $1,107,750) | Tax Year 2026 Inflation-Adjusted Amounts; Minn. Stat. 290.0123 subd. 2, 5, 6 |
 
 Lesson: a module header that says "corroborated by secondary sources" or "inferred" is a to-do, not a finding. Search the
 modules for those phrases (`widely`, `secondary`, `not independently`, `inferred`, `assumed`) at the start of every refresh and

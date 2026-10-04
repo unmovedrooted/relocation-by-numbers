@@ -12,10 +12,16 @@ import { ageAtYearEnd } from "./rules";
  *   / $30,600 (married) 2026 standard deduction -- Minnesota's own figure,
  *   not conformed to the federal standard deduction.
  *   https://www.revenue.state.mn.us/press-release/2025-12-16/minnesota-income-tax-brackets-standard-deduction-and-dependent-exemption
- * - Minnesota's additional standard deduction for age 65+ or blind: $1,850
- *   per qualifying condition for unmarried filers, $1,450 per qualifying
- *   condition (per spouse) for married filers; a taxpayer who is both 65+
- *   and blind claims it twice.
+ * - Minnesota's additional standard deduction for age 65+ or blind: $2,000
+ *   per qualifying condition for unmarried filers, $1,600 per qualifying
+ *   condition (per spouse) for married filers in 2026 (the statute's 2023 amounts of $1,850 and $1,450,
+ *   inflation-adjusted under Minn. Stat. 290.0123 subd. 6); a taxpayer who is both 65+
+ *   and blind claims it twice. Standard deduction limitation (290.0123 subd. 5, 2026 amounts): federal AGI
+ *   over $244,400 reduces the whole standard deduction, including the additional amounts, by the lesser of
+ *   3% of AGI between $244,400 and $337,800 plus 10% of AGI above $337,800, or 80%; above $1,107,750 the
+ *   reduction is a flat 80%. Amounts are the Department of Revenue's "Tax Year 2026 Inflation-Adjusted Amounts",
+ *   https://www.revenue.state.mn.us/sites/default/files/2025-12/inflation-adjusted-amounts-2026.pdf (read 2026-10-04),
+ *   which also puts the Qualified Public Pension Subtraction maximum at $27,690 married / $13,850 other filers.
  * - Minnesota Department of Revenue, Social Security Benefit Subtraction:
  *   this planner reuses the already-verified stateSocialSecurityInclusion
  *   Minnesota branch (simplified vs. alternate method, the larger
@@ -34,7 +40,7 @@ import { ageAtYearEnd } from "./rules";
  *
  * Uses enacted law, not a prediction of future legislation. Minnesota has no
  * local income tax; localTax is always zero. Minnesota's Qualified Public
- * Pension Subtraction (up to $25,000 married / $12,500 other filers) is NOT
+ * Pension Subtraction (up to $27,690 married / $13,850 other filers in 2026) is NOT
  * modeled: it applies only to specific Minnesota and out-of-state public
  * pension plans whose service was not also covered by Social Security, a
  * distinction this planner's generic "pension" income kind cannot make: all
@@ -46,7 +52,11 @@ import { ageAtYearEnd } from "./rules";
  */
 
 const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 15300, married: 30600 };
-const ADDITIONAL_DEDUCTION: Record<FilingStatus, number> = { single: 1850, married: 1450 };
+const ADDITIONAL_DEDUCTION: Record<FilingStatus, number> = { single: 2000, married: 1600 };
+// Standard deduction limitation, Minn. Stat. 290.0123 subd. 5, 2026 inflation-adjusted amounts.
+const LIMIT_START_AGI = 244400;
+const LIMIT_STEP_AGI = 337800;
+const LIMIT_FULL_AGI = 1107750;
 
 const STATE_BRACKETS: Record<FilingStatus, { upTo: number; rate: number }[]> = {
   single: [
@@ -57,13 +67,17 @@ const STATE_BRACKETS: Record<FilingStatus, { upTo: number; rate: number }[]> = {
   ],
 };
 
-function standardDeduction(input: HouseholdTaxInput, year: number) {
+function standardDeduction(input: HouseholdTaxInput, year: number, federalAgi: number) {
   let additional = 0;
   for (const person of input.people) {
     if (ageAtYearEnd(person.birthDate, year) >= 65) additional++;
     if (person.blind) additional++;
   }
-  return STANDARD_DEDUCTION[input.filing] + additional * ADDITIONAL_DEDUCTION[input.filing];
+  const deduction = STANDARD_DEDUCTION[input.filing] + additional * ADDITIONAL_DEDUCTION[input.filing];
+  if (federalAgi <= LIMIT_START_AGI) return deduction;
+  const reduction = federalAgi > LIMIT_FULL_AGI ? .8 * deduction
+    : Math.min(.03 * (Math.min(federalAgi, LIMIT_STEP_AGI) - LIMIT_START_AGI) + .1 * Math.max(0, federalAgi - LIMIT_STEP_AGI), .8 * deduction);
+  return deduction - reduction;
 }
 
 export function minnesotaTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, taxExemptInterest: number) {
@@ -77,12 +91,12 @@ export function minnesotaTax(input: HouseholdTaxInput, federalAgi: number, taxab
     federallyTaxableBenefits: taxableBenefits, mnProvisionalIncome: provisionalIncome,
   });
   const socialSecuritySubtraction = taxableBenefits - ssResult.taxableBenefits!;
-  const taxable = Math.max(0, federalAgi - standardDeduction(input, input.year) - socialSecuritySubtraction);
+  const taxable = Math.max(0, federalAgi - standardDeduction(input, input.year, federalAgi) - socialSecuritySubtraction);
   const stateTax = sumBrackets(taxable, STATE_BRACKETS[input.filing]);
   return {
     stateTax, localTax: 0, socialSecuritySubtraction,
     warning: "Minnesota pre-credit estimate: enacted 2026 brackets (reviewed 2026-09-23), Minnesota's own $15,300/$30,600 "
-      + "standard deduction (plus $1,850/$1,450 per age-65-or-blind condition), and the larger of the simplified or "
+      + "standard deduction (plus $2,000/$1,600 per age-65-or-blind condition, reduced when federal AGI exceeds $244,400 and by 80% above $1,107,750), and the larger of the simplified or "
       + "alternate-method Social Security subtraction. The Qualified Public Pension Subtraction is not modeled: it applies "
       + "only to specific public pension plans not coordinated with Social Security, which this planner cannot identify, so "
       + "pension income is fully taxable here. Minnesota's 1% tax on net investment income over $1,000,000 is not modeled. Minnesota has no local income tax. Only single and married-filing-jointly are "
