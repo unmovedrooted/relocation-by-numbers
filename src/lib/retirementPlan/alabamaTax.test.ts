@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import type { HouseholdTaxInput } from "./householdTax";
+import { estimateHouseholdTax, type HouseholdTaxInput } from "./householdTax";
 import { taxCharacter } from "./accountTax";
 import { alabamaTax } from "./alabamaTax";
 import { buildPreviewInput, PREVIEW_DEFAULTS } from "./preview";
@@ -12,6 +12,16 @@ function input(overrides: Partial<HouseholdTaxInput> = {}): HouseholdTaxInput {
 }
 
 describe("restricted Alabama annual settlement", () => {
+  it("adds Birmingham's 1% occupational tax on wages, and none for Montgomery, Huntsville or no city", () => {
+    const wages = [{ ownerId: "one", kind: "wages" as const, amount: 60000 }];
+    expect(estimateHouseholdTax(input({ cityId: "birmingham-al", income: wages })).localTax).toBeCloseTo(600, 6);
+    expect(estimateHouseholdTax(input({ cityId: "montgomery-al", income: wages })).localTax).toBe(0);
+    expect(estimateHouseholdTax(input({ cityId: "huntsville-al", income: wages })).localTax).toBe(0);
+    expect(estimateHouseholdTax(input({ income: wages })).localTax).toBe(0);
+    const retired = [{ ownerId: "one", kind: "pension" as const, amount: 40000 }, { ownerId: "one", kind: "social-security" as const, amount: 20000 }];
+    expect(estimateHouseholdTax(input({ cityId: "birmingham-al", income: retired })).localTax).toBe(0);
+  });
+
   it("applies the graduated 2%/4%/5% brackets net of the standard deduction, personal exemption and federal tax deduction", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 40000 }] });
     const al = alabamaTax(terms, 40000, 0, 0, 0, 0);

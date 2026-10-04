@@ -1,4 +1,5 @@
 import type { HouseholdTaxInput } from "./householdTax";
+import { cityIncomeTax, type CityIncomeBase } from "./cityIncomeTax";
 import { ageAtYearEnd } from "./rules";
 
 /** Restricted, flat-rate, PRE-CREDIT planning estimate. Rates and thresholds
@@ -32,9 +33,9 @@ import { ageAtYearEnd } from "./rules";
  *   exemptions is under $100,000.
  *
  * Uses enacted law, not a prediction of future legislation. Ohio has no
- * state-level local income tax in this planner (Ohio's municipal and school
- * district income taxes are separate, address-specific levies this planner
- * does not model). The Joint Filing Credit (up to $650, requiring each
+ * state-level local income tax; Ohio municipal income tax on wages is modeled for Columbus,
+ * Cleveland and Cincinnati when selected (see cityIncomeTax.ts), while other cities and Ohio's
+ * school district income taxes are not modeled. The Joint Filing Credit (up to $650, requiring each
  * spouse have $500+ of qualifying non-investment income) and the
  * alternative lump-sum retirement/distribution credits are not modeled,
  * understating the benefit for a two-earner household or one taking a
@@ -72,7 +73,7 @@ function retirementIncomeCredit(amount: number) {
   return 200;
 }
 
-export function ohioTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
+export function ohioTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number, cityBase?: CityIncomeBase) {
   if (input.ohioContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Ohio planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Ohio projection year.");
   const ohioAgi = federalAgi - taxableBenefits;
@@ -87,8 +88,9 @@ export function ohioTax(input: HouseholdTaxInput, federalAgi: number, taxableBen
   const anySenior = input.people.some(person => ageAtYearEnd(person.birthDate, input.year) >= 65);
   const seniorCredit = eligibleForCredits && anySenior ? SENIOR_CREDIT : 0;
   const stateTax = Math.max(0, bracketTax - retirementCredit - seniorCredit);
+  const localTax = cityBase ? cityIncomeTax("oh", input.cityId ?? "", cityBase, input.people.length) : 0;
   return {
-    stateTax, localTax: 0, retirementIncomeCredit: retirementCredit, seniorCitizenCredit: seniorCredit,
+    stateTax, localTax, retirementIncomeCredit: retirementCredit, seniorCitizenCredit: seniorCredit,
     warning: "Ohio pre-credit estimate: the enacted 2026 tax of $332 plus 2.75% of Ohio taxable nonbusiness income above "
       + "$26,050 (R.C. 5747.02, reviewed 2026-10-04; income up to $26,050 is taxed at 0%). Ohio has no standard deduction; instead a "
       + "Personal and Dependent Exemption of $2,400/$2,150/$1,900/$0 per person, tiered by modified adjusted gross income "
@@ -98,8 +100,7 @@ export function ohioTax(input: HouseholdTaxInput, federalAgi: number, taxableBen
       + "exemptions under $100,000. The Joint Filing Credit (up to $650) and the alternative lump-sum retirement and "
       + "distribution credits are not modeled, understating the benefit for a two-earner household or one taking a "
       + "one-time total distribution. Ohio's military-specific deductions are not modeled, since this planner cannot "
-      + "identify military retirement income. Ohio's own municipal and school district income taxes are separate, "
-      + "address-specific levies not modeled here; localTax is always zero. Only single and married-filing-jointly are "
+      + "identify military retirement income. Ohio municipal income tax is modeled for Columbus (2.5%), Cleveland (2.5%) and Cincinnati (1.8%) when one is selected: it applies to wages only (including 401(k) deferrals), never to Social Security, pensions or retirement distributions, assumes the wages are earned in that city and ignores credits for tax paid to a work city. Other cities, and Ohio's school district income taxes, are not modeled. Only single and married-filing-jointly are "
       + "supported. Itemized deductions and other credits are excluded. Ohio's dollar figures are not further "
       + "inflation-indexed in this model. Future legislation is not predicted. Not a tax return.",
   };

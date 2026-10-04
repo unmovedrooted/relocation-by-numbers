@@ -1,5 +1,6 @@
 import type { FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
+import { cityIncomeTax, type CityIncomeBase } from "./cityIncomeTax";
 
 /** Restricted, income-tested-standard-deduction, PRE-CREDIT planning
  * estimate. Rates and thresholds reviewed 2026-09-25 against the Alabama
@@ -42,8 +43,8 @@ import type { HouseholdTaxInput } from "./householdTax";
  * distribution; this planner's aggregate 401(k)/IRA/annuity distribution
  * figure remains fully taxable, with no separate basis recovery for
  * nondeductible contributions made before 1982. Alabama's local
- * occupational and municipal income taxes (levied in some cities, distinct
- * from a working payroll tax) are not modeled; localTax is always 0. Only
+ * occupational taxes (on wages, by workplace) are modeled only for Birmingham when selected
+ * (see cityIncomeTax.ts); other cities are not modeled. Only
  * single and married-filing-jointly are supported. Itemized deductions,
  * the dependent exemption and all other credits are excluded. Alabama's
  * dollar figures are not further inflation-indexed in this model. Future
@@ -71,7 +72,7 @@ function pensionSubtraction(input: HouseholdTaxInput) {
   return input.income.filter(item => item.kind === "pension").reduce((sum, item) => sum + item.amount, 0);
 }
 
-export function alabamaTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, regularFederal: number, alternativeMinimumTax: number, niit: number) {
+export function alabamaTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, regularFederal: number, alternativeMinimumTax: number, niit: number, cityBase?: CityIncomeBase) {
   if (input.alabamaContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Alabama planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Alabama projection year.");
   const alAgi = Math.max(0, federalAgi - taxableBenefits - pensionSubtraction(input));
@@ -80,7 +81,7 @@ export function alabamaTax(input: HouseholdTaxInput, federalAgi: number, taxable
   const taxable = Math.max(0, alAgi - deduction - PERSONAL_EXEMPTION[input.filing] - federalTaxDeduction);
   const stateTax = bracketTax(taxable, input.filing);
   return {
-    stateTax, localTax: 0, alAgi, standardDeduction: deduction, federalTaxDeduction,
+    stateTax, localTax: cityBase ? cityIncomeTax("al", input.cityId ?? "", cityBase, input.people.length) : 0, alAgi, standardDeduction: deduction, federalTaxDeduction,
     warning: "Alabama pre-credit estimate: enacted graduated brackets (2% to $500 single/$1,000 married, 4% to "
       + "$3,000/$6,000, 5% above), reviewed 2026-09-25. Alabama's own standard deduction phases down from $3,000 (single) "
       + "or $8,500 (married) at $25,999 Alabama AGI or below, to a $2,500/$5,000 floor at $35,500 and above, on top of a "
@@ -88,8 +89,7 @@ export function alabamaTax(input: HouseholdTaxInput, federalAgi: number, taxable
       + "plus AMT plus the Net Investment Income Tax) is also subtracted. Social Security is fully excluded. Income "
       + "entered as annual pension is treated as a qualifying defined-benefit pension (or one of Alabama's specifically "
       + "exempt government systems) and fully excluded regardless of pensionType; this planner's aggregate 401(k)/IRA/"
-      + "annuity distribution figure remains fully taxable, without Alabama's separate pre-1982 basis recovery. Alabama's "
-      + "local occupational and municipal income taxes, levied in some cities, are not modeled. Only single and "
+      + "annuity distribution figure remains fully taxable, without Alabama's separate pre-1982 basis recovery. Birmingham's 1% occupational tax is modeled when Birmingham is selected, on wages assumed to be earned there; Montgomery (its 2025 occupational tax was blocked by state law) and Huntsville levy none, and other Alabama cities' occupational taxes are not modeled. Only single and "
       + "married-filing-jointly are supported. Itemized deductions, the dependent exemption, the new 2026-2028 overtime premium deduction (up to $1,000 per taxpayer) "
       + "and other credits are excluded. Alabama's dollar figures are fixed in statute and not inflation-indexed. Future legislation is not "
       + "predicted. Not a tax return.",

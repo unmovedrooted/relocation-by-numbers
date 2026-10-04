@@ -12,6 +12,25 @@ function input(overrides: Partial<HouseholdTaxInput> = {}): HouseholdTaxInput {
 }
 
 describe("restricted Michigan annual settlement", () => {
+  it("adds Detroit or Grand Rapids resident tax on wages, interest and gains but not pensions or Social Security", () => {
+    const earning = [{ ownerId: "one", kind: "wages" as const, amount: 50000 }, { ownerId: "one", kind: "interest" as const, amount: 2000 }];
+    const retired = [...earning, { ownerId: "one", kind: "pension" as const, amount: 30000 }, { ownerId: "one", kind: "social-security" as const, amount: 20000 }];
+    expect(estimateHouseholdTax(input({ cityId: "detroit-mi", income: earning })).localTax).toBeCloseTo((52000 - 600) * .024, 6);
+    expect(estimateHouseholdTax(input({ cityId: "grand-rapids-mi", income: earning })).localTax).toBeCloseTo((52000 - 600) * .015, 6);
+    // Pensions and Social Security are exempt from both cities, so adding them changes nothing.
+    expect(estimateHouseholdTax(input({ cityId: "detroit-mi", income: retired })).localTax).toBeCloseTo((52000 - 600) * .024, 6);
+    expect(estimateHouseholdTax(input({ cityId: "ann-arbor-mi", income: earning })).localTax).toBe(0);
+    expect(estimateHouseholdTax(input({ income: earning })).localTax).toBe(0);
+  });
+
+  it("charges both exemptions on a joint return and leaves 401(k) deferrals out of the resident base", () => {
+    const two = [{ id: "one", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true }, { id: "two", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true }];
+    const joint = estimateHouseholdTax(input({ filing: "married", people: two, cityId: "detroit-mi", income: [{ ownerId: "one", kind: "wages", amount: 100000 }] }));
+    expect(joint.localTax).toBeCloseTo((100000 - 1200) * .024, 6);
+    const deferred = estimateHouseholdTax(input({ cityId: "detroit-mi", income: [{ ownerId: "one", kind: "wages", amount: 100000 }], pretax401k: [{ ownerId: "one", amount: 20000 }] }));
+    expect(deferred.localTax).toBeCloseTo((80000 - 600) * .024, 6);
+  });
+
   it("applies the flat 4.25% rate net of the personal exemption", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });
     const mi = estimateHouseholdTax(terms);

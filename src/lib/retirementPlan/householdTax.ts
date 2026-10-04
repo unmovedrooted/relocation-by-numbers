@@ -255,6 +255,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   }
   const wageByOwner = new Map(input.people.map(person => [person.id, 0]));
   let otherOrdinary = 0;
+  let otherOnly = 0;
   let socialSecurity = 0;
   let taxExemptInterest = 0;
   let cashInvestmentOrdinary = 0;
@@ -264,7 +265,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
     finiteDollars(item.amount, "Income");
     switch (item.kind) {
       case "wages": wageByOwner.set(item.ownerId, finiteDollars(wageByOwner.get(item.ownerId)! + item.amount, "Owner wages")); break;
-      case "pension": case "other": otherOrdinary += item.amount; break;
+      case "pension": case "other": otherOrdinary += item.amount; if (item.kind === "other") otherOnly += item.amount; break;
       case "social-security": socialSecurity += item.amount; break;
       case "interest": case "nonqualified-dividends": cashInvestmentOrdinary += item.amount; break;
       case "qualified-dividends": cashQualifiedDividends += item.amount; break;
@@ -308,6 +309,13 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const taxableBenefits = taxableSocialSecurity(socialSecurity,
     nonSocialIncome + capitalIncome - capitalDeduction, taxExemptInterest, input.filing === "married");
   const agi = finiteDollars(nonSocialIncome + capitalIncome - capitalDeduction + taxableBenefits - iraDeduction, "AGI", true);
+  // Base for the resident-city taxes of Ohio, Michigan and Alabama cities (see cityIncomeTax.ts): wages count in full
+  // (Medicare wages), while Michigan cities start from AGI-like income and leave out normal retirement distributions.
+  const cityBase = {
+    qualifyingWages: wages + account.esppCompensation,
+    residentIncome: Math.max(0, wages - pretaxDeferrals + account.esppCompensation + otherOnly + investmentOrdinary + qualifiedDividends
+      + capitalIncome - capitalDeduction + account.additionalTaxBase - iraDeduction),
+  };
   const standardDeduction = ((input.filing === "married" ? 32200 : 16100)
     + additionalDeductionCount * (input.filing === "married" ? 1650 : 2050)) * factors.bracket;
   const seniorDeduction = input.year <= 2028
@@ -368,7 +376,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const ga = location && input.state === "ga" ? georgiaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const nc = location && input.state === "nc" ? northCarolinaTax(input, agi, taxableBenefits) : null;
   const sc = location && input.state === "sc" ? southCarolinaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
-  const oh = location && input.state === "oh" ? ohioTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
+  const oh = location && input.state === "oh" ? ohioTax(input, agi, taxableBenefits, account.retirementOrdinary, cityBase) : null;
   let ma = null;
   if (location && input.state === "ma") {
     if (!input.massachusettsLossCarryover && (input.lossCarryover.shortTerm > 0 || input.lossCarryover.longTerm > 0)) {
@@ -384,7 +392,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const ms = location && input.state === "ms" ? mississippiTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase) : null;
   const mo = location && input.state === "mo" ? missouriTax(input, agi, taxableBenefits, standardDeduction, account.retirementOrdinary) : null;
   const wa = location && input.state === "wa" ? washingtonTax(input, lt, agi, st, capitalDeduction) : null;
-  const al = location && input.state === "al" ? alabamaTax(input, agi, taxableBenefits, regularFederal, alternativeMinimumTax, niit) : null;
+  const al = location && input.state === "al" ? alabamaTax(input, agi, taxableBenefits, regularFederal, alternativeMinimumTax, niit, cityBase) : null;
   const ar = location && input.state === "ar" ? arkansasTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase) : null;
   const de = location && input.state === "de" ? delawareTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const ks = location && input.state === "ks" ? kansasTax(input, agi, taxableBenefits) : null;
@@ -393,7 +401,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const wv = location && input.state === "wv" ? westVirginiaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const id = location && input.state === "id" ? idahoTax(input, agi, taxableBenefits, standardDeduction) : null;
   const la = location && input.state === "la" ? louisianaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
-  const mi = location && input.state === "mi" ? michiganTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
+  const mi = location && input.state === "mi" ? michiganTax(input, agi, taxableBenefits, account.retirementOrdinary, cityBase) : null;
   const ok = location && input.state === "ok" ? oklahomaTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const wi = location && input.state === "wi" ? wisconsinTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const hi = location && input.state === "hi" ? hawaiiTax(input, agi, taxableBenefits, preferredCapital) : null;

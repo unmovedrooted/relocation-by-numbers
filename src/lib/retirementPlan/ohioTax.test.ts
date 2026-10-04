@@ -12,6 +12,16 @@ function input(overrides: Partial<HouseholdTaxInput> = {}): HouseholdTaxInput {
 }
 
 describe("restricted Ohio annual settlement", () => {
+  it("adds the selected city's income tax on wages only, and none without a city", () => {
+    const wages = [{ ownerId: "one", kind: "wages" as const, amount: 60000 }];
+    const retired = [{ ownerId: "one", kind: "pension" as const, amount: 40000 }, { ownerId: "one", kind: "social-security" as const, amount: 20000 }, { ownerId: "one", kind: "interest" as const, amount: 5000 }];
+    expect(estimateHouseholdTax(input({ cityId: "columbus-oh", income: wages })).localTax).toBeCloseTo(1500, 6);
+    expect(estimateHouseholdTax(input({ cityId: "cincinnati-oh", income: wages })).localTax).toBeCloseTo(1080, 6);
+    expect(estimateHouseholdTax(input({ cityId: "columbus-oh", income: retired })).localTax).toBe(0);
+    expect(estimateHouseholdTax(input({ income: wages })).localTax).toBe(0);
+    expect(estimateHouseholdTax(input({ cityId: "other-oh", income: wages })).localTax).toBe(0);
+  });
+
   it("applies the 2026 R.C. 5747.02 tax of $332 plus 2.75% above $26,050 net of the exemption, with no local tax", () => {
     // AGI 60000, one exemption of 2400 (MAGI 60000 <= 80000 tier is actually 2150; MAGI here is 60000 which is >40000 so tier=2150).
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 60000 }] });

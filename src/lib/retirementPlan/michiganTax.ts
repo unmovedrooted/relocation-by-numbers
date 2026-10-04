@@ -1,5 +1,6 @@
 import type { FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
+import { cityIncomeTax, type CityIncomeBase } from "./cityIncomeTax";
 
 /**
  * Restricted, verified Michigan resident annual settlement.
@@ -31,13 +32,16 @@ import type { HouseholdTaxInput } from "./householdTax";
  * retirement subtraction) is not modeled, since this planner cannot
  * determine which of the two options is more favorable for a given
  * household without also modeling that alternative in full.
+ *
+ * City income taxes: Detroit and Grand Rapids residents pay a city tax (see cityIncomeTax.ts), modeled when
+ * the city is selected; no other Michigan city is modeled.
  */
 
 const FLAT_RATE = .0425;
 const RETIREMENT_SUBTRACTION_CAP: Record<FilingStatus, number> = { single: 67610, married: 135220 };
 const PERSONAL_EXEMPTION_PER_PERSON = 5900;
 
-export function michiganTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
+export function michiganTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number, cityBase?: CityIncomeBase) {
   if (input.michiganContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Michigan planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Michigan projection year.");
   const pensionIncome = input.income.filter(item => item.kind === "pension").reduce((sum, item) => sum + item.amount, 0);
@@ -47,14 +51,14 @@ export function michiganTax(input: HouseholdTaxInput, federalAgi: number, taxabl
   const taxable = Math.max(0, miAgi - personalExemption);
   const stateTax = taxable * FLAT_RATE;
   return {
-    stateTax, localTax: 0, miAgi, retirementSubtraction,
+    stateTax, localTax: cityBase ? cityIncomeTax("mi", input.cityId ?? "", cityBase, input.people.length) : 0, miAgi, retirementSubtraction,
     warning: "Michigan pre-credit estimate using the enacted, ongoing flat 4.25% rate applied after a $5,900 personal "
       + "exemption per person (Michigan Treasury's 2026 figure, held for later years). Social "
       + "Security is fully exempt at any income level. Pension income of any pensionType, plus this planner's "
       + "aggregate 401(k)/IRA/annuity distribution figure, are excluded up to a combined household cap of $67,610 "
       + "single/married filing separately or $135,220 married filing jointly (2026's fully phased-in, age-independent "
       + "retirement and pension subtraction, from Michigan Treasury's 2026 withholding guide and held for later years). Michigan's separate, income-tested standard-deduction alternative for a "
-      + "taxpayer 67 or older is not modeled. Only single and married-filing-jointly are supported. Itemized "
+      + "taxpayer 67 or older is not modeled. Michigan city income tax is modeled for Detroit (2.4% resident) and Grand Rapids (1.5% resident), each with $600 exemptions, when one is selected: it taxes a full-year resident's wages, interest, dividends, capital gains and early retirement distributions and exempts Social Security and normal pension and retirement distributions; interest on U.S. obligations, which both cities exempt, is not tracked, and no other Michigan city is modeled (Ann Arbor has no city income tax). Only single and married-filing-jointly are supported. Itemized "
       + "deductions and credits are excluded.",
   };
 }
