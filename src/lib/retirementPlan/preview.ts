@@ -5,9 +5,11 @@ import { addPreviewContributions, type ContributionEditorState } from "./preview
 import { addPreviewIraContributions } from "./previewIraContributions";
 import { addPreviewMedicare, type MedicareEditorState } from "./previewMedicare";
 import { verifiedRetirementLocation } from "./verifiedLocation";
+import { validateOregonLocalContract, type OregonLocalContract } from "./oregonLocalTax";
 
 export const PREVIEW_DEFAULTS: Record<string, string> = {
   state: "fl", cityId: "",
+  orMetro: "", orMultnomah: "", orLocalAdjustments: "",
   "one-pensionType": "unspecified", "two-pensionType": "unspecified",
   "one-hawaiiPensionTreatment": "unknown", "two-hawaiiPensionTreatment": "unknown",
   household: "single", startYear: "2026", endYear: "2060", spending: "50000", cash: "50000",
@@ -144,7 +146,9 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
     ...(location.state === "hi" ? { hawaiiContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "me" ? { maineContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "nd" ? { northDakotaContract: "verified-law-precredit" as const } : {}),
-    ...(location.state === "or" ? { oregonContract: "verified-law-precredit" as const } : {}),
+    ...(location.state === "or" ? { oregonContract: "verified-law-precredit" as const,
+      oregonLocal: validateOregonLocalContract({ metro: values.orMetro, multnomah: values.orMultnomah,
+        adjustments: values.orLocalAdjustments } as OregonLocalContract) } : {}),
     people: ids.map(id => ({ id, birthDate: date(`${id}-birth`), blind: false, eligibleForSeniorDeduction: true,
       iraBasis: 0, iraAdditionalTaxExceptionAmount: 0, rothAdditionalTaxExceptionAmount: 0,
       roth: { firstContributionYear: null, regularContributionBasis: 0, conversions: [] } })),

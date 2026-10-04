@@ -7,7 +7,7 @@ import { runRetirementTimeline } from "./timeline";
 
 function input(overrides: Partial<HouseholdTaxInput> = {}): HouseholdTaxInput {
   return { year: 2026, filing: "single", state: "or", stateTreatment: "verified-resident-location",
-    oregonContract: "verified-law-precredit", people: [{ id: "one", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true }],
+    oregonContract: "verified-law-precredit", oregonLocal: { metro: "outside-no-source", multnomah: "outside-no-source", adjustments: "none-confirmed" }, people: [{ id: "one", birthDate: "1975-01-01", blind: false, eligibleForSeniorDeduction: true }],
     income: [], accountIncome: taxCharacter(), lossCarryover: { shortTerm: 0, longTerm: 0 }, ...overrides };
 }
 
@@ -152,7 +152,7 @@ describe("restricted Oregon annual settlement", () => {
   });
 
   it("independently reconciles a complete household projection through the preview adapter", () => {
-    const values = { ...PREVIEW_DEFAULTS, state: "or", orContract: "confirmed" };
+    const values = { ...PREVIEW_DEFAULTS, state: "or", orContract: "confirmed", orMetro: "outside-no-source", orMultnomah: "outside-no-source", orLocalAdjustments: "none-confirmed" };
     const or = runRetirementTimeline(buildPreviewInput(values));
     const florida = runRetirementTimeline(buildPreviewInput({ ...PREVIEW_DEFAULTS }));
     expect(or.years[0].result.tax.stateTax).toBeGreaterThan(0);

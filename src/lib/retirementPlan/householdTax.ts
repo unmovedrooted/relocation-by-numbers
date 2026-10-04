@@ -176,6 +176,7 @@ export type HouseholdTaxInput = Readonly<{
   maineContract?: "verified-law-precredit";
   northDakotaContract?: "verified-law-precredit";
   oregonContract?: "verified-law-precredit";
+  oregonLocal?: import("./oregonLocalTax").OregonLocalContract;
   projection?: TaxProjectionPolicy;
   /** Employee traditional 401(k) deferrals: reduce income-tax wages, not FICA. */
   pretax401k?: readonly Readonly<{ ownerId: string; amount: number }>[];

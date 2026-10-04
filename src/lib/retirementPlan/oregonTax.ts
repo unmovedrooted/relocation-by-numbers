@@ -1,5 +1,6 @@
 import type { FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
+import { oregonLocalTax } from "./oregonLocalTax";
 
 /** Restricted Oregon planning estimate.
  * 2026 DOR inflation-adjusted amounts supersede early OR-ESTIMATE amounts:
@@ -55,8 +56,13 @@ export function oregonTax(input: HouseholdTaxInput, federalAgi: number, taxableB
   const baseTax = marginal(taxable, BRACKET_CEILINGS[input.filing], BRACKET_RATES);
   const exemptionCredit = federalAgi <= EXEMPTION_CREDIT_AGI_LIMIT[input.filing] ? EXEMPTION_CREDIT_PER_PERSON * input.people.length : 0;
   const stateTax = Math.max(0, baseTax - exemptionCredit);
+  const local = oregonLocalTax(input.year, input.filing, taxable, input.oregonLocal);
+  if ((input.oregonLocal?.metro === "resident" || input.oregonLocal?.multnomah === "resident")
+    && input.income.some(item => item.kind === "pension" && item.amount > 0 && item.pensionType !== "private")) {
+    throw new RangeError("Oregon local taxes currently support only explicitly classified private pensions. Public or unknown pension exemptions need separate treatment.");
+  }
   return {
-    stateTax, localTax: 0, orAgi, federalTaxSubtraction,
+    stateTax, ...local, orAgi, federalTaxSubtraction,
     warning: "Oregon planning estimate using the enacted graduated schedule (4.75% to 9.9% at $4,550/$11,400/"
       + "$125,000 single, doubled for married filing jointly) applied after the 2026 standard deduction ($2,910 "
       + "single/$5,820 married filing jointly, plus $1,200 single or $1,000 married per person per age-65-or-blind "
@@ -68,6 +74,8 @@ export function oregonTax(input: HouseholdTaxInput, federalAgi: number, taxableB
       + "with federal credits and other adjustments. Oregon's federal pension income "
       + "subtraction for service before October 1, 1991, Retirement Income Credit and one-time kicker credit are not "
       + "modeled. Only single and married-filing-jointly are supported. Itemized deductions and other credits are "
-      + "excluded.",
+      + "excluded. SHS/PFA use explicitly confirmed full-year local residence or outside-with-no-source status, "
+      + "with no special local exemptions, modifications or credits. SHS uses published 2026/2027 thresholds, "
+      + "holding 2027 amounts through 2030 then applying the SHS sunset; PFA includes its scheduled 2028 increase. Portland Arts Tax is omitted.",
   };
 }
