@@ -53,6 +53,8 @@ agency's own worksheet instead of a summary:
 | Minnesota | Used the statute's 2023 age-65/blind additional deduction ($1,850/$1,450) instead of 2026's $2,000/$1,600, and omitted the standard deduction limitation (reduced above $244,400 federal AGI, 80% above $1,107,750) | Tax Year 2026 Inflation-Adjusted Amounts; Minn. Stat. 290.0123 subd. 2, 5, 6 |
 | Maryland | No personal exemptions at all: missed the $3,200 per taxpayer and spouse (stepped down above $100,000 single / $150,000 joint federal AGI), the $1,000 age/blind exemption, and the $1,200 two-income married subtraction | 2025 Resident Tax Booklet, Instruction 10 chart 10A and Worksheet 13D |
 | Virginia | No personal exemptions ($930 each, $800 more for age 65/blind); married age deduction reduced each spouse separately instead of sharing one limit; treated anyone born in 1939 as grandfathered; used year-end age instead of the January 1 cutoff | 2025 Form 760 instructions, line 12 and the Age 65 and Older Deduction Worksheet |
+| Indiana | Applied the $16,000 civil service annuity deduction to every pension; Indiana allows it only for a nonmilitary federal civil service annuity, so it now needs the federal-government pension type | Department of Revenue, Deductions |
+| Missouri | Omitted the 100% capital gains subtraction (RSMo 143.121, effective for tax years from 2025), which also lowers the AGI that tests the private pension deduction | MO-A line 18; Department of Revenue year-changes page and FAQ |
 
 Lesson: a module header that says "corroborated by secondary sources" or "inferred" is a to-do, not a finding. Search the
 modules for those phrases (`widely`, `secondary`, `not independently`, `inferred`, `assumed`) at the start of every refresh and

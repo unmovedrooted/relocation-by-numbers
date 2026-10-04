@@ -35,6 +35,15 @@ import { ageAtYearEnd } from "./rules";
  *   of household) or $32,000 (married filing jointly).
  *   https://dor.mo.gov/forms/MO-A_2025.pdf
  *
+ * - Capital gains: HB 798 (2025) added a 100% subtraction of capital gains reported for federal tax, for
+ *   individuals from tax years beginning on or after January 1, 2025 (RSMo 143.121; Form MO-A line 18, 2025 MO-A;
+ *   Department of Revenue "2025 Individual Income Tax Year Changes" and "Capital Gains Subtraction" FAQ, read
+ *   2026-10-04). Capital losses are not subtracted. MO-1040 line 5 subtracts MO-A line 19 (which includes it) before
+ *   the pension and Social Security exemption on line 8, so Part 3's private pension income test starts from AGI
+ *   net of the gain. The committee substitute of HB 798 also described a flat 4.7% rate and a standard deduction of
+ *   the federal amount plus $4,000, but the Department of Revenue's 2026 withholding formula still uses the
+ *   graduated schedule below and the federal standard deduction, so neither is modeled.
+ *
  * Uses enacted law, not a prediction of future legislation. Income entered
  * as annual pension with a federal-government, other-government or
  * ny-government pensionType is treated as a public pension; a private or
@@ -56,6 +65,7 @@ import { ageAtYearEnd } from "./rules";
  * Massachusetts, Iowa and Mississippi estimates' convention.
  */
 
+const NOTE = "Net capital gains included in federal AGI are fully subtracted (Section 143.121, effective for tax years beginning January 1, 2025; Form MO-A line 18, Department of Revenue year-changes page and FAQ), while a net capital loss is not; the subtraction also lowers the Missouri AGI used in the private pension income test.";
 const MAX_PUBLIC_PENSION_CAP = 48967;
 const PRIVATE_PENSION_CAP_PER_PERSON = 6000;
 const PRIVATE_PENSION_THRESHOLD: Record<FilingStatus, number> = { single: 25000, married: 32000 };
@@ -86,7 +96,7 @@ function incomeByOwner(input: HouseholdTaxInput, kind: "social-security") {
   return map;
 }
 
-export function missouriTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, standardDeduction: number, retirementOrdinary: number) {
+export function missouriTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, standardDeduction: number, retirementOrdinary: number, capitalIncome: number) {
   if (input.missouriContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Missouri planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Missouri projection year.");
   const ownerRetirement = ownerRetirementIncome(input, retirementOrdinary, "Missouri");
@@ -108,17 +118,18 @@ export function missouriTax(input: HouseholdTaxInput, federalAgi: number, taxabl
     const ownPrivate = ownPension(input, person.id, "private") + ownerRetirement.get(person.id)!;
     privatePensionTotal += Math.min(ownPrivate, PRIVATE_PENSION_CAP_PER_PERSON);
   }
-  const excess = Math.max(0, federalAgi - taxableBenefits - PRIVATE_PENSION_THRESHOLD[input.filing]);
+  if (!Number.isFinite(capitalIncome) || capitalIncome < 0) throw new RangeError("Invalid Missouri capital gain.");
+  const excess = Math.max(0, federalAgi - capitalIncome - taxableBenefits - PRIVATE_PENSION_THRESHOLD[input.filing]);
   const privatePensionSubtraction = Math.max(0, privatePensionTotal - excess);
-  const moAgi = federalAgi - socialSecuritySubtraction - publicPensionSubtraction - privatePensionSubtraction;
+  const moAgi = federalAgi - capitalIncome - socialSecuritySubtraction - publicPensionSubtraction - privatePensionSubtraction;
   const taxable = Math.max(0, moAgi - standardDeduction);
   const stateTax = marginal(taxable, BRACKET_CEILINGS, BRACKET_RATES);
   return {
-    stateTax, localTax: 0, socialSecuritySubtraction, publicPensionSubtraction, privatePensionSubtraction,
+    stateTax, localTax: 0, capitalGainSubtraction: capitalIncome, socialSecuritySubtraction, publicPensionSubtraction, privatePensionSubtraction,
     warning: "Missouri pre-credit estimate: Missouri taxable income (Missouri AGI less the federal-conforming standard "
       + "deduction of $16,100 single/$32,200 married filing jointly) is taxed under the enacted graduated schedule -- 0% to "
       + "$1,348, then six 0.5-point steps to 4.5% at $8,088, then 4.7% above $9,436 -- the same brackets for every filing "
-      + "status. Social Security is fully deducted for an owner 62 or older; this planner does not model the separate "
+      + "status. " + NOTE + " Social Security is fully deducted for an owner 62 or older; this planner does not model the separate "
       + "disability-based deduction for a younger owner. Income entered as annual pension with a federal-government, "
       + "other-government or ny-government pensionType is a public pension, capped at $48,967 per owner (the "
       + "published 2026 maximum Social Security benefit, held for later years until Missouri publishes them) and "

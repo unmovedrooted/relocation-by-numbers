@@ -61,29 +61,42 @@ describe("restricted Indiana annual settlement", () => {
 
   it("grants the civil service annuity deduction only to an owner 62 or older, capped and reduced by that owner's own Social Security", () => {
     const eligible = input({ people: [{ ...input().people[0], birthDate: "1963-01-01" }], // turns 63 in 2026.
-      income: [{ ownerId: "one", kind: "pension", amount: 50000 }, { ownerId: "one", kind: "social-security", amount: 10000 }] });
+      income: [{ ownerId: "one", kind: "pension", pensionType: "federal-government", amount: 50000 }, { ownerId: "one", kind: "social-security", amount: 10000 }] });
     // Capped at 16000, minus 10000 SS = 6000.
     expect(indianaTax(eligible, 50000, 0).civilServiceAnnuityDeduction).toBe(6000);
 
     const notYet62 = input({ people: [{ ...input().people[0], birthDate: "1965-01-01" }], // turns 61 in 2026.
-      income: [{ ownerId: "one", kind: "pension", amount: 50000 }] });
+      income: [{ ownerId: "one", kind: "pension", pensionType: "federal-government", amount: 50000 }] });
     expect(indianaTax(notYet62, 50000, 0).civilServiceAnnuityDeduction).toBe(0);
 
     const turns62OnDec31 = input({ people: [{ ...input().people[0], birthDate: "1964-12-31" }],
-      income: [{ ownerId: "one", kind: "pension", amount: 10000 }] });
+      income: [{ ownerId: "one", kind: "pension", pensionType: "federal-government", amount: 10000 }] });
     expect(indianaTax(turns62OnDec31, 10000, 0).civilServiceAnnuityDeduction).toBe(10000);
+  });
+
+  it("gives the civil service annuity deduction only to a federal-government pension, not private, other-government or unspecified ones", () => {
+    const person = { ...input().people[0], birthDate: "1960-01-01" };
+    const deduction = (pensionType?: "private" | "other-government" | "ny-government" | "unspecified" | "federal-government") =>
+      indianaTax(input({ people: [person], income: [{ ownerId: "one", kind: "pension", ...(pensionType ? { pensionType } : {}), amount: 30000 }] }), 30000, 0)
+        .civilServiceAnnuityDeduction;
+    expect(deduction("federal-government")).toBe(16000);
+    expect(deduction("private")).toBe(0);
+    expect(deduction("other-government")).toBe(0);
+    expect(deduction("ny-government")).toBe(0);
+    expect(deduction("unspecified")).toBe(0);
+    expect(deduction()).toBe(0);
   });
 
   it("floors the civil service annuity deduction at zero when Social Security exceeds the capped pension", () => {
     const terms = input({ people: [{ ...input().people[0], birthDate: "1960-01-01" }],
-      income: [{ ownerId: "one", kind: "pension", amount: 5000 }, { ownerId: "one", kind: "social-security", amount: 20000 }] });
+      income: [{ ownerId: "one", kind: "pension", pensionType: "federal-government", amount: 5000 }, { ownerId: "one", kind: "social-security", amount: 20000 }] });
     expect(indianaTax(terms, 5000, 0).civilServiceAnnuityDeduction).toBe(0);
   });
 
   it("does not transfer unused civil service annuity capacity between spouses", () => {
     const terms = input({ filing: "married", people: [{ ...input().people[0], id: "one", birthDate: "1960-01-01" },
       { ...input().people[0], id: "two", birthDate: "1960-01-01" }],
-      income: [{ ownerId: "one", kind: "pension", amount: 20000 }, { ownerId: "two", kind: "pension", amount: 10000 }] });
+      income: [{ ownerId: "one", kind: "pension", pensionType: "federal-government", amount: 20000 }, { ownerId: "two", kind: "pension", pensionType: "federal-government", amount: 10000 }] });
     // Owner one: min(20000,16000) = 16000. Owner two: min(10000,16000) = 10000. Total 26000.
     expect(indianaTax(terms, 30000, 0).civilServiceAnnuityDeduction).toBe(26000);
   });

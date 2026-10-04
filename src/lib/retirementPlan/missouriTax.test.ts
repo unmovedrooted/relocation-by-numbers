@@ -50,13 +50,13 @@ describe("restricted Missouri annual settlement", () => {
   it("does not deduct Social Security for an owner under 62", () => {
     const terms = input({ people: [{ id: "one", birthDate: "2000-01-01", blind: false, eligibleForSeniorDeduction: true }],
       income: [{ ownerId: "one", kind: "social-security", amount: 20000 }] });
-    const mo = missouriTax(terms, 20000, 20000, 16100, 0);
+    const mo = missouriTax(terms, 20000, 20000, 16100, 0, 0);
     expect(mo.socialSecuritySubtraction).toBe(0);
   });
 
   it("caps the public pension exemption at the maximum Social Security benefit per owner", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", pensionType: "other-government", amount: 60000 }] });
-    const mo = missouriTax(terms, 60000, 0, 16100, 0);
+    const mo = missouriTax(terms, 60000, 0, 16100, 0, 0);
     expect(mo.publicPensionSubtraction).toBe(48967);
   });
 
@@ -64,36 +64,56 @@ describe("restricted Missouri annual settlement", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1960-01-01", blind: false, eligibleForSeniorDeduction: true }],
       income: [{ ownerId: "one", kind: "pension", pensionType: "other-government", amount: 30000 },
         { ownerId: "one", kind: "social-security", amount: 10000 }] });
-    const mo = missouriTax(terms, 40000, 10000, 16100, 0);
+    const mo = missouriTax(terms, 40000, 10000, 16100, 0, 0);
     expect(mo.socialSecuritySubtraction).toBe(10000);
     expect(mo.publicPensionSubtraction).toBe(20000);
   });
 
   it("caps the private pension exemption at $6,000 per owner, including a share of the retirement-ordinary figure", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", pensionType: "private", amount: 3000 }] });
-    const mo = missouriTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 6000 }] }, 20000, 0, 16100, 6000);
+    const mo = missouriTax({ ...terms, retirementIncome: [{ ownerId: "one", source: "traditional-ira", date: "2026-07-01", amount: 6000 }] }, 20000, 0, 16100, 6000, 0);
     expect(mo.privatePensionSubtraction).toBe(6000);
   });
 
   it("phases out the private pension exemption above the AGI-less-Social-Security threshold", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", pensionType: "private", amount: 6000 }] });
-    const mo = missouriTax(terms, 26000, 0, 16100, 0);
+    const mo = missouriTax(terms, 26000, 0, 16100, 0, 0);
     expect(mo.privatePensionSubtraction).toBe(5000);
   });
 
   it("treats an unspecified pension as private, not public", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", pensionType: "unspecified", amount: 6000 }] });
-    const mo = missouriTax(terms, 20000, 0, 16100, 0);
+    const mo = missouriTax(terms, 20000, 0, 16100, 0, 0);
     expect(mo.publicPensionSubtraction).toBe(0);
     expect(mo.privatePensionSubtraction).toBe(6000);
   });
 
+  it("subtracts net capital gains in full, never a capital loss, and lowers the AGI that tests the private pension", () => {
+    const terms = input({ people: [{ ...input().people[0], birthDate: "1960-01-01" }],
+      income: [{ ownerId: "one", kind: "pension", amount: 6000 }] });
+    // AGI 50000 = 6000 pension + 44000 gain. Without the subtraction the private pension (6000) would be reduced by
+    // 50000 - 25000 = 25000 to nothing. With it, Missouri AGI is 6000, under the 25000 threshold, so the full 6000 is deducted.
+    const withGain = missouriTax(terms, 50000, 0, 16100, 0, 44000);
+    expect(withGain.capitalGainSubtraction).toBe(44000);
+    expect(withGain.privatePensionSubtraction).toBe(6000);
+    expect(withGain.stateTax).toBe(0); // 50000 - 44000 - 6000 = 0 taxable income.
+    // The same AGI without gains keeps the old treatment: the pension deduction phases out.
+    expect(missouriTax(terms, 50000, 0, 16100, 0, 0).privatePensionSubtraction).toBe(0);
+    expect(() => missouriTax(terms, 50000, 0, 16100, 0, -1)).toThrow(/capital gain/);
+  });
+
+  it("taxes ordinary income but not the gain when both are present", () => {
+    const terms = input();
+    const marginalRate = (income: number, gain: number) => missouriTax(terms, income + gain, 0, 16100, 0, gain).stateTax;
+    expect(marginalRate(60000, 100000)).toBeCloseTo(marginalRate(60000, 0), 9);
+  });
+
   it("requires explicit confirmation of the restricted Missouri assumptions", () => {
-    expect(() => missouriTax(input({ missouriContract: undefined }), 0, 0, 16100, 0)).toThrow(/Confirm/);
+    expect(() => missouriTax(input({ missouriContract: undefined }), 0, 0, 16100, 0, 0)).toThrow(/Confirm/);
   });
 
   it("rejects an unsupported projection year", () => {
-    expect(() => missouriTax(input({ year: 2025 }), 0, 0, 16100, 0)).toThrow(/year/);
+    expect(() => missouriTax(input({ year: 2025 }), 0, 0, 16100, 0, 0)).toThrow(/year/);
   });
 
   it("independently reconciles a complete household projection through the preview adapter", () => {

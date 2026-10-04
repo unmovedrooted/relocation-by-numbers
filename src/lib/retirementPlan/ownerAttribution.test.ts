@@ -81,7 +81,7 @@ describe("owner-attributed retirement income (no even spousal split)", () => {
 
   it("Missouri: one owner's $20,000 private income is capped once at $6,000", () => {
     const items = [withdrawal("one", 20000)];
-    const mo = missouriTax(household("mo", "missouriContract", ["1975-01-01", "1975-01-01"], items), 30000, 0, 25000, total(items));
+    const mo = missouriTax(household("mo", "missouriContract", ["1975-01-01", "1975-01-01"], items), 30000, 0, 25000, total(items), 0);
     expect(mo.privatePensionSubtraction).toBe(6000);
   });
 

@@ -34,13 +34,12 @@ import type { HouseholdTaxInput } from "./householdTax";
  *
  * Uses enacted law, not a prediction of future legislation. Only Marion
  * County (Indianapolis), Allen County (Fort Wayne) and Vanderburgh County
- * (Evansville) are rated; every other Indiana county is unsupported. Because
- * this planner's income model does not distinguish a nonmilitary civil
- * service annuity from any other qualifying pension, the civil service
- * annuity deduction is applied to any income entered as "pension" for an
- * owner 62 or older, capped at $16,000 and reduced by that owner's own Social
- * Security; this is a simplification, not a claim that every such pension
- * qualifies. Indiana's separate, fully-excluding military retirement pay
+ * (Evansville) are rated; every other Indiana county is unsupported. The Department of Revenue allows
+ * the civil service annuity deduction only for a federal civil service annuity, so it is applied only to income
+ * entered as "pension" with the federal-government pensionType, for an owner 62 or older, capped at $16,000
+ * and reduced by that owner's own Social Security; private, other-government and unspecified pensions get
+ * nothing. This planner cannot tell a nonmilitary annuity from military retirement pay, so a military pension
+ * entered as federal also takes the capped deduction. Indiana's separate, fully-excluding military retirement pay
  * deduction is not modeled: military retirement income must be entered as
  * ordinary pension income and will be capped like any other pension, which
  * understates the true benefit for military retirees. Dependent exemptions
@@ -52,6 +51,7 @@ import type { HouseholdTaxInput } from "./householdTax";
  */
 
 /** 2.95% for 2026, 2.90% from 2027 (Department of Revenue); conditional cuts from 2030 are not assumed. */
+const NOTE = "The civil service annuity deduction applies only to income entered as annual pension with the federal government pension type, for an owner 62 or older, capped at $16,000 and reduced by that owner's own Social Security; a private, other government or unspecified pension type gets no deduction, since Indiana allows it only for a nonmilitary federal civil service annuity (Department of Revenue, \"Deductions\"), and this planner cannot separate a military pension from a civil service one.";
 const stateRate = (year: number) => year <= 2026 ? .0295 : .029;
 const CIVIL_SERVICE_ANNUITY_MAX = 16000;
 const BASE_EXEMPTION = 1000;
@@ -87,7 +87,7 @@ function civilServiceAnnuityDeduction(input: HouseholdTaxInput, year: number) {
   const qualifyingPension = new Map(input.people.map(person => [person.id, 0]));
   for (const item of input.income) {
     if (item.kind === "social-security") grossSocialSecurity.set(item.ownerId, grossSocialSecurity.get(item.ownerId)! + item.amount);
-    else if (item.kind === "pension") qualifyingPension.set(item.ownerId, qualifyingPension.get(item.ownerId)! + item.amount);
+    else if (item.kind === "pension" && item.pensionType === "federal-government") qualifyingPension.set(item.ownerId, qualifyingPension.get(item.ownerId)! + item.amount);
   }
   let total = 0;
   for (const person of input.people) {
@@ -122,9 +122,8 @@ export function indianaTax(input: HouseholdTaxInput, federalAgi: number, taxable
     stateTax, localTax, inAgi, civilServiceAnnuityDeduction: deduction,
     warning: "Indiana pre-credit estimate: enacted flat state rate (2.95% for 2026, 2.90% from 2027; further cuts from 2030 depend on revenue and are not assumed) and flat county rates (reviewed 2026-10-04), "
       + "personal exemptions ($1,000 per person, plus $1,000 each for age 65+ or blind, plus $500 per qualifying senior when "
-      + "federal AGI is under $40,000), and Social Security fully excluded. The civil service annuity deduction is applied "
-      + "to income entered as \"pension\" for an owner 62 or older, capped at $16,000 and reduced by that owner's own Social "
-      + "Security; this planner cannot verify the pension is actually a nonmilitary civil service annuity. Indiana's separate, "
+      + "federal AGI is under $40,000), and Social Security fully excluded. " + NOTE + " "
+      + "Indiana's separate, "
       + "fully-excluding military retirement pay deduction is not modeled. Only Marion, Allen and Vanderburgh counties are "
       + "rated. Dependent exemptions, itemized deductions and credits are excluded. Indiana parameters are not "
       + "inflation-indexed in this model. Future legislation is not predicted. Not a tax return.",
