@@ -83,7 +83,8 @@ describe("restricted retirement locations",()=>{
       expect(source.match(new RegExp(`id="${id}"`,"g"))).toHaveLength(1);
       expect(source).toContain(`htmlFor="${id}"`);
     }
-    expect(source).toContain("State: values.state");
+    expect(source).toContain("projectionCsvRows(result, values.state, location)");
+    expect(readFileSync("src/lib/retirementPlan/previewCsv.ts","utf8")).toMatch(/State: state\.toUpperCase\(\),\s+Location: location/);
     expect(source).toContain('Metric: "Resident location"');
     expect(source).toContain('state: event.target.value, cityId: ""');
   });

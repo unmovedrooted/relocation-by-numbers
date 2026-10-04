@@ -26,7 +26,8 @@ import RetirementMedicareResults from "@/components/RetirementMedicareResults";
 import { initialMedicareEditor } from "@/lib/retirementPlan/previewMedicare";
 import { initialIraContributionEditor, previewIraRows } from "@/lib/retirementPlan/previewIraContributions";
 import { initialContributionEditor } from "@/lib/retirementPlan/previewContributions";
-import { downloadCsv, type CsvRow } from "@/lib/csvExport";
+import { downloadCsv } from "@/lib/csvExport";
+import { projectionCsvRows } from "@/lib/retirementPlan/previewCsv";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
 
 const control = "w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100";
@@ -122,19 +123,8 @@ export default function RetirementPlanPreview() {
 
   const handleExportCsv = () => {
     if (!result || dirty || error) return;
-    const rows: CsvRow[] = result.years.map(row => ({
-      Year: row.year,
-      State: values.state,
-      City: values.cityId || "Outside listed cities",
-      "Age(s)": row.people.map(person => person.ageAtYearEnd).join(" / "),
-      Income: row.result.cash.income,
-      Spending: row.spending,
-      "Tax estimate": row.result.tax.total,
-      RMDs: row.result.cash.requiredWithdrawals,
-      "Other withdrawals": row.result.cash.voluntaryWithdrawals,
-      Shortfall: row.result.cash.shortfall,
-      "Ending assets": row.endingPortfolio,
-    }));
+    const location = !CITY_FIELD_STATES.includes(values.state) ? "" : values.cityId === "ny-outside-nyc-yonkers" ? "Outside NYC and Yonkers" : CITIES.find(city => city.id === values.cityId)?.name ?? "Outside listed cities";
+    const rows = projectionCsvRows(result, values.state, location);
     downloadCsv("complete-retirement-plan-projection", rows);
   };
   const handleExportPdf = () => {
