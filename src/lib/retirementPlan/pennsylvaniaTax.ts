@@ -25,6 +25,15 @@ import type { HouseholdTaxInput } from "./householdTax";
  *   "Taxes" page (read 2026-10-04).
  *   https://pittsburghpa.gov/finance/tax-descriptions
  *
+ * Federal adjustments Pennsylvania does not allow (checked 2026-10-04): the PA Personal Income Tax Guide says
+ * "Employee contributions to an eligible Pennsylvania retirement plan and contributions to a qualified deferred
+ * compensation plan" are taxable compensation even though federal wages exclude them, and IRA contributions
+ * "may not be excluded or deducted from income" (Gross Compensation and Deductions and Credits pages of
+ * https://www.pa.gov/agencies/revenue/forms-and-publications/pa-personal-income-tax-guide). Pennsylvania also taxes
+ * each income class separately, so the federal $3,000 net capital loss deduction against other income is not
+ * available. This module adds back 401(k) deferrals, the IRA deduction and that capital loss deduction; earlier
+ * versions started from federal AGI and so understated PA tax for anyone saving into a plan.
+ *
  * Uses enacted law, not a prediction of future legislation. Only
  * Philadelphia, Pittsburgh and Allentown are rated; every other Pennsylvania
  * municipality (of roughly 2,500 with their own Earned Income Tax rate) is
@@ -67,12 +76,14 @@ function pensionSubtraction(input: HouseholdTaxInput) {
 }
 
 export function pennsylvaniaTax(
-  input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number, earlyDistributionBase: number, wages: number,
+  input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number, earlyDistributionBase: number, wages: number, federalOnlyDeductions = 0,
 ) {
   if (input.pennsylvaniaContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Pennsylvania planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Pennsylvania projection year.");
   const excludableRetirementOrdinary = Math.max(0, retirementOrdinary - earlyDistributionBase);
-  const paAgi = federalAgi - taxableBenefits - pensionSubtraction(input) - excludableRetirementOrdinary;
+  if (!Number.isFinite(federalOnlyDeductions) || federalOnlyDeductions < 0) throw new RangeError("Invalid Pennsylvania add-back.");
+  // 401(k)-type deferrals, the IRA deduction and the net capital loss deduction are federal-only adjustments.
+  const paAgi = federalAgi + federalOnlyDeductions - taxableBenefits - pensionSubtraction(input) - excludableRetirementOrdinary;
   const taxable = Math.max(0, paAgi);
   const stateTax = taxable * STATE_RATE;
   const localTax = localTaxAmount(input.cityId ?? "", wages);
@@ -85,7 +96,7 @@ export function pennsylvaniaTax(
       + "exclude a distribution that avoids the federal penalty for another reason. Only Philadelphia, Pittsburgh and "
       + "Allentown are rated, and unlike every other verified state here, Pennsylvania's local Earned Income Tax applies "
       + "only to wages, never to retirement income. Pittsburgh's 3% rate (1% city, 2% school district) is from the "
-      + "city's Finance Department. Tax Forgiveness and other credits are excluded. "
+      + "city's Finance Department. Unlike federal AGI, Pennsylvania taxes employee 401(k), 403(b) and 457(b) deferrals, does not allow IRA contribution deductions and does not allow the federal net capital loss deduction against other income, so those amounts are added back. Tax Forgiveness and other credits are excluded. "
       + "Pennsylvania parameters are not inflation-indexed in this model. Future legislation is not predicted. Not a tax "
       + "return.",
   };

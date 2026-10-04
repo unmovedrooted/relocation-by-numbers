@@ -97,6 +97,14 @@ describe("restricted New Jersey annual settlement", () => {
     expect(newJerseyTax(terms, 50000, 0, 0).stateTax).toBeCloseTo(1104.25, 6);
   });
 
+  it("adds back the federal IRA and capital loss deductions that New Jersey disallows", () => {
+    // Federal AGI 76000 = 80000 wages - 3000 capital loss deduction - 1000 IRA deduction; NJ taxes the full 80000.
+    const nj = newJerseyTax(input(), 76000, 0, 0, 4000);
+    expect(nj.njAgi).toBe(80000);
+    expect(nj.stateTax).toBeCloseTo(2906.05, 6);
+    expect(() => newJerseyTax(input(), 0, 0, 0, -1)).toThrow(/add-back/);
+  });
+
   it("requires explicit confirmation of the restricted New Jersey assumptions", () => {
     expect(() => newJerseyTax(input({ newJerseyContract: undefined }), 0, 0, 0)).toThrow(/Confirm/);
   });

@@ -41,8 +41,12 @@ import type { HouseholdTaxInput } from "./householdTax";
  * as "pension" with this planner's aggregate 401(k)/IRA/annuity distribution
  * figure; the latter includes nonqualified annuity withdrawals, which this
  * planner does not yet filter out although its owner-level records identify
- * them, so it cannot confirm every dollar actually qualifies under GIT-1. No itemized deductions, credits or dependent exemptions are
- * modeled. New Jersey parameters remain nominal; the household's
+ * them, so it cannot confirm every dollar actually qualifies under GIT-1.
+ * Federal-only adjustments added back (NJ-1040 instructions, 2025, read 2026-10-04): the IRA contribution deduction
+ * (Worksheet C treats IRA contributions as previously taxed) and the federal $3,000 net capital loss deduction
+ * (a net loss in one income category cannot offset another; line 19 takes no entry for a loss). 401(k) deferrals
+ * are excluded from NJ wages; 403(b), 457(b) and similar deferrals are taxable in NJ but this planner does not
+ * tell them from 401(k) deferrals. No itemized deductions, credits or dependent exemptions are modeled. New Jersey parameters remain nominal; the household's
  * inflation/threshold-growth assumption does not index them, matching the
  * restricted New York, Maryland, Indiana, DC and Illinois estimates'
  * convention.
@@ -87,10 +91,11 @@ function retirementExclusion(input: HouseholdTaxInput, year: number, totalIncome
   return capped * multiplier;
 }
 
-export function newJerseyTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
+export function newJerseyTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number, federalOnlyDeductions = 0) {
   if (input.newJerseyContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted New Jersey planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported New Jersey projection year.");
-  const totalIncome = federalAgi - taxableBenefits;
+  if (!Number.isFinite(federalOnlyDeductions) || federalOnlyDeductions < 0) throw new RangeError("Invalid New Jersey add-back.");
+  const totalIncome = federalAgi + federalOnlyDeductions - taxableBenefits;
   const exclusion = retirementExclusion(input, input.year, totalIncome, retirementOrdinary);
   const njAgi = totalIncome - exclusion;
   const taxable = Math.max(0, njAgi - personalExemptions(input, input.year));
@@ -103,7 +108,7 @@ export function newJerseyTax(input: HouseholdTaxInput, federalAgi: number, taxab
       + "household's total income (federal AGI less Social Security) is $150,000 or less, combining income entered as "
       + "\"pension\" with this planner's aggregate 401(k)/IRA/annuity distribution figure, capped and phased down by filing "
       + "status; that aggregate figure includes nonqualified annuity withdrawals, which are not yet filtered out and may "
-      + "not actually qualify. Only single and married-filing-jointly tiers are supported. New Jersey has no local income tax. Itemized "
+      + "not actually qualify. Only single and married-filing-jointly tiers are supported. New Jersey has no local income tax. New Jersey does not follow two federal adjustments: IRA contributions are not deductible (NJ-1040 Worksheet C treats them as previously taxed) and a net capital loss is never deducted against other income (NJ-1040 instructions: losses in one category cannot offset another, and a net loss makes no entry on line 19), so the federal IRA deduction and the federal $3,000 capital loss deduction are added back. 401(k) deferrals stay excluded from wages; 403(b), 457(b) and other deferrals, which New Jersey taxes, are not told apart from 401(k) deferrals here. Itemized "
       + "deductions, credits and dependent exemptions are excluded. New Jersey parameters are not inflation-indexed in this "
       + "model. Future legislation is not predicted. Not a tax return.",
   };

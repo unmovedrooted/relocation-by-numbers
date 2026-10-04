@@ -360,8 +360,8 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const inTax = location && input.state === "in" ? indianaTax(input, agi, taxableBenefits) : null;
   const dc = location && input.state === "dc" ? dcTax(input, agi, taxableBenefits) : null;
   const il = location && input.state === "il" ? illinoisTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
-  const nj = location && input.state === "nj" ? newJerseyTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
-  const pa = location && input.state === "pa" ? pennsylvaniaTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase, wages) : null;
+  const nj = location && input.state === "nj" ? newJerseyTax(input, agi, taxableBenefits, account.retirementOrdinary, iraDeduction + capitalDeduction) : null;
+  const pa = location && input.state === "pa" ? pennsylvaniaTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase, wages, pretaxDeferrals + iraDeduction + capitalDeduction) : null;
   const co = location && input.state === "co" ? coloradoTax(input, agi, taxableBenefits, taxableIncome) : null;
   const nm = location && input.state === "nm" ? newMexicoTax(input, agi, taxableBenefits, standardDeduction, preferredCapital) : null;
   const mn = location && input.state === "mn" ? minnesotaTax(input, agi, taxableBenefits, taxExemptInterest) : null;

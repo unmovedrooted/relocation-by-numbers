@@ -47,11 +47,16 @@ agency's own worksheet instead of a summary:
 | Colorado | Treated the pension subtraction as independent of Social Security; Colorado reduces it by the owner's Social Security subtraction | Income Tax Topics guide; DR 0104 line 4 |
 | Michigan | 2026 personal exemption $5,600 instead of $5,900 | Treasury's 2026 withholding guide |
 | Arkansas | Taxed income above $94,700 on the graduated schedule instead of the upper table | Act 1 of 2026S1 |
+| Wisconsin | Held stale 2025 deduction and bracket amounts | Department of Revenue 2026 published schedule |
+| Pennsylvania | Started from federal AGI: missed that PA taxes 401(k)/403(b)/457(b) deferrals and disallows the IRA deduction and the federal net capital loss deduction | PA Personal Income Tax Guide, "Gross Compensation" and "Net Gains" |
+| New Jersey | Started from federal AGI: missed that NJ disallows the IRA contribution deduction and the net capital loss deduction (401(k) deferrals are properly excluded) | 2025 NJ-1040 instructions, Worksheet C and the loss-category rule |
 
 Lesson: a module header that says "corroborated by secondary sources" or "inferred" is a to-do, not a finding. Search the
 modules for those phrases (`widely`, `secondary`, `not independently`, `inferred`, `assumed`) at the start of every refresh and
 resolve each against a primary document. All such caveats present on 2026-10-04 were resolved except Maryland's 2026
 joint standard deduction ($6,800, exactly twice the confirmed single figure).
+
+Federal-AGI starting points deserve a check in every state: a state that does not follow a federal adjustment (401(k) deferrals, IRA deduction, capital loss deduction) needs an add-back, as Pennsylvania and New Jersey do. Not yet checked for the remaining states.
 
 Modules with no caveat were not re-derived line by line on 2026-10-04. A line-by-line re-read of the highest-population
 states (California, New York, Pennsylvania, Illinois, Georgia, North Carolina,
