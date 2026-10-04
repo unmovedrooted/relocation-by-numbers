@@ -35,6 +35,35 @@ reading a primary source.
 7. **Read the whole table when a state has two.** Arkansas's upper table above $94,700 sat unnoticed beside a
    correct graduated schedule.
 
+## Why the second look matters: errors found on 2026-10-04
+
+Modules that were already marked "verified" had real errors, each found only by reading the enacted text or the
+agency's own worksheet instead of a summary:
+
+| State | Error | Found in |
+| --- | --- | --- |
+| Ohio | Omitted the $332 base in the 2026 rate (tax is $332 plus 2.75% over $26,050); kept the 2025 exemption cutoff of $749,999 instead of $500,000 | R.C. 5747.02; LSC final analysis of HB 96 |
+| Rhode Island | Phase-out modeled as 25% steps; the Division's worksheet uses 20% steps (0.8 / 0.6 / 0.4 / 0.2) | 2025 Tax Rate and Worksheets |
+| Colorado | Treated the pension subtraction as independent of Social Security; Colorado reduces it by the owner's Social Security subtraction | Income Tax Topics guide; DR 0104 line 4 |
+| Michigan | 2026 personal exemption $5,600 instead of $5,900 | Treasury's 2026 withholding guide |
+| Arkansas | Taxed income above $94,700 on the graduated schedule instead of the upper table | Act 1 of 2026S1 |
+
+Lesson: a module header that says "corroborated by secondary sources" or "inferred" is a to-do, not a finding. Search the
+modules for those phrases (`widely`, `secondary`, `not independently`, `inferred`, `assumed`) at the start of every refresh and
+resolve each against a primary document. All such caveats present on 2026-10-04 were resolved except Maryland's 2026
+joint standard deduction ($6,800, exactly twice the confirmed single figure).
+
+Modules with no caveat were not re-derived line by line on 2026-10-04. A line-by-line re-read of the highest-population
+states (California, New York, Pennsylvania, Illinois, Georgia, North Carolina,
+Michigan) is the best use of spare time in the next refresh.
+
+## City income taxes
+
+Ohio (Columbus, Cleveland, Cincinnati), Michigan (Detroit, Grand Rapids) and Alabama (Birmingham) are modeled in
+`cityIncomeTax.ts` when the optional city is selected; rates are held for later years. At each refresh check each city's own
+page for a rate change, and Michigan Treasury's Form 5123 for Detroit. Not modeled: other cities, Ohio school district
+income taxes, and credits for tax paid to a work city.
+
 ## Per-state steps
 
 For every state, in this order:
