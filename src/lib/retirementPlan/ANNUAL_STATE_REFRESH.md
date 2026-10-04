@@ -51,6 +51,8 @@ agency's own worksheet instead of a summary:
 | Pennsylvania | Started from federal AGI: missed that PA taxes 401(k)/403(b)/457(b) deferrals and disallows the IRA deduction and the federal net capital loss deduction | PA Personal Income Tax Guide, "Gross Compensation" and "Net Gains" |
 | New Jersey | Started from federal AGI: missed that NJ disallows the IRA contribution deduction and the net capital loss deduction (401(k) deferrals are properly excluded) | 2025 NJ-1040 instructions, Worksheet C and the loss-category rule |
 | Minnesota | Used the statute's 2023 age-65/blind additional deduction ($1,850/$1,450) instead of 2026's $2,000/$1,600, and omitted the standard deduction limitation (reduced above $244,400 federal AGI, 80% above $1,107,750) | Tax Year 2026 Inflation-Adjusted Amounts; Minn. Stat. 290.0123 subd. 2, 5, 6 |
+| Maryland | No personal exemptions at all: missed the $3,200 per taxpayer and spouse (stepped down above $100,000 single / $150,000 joint federal AGI), the $1,000 age/blind exemption, and the $1,200 two-income married subtraction | 2025 Resident Tax Booklet, Instruction 10 chart 10A and Worksheet 13D |
+| Virginia | No personal exemptions ($930 each, $800 more for age 65/blind); married age deduction reduced each spouse separately instead of sharing one limit; treated anyone born in 1939 as grandfathered; used year-end age instead of the January 1 cutoff | 2025 Form 760 instructions, line 12 and the Age 65 and Older Deduction Worksheet |
 
 Lesson: a module header that says "corroborated by secondary sources" or "inferred" is a to-do, not a finding. Search the
 modules for those phrases (`widely`, `secondary`, `not independently`, `inferred`, `assumed`) at the start of every refresh and
@@ -58,6 +60,8 @@ resolve each against a primary document. All such caveats present on 2026-10-04 
 joint standard deduction ($6,800, exactly twice the confirmed single figure).
 
 Federal-AGI starting points deserve a check in every state: a state that does not follow a federal adjustment (401(k) deferrals, IRA deduction, capital loss deduction) needs an add-back, as Pennsylvania and New Jersey do. Not yet checked for the remaining states.
+
+Likewise check every module for personal exemptions and for each age rule's exact cutoff date: Maryland and Virginia had no exemptions at all. A keyword scan of the modules on 2026-10-04 plus spot checks (Arkansas, Delaware, Kentucky, Montana, New York, South Carolina) found no other module missing an exemption it should model, but amounts in the other modules were not re-derived.
 
 Modules with no caveat were not re-derived line by line on 2026-10-04. A line-by-line re-read of the highest-population
 states (California, New York, Pennsylvania, Illinois, Georgia, North Carolina,

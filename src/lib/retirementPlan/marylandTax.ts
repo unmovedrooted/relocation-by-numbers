@@ -1,5 +1,6 @@
 import { sumBrackets, type FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
+import { ownerRetirementIncome } from "./ownerRetirementIncome";
 
 /** Restricted, standard-deduction, PRE-CREDIT planning estimate. Rates and
  * thresholds reviewed 2026-09-10 against:
@@ -18,6 +19,14 @@ import type { HouseholdTaxInput } from "./householdTax";
  *   Retirement benefits, floored at zero). Confirms Social Security and
  *   Railroad Retirement benefits are not taxed by Maryland.
  *   https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/legal-publications/technical-bulletins/tb-51.pdf
+ *
+ * - Comptroller of Maryland, 2025 Resident Tax Booklet (Instruction 10, Exemption Amount Chart 10A, and Worksheet 13D),
+ *   read 2026-10-04: the $3,200 personal exemption per taxpayer and spouse, reduced above $100,000 federal AGI
+ *   ($150,000 joint/HOH) in the chart's steps and gone above $150,000 ($200,000 joint); the additional $1,000
+ *   exemption for age 65 or older or blind, which the phase-out does not reduce; and the two-income married
+ *   subtraction, the lesser of $1,200 and the smaller spouse's own income less that spouse's subtractions. The
+ *   $3,200 is the statutory amount and the booklet shows it unchanged; no 2026 change was found.
+ *   https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/instructions/2025/resident-booklet.pdf
  *
  * The 2026 MFJ/HOH/QSS standard deduction ($6,800) is not independently
  * confirmed in a fetched source; it is inferred from the exact 2x relationship
@@ -44,6 +53,24 @@ import type { HouseholdTaxInput } from "./householdTax";
 
 const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 3400, married: 6800 };
 const PENSION_EXCLUSION_MAX = 40600;
+const EXEMPTION_AMOUNT = 3200;
+const AGE_OR_BLIND_EXEMPTION = 1000;
+const TWO_INCOME_SUBTRACTION = 1200;
+/** Exemption Amount Chart (10A): each exemption is worth the amount whose AGI ceiling is the first one not below federal AGI. */
+const EXEMPTION_CHART: Record<FilingStatus, readonly (readonly [number, number])[]> = {
+  single: [[100000, 3200], [125000, 1600], [150000, 800]],
+  married: [[150000, 3200], [175000, 1600], [200000, 800]],
+};
+
+function exemptionAllowance(input: HouseholdTaxInput, year: number, federalAgi: number) {
+  const step = EXEMPTION_CHART[input.filing].find(([ceiling]) => federalAgi <= ceiling);
+  let total = input.people.length * (step ? Math.min(step[1], EXEMPTION_AMOUNT) : 0);
+  for (const person of input.people) {
+    if (person.birthDate <= `${year - 65}-12-31`) total += AGE_OR_BLIND_EXEMPTION;
+    if (person.blind) total += AGE_OR_BLIND_EXEMPTION;
+  }
+  return total;
+}
 
 const STATE_BRACKETS: Record<FilingStatus, { upTo: number; rate: number }[]> = {
   single: [
@@ -80,39 +107,57 @@ function localTaxAmount(cityId: string, filing: FilingStatus, taxable: number) {
 /** Worksheet 13A: cap each owner's own qualifying pension at the annual maximum,
  * then reduce (not below zero) by that owner's own gross Social Security and
  * Railroad Retirement benefits. Unused capacity does not transfer between owners. */
-function pensionExclusion(input: HouseholdTaxInput, year: number) {
+function ownerPensionExclusions(input: HouseholdTaxInput, year: number) {
   const grossSocialSecurity = new Map(input.people.map(person => [person.id, 0]));
   const qualifyingPension = new Map(input.people.map(person => [person.id, 0]));
   for (const item of input.income) {
     if (item.kind === "social-security") grossSocialSecurity.set(item.ownerId, grossSocialSecurity.get(item.ownerId)! + item.amount);
     else if (item.kind === "pension") qualifyingPension.set(item.ownerId, qualifyingPension.get(item.ownerId)! + item.amount);
   }
-  let total = 0;
+  const byOwner = new Map<string, number>();
   for (const person of input.people) {
+    byOwner.set(person.id, 0);
     const ageEligible = person.birthDate <= `${year - 65}-12-31`;
     if (!ageEligible) continue; // Disability-based eligibility for under-65 owners is unsupported.
     const capped = Math.min(qualifyingPension.get(person.id)!, PENSION_EXCLUSION_MAX);
-    total += Math.max(0, capped - grossSocialSecurity.get(person.id)!);
+    byOwner.set(person.id, Math.max(0, capped - grossSocialSecurity.get(person.id)!));
   }
-  return total;
+  return byOwner;
 }
 
-export function marylandTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number) {
+/** Worksheet 13D: for a joint return of two owners, the lesser of $1,200 and the smaller spouse's own income less
+ * that spouse's pension exclusion, floored at zero. Income this planner cannot attribute to an owner is left out. */
+function twoIncomeSubtraction(input: HouseholdTaxInput, exclusions: Map<string, number>, retirementOrdinary: number) {
+  if (input.filing !== "married" || input.people.length !== 2) return 0;
+  const retirement = ownerRetirementIncome(input, retirementOrdinary, "Maryland");
+  const attributed = new Set(["wages", "pension", "other", "interest", "qualified-dividends", "nonqualified-dividends"]);
+  const shares = input.people.map(person => {
+    const ordinary = input.income.filter(item => item.ownerId === person.id && attributed.has(item.kind)).reduce((sum, item) => sum + item.amount, 0);
+    const deferrals = (input.pretax401k ?? []).filter(item => item.ownerId === person.id).reduce((sum, item) => sum + item.amount, 0);
+    const iraDeduction = (input.deductibleIra ?? []).filter(item => item.ownerId === person.id).reduce((sum, item) => sum + item.amount, 0);
+    return ordinary - deferrals - iraDeduction + retirement.get(person.id)! - exclusions.get(person.id)!;
+  });
+  return Math.min(TWO_INCOME_SUBTRACTION, Math.max(0, Math.min(...shares)));
+}
+
+export function marylandTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
   if (input.marylandContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Maryland planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Maryland projection year.");
-  const exclusion = pensionExclusion(input, input.year);
-  const mdAgi = federalAgi - taxableBenefits - exclusion;
-  const taxable = Math.max(0, mdAgi - STANDARD_DEDUCTION[input.filing]);
+  const exclusions = ownerPensionExclusions(input, input.year);
+  const exclusion = [...exclusions.values()].reduce((sum, value) => sum + value, 0);
+  const mdAgi = federalAgi - taxableBenefits - exclusion - twoIncomeSubtraction(input, exclusions, retirementOrdinary);
+  const exemptions = exemptionAllowance(input, input.year, federalAgi);
+  const taxable = Math.max(0, mdAgi - STANDARD_DEDUCTION[input.filing] - exemptions);
   const stateTax = sumBrackets(taxable, STATE_BRACKETS[input.filing]);
   const localTax = localTaxAmount(input.cityId ?? "", input.filing, taxable);
   return {
-    stateTax, localTax, mdAgi, pensionExclusion: exclusion,
+    stateTax, localTax, mdAgi, pensionExclusion: exclusion, exemptions,
     warning: "Maryland pre-credit estimate: enacted 2026 state brackets and local rates (reviewed 2026-09-10), a "
       + `$${STANDARD_DEDUCTION[input.filing].toLocaleString()} standard deduction, and Social Security fully excluded. `
       + "The pension exclusion applies only to income entered as \"pension\" for owners 65 or older by year end, capped "
       + `at $${PENSION_EXCLUSION_MAX.toLocaleString()} and reduced by that owner's own Social Security; disability-based `
       + "eligibility and 401(k)/IRA account withdrawals are not eligible here. Only Baltimore City, Frederick County and "
-      + "Montgomery County are rated. The 2% net-capital-gains surtax above $350,000 FAGI, itemized deductions, credits "
+      + "Montgomery County are rated. Personal exemptions of $3,200 per taxpayer and spouse (reduced above $100,000 federal AGI for single filers and $150,000 for joint filers, and eliminated above $150,000 and $200,000), plus $1,000 for each owner who is 65 or older or blind, which the phase-out does not reduce, are subtracted; the $1,200 two-income married subtraction is based on each spouse's own wages, pension, other income, interest, dividends and retirement-account distributions, so income from taxable-account gains, which this planner does not attribute to an owner, can understate it. The 2% net-capital-gains surtax above $350,000 FAGI, itemized deductions, credits "
       + "and the itemized-deduction phase-out are excluded. Maryland parameters are not inflation-indexed in this model. "
       + "Future legislation is not predicted. Not a tax return.",
   };

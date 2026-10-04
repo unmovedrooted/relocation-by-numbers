@@ -356,7 +356,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   // Not asserted to be a retirement-specific state return: existing wage-based
   // state deductions/rates applied to federal AGI as an explicitly named proxy.
   const ny = location && input.state === "ny" ? newYorkTax(input, agi, taxableBenefits) : null;
-  const md = location && input.state === "md" ? marylandTax(input, agi, taxableBenefits) : null;
+  const md = location && input.state === "md" ? marylandTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const inTax = location && input.state === "in" ? indianaTax(input, agi, taxableBenefits) : null;
   const dc = location && input.state === "dc" ? dcTax(input, agi, taxableBenefits) : null;
   const il = location && input.state === "il" ? illinoisTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
