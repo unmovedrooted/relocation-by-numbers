@@ -69,6 +69,13 @@ describe("restricted California annual settlement", () => {
     expect(estimateHouseholdTax(pension).stateTax).toBe(estimateHouseholdTax(wages).stateTax);
   });
 
+  it("counts a January 1 65th birthday as age 65 on the prior December 31 (Form 540 line 9)", () => {
+    const credit = (birthDate: string) => californiaTax(input({ people: [{ id: "one", birthDate, blind: false, eligibleForSeniorDeduction: true }] }), 60000, 0).exemptionCredit;
+    // For 2026 the cutoff is January 1, 1962.
+    expect(credit("1962-01-01")).toBe(2 * 153);
+    expect(credit("1962-01-02")).toBe(153);
+  });
+
   it("adds a $153 exemption credit for blindness and for reaching age 65", () => {
     const base = californiaTax(input(), 60000, 0).exemptionCredit;
     const blind = californiaTax(input({ people: [{ id: "one", birthDate: "1975-01-01", blind: true, eligibleForSeniorDeduction: true }] }), 60000, 0).exemptionCredit;

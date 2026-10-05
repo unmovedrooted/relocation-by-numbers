@@ -72,6 +72,8 @@ Federal-AGI starting points deserve a check in every state: a state that does no
 
 Capital-gain preferences: most modules ignored them. Modeled now: Massachusetts, Vermont, Montana, New Mexico, North Dakota, Hawaii, Missouri (100% subtraction), South Carolina (44%), Wisconsin (30%) and Arkansas (50%). Arkansas is modeled too (50% of net capital gain, 100% above $10 million, per the 2025 AR1000D). Disclosed but not modeled: Arizona (25% of long-term gains on assets acquired after 2011, needs acquisition dates). A planner with per-lot acquisition dates could add Arizona.
 
+Age cutoffs: many modules test age with ageAtYearEnd (calendar-year age), which differs from the federal and several state rules only for someone born exactly on January 1 (65 on the prior December 31 under the IRS, California, Virginia, Mississippi and DC rules). Virginia, Mississippi, California and DC now use the January 1 rule; the rest stay on calendar-year age and are right except for that one birthday (not checked state by state).
+
 Likewise check every module for personal exemptions and for each age rule's exact cutoff date: Maryland and Virginia had no exemptions at all. A keyword scan of the modules on 2026-10-04 plus spot checks (Arkansas, Delaware, Kentucky, Montana, New York, South Carolina) found no other module missing an exemption it should model, but amounts in the other modules were not re-derived.
 
 Modules with no caveat were not re-derived line by line on 2026-10-04. A line-by-line re-read of the highest-population
