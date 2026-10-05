@@ -166,7 +166,7 @@ export default function PaycheckCalculator() {
       { Metric: "Take-home pay (annual)", Value: money(b.net) },
       { Metric: `Take-home pay (per ${eachLabel})`, Value: money(per(b.net)) },
     ];
-  }, [results, frequency, filing, stateName, k401Pct, eachLabel]);
+  }, [results, frequency, filing, state, cityId, stateName, k401Pct, eachLabel]);
 
   const handleExportCsv = () => downloadCsv("paycheck-breakdown", exportRows);
   const handleExportPdf = () =>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
 import {
@@ -370,11 +370,11 @@ export default function AsiaRelocationCalculator() {
 
   const originCurrency = COUNTRY_TO_CURRENCY[fromCountry] ?? "USD";
 
-  const displayAmount = (amountUsd: number, digits: number = 0) => {
+  const displayAmount = useCallback((amountUsd: number, digits: number = 0) => {
     if (currencyDisplay === "CURRENT") return money(convertUsdToLocal(amountUsd, fromCountry), digits, COUNTRY_TO_CURRENCY[fromCountry] ?? "USD");
     if (currencyDisplay === "DESTINATION") return money(convertUsdToLocal(amountUsd, toCountry), digits, COUNTRY_TO_CURRENCY[toCountry] ?? "USD");
     return money(amountUsd, digits, "USD");
-  };
+  }, [currencyDisplay, fromCountry, toCountry]);
 
   const fromCityLabel = getInternationalCityByCode(fromCityCode)?.name ?? "Current city";
   const toCityLabel   = getInternationalCityByCode(toCityCode)?.name ?? "Target city";
@@ -383,7 +383,6 @@ export default function AsiaRelocationCalculator() {
   const currentCityDefaults  = useMemo(() => getCityDefaultsByCode(fromCityCode), [fromCityCode]);
   const targetCityDefaults   = useMemo(() => getCityDefaultsByCode(toCityCode), [toCityCode]);
   const fromCityMultipliers  = useMemo(() => getCityCostMultipliers(fromCityCode), [fromCityCode]);
-  const toCityMultipliers    = useMemo(() => getCityCostMultipliers(toCityCode), [toCityCode]);
 
   useEffect(() => {
     const valid = fromCities.some(c => c.code === fromCityCode);
@@ -633,7 +632,7 @@ export default function AsiaRelocationCalculator() {
   }, [
     mode, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
     incomeScenario, conditionalAnswers,
-    fromCityMultipliers, toCityMultipliers, currentCityDefaults, targetCityDefaults,
+    fromCityMultipliers, currentCityDefaults, targetCityDefaults,
     adults, children, needCar, furnished, utilitiesIncluded, utilities, destinationRent,
     groceries, transportation, healthcare, depositRequired, firstMonthRent, lastMonthRent,
     visaCost, flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,

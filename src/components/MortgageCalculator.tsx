@@ -1011,7 +1011,7 @@ function USTab() {
 
   const amortRows = useMemo(
     () => buildSchedule(loan, r, term, nz(extraMonthly)),
-    [loan, rate, term, extraMonthly]
+    [loan, r, term, extraMonthly]
   );
 
   const extraInterest    = nz(extraMonthly) > 0 ? totalInterest - amortRows.reduce((s, row) => s + row.interest, 0) : 0;
@@ -1019,7 +1019,7 @@ function USTab() {
 
   const bwSavings = useMemo(
     () => biweekly ? calcBiweeklySavings(loan, r, term) : null,
-    [biweekly, loan, rate, term]
+    [biweekly, loan, r, term]
   );
 
   const grossMonthly = nz(grossIncome) / 12;
@@ -1860,7 +1860,7 @@ const beYears =
     setDownPct(String(effectiveDownMin));
     setUseCustomRate(false);
     setCustomRate("");
-  }, [countryCode, residencyStatus]);
+  }, [countryCode, residencyStatus, effectiveDownMin]);
 
   const shareState = {
     tab:"international", countryCode, residencyStatus, homePrice, downPct,

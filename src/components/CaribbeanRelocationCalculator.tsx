@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
 import {
@@ -369,13 +369,13 @@ export default function CaribbeanRelocationCalculator() {
 
   const originCurrency = COUNTRY_TO_CURRENCY[fromCountry] ?? "USD";
 
-  const displayAmount = (amountUsd: number, digits = 0) => {
+  const displayAmount = useCallback((amountUsd: number, digits = 0) => {
     if (currencyDisplay === "CURRENT")
       return money(convertUsdToLocal(amountUsd, fromCountry), digits, COUNTRY_TO_CURRENCY[fromCountry] ?? "USD");
     if (currencyDisplay === "DESTINATION")
       return money(convertUsdToLocal(amountUsd, toCountry), digits, COUNTRY_TO_CURRENCY[toCountry] ?? "USD");
     return money(amountUsd, digits, "USD");
-  };
+  }, [currencyDisplay, fromCountry, toCountry]);
 
   const fromCityLabel = getInternationalCityByCode(fromCityCode)?.name ?? "Current city";
   const toCityLabel   = getInternationalCityByCode(toCityCode)?.name  ?? "Target city";
@@ -894,7 +894,7 @@ const relativeDifference =
   }, [
     mode, salary, retirementIncome, filing, incomeScenario,
     fromCountry, toCountry, conditionalAnswers,
-    toCityMultipliers, fromCityMultipliers, currentCityDefaults, targetCityDefaults,
+    toCityMultipliers, fromCityMultipliers, currentCityDefaults, targetCityDefaults, selectedCityDefaults?.monthlyDefaults,
     adults, children, needCar, furnished, utilitiesIncluded,
     utilities, destinationRent, groceries, transportation, carCost, healthcare,
     depositRequired, firstMonthRent, lastMonthRent,

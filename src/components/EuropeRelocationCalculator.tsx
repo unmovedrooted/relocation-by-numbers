@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore, useCallback } from "react";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
 import {
@@ -567,11 +567,11 @@ const [carCostMonthly, setCarCostMonthly] = useState<string>(initial.carCostMont
 
   const originCurrency = COUNTRY_TO_CURRENCY[fromCountry] ?? "USD";
 
-  const displayAmount = (amountUsd: number, digits: number = 0) => {
+  const displayAmount = useCallback((amountUsd: number, digits: number = 0) => {
     if (currencyDisplay === "CURRENT") return money(convertUsdToLocal(amountUsd, fromCountry), digits, COUNTRY_TO_CURRENCY[fromCountry] ?? "USD");
     if (currencyDisplay === "DESTINATION") return money(convertUsdToLocal(amountUsd, toCountry), digits, COUNTRY_TO_CURRENCY[toCountry] ?? "USD");
     return money(amountUsd, digits, "USD");
-  };
+  }, [currencyDisplay, fromCountry, toCountry]);
 
   const fromCityLabel = getInternationalCityByCode(fromCityCode)?.name ?? "Current city";
   const toCityLabel   = getInternationalCityByCode(toCityCode)?.name  ?? "Target city";

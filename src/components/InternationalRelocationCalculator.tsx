@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
 import {
@@ -221,11 +221,11 @@ export default function InternationalRelocationCalculator() {
   const originCurrency = COUNTRY_TO_CURRENCY[fromCountry] ?? "USD";
   const destCurrency   = COUNTRY_TO_CURRENCY[toCountry]   ?? "USD";
 
-  const displayAmount = (amountUsd: number, digits: number = 0) => {
+  const displayAmount = useCallback((amountUsd: number, digits: number = 0) => {
     if (currencyDisplay === "CURRENT") return money(convertUsdToLocal(amountUsd, fromCountry), digits, COUNTRY_TO_CURRENCY[fromCountry] ?? "USD");
     if (currencyDisplay === "DESTINATION") return money(convertUsdToLocal(amountUsd, toCountry), digits, COUNTRY_TO_CURRENCY[toCountry] ?? "USD");
     return money(amountUsd, digits, "USD");
-  };
+  }, [currencyDisplay, fromCountry, toCountry]);
 
   const sortedCountries = useMemo(() =>
     [...INTERNATIONAL_COUNTRIES].sort((a, b) => a.name.localeCompare(b.name)), []);

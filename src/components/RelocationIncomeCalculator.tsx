@@ -460,7 +460,9 @@ export default function RelocationIncomeCalculator() {
     if (housingMode !== 'rent' || securityDeposit) return
     const rent = parseMoney(monthlyRent)
     if (rent > 0) setSecurityDeposit(String(rent * 2))
-  }, [monthlyRent, housingMode]) // intentionally omits securityDeposit to avoid loop
+    // securityDeposit is deliberately not a dependency: listing it would refill the field the moment a user clears it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [monthlyRent, housingMode])
 
   //, Auto-prefill living costs unless manually edited
   useEffect(() => {

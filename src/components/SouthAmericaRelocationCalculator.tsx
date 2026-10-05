@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore, useCallback } from "react";
 import CalculatorImmediateNumberField from "./calculator-form/CalculatorImmediateNumberField";
 import CalculatorSelect from "./calculator-form/CalculatorSelect";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -361,11 +361,11 @@ function SouthAmericaRelocationCalculatorContent({ initialSearch, urlReady }: { 
   const destinationFieldCurrency = (field: SouthAmericaDestinationCostField) =>
     getSouthAmericaFieldInputUnit(scenarioContract, field) === "usd" ? "USD" : destinationCurrency;
 
-  const displayAmount = (amountUsd: number, digits: number = 0) => {
+  const displayAmount = useCallback((amountUsd: number, digits: number = 0) => {
     if (currencyDisplay === "CURRENT") return money(convertUsdToLocal(amountUsd, fromCountry), digits, COUNTRY_TO_CURRENCY[fromCountry] ?? "USD");
     if (currencyDisplay === "DESTINATION") return money(convertUsdToLocal(amountUsd, toCountry), digits, COUNTRY_TO_CURRENCY[toCountry] ?? "USD");
     return money(amountUsd, digits, "USD");
-  };
+  }, [currencyDisplay, fromCountry, toCountry]);
 
   const fromCityLabel = getInternationalCityByCode(fromCityCode)?.name ?? "Current city";
   const toCityLabel = getInternationalCityByCode(toCityCode)?.name ?? "Target city";
