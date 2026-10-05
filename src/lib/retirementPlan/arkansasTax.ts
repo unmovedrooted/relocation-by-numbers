@@ -45,8 +45,12 @@ import { ownerRetirementIncome } from "./ownerRetirementIncome";
  * identify military retirement income, understating the benefit for a
  * military retiree with more than $6,000 of such pay. The small $29
  * age-65 "65 Special" credit (available only to a taxpayer not claiming any
- * retirement-income exemption) and Arkansas's own net-capital-gain
- * exclusion are not modeled. Only single and married-filing-jointly are
+ * retirement-income exemption) is not modeled.
+ *
+ * Capital gains (2025 Form AR1000D, read 2026-10-04, https://www.dfa.arkansas.gov/wp-content/uploads/2025_AR1000D_CapitalGains.pdf):
+ * the Arkansas net capital gain (net long-term gain less net short-term loss, line 7a) is capped at $10,000,000 on line 7b and
+ * multiplied by 50% on line 8, so half of it is excluded and any amount over $10,000,000 is exempt entirely (Act 1 of 2023);
+ * short-term gains (line 11) are taxed in full. Here the net capital gain is the planner's net long-term gain limited to net capital gain. Only single and married-filing-jointly are
  * supported. Itemized deductions and other credits are excluded. Arkansas's
  * dollar figures are not further inflation-indexed in this model. Future
  * legislation is not predicted. Not a tax return.
@@ -55,6 +59,8 @@ import { ownerRetirementIncome } from "./ownerRetirementIncome";
 const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 2470, married: 4940 };
 const PERSONAL_CREDIT_PER_PERSON = 29;
 const RETIREMENT_CAP_PER_PERSON = 6000;
+const CAPITAL_GAIN_EXCLUSION_RATE = .5;
+const CAPITAL_GAIN_FULL_TAX_CEILING = 10000000;
 const BRACKET_CEILINGS = [5600, 11200, 16000, 26400, Infinity];
 const BRACKET_RATES = [0, .02, .03, .034, .037];
 
@@ -80,7 +86,7 @@ function marginal(amount: number, ceilings: number[], rates: number[]) {
   return total;
 }
 
-export function arkansasTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number, earlyDistributionBase: number) {
+export function arkansasTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number, earlyDistributionBase: number, netCapitalGain = 0) {
   if (input.arkansasContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Arkansas planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Arkansas projection year.");
   const ownerRetirement = ownerRetirementIncome(input, retirementOrdinary, "Arkansas", earlyDistributionBase);
@@ -91,12 +97,15 @@ export function arkansasTax(input: HouseholdTaxInput, federalAgi: number, taxabl
     retirementExclusion += Math.min(RETIREMENT_CAP_PER_PERSON, ownPension + ownerRetirement.get(person.id)!);
     personalCredit += PERSONAL_CREDIT_PER_PERSON + (person.blind ? PERSONAL_CREDIT_PER_PERSON : 0);
   }
-  const arAgi = Math.max(0, federalAgi - taxableBenefits - retirementExclusion);
+  if (!Number.isFinite(netCapitalGain) || netCapitalGain < 0) throw new RangeError("Invalid Arkansas net capital gain.");
+  const capitalGainExclusion = CAPITAL_GAIN_EXCLUSION_RATE * Math.min(netCapitalGain, CAPITAL_GAIN_FULL_TAX_CEILING)
+    + Math.max(0, netCapitalGain - CAPITAL_GAIN_FULL_TAX_CEILING);
+  const arAgi = Math.max(0, federalAgi - taxableBenefits - retirementExclusion - capitalGainExclusion);
   const taxable = Math.max(0, arAgi - STANDARD_DEDUCTION[input.filing]);
   const grossTax = arkansasGrossTax(taxable);
   const stateTax = Math.max(0, grossTax - personalCredit);
   return {
-    stateTax, localTax: 0, retirementExclusion, personalCredit,
+    stateTax, localTax: 0, retirementExclusion, personalCredit, capitalGainExclusion,
     warning: "Arkansas pre-credit estimate: the enacted graduated schedule (0% to $5,600, 2%/3%/3.4% through $26,400, "
       + "3.7% above, Act 1 of the 2026 Special Session), the same brackets for every filing status, with the upper table "
       + "(2% on the first $4,700 and 3.7% above, less a transition adjustment of up to $290 that ends at $97,601) replacing "
@@ -107,8 +116,8 @@ export function arkansasTax(input: HouseholdTaxInput, federalAgi: number, taxabl
       + "up to $6,000 per owner, except the portion of the distribution figure that triggers the federal "
       + "early-distribution penalty, used as a proxy for Arkansas's own age-59 1/2 test on IRA distributions (a proxy "
       + "that does not distinguish an employer-plan distribution, which needs no age test, from an IRA distribution, "
-      + "which does). Arkansas's separate, unlimited military retirement pay exemption, its small age-65 credit, and its "
-      + "own net-capital-gain exclusion are not modeled. Only single and married-filing-jointly are supported. Itemized "
+      + "which does). Arkansas's separate, unlimited military retirement pay exemption, and its small age-65 credit "
+      + "are not modeled. " + "Arkansas taxes only 50% of net capital gain (long-term gain over short-term loss) and exempts any amount over $10,000,000 (Form AR1000D lines 7a-8, Act 1 of 2023, 2025 form); short-term gains are taxed in full." + " Only single and married-filing-jointly are supported. Itemized "
       + "deductions and other credits are excluded. Arkansas indexes its tables by statute; the 2026 dollar figures are "
       + "held for later years because the later amounts are not yet published. Future legislation is not predicted. Not a tax return.",
   };

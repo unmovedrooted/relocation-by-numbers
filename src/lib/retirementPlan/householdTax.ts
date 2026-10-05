@@ -393,7 +393,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const mo = location && input.state === "mo" ? missouriTax(input, agi, taxableBenefits, standardDeduction, account.retirementOrdinary, capitalIncome) : null;
   const wa = location && input.state === "wa" ? washingtonTax(input, lt, agi, st, capitalDeduction) : null;
   const al = location && input.state === "al" ? alabamaTax(input, agi, taxableBenefits, regularFederal, alternativeMinimumTax, niit, cityBase) : null;
-  const ar = location && input.state === "ar" ? arkansasTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase) : null;
+  const ar = location && input.state === "ar" ? arkansasTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase, preferredCapital) : null;
   const de = location && input.state === "de" ? delawareTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const ks = location && input.state === "ks" ? kansasTax(input, agi, taxableBenefits) : null;
   const ky = location && input.state === "ky" ? kentuckyTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
