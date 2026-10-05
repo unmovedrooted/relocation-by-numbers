@@ -55,6 +55,8 @@ agency's own worksheet instead of a summary:
 | Virginia | No personal exemptions ($930 each, $800 more for age 65/blind); married age deduction reduced each spouse separately instead of sharing one limit; treated anyone born in 1939 as grandfathered; used year-end age instead of the January 1 cutoff | 2025 Form 760 instructions, line 12 and the Age 65 and Older Deduction Worksheet |
 | Indiana | Applied the $16,000 civil service annuity deduction to every pension; Indiana allows it only for a nonmilitary federal civil service annuity, so it now needs the federal-government pension type | Department of Revenue, Deductions |
 | South Carolina | Omitted the 44% net capital gain deduction (S.C. Code 12-6-1150, unchanged by Act 110) | 2025 SC1040 instructions |
+| Mississippi | Omitted the additional $1,500 exemption for each taxpayer or spouse 65 or older and each who is blind | 2025 Resident Return instructions, lines 8-12 |
+| Kansas, Louisiana | Treated New York government pensions as exempt state systems; both states exempt only federal plans and their own named systems | Kansas 2025 booklet Schedule S line A14; Louisiana R-1306 and IT-540 instructions (codes 02E-06E) |
 | Wisconsin | Omitted the 30% exclusion of net capital gain from assets held over one year | 2025 Schedule WD instructions |
 | Missouri | Omitted the 100% capital gains subtraction (RSMo 143.121, effective for tax years from 2025), which also lowers the AGI that tests the private pension deduction | MO-A line 18; Department of Revenue year-changes page and FAQ |
 
@@ -119,6 +121,7 @@ and the Social Security age requirement removed; Washington income tax from 2028
 - **Contingent cuts:** Kansas SB 269 (look for the notice about the following tax year each autumn), Indiana from
   2030, North Carolina's revenue triggers, Oklahoma HB 2764 triggers, Georgia HB 463 step-downs, Mississippi from
   2031.
+- **Proposed, not enacted:** Delaware HS 1/HS 2 for HB 13 (new 6.75%/6.85%/6.95% brackets above $125,000, slightly lower middle rates, taxable years after 2025); the Division of Revenue still prints the old schedule for 2026.
 - **Unresolved, disclosed:**
   - DC conformity: whether the standard deduction is the federal figure or the decoupled TCJA figure, and
     whether the $6,000 senior deduction applies. Status after the Congress disapproval, the expired temporary

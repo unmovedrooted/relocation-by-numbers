@@ -43,6 +43,16 @@ describe("restricted Louisiana annual settlement", () => {
     expect(la.laAgi).toBe(0);
   });
 
+  it("treats a New York government pension as an ordinary pension under the $12,000 exemption, not an exempt Louisiana system", () => {
+    const old = { ...input().people[0], birthDate: "1950-01-01" };
+    const young = { ...input().people[0], birthDate: "1990-01-01" };
+    const pension = (person: typeof old, pensionType: "ny-government" | "other-government") =>
+      louisianaTax(input({ people: [person], income: [{ ownerId: "one", kind: "pension", amount: 30000, pensionType }] }), 30000, 0, 0).laAgi;
+    expect(pension(old, "ny-government")).toBe(30000 - 12000);
+    expect(pension(young, "ny-government")).toBe(30000);
+    expect(pension(young, "other-government")).toBe(0);
+  });
+
   it("excludes a private pension and retirement-ordinary aggregate up to $12,000 for an owner 65 or older", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1955-01-01", blind: false, eligibleForSeniorDeduction: true }],
       income: [{ ownerId: "one", kind: "pension", amount: 5000, pensionType: "private" }] });

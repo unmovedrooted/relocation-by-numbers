@@ -35,7 +35,9 @@ import { ageAtYearEnd } from "./rules";
  * police, Assessors, Clerks of Court, District Attorneys, Registrars of
  * Voters, Sheriffs, and others) are fully exempt regardless of age (codes
  * 02E-05E); this planner maps that to any pension income with a
- * federal-government, other-government or ny-government pensionType. A
+ * federal-government or other-government pensionType; the exempt systems are federal ones and Louisiana's own,
+ * so an ny-government pension (another state's system) is not exempt here and falls into the $12,000
+ * exemption below, and an other-government pension is assumed to be a Louisiana system. A
  * separate Annual Retirement Income Exemption of up to $12,000 per
  * taxpayer 65 or older applies to any other taxable pension, annuity or
  * IRA distribution (code 06E) not otherwise exempt above; this planner
@@ -49,7 +51,7 @@ const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 12875, marrie
 const RETIREMENT_EXEMPTION_CAP = 12000;
 
 function isExemptSystemPension(pensionType: HouseholdTaxInput["income"][number]["pensionType"]) {
-  return pensionType === "federal-government" || pensionType === "other-government" || pensionType === "ny-government";
+  return pensionType === "federal-government" || pensionType === "other-government";
 }
 
 export function louisianaTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
@@ -71,9 +73,9 @@ export function louisianaTax(input: HouseholdTaxInput, federalAgi: number, taxab
     warning: "Louisiana pre-credit estimate using the enacted flat 3% rate applied after the published 2026 "
       + "standard deduction ($12,875 single/$25,750 married filing jointly, held for later years without predicting "
       + "Louisiana's annual inflation adjustment), not a prediction of future legislation; Louisiana has no personal exemption. Social Security is "
-      + "fully exempt. Income entered as annual pension with a federal-government, other-government or ny-government "
+      + "fully exempt. Income entered as annual pension with a federal-government or other-government "
       + "pensionType is treated as an exempt state, local or federal retirement system benefit and fully excluded at "
-      + "any age; a private or unspecified pension, and that owner's own attributed 401(k)/IRA/annuity "
+      + "any age. " + "A New York government pension is another state's system, so it is not an exempt Louisiana system and falls under the $12,000 exemption for owners 65 or older; an other-government pension is assumed to be a Louisiana system." + " A private or unspecified pension, and that owner's own attributed 401(k)/IRA/annuity "
       + "distributions, are excluded up to $12,000 per owner 65 or older only. Only single and "
       + "married-filing-jointly are supported. Itemized deductions and credits are excluded.",
   };
