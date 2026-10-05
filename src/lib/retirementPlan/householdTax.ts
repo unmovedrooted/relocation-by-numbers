@@ -362,7 +362,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const il = location && input.state === "il" ? illinoisTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const nj = location && input.state === "nj" ? newJerseyTax(input, agi, taxableBenefits, account.retirementOrdinary, iraDeduction + capitalDeduction) : null;
   const pa = location && input.state === "pa" ? pennsylvaniaTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase, wages, pretaxDeferrals + iraDeduction + capitalDeduction) : null;
-  const co = location && input.state === "co" ? coloradoTax(input, agi, taxableBenefits, taxableIncome) : null;
+  const co = location && input.state === "co" ? coloradoTax(input, agi, taxableBenefits, taxableIncome, account.retirementOrdinary, account.additionalTaxBase) : null;
   const nm = location && input.state === "nm" ? newMexicoTax(input, agi, taxableBenefits, standardDeduction, preferredCapital) : null;
   const mn = location && input.state === "mn" ? minnesotaTax(input, agi, taxableBenefits, taxExemptInterest) : null;
   const ut = location && input.state === "ut" ? utahTax(input, agi, taxableBenefits, taxExemptInterest, standardDeduction) : null;
