@@ -32,7 +32,7 @@ export default function SavedScenariosPanel({
   };
 
   const handleLoad = (scenario: SavedScenario) => {
-    window.location.href = scenario.url;
+    window.location.assign(scenario.url);
   };
 
   const handleDelete = (id: string) => {
