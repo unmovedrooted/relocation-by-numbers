@@ -333,6 +333,19 @@ function MoneyFlowBar({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
+// Stateless display pieces live at module scope so React does not recreate them on every render.
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[11px] font-semibold tracking-widest text-slate-400 uppercase dark:text-slate-500 mb-3">
+      {children}
+    </p>
+  )
+}
+
+function Divider() {
+  return <div className="border-t border-slate-100 dark:border-slate-800 my-5" />
+}
+
 export default function RelocationIncomeCalculator() {
   // FIX 4: separate scroll intent from calculate so debounce doesn't scroll
   const resultsRef   = useRef<HTMLDivElement>(null)
@@ -690,14 +703,6 @@ export default function RelocationIncomeCalculator() {
   const showIncome2   = householdType !== 'solo'
 
   // ─── Sub-components ────────────────────────────────────────────────────────
-
-  const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-    <p className="text-[11px] font-semibold tracking-widest text-slate-400 uppercase dark:text-slate-500 mb-3">
-      {children}
-    </p>
-  )
-
-  const Divider = () => <div className="border-t border-slate-100 dark:border-slate-800 my-5" />
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
