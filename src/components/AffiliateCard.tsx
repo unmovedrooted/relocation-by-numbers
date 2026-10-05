@@ -8,7 +8,6 @@ type Props = {
 };
 
 export default function AffiliateCard({
-  stateCode,
   stateName,
   cityName,
   mode = "rent",

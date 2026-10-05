@@ -93,15 +93,6 @@ function getSalesTaxNote(fromState: string, toState: string): string | null {
 
 // ─── URL param keys ───────────────────────────────────────────────────────────
 
-const PARAM_KEYS = [
-  'household', 'adults', 'children',
-  'income1', 'income2', 'filing', 'k401Pct1', 'k401Pct2',
-  'currentState', 'currentCityId', 'targetState', 'targetCityId',
-  'housingMode', 'monthlyRent', 'rentersInsurance',
-  'homePrice', 'downPct', 'mortgageRate', 'termYears', 'hoa',
-  'movingTruck', 'securityDeposit', 'furnitureBudget', 'miscMoving',
-] as const
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const fmt = (n: number) =>
@@ -898,7 +889,7 @@ export default function RelocationIncomeCalculator() {
               </div>
             </div>
             <div>
-              <FieldLabel>Renter's insurance / mo</FieldLabel>
+              <FieldLabel>Renter&apos;s insurance / mo</FieldLabel>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
                 <input type="number" value={rentersInsurance}

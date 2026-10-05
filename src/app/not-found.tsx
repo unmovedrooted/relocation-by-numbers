@@ -23,12 +23,12 @@ export default function NotFound() {
 
         {/* Heading */}
         <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          This page doesn't exist
+          This page doesn&apos;t exist
         </h1>
 
         {/* Body */}
         <p className="text-sm leading-7 text-slate-400">
-          The page you're looking for may have moved or the URL may be incorrect.
+          The page you&apos;re looking for may have moved or the URL may be incorrect.
           Use the links below to find what you need.
         </p>
 

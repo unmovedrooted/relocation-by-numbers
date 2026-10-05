@@ -1276,7 +1276,7 @@ const readinessRecommendation =
               </div>
               {results.incomeGap > 0 ? (
                 <div className="mt-2 text-sm font-medium text-rose-600 dark:text-rose-400">
-                  You're about {displayAmount(results.incomeGap, 0)} below this target.
+                  You&apos;re about {displayAmount(results.incomeGap, 0)} below this target.
                 </div>
               ) : (
                 <div className="mt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">

@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import CalculatorNumberField from "./calculator-form/CalculatorNumberField";
-import FireEmailCapture from "@/components/FireEmailCapture";
 import FireReport, { type FireReportInputs } from "@/components/FireReport";
 import FireUpsellCard from "@/components/FireUpsellCard";
 import Link from "next/link";
@@ -165,7 +164,6 @@ const VIRAL_COMPARE_CITIES = [
 
 const ADSENSE_CLIENT        = process.env.NEXT_PUBLIC_ADSENSE_CLIENT        || "";
 const ADSENSE_SLOT_RESULTS  = process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULTS  || "";
-const ADSENSE_SLOT_BOTTOM   = process.env.NEXT_PUBLIC_ADSENSE_SLOT_BOTTOM   || "";
 
 // ── Mode nav ──────────────────────────────────────────────────────────────────
 const MODE_NAV: { mode: FireMode; label: string; href: string }[] = [
@@ -286,14 +284,6 @@ function money(n: number, digits = 0) {
 function pct(n: number, digits = 1) {
   if (!Number.isFinite(n)) return "—";
   return `${(n * 100).toFixed(digits)}%`;
-}
-
-function impactLabel(yearsSaved: number | null) {
-  if (yearsSaved === null) return "—";
-  if (yearsSaved >= 5)  return `high impact · save ${yearsSaved} years`;
-  if (yearsSaved >= 2)  return `medium impact · save ${yearsSaved} years`;
-  if (yearsSaved >= 1)  return `helpful · save ${yearsSaved} year`;
-  return "limited impact with current inputs";
 }
 
 function annualExpensesFromMonthly(m: number)  { return Math.max(0, (Number(m) || 0) * 12); }
@@ -1000,14 +990,14 @@ function DecisionEngineCard({ result }: { result: DecisionEngineResult }) {
       <p className="mt-2 text-sm leading-6 text-slate-300">
         {alreadyReached ? (
           <>
-            You've already reached your goal under current assumptions. These
+            You&apos;ve already reached your goal under current assumptions. These
             scenarios show what would{" "}
             <strong className="text-white">strengthen your full FIRE position</strong>{" "}
             from here.
           </>
         ) : (
           <>
-            You're currently projected to reach your goal in{" "}
+            You&apos;re currently projected to reach your goal in{" "}
             <strong className="text-white">
               {formatDecisionYears(result.baseline.yearsToGoal)}
             </strong>
@@ -1503,7 +1493,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
 
             <Field label="401(k) contribution %" info="Percentage of salary contributed to a 401(k). Lowers taxable income." value={inputs.k401Pct} onChange={v => setInputs(s => ({ ...s, k401Pct: clamp(v, 0, 60) }))} suffix="%" />
             <Field label="Monthly spending" info="Used to calculate your FIRE target. Higher spending = larger number." value={inputs.expensesMonthly} onChange={v => setInputs(s => ({ ...s, expensesMonthly: clamp(v, 0, 200_000) }))} prefix="$" />
-            <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">That's <span className="font-semibold text-slate-200">{money(annualExp, 0)}</span>/yr</div>
+            <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">That&apos;s <span className="font-semibold text-slate-200">{money(annualExp, 0)}</span>/yr</div>
 
             <Field label="Current invested portfolio" value={inputs.currentPortfolio}
               onChange={v => setInputs(s => {
@@ -1794,7 +1784,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 </div>
                 {leanYearsSaved !== null && leanYearsSaved > 0 && (
                   <div className="rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100">
-                    Lean spending saves you <strong>{leanYearsSaved} years</strong> vs a 50% higher spending plan. That's the power of the lean approach.
+                    Lean spending saves you <strong>{leanYearsSaved} years</strong> vs a 50% higher spending plan. That&apos;s the power of the lean approach.
                   </div>
                 )}
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -1856,7 +1846,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 </div>
                 {baristaYearsSaved !== null && baristaYearsSaved > 0 && (
                   <div className="rounded-xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm text-amber-100">
-                    Part-time income saves you <strong>{baristaYearsSaved} years</strong> vs waiting for full FIRE. That's the Barista FIRE advantage.
+                    Part-time income saves you <strong>{baristaYearsSaved} years</strong> vs waiting for full FIRE. That&apos;s the Barista FIRE advantage.
                   </div>
                 )}
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -1908,7 +1898,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
           <section className={activeResultTab === "move" ? "block space-y-4" : "hidden"}>
             <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4">
               <div className="text-sm font-semibold text-amber-100">🔥 How a move could change your timeline</div>
-              <div className="mt-1 text-xs text-amber-100/80">Same income and investing assumptions, spending adjusted by each city's cost profile.</div>
+              <div className="mt-1 text-xs text-amber-100/80">Same income and investing assumptions, spending adjusted by each city&apos;s cost profile.</div>
               <div className="mt-4 space-y-2">
                 {viralCityResults.map(row => {
                   const isBest = row!.cityId === bestMoveRow?.cityId;

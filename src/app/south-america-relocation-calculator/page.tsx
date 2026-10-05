@@ -257,7 +257,7 @@ export default function Page() {
             </div>
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white">
-                How does this calculator handle Argentina's currency situation?
+                How does this calculator handle Argentina&apos;s currency situation?
               </dt>
               <dd className="mt-1">
                 It uses a standardized planning approach. In practice, currency conditions may shift the real cost picture materially, so Argentina should be treated as a destination where extra verification matters.
@@ -291,12 +291,12 @@ export default function Page() {
               See how relocating to South America may change your FIRE timeline after taxes, spending, and housing costs.
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
-              <a
+              <Link
                 href="/fire-calculator"
                 className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
               >
                 🔥 Calculate My FIRE Timeline
-              </a>
+              </Link>
               <Link
                 href="/best-cities-for-fire"
                 className="text-sm font-semibold text-slate-700 underline underline-offset-4 hover:no-underline"
@@ -314,36 +314,36 @@ export default function Page() {
               Keep comparing your options with more relocation, budgeting, and FIRE tools from Relocation by Numbers.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              <a
+              <Link
                 href="/explore"
                 className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
               >
                 Explore all tools
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/international-relocation"
                 className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
                 International Calculator
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/caribbean-relocation-calculator"
                 className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
                 Caribbean Calculator
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/europe-relocation-calculator"
                 className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
                 Europe Calculator
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/asia-relocation-calculator"
                 className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
                 Asia Calculator
-              </a>
+              </Link>
             </div>
           </section>
         </div>
@@ -352,15 +352,15 @@ export default function Page() {
       <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
         <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-            <a href="/about" className="transition hover:text-slate-900 dark:hover:text-white">About</a>
+            <Link href="/about" className="transition hover:text-slate-900 dark:hover:text-white">About</Link>
             <span>•</span>
-            <a href="/disclaimer" className="transition hover:text-slate-900 dark:hover:text-white">Disclaimer</a>
+            <Link href="/disclaimer" className="transition hover:text-slate-900 dark:hover:text-white">Disclaimer</Link>
             <span>•</span>
-            <a href="/privacy" className="transition hover:text-slate-900 dark:hover:text-white">Privacy</a>
+            <Link href="/privacy" className="transition hover:text-slate-900 dark:hover:text-white">Privacy</Link>
             <span>•</span>
-            <a href="/terms" className="transition hover:text-slate-900 dark:hover:text-white">Terms</a>
+            <Link href="/terms" className="transition hover:text-slate-900 dark:hover:text-white">Terms</Link>
             <span>•</span>
-            <a href="/methodology" className="transition hover:text-slate-900 dark:hover:text-white">Methodology</a>
+            <Link href="/methodology" className="transition hover:text-slate-900 dark:hover:text-white">Methodology</Link>
           </div>
         </div>
       </footer>

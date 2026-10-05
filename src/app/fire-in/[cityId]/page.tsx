@@ -208,10 +208,6 @@ export default async function Page({ params }: Props) {
     .map((id) => findCity(id))
     .filter(Boolean);
 
-  const rent = city.defaultRent ?? 0;
-  const homePrice = city.medianHomePrice ?? 0;
-  const propertyTaxPct = city.propertyTaxPct ?? 0;
-
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-10">

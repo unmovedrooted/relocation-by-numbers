@@ -123,7 +123,7 @@ export function simulateFire(raw: FireInputs): FireResult {
   let balance = sum3(inputs.balance401k, inputs.balanceIra, inputs.balanceBrokerage);
 
   // contributions (simple version: combine; you can later model account-specific rules)
-  let annualContrib = sum3(inputs.contrib401k, inputs.contribIra, inputs.contribBrokerage);
+  const annualContrib = sum3(inputs.contrib401k, inputs.contribIra, inputs.contribBrokerage);
 
   let grossIncome = Math.max(0, inputs.annualIncome);
   let annualExpenses = Math.max(0, inputs.monthlyExpenses * 12);

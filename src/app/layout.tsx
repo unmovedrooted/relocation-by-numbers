@@ -8,7 +8,6 @@ import ThemeToggle from "@/components/ThemeToggle";
 import PwaRegistration from "@/components/PwaRegistration";
 import MobileNavigation from "@/components/MobileNavigation";
 import NavToolsDropdown from "@/components/NavToolsDropdown";
-// @ts-ignore: allow importing global CSS in Next.js app
 import "./globals.css";
 
 const geistSans = Geist({

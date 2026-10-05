@@ -152,15 +152,15 @@ export default function Page() {
         <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
           <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
-              <a href="/about" className="transition hover:text-slate-900 dark:hover:text-white">About</a>
+              <Link href="/about" className="transition hover:text-slate-900 dark:hover:text-white">About</Link>
               <span aria-hidden="true">•</span>
-              <a href="/disclaimer" className="transition hover:text-slate-900 dark:hover:text-white">Disclaimer</a>
+              <Link href="/disclaimer" className="transition hover:text-slate-900 dark:hover:text-white">Disclaimer</Link>
               <span aria-hidden="true">•</span>
-              <a href="/privacy" className="transition hover:text-slate-900 dark:hover:text-white">Privacy</a>
+              <Link href="/privacy" className="transition hover:text-slate-900 dark:hover:text-white">Privacy</Link>
               <span aria-hidden="true">•</span>
-              <a href="/terms" className="transition hover:text-slate-900 dark:hover:text-white">Terms</a>
+              <Link href="/terms" className="transition hover:text-slate-900 dark:hover:text-white">Terms</Link>
               <span aria-hidden="true">•</span>
-              <a href="/methodology" className="transition hover:text-slate-900 dark:hover:text-white">Methodology</a>
+              <Link href="/methodology" className="transition hover:text-slate-900 dark:hover:text-white">Methodology</Link>
             </div>
           </div>
         </footer>

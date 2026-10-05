@@ -77,7 +77,7 @@ export default function WaitlistPage() {
         <div className="mt-10 rounded-2xl border border-violet-300/20 bg-violet-300/[0.06] p-6">
           <p className="text-base font-semibold text-white">Get early access</p>
           <p className="mt-1 text-sm text-slate-400">
-            We'll email you when it's ready. No spam, one email when it launches.
+            We&apos;ll email you when it&apos;s ready. No spam, one email when it launches.
           </p>
           <div className="mt-4">
             <WaitlistForm />

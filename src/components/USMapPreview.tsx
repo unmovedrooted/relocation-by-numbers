@@ -17,7 +17,6 @@ function money(n: number, digits = 0) {
 }
 
 const NAME_TO_CODE = new Map<string, StateCode>(STATES.map((s) => [s.name, s.code]));
-const CODE_TO_NAME = new Map<StateCode, string>(STATES.map((s) => [s.code, s.name]));
 
 type StateStat = { code: StateCode; name: string; stateTax: number; effRate: number; takeHome: number };
 

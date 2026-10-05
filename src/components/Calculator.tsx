@@ -291,7 +291,6 @@ function EstimatedLivingCosts({
 
 // ─── Main component ──────────────────────────────────────────────────────────
 export default function Calculator({
-  monetization,
   initialFromState,
   initialToState,
   initialFromCityId,
@@ -542,11 +541,6 @@ export default function Calculator({
   const estTransport = useMemo<number | null>(() => {
     if (!hasCOLData) return null;
     return 300 * ((toCity as any).col.transport / (fromCity as any).col.transport);
-  }, [hasCOLData, fromCity, toCity]);
-
-  const estHealthcare = useMemo<number | null>(() => {
-    if (!hasCOLData) return null;
-    return 200 * ((toCity as any).col.healthcare / (fromCity as any).col.healthcare);
   }, [hasCOLData, fromCity, toCity]);
 
   // ── Effective COL values, user override → city estimate → national default ──
@@ -870,9 +864,6 @@ export default function Calculator({
     source: "US",
   });
 
-  const isStatePage = monetization === "state";
-  const isPremiumState = ["tx", "fl", "ca", "nc", "ny", "ma", "wa"].includes(toState);
-
   // ─────────────────────────────────────────────────────────────────────────
   // RENDER
   // ─────────────────────────────────────────────────────────────────────────
@@ -1146,7 +1137,7 @@ export default function Calculator({
                     type="number" value={rentMonthly} onChange={(e) => setRentMonthly(e.target.value)} placeholder=" " />
                 </label>
                 <label className="text-sm">
-                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Renter's insurance (monthly)</div>
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Renter&apos;s insurance (monthly)</div>
                   <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                     type="number" value={rentersInsMonthly} onChange={(e) => setRentersInsMonthly(e.target.value)} placeholder=" " />
                 </label>
@@ -1302,7 +1293,7 @@ export default function Calculator({
               ) : (
                 <>
                   <div className="mt-2 font-semibold text-slate-900 dark:text-slate-100">Monthly housing (rent)</div>
-                  <div>Total (rent + renter's ins + parking): <span className="font-bold text-slate-900 dark:text-slate-100">{money(results.rentTotal, 2)}</span></div>
+                  <div>Total (rent + renter&apos;s ins + parking): <span className="font-bold text-slate-900 dark:text-slate-100">{money(results.rentTotal, 2)}</span></div>
                 </>
               )}
 

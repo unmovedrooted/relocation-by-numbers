@@ -406,7 +406,6 @@ export default function CompareCitiesCalculator() {
         return { ...t, countryCode: fallback.code, cityCode: cities[0]?.code ?? "" };
       })
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [region]);
 
   function addTarget() {

@@ -101,7 +101,7 @@ export default async function FireSharePage({ searchParams }: SharePageProps) {
         {/* ── Dynamic headline ───────────────────────────────────────── */}
         <div>
           <p className="mb-3 text-sm font-medium uppercase tracking-widest text-emerald-400">
-            Someone's FIRE result
+            Someone&apos;s FIRE result
           </p>
 
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
@@ -158,7 +158,7 @@ export default async function FireSharePage({ searchParams }: SharePageProps) {
         {/* ── CTA block ──────────────────────────────────────────────── */}
         <div className="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-6">
           <h2 className="text-xl font-semibold text-white">
-            What's your FIRE number?
+            What&apos;s your FIRE number?
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-300">
             Enter your income, spending, and location to see your projected FIRE

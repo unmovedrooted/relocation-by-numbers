@@ -188,12 +188,12 @@ export default function Page() {
             </h1>
 
             <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              See your 2025 contribution limit, this year's real tax savings, and how your HSA balance could grow
+              See your 2025 contribution limit, this year&apos;s real tax savings, and how your HSA balance could grow
               over time with tax-advantaged investing.
             </p>
 
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-              Accounts for federal, FICA, and state tax rules, including California and New Jersey's HSA
+              Accounts for federal, FICA, and state tax rules, including California and New Jersey&apos;s HSA
               non-conformity.
             </p>
 
@@ -238,7 +238,7 @@ export default function Page() {
                     Enter your coverage type, contribution amounts, and income. The calculator applies the actual
                     2025 IRS limits, then computes your real combined tax savings, federal income tax, FICA
                     (Social Security and Medicare), and state income tax, by comparing your tax bill with and
-                    without the contribution, the same verified tax engine used across this site's other
+                    without the contribution, the same verified tax engine used across this site&apos;s other
                     calculators.
                   </p>
                   <p>
@@ -279,7 +279,7 @@ export default function Page() {
                   </p>
                   <p>
                     The growth projection assumes contributions are invested rather than spent on current medical
-                    expenses, and doesn't model custodian fees or investment sequencing risk.
+                    expenses, and doesn&apos;t model custodian fees or investment sequencing risk.
                   </p>
                   <p>This calculator is not tax or investment advice.</p>
                 </div>
@@ -359,15 +359,15 @@ export default function Page() {
         <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
           <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
-              <a href="/about" className="transition hover:text-slate-900 dark:hover:text-white">About</a>
+              <Link href="/about" className="transition hover:text-slate-900 dark:hover:text-white">About</Link>
               <span aria-hidden="true">•</span>
-              <a href="/disclaimer" className="transition hover:text-slate-900 dark:hover:text-white">Disclaimer</a>
+              <Link href="/disclaimer" className="transition hover:text-slate-900 dark:hover:text-white">Disclaimer</Link>
               <span aria-hidden="true">•</span>
-              <a href="/privacy" className="transition hover:text-slate-900 dark:hover:text-white">Privacy</a>
+              <Link href="/privacy" className="transition hover:text-slate-900 dark:hover:text-white">Privacy</Link>
               <span aria-hidden="true">•</span>
-              <a href="/terms" className="transition hover:text-slate-900 dark:hover:text-white">Terms</a>
+              <Link href="/terms" className="transition hover:text-slate-900 dark:hover:text-white">Terms</Link>
               <span aria-hidden="true">•</span>
-              <a href="/methodology" className="transition hover:text-slate-900 dark:hover:text-white">Methodology</a>
+              <Link href="/methodology" className="transition hover:text-slate-900 dark:hover:text-white">Methodology</Link>
             </div>
           </div>
         </footer>

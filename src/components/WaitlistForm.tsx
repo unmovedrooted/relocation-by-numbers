@@ -33,9 +33,9 @@ export default function WaitlistForm() {
           ✓
         </div>
         <div>
-          <p className="text-sm font-medium text-emerald-100">You're on the list</p>
+          <p className="text-sm font-medium text-emerald-100">You&apos;re on the list</p>
           <p className="text-xs text-emerald-200/70">
-            We'll email you when it launches.
+            We&apos;ll email you when it launches.
           </p>
         </div>
       </div>

@@ -4,5 +4,5 @@
 // aren't needed for a modern browser target, so all three are aliased to
 // this empty stub instead (see next.config.ts). Safe because the real
 // modules are never actually reached at runtime.
-export {};
-export default {};
+const emptyStub = {};
+export { emptyStub as default };

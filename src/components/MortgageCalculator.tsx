@@ -481,10 +481,6 @@ function readHashState() {
   const m = window.location.hash.match(/[?&]?state=([^&]+)/);
   return m ? decodeState(m[1]) : null;
 }
-function writeHashState(state: object) {
-  if (typeof window === "undefined") return;
-  window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#state=${encodeState(state)}`);
-}
 
 // ═══════════════════════════════════════════════════════════════════════
 // UI PRIMITIVES

@@ -41,7 +41,7 @@ export default function FireEmailCapture({ fireAge, location }: Props) {
           <div>
             <p className="text-sm font-medium text-emerald-100">Plan saved</p>
             <p className="text-xs text-emerald-200/70">
-              We'll send a check-in in 6 months with updated projections.
+              We&apos;ll send a check-in in 6 months with updated projections.
             </p>
           </div>
         </div>

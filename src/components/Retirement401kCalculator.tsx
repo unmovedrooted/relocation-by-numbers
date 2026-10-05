@@ -163,7 +163,6 @@ export default function Retirement401kCalculator() {
   }, [salary, yourContribPct, employerMatchPct, employerCapPct, currentBalance, age, retirementAge, expectedReturnPct, inflationPct, adjustForInflation, filing, state, viewMode, volatility]);
 
   const inputsReady = results.sal > 0 && results.years > 0;
-  const stateName = STATES.find((s) => s.code === state)?.name ?? state;
   const dollarsNote = adjustForInflation ? " (today's dollars)" : "";
 
   const exportRows = useMemo<CsvRow[]>(() => {
