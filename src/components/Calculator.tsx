@@ -154,7 +154,8 @@ type COL = {
   healthcare: number;
 };
 
-function hasCOL(x: any): x is { col: COL } {
+function hasCOL(value: unknown): value is { col: COL } {
+  const x = value as { col?: Partial<Record<keyof COL, unknown>> } | null;
   return (
     !!x &&
     typeof x === "object" &&
@@ -345,18 +346,18 @@ export default function Calculator({
 
   useEffect(() => {
     if (!fromCities.length) return;
-    const exists = fromCities.some((c: any) => c.id === fromCityId);
+    const exists = fromCities.some((c) => c.id === fromCityId);
     if (!exists) {
-      const firstReal = fromCities.find((c: any) => !String(c.id).startsWith("other-"));
+      const firstReal = fromCities.find((c) => !String(c.id).startsWith("other-"));
       setFromCityId(firstReal?.id ?? fromCities[0].id);
     }
   }, [fromCities, fromCityId]);
 
   useEffect(() => {
     if (!toCities.length) return;
-    const exists = toCities.some((c: any) => c.id === toCityId);
+    const exists = toCities.some((c) => c.id === toCityId);
     if (!exists) {
-      const firstReal = toCities.find((c: any) => !String(c.id).startsWith("other-"));
+      const firstReal = toCities.find((c) => !String(c.id).startsWith("other-"));
       setToCityId(firstReal?.id ?? toCities[0].id);
     }
   }, [toCities, toCityId]);
@@ -506,23 +507,23 @@ export default function Calculator({
       return {
         comparableSalary: Math.round((salaryN * ratio) / 100) * 100,
         pctLessMore: (1 - ratio) * 100,
-        fromCityName: (fromCity as any).name,
-        toCityName: (toCity as any).name,
+        fromCityName: fromCity!.name,
+        toCityName: toCity!.name,
         method: "col" as const,
       };
     }
 
-    if (typeof (fromCity as any).defaultRent !== "number") return null;
-    if (typeof (toCity as any).defaultRent !== "number") return null;
+    if (typeof fromCity!.defaultRent !== "number") return null;
+    if (typeof toCity!.defaultRent !== "number") return null;
 
-    const rentFrom = Math.max(500, (fromCity as any).defaultRent);
-    const rentTo = Math.max(500, (toCity as any).defaultRent);
+    const rentFrom = Math.max(500, fromCity!.defaultRent);
+    const rentTo = Math.max(500, toCity!.defaultRent);
     const ratio = 0.55 * (rentTo / rentFrom) + 0.45;
     return {
       comparableSalary: Math.round((salaryN * ratio) / 100) * 100,
       pctLessMore: (1 - ratio) * 100,
-      fromCityName: (fromCity as any).name,
-      toCityName: (toCity as any).name,
+      fromCityName: fromCity!.name,
+      toCityName: toCity!.name,
       method: "rent" as const,
     };
   }, [fromCity, toCity, salary, isFromOther, isToOther]);
@@ -530,17 +531,17 @@ export default function Calculator({
   // ── Estimated Living Costs, TARGET city ─────────────────────────────────
   const estGroceries = useMemo<number | null>(() => {
     if (!hasCOLData) return null;
-    return 600 * ((toCity as any).col.groceries / (fromCity as any).col.groceries);
+    return 600 * (toCity!.col!.groceries / fromCity!.col!.groceries);
   }, [hasCOLData, fromCity, toCity]);
 
   const estUtilities = useMemo<number | null>(() => {
     if (!hasCOLData) return null;
-    return 250 * ((toCity as any).col.utilities / (fromCity as any).col.utilities);
+    return 250 * (toCity!.col!.utilities / fromCity!.col!.utilities);
   }, [hasCOLData, fromCity, toCity]);
 
   const estTransport = useMemo<number | null>(() => {
     if (!hasCOLData) return null;
-    return 300 * ((toCity as any).col.transport / (fromCity as any).col.transport);
+    return 300 * (toCity!.col!.transport / fromCity!.col!.transport);
   }, [hasCOLData, fromCity, toCity]);
 
   // ── Effective COL values, user override → city estimate → national default ──
@@ -655,7 +656,7 @@ export default function Calculator({
 
   const currentHousingEst = useMemo<number | null>(() => {
     if (!hasCOLData || !results.activeHousing) return null;
-    return results.activeHousing * ((fromCity as any).col.housing / (toCity as any).col.housing);
+    return results.activeHousing * (fromCity!.col!.housing / toCity!.col!.housing);
   }, [hasCOLData, results.activeHousing, fromCity, toCity]);
 
   const currentHousingActual = useMemo<number | null>(() => {
@@ -722,11 +723,11 @@ export default function Calculator({
     setSalary("150000");
     setK401Pct("10");
 
-    const firstFrom = fromCities.find((c: any) => !String(c.id).startsWith("other-"));
+    const firstFrom = fromCities.find((c) => !String(c.id).startsWith("other-"));
     setFromCityId(firstFrom?.id ?? "");
     setFromCityOther("");
 
-    const firstTo = toCities.find((c: any) => !String(c.id).startsWith("other-"));
+    const firstTo = toCities.find((c) => !String(c.id).startsWith("other-"));
     setToCityId(firstTo?.id ?? "");
     setToCityOther("");
 
@@ -986,11 +987,11 @@ export default function Calculator({
                     if (!id.startsWith("other-")) setFromCityOther("");
                     const city = findCity(id);
                     if (!city) return;
-                    if ((city as any).state && (city as any).state !== fromState) setFromState((city as any).state);
+                    if (city.state && city.state !== fromState) setFromState(city.state);
                   }}
                 >
                   <option value="">Select city</option>
-                  {fromCities.map((c: any) => (
+                  {fromCities.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}{c.tier ? `, ${c.tier}` : ""}</option>
                   ))}
                 </select>
@@ -1007,11 +1008,11 @@ export default function Calculator({
                     if (!id.startsWith("other-")) setToCityOther("");
                     const city = findCity(id);
                     if (!city) return;
-                    if ((city as any).state && (city as any).state !== toState) setToState((city as any).state);
+                    if (city.state && city.state !== toState) setToState(city.state);
                   }}
                 >
                   <option value="">Select city</option>
-                  {toCities.map((c: any) => (
+                  {toCities.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}{c.tier ? `, ${c.tier}` : ""}</option>
                   ))}
                 </select>

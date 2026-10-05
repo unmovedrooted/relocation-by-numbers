@@ -1496,7 +1496,7 @@ const relativeDifference =
                     const shareText = `My Caribbean relocation scenario: ${fromCityLabel} → ${toCityLabel}. Monthly flexibility ${displayAmount(results.monthlyFlexibility, 0)} after housing.`;
                     const canNativeShare = typeof navigator !== "undefined" && "share" in navigator;
                     if (canNativeShare) {
-                      await (navigator as any).share({ title: "My Caribbean Relocation Scenario", text: shareText, url: shareUrl.toString() });
+                      await navigator.share({ title: "My Caribbean Relocation Scenario", text: shareText, url: shareUrl.toString() });
                       setShareStatus("shared");
                     } else {
                       await navigator.clipboard.writeText(shareUrl.toString());

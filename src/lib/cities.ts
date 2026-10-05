@@ -456,15 +456,15 @@ function enrichCities(raw: City[]): City[] {
 // RentCafe: US average rent (Last updated Feb 09, 2026)
 const US_AVG_RENT = 1737;
 
-const CITY_STATS = [
+type CityStats = { readonly id: string; readonly medianRent?: number; readonly medianHomePrice?: number };
+
+const CITY_STATS: readonly CityStats[] = [
   { id: "nyc-ny", medianRent: 5227, medianHomePrice: 865000 },
   { id: "raleigh-nc", medianRent: 1579, medianHomePrice: 395000 },
   { id: "buffalo-ny", medianRent: 1414 },
   { id: "albany-ny", medianRent: 1743 },
   { id: "durham-nc", medianRent: 1540 },
-] as const;
-
-type CityStats = (typeof CITY_STATS)[number];
+];
 
 const CITY_STATS_BY_ID: Record<string, CityStats> = Object.fromEntries(
   CITY_STATS.map((s) => [s.id, s])
@@ -475,7 +475,7 @@ function attachStats(cities: City[]): City[] {
     const s = CITY_STATS_BY_ID[c.id];
     if (!s) return c;
 
-    const medianRent = (s as any).medianRent ?? c.medianRent ?? c.defaultRent;
+    const medianRent = s.medianRent ?? c.medianRent ?? c.defaultRent;
     const rentIndex =
       typeof medianRent === "number" && medianRent > 0
         ? Math.round((medianRent / US_AVG_RENT) * 100)
