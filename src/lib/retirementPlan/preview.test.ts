@@ -25,12 +25,15 @@ describe("Local retirement preview", () => {
       expect(() => calculatePreview({ ...PREVIEW_DEFAULTS, ...patch })).toThrow();
     }
   });
-  it("is live in production and listed in the explore grid, but stays out of the sitemap and search indexing", () => {
+  it("is live in production, listed in the explore grid and sitemap, and open to search indexing", () => {
     const read = (path: string) => readFileSync(path, "utf8");
-    expect(read("src/app/sitemap.ts")).not.toContain("/complete-retirement-plan");
+    expect(read("src/app/sitemap.ts")).toContain('"/complete-retirement-plan"');
     expect(read("src/components/ExploreCalculatorGrid.tsx")).toContain('href: "/complete-retirement-plan"');
     const page = read("src/app/complete-retirement-plan/page.tsx");
     expect(page).not.toContain("notFound()");
-    expect(page).toContain("index: false");
+    expect(page).toContain("index: true");
+    expect(page).not.toContain("index: false");
+    expect(page).toContain('canonical: "https://www.relocationbynumbers.com/complete-retirement-plan"');
+    expect(page).not.toMatch(/Not indexed/);
   });
 });

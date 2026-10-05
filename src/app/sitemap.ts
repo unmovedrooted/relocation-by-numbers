@@ -50,6 +50,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/investment-calculator",
     "/how-much-do-i-need-to-retire",
     "/savings-rate-for-fire",
+    "/complete-retirement-plan",
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: now,
