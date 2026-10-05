@@ -279,32 +279,54 @@ export function settleAnnualCashFlow(input: AnnualCashFlowInput): AnnualCashFlow
   const cashNeed = amount(input.spending + contributionTotal, "Spending and contributions");
   let settled = evaluate(0);
   if (settled.net < cashNeed) {
-    let low = 0;
-    let high = maximum;
-    let lowNet = settled.net;
-    let highResult = evaluate(high);
-    let highNet = highResult.net;
-    if (highNet + CASH_TOLERANCE < lowNet) throw new RangeError("After-tax cash is not nondecreasing; this tax policy requires a different solver.");
-    if (highNet < cashNeed) {
-      settled = highResult;
+    // After-tax cash need not be monotone in the withdrawal: a hard cliff (a deduction phase-out in steps, a benefit
+    // cap, a credit threshold) lets net cash fall as the withdrawal rises. Scan upward in cells (about $1,000 wide, 64
+    // to 2,048 of them) for the first grid point that funds the need, then bisect the cell before it, which brackets an
+    // unfunded low end and a funded high end. A cell whose end has less cash than its start contains a cliff, so it is
+    // rescanned at 32 times the resolution, twice, to catch a funded window the cell ends skip over. Windows narrower
+    // than that can still be missed, but the result always funds the need when it is reported as funded. If nothing
+    // funds it, settle at the withdrawal that yields the most cash, preferring the larger on a tie (all of it when
+    // cash is monotone, as before).
+    let best = settled;
+    const firstFunded = (start: number, startNet: number, end: number, steps: number, depth: number) => {
+      let low = start;
+      let lowNet = startNet;
+      for (let step = 1; step <= steps; step++) {
+        const gross = step === steps ? end : start + (end - start) * step / steps;
+        const candidate = evaluate(gross);
+        if (candidate.net >= cashNeed) return { low, high: gross, result: candidate };
+        if (candidate.net >= best.net) best = candidate;
+        if (depth > 0 && candidate.net + CASH_TOLERANCE < lowNet) {
+          const inner = firstFunded(low, lowNet, gross, 32, depth - 1);
+          if (inner) return inner;
+        }
+        low = gross;
+        lowNet = candidate.net;
+      }
+      return undefined;
+    };
+    const bracket = firstFunded(0, settled.net, maximum, Math.min(2048, Math.max(64, Math.ceil(maximum / 1000))), 2);
+    if (!bracket) {
+      // Withdrawing everything must not leave less cash than withdrawing nothing: that is a tax above 100%, not a cliff.
+      if (best.net < settled.net + CASH_TOLERANCE && evaluate(maximum).net + CASH_TOLERANCE < settled.net) {
+        throw new RangeError("After-tax cash at full withdrawal is below cash with no withdrawal; the tax policy is not usable.");
+      }
+      settled = best;
     } else {
+      let { low, high } = bracket;
+      let funded = bracket.result;
       // Always retain the funded endpoint; do not round a tax gross-up down.
       for (let iteration = 0; iteration < 100 && high - low > CASH_TOLERANCE; iteration++) {
         const middle = low + (high - low) / 2;
         const candidate = evaluate(middle);
-        if (candidate.net + CASH_TOLERANCE < lowNet || candidate.net > highNet + CASH_TOLERANCE) {
-          throw new RangeError("After-tax cash is not nondecreasing; this tax policy requires a different solver.");
-        }
         if (candidate.net < cashNeed) {
           low = middle;
-          lowNet = candidate.net;
         } else {
           high = middle;
-          highNet = candidate.net;
-          highResult = candidate;
+          funded = candidate;
         }
       }
-      settled = highResult;
+      settled = funded;
     }
   }
   const shortfall = Math.max(0, cashNeed - settled.net);

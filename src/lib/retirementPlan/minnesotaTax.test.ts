@@ -70,14 +70,19 @@ describe("restricted Minnesota annual settlement", () => {
   });
 
   it("independently reconciles a complete household projection through the preview adapter", () => {
-    // Spending is set off the default: the Social Security simplified-method steps are cash cliffs, and the annual cash-flow
-    // solver rejects some spending levels with "After-tax cash is not nondecreasing" (also true of the defaults before this test changed).
-    const values = { ...PREVIEW_DEFAULTS, state: "mn", mnContract: "confirmed", spending: "48000" };
+    const values = { ...PREVIEW_DEFAULTS, state: "mn", mnContract: "confirmed" };
     const mn = runRetirementTimeline(buildPreviewInput(values));
     const florida = runRetirementTimeline(buildPreviewInput({ ...PREVIEW_DEFAULTS }));
     expect(mn.years[0].result.tax.stateTax).toBeGreaterThan(0);
     expect(mn.years[0].result.tax.localTax).toBe(0);
     expect(mn.years[0].endingPortfolio).toBeLessThan(florida.years[0].endingPortfolio);
+    expect(mn.years.every(row => Math.abs(row.reconciliationResidual) < 1e-5)).toBe(true);
+  });
+
+  it.each(["50000", "51000", "52000"])("settles the Social Security subtraction cash cliffs at spending %s", spending => {
+    // Each 4,000 of AGI above the threshold removes 10% of the benefit subtraction, so after-tax cash falls at each step.
+    const mn = runRetirementTimeline(buildPreviewInput({ ...PREVIEW_DEFAULTS, state: "mn", mnContract: "confirmed", spending }));
+    expect(mn.years.length).toBeGreaterThan(0);
     expect(mn.years.every(row => Math.abs(row.reconciliationResidual) < 1e-5)).toBe(true);
   });
 

@@ -306,8 +306,34 @@ describe("Annual ledger validation and isolation", () => {
     expect(() => settleAnnualCashFlow(input({ conversions: [{ sourceId: "reserve", destinationId: "roth", amount: 0 }] }))).toThrow(/Conversions require/);
     expect(() => settleAnnualCashFlow(input({ requiredWithdrawals: [{ accountId: "roth", amount: 1 }] }))).toThrow(/required withdrawals/);
   });
-  it("rejects a detected nonmonotonic cash-after-tax function", () => {
-    expect(() => settleAnnualCashFlow(input({ calculateTax: context => grossWithdrawals(context) * 1.1 }))).toThrow(/nondecreasing/);
+  it("finds the first funded withdrawal when a cash cliff lies beyond it", () => {
+    // 10% tax plus a $20,000 cliff from $38,000: cash is 0.9w, then 0.9w - 20,000, so $33,000 is first covered at 36,666.67.
+    const cliff = (context: TaxContext) => { const gross = grossWithdrawals(context); return gross * 0.1 + (gross >= 38000 ? 20000 : 0); };
+    const result = settleAnnualCashFlow(input({ spending: 33000, calculateTax: cliff }));
+    expect(result.voluntaryWithdrawals).toBeCloseTo(33000 / 0.9, 5);
+    expect(result.surplus).toBeLessThan(1e-5);
+    expect(result.spendingFunded).toBe(true);
+    assertReconciled(result);
+  });
+  it("finds a funded window just below a cliff that grid points step over", () => {
+    // Cash is 0.9w - 5,000 per 4,000 of withdrawal; $3,500 is covered only on [3,888.89, 4,000), narrower than a cell.
+    const sawtooth = (context: TaxContext) => { const gross = grossWithdrawals(context); return gross * 0.1 + 5000 * Math.floor(gross / 4000); };
+    const result = settleAnnualCashFlow(input({ spending: 3500, calculateTax: sawtooth }));
+    expect(result.voluntaryWithdrawals).toBeCloseTo(3500 / 0.9, 5);
+    expect(result.spendingFunded).toBe(true);
+    assertReconciled(result);
+  });
+  it("reports a shortfall at the most cash when no withdrawal covers a cliff-limited need", () => {
+    const cliff = (context: TaxContext) => { const gross = grossWithdrawals(context); return gross >= 20000 ? gross : 0; };
+    const result = settleAnnualCashFlow(input({ spending: 30000, calculateTax: cliff }));
+    expect(result.spendingFunded).toBe(false);
+    expect(result.voluntaryWithdrawals).toBeGreaterThanOrEqual(19000);
+    expect(result.voluntaryWithdrawals).toBeLessThan(20000);
+    expect(result.shortfall).toBeCloseTo(30000 - result.voluntaryWithdrawals, 5);
+    assertReconciled(result);
+  });
+  it("rejects a tax above 100% of every withdrawal", () => {
+    expect(() => settleAnnualCashFlow(input({ calculateTax: context => grossWithdrawals(context) * 1.1 }))).toThrow(/not usable/);
   });
   it("does not swallow tax-model exceptions", () => {
     expect(() => settleAnnualCashFlow(input({ calculateTax: () => { throw new Error("Unsupported tax treatment"); } }))).toThrow(/Unsupported tax/);
