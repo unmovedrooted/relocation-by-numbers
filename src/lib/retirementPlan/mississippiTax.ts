@@ -27,6 +27,11 @@ import type { HouseholdTaxInput } from "./householdTax";
  *   before the $10,000/$20,000 exempt bracket.
  *   https://help.nfc.usda.gov/bulletins/2026/1768327516.htm
  *
+ * - 2025 Resident Return instructions (Form 80-100, lines 8-12, read 2026-10-04): the filing-status exemption plus an
+ *   additional $1,500 for each box checked for age 65 or over and for blindness (a person is 65 on the day before the
+ *   65th birthday), the $2,300/$4,600 standard deduction, and the House Bill 1 (2025) schedule above. The 2025 rate was 4.4%.
+ *   https://www.dor.ms.gov/sites/default/files/tax-forms/individual/80100251%202.pdf
+ *
  * Uses enacted law, not a prediction of future legislation. This planner's
  * aggregate 401(k)/IRA/annuity distribution figure is excluded except for
  * the portion that triggers the federal 10%-early-distribution-penalty base,
@@ -46,6 +51,13 @@ import type { HouseholdTaxInput } from "./householdTax";
 const STANDARD_DEDUCTION: Record<FilingStatus, number> = { single: 2300, married: 4600 };
 const PERSONAL_EXEMPTION: Record<FilingStatus, number> = { single: 6000, married: 12000 };
 const EXEMPT_BRACKET: Record<FilingStatus, number> = { single: 10000, married: 20000 };
+const ADDITIONAL_EXEMPTION = 1500;
+
+/** One $1,500 exemption per taxpayer or spouse age 65 or older, and one more per blind one. */
+function additionalExemptions(input: HouseholdTaxInput) {
+  return input.people.reduce((sum, person) => sum + (person.birthDate <= `${input.year - 64}-01-01` ? ADDITIONAL_EXEMPTION : 0)
+    + (person.blind ? ADDITIONAL_EXEMPTION : 0), 0);
+}
 
 function stateRate(year: number) {
   if (year <= 2026) return .04;
@@ -64,17 +76,17 @@ export function mississippiTax(input: HouseholdTaxInput, federalAgi: number, tax
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Mississippi projection year.");
   const excludableRetirementOrdinary = Math.max(0, retirementOrdinary - earlyDistributionBase);
   const msAgi = federalAgi - taxableBenefits - pensionSubtraction(input) - excludableRetirementOrdinary;
-  const taxableIncome = Math.max(0, msAgi - STANDARD_DEDUCTION[input.filing] - PERSONAL_EXEMPTION[input.filing]);
+  const taxableIncome = Math.max(0, msAgi - STANDARD_DEDUCTION[input.filing] - PERSONAL_EXEMPTION[input.filing] - additionalExemptions(input));
   const taxable = Math.max(0, taxableIncome - EXEMPT_BRACKET[input.filing]);
   const stateTax = taxable * stateRate(input.year);
   return {
-    stateTax, localTax: 0, excludableRetirementOrdinary,
+    stateTax, localTax: 0, excludableRetirementOrdinary, additionalExemptions: additionalExemptions(input),
     warning: "Mississippi pre-credit estimate: the first $10,000 of taxable income per spouse ($20,000 married filing "
       + "jointly) is exempt, with the remainder taxed at the enacted, unconditionally scheduled rate -- 4.0% for 2026, "
       + "stepping down to 3.75% (2027), 3.5% (2028), 3.25% (2029) and 3.0% (2030 and later); further post-2030 cuts are "
       + "contingent on state revenue-growth triggers and are not predicted here. Mississippi's own standard deduction "
       + "($2,300 single/$4,600 married) and personal exemption ($6,000 single/$12,000 married) apply before that exempt "
-      + "bracket. Social Security is fully exempt. Income entered as annual pension is fully exempt, and this planner's "
+      + "bracket. " + "An additional $1,500 exemption applies for each taxpayer or spouse who is 65 or older (counted as 65 on the day before the 65th birthday) and a separate $1,500 for each who is blind, taken with the personal exemption before the exempt bracket." + " Social Security is fully exempt. Income entered as annual pension is fully exempt, and this planner's "
       + "aggregate 401(k)/IRA/annuity distribution figure is excluded except for the portion that triggers the federal "
       + "early-distribution penalty, used as a proxy for Mississippi's own retirement-requirements test; this can "
       + "incorrectly exclude a distribution that avoids the federal penalty for another reason. Only single and "

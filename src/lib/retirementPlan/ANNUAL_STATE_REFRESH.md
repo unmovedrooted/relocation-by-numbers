@@ -55,6 +55,11 @@ agency's own worksheet instead of a summary:
 | Virginia | No personal exemptions ($930 each, $800 more for age 65/blind); married age deduction reduced each spouse separately instead of sharing one limit; treated anyone born in 1939 as grandfathered; used year-end age instead of the January 1 cutoff | 2025 Form 760 instructions, line 12 and the Age 65 and Older Deduction Worksheet |
 | Indiana | Applied the $16,000 civil service annuity deduction to every pension; Indiana allows it only for a nonmilitary federal civil service annuity, so it now needs the federal-government pension type | Department of Revenue, Deductions |
 | South Carolina | Omitted the 44% net capital gain deduction (S.C. Code 12-6-1150, unchanged by Act 110) | 2025 SC1040 instructions |
+| Mississippi | Omitted the additional $1,500 exemption for each taxpayer or spouse 65 or older and each who is blind | 2025 Resident Return instructions, lines 8-12 |
+| Colorado | Counted only income entered as "pension" toward the $24,000/$20,000 pension and annuity subtraction; the statute also covers IRA, 401(k) and matured private annuity distributions (not premature ones), so most retirees' account income was taxed in full | C.R.S. 39-22-104(4)(f); Legislative Council Staff evaluation 2021-TE20 (SB25-136, which would have lifted the caps, died 2025-02-27) |
+| Rhode Island | Counted only income entered as "pension" toward the $50,000 pension and annuity modification; the Division also counts 401(k), 403(b), 457(b), profit-sharing and annuity income (Form 1040 line 5b) and never IRA income | Division of Taxation Retirement Income Tax Guide (PUB 2024-01); 2025 RI-1040 instructions line 1t |
+| Arkansas | Omitted the 50% exclusion of net capital gain (100% above $10 million) | 2025 Form AR1000D lines 7a-8; Act 1 of 2023 |
+| Kansas, Louisiana, West Virginia | Treated New York government pensions as exempt state systems; both states exempt only federal plans and their own named systems | Kansas 2025 booklet Schedule S line A14; Louisiana R-1306 and IT-540 instructions (codes 02E-06E); West Virginia 2025 booklet, "Certain State and Federal Retirement Systems" |
 | Wisconsin | Omitted the 30% exclusion of net capital gain from assets held over one year | 2025 Schedule WD instructions |
 | Missouri | Omitted the 100% capital gains subtraction (RSMo 143.121, effective for tax years from 2025), which also lowers the AGI that tests the private pension deduction | MO-A line 18; Department of Revenue year-changes page and FAQ |
 
@@ -65,7 +70,9 @@ joint standard deduction ($6,800, exactly twice the confirmed single figure).
 
 Federal-AGI starting points deserve a check in every state: a state that does not follow a federal adjustment (401(k) deferrals, IRA deduction, capital loss deduction) needs an add-back, as Pennsylvania and New Jersey do. Not yet checked for the remaining states.
 
-Capital-gain preferences: most modules ignored them. Modeled now: Massachusetts, Vermont, Montana, New Mexico, North Dakota, Hawaii, Missouri (100% subtraction), South Carolina (44%) and Wisconsin (30%). Disclosed but not modeled: Arizona (25% of long-term gains on assets acquired after 2011, needs acquisition dates) and Arkansas (50% of net capital gain, and 100% above $10 million; Ark. Code 26-51-815 as summarized by a 2018 legislative task force, so confirm the 2026 text on the AR1000D before modeling). A planner with per-lot acquisition dates could add Arizona.
+Capital-gain preferences: most modules ignored them. Modeled now: Massachusetts, Vermont, Montana, New Mexico, North Dakota, Hawaii, Missouri (100% subtraction), South Carolina (44%), Wisconsin (30%) and Arkansas (50%). Arkansas is modeled too (50% of net capital gain, 100% above $10 million, per the 2025 AR1000D). Disclosed but not modeled: Arizona (25% of long-term gains on assets acquired after 2011, needs acquisition dates). A planner with per-lot acquisition dates could add Arizona.
+
+Age cutoffs: many modules test age with ageAtYearEnd (calendar-year age), which differs from the federal and several state rules only for someone born exactly on January 1 (65 on the prior December 31 under the IRS, California, Virginia, Mississippi and DC rules). Virginia, Mississippi, California and DC now use the January 1 rule; the rest stay on calendar-year age and are right except for that one birthday (not checked state by state).
 
 Likewise check every module for personal exemptions and for each age rule's exact cutoff date: Maryland and Virginia had no exemptions at all. A keyword scan of the modules on 2026-10-04 plus spot checks (Arkansas, Delaware, Kentucky, Montana, New York, South Carolina) found no other module missing an exemption it should model, but amounts in the other modules were not re-derived.
 
@@ -119,6 +126,7 @@ and the Social Security age requirement removed; Washington income tax from 2028
 - **Contingent cuts:** Kansas SB 269 (look for the notice about the following tax year each autumn), Indiana from
   2030, North Carolina's revenue triggers, Oklahoma HB 2764 triggers, Georgia HB 463 step-downs, Mississippi from
   2031.
+- **Proposed, not enacted:** Delaware HS 1/HS 2 for HB 13 (new 6.75%/6.85%/6.95% brackets above $125,000, slightly lower middle rates, taxable years after 2025); the Division of Revenue still prints the old schedule for 2026.
 - **Unresolved, disclosed:**
   - DC conformity: whether the standard deduction is the federal figure or the decoupled TCJA figure, and
     whether the $6,000 senior deduction applies. Status after the Congress disapproval, the expired temporary

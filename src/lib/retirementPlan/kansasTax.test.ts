@@ -54,6 +54,12 @@ describe("restricted Kansas annual settlement", () => {
     expect(ks.stateTax).toBe(0);
   });
 
+  it("taxes a New York government pension, which is another state's system, but excludes other-government ones", () => {
+    const pension = (pensionType: "ny-government" | "other-government") => kansasTax(input({ income: [{ ownerId: "one", kind: "pension", amount: 30000, pensionType }] }), 30000, 0);
+    expect(pension("ny-government").ksAgi).toBe(30000);
+    expect(pension("other-government").ksAgi).toBe(0);
+  });
+
   it("fully taxes a private or unspecified pension", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", amount: 30000, pensionType: "private" }] });
     const ks = kansasTax(terms, 30000, 0);

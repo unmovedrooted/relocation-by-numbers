@@ -27,6 +27,11 @@ import { ageAtYearEnd } from "./rules";
  *   spouse.
  *   https://revenuefiles.delaware.gov/2025/PITForms_Instructions/Instructions/PIT-RES_Instructions_2025-01.pdf
  *
+ * Not enacted (checked 2026-10-04): House Substitute 1 and 2 for HB 13 ("John Kowalko, Jr., Fairness in Taxation Act")
+ * would cut the 2.2%-5.55% rates slightly and add 6.75%/6.85%/6.95% brackets above $125,000/$250,000/$500,000 for
+ * taxable years after 2025, but HS 2 sat in committee (last action 2025-06-17) and the Division of Revenue's 2026
+ * estimated-tax instructions still print the schedule below, so it is not modeled. Re-check each session.
+ *
  * Uses enacted law, not a prediction of future legislation. Each owner's own
  * attributed 401(k)/IRA/annuity distributions are, for an owner 60 or older,
  * combined with that owner's own

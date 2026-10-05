@@ -362,14 +362,14 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const il = location && input.state === "il" ? illinoisTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const nj = location && input.state === "nj" ? newJerseyTax(input, agi, taxableBenefits, account.retirementOrdinary, iraDeduction + capitalDeduction) : null;
   const pa = location && input.state === "pa" ? pennsylvaniaTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase, wages, pretaxDeferrals + iraDeduction + capitalDeduction) : null;
-  const co = location && input.state === "co" ? coloradoTax(input, agi, taxableBenefits, taxableIncome) : null;
+  const co = location && input.state === "co" ? coloradoTax(input, agi, taxableBenefits, taxableIncome, account.retirementOrdinary, account.additionalTaxBase) : null;
   const nm = location && input.state === "nm" ? newMexicoTax(input, agi, taxableBenefits, standardDeduction, preferredCapital) : null;
   const mn = location && input.state === "mn" ? minnesotaTax(input, agi, taxableBenefits, taxExemptInterest) : null;
   const ut = location && input.state === "ut" ? utahTax(input, agi, taxableBenefits, taxExemptInterest, standardDeduction) : null;
   const ct = location && input.state === "ct" ? connecticutTax(input, agi, taxableBenefits, taxExemptInterest, account.retirementOrdinary) : null;
   const vt = location && input.state === "vt" ? vermontTax(input, agi, taxableBenefits, taxExemptInterest, preferredCapital, taxableIncome) : null;
   const mt = location && input.state === "mt" ? montanaTax(input, agi, standardDeduction, seniorDeduction, preferredCapital) : null;
-  const ri = location && input.state === "ri" ? rhodeIslandTax(input, agi, taxableBenefits, taxExemptInterest) : null;
+  const ri = location && input.state === "ri" ? rhodeIslandTax(input, agi, taxableBenefits, taxExemptInterest, account.retirementOrdinary) : null;
   const ca = location && input.state === "ca" ? californiaTax(input, agi, taxableBenefits) : null;
   const va = location && input.state === "va" ? virginiaTax(input, agi, taxableBenefits) : null;
   const az = location && input.state === "az" ? arizonaTax(input, agi, taxableBenefits, seniorDeduction) : null;
@@ -393,7 +393,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const mo = location && input.state === "mo" ? missouriTax(input, agi, taxableBenefits, standardDeduction, account.retirementOrdinary, capitalIncome) : null;
   const wa = location && input.state === "wa" ? washingtonTax(input, lt, agi, st, capitalDeduction) : null;
   const al = location && input.state === "al" ? alabamaTax(input, agi, taxableBenefits, regularFederal, alternativeMinimumTax, niit, cityBase) : null;
-  const ar = location && input.state === "ar" ? arkansasTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase) : null;
+  const ar = location && input.state === "ar" ? arkansasTax(input, agi, taxableBenefits, account.retirementOrdinary, account.additionalTaxBase, preferredCapital) : null;
   const de = location && input.state === "de" ? delawareTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;
   const ks = location && input.state === "ks" ? kansasTax(input, agi, taxableBenefits) : null;
   const ky = location && input.state === "ky" ? kentuckyTax(input, agi, taxableBenefits, account.retirementOrdinary) : null;

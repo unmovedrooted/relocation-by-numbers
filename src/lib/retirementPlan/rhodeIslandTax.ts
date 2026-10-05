@@ -1,6 +1,7 @@
 import { sumBrackets, type FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
 import { stateSocialSecurityInclusion } from "./stateSocialSecurityCoverage";
+import { ownerRetirementIncome } from "./ownerRetirementIncome";
 
 /** Restricted, own-standard-deduction, PRE-CREDIT planning estimate. Rates and
  * thresholds reviewed 2026-09-24 against the Rhode Island Division of
@@ -31,7 +32,10 @@ import { stateSocialSecurityInclusion } from "./stateSocialSecurityCoverage";
  *   share by gross benefits and excluding only a qualifying owner's own
  *   share. The pension modification is per owner (up to $50,000 of income
  *   entered as annual pension for that owner alone), summed across owners
- *   who individually qualify.
+ *   who individually qualify. Per the Division's Retirement Income Tax Guide (PUB 2024-01, read 2026-10-04) the
+ *   modification also covers 401(k), 403(b), 457(b), profit-sharing and annuity-contract income reported on Form
+ *   1040 line 5b, and never IRA income (line 4b) of any kind, so the owner's own attributed 401(k), plan-conversion
+ *   and annuity distributions join that owner's pension income under the same $50,000 cap.
  *   https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-12/2025%201040R%20Instructions%20122025.pdf
  *
  * 2026 session (checked 2026-10-04): Article 6 of the FY2027 budget, 2026-H 7127 Substitute A as amended
@@ -71,6 +75,8 @@ const PHASE_LOWER = 261000;
 const PHASE_INCREMENT = 7450;
 const MODIFICATION_THRESHOLD: Record<FilingStatus, number> = { single: 107000, married: 133750 };
 const PENSION_CAP_PER_PERSON = 50000;
+/** Line 5b sources: workplace plans and annuities qualify; every IRA source does not. */
+const PLAN_SOURCES = ["401k", "roth-401k", "plan-conversion", "annuity"];
 const SURTAX_THRESHOLD = 1000000;
 
 /** 44-30-2.6(c)(3)(A)(I)(2): 1% for 2027, 2% for 2028, 3% from 2029; none before 2027. */
@@ -104,7 +110,7 @@ function phaseFraction(modifiedAgi: number) {
   return steps > 4 ? 0 : 1 - steps * 0.2;
 }
 
-export function rhodeIslandTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, taxExemptInterest: number) {
+export function rhodeIslandTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, taxExemptInterest: number, retirementOrdinary = 0) {
   if (input.rhodeIslandContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Rhode Island planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Rhode Island projection year.");
   const grossBenefits = input.income.filter(item => item.kind === "social-security").reduce((sum, item) => sum + item.amount, 0);
@@ -119,12 +125,15 @@ export function rhodeIslandTax(input: HouseholdTaxInput, federalAgi: number, tax
     federallyTaxableBenefits: taxableBenefits, ri: { owners },
   });
   const socialSecuritySubtraction = taxableBenefits - ssResult.taxableBenefits!;
+  ownerRetirementIncome(input, retirementOrdinary, "Rhode Island"); // fails closed unless the owner-level records reconcile
+  const planIncome = (ownerId: string) => (input.retirementIncome ?? [])
+    .filter(item => item.ownerId === ownerId && PLAN_SOURCES.includes(item.source)).reduce((sum, item) => sum + item.amount, 0);
   const threshold = MODIFICATION_THRESHOLD[input.filing];
   const pensionSubtraction = federalAgi < threshold
     ? input.people.reduce((sum, person) => {
         if (!reachedFullRetirementAge(person.birthDate, input.year)) return sum;
         const pension = input.income.filter(item => item.kind === "pension" && item.ownerId === person.id).reduce((s, item) => s + item.amount, 0);
-        return sum + Math.min(pension, PENSION_CAP_PER_PERSON);
+        return sum + Math.min(pension + planIncome(person.id), PENSION_CAP_PER_PERSON);
       }, 0)
     : 0;
   const modifiedAgi = federalAgi + taxExemptInterest - socialSecuritySubtraction - pensionSubtraction;
@@ -139,7 +148,7 @@ export function rhodeIslandTax(input: HouseholdTaxInput, federalAgi: number, tax
       + "by 20% for each $7,450 (or part) of modified federal AGI over $261,000, and to zero above $290,800, as the Division's "
       + "phase-out worksheet specifies). Pension/401(k)/annuity income (entered as annual "
       + "pension, capped at $50,000 per owner) is excluded only for an owner who has reached SSA full retirement age "
-      + "(computed from birth year, not day-precise), and Social Security is excluded likewise through 2026 and without the age "
+      + "(computed from birth year, not day-precise). " + "It also counts each owner's own attributed 401(k), 403(b), workplace-plan conversion and nonqualified annuity distributions, which the Division lists as qualifying pension and annuity income, but not IRA income of any kind (traditional, Roth, SEP or SIMPLE), which it says never qualifies." + " Social Security is excluded likewise through 2026 and without the age "
       + "requirement from 2027 (2026 budget), in each case while household federal AGI stays under $107,000 (single/MFS/HOH) or "
       + "$133,750 (married-joint); these dollar thresholds are Rhode Island's most recently published (2025) figures, since "
       + "2026 figures were not yet published as of this review. All entered tax-exempt interest is added back as Rhode "

@@ -83,6 +83,27 @@ describe("restricted Arkansas annual settlement", () => {
     expect(ar.retirementExclusion).toBe(6000);
   });
 
+  it("excludes half of net capital gain, and everything above $10,000,000 (AR1000D)", () => {
+    const exclusion = (gain: number) => arkansasTax(input(), 100000 + gain, 0, 0, 0, gain).capitalGainExclusion;
+    expect(exclusion(0)).toBe(0);
+    expect(exclusion(40000)).toBe(20000);
+    expect(exclusion(10000000)).toBe(5000000);
+    // Line 7b caps the half-taxed amount at $10,000,000; the $2,000,000 above it is exempt in full.
+    expect(exclusion(12000000)).toBe(5000000 + 2000000);
+    expect(() => arkansasTax(input(), 0, 0, 0, 0, -1)).toThrow(/capital gain/);
+  });
+
+  it("taxes only half the gain in the household engine, and short-term gains in full", () => {
+    const wages = [{ ownerId: "one", kind: "wages" as const, amount: 60000 }];
+    const base = estimateHouseholdTax(input({ income: wages }));
+    const longTerm = estimateHouseholdTax(input({ income: wages, accountIncome: taxCharacter({ longTermGain: 20000 }) }));
+    const shortTerm = estimateHouseholdTax(input({ income: wages, accountIncome: taxCharacter({ shortTermGain: 20000 }) }));
+    const manual = (gainTaxed: number) => arkansasTax(input({ income: wages }), 60000 + gainTaxed, 0, 0, 0, 0).stateTax;
+    expect(longTerm.stateTax).toBeCloseTo(manual(10000), 6);
+    expect(shortTerm.stateTax).toBeCloseTo(manual(20000), 6);
+    expect(longTerm.stateTax).toBeGreaterThan(base.stateTax);
+  });
+
   it("requires explicit confirmation of the restricted Arkansas assumptions", () => {
     expect(() => arkansasTax(input({ arkansasContract: undefined }), 0, 0, 0, 0)).toThrow(/Confirm/);
   });

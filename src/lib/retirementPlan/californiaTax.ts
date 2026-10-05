@@ -1,6 +1,5 @@
 import { sumBrackets, type FilingStatus } from "../tax";
 import type { HouseholdTaxInput } from "./householdTax";
-import { ageAtYearEnd } from "./rules";
 
 /** Restricted, exemption-credit, PRE-CREDIT (aside from the exemption credits
  * themselves) planning estimate. Rates and thresholds reviewed 2026-09-24
@@ -67,7 +66,8 @@ function exemptionCreditTotal(input: HouseholdTaxInput, federalAgi: number) {
   for (const person of input.people) {
     count += 1;
     if (person.blind) count += 1;
-    if (ageAtYearEnd(person.birthDate, input.year) >= 65) count += 1;
+    // FTB (2025 Form 540, line 9): 65 by December 31, and a January 1 65th birthday counts as the prior December 31.
+    if (person.birthDate <= `${input.year - 64}-01-01`) count += 1;
   }
   const excess = Math.max(0, federalAgi - EXEMPTION_PHASE_THRESHOLD[input.filing]);
   const reductionPerCredit = Math.ceil(excess / EXEMPTION_PHASE_STEP[input.filing]) * 6;

@@ -100,6 +100,25 @@ describe("restricted Rhode Island annual settlement", () => {
     expect(ri.pensionSubtraction).toBe(50000);
   });
 
+  it("counts 401(k), plan-conversion and annuity distributions toward the pension modification, but never IRA income", () => {
+    const retiree = { id: "one", birthDate: "1950-01-01", blind: false, eligibleForSeniorDeduction: true };
+    const record = (source: "401k" | "roth-401k" | "plan-conversion" | "annuity" | "traditional-ira" | "ira-conversion" | "roth-ira", amount: number) =>
+      ({ ownerId: "one", date: "2026-06-01", source, amount });
+    const subtraction = (records: ReturnType<typeof record>[], pension = 0) => {
+      const total = records.reduce((sum, item) => sum + item.amount, 0);
+      return rhodeIslandTax(input({ people: [retiree], income: pension ? [{ ownerId: "one", kind: "pension", amount: pension }] : [],
+        retirementIncome: records, accountIncome: taxCharacter({ retirementOrdinary: total }) }), 60000, 0, 0, total).pensionSubtraction;
+    };
+    expect(subtraction([record("401k", 20000)])).toBe(20000);
+    expect(subtraction([record("annuity", 12000), record("plan-conversion", 8000)])).toBe(20000);
+    expect(subtraction([record("traditional-ira", 20000)])).toBe(0);
+    expect(subtraction([record("ira-conversion", 5000), record("roth-ira", 5000)])).toBe(0);
+    // Pension and 401(k) share the $50,000 per-owner cap; the IRA part never counts.
+    expect(subtraction([record("401k", 30000), record("traditional-ira", 40000)], 35000)).toBe(50000);
+    // Owner-level records that do not reconcile fail closed.
+    expect(() => rhodeIslandTax(input({ people: [retiree], retirementIncome: [record("401k", 1000)] }), 60000, 0, 0, 0)).toThrow(/reconciled/);
+  });
+
   it("does not exclude pension income for an owner under full retirement age", () => {
     const terms = input({ people: [{ id: "one", birthDate: "1995-01-01", blind: false, eligibleForSeniorDeduction: true }],
       income: [{ ownerId: "one", kind: "pension", amount: 30000 }] });

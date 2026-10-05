@@ -36,6 +36,35 @@ describe("restricted Colorado annual settlement", () => {
     expect(co.stateTax).toBeCloseTo(Math.max(0, 20000 - 24000) * .044, 6);
   });
 
+  it("counts an owner's IRA and 401(k) distributions toward the pension cap, but not the early-distribution portion", () => {
+    const older = { ...input().people[0], birthDate: "1955-01-01" };
+    const ira = (amount: number, early = 0) => ({ ownerId: "one", date: "2026-06-01", source: "traditional-ira" as const, amount, earlyDistributionTaxable: early });
+    // 18000 of IRA income plus 10000 of pension: 28000 is capped at 24000.
+    const withBoth = input({ people: [older], income: [{ ownerId: "one", kind: "pension", amount: 10000 }],
+      retirementIncome: [ira(18000)], accountIncome: taxCharacter({ retirementOrdinary: 18000 }) });
+    expect(coloradoTax(withBoth, 28000, 0, 28000, 18000, 0).pensionSubtraction).toBe(24000);
+    // IRA income alone is subtracted.
+    const iraOnly = input({ people: [older], retirementIncome: [ira(15000)], accountIncome: taxCharacter({ retirementOrdinary: 15000 }) });
+    expect(coloradoTax(iraOnly, 15000, 0, 15000, 15000, 0).pensionSubtraction).toBe(15000);
+    // A premature distribution (here 5000 of 15000 subject to the federal early-distribution tax) does not qualify.
+    const early = input({ people: [older], retirementIncome: [ira(15000, 5000)], accountIncome: taxCharacter({ retirementOrdinary: 15000, additionalTaxBase: 5000 }) });
+    expect(coloradoTax(early, 15000, 0, 15000, 15000, 5000).pensionSubtraction).toBe(10000);
+    // Each spouse's distributions are measured against that spouse's own cap.
+    const couple = input({ filing: "married", people: [{ ...older, id: "one" }, { ...older, id: "two" }],
+      retirementIncome: [ira(30000), { ...ira(10000), ownerId: "two" }], accountIncome: taxCharacter({ retirementOrdinary: 40000 }) });
+    expect(coloradoTax(couple, 40000, 0, 40000, 40000, 0).pensionSubtraction).toBe(24000 + 10000);
+  });
+
+  it("flows IRA income through the household engine to a lower Colorado tax", () => {
+    const older = { ...input().people[0], birthDate: "1955-01-01" };
+    const base = { people: [older], retirementIncome: [{ ownerId: "one", date: "2026-06-01", source: "traditional-ira" as const, amount: 60000 }],
+      accountIncome: taxCharacter({ retirementOrdinary: 60000 }) };
+    const withIra = estimateHouseholdTax(input(base));
+    // Colorado taxes federal taxable income less the capped $24,000 pension and annuity subtraction.
+    expect(withIra.taxableIncome).toBeGreaterThan(24000);
+    expect(withIra.stateTax).toBeCloseTo((withIra.taxableIncome - 24000) * .044, 6);
+  });
+
   it("grants the full $20,000 pension cap to an owner 55-64 with no Social Security", () => {
     const terms = input({ people: [{ ...input().people[0], birthDate: "1966-01-01" }], // turns 60 in 2026.
       income: [{ ownerId: "one", kind: "pension", amount: 30000 }] });

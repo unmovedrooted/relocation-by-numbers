@@ -1,6 +1,7 @@
 import type { HouseholdTaxInput } from "./householdTax";
 import { stateSocialSecurityInclusion } from "./stateSocialSecurityCoverage";
 import { ageAtYearEnd } from "./rules";
+import { ownerRetirementIncome } from "./ownerRetirementIncome";
 
 /** Restricted, federal-taxable-income-based, PRE-CREDIT planning estimate.
  * Rates and thresholds reviewed 2026-09-23 against:
@@ -36,6 +37,13 @@ import { ageAtYearEnd } from "./rules";
  * https://tax.colorado.gov/sites/tax/files/documents/ITT_Social_Security_Pensions_and_Annuities_Jan_2025.pdf
  * https://tax.colorado.gov/sites/tax/files/documents/Book104_2025.pdf
  *
+ * What counts as pension and annuity income (C.R.S. 39-22-104(4)(f), Legislative Council Staff evaluation 2021-TE20,
+ * read 2026-10-04): "amounts received as pensions or annuities from any source" included in federal AGI, which the statute
+ * says covers distributions from IRAs, 401(k) plans and other retirement accounts and from fully matured privately purchased
+ * annuities, but not premature distributions. So each owner's own attributed account distributions join that owner's pension
+ * income under the same cap, net of the portion subject to the federal early-distribution tax (a proxy for "premature").
+ * Senate Bill 25-136, which would have removed the caps from 2026, was postponed indefinitely on 2025-02-27.
+ *
  * Uses enacted law, not a prediction of future legislation. Only single and
  * married-filing-jointly are supported. No itemized deductions or credits,
  * including the separate senior/disabled property-tax-style credits, are
@@ -56,11 +64,12 @@ function incomeByOwner(input: HouseholdTaxInput, kind: "pension" | "social-secur
   return map;
 }
 
-export function coloradoTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, federalTaxableIncome: number) {
+export function coloradoTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, federalTaxableIncome: number, retirementOrdinary = 0, earlyDistributionBase = 0) {
   if (input.coloradoContract !== "verified-law-precredit") throw new RangeError("Confirm the restricted Colorado planning assumptions.");
   if (!Number.isInteger(input.year) || input.year < 2026 || input.year > 2126) throw new RangeError("Unsupported Colorado projection year.");
   const socialSecurityByOwner = incomeByOwner(input, "social-security");
   const pensionByOwner = incomeByOwner(input, "pension");
+  const accountByOwner = ownerRetirementIncome(input, retirementOrdinary, "Colorado", earlyDistributionBase);
   const grossBenefits = [...socialSecurityByOwner.values()].reduce((sum, value) => sum + value, 0);
   const ssResult = stateSocialSecurityInclusion({
     state: "co", year: input.year, futurePolicy: input.year > 2026 ? "hold-2026-law" : undefined,
@@ -74,7 +83,7 @@ export function coloradoTax(input: HouseholdTaxInput, federalAgi: number, taxabl
   let pensionSubtraction = 0;
   for (const person of input.people) {
     const age = ageAtYearEnd(person.birthDate, input.year);
-    const ownPension = pensionByOwner.get(person.id)!;
+    const ownPension = pensionByOwner.get(person.id)! + accountByOwner.get(person.id)!;
     if (age < 55) continue;
     // The owner's Social Security subtraction (line 3) reduces the pension cap (line 4) dollar for dollar.
     const ownShare = grossBenefits > 0 ? taxableBenefits * (socialSecurityByOwner.get(person.id)! / grossBenefits) : 0;
@@ -88,7 +97,7 @@ export function coloradoTax(input: HouseholdTaxInput, federalAgi: number, taxabl
     warning: "Colorado pre-credit estimate: enacted flat 4.40% rate applied to federal taxable income (reviewed 2026-09-23), "
       + "with no separate Colorado standard deduction. Social Security is fully subtracted for an owner 65 or older, or for "
       + "an owner 55-64 when household federal AGI is at or below $75,000 (single) or $95,000 (married); otherwise up to "
-      + "$20,000 per owner 55-64. Pension/annuity income (entered as annual pension) is separately subtracted, up to "
+      + "$20,000 per owner 55-64. Pension/annuity income (entered as annual pension, plus " + "each owner's own attributed IRA, 401(k) and annuity distributions other than the portion subject to the federal early-distribution tax" + ") is separately subtracted, up to "
       + "$24,000 per owner 65 or older, or up to $20,000 per owner 55-64, in each case reduced dollar for dollar by that "
       + "owner's own Social Security subtraction (Colorado's DR 0104 line 4 rule), so a large Social Security subtraction can "
       + "eliminate the pension subtraction. An owner under 55 receiving Social Security, or any pension for an owner under 55, is unsupported. "

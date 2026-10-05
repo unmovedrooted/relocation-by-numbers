@@ -44,6 +44,13 @@ describe("restricted DC annual settlement", () => {
     expect(dcTax(terms, 80000, 0).stateTax).toBeCloseTo(3657.25, 6);
   });
 
+  it("counts a January 1 65th birthday as age 65 for the federal-conforming additional deduction", () => {
+    const tax = (birthDate: string) => dcTax(input({ people: [{ ...input().people[0], birthDate }] }), 80000, 0).stateTax;
+    // For 2026 the cutoff is January 1, 1962: that owner gets the extra $2,050, the next day's birthday does not.
+    expect(tax("1962-01-01")).toBeCloseTo(3657.25, 6);
+    expect(tax("1962-01-02")).toBeGreaterThan(3657.25);
+  });
+
   it("grants the additional standard deduction for a blind owner", () => {
     // Standard deduction = 16100 + 2050 (single) = 18150. Taxable = 100000-18150 = 81850.
     // Tax: 10000*.04 + 30000*.06 + 20000*.065 + 21850*.085 = 400+1800+1300+1857.25 = 5357.25.

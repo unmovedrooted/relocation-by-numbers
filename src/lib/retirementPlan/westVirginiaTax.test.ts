@@ -68,6 +68,13 @@ describe("restricted West Virginia annual settlement", () => {
     expect(wv.governmentPensionExclusion).toBe(2000);
   });
 
+  it("gives a New York government pension no exclusion, since it is another state's system, but keeps other-government ones", () => {
+    const exclusion = (pensionType: "ny-government" | "other-government") =>
+      westVirginiaTax(input({ income: [{ ownerId: "one", kind: "pension", amount: 5000, pensionType }] }), 5000, 0, 0).governmentPensionExclusion;
+    expect(exclusion("ny-government")).toBe(0);
+    expect(exclusion("other-government")).toBe(2000);
+  });
+
   it("fully taxes a private or unspecified pension", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "pension", amount: 5000, pensionType: "private" }] });
     const wv = westVirginiaTax(terms, 5000, 0, 0);

@@ -41,8 +41,11 @@ import { ageAtYearEnd } from "./rules";
  * from Kansas income tax (line A14) cover KPERS, the state's other named
  * government retirement systems, and federal civil service/military
  * retirement; this planner maps that to any pension income with a
- * federal-government, other-government or ny-government pensionType.
- * A private or unspecified pensionType, and this planner's aggregate
+ * federal-government or other-government pensionType. Per the 2025 booklet (Schedule S line A14, read 2026-10-04)
+ * the exempt plans are federal ones plus named Kansas systems (KPERS, Kansas Police and Firemen's, Kansas Teachers',
+ * Highway Patrol, Justices and Judges, Board of Public Utilities, Overland Park police and fire, Board of Regents
+ * annuities), so an ny-government pension is taxable, and an other-government pension is assumed to be a Kansas
+ * system. A private or unspecified pensionType, and this planner's aggregate
  * 401(k)/IRA/annuity distribution figure, are fully taxable in Kansas --
  * neither qualifies for the "specifically exempt" retirement-benefit
  * subtraction. Itemized deductions and credits are excluded.
@@ -56,7 +59,7 @@ const LOW_RATE = .052;
 const HIGH_RATE = .0558;
 
 function isExemptPension(pensionType: HouseholdTaxInput["income"][number]["pensionType"]) {
-  return pensionType === "federal-government" || pensionType === "other-government" || pensionType === "ny-government";
+  return pensionType === "federal-government" || pensionType === "other-government";
 }
 
 export function kansasTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number) {
@@ -76,8 +79,8 @@ export function kansasTax(input: HouseholdTaxInput, federalAgi: number, taxableB
       + "-- 65 or older or blind -- for single filers and $700 per condition for married filers) and the consolidated "
       + "exemption allowance ($9,160 single/$18,320 married), not a prediction of future legislation. Senate Bill 269 of 2025 would cut these rates only if revenue and "
       + "reserve conditions are met (none for 2026); such contingent cuts are not assumed. Social Security is "
-      + "fully exempt. Income entered as annual pension with a federal-government, other-government or ny-government "
-      + "pensionType is treated as a specifically-exempt retirement benefit and fully excluded; a private or unspecified "
+      + "fully exempt. Income entered as annual pension with a federal-government or other-government "
+      + "pensionType is treated as a specifically-exempt retirement benefit and fully excluded. " + "A New York government pension is another state's system, which Kansas taxes, so it gets no exemption; an other-government pension is assumed to be a Kansas system, and one from another state would be taxable." + " A private or unspecified "
       + "pension, and this planner's aggregate 401(k)/IRA/annuity distribution figure, remain fully taxable. Only single "
       + "and married-filing-jointly are supported. Itemized deductions and credits are excluded.",
   };

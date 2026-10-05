@@ -57,7 +57,8 @@ const STATE_BRACKETS: { upTo: number; rate: number }[] = [
 function standardDeduction(input: HouseholdTaxInput, year: number) {
   let additional = 0;
   for (const person of input.people) {
-    if (person.birthDate <= `${year - 65}-12-31`) additional++;
+    // Same January 1 rule as the federal additional standard deduction DC conforms to: 65 on the day before the birthday.
+    if (person.birthDate <= `${year - 64}-01-01`) additional++;
     if (person.blind) additional++;
   }
   return STANDARD_DEDUCTION[input.filing] + additional * (input.filing === "married" ? 1650 : 2050);

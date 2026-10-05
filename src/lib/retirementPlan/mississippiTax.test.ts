@@ -30,6 +30,22 @@ describe("restricted Mississippi annual settlement", () => {
     expect(ms.stateTax).toBeCloseTo(taxable * 0.04, 6);
   });
 
+  it("takes an additional $1,500 for each taxpayer or spouse 65 or older and each who is blind", () => {
+    const owner = (id: string, extra: object) => ({ id, birthDate: "1990-01-01", blind: false, eligibleForSeniorDeduction: true, ...extra });
+    const additional = (people: ReturnType<typeof owner>[], filing: "single" | "married" = "single") =>
+      mississippiTax(input({ filing, people }), 80000, 0, 0, 0).additionalExemptions;
+    expect(additional([owner("one", {})])).toBe(0);
+    expect(additional([owner("one", { birthDate: "1950-01-01" })])).toBe(1500);
+    expect(additional([owner("one", { birthDate: "1950-01-01", blind: true })])).toBe(3000);
+    expect(additional([owner("one", { birthDate: "1950-01-01" }), owner("two", { blind: true })], "married")).toBe(3000);
+    // Age 65 on the day before the 65th birthday: a January 1 birthday in the next year still counts for 2026.
+    expect(additional([owner("one", { birthDate: "1962-01-01" })])).toBe(1500);
+    expect(additional([owner("one", { birthDate: "1962-01-02" })])).toBe(0);
+    // The exemption reduces taxable income before the exempt bracket: (80000 - 2300 - 6000 - 1500 - 10000) at 4%.
+    expect(mississippiTax(input({ people: [owner("one", { birthDate: "1950-01-01" })] }), 80000, 0, 0, 0).stateTax)
+      .toBeCloseTo((80000 - 2300 - 6000 - 1500 - 10000) * .04, 6);
+  });
+
   it("follows the enacted year-by-year rate schedule through 2030", () => {
     const terms = input({ income: [{ ownerId: "one", kind: "wages", amount: 80000 }] });
     const taxable = 80000 - 2300 - 6000 - 10000;
@@ -37,7 +53,9 @@ describe("restricted Mississippi annual settlement", () => {
     expect(mississippiTax(input({ ...terms, year: 2028 }), 80000, 0, 0, 0).stateTax).toBeCloseTo(taxable * 0.035, 6);
     expect(mississippiTax(input({ ...terms, year: 2029 }), 80000, 0, 0, 0).stateTax).toBeCloseTo(taxable * 0.0325, 6);
     expect(mississippiTax(input({ ...terms, year: 2030 }), 80000, 0, 0, 0).stateTax).toBeCloseTo(taxable * 0.03, 6);
-    expect(mississippiTax(input({ ...terms, year: 2050 }), 80000, 0, 0, 0).stateTax).toBeCloseTo(taxable * 0.03, 6);
+    // The default owner (born 1975) is 75 in 2050 and would get the age exemption, so use a younger one.
+    const young = [{ id: "one", birthDate: "1995-01-01", blind: false, eligibleForSeniorDeduction: true }];
+    expect(mississippiTax(input({ ...terms, year: 2050, people: young }), 80000, 0, 0, 0).stateTax).toBeCloseTo(taxable * 0.03, 6);
   });
 
   it("excludes Social Security from the Mississippi tax base", () => {
