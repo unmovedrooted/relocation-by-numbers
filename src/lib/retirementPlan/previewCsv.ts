@@ -1,4 +1,5 @@
 import type { CsvRow } from "../csvExport";
+import { PLANNER_NOTICE } from "./plannerNotice";
 import type { calculatePreview } from "./preview";
 
 /** Whole cents, with no -0 and none of the float noise (e.g. 0.30000000000000004) the engine's sums carry. */
@@ -26,4 +27,9 @@ export function projectionCsvRows(result: ReturnType<typeof calculatePreview>, s
     Shortfall: csvCents(row.result.cash.shortfall),
     "Ending assets": csvCents(row.endingPortfolio),
   }));
+}
+
+/** The exported file ends with a text row carrying the planning-estimate notice, so it travels with the numbers. */
+export function withPlannerNotice(rows: CsvRow[]): CsvRow[] {
+  return rows.length === 0 ? rows : [...rows, { Year: "Notice", State: PLANNER_NOTICE }];
 }

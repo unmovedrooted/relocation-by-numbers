@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PLANNER_NOTICE } from "@/lib/retirementPlan/plannerNotice";
 
 export const metadata: Metadata = {
   title: "Disclaimer",
@@ -46,6 +47,31 @@ export default function DisclaimerPage() {
             another, how a move may affect a monthly budget, or how lower expenses
             may change a FIRE timeline. They are not designed to predict exact
             personal outcomes.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+          Retirement planner estimates
+        </h2>
+
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
+          <p>{PLANNER_NOTICE}</p>
+
+          <p>
+            The Complete Retirement Plan projects taxes and withdrawals from the
+            figures you enter and from simplified, pre-credit models of each state&apos;s
+            income tax. It leaves out credits, itemized deductions, dependents and
+            many state-specific rules, and its results will differ from a filed
+            return. Using it does not create a professional relationship of any
+            kind between you and Relocation By Numbers.
+          </p>
+
+          <p>
+            Before you move, sell assets, convert retirement accounts or make any
+            other decision that depends on your taxes, talk to a certified public
+            accountant (CPA) or enrolled agent who can review your own situation.
           </p>
         </div>
       </section>

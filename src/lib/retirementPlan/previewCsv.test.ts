@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { rowsToCsv } from "../csvExport";
 import { calculatePreview, PREVIEW_DEFAULTS } from "./preview";
-import { csvCents, projectionCsvRows } from "./previewCsv";
+import { csvCents, projectionCsvRows, withPlannerNotice } from "./previewCsv";
+import { PLANNER_NOTICE } from "./plannerNotice";
 
 // The on-screen table formats every amount with exactly this formatter (RetirementPlanPreview.tsx `money`).
 const displayed = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
@@ -61,6 +62,19 @@ describe("projection CSV export", () => {
     expect(rows.reduce((sum, row) => sum + Number(row["Tax estimate"]), 0))
       .toBeCloseTo(result.years.reduce((sum, row) => sum + row.result.tax.total, 0), 0);
     if (values.spending === "150000.37") expect(rows.some(row => Number(row.Shortfall) > 0)).toBe(true);
+  });
+
+  it("ends the exported file with the planning-estimate notice, leaving the year rows untouched", () => {
+    const rows = projectionCsvRows(calculatePreview({ ...PREVIEW_DEFAULTS }), "fl", "");
+    const withNotice = withPlannerNotice(rows);
+    expect(withNotice).toHaveLength(rows.length + 1);
+    expect(withNotice.slice(0, rows.length)).toEqual(rows);
+    expect(withNotice[withNotice.length - 1]).toEqual({ Year: "Notice", State: PLANNER_NOTICE });
+    expect(PLANNER_NOTICE).toMatch(/CPA or enrolled agent/);
+    const parsed = parseCsv(rowsToCsv(withNotice));
+    expect(parsed[parsed.length - 1][0]).toBe("Notice");
+    expect(parsed[parsed.length - 1][1]).toBe(PLANNER_NOTICE);
+    expect(withPlannerNotice([])).toEqual([]);
   });
 
   it("exports whole cents with no float noise or negative zero", () => {
