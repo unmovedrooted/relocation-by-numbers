@@ -369,7 +369,7 @@ export function estimateHouseholdTax(input: HouseholdTaxInput) {
   const ct = location && input.state === "ct" ? connecticutTax(input, agi, taxableBenefits, taxExemptInterest, account.retirementOrdinary) : null;
   const vt = location && input.state === "vt" ? vermontTax(input, agi, taxableBenefits, taxExemptInterest, preferredCapital, taxableIncome) : null;
   const mt = location && input.state === "mt" ? montanaTax(input, agi, standardDeduction, seniorDeduction, preferredCapital) : null;
-  const ri = location && input.state === "ri" ? rhodeIslandTax(input, agi, taxableBenefits, taxExemptInterest) : null;
+  const ri = location && input.state === "ri" ? rhodeIslandTax(input, agi, taxableBenefits, taxExemptInterest, account.retirementOrdinary) : null;
   const ca = location && input.state === "ca" ? californiaTax(input, agi, taxableBenefits) : null;
   const va = location && input.state === "va" ? virginiaTax(input, agi, taxableBenefits) : null;
   const az = location && input.state === "az" ? arizonaTax(input, agi, taxableBenefits, seniorDeduction) : null;
