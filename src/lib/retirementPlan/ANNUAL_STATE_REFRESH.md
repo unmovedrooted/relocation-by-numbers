@@ -56,7 +56,7 @@ agency's own worksheet instead of a summary:
 | Indiana | Applied the $16,000 civil service annuity deduction to every pension; Indiana allows it only for a nonmilitary federal civil service annuity, so it now needs the federal-government pension type | Department of Revenue, Deductions |
 | South Carolina | Omitted the 44% net capital gain deduction (S.C. Code 12-6-1150, unchanged by Act 110) | 2025 SC1040 instructions |
 | Mississippi | Omitted the additional $1,500 exemption for each taxpayer or spouse 65 or older and each who is blind | 2025 Resident Return instructions, lines 8-12 |
-| Kansas, Louisiana | Treated New York government pensions as exempt state systems; both states exempt only federal plans and their own named systems | Kansas 2025 booklet Schedule S line A14; Louisiana R-1306 and IT-540 instructions (codes 02E-06E) |
+| Kansas, Louisiana, West Virginia | Treated New York government pensions as exempt state systems; both states exempt only federal plans and their own named systems | Kansas 2025 booklet Schedule S line A14; Louisiana R-1306 and IT-540 instructions (codes 02E-06E); West Virginia 2025 booklet, "Certain State and Federal Retirement Systems" |
 | Wisconsin | Omitted the 30% exclusion of net capital gain from assets held over one year | 2025 Schedule WD instructions |
 | Missouri | Omitted the 100% capital gains subtraction (RSMo 143.121, effective for tax years from 2025), which also lowers the AGI that tests the private pension deduction | MO-A line 18; Department of Revenue year-changes page and FAQ |
 

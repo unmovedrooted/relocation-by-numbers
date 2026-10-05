@@ -25,9 +25,10 @@ import { ageAtYearEnd } from "./rules";
  * Virginia's further scheduled increase toward full exemption). The
  * modification for West Virginia Teachers' Retirement, West Virginia
  * Public Employees' Retirement and Federal Retirement is combined and
- * capped at $2,000 per owner; this planner maps that to any pension
- * income with a federal-government, other-government or ny-government
- * pensionType. West Virginia's separate, uncapped exemptions for state
+ * capped at $2,000 per owner (2025 booklet, "Certain State and Federal Retirement Systems", read 2026-10-04);
+ * this planner maps that to any pension income with a federal-government or other-government pensionType,
+ * assuming the latter is a West Virginia system. An ny-government pension is another state's system and gets
+ * no exclusion. West Virginia's separate, uncapped exemptions for state
  * or local police/deputy sheriff/firefighter retirement, federal law
  * enforcement retirement and military retirement are not modeled, since
  * this planner cannot distinguish those systems from other government
@@ -66,7 +67,7 @@ function marginal(amount: number, ceilings: number[], rates: number[]) {
 }
 
 function isGovernmentPension(pensionType: HouseholdTaxInput["income"][number]["pensionType"]) {
-  return pensionType === "federal-government" || pensionType === "other-government" || pensionType === "ny-government";
+  return pensionType === "federal-government" || pensionType === "other-government";
 }
 
 export function westVirginiaTax(input: HouseholdTaxInput, federalAgi: number, taxableBenefits: number, retirementOrdinary: number) {
@@ -103,8 +104,8 @@ export function westVirginiaTax(input: HouseholdTaxInput, federalAgi: number, ta
       + "personal exemption per person; West Virginia has no standard deduction. Social Security is fully excluded when "
       + "federal AGI does not exceed $50,000 single/$100,000 married filing jointly, and 65% excluded above that "
       + "threshold (West Virginia's own enacted, but not yet finalized for 2026, phase-in). Income entered as annual "
-      + "pension with a federal-government, other-government or ny-government pensionType is excluded up to $2,000 per "
-      + "owner, but West Virginia's separate, uncapped exemptions for police, firefighter, federal law enforcement and "
+      + "pension with a federal-government or other-government pensionType is excluded up to $2,000 per "
+      + "owner. " + "A New York government pension is another state's system, so it is not excluded here and counts as ordinary income for the $8,000 deduction; an other-government pension is assumed to be a West Virginia system (2025 booklet: only the West Virginia Public Employees' and Teachers' Retirement Systems and federal retirement qualify for the $2,000 modification)." + " But West Virginia's separate, uncapped exemptions for police, firefighter, federal law enforcement and "
       + "military retirement systems are not modeled. An owner 65 or older further excludes up to $8,000 of that owner's "
       + "own wages, private pension income and own attributed 401(k)/IRA/annuity distributions, "
       + "net of that owner's own Social Security and government-pension exclusions; investment income is not "
