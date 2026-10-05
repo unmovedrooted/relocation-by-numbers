@@ -162,6 +162,7 @@ export default function RetirementPlanPreview() {
         projected year by year across your household’s modeled horizon, for one or two people with independent retirement dates.
       </p>
       <p role="note" className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200">{PLANNER_NOTICE}</p>
+      <p className="text-sm text-slate-500 dark:text-slate-400">Example scenario shown. Replace it with your own numbers.</p>
     </header>
 
     <form onSubmit={submit} className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_440px] lg:items-start">
