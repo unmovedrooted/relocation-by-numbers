@@ -65,6 +65,11 @@ const nextConfig: NextConfig = {
         destination: "/cost-of-living/:cityId",
         permanent: true,
       },
+      {
+        source: "/international-relocation-calculator",
+        destination: "/international-relocation",
+        permanent: true,
+      },
     ];
   },
 };
