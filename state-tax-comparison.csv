@@ -1,0 +1,154 @@
+State,Agency,Form,Household,Federal AGI,Taxable Social Security,State tax,Local tax,Total
+Florida,none,,A,67300,23800,0,0,0
+Florida,none,,B,163900,45900,0,0,0
+Florida,none,,C,137000,0,0,0,0
+Texas,none,,A,67300,23800,0,0,0
+Texas,none,,B,163900,45900,0,0,0
+Texas,none,,C,137000,0,0,0,0
+Alaska,none,,A,67300,23800,0,0,0
+Alaska,none,,B,163900,45900,0,0,0
+Alaska,none,,C,137000,0,0,0,0
+Nevada,none,,A,67300,23800,0,0,0
+Nevada,none,,B,163900,45900,0,0,0
+Nevada,none,,C,137000,0,0,0,0
+South Dakota,none,,A,67300,23800,0,0,0
+South Dakota,none,,B,163900,45900,0,0,0
+South Dakota,none,,C,137000,0,0,0,0
+Tennessee,none,,A,67300,23800,0,0,0
+Tennessee,none,,B,163900,45900,0,0,0
+Tennessee,none,,C,137000,0,0,0,0
+Wyoming,none,,A,67300,23800,0,0,0
+Wyoming,none,,B,163900,45900,0,0,0
+Wyoming,none,,C,137000,0,0,0,0
+New Hampshire,none,,A,67300,23800,0,0,0
+New Hampshire,none,,B,163900,45900,0,0,0
+New Hampshire,none,,C,137000,0,0,0,0
+Alabama,Alabama DOR,Form 40,A,67300,23800,1079,0,1079
+Alabama,Alabama DOR,Form 40,B,163900,45900,3243,0,3243
+Alabama,Alabama DOR,Form 40,C,137000,0,5842,0,5842
+Arizona,Arizona DOR,Form 140,A,67300,23800,535,0,535
+Arizona,Arizona DOR,Form 140,B,163900,45900,1824,0,1824
+Arizona,Arizona DOR,Form 140,C,137000,0,2620,0,2620
+Arkansas,Arkansas DFA,AR1000F,A,67300,23800,900,0,900
+Arkansas,Arkansas DFA,AR1000F,B,163900,45900,2852,0,2852
+Arkansas,Arkansas DFA,AR1000F,C,137000,0,4378,0,4378
+California,California FTB,Form 540,A,67300,23800,570,0,570
+California,California FTB,Form 540,B,163900,45900,2853,0,2853
+California,California FTB,Form 540,C,137000,0,4509,0,4509
+Colorado,Colorado DOR,DR 0104,A,67300,23800,843,0,843
+Colorado,Colorado DOR,DR 0104,B,163900,45900,2942,0,2942
+Colorado,Colorado DOR,DR 0104,C,137000,0,4611,0,4611
+Connecticut,CT Dept. of Revenue Services,CT-1040,A,67300,23800,0,0,0
+Connecticut,CT Dept. of Revenue Services,CT-1040,B,163900,45900,6083,0,6083
+Connecticut,CT Dept. of Revenue Services,CT-1040,C,137000,0,6435,0,6435
+Delaware,Delaware Division of Revenue,PIT-RES,A,67300,23800,795,0,795
+Delaware,Delaware Division of Revenue,PIT-RES,B,163900,45900,3923,0,3923
+Delaware,Delaware Division of Revenue,PIT-RES,C,137000,0,7267,0,7267
+District of Columbia,DC Office of Tax and Revenue,D-40,A,67300,23800,1321,0,1321
+District of Columbia,DC Office of Tax and Revenue,D-40,B,163900,45900,5413,0,5413
+District of Columbia,DC Office of Tax and Revenue,D-40,C,137000,0,7308,0,7308
+Georgia,Georgia DOR,Form 500,A,67300,23800,0,0,0
+Georgia,Georgia DOR,Form 500,B,163900,45900,150,0,150
+Georgia,Georgia DOR,Form 500,C,137000,0,5339,0,5339
+Hawaii,Hawaii Dept. of Taxation,N-11,A,67300,23800,681,0,681
+Hawaii,Hawaii Dept. of Taxation,N-11,B,163900,45900,3039,0,3039
+Hawaii,Hawaii Dept. of Taxation,N-11,C,137000,0,6735,0,6735
+Idaho,Idaho State Tax Commission,Form 40,A,67300,23800,1082,0,1082
+Idaho,Idaho State Tax Commission,Form 40,B,163900,45900,2750,0,2750
+Idaho,Idaho State Tax Commission,Form 40,C,137000,0,5031,0,5031
+Illinois,Illinois DOR,IL-1040,A,67300,23800,0,0,0
+Illinois,Illinois DOR,IL-1040,B,163900,45900,997,0,997
+Illinois,Illinois DOR,IL-1040,C,137000,0,6492,0,6492
+Indiana,Indiana DOR,IT-40,A,67300,23800,1224,838,2062
+Indiana,Indiana DOR,IT-40,B,163900,45900,3363,2303,5666
+Indiana,Indiana DOR,IT-40,C,137000,0,3983,2727,6710
+Iowa,Iowa DOR,IA 1040,A,67300,23800,0,0,0
+Iowa,Iowa DOR,IA 1040,B,163900,45900,0,0,0
+Iowa,Iowa DOR,IA 1040,C,137000,0,3902,0,3902
+Kansas,Kansas DOR,K-40,A,67300,23800,1580,0,1580
+Kansas,Kansas DOR,K-40,B,163900,45900,3175,0,3175
+Kansas,Kansas DOR,K-40,C,137000,0,5988,0,5988
+Kentucky,Kentucky DOR,Form 740,A,67300,23800,316,0,316
+Kentucky,Kentucky DOR,Form 740,B,163900,45900,2106,0,2106
+Kentucky,Kentucky DOR,Form 740,C,137000,0,4560,0,4560
+Louisiana,Louisiana DOR,IT-540,A,67300,23800,559,0,559
+Louisiana,Louisiana DOR,IT-540,B,163900,45900,1148,0,1148
+Louisiana,Louisiana DOR,IT-540,C,137000,0,3338,0,3338
+Maine,Maine Revenue Services,1040ME,A,67300,23800,0,0,0
+Maine,Maine Revenue Services,1040ME,B,163900,45900,2023,0,2023
+Maine,Maine Revenue Services,1040ME,C,137000,0,5891,0,5891
+Maryland,Comptroller of Maryland,Form 502,A,67300,23800,1653,1149,2802
+Maryland,Comptroller of Maryland,Form 502,B,163900,45900,4926,3354,8280
+Maryland,Comptroller of Maryland,Form 502,C,137000,0,5771,3923,9694
+Massachusetts,Massachusetts DOR,Form 1,A,67300,23800,1920,0,1920
+Massachusetts,Massachusetts DOR,Form 1,B,163900,45900,3890,0,3890
+Massachusetts,Massachusetts DOR,Form 1,C,137000,0,6410,0,6410
+Michigan,Michigan Treasury,MI-1040,A,67300,23800,0,0,0
+Michigan,Michigan Treasury,MI-1040,B,163900,45900,689,0,689
+Michigan,Michigan Treasury,MI-1040,C,137000,0,5321,0,5321
+Minnesota,Minnesota DOR,M1,A,67300,23800,1402,0,1402
+Minnesota,Minnesota DOR,M1,B,163900,45900,8141,0,8141
+Minnesota,Minnesota DOR,M1,C,137000,0,6529,0,6529
+Mississippi,Mississippi DOR,80-105,A,67300,23800,0,0,0
+Mississippi,Mississippi DOR,80-105,B,163900,45900,0,0,0
+Mississippi,Mississippi DOR,80-105,C,137000,0,4016,0,4016
+Missouri,Missouri DOR,MO-1040,A,67300,23800,1011,0,1011
+Missouri,Missouri DOR,MO-1040,B,163900,45900,2390,0,2390
+Missouri,Missouri DOR,MO-1040,C,137000,0,3805,0,3805
+Montana,Montana DOR,Form 2,A,67300,23800,1755,0,1755
+Montana,Montana DOR,Form 2,B,163900,45900,4704,0,4704
+Montana,Montana DOR,Form 2,C,137000,0,4693,0,4693
+Nebraska,Nebraska DOR,1040N,A,67300,23800,1006,0,1006
+Nebraska,Nebraska DOR,1040N,B,163900,45900,3455,0,3455
+Nebraska,Nebraska DOR,1040N,C,137000,0,4474,0,4474
+New Jersey,NJ Division of Taxation,NJ-1040,A,67300,23800,0,0,0
+New Jersey,NJ Division of Taxation,NJ-1040,B,163900,45900,1271,0,1271
+New Jersey,NJ Division of Taxation,NJ-1040,C,137000,0,4684,0,4684
+New Mexico,NM Taxation and Revenue,PIT-1,A,67300,23800,815,0,815
+New Mexico,NM Taxation and Revenue,PIT-1,B,163900,45900,5358,0,5358
+New Mexico,NM Taxation and Revenue,PIT-1,C,137000,0,4202,0,4202
+New York,NY Dept. of Taxation and Finance,IT-201,A,67300,23800,672,0,672
+New York,NY Dept. of Taxation and Finance,IT-201,B,163900,45900,1393,0,1393
+New York,NY Dept. of Taxation and Finance,IT-201,C,137000,0,6394,0,6394
+North Carolina,NC DOR,D-400,A,67300,23800,1227,0,1227
+North Carolina,NC DOR,D-400,B,163900,45900,3691,0,3691
+North Carolina,NC DOR,D-400,C,137000,0,4449,0,4449
+North Dakota,ND Tax Commissioner,ND-1,A,67300,23800,0,0,0
+North Dakota,ND Tax Commissioner,ND-1,B,163900,45900,0,0,0
+North Dakota,ND Tax Commissioner,ND-1,C,137000,0,273,0,273
+Ohio,Ohio Dept. of Taxation,IT 1040,A,67300,23800,503,0,503
+Ohio,Ohio Dept. of Taxation,IT 1040,B,163900,45900,2756,0,2756
+Ohio,Ohio Dept. of Taxation,IT 1040,C,137000,0,3279,0,3279
+Oklahoma,Oklahoma Tax Commission,Form 511,A,67300,23800,962,0,962
+Oklahoma,Oklahoma Tax Commission,Form 511,B,163900,45900,3319,0,3319
+Oklahoma,Oklahoma Tax Commission,Form 511,C,137000,0,5074,0,5074
+Oregon,Oregon DOR,OR-40,A,67300,23800,2433,0,2433
+Oregon,Oregon DOR,OR-40,B,163900,45900,7711,0,7711
+Oregon,Oregon DOR,OR-40,C,137000,0,9549,0,9549
+Pennsylvania,PA Dept. of Revenue,PA-40,A,67300,23800,46,0,46
+Pennsylvania,PA Dept. of Revenue,PA-40,B,163900,45900,860,0,860
+Pennsylvania,PA Dept. of Revenue,PA-40,C,137000,0,4666,2568,7234
+Rhode Island,RI Division of Taxation,RI-1040,A,67300,23800,564,0,564
+Rhode Island,RI Division of Taxation,RI-1040,B,163900,45900,5402,0,5402
+Rhode Island,RI Division of Taxation,RI-1040,C,137000,0,4124,0,4124
+South Carolina,SC DOR,SC1040,A,67300,23800,417,0,417
+South Carolina,SC DOR,SC1040,B,163900,45900,2675,0,2675
+South Carolina,SC DOR,SC1040,C,137000,0,4960,0,4960
+Utah,Utah State Tax Commission,TC-40,A,67300,23800,1811,0,1811
+Utah,Utah State Tax Commission,TC-40,B,163900,45900,6613,0,6613
+Utah,Utah State Tax Commission,TC-40,C,137000,0,5459,0,5459
+Vermont,Vermont Dept. of Taxes,IN-111,A,67300,23800,1835,0,1835
+Vermont,Vermont Dept. of Taxes,IN-111,B,163900,45900,5821,0,5821
+Vermont,Vermont Dept. of Taxes,IN-111,C,137000,0,4210,0,4210
+Virginia,Virginia Tax,Form 760,A,67300,23800,951,0,951
+Virginia,Virginia Tax,Form 760,B,163900,45900,5322,0,5322
+Virginia,Virginia Tax,Form 760,C,137000,0,6507,0,6507
+Washington,Washington DOR,excise returns (no wage income tax filing),A,67300,23800,0,0,0
+Washington,Washington DOR,excise returns (no wage income tax filing),B,163900,45900,0,0,0
+Washington,Washington DOR,excise returns (no wage income tax filing),C,137000,0,0,0,0
+West Virginia,WV State Tax Division,IT-140,A,67300,23800,1521,0,1521
+West Virginia,WV State Tax Division,IT-140,B,163900,45900,5068,0,5068
+West Virginia,WV State Tax Division,IT-140,C,137000,0,5294,0,5294
+Wisconsin,Wisconsin DOR,Form 1,A,67300,23800,161,0,161
+Wisconsin,Wisconsin DOR,Form 1,B,163900,45900,2912,0,2912
+Wisconsin,Wisconsin DOR,Form 1,C,137000,0,5763,0,5763
