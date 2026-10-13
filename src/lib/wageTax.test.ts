@@ -344,3 +344,100 @@ describe("published-versus-held labels", () => {
     }
   });
 });
+
+describe("employee-paid state payroll programs (2026, agency pages read 2026-10-13)", () => {
+  const payroll = (state: StateCode, gross: number, filing: "single" | "married" = "single", earnerWages?: number[]) =>
+    estimateNetBreakdown({ grossAnnual: gross, state, filing, k401Pct: 0, earnerWages }).statePayroll;
+
+  it("California SDI is 1.3% of all wages with no cap (EDD DE 201)", () => {
+    expect(payroll("ca", 100_000)).toBeCloseTo(1_300, 2);
+    expect(payroll("ca", 1_000_000)).toBeCloseTo(13_000, 2);
+  });
+
+  it("New Jersey: UI and workforce fund on the first 44,800, disability and family leave on the first 171,100", () => {
+    // 100,000: 0.3825% x 44,800 + 0.0425% x 44,800 + 0.19% x 100,000 + 0.23% x 100,000.
+    expect(payroll("nj", 100_000)).toBeCloseTo(171.36 + 19.04 + 190 + 230, 2);
+    // Above the cap: 171.36 + 19.04 + 325.09 + 393.53 (the maximums the state prints).
+    expect(payroll("nj", 300_000)).toBeCloseTo(171.36 + 19.04 + 325.09 + 393.53, 2);
+  });
+
+  it("New York: Paid Family Leave 0.432% capped at 411.91, plus disability at most 60 cents a week", () => {
+    expect(payroll("ny", 50_000)).toBeCloseTo(216 + 31.2, 2);
+    expect(payroll("ny", 100_000)).toBeCloseTo(411.91 + 31.2, 2);
+  });
+
+  it("Washington: paid leave employee share (1.13% x 71.43%) to the 184,500 cap, and WA Cares 0.58% uncapped", () => {
+    expect(payroll("wa", 100_000)).toBeCloseTo(100_000 * 0.0113 * 0.7143 + 580, 2);
+    expect(payroll("wa", 250_000)).toBeCloseTo(184_500 * 0.0113 * 0.7143 + 1_450, 2);
+  });
+
+  it("Oregon: Paid Leave Oregon 0.6% to the 184,500 cap and the 0.1% statewide transit tax", () => {
+    expect(payroll("or", 100_000)).toBeCloseTo(600 + 100, 2);
+    expect(payroll("or", 300_000)).toBeCloseTo(0.006 * 184_500 + 300, 2);
+  });
+
+  it("other paid-leave states use the published employee share and cap", () => {
+    expect(payroll("co", 100_000)).toBeCloseTo(440, 2);
+    expect(payroll("ct", 100_000)).toBeCloseTo(500, 2);
+    expect(payroll("ma", 100_000)).toBeCloseTo(460, 2);
+    expect(payroll("mn", 100_000)).toBeCloseTo(440, 2);
+    expect(payroll("mn", 400_000)).toBeCloseTo(0.0044 * 185_000, 2);
+    expect(payroll("me", 100_000)).toBeCloseTo(500, 2);
+    expect(payroll("de", 100_000)).toBeCloseTo(400, 2);
+    expect(payroll("ct", 400_000)).toBeCloseTo(0.005 * 184_500, 2);
+  });
+
+  it("Hawaii is capped at 7.50 a week, Rhode Island at 1.1% of 100,000, Alaska at 0.5% of 54,200, Pennsylvania 0.07% uncapped", () => {
+    expect(payroll("hi", 50_000)).toBeCloseTo(250, 2);
+    expect(payroll("hi", 200_000)).toBeCloseTo(390, 2);
+    expect(payroll("ri", 80_000)).toBeCloseTo(880, 2);
+    expect(payroll("ri", 500_000)).toBeCloseTo(1_100, 2);
+    expect(payroll("ak", 100_000)).toBeCloseTo(271, 2);
+    expect(payroll("pa", 100_000)).toBeCloseTo(70, 2);
+    expect(payroll("pa", 1_000_000)).toBeCloseTo(700, 2);
+  });
+
+  it("has no employee payroll programs elsewhere in 2026, including Maryland (starts 2027) and DC", () => {
+    const withPrograms = new Set(["ca", "nj", "ny", "wa", "or", "co", "ct", "ma", "mn", "me", "de", "hi", "ri", "ak", "pa"]);
+    for (const s of STATES) {
+      if (withPrograms.has(s.code)) continue;
+      expect(payroll(s.code, 250_000), s.name).toBe(0);
+    }
+  });
+
+  it("applies each earner's own caps on a joint return when the split is given", () => {
+    // Two 50,000 earners in New Jersey: each pays UI and workforce on 44,800; disability and family leave on all wages.
+    const split = payroll("nj", 100_000, "married", [50_000, 50_000]);
+    expect(split).toBeCloseTo(2 * (171.36 + 19.04) + 190 + 230, 2);
+    expect(payroll("nj", 100_000, "married")).toBeCloseTo(171.36 + 19.04 + 190 + 230, 2);
+    // Social Security applies to each worker up to the wage base.
+    const two = estimateNetBreakdown({ grossAnnual: 300_000, state: "tx", filing: "married", k401Pct: 0, earnerWages: [150_000, 150_000] });
+    expect(two.fica).toBeCloseTo(300_000 * 0.062 + 300_000 * 0.0145 + 50_000 * 0.009, 2);
+    const pooled = estimateNetBreakdown({ grossAnnual: 300_000, state: "tx", filing: "married", k401Pct: 0 });
+    expect(pooled.fica).toBeCloseTo(184_500 * 0.062 + 300_000 * 0.0145 + 50_000 * 0.009, 2);
+  });
+
+  it("ignores a split that does not add up to the wages, and a split on a single return", () => {
+    const base = payroll("nj", 100_000, "married");
+    expect(payroll("nj", 100_000, "married", [10_000, 10_000])).toBeCloseTo(base, 2);
+    expect(payroll("nj", 100_000, "single", [50_000, 50_000])).toBeCloseTo(payroll("nj", 100_000, "single"), 2);
+  });
+
+  it("includes the programs in total tax and take-home pay", () => {
+    const r = estimateNetBreakdown({ grossAnnual: 100_000, state: "ca", filing: "single", k401Pct: 0 });
+    expect(r.totalTax).toBeCloseTo(r.federal + r.fica + r.state + r.local + r.statePayroll, 6);
+    expect(r.net).toBeCloseTo(r.after401k - r.totalTax, 6);
+    expect(r.statePayrollLines.map((l) => l.id)).toEqual(["ca-sdi"]);
+  });
+
+  it("never lowers the payroll deduction as wages rise", () => {
+    for (const s of STATES) {
+      let previous = -1;
+      for (let gross = 0; gross <= 400_000; gross += 5_000) {
+        const value = payroll(s.code, gross);
+        expect(value).toBeGreaterThanOrEqual(previous - 1e-9);
+        previous = value;
+      }
+    }
+  });
+});

@@ -2,6 +2,7 @@ import type { FilingStatus } from "./tax";
 import { sumBrackets } from "./tax";
 import type { StateCode } from "./states";
 import { CONTRIBUTION_LIMITS_2026, FEDERAL_2026, PAYROLL_2026, TAX_YEAR } from "./taxYear2026";
+import { statePayrollLines, statePayrollTotal, type PayrollLine } from "./statePayrollPrograms";
 import type { CityIncomeBase } from "./retirementPlan/cityIncomeTax";
 import type { HouseholdTaxInput } from "./retirementPlan/householdTax";
 import { alabamaTax } from "./retirementPlan/alabamaTax";
@@ -73,6 +74,10 @@ export type TaxBreakdown = {
   fica: number;
   state: number;
   local: number;
+  /** Employee-paid state payroll programs (SDI, paid family leave, WA Cares and similar). Included in totalTax. */
+  statePayroll: number;
+  /** The same amount broken out by program. */
+  statePayrollLines: PayrollLine[];
   totalTax: number;
   net: number;
 };
@@ -90,6 +95,12 @@ export type TaxOpts = {
    * grossAnnual should add each spouse's capped amount and pass the sum here.
    */
   k401Dollar?: number;
+  /**
+   * Optional wages of each earner when a joint return combines two incomes. Social Security tax and the
+   * state payroll programs apply to each worker's own wages (each has its own wage cap), so pass them
+   * when you know the split. When omitted, grossAnnual is treated as one worker's pay.
+   */
+  earnerWages?: readonly number[];
 };
 
 function clamp(n: number, min: number, max: number) {
@@ -107,14 +118,15 @@ export function getFederalBrackets(filing: FilingStatus): { upTo: number; rate: 
 }
 
 /**
- * Social Security and Medicare on combined wages, treated as one worker's pay (the wage base applies once).
- * Callers that need two earners compute each earner separately and add the results.
+ * Social Security applies to each worker's own wages up to the wage base; Medicare and the Additional Medicare
+ * tax apply to the household's combined wages. Without a per-earner split, grossWages is one worker's pay.
  */
-function ficaTax(grossWages: number, filing: FilingStatus): number {
-  const wages = Math.max(0, grossWages);
-  const ss = Math.min(wages, PAYROLL_2026.socialSecurityWageBase) * PAYROLL_2026.socialSecurityRate;
-  const medicare = wages * PAYROLL_2026.medicareRate;
-  const addl = Math.max(0, wages - PAYROLL_2026.additionalMedicareThreshold[filing]) * PAYROLL_2026.additionalMedicareRate;
+function ficaTax(earnerWages: readonly number[], filing: FilingStatus): number {
+  const earners = earnerWages.map((w) => Math.max(0, w));
+  const total = earners.reduce((sum, w) => sum + w, 0);
+  const ss = earners.reduce((sum, w) => sum + Math.min(w, PAYROLL_2026.socialSecurityWageBase), 0) * PAYROLL_2026.socialSecurityRate;
+  const medicare = total * PAYROLL_2026.medicareRate;
+  const addl = Math.max(0, total - PAYROLL_2026.additionalMedicareThreshold[filing]) * PAYROLL_2026.additionalMedicareRate;
   return ss + medicare + addl;
 }
 
@@ -301,7 +313,13 @@ function compute(opts: TaxOpts): TaxBreakdown {
   const standardDeduction = getFederalStandardDeduction(opts.filing);
   const taxableFederal = Math.max(0, after401k - standardDeduction);
   const federal = sumBrackets(taxableFederal, FEDERAL_2026.brackets[opts.filing]);
-  const fica = ficaTax(gross, opts.filing);
+  // Per-earner wages, only for a joint return where the caller knows the split and it matches the total.
+  const given = opts.filing === "married" && opts.earnerWages && opts.earnerWages.length > 0
+    ? opts.earnerWages.map((w) => Math.max(0, Number(w) || 0)) : null;
+  const earners = given && Math.abs(given.reduce((a, b) => a + b, 0) - gross) < 1 ? given : [gross];
+  const fica = ficaTax(earners, opts.filing);
+  const payrollLines = earners.flatMap((w) => statePayrollLines(opts.state, w));
+  const statePayroll = statePayrollTotal(opts.state, earners);
 
   const ctx: WageContext = {
     filing: opts.filing,
@@ -317,9 +335,18 @@ function compute(opts: TaxOpts): TaxBreakdown {
     : { stateTax: 0, localTax: 0 };
   const local = localTax + (gross > 0 ? extraLocalTax(opts.state, opts.cityId, ctx, stateTax) : 0);
 
-  const totalTax = federal + fica + stateTax + local;
+  const totalTax = federal + fica + stateTax + local + statePayroll;
   const net = Math.max(0, after401k - totalTax);
-  return { gross, k401, after401k, taxableFederal, federal, fica, state: stateTax, local, totalTax, net };
+  // Combine lines for the same program across earners.
+  const merged = new Map<string, PayrollLine>();
+  for (const line of payrollLines) {
+    const existing = merged.get(line.id);
+    merged.set(line.id, existing ? { ...existing, amount: existing.amount + line.amount } : line);
+  }
+  return {
+    gross, k401, after401k, taxableFederal, federal, fica, state: stateTax, local,
+    statePayroll, statePayrollLines: [...merged.values()], totalTax, net,
+  };
 }
 
 /** Annual net take-home only. */

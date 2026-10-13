@@ -157,7 +157,7 @@ function estimateCombinedNet(
     const k401_1 = Math.min(income1 * (k401Pct1 / 100), EMPLOYEE_401K_LIMIT)
     const k401_2 = Math.min(income2 * (k401Pct2 / 100), EMPLOYEE_401K_LIMIT)
     const combined = income1 + income2
-    return estimateNetAnnual({ grossAnnual: combined, state, filing: 'married', k401Pct: 0, k401Dollar: k401_1 + k401_2, cityId })
+    return estimateNetAnnual({ grossAnnual: combined, state, filing: 'married', k401Pct: 0, k401Dollar: k401_1 + k401_2, earnerWages: [income1, income2], cityId })
   }
   const net1 = estimateNetAnnual({ grossAnnual: income1, state, filing: 'single', k401Pct: k401Pct1, cityId })
   const net2 = estimateNetAnnual({ grossAnnual: income2, state, filing: 'single', k401Pct: k401Pct2, cityId })
@@ -558,7 +558,7 @@ export default function RelocationIncomeCalculator() {
       const k401_1 = Math.min(i1 * (k1 / 100), EMPLOYEE_401K_LIMIT)
       const k401_2 = Math.min(i2 * (k2 / 100), EMPLOYEE_401K_LIMIT)
       const combined = i1 + i2
-      const bd = estimateNetBreakdown({ grossAnnual: combined, state: targetState, filing: 'married', k401Pct: 0, k401Dollar: k401_1 + k401_2, cityId: targetCityId })
+      const bd = estimateNetBreakdown({ grossAnnual: combined, state: targetState, filing: 'married', k401Pct: 0, k401Dollar: k401_1 + k401_2, earnerWages: [i1, i2], cityId: targetCityId })
       taxesTwo = bd.totalTax
     } else if (i2 > 0) {
       const bd1 = estimateNetBreakdown({ grossAnnual: i1, state: targetState, filing: 'single', k401Pct: k1, cityId: targetCityId })
@@ -1343,7 +1343,7 @@ export default function RelocationIncomeCalculator() {
 
             <TaxAssumptionsNote states={[currentState, targetState]} className="text-center" />
             <p className="text-center text-xs text-slate-400 dark:text-slate-600">
-              Planning estimates only · Tax figures based on {TAX_YEAR} federal brackets and each state&apos;s published rules · State payroll deductions (such as CA SDI or NY PFL) are not included · Not financial advice
+              Planning estimates only · Tax figures based on {TAX_YEAR} federal brackets and each state&apos;s published rules · Employee-paid state payroll programs (such as CA SDI or NY PFL) are included where the state has them · Not financial advice
             </p>
 
           </div>

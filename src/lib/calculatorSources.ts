@@ -29,7 +29,7 @@ const US_TAX_EXCLUSIONS = [
   "Wages only: no self-employment, investment, capital-gain or other non-wage income.",
   "Standard deduction only; no itemized deductions, tax credits (dependents, education, earned income and others) or alternative minimum tax.",
   "Single and married-filing-jointly only; no head of household or married filing separately.",
-  "State payroll deductions such as CA SDI, NJ, NY PFL, WA Cares and Oregon paid leave and transit tax are not included.",
+  "Employers may pay some or all of a state paid-leave program's employee share; the calculators assume the largest employee share the law allows.",
   "Local income taxes cover a resident who works in the same city; commuter taxes and credits for tax paid to another city are not included.",
 ];
 
@@ -48,7 +48,7 @@ export type CalculatorInfo = Readonly<{
 const FIRE_INFO = (name: string): CalculatorInfo => ({
   name,
   taxDriven: true,
-  sources: [RP_2025_32, PUB_15, STATE_SOURCES_LINK],
+  sources: [RP_2025_32, PUB_15, STATE_SOURCES_LINK, PAYROLL_PROGRAMS_LINK],
   notes: ["Savings, returns, inflation, spending and withdrawal rate are your assumptions."],
   exclusions: [
     "Taxes use a simplified state-specific model, not a filing-ready return.",
@@ -57,7 +57,8 @@ const FIRE_INFO = (name: string): CalculatorInfo => ({
   ],
 });
 
-const TAXES = [RP_2025_32, PUB_15, FORM_8959, STATE_SOURCES_LINK, LOCAL_SOURCES_LINK];
+const PAYROLL_PROGRAMS_LINK: SourceRef = { label: "Employee-paid state payroll programs included, with rates and sources", url: "/methodology#state-payroll" };
+const TAXES = [RP_2025_32, PUB_15, FORM_8959, STATE_SOURCES_LINK, LOCAL_SOURCES_LINK, PAYROLL_PROGRAMS_LINK];
 
 export const CALCULATOR_INFO: Readonly<Record<string, CalculatorInfo>> = Object.freeze({
   "/": { name: "US Relocation & Take-Home Calculator", taxDriven: true, sources: TAXES, notes: [HOUSING_NOTE],
@@ -67,7 +68,7 @@ export const CALCULATOR_INFO: Readonly<Record<string, CalculatorInfo>> = Object.
   "/paycheck-calculator": { name: "Paycheck Calculator", taxDriven: true, sources: TAXES,
     exclusions: [...US_TAX_EXCLUSIONS, "Health-premium and HSA pre-tax deductions, additional withholding and bonus withholding rules are not modeled; this estimates the tax owed for the year, not employer withholding."] },
   "/income-tax-calculator": { name: "Income Tax Calculator", taxDriven: true, sources: [RP_2025_32, STATE_SOURCES_LINK],
-    exclusions: ["Federal income tax only (state is an optional add-on); no Social Security or Medicare tax.", "No credits, qualified business income deduction, alternative minimum tax or capital-gain rates.", ...US_TAX_EXCLUSIONS.slice(2)] },
+    exclusions: ["Federal income tax only (state is an optional add-on); no Social Security or Medicare tax.", "No credits, qualified business income deduction, alternative minimum tax or capital-gain rates.", US_TAX_EXCLUSIONS[2], US_TAX_EXCLUSIONS[4]] },
   "/401k-calculator": { name: "401(k) Calculator", taxDriven: true, sources: [NOTICE_2025_67, RP_2025_32, PUB_15, STATE_SOURCES_LINK],
     exclusions: ["The rule that requires higher earners' catch-up contributions to be Roth is not modeled.", "Plan-specific limits, vesting and compensation caps are not modeled.", "Investment returns are assumptions, and the Monte Carlo range is illustrative, not a forecast.", ...US_TAX_EXCLUSIONS.slice(0, 2)] },
   "/hsa-calculator": { name: "HSA Calculator", taxDriven: true, sources: [RP_2025_19, PUB_969, RP_2025_32, PUB_15, STATE_SOURCES_LINK],

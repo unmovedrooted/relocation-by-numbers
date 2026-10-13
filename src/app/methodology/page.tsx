@@ -3,6 +3,7 @@ import Link from "next/link";
 import { STATES } from "../../lib/states";
 import { STATE_RULE_NOTES, taxRulesVerifiedLabel, PAYROLL_PROGRAMS_NOTE, TAX_YEAR } from "../../lib/taxRuleNotes";
 import { CALCULATOR_INFO, LOCAL_TAX_SOURCES, STATE_TAX_SOURCES } from "../../lib/calculatorSources";
+import { STATE_PAYROLL_PROGRAMS } from "../../lib/statePayrollPrograms";
 import type { StateCode } from "../../lib/states";
 
 export const metadata: Metadata = {
@@ -162,6 +163,24 @@ export default function MethodologyPage() {
               </ul>
             </div>
 
+            <div id="state-payroll">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">State payroll programs included</h3>
+              <p className="mt-2">{PAYROLL_PROGRAMS_NOTE}</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6">
+                {STATE_PAYROLL_PROGRAMS.map((p) => (
+                  <li key={p.id}>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">{STATES.find((st) => st.code === p.state)?.name}: {p.name}</span>{" "}
+                    {String(parseFloat((p.rate * 100).toFixed(4)))}%
+                    {p.wageCap !== undefined ? ` of the first $${p.wageCap.toLocaleString("en-US")}` : " of all wages"}
+                    {p.maxAnnual !== undefined ? `, at most $${p.maxAnnual.toLocaleString("en-US", { maximumFractionDigits: 2 })} a year` : ""}
+                    {p.employerMayPay ? " (employer may pay)" : ""}
+                    {p.status === "not-independently-confirmed" ? " (not independently confirmed)" : ""}.{" "}
+                    <a href={p.source.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{p.source.label}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             <div>
               <h3 className="font-semibold text-slate-900 dark:text-slate-100">Local income taxes modeled</h3>
               <p className="mt-2">
@@ -176,7 +195,7 @@ export default function MethodologyPage() {
             <div>
               <h3 className="font-semibold text-slate-900 dark:text-slate-100">Not included</h3>
               <p className="mt-2">
-                {PAYROLL_PROGRAMS_NOTE} Also not included: itemized deductions, tax credits for dependents and
+                Not included: itemized deductions, tax credits for dependents and
                 education, the Roth-only rule for high earners&apos; 401(k) catch-up contributions, and capital gains or
                 other non-wage income in the paycheck, relocation and comparison tools. Washington&apos;s income tax on
                 high earners, enacted in 2026, applies to income from 2028 and is not part of {TAX_YEAR} results.

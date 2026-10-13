@@ -1,4 +1,5 @@
-import type { StateCode } from "./states";
+import { STATES, type StateCode } from "./states";
+import { STATES_WITH_PAYROLL_PROGRAMS } from "./statePayrollPrograms";
 import { TAX_RULES_VERIFIED_ON, TAX_YEAR } from "./taxYear2026";
 
 /**
@@ -37,8 +38,10 @@ export function taxRulesVerifiedLabel(): string {
   return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
 }
 
-/** Short statement of what the calculators include and leave out. */
+const PAYROLL_STATE_NAMES = STATES.filter((s) => STATES_WITH_PAYROLL_PROGRAMS.has(s.code)).map((s) => s.name).join(", ");
+
+/** What the calculators do about employee-paid state payroll programs. */
 export const PAYROLL_PROGRAMS_NOTE =
-  "State disability, paid-family-leave and similar payroll deductions (such as CA SDI, NJ, NY PFL, WA Cares, Oregon paid leave and transit tax) are not included, so take-home pay in those states is lower than shown.";
+  `Employee-paid state payroll programs (state disability, paid family leave, long-term care and employee unemployment contributions) are included for ${PAYROLL_STATE_NAMES}, and assume your employer withholds the largest employee share the law allows. Maryland's program starts collecting in 2027.`;
 
 export { TAX_YEAR };

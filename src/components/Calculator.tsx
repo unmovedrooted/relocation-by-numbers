@@ -830,6 +830,9 @@ export default function Calculator({
       if (targetBreakdown.local > 0) {
         rows.push({ Metric: "Local tax withheld (to city, annual)", Value: money(targetBreakdown.local) });
       }
+      if (targetBreakdown.statePayroll > 0) {
+        rows.push({ Metric: "State payroll programs withheld (annual)", Value: money(targetBreakdown.statePayroll) });
+      }
     }
     if (negotiationEstimate && !negotiationEstimate.aheadOfTarget) {
       rows.push({ Metric: "Suggested negotiation ask", Value: money(negotiationEstimate.suggestedAsk) });
@@ -1262,9 +1265,15 @@ export default function Calculator({
                           <span className="font-semibold text-slate-900 dark:text-slate-100">{money(targetBreakdown.local)}</span>
                         </div>
                       )}
+                      {targetBreakdown.statePayroll > 0 && (
+                        <div className="flex justify-between">
+                          <span>State payroll programs (SDI, paid leave)</span>
+                          <span className="font-semibold text-slate-900 dark:text-slate-100">{money(targetBreakdown.statePayroll)}</span>
+                        </div>
+                      )}
                       <div className="mt-1 flex justify-between border-t border-slate-200 pt-1.5 font-semibold text-slate-900 dark:border-slate-800 dark:text-slate-100">
                         <span>Total taxes</span>
-                        <span>{money(targetBreakdown.federal + targetBreakdown.fica + targetBreakdown.state + targetBreakdown.local)}</span>
+                        <span>{money(targetBreakdown.federal + targetBreakdown.fica + targetBreakdown.state + targetBreakdown.local + targetBreakdown.statePayroll)}</span>
                       </div>
                       <div className="flex justify-between text-slate-500 dark:text-slate-400">
                         <span>Effective rate</span>

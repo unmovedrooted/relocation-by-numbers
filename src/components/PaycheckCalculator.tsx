@@ -131,6 +131,7 @@ export default function PaycheckCalculator() {
       { key: "fed", name: "Federal tax", value: b.federal, fill: "#f59e0b" },
       { key: "fica", name: "Social Security + Medicare", value: b.fica, fill: "#fb7185" },
       { key: "state", name: "State & local tax", value: stateLocal, fill: "#8b5cf6" },
+      { key: "payroll", name: "State payroll programs", value: b.statePayroll, fill: "#ec4899" },
       { key: "k401", name: "401(k)", value: b.k401, fill: "#0e7490" },
     ].filter((s) => s.value > 0.5);
 
@@ -141,6 +142,7 @@ export default function PaycheckCalculator() {
       { label: "Social Security + Medicare", annual: -b.fica, tone: "text-rose-500 dark:text-rose-400" },
       { label: "State income tax", annual: -b.state, tone: "text-violet-600 dark:text-violet-400" },
       ...(b.local > 0.5 ? [{ label: "Local income tax", annual: -b.local, tone: "text-violet-600 dark:text-violet-400" }] : []),
+      ...(b.statePayroll > 0.5 ? [{ label: "State payroll programs (SDI, paid leave)", annual: -b.statePayroll, tone: "text-pink-500 dark:text-pink-400" }] : []),
     ];
 
     return { grossAnnual, b, periods, stateLocal, effectiveTaxRate, takeHomePct, per, donut, rows };
@@ -164,6 +166,7 @@ export default function PaycheckCalculator() {
       { Metric: "Social Security + Medicare (annual)", Value: money(b.fica) },
       { Metric: "State income tax (annual)", Value: money(b.state) },
       { Metric: "Local income tax (annual)", Value: money(b.local) },
+      { Metric: "State payroll programs (annual)", Value: money(b.statePayroll) },
       { Metric: "Total tax (annual)", Value: money(b.totalTax) },
       { Metric: "Effective tax rate", Value: `${(results.effectiveTaxRate * 100).toFixed(1)}%` },
       { Metric: "Take-home pay (annual)", Value: money(b.net) },
@@ -276,7 +279,7 @@ export default function PaycheckCalculator() {
             </div>
             <TaxAssumptionsNote states={[state]} className="mt-3" />
             <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              Uses {TAX_YEAR} federal brackets, Social Security &amp; Medicare (FICA), state income tax with the standard deduction, and local city income tax where selected. Doesn&apos;t include health-premium or HSA pre-tax deductions. State disability, paid-family-leave and similar payroll deductions (such as CA SDI, NJ, NY PFL, WA Cares, Oregon paid leave and transit tax) are not included, so take-home pay in those states is lower than shown.
+              Uses {TAX_YEAR} federal brackets, Social Security &amp; Medicare (FICA), state income tax with the standard deduction, and local city income tax where selected. Doesn&apos;t include health-premium or HSA pre-tax deductions. Employee-paid state payroll programs (state disability, paid family leave and similar, such as CA SDI, NJ, NY PFL, WA Cares and Oregon paid leave) are included where the state has them, assuming your employer withholds the largest employee share the law allows.
             </div>
           </div>
         </div>
@@ -347,7 +350,7 @@ export default function PaycheckCalculator() {
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                Estimates use {TAX_YEAR} federal brackets, the standard deduction, Social Security (up to the wage base) and Medicare, and state income tax. They don&apos;t model pre-tax health or HSA deductions, additional withholdings, credits, or non-standard local taxes. State disability, paid-family-leave and similar payroll deductions (such as CA SDI, NJ, NY PFL, WA Cares, Oregon paid leave and transit tax) are not included, so take-home pay in those states is lower than shown. Not tax advice.
+                Estimates use {TAX_YEAR} federal brackets, the standard deduction, Social Security (up to the wage base) and Medicare, and state income tax. They don&apos;t model pre-tax health or HSA deductions, additional withholdings, credits, or non-standard local taxes. Employee-paid state payroll programs (state disability, paid family leave and similar, such as CA SDI, NJ, NY PFL, WA Cares and Oregon paid leave) are included where the state has them, assuming your employer withholds the largest employee share the law allows. Not tax advice.
               </div>
             </>
           )}
