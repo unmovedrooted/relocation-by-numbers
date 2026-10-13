@@ -1328,6 +1328,7 @@ export default function Calculator({
               hasCurrentIncome={currentSalary.trim() !== "" && nz(currentSalary) !== n(salary)}
               inputIds={MOVE_IDS}
               fireHref={fireHref}
+              retirementHref={`/retirement-state-tax?from=${fromState}&to=${toState}`}
             />
           )}
 

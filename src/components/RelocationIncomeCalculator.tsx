@@ -1223,6 +1223,7 @@ export default function RelocationIncomeCalculator() {
               toName={results.targetCityName}
               hasCurrentIncome={results.hasCurrentIncome}
               fireHref={results.fireHref}
+              retirementHref={`/retirement-state-tax?from=${currentState}&to=${targetState}`}
               inputIds={MOVE_INPUT_IDS}
             />
 

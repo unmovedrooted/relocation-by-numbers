@@ -137,11 +137,11 @@ const BIRTH_DATE = "1986-06-30"; // age 40 in 2026: no age-based additions apply
 // The state functions require a location they can rate (a county or city) and reject others. The state tax
 // does not depend on it, so a neutral location is used when the real city is not one they rate, and the local
 // tax from that neutral run is discarded.
-const NEUTRAL_CITY: Partial<Record<StateCode, string>> = {
+export const NEUTRAL_CITY: Partial<Record<StateCode, string>> = {
   pa: "allentown-pa", in: "indianapolis-in", md: "baltimore-md", ny: "ny-outside-nyc-yonkers",
 };
 
-const CONTRACTS = {
+export const CONTRACTS = {
   newYorkContract: "enacted-law-precredit",
   marylandContract: VERIFIED, indianaContract: VERIFIED, dcContract: VERIFIED, illinoisContract: VERIFIED,
   newJerseyContract: VERIFIED, coloradoContract: VERIFIED, newMexicoContract: VERIFIED, minnesotaContract: VERIFIED,
@@ -173,7 +173,7 @@ type WageContext = {
   regularFederal: number;
 };
 
-function oregonLocalFor(cityId: string | undefined) {
+export function oregonLocalFor(cityId: string | undefined) {
   // Portland sits inside both Metro and Multnomah County; Eugene, Salem and the rest of Oregon sit in neither.
   const inside = cityId === "portland-or";
   const where = inside ? "resident" : "outside-no-source";

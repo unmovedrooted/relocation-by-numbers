@@ -29,7 +29,7 @@ export const MOVE_INPUT_IDS: Record<string, string> = {
 const signed = (n: number) => (n >= 0 ? '+' : '−') + fmt(Math.abs(n))
 
 export default function MoveSummary({
-  move, fromName, toName, hasCurrentIncome, inputIds, fireHref,
+  move, fromName, toName, hasCurrentIncome, inputIds, fireHref, retirementHref,
 }: {
   move: MoveResult
   fromName: string
@@ -39,6 +39,8 @@ export default function MoveSummary({
   inputIds: Record<string, string>
   /** Link to the FIRE calculator prefilled with this move. */
   fireHref?: string
+  /** Link to the retirement-state tax view for the two states. */
+  retirementHref?: string
 }) {
   const e = move.expected
   const rows = [
@@ -135,13 +137,25 @@ export default function MoveSummary({
           The range changes only figures this site estimated: housing by 10%, living costs by 15% and one-time costs by 25%, in the worse direction for the low end and the better direction for the high end. Figures you typed do not move. These spreads are planning assumptions.
         </p>
 
-        {fireHref && (
-          <a
-            href={fireHref}
-            className="mt-4 inline-flex items-center rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-700"
-          >
-            See your FIRE number after this move →
-          </a>
+        {(fireHref || retirementHref) && (
+          <div className="mt-4 flex flex-wrap gap-3">
+            {fireHref && (
+              <a
+                href={fireHref}
+                className="inline-flex items-center rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-700"
+              >
+                See your FIRE number after this move →
+              </a>
+            )}
+            {retirementHref && (
+              <a
+                href={retirementHref}
+                className="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              >
+                How would retirement income be taxed there? →
+              </a>
+            )}
+          </div>
         )}
 
         {estimated.length > 0 && (
