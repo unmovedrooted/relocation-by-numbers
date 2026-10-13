@@ -379,7 +379,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
                 What is the cost of living in {city.name}?
               </dt>
               <dd className="mt-1">
-                The biggest drivers are usually housing, taxes, and transportation. This page uses planning estimates for rent, home prices, and tax context to help you compare {city.name} with other cities.
+                The biggest drivers are usually housing, taxes, and transportation. Rent, home price and property tax on this page come from the Census Bureau American Community Survey 2020-2024, and price levels from BEA Regional Price Parities 2024; budgets for other categories are planning assumptions.
               </dd>
             </div>
             <div>

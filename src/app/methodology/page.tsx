@@ -295,6 +295,16 @@ export default function MethodologyPage() {
             </p>
 
             <p>
+              City rent, home-price and property-tax defaults come from the U.S. Census Bureau American Community
+              Survey 2020-2024 (5-year estimates). Rent is what households that moved in during 2023 or later
+              pay, converted to the contract-rent basis (tables B25113, B25058 and B25064); home price is the
+              owner-reported value of homes bought in 2023 or later (B25109). Where that group is too small to be
+              reliable (margin of error above 25% of the estimate), the all-renter or all-owner median is used
+              instead, and the city page says which. The property-tax rate is median real estate taxes paid
+              divided by median home value (B25103 and B25077); a city without its own figure uses its state&apos;s.
+            </p>
+
+            <p>
               These housing calculations are designed for planning comparison only and do not
               represent a mortgage approval, underwriting decision, or final lender quote.
             </p>
@@ -311,6 +321,20 @@ export default function MethodologyPage() {
               Cost-of-living comparisons use location-specific assumptions for categories
               such as housing, groceries, utilities, transportation, healthcare, and
               other recurring living expenses when those inputs are available in the model.
+            </p>
+
+            <p>
+              City price levels come from the Bureau of Economic Analysis Regional Price Parities for 2024, which
+              compare a metro area (or the state, for cities outside a metro area) with the national average of
+              1.00. Housing uses the housing index and utilities the utilities index. BEA does not publish
+              separate indexes for groceries, transportation or healthcare, so groceries and transportation use
+              the goods index and healthcare uses the other-services index.
+            </p>
+
+            <p>
+              The national dollar budgets those indexes scale (groceries, utilities, transportation, healthcare,
+              childcare and miscellaneous), plus insurance, closing costs and state sales tax, are planning
+              assumptions rather than government figures.
             </p>
 
             <p>

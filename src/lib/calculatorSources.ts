@@ -21,7 +21,7 @@ const STATE_SOURCES_LINK: SourceRef = { label: "State income tax rules: the stat
 const LOCAL_SOURCES_LINK: SourceRef = { label: "Local income taxes modeled and their sources", url: "/methodology#tax-year-and-sources" };
 
 const HOUSING_NOTE =
-  "State property-tax, insurance and closing-cost defaults are planning averages (the code credits ATTOM, the Insurance Information Institute and CoreLogic public figures from 2023 to 2024), not a government dataset. City rent, home-price and cost-of-living defaults are planning estimates kept on this site and are not yet tied to a published government dataset such as Census American Community Survey data or BEA regional price parities.";
+  "City rent, home-price and property-tax defaults come from the Census Bureau American Community Survey 2020-2024 (tables B25113, B25109, B25058, B25064, B25077 and B25103). City price levels for housing, goods, utilities and other services come from BEA Regional Price Parities 2024. Insurance and closing-cost defaults, and the dollar budgets for groceries, utilities, transportation, healthcare and childcare, are planning assumptions, not government data; the price-level indexes only scale them by city.";
 const INTERNATIONAL_NOTE =
   "International tax and cost figures are planning assumptions last reviewed in March 2026. They were not part of the October 2026 U.S. tax refresh; verify them locally before a major decision.";
 
