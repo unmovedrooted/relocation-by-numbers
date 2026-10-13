@@ -1,3 +1,12 @@
+/**
+ * LEGACY 2025 PROXY ENGINE. Do not use for new work and do not read these values as current.
+ *
+ * The calculators now use src/lib/wageTax.ts (2026 federal rules plus the verified per-state functions in
+ * src/lib/retirementPlan). This file stays only because the retirement planner's "existing-2025-proxy" mode and
+ * its tests call it, and because it exports sumBrackets and the shared FilingStatus type. Its state tables are
+ * 2025 approximations (28 states use rough effective rates; California and Pennsylvania are treated alike for
+ * 401(k) deferrals). See STEP2-INVENTORY.md and STATE-WAGE-RULES-DRAFT.md.
+ */
 import type { StateCode } from "./states";
 
 export type FilingStatus = "single" | "married";

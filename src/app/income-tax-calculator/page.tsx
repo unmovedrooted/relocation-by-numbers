@@ -8,27 +8,27 @@ const PAGE_PATH = "/income-tax-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "Income Tax Calculator, Federal Tax, Brackets & Effective Rate (2025)",
+  title: "Income Tax Calculator, Federal Tax, Brackets & Effective Rate (2026)",
   description:
-    "Free federal income tax calculator. See your 2025 federal tax, effective and marginal rates, and a bracket-by-bracket breakdown of how your income is taxed, with an optional state add-on.",
+    "Free federal income tax calculator. See your 2026 federal tax, effective and marginal rates, and a bracket-by-bracket breakdown of how your income is taxed, with an optional state add-on.",
   keywords: [
     "income tax calculator",
     "federal income tax calculator",
     "tax bracket calculator",
     "effective tax rate calculator",
     "marginal tax rate calculator",
-    "2025 tax calculator",
+    "2026 tax calculator",
   ],
   alternates: { canonical: CANONICAL },
   openGraph: {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "Income Tax Calculator, Federal Tax, Brackets & Effective Rate (2025)",
-    description: "Your 2025 federal tax, effective and marginal rates, and a bracket-by-bracket breakdown.",
+    title: "Income Tax Calculator, Federal Tax, Brackets & Effective Rate (2026)",
+    description: "Your 2026 federal tax, effective and marginal rates, and a bracket-by-bracket breakdown.",
     locale: "en_US",
   },
-  twitter: { card: "summary", title: "Income Tax Calculator, Federal Tax, Brackets & Effective Rate (2025)", description: "Federal tax, effective/marginal rates, and a bracket breakdown.", site: "@relocationbynumbers" },
+  twitter: { card: "summary", title: "Income Tax Calculator, Federal Tax, Brackets & Effective Rate (2026)", description: "Federal tax, effective/marginal rates, and a bracket breakdown.", site: "@relocationbynumbers" },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" } },
 };
 
@@ -38,12 +38,12 @@ const webAppSchema = {
   name: "Income Tax Calculator",
   url: CANONICAL,
   description:
-    "Free federal income tax calculator showing 2025 federal tax, effective and marginal tax rates, and a bracket-by-bracket breakdown of taxable income, with an optional state income-tax add-on.",
+    "Free federal income tax calculator showing 2026 federal tax, effective and marginal tax rates, and a bracket-by-bracket breakdown of taxable income, with an optional state income-tax add-on.",
   applicationCategory: "FinanceApplication",
   operatingSystem: "Any",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   featureList: [
-    "2025 federal income tax and standard deduction",
+    "2026 federal income tax and standard deduction",
     "Effective and marginal tax rates",
     "Bracket-by-bracket breakdown",
     "Pre-tax and itemized deductions",
@@ -58,7 +58,7 @@ const faqSchema = {
   mainEntity: [
     { "@type": "Question", name: "What's the difference between marginal and effective tax rates?", acceptedAnswer: { "@type": "Answer", text: "Your marginal rate is the rate applied to your last dollar of taxable income, the top bracket you reach. Your effective rate is your total tax divided by your income. The effective rate is always lower, because the first portions of your income are taxed at lower bracket rates before you reach the top one." } },
     { "@type": "Question", name: "How do federal tax brackets work?", acceptedAnswer: { "@type": "Answer", text: "The U.S. uses a progressive system: income is taxed in tiers. Only the income that falls within each bracket is taxed at that bracket's rate. So moving into a higher bracket only raises the tax on the income above that threshold, not your whole income." } },
-    { "@type": "Question", name: "What is the 2025 standard deduction?", acceptedAnswer: { "@type": "Answer", text: "For 2025 the federal standard deduction is $15,750 for single filers and $31,500 for married filing jointly. Your taxable income is your income minus pre-tax deductions and either the standard deduction or your itemized deductions, whichever is larger." } },
+    { "@type": "Question", name: "What is the 2026 standard deduction?", acceptedAnswer: { "@type": "Answer", text: "For 2026 the federal standard deduction is $16,100 for single filers and $32,200 for married filing jointly. Your taxable income is your income minus pre-tax deductions and either the standard deduction or your itemized deductions, whichever is larger." } },
     { "@type": "Question", name: "Does this include Social Security and Medicare?", acceptedAnswer: { "@type": "Answer", text: "No. This is income tax only. Social Security and Medicare (FICA) are separate payroll taxes. To see your full take-home pay including FICA and state tax, use the paycheck calculator." } },
   ],
 };
@@ -76,7 +76,7 @@ const breadcrumbSchema = {
 const FAQ_ITEMS = [
   { q: "Marginal vs. effective rate?", a: "Marginal is the rate on your last dollar (your top bracket); effective is total tax ÷ income. Effective is always lower because earlier dollars are taxed at lower rates." },
   { q: "How do brackets work?", a: "Progressive tiers: only the income within each bracket is taxed at that rate, so a higher bracket only raises tax on the income above its threshold." },
-  { q: "2025 standard deduction?", a: "$15,750 single, $31,500 married filing jointly. Taxable income = income − pre-tax deductions − the larger of the standard or itemized deduction." },
+  { q: "2026 standard deduction?", a: "$16,100 single, $32,200 married filing jointly. Taxable income = income − pre-tax deductions − the larger of the standard or itemized deduction." },
   { q: "Does it include FICA?", a: "No, income tax only. For full take-home including Social Security, Medicare, and state tax, use the paycheck calculator." },
 ];
 
@@ -92,7 +92,7 @@ export default function Page() {
           <div className="mx-auto max-w-4xl px-4 sm:px-6">
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Income Tax Calculator</h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              See your 2025 federal income tax, your effective and marginal rates, and a clear bracket-by-bracket
+              See your 2026 federal income tax, your effective and marginal rates, and a clear bracket-by-bracket
               breakdown of how each part of your income is taxed.
             </p>
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Federal brackets · effective &amp; marginal rate · optional state.</p>
@@ -118,7 +118,7 @@ export default function Page() {
                 <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
                   <p>
                     It subtracts your pre-tax deductions and either the standard or your itemized deduction to find your
-                    taxable income, then runs it through the 2025 federal brackets, taxing each tier of income at its
+                    taxable income, then runs it through the 2026 federal brackets, taxing each tier of income at its
                     own rate. The result is your federal tax, your marginal rate (the rate on your last dollar), and
                     your effective rate (total tax over income).
                   </p>
@@ -150,7 +150,7 @@ export default function Page() {
                   <p>It&apos;s an estimate, not tax advice.</p>
                 </div>
                 <div className="mt-5 space-y-2">
-                  {["No account or sign-up required", "2025 federal brackets", "Effective and marginal rates"].map((t) => (<div key={t} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400"><span className="mt-0.5 flex-shrink-0 text-cyan-500">✓</span><span>{t}</span></div>))}
+                  {["No account or sign-up required", "2026 federal brackets", "Effective and marginal rates"].map((t) => (<div key={t} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400"><span className="mt-0.5 flex-shrink-0 text-cyan-500">✓</span><span>{t}</span></div>))}
                 </div>
               </div>
             </div>

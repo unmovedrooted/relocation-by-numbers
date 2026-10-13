@@ -228,13 +228,13 @@ export const sections: HubSection[] = [
         href: "/401k-calculator",
         title: "401(k) Calculator",
         description:
-          "Employer match, this year's tax savings, and projected balance, with 2025 limits and a Monte Carlo range.",
+          "Employer match, this year's tax savings, and projected balance, with 2026 limits and a Monte Carlo range.",
       },
       {
         href: "/hsa-calculator",
         title: "HSA Calculator",
         description:
-          "2025 contribution limits, real federal + FICA + state tax savings, and long-term tax-free growth.",
+          "2026 contribution limits, real federal + FICA + state tax savings, and long-term tax-free growth.",
       },
       {
         href: "/investment-calculator",

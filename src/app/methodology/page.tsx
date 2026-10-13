@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { STATES } from "../../lib/states";
+import { STATE_RULE_NOTES, taxRulesVerifiedLabel, PAYROLL_PROGRAMS_NOTE, TAX_YEAR } from "../../lib/taxRuleNotes";
 
 export const metadata: Metadata = {
   title: "Methodology & Data Sources",
@@ -132,6 +134,70 @@ export default function MethodologyPage() {
               credits, local taxes, self-employment rules, investment income treatment,
               treaty treatment, residency edge cases, or unusual filing situations.
             </p>
+          </div>
+        </section>
+
+        <section id="tax-year-and-sources" className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            U.S. tax year, sources and known limits
+          </h2>
+
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
+            <p>
+              The U.S. calculators use {TAX_YEAR} tax rules, last checked {taxRulesVerifiedLabel()}. They estimate
+              the tax owed for the year on wages for a resident with the standard deduction. They do not estimate
+              paycheck withholding, which follows different employer formulas.
+            </p>
+
+            <div>
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Sources</h3>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                <li>Federal brackets and standard deduction: IRS Rev. Proc. 2025-32.</li>
+                <li>Social Security wage base and payroll rates: IRS Publication 15 (2026); Additional Medicare thresholds: IRS Form 8959 instructions.</li>
+                <li>401(k), IRA and catch-up limits: IRS Notice 2025-67. HSA limits and high-deductible plan limits: IRS Rev. Proc. 2025-19 and Publication 969.</li>
+                <li>State income tax: each state tax agency, state legislature or state code, as listed in the verification notes (rates, brackets, deductions, exemptions and credits).</li>
+                <li>Local income tax: the city, county or state agency that administers it (for example NYC through the New York State Department of Taxation and Finance; Maryland counties through the Comptroller of Maryland).</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Local income taxes modeled</h3>
+              <p className="mt-2">
+                New York City, Philadelphia, Pittsburgh, Allentown, Columbus, Cleveland, Cincinnati, Detroit,
+                Grand Rapids, Birmingham, Kansas City (Missouri), St. Louis, Baltimore, Frederick County and Montgomery
+                County (Maryland), Indianapolis, Fort Wayne and Evansville (Indiana county taxes), and Portland (Oregon
+                Metro and Multnomah County taxes). These assume you live and work in the same place. Taxes on nonresident
+                commuters and credits for tax paid to another city are not included.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Not included</h3>
+              <p className="mt-2">
+                {PAYROLL_PROGRAMS_NOTE} Also not included: itemized deductions, tax credits for dependents and
+                education, the Roth-only rule for high earners&apos; 401(k) catch-up contributions, and capital gains or
+                other non-wage income in the paycheck, relocation and comparison tools. Washington&apos;s income tax on
+                high earners, enacted in 2026, applies to income from 2028 and is not part of {TAX_YEAR} results.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">State figures that are held, derived or not yet confirmed</h3>
+              <p className="mt-2">
+                These states use at least one figure that the state has not published for {TAX_YEAR}, or that we could not
+                confirm. Each is replaced when the state publishes it.
+              </p>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                {Object.entries(STATE_RULE_NOTES).map(([code, item]) => (
+                  <li key={code}>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">
+                      {STATES.find((st) => st.code === code)?.name ?? code}:
+                    </span>{" "}
+                    {item.note}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </section>
 
@@ -269,7 +335,7 @@ export default function MethodologyPage() {
               withdrawals and Roth conversions use the same federal and state engine as the
               rest of the site, treated as ordinary income (no FICA); Illinois, Pennsylvania,
               Mississippi, and the nine no-income-tax states are handled as exempting
-              qualified retirement income. HSA figures use the 2025 IRS limits, with
+              qualified retirement income. HSA figures use the 2026 IRS limits, with
               California and New Jersey modeled as not conforming to the federal HSA exemption.
             </p>
 

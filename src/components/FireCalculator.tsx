@@ -20,7 +20,8 @@ import {
 
 import { STATES, type StateCode } from "@/lib/states";
 import { findCity, citiesForState } from "@/lib/cities";
-import { estimateNetAnnual, effectiveTaxRatePct, type FilingStatus } from "@/lib/tax";
+import { estimateNetAnnual, effectiveTaxRatePct } from "@/lib/wageTax";
+import type { FilingStatus } from "@/lib/tax";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIRE MODE

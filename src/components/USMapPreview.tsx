@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { ComposableMap, Geographies, Geography } from "@vnedyalk0v/react19-simple-maps";
 import usStates from "@/data/us-states.json";
 import { STATES, type StateCode } from "@/lib/states";
-import { estimateNetBreakdown, type FilingStatus } from "@/lib/tax";
+import { estimateNetBreakdown } from "@/lib/wageTax";
+import type { FilingStatus } from "@/lib/tax";
 
 const SALARIES = [75000, 100000, 150000, 250000];
 const NO_DATA = "#182235";

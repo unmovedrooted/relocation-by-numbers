@@ -40,8 +40,8 @@ const CALCULATORS: Calc[] = [
   // Retirement
   { href: "/complete-retirement-plan", title: "Complete Retirement Plan (preview)", desc: "Full household retirement timeline: RMDs, Social Security, pensions, IRA/Roth basis, and year-by-year cash flow, with state tax estimates and disclosed modeling limitations.", cat: "Retirement" },
   { href: "/retirement-calculator", title: "Retirement Calculator", desc: "Project your savings with a live balance chart and a Monte Carlo range.", cat: "Retirement" },
-  { href: "/401k-calculator", title: "401(k) Calculator", desc: "Employer match, this year's tax savings, and projected balance with 2025 limits.", cat: "Retirement" },
-  { href: "/hsa-calculator", title: "HSA Calculator", desc: "2025 limits, real federal + FICA + state tax savings, and tax-free growth.", cat: "Retirement" },
+  { href: "/401k-calculator", title: "401(k) Calculator", desc: "Employer match, this year's tax savings, and projected balance with 2026 limits.", cat: "Retirement" },
+  { href: "/hsa-calculator", title: "HSA Calculator", desc: "2026 limits, real federal + FICA + state tax savings, and tax-free growth.", cat: "Retirement" },
   { href: "/retirement-withdrawal-calculator", title: "Retirement Withdrawal", desc: "How long will your money last, or your safe withdrawal, with sequence-of-returns risk.", cat: "Retirement" },
   { href: "/rmd-calculator", title: "RMD Calculator", desc: "Your required minimum distribution from the IRS Uniform Lifetime Table.", cat: "Retirement" },
   { href: "/roth-conversion-calculator", title: "Roth Conversion Calculator", desc: "Convert now or pay tax later? Tax due, both paths, and break-even rate.", cat: "Retirement" },

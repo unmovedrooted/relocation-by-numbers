@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { STATES, type StateCode } from "../lib/states";
-import { getFederalStandardDeduction, getFederalBrackets, estimateNetBreakdown, type FilingStatus } from "../lib/tax";
+import { getFederalStandardDeduction, getFederalBrackets, estimateNetBreakdown } from "../lib/wageTax";
+import type { FilingStatus } from "../lib/tax";
+import { TAX_YEAR } from "../lib/taxYear2026";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -133,7 +135,7 @@ export default function FederalTaxCalculator() {
   }, [results, filing, preTax, includeState, stateName]);
 
   const handleExportCsv = () => downloadCsv("federal-tax", exportRows);
-  const handleExportPdf = () => downloadPdfReport({ filename: "federal-tax", title: "Federal Income Tax Breakdown", subtitle: `${money(results.tax)} federal tax · ${(results.effectiveOfGross * 100).toFixed(1)}% effective, ${(results.marginalRate * 100).toFixed(0)}% marginal`, rows: exportRows as PdfRow[], footerNote: "2025 federal brackets, standard deduction. Not tax advice. relocationbynumbers.com" });
+  const handleExportPdf = () => downloadPdfReport({ filename: "federal-tax", title: "Federal Income Tax Breakdown", subtitle: `${money(results.tax)} federal tax · ${(results.effectiveOfGross * 100).toFixed(1)}% effective, ${(results.marginalRate * 100).toFixed(0)}% marginal`, rows: exportRows as PdfRow[], footerNote: `${TAX_YEAR} federal brackets, standard deduction. Not tax advice. relocationbynumbers.com` });
   const getCurrentScenario = () => ({ label: "Federal tax", url: typeof window !== "undefined" ? window.location.pathname + window.location.search : "/", subtitle: `${money(results.tax, 0)} · ${(results.effectiveOfGross * 100).toFixed(1)}% eff`, source: "FederalTax" });
 
   return (
@@ -154,7 +156,7 @@ export default function FederalTaxCalculator() {
               <label htmlFor="incState" className="text-sm text-slate-700 dark:text-slate-300">Add state income tax</label>
               {includeState && (<select className={`${selectCls} ml-auto h-8 w-40`} value={state} onChange={(e) => setState(e.target.value as StateCode)}>{STATES.map((s) => (<option key={s.code} value={s.code}>{s.name}</option>))}</select>)}
             </div>
-            <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">Uses 2025 federal brackets and the standard deduction. This is income tax only, it doesn&apos;t include Social Security/Medicare (FICA); for full take-home, use the paycheck calculator.</div>
+            <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">Uses {TAX_YEAR} federal brackets and the standard deduction. This is income tax only, it doesn&apos;t include Social Security/Medicare (FICA); for full take-home, use the paycheck calculator.</div>
           </div>
         </div>
 
@@ -217,7 +219,7 @@ export default function FederalTaxCalculator() {
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                Your marginal rate is the rate on your last dollar; your effective rate is total tax divided by income, always lower, because the first dollars are taxed at lower rates. Estimates use 2025 federal brackets and the standard deduction and don&apos;t include credits, the QBI deduction, AMT, capital-gains rates, or FICA. Not tax advice.
+                Your marginal rate is the rate on your last dollar; your effective rate is total tax divided by income, always lower, because the first dollars are taxed at lower rates. Estimates use {TAX_YEAR} federal brackets and the standard deduction and don&apos;t include credits, the QBI deduction, AMT, capital-gains rates, or FICA. Not tax advice.
               </div>
             </>
           )}

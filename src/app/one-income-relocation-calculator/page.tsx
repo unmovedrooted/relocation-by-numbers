@@ -487,7 +487,7 @@ export default function Page() {
           </section>
 
           <p className="text-center text-xs text-slate-400 dark:text-slate-600">
-            Planning estimates only · Tax figures based on 2025 brackets · Assumptions updated March 2026
+            Planning estimates only · Tax figures based on 2026 federal brackets and each state's published rules; state payroll deductions (such as CA SDI or NY PFL) are not included · Assumptions updated March 2026
           </p>
         </div>
 

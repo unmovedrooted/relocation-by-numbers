@@ -7,8 +7,10 @@ import {
   estimateNetAnnual,
   estimateNetBreakdown,
   EMPLOYEE_401K_LIMIT,
-  type FilingStatus,
-} from '@/lib/tax'
+} from '@/lib/wageTax'
+import type { FilingStatus } from '@/lib/tax'
+import { TAX_YEAR } from '@/lib/taxYear2026'
+import TaxAssumptionsNote from './TaxAssumptionsNote'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1339,8 +1341,9 @@ export default function RelocationIncomeCalculator() {
               </p>
             </div>
 
+            <TaxAssumptionsNote states={[currentState, targetState]} className="text-center" />
             <p className="text-center text-xs text-slate-400 dark:text-slate-600">
-              Planning estimates only · Tax figures based on 2025 brackets · Not financial advice
+              Planning estimates only · Tax figures based on {TAX_YEAR} federal brackets and each state&apos;s published rules · State payroll deductions (such as CA SDI or NY PFL) are not included · Not financial advice
             </p>
 
           </div>

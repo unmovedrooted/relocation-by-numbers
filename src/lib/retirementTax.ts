@@ -1,4 +1,5 @@
-import { estimateNetBreakdown, type FilingStatus } from "./tax";
+import { estimateNetBreakdown } from "./wageTax";
+import type { FilingStatus } from "./tax";
 import type { StateCode } from "./states";
 
 // ─────────────────────────────────────────────────────────────────────────

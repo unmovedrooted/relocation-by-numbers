@@ -3,14 +3,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 import { STATES, type StateCode } from "../lib/states";
-import { estimateNetBreakdown, type FilingStatus } from "../lib/tax";
+import { estimateNetBreakdown } from "../lib/wageTax";
+import type { FilingStatus } from "../lib/tax";
+import { TAX_YEAR } from "../lib/taxYear2026";
+import TaxAssumptionsNote from "./TaxAssumptionsNote";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 
 // ─────────────────────────────────────────────────────────────────────────
 // Take-home paycheck calculator. Reuses the site's verified federal + FICA +
-// state tax engine (src/lib/tax.ts, 2025 assumptions). All figures shown are
+// state tax engine (src/lib/wageTax.ts, tax year in src/lib/taxYear2026.ts). All figures shown are
 // pre-tax gross broken into 401(k), federal, FICA, state/local, and net pay.
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -175,7 +178,7 @@ export default function PaycheckCalculator() {
       title: "Take-Home Paycheck Breakdown",
       subtitle: `${money(results.per(results.b.net))} per ${eachLabel} · ${money(results.b.net)}/yr net in ${stateName}`,
       rows: exportRows as PdfRow[],
-      footerNote: "2025 federal, FICA, and state estimates. Not tax advice. relocationbynumbers.com",
+      footerNote: `${TAX_YEAR} federal, FICA, and state estimates. Not tax advice. relocationbynumbers.com`,
     });
 
   const getCurrentScenario = () => ({
@@ -271,8 +274,9 @@ export default function PaycheckCalculator() {
                 </label>
               )}
             </div>
+            <TaxAssumptionsNote states={[state]} className="mt-3" />
             <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              Uses 2025 federal brackets, Social Security &amp; Medicare (FICA), state income tax with the standard deduction, and local city income tax where selected. Doesn&apos;t include health-premium or HSA pre-tax deductions.
+              Uses {TAX_YEAR} federal brackets, Social Security &amp; Medicare (FICA), state income tax with the standard deduction, and local city income tax where selected. Doesn&apos;t include health-premium or HSA pre-tax deductions. State disability, paid-family-leave and similar payroll deductions (such as CA SDI, NJ, NY PFL, WA Cares, Oregon paid leave and transit tax) are not included, so take-home pay in those states is lower than shown.
             </div>
           </div>
         </div>
@@ -343,7 +347,7 @@ export default function PaycheckCalculator() {
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                Estimates use 2025 federal brackets, the standard deduction, Social Security (up to the wage base) and Medicare, and state income tax. They don&apos;t model pre-tax health or HSA deductions, additional withholdings, credits, or non-standard local taxes. Not tax advice.
+                Estimates use {TAX_YEAR} federal brackets, the standard deduction, Social Security (up to the wage base) and Medicare, and state income tax. They don&apos;t model pre-tax health or HSA deductions, additional withholdings, credits, or non-standard local taxes. State disability, paid-family-leave and similar payroll deductions (such as CA SDI, NJ, NY PFL, WA Cares, Oregon paid leave and transit tax) are not included, so take-home pay in those states is lower than shown. Not tax advice.
               </div>
             </>
           )}

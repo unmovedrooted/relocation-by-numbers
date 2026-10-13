@@ -8,7 +8,7 @@ const PAGE_PATH = "/paycheck-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "Paycheck Calculator, Take-Home Pay by State (2025)",
+  title: "Paycheck Calculator, Take-Home Pay by State (2026)",
   description:
     "Free take-home pay calculator. Enter your salary or hourly wage and state to see your paycheck after federal, Social Security, Medicare, and state taxes, plus a full breakdown and 401(k) impact.",
   keywords: [
@@ -18,20 +18,20 @@ export const metadata: Metadata = {
     "net pay calculator by state",
     "hourly paycheck calculator",
     "how much will my paycheck be",
-    "2025 paycheck calculator",
+    "2026 paycheck calculator",
   ],
   alternates: { canonical: CANONICAL },
   openGraph: {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "Paycheck Calculator, Take-Home Pay by State (2025)",
+    title: "Paycheck Calculator, Take-Home Pay by State (2026)",
     description: "See your paycheck after federal, FICA, and state taxes, with a full breakdown and 401(k) impact.",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "Paycheck Calculator, Take-Home Pay by State (2025)",
+    title: "Paycheck Calculator, Take-Home Pay by State (2026)",
     description: "Your take-home pay after federal, FICA, and state taxes, with a full breakdown.",
     site: "@relocationbynumbers",
   },
@@ -67,7 +67,7 @@ const faqSchema = {
       name: "How is take-home pay calculated?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Take-home pay is your gross pay minus federal income tax, Social Security and Medicare (FICA), state and any local income tax, and pre-tax deductions like a 401(k). This calculator applies 2025 federal brackets, the standard deduction, and state income tax to estimate your net paycheck.",
+        text: "Take-home pay is your gross pay minus federal income tax, Social Security and Medicare (FICA), state and any local income tax, and pre-tax deductions like a 401(k). This calculator applies 2026 federal brackets, the standard deduction, and state income tax to estimate your net paycheck.",
       },
     },
     {
@@ -108,7 +108,7 @@ const breadcrumbSchema = {
 };
 
 const FAQ_ITEMS = [
-  { q: "How is take-home pay calculated?", a: "Gross pay minus federal income tax, Social Security and Medicare (FICA), state/local income tax, and pre-tax deductions like a 401(k). This tool uses 2025 federal brackets, the standard deduction, and state income tax." },
+  { q: "How is take-home pay calculated?", a: "Gross pay minus federal income tax, Social Security and Medicare (FICA), state/local income tax, and pre-tax deductions like a 401(k). This tool uses 2026 federal brackets, the standard deduction, and state income tax." },
   { q: "Does a 401(k) increase my take-home pay?", a: "No, it lowers your taxable income (reducing federal and usually state tax), but the contribution still leaves your paycheck and goes to your retirement account. It doesn't reduce Social Security or Medicare." },
   { q: "Which states have no income tax?", a: "Alaska, Florida, Nevada, New Hampshire, South Dakota, Tennessee, Texas, Washington, and Wyoming. Paychecks there are reduced only by federal tax and FICA." },
   { q: "What is FICA?", a: "Social Security (6.2% up to a wage base) plus Medicare (1.45%, plus 0.9% above higher-income thresholds). It's separate from federal income tax." },
@@ -130,7 +130,7 @@ export default function Page() {
               of where every dollar of your paycheck goes.
             </p>
             <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-              Salary or hourly, any state, with 401(k) impact, 2025 tax rules.
+              Salary or hourly, any state, with 401(k) impact, 2026 tax rules.
             </p>
             <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">
               <Link href="/methodology" className="font-medium text-slate-700 underline underline-offset-4 hover:no-underline dark:text-slate-300">See methodology</Link>
@@ -156,7 +156,7 @@ export default function Page() {
                 <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
                   <p>
                     Enter your salary (or hourly rate and hours), your state, and filing status. The calculator applies
-                    2025 federal tax brackets and the standard deduction, Social Security and Medicare (FICA), and your
+                    2026 federal tax brackets and the standard deduction, Social Security and Medicare (FICA), and your
                     state&rsquo;s income tax, the same verified tax engine used across the rest of this site.
                   </p>
                   <p>
@@ -188,7 +188,7 @@ export default function Page() {
                   <p>This calculator is not tax advice.</p>
                 </div>
                 <div className="mt-5 space-y-2">
-                  {["No account or sign-up required", "2025 federal, FICA, and state rules", "Results per paycheck and per year"].map((t) => (
+                  {["No account or sign-up required", "2026 federal, FICA, and state rules", "Results per paycheck and per year"].map((t) => (
                     <div key={t} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400"><span className="mt-0.5 flex-shrink-0 text-cyan-500">✓</span><span>{t}</span></div>
                   ))}
                 </div>

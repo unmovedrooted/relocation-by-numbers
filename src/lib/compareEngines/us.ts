@@ -12,7 +12,8 @@
  * tool auto-fills from each city's defaultRent / medianHomePrice so 2-3
  * targets can be compared without re-typing housing assumptions each time.
  */
-import { estimateNetAnnual, type FilingStatus } from "../tax";
+import { estimateNetAnnual } from "../wageTax";
+import type { FilingStatus } from "../tax";
 import { monthlyHousingCost } from "../housing";
 import type { City } from "../cities";
 import type { StateCode } from "../states";

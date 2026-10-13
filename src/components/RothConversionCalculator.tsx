@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, BarChart, Bar, Cell, XAxis, YAxis, Tooltip } from "recharts";
 import { STATES, type StateCode } from "../lib/states";
-import { estimateNetBreakdown, type FilingStatus } from "../lib/tax";
+import { estimateNetBreakdown } from "../lib/wageTax";
+import type { FilingStatus } from "../lib/tax";
 import { RETIREMENT_STATE_EXEMPT, representativeStateMarginalRate } from "../lib/retirementTax";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";

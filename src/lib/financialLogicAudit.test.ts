@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { monthlyHousingCost, estimateMortgageMonthly as estimatePercentMortgage } from "./housing";
 import { estimateMortgageMonthly as estimateDecimalMortgage } from "./mortgage";
 import { simulateFire, type FireInputs } from "./fireSim";
-import { estimateNetBreakdown } from "./tax";
+import { estimateNetBreakdown } from "./wageTax";
 
 describe("financial logic audit: known-answer scenarios", () => {
   it("matches the standard fixed-rate mortgage payment equation", () => {
@@ -102,7 +102,7 @@ describe("financial logic audit: known-answer scenarios", () => {
     expect(estimateDecimalMortgage(400_000, { downPct: 0.2, rate: 0.07, years: 30 })).toBe(2_129);
   });
 
-  it("matches a hand-calculated 2025 federal plus FICA result in Florida", () => {
+  it("matches a hand-calculated 2026 federal plus FICA result in Florida", () => {
     const result = estimateNetBreakdown({
       grossAnnual: 100_000,
       state: "fl",
@@ -110,11 +110,12 @@ describe("financial logic audit: known-answer scenarios", () => {
       k401Pct: 0,
     });
 
-    expect(result.taxableFederal).toBe(84_250);
-    expect(result.federal).toBeCloseTo(13_449, 2);
+    // Taxable 100,000 - 16,100 = 83,900: 10% x 12,400 + 12% x 38,000 + 22% x 33,500 = 13,170.
+    expect(result.taxableFederal).toBe(83_900);
+    expect(result.federal).toBeCloseTo(13_170, 2);
     expect(result.fica).toBeCloseTo(7_650, 2);
     expect(result.state).toBe(0);
-    expect(result.net).toBeCloseTo(78_901, 2);
+    expect(result.net).toBeCloseTo(79_180, 2);
   });
 
   it("reaches a fixed FIRE target in the independently calculable zero-return case", () => {

@@ -2,23 +2,20 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { STATES, type StateCode } from "../lib/states";
-import { estimateNetBreakdown, type FilingStatus } from "../lib/tax";
+import { estimateNetBreakdown } from "../lib/wageTax";
+import type { FilingStatus } from "../lib/tax";
+import { CONTRIBUTION_LIMITS_2026, TAX_YEAR } from "../lib/taxYear2026";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 
 // ─────────────────────────────────────────────────────────────────────────
-// 2025 IRS / HHS FIGURES, this calculator's base tax year, matching
-// src/lib/tax.ts's TAX_YEAR constant. Update both together each January.
+// IRS figures for the tax year in src/lib/taxYear2026.ts (Rev. Proc. 2025-19, Pub. 969).
+// Replace that file each year; this calculator reads from it.
 // ─────────────────────────────────────────────────────────────────────────
-const HSA_LIMITS = {
-  self: 4_300,
-  family: 8_550,
-  catchUp55: 1_000,
-} as const;
-
-const HDHP_MIN_DEDUCTIBLE = { self: 1_650, family: 3_300 };
-const HDHP_MAX_OOP = { self: 8_300, family: 16_600 };
+const HSA_LIMITS = CONTRIBUTION_LIMITS_2026.hsa;
+const HDHP_MIN_DEDUCTIBLE = CONTRIBUTION_LIMITS_2026.hdhpMinDeductible;
+const HDHP_MAX_OOP = CONTRIBUTION_LIMITS_2026.hdhpMaxOutOfPocket;
 
 // California and New Jersey are the only two states that do not conform to
 // the federal HSA tax exemption: contributions are after-tax for state
@@ -280,7 +277,7 @@ export default function HsaCalculator() {
       { Metric: "Coverage type", Value: coverageType === "family" ? "Family" : "Self-only" },
       { Metric: "Age", Value: age },
       { Metric: "55+ catch-up eligible", Value: results.catchUpEligible ? "Yes" : "No" },
-      { Metric: "2025 contribution limit", Value: money(results.contributionLimit) },
+      { Metric: `${TAX_YEAR} contribution limit`, Value: money(results.contributionLimit) },
       { Metric: "Your contribution", Value: money(results.yourContributionAmount) },
       { Metric: "Employer contribution", Value: money(results.employerContributionAmount) },
       { Metric: "Total annual contribution", Value: money(results.totalAnnualContribution) },
@@ -344,7 +341,7 @@ export default function HsaCalculator() {
               <label className="text-sm">
                 <div className={labelHeadCls}>
                   Your annual contribution
-                  <InfoTip text={`2025 limit: ${money(coverageType === "family" ? HSA_LIMITS.family : HSA_LIMITS.self)}${nz(age) >= 55 ? ` + ${money(HSA_LIMITS.catchUp55)} catch-up (55+) = ${money(results.contributionLimit)}` : ""}.`} />
+                  <InfoTip text={`${TAX_YEAR} limit: ${money(coverageType === "family" ? HSA_LIMITS.family : HSA_LIMITS.self)}${nz(age) >= 55 ? ` + ${money(HSA_LIMITS.catchUp55)} catch-up (55+) = ${money(results.contributionLimit)}` : ""}.`} />
                 </div>
                 <input className={inputCls} type="number" min="0" value={yourContribution} onChange={(e) => setYourContribution(e.target.value)} placeholder=" " />
               </label>
@@ -354,7 +351,7 @@ export default function HsaCalculator() {
               </label>
             </div>
             <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              {coverageType === "family" ? "Family" : "Self-only"} HDHP minimum deductible: {money(hdhpMinDeductible)} · max out-of-pocket: {money(hdhpMaxOOP)} (2025 IRS figures).
+              {coverageType === "family" ? "Family" : "Self-only"} HDHP minimum deductible: {money(hdhpMinDeductible)} · max out-of-pocket: {money(hdhpMaxOOP)} ({TAX_YEAR} IRS figures).
             </div>
             {results.overLimitAmount > 0 && (
               <div className="mt-3 rounded-xl border border-amber-300 bg-amber-100 px-3 py-2 text-xs leading-5 text-amber-800 dark:border-amber-700 dark:bg-amber-900/40 dark:text-amber-200">

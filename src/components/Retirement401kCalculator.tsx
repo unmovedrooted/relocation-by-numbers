@@ -3,15 +3,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, ComposedChart, Area, Line, XAxis, YAxis } from "recharts";
 import { STATES, type StateCode } from "../lib/states";
-import { estimateNetBreakdown, EMPLOYEE_401K_LIMIT, type FilingStatus } from "../lib/tax";
+import { estimateNetBreakdown, EMPLOYEE_401K_LIMIT } from "../lib/wageTax";
+import type { FilingStatus } from "../lib/tax";
+import { CONTRIBUTION_LIMITS_2026, TAX_YEAR } from "../lib/taxYear2026";
 import { accumulationPaths, RISK_PRESETS, type RiskLevel } from "../lib/monteCarlo";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 
-// 2025 employee elective deferral limits (base + catch-up). Verified vs IRS.
-const CATCHUP_50 = 7_500;
-const CATCHUP_60_63 = 11_250;
+// Employee elective deferral limits (base + catch-up) from src/lib/taxYear2026.ts (IRS Notice 2025-67).
+// Not modeled: the Roth-only catch-up rule for prior-year wages above the IRS threshold.
+const CATCHUP_50 = CONTRIBUTION_LIMITS_2026.catchUp50;
+const CATCHUP_60_63 = CONTRIBUTION_LIMITS_2026.catchUp60to63;
 function employeeLimitForAge(age: number): number {
   if (age >= 60 && age <= 63) return EMPLOYEE_401K_LIMIT + CATCHUP_60_63;
   if (age >= 50) return EMPLOYEE_401K_LIMIT + CATCHUP_50;
@@ -170,7 +173,7 @@ export default function Retirement401kCalculator() {
     const rows: CsvRow[] = [
       { Metric: "Annual salary", Value: money(r.sal) },
       { Metric: "Your contribution", Value: `${yourContribPct}% (${money(r.yourContrib)}/yr)` },
-      { Metric: "2025 employee limit (your age)", Value: money(r.limit) },
+      { Metric: `${TAX_YEAR} employee limit (your age)`, Value: money(r.limit) },
       { Metric: "Employer match", Value: `${employerMatchPct}% up to ${employerCapPct}% of salary (${money(r.employerContrib)}/yr)` },
       { Metric: "Total annual contribution", Value: money(r.totalAnnual) },
       { Metric: "Federal tax saved this year", Value: money(r.federalSaved) },
@@ -222,7 +225,7 @@ export default function Retirement401kCalculator() {
             <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Contributions</div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm"><div className={labelHeadCls}>Annual salary</div><input className={inputCls} type="number" min="0" value={salary} onChange={(e) => setSalary(e.target.value)} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Your contribution (%)<InfoTip text={`Percent of salary you defer. 2025 employee limit is ${money(results.limit)} at your age.`} /></div><input className={inputCls} type="number" min="0" step="0.5" value={yourContribPct} onChange={(e) => setYourContribPct(e.target.value)} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Your contribution (%)<InfoTip text={`Percent of salary you defer. ${TAX_YEAR} employee limit is ${money(results.limit)} at your age.`} /></div><input className={inputCls} type="number" min="0" step="0.5" value={yourContribPct} onChange={(e) => setYourContribPct(e.target.value)} placeholder=" " /></label>
               <label className="text-sm"><div className={labelHeadCls}>Employer match (%)<InfoTip text="How much of your contribution the employer matches, e.g. 50% means 50¢ per $1 you contribute." /></div><input className={inputCls} type="number" min="0" step="1" value={employerMatchPct} onChange={(e) => setEmployerMatchPct(e.target.value)} placeholder=" " /></label>
               <label className="text-sm"><div className={labelHeadCls}>…up to (% of salary)<InfoTip text="The match applies only to the first X% of salary you contribute. A common plan is '50% up to 6%.'" /></div><input className={inputCls} type="number" min="0" step="0.5" value={employerCapPct} onChange={(e) => setEmployerCapPct(e.target.value)} placeholder=" " /></label>
               <label className="text-sm"><div className={labelHeadCls}>Current 401(k) balance</div><input className={inputCls} type="number" min="0" value={currentBalance} onChange={(e) => setCurrentBalance(e.target.value)} placeholder=" " /></label>

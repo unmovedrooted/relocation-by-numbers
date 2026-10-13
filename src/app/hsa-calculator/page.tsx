@@ -14,11 +14,11 @@ const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 export const metadata: Metadata = {
   title: "HSA Calculator, Contribution Limits, Tax Savings & Growth Projection",
   description:
-    "Free HSA calculator. See your 2025 contribution limit, this year's federal + FICA + state tax savings, and how your HSA balance could grow over time with tax-advantaged investing.",
+    "Free HSA calculator. See your 2026 contribution limit, this year's federal + FICA + state tax savings, and how your HSA balance could grow over time with tax-advantaged investing.",
   keywords: [
     "hsa calculator",
     "health savings account calculator",
-    "hsa contribution limit 2025",
+    "hsa contribution limit 2026",
     "hsa tax savings calculator",
     "hsa growth calculator",
     "hdhp calculator",
@@ -34,13 +34,13 @@ export const metadata: Metadata = {
     siteName: "Relocation by Numbers",
     title: "HSA Calculator, Contribution Limits, Tax Savings & Growth Projection",
     description:
-      "See your 2025 HSA contribution limit, this year's real tax savings (federal, FICA, and state), and a long-term growth projection.",
+      "See your 2026 HSA contribution limit, this year's real tax savings (federal, FICA, and state), and a long-term growth projection.",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
     title: "HSA Calculator, Contribution Limits, Tax Savings & Growth Projection",
-    description: "2025 contribution limits, real tax savings, and long-term growth projection for your HSA.",
+    description: "2026 contribution limits, real tax savings, and long-term growth projection for your HSA.",
     site: "@relocationbynumbers",
   },
   robots: {
@@ -60,12 +60,12 @@ const webAppSchema = {
   name: "HSA Calculator",
   url: CANONICAL,
   description:
-    "Free HSA calculator covering 2025 IRS contribution limits, real federal + FICA + state tax savings (including California and New Jersey's HSA non-conformity), and a long-term balance growth projection.",
+    "Free HSA calculator covering 2026 IRS contribution limits, real federal + FICA + state tax savings (including California and New Jersey's HSA non-conformity), and a long-term balance growth projection.",
   applicationCategory: "FinanceApplication",
   operatingSystem: "Any",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   featureList: [
-    "2025 self-only, family, and 55+ catch-up contribution limits",
+    "2026 self-only, family, and 55+ catch-up contribution limits",
     "Federal, FICA, and state tax savings estimate",
     "California / New Jersey HSA state non-conformity handling",
     "Multi-year balance growth projection",
@@ -84,10 +84,10 @@ const faqSchema = {
   mainEntity: [
     {
       "@type": "Question",
-      name: "What is the HSA contribution limit for 2025?",
+      name: "What is the HSA contribution limit for 2026?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "For 2025, the IRS limit is $4,300 for self-only HDHP coverage and $8,550 for family coverage. Those age 55 or older can contribute an additional $1,000 catch-up contribution.",
+        text: "For 2026, the IRS limit is $4,400 for self-only HDHP coverage and $8,750 for family coverage. Those age 55 or older can contribute an additional $1,000 catch-up contribution.",
       },
     },
     {
@@ -137,8 +137,8 @@ const breadcrumbSchema = {
 
 const FAQ_ITEMS = [
   {
-    q: "What is the HSA contribution limit for 2025?",
-    a: "$4,300 for self-only HDHP coverage, $8,550 for family coverage, plus a $1,000 catch-up contribution if you're 55 or older.",
+    q: "What is the HSA contribution limit for 2026?",
+    a: "$4,400 for self-only HDHP coverage, $8,750 for family coverage, plus a $1,000 catch-up contribution if you're 55 or older.",
   },
   {
     q: "What is the triple tax advantage of an HSA?",
@@ -188,7 +188,7 @@ export default function Page() {
             </h1>
 
             <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              See your 2025 contribution limit, this year&apos;s real tax savings, and how your HSA balance could grow
+              See your 2026 contribution limit, this year&apos;s real tax savings, and how your HSA balance could grow
               over time with tax-advantaged investing.
             </p>
 
@@ -204,7 +204,7 @@ export default function Page() {
             </div>
 
             <div className="mt-5 flex flex-wrap justify-center gap-2">
-              {["2025 IRS limits", "Federal + FICA + state savings", "CA/NJ handling", "Growth projection"].map((f) => (
+              {["2026 IRS limits", "Federal + FICA + state savings", "CA/NJ handling", "Growth projection"].map((f) => (
                 <span
                   key={f}
                   className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
@@ -236,7 +236,7 @@ export default function Page() {
                 <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
                   <p>
                     Enter your coverage type, contribution amounts, and income. The calculator applies the actual
-                    2025 IRS limits, then computes your real combined tax savings, federal income tax, FICA
+                    2026 IRS limits, then computes your real combined tax savings, federal income tax, FICA
                     (Social Security and Medicare), and state income tax, by comparing your tax bill with and
                     without the contribution, the same verified tax engine used across this site&apos;s other
                     calculators.
@@ -250,7 +250,7 @@ export default function Page() {
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
                   {[
-                    { title: "2025 IRS limits", body: "Self-only, family, and 55+ catch-up contribution limits." },
+                    { title: "2026 IRS limits", body: "Self-only, family, and 55+ catch-up contribution limits." },
                     { title: "Real tax savings", body: "Federal, FICA, and state, not just a flat estimate." },
                     { title: "CA / NJ handling", body: "The only two states that tax HSA contributions and growth." },
                     { title: "Growth projection", body: "Balance at 5, 10, 20, and 30 years, plus your custom horizon." },

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip } from "recharts";
 import { STATES, type StateCode } from "../lib/states";
 import { type FilingStatus } from "../lib/tax";
+import { TAX_YEAR } from "../lib/taxYear2026";
 import { RETIREMENT_STATE_EXEMPT, withdrawalIncomeTax } from "../lib/retirementTax";
 import { withdrawalPaths, RISK_PRESETS, type RiskLevel } from "../lib/monteCarlo";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
@@ -660,7 +661,7 @@ export default function RetirementWithdrawalCalculator() {
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
                 All figures are in today&apos;s dollars. Tax estimates treat withdrawals as your only ordinary income
-                using {`${accountType === "roth" ? "Roth (tax-free)" : "traditional/taxable"}`} treatment and 2025
+                using {`${accountType === "roth" ? "Roth (tax-free)" : "traditional/taxable"}`} treatment and {TAX_YEAR}
                 federal &amp; state rules with the standard deduction; they don&apos;t include Social Security, the
                 extra standard deduction at 65+, capital-gains treatment, or Required Minimum Distributions (which
                 begin at age 73).{" "}
