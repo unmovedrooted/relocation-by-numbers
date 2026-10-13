@@ -16,6 +16,17 @@ import TaxAssumptionsNote from "./TaxAssumptionsNote";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
+import MoveSummary from "./MoveSummary";
+import { compareMove, type Item } from "../lib/relocationMove";
+
+const MOVE_INPUT_CLS =
+  "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800";
+
+/** Input ids for the "enter yours" buttons in the move summary. */
+const MOVE_IDS: Record<string, string> = {
+  currentHousing: "in-curHousing", targetHousing: "in-rent", movers: "in-movers", travel: "in-travel",
+  setup: "in-setup", leaseBreak: "in-leaseBreak", fees: "in-fees", refundableDeposit: "in-deposit",
+};
 
 type Mode = "rent" | "buy";
 
@@ -318,6 +329,23 @@ export default function Calculator({
 
   const [currentHousingMonthly, setCurrentHousingMonthly] = useState<string>("");
 
+  // ── Move details (blank means the site estimates it) ─────────────────────
+  const [currentSalary, setCurrentSalary] = useState<string>("");
+  const [moversCost, setMoversCost] = useState<string>("");
+  const [travelCost, setTravelCost] = useState<string>("");
+  const [setupCost, setSetupCost] = useState<string>("");
+  const [leaseBreakCost, setLeaseBreakCost] = useState<string>("");
+  const [overlapMonths, setOverlapMonths] = useState<string>("");
+  const [moveFeesCost, setMoveFeesCost] = useState<string>("");
+  const [depositCost, setDepositCost] = useState<string>("");
+
+  // Rent, home price and property tax start from the target city's Census figures until the user types their own.
+  type TypedFlags = { rent?: boolean; home?: boolean; tax?: boolean };
+  const typedRef = useRef<TypedFlags>({});
+  const [typed, setTyped] = useState<TypedFlags>({});
+  const markTyped = (k: keyof TypedFlags) => { typedRef.current = { ...typedRef.current, [k]: true }; setTyped(typedRef.current); };
+  const clearTyped = () => { typedRef.current = {}; setTyped({}); };
+
   // ── Buy inputs ──────────────────────────────────────────────────────────
   const [homePrice, setHomePrice] = useState<string>("450000");
   const [downPct, setDownPct] = useState<string>("20");
@@ -441,7 +469,27 @@ export default function Calculator({
     const vColTransport = qs.get("colTransport"); if (typeof vColTransport === "string") setColTransport(vColTransport);
     const vColDining = qs.get("colDining");       if (typeof vColDining === "string") setColDining(vColDining);
     const vColMisc = qs.get("colMisc");           if (typeof vColMisc === "string") setColMisc(vColMisc);
+
+    const setIf = (key: string, set: (v: string) => void) => { const v = qs.get(key); if (typeof v === "string") set(v); };
+    setIf("curSalary", setCurrentSalary); setIf("movers", setMoversCost); setIf("travel", setTravelCost);
+    setIf("setup", setSetupCost); setIf("leaseBreak", setLeaseBreakCost); setIf("overlap", setOverlapMonths);
+    setIf("fees", setMoveFeesCost); setIf("deposit", setDepositCost);
+
+    const t = (qs.get("typed") ?? "").split(",");
+    const restored = { rent: t.includes("rent"), home: t.includes("home"), tax: t.includes("tax") };
+    typedRef.current = restored;
+    setTyped(restored);
   }, []);
+
+  // Start rent, home price and property tax from the target city's Census figures unless the user typed their own.
+  useEffect(() => {
+    const city = toCityId ? findCity(toCityId) : null;
+    if (!city) return;
+    const t = typedRef.current;
+    if (!t.rent && city.defaultRent) setRentMonthly(String(city.defaultRent));
+    if (!t.home && city.medianHomePrice) setHomePrice(String(city.medianHomePrice));
+    if (!t.tax && city.propertyTaxPct) setPropertyTaxPct(String(city.propertyTaxPct));
+  }, [toCityId]);
 
   // ── Write QS on change ───────────────────────────────────────────────────
   useEffect(() => {
@@ -482,8 +530,20 @@ export default function Calculator({
     if (colDining !== "")    qs.set("colDining",    colDining);
     if (colMisc !== "")      qs.set("colMisc",      colMisc);
 
+    if (currentSalary !== "")  qs.set("curSalary", currentSalary);
+    if (moversCost !== "")     qs.set("movers", moversCost);
+    if (travelCost !== "")     qs.set("travel", travelCost);
+    if (setupCost !== "")      qs.set("setup", setupCost);
+    if (leaseBreakCost !== "") qs.set("leaseBreak", leaseBreakCost);
+    if (overlapMonths !== "")  qs.set("overlap", overlapMonths);
+    if (moveFeesCost !== "")   qs.set("fees", moveFeesCost);
+    if (depositCost !== "")    qs.set("deposit", depositCost);
+    const typedKeys = (["rent", "home", "tax"] as const).filter((k) => typed[k]);
+    if (typedKeys.length) qs.set("typed", typedKeys.join(","));
+
     setQS(qs);
   }, [
+    currentSalary, moversCost, travelCost, setupCost, leaseBreakCost, overlapMonths, moveFeesCost, depositCost, typed,
     mode, fromState, toState, filing, salary, k401Pct,
     fromCityId, toCityId, fromCityOther, toCityOther, currentHousingMonthly,
     homePrice, downPct, ratePct, termYears, propertyTaxPct,
@@ -656,9 +716,12 @@ export default function Calculator({
   );
 
   const currentHousingEst = useMemo<number | null>(() => {
+    if (mode === "rent" && fromCity && typeof fromCity.defaultRent === "number") {
+      return fromCity.defaultRent + nz(rentersInsMonthly) + nz(parkingMonthly);
+    }
     if (!hasCOLData || !results.activeHousing) return null;
     return results.activeHousing * (fromCity!.col!.housing / toCity!.col!.housing);
-  }, [hasCOLData, results.activeHousing, fromCity, toCity]);
+  }, [mode, fromCity, rentersInsMonthly, parkingMonthly, hasCOLData, results.activeHousing, toCity]);
 
   const currentHousingActual = useMemo<number | null>(() => {
     if (currentHousingMonthly !== "") return nz(currentHousingMonthly);
@@ -685,6 +748,47 @@ export default function Calculator({
     if (targetAnnualNet <= 0) return null;
     return findNeededSalary(targetAnnualNet, toState, filing, k401N, toCityId);
   }, [results.salaryReady, results.activeHousing, targetEssentialNonHousing, currentTrueLeftover, toState, filing, k401Pct, toCityId]);
+
+  // ── Before-and-after comparison of the move ──────────────────────────────
+  const move = useMemo(() => {
+    if (!results.salaryReady || currentHousingActual === null) return null;
+    const salaryN = n(salary);
+    const currentSalaryN = currentSalary.trim() === "" ? salaryN : nz(currentSalary);
+    const entered = (v: string, fallback: number): Item =>
+      v.trim() === "" ? { amount: fallback, estimated: fallback > 0 } : { amount: nz(v), estimated: false };
+    const buying = mode === "buy" && results.buyReady;
+    const homePriceN = nz(homePrice);
+    const rentDeposit = mode === "rent" ? nz(rentMonthly) * 2 : 0;
+    return compareMove({
+      filing,
+      k401Pct1: nz(k401Pct), k401Pct2: 0,
+      currentIncome1: currentSalaryN, currentIncome2: 0,
+      offerIncome1: salaryN, offerIncome2: 0,
+      currentState: fromState, currentCityId: fromCityId,
+      targetState: toState, targetCityId: toCityId,
+      currentHousing: { amount: currentHousingActual, estimated: isCurrentHousingEstimated },
+      targetHousing: { amount: results.activeHousing, estimated: mode === "buy" ? !typed.home : !typed.rent },
+      currentLiving: { amount: currentEssentialNonHousing, estimated: true },
+      targetLiving: { amount: targetEssentialNonHousing, estimated: colGroceries === "" || colUtilities === "" || colTransport === "" || colDining === "" || colMisc === "" },
+      oneTime: {
+        movers: entered(moversCost, 1500),
+        travel: entered(travelCost, 500),
+        setup: entered(setupCost, 2000),
+        leaseBreak: entered(leaseBreakCost, 0),
+        // Closing costs of about 3% of the price when buying; application and broker fees are entered by the user
+        fees: entered(moveFeesCost, buying ? homePriceN * 0.03 : 0),
+        overlapMonths: nz(overlapMonths),
+        refundableDeposit: entered(depositCost, rentDeposit),
+        downPayment: buying ? { amount: homePriceN * (nz(downPct) / 100), estimated: false } : undefined,
+      },
+    });
+  }, [
+    results.salaryReady, results.activeHousing, results.buyReady, currentHousingActual, isCurrentHousingEstimated,
+    currentEssentialNonHousing, targetEssentialNonHousing, salary, currentSalary, filing, k401Pct, mode,
+    fromState, fromCityId, toState, toCityId, typed, homePrice, downPct, rentMonthly,
+    colGroceries, colUtilities, colTransport, colDining, colMisc,
+    moversCost, travelCost, setupCost, leaseBreakCost, overlapMonths, moveFeesCost, depositCost,
+  ]);
 
   const verdict = useMemo(
     () => getVerdict(results.pct, trueMonthlyLeftover, results.netToMonthly, nz(netWorth), n(homePrice)),
@@ -733,6 +837,9 @@ export default function Calculator({
     setToCityOther("");
 
     setCurrentHousingMonthly("");
+    setCurrentSalary(""); setMoversCost(""); setTravelCost(""); setSetupCost(""); setLeaseBreakCost("");
+    setOverlapMonths(""); setMoveFeesCost(""); setDepositCost("");
+    clearTyped();
     setHomePrice("450000");
     setDownPct("20");
     setRatePct("6.5");
@@ -974,7 +1081,7 @@ export default function Calculator({
                 <select
                   className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                   value={toState}
-                  onChange={(e) => { const state = e.target.value as StateCode; setToState(state); setToCityId(""); setToCityOther(""); }}
+                  onChange={(e) => { const state = e.target.value as StateCode; setToState(state); setToCityId(""); setToCityOther(""); clearTyped(); }}
                 >
                   {STATES.map((s) => <option key={s.code} value={s.code}>{s.name} ({s.code.toUpperCase()})</option>)}
                 </select>
@@ -1008,6 +1115,7 @@ export default function Calculator({
                   value={toCityId}
                   onChange={(e) => {
                     const id = e.target.value;
+                    clearTyped();
                     setToCityId(id);
                     if (!id.startsWith("other-")) setToCityOther("");
                     const city = findCity(id);
@@ -1049,7 +1157,7 @@ export default function Calculator({
                 </div>
                 <input
                   className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
-                  type="number" value={currentHousingMonthly} onChange={(e) => setCurrentHousingMonthly(e.target.value)}
+                  id="in-curHousing" type="number" value={currentHousingMonthly} onChange={(e) => setCurrentHousingMonthly(e.target.value)}
                   placeholder={currentHousingEst != null ? `~${Math.round(currentHousingEst)} estimated` : "e.g. 2500"}
                 />
               </label>
@@ -1064,6 +1172,35 @@ export default function Calculator({
                   type="number" value={netWorth} onChange={(e) => setNetWorth(e.target.value)} placeholder="e.g. 500000"
                 />
               </label>
+
+              <details className="sm:col-span-2 rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
+                <summary className="cursor-pointer text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  Job offer and moving costs <span className="font-normal text-slate-400 dark:text-slate-500">(optional, adds first-year impact and cash needed)</span>
+                </summary>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <label className="text-sm sm:col-span-2">
+                    <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Salary now <span className="font-normal text-slate-400">(blank = same as the salary above, which is the salary after the move)</span></div>
+                    <input className={MOVE_INPUT_CLS} type="number" value={currentSalary} onChange={(e) => setCurrentSalary(e.target.value)} placeholder="e.g. 120000" />
+                  </label>
+                  {([
+                    ["in-movers", "Movers or truck", moversCost, setMoversCost, "1500 estimated"],
+                    ["in-travel", "Travel and storage", travelCost, setTravelCost, "500 estimated"],
+                    ["in-setup", "Furniture and setup", setupCost, setSetupCost, "2000 estimated"],
+                    ["in-leaseBreak", "Lease break fee", leaseBreakCost, setLeaseBreakCost, "0"],
+                    ["in-fees", mode === "buy" ? "Closing and other fees" : "Application and broker fees", moveFeesCost, setMoveFeesCost, mode === "buy" ? "about 3% of price estimated" : "0"],
+                    ["in-deposit", "Security deposit (refundable)", depositCost, setDepositCost, mode === "rent" ? "2 months of rent estimated" : "not applicable"],
+                  ] as [string, string, string, (v: string) => void, string][]).map(([id, label, value, set, ph]) => (
+                    <label key={id} className="text-sm">
+                      <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">{label}</div>
+                      <input id={id} className={MOVE_INPUT_CLS} type="number" min={0} value={value} onChange={(e) => set(e.target.value)} placeholder={ph} />
+                    </label>
+                  ))}
+                  <label className="text-sm">
+                    <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Months paying both homes</div>
+                    <input className={MOVE_INPUT_CLS} type="number" min={0} step={0.5} value={overlapMonths} onChange={(e) => setOverlapMonths(e.target.value)} placeholder="0" />
+                  </label>
+                </div>
+              </details>
 
               {fromCityId && toCityId && !compareRouteAllowed ? (
                 <div className="sm:col-span-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
@@ -1081,7 +1218,7 @@ export default function Calculator({
                 <label className="block text-sm sm:col-span-2">
                   <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Home price</div>
                   <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
-                    type="number" value={homePrice} onChange={(e) => setHomePrice(e.target.value)} placeholder=" " />
+                    type="number" value={homePrice} onChange={(e) => { markTyped("home"); setHomePrice(e.target.value); }} placeholder=" " />
                 </label>
                 <label className="block text-sm">
                   <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Down payment %</div>
@@ -1101,7 +1238,7 @@ export default function Calculator({
                 <label className="text-sm">
                   <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Property tax % (annual)</div>
                   <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
-                    type="number" step="0.01" value={propertyTaxPct} onChange={(e) => setPropertyTaxPct(e.target.value)} placeholder=" " />
+                    type="number" step="0.01" value={propertyTaxPct} onChange={(e) => { markTyped("tax"); setPropertyTaxPct(e.target.value); }} placeholder=" " />
                 </label>
                 <label className="text-sm">
                   <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Home insurance (monthly)</div>
@@ -1139,7 +1276,7 @@ export default function Calculator({
                 <label className="text-sm sm:col-span-2">
                   <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Monthly rent</div>
                   <input className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
-                    type="number" value={rentMonthly} onChange={(e) => setRentMonthly(e.target.value)} placeholder=" " />
+                    id="in-rent" type="number" value={rentMonthly} onChange={(e) => { markTyped("rent"); setRentMonthly(e.target.value); }} placeholder=" " />
                 </label>
                 <label className="text-sm">
                   <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Renter&apos;s insurance (monthly)</div>
@@ -1167,6 +1304,16 @@ export default function Calculator({
 
         {/* ══════════════════════════ RESULTS ══════════════════════════ */}
         <div className="space-y-3">
+
+          {move && (
+            <MoveSummary
+              move={move}
+              fromName={currentCityLabel}
+              toName={findCity(toCityId)?.name || stateName}
+              hasCurrentIncome={currentSalary.trim() !== "" && nz(currentSalary) !== n(salary)}
+              inputIds={MOVE_IDS}
+            />
+          )}
 
           {/* ── 1. BOTTOM LINE VERDICT ── */}
           <div className={`rounded-2xl border p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ${vs.border} ${vs.bg}`}>

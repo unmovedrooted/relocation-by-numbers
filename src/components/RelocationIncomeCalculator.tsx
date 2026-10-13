@@ -8,9 +8,11 @@ import {
   estimateNetBreakdown,
   EMPLOYEE_401K_LIMIT,
 } from '@/lib/wageTax'
+import { compareMove, householdNetAnnual, type Item, type MoveResult } from '@/lib/relocationMove'
 import type { FilingStatus } from '@/lib/tax'
 import { TAX_YEAR } from '@/lib/taxYear2026'
 import TaxAssumptionsNote from './TaxAssumptionsNote'
+import MoveSummary, { MOVE_INPUT_IDS } from './MoveSummary'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -48,9 +50,9 @@ interface Results {
   targetCitySlug:       string
   currentCityName:      string
   hasTwoIncomes:        boolean
-  // ── NEW: one-time moving cost payback ────────────────────────────────
-  totalMovingCost:      number
-  monthsToPayBack:      number | null   // null when flexibility ≤ 0
+  // Before-and-after comparison of the move
+  move:                 MoveResult
+  hasCurrentIncome:     boolean
   // ── NEW: sales-tax purchasing-power note ─────────────────────────────
   salesTaxNote:         string | null
 }
@@ -144,24 +146,7 @@ function estimateCombinedNet(
   k401Pct2:  number,
   cityId:    string,
 ): number {
-  if (income2 === 0) {
-    return estimateNetAnnual({ grossAnnual: income1, state, filing, k401Pct: k401Pct1, cityId })
-  }
-  if (filing === 'married') {
-    // The IRS elective deferral limit (EMPLOYEE_401K_LIMIT) applies per
-    // person, not per return, a couple who each max out their own 401(k)
-    // can jointly exclude up to 2x the single-filer limit. Cap each
-    // spouse's contribution individually, then pass the summed dollar
-    // amount via k401Dollar so tax.ts doesn't re-apply the single-person
-    // cap to the household total.
-    const k401_1 = Math.min(income1 * (k401Pct1 / 100), EMPLOYEE_401K_LIMIT)
-    const k401_2 = Math.min(income2 * (k401Pct2 / 100), EMPLOYEE_401K_LIMIT)
-    const combined = income1 + income2
-    return estimateNetAnnual({ grossAnnual: combined, state, filing: 'married', k401Pct: 0, k401Dollar: k401_1 + k401_2, earnerWages: [income1, income2], cityId })
-  }
-  const net1 = estimateNetAnnual({ grossAnnual: income1, state, filing: 'single', k401Pct: k401Pct1, cityId })
-  const net2 = estimateNetAnnual({ grossAnnual: income2, state, filing: 'single', k401Pct: k401Pct2, cityId })
-  return net1 + net2
+  return householdNetAnnual(income1, income2, state, filing, k401Pct1, k401Pct2, cityId)
 }
 
 function findMinIncome2(
@@ -217,6 +202,9 @@ function buildScenarioUrl(state: {
   housingMode: HousingMode; monthlyRent: string; rentersInsurance: string
   homePrice: string; downPct: string; mortgageRate: string; termYears: string; hoa: string
   movingTruck: string; securityDeposit: string; furnitureBudget: string; miscMoving: string
+  leaseBreak: string; overlapMonths: string; moveFees: string
+  curIncome1: string; curIncome2: string; curHousing: string; curLiving: string
+  typed: string[]
 }): string {
   const url = new URL(window.location.href)
   url.searchParams.set('household',        state.householdType)
@@ -243,6 +231,14 @@ function buildScenarioUrl(state: {
   url.searchParams.set('securityDeposit',  state.securityDeposit)
   url.searchParams.set('furnitureBudget',  state.furnitureBudget)
   url.searchParams.set('miscMoving',       state.miscMoving)
+  url.searchParams.set('leaseBreak',       state.leaseBreak)
+  url.searchParams.set('overlapMonths',    state.overlapMonths)
+  url.searchParams.set('moveFees',         state.moveFees)
+  url.searchParams.set('curIncome1',       state.curIncome1)
+  url.searchParams.set('curIncome2',       state.curIncome2)
+  url.searchParams.set('curHousing',       state.curHousing)
+  url.searchParams.set('curLiving',        state.curLiving)
+  url.searchParams.set('typed',            state.typed.join(','))
   return url.toString()
 }
 
@@ -387,6 +383,24 @@ export default function RelocationIncomeCalculator() {
   const [securityDeposit,  setSecurityDeposit]  = useState('')
   const [furnitureBudget,  setFurnitureBudget]  = useState('2000')
   const [miscMoving,       setMiscMoving]       = useState('500')
+  const [leaseBreak,       setLeaseBreak]       = useState('0')
+  const [overlapMonths,    setOverlapMonths]    = useState('0')
+  const [moveFees,         setMoveFees]         = useState('0')
+
+  // Income now (optional; blank means the same as the income after the move) and what the household pays now
+  const [curIncome1,   setCurIncome1]   = useState('')
+  const [curIncome2,   setCurIncome2]   = useState('')
+  const [curHousing,   setCurHousing]   = useState('')
+  const [curLiving,    setCurLiving]    = useState('')
+
+  // Figures the user typed. Anything not listed here is a site estimate and is shown as one.
+  const touchedRef = useRef<Record<string, boolean>>({})
+  const [touched, setTouchedState] = useState<Record<string, boolean>>({})
+  const markTouched = (key: string, value = true) => {
+    touchedRef.current = { ...touchedRef.current, [key]: value }
+    setTouchedState(touchedRef.current)
+  }
+  const restoredRef = useRef<Record<string, boolean>>({})
 
   //, Living costs
   const [costs, setCosts] = useState<LivingCosts>(() =>
@@ -448,14 +462,46 @@ export default function RelocationIncomeCalculator() {
     if (p.get('securityDeposit'))  setSecurityDeposit(p.get('securityDeposit')!)
     if (p.get('furnitureBudget'))  setFurnitureBudget(p.get('furnitureBudget')!)
     if (p.get('miscMoving'))       setMiscMoving(p.get('miscMoving')!)
+    if (p.get('leaseBreak'))       setLeaseBreak(p.get('leaseBreak')!)
+    if (p.get('overlapMonths'))    setOverlapMonths(p.get('overlapMonths')!)
+    if (p.get('moveFees'))         setMoveFees(p.get('moveFees')!)
+    if (p.get('curIncome1'))       setCurIncome1(p.get('curIncome1')!)
+    if (p.get('curIncome2'))       setCurIncome2(p.get('curIncome2')!)
+    if (p.get('curHousing'))       setCurHousing(p.get('curHousing')!)
+    if (p.get('curLiving'))        setCurLiving(p.get('curLiving')!)
+
+    // Which figures were typed rather than estimated, so a shared link keeps the labels honest
+    const typedKeys = (p.get('typed') ?? '').split(',').filter(Boolean)
+    if (typedKeys.length) {
+      const t: Record<string, boolean> = {}
+      for (const k of typedKeys) t[k] = true
+      touchedRef.current = t
+      setTouchedState(t)
+      restoredRef.current = { rent: !!t.rent, home: !!t.home }
+    }
   }, [])
 
   //, Auto-fill rent + home price when target city changes
   useEffect(() => {
     const city = findCity(targetCityId)
-    if (city?.defaultRent)     setMonthlyRent(String(city.defaultRent))
-    if (city?.medianHomePrice) setHomePrice(String(city.medianHomePrice))
+    const kept = restoredRef.current
+    if (city?.defaultRent     && !kept.rent) setMonthlyRent(String(city.defaultRent))
+    if (city?.medianHomePrice && !kept.home) setHomePrice(String(city.medianHomePrice))
+    restoredRef.current = {}
   }, [targetCityId])
+
+  //, What the household pays now: the current city's rent and costs until the user types their own
+  useEffect(() => {
+    if (touchedRef.current.curHousing) return
+    const city = findCity(currentCityId)
+    if (city?.defaultRent) setCurHousing(String(city.defaultRent))
+  }, [currentCityId])
+
+  useEffect(() => {
+    if (touchedRef.current.curLiving) return
+    const total = Object.values(getPrefillCosts(findCity(currentCityId), householdType, children)).reduce((a, b) => a + b, 0)
+    setCurLiving(String(total))
+  }, [currentCityId, householdType, children])
 
   //, Auto-fill security deposit when rent changes (2× rent, unless user has typed something)
   useEffect(() => {
@@ -475,6 +521,13 @@ export default function RelocationIncomeCalculator() {
 
   useEffect(() => { setCostsManuallyEdited(false) }, [targetCityId])
 
+  // Choosing a different target city replaces the city-based estimates, so those figures go back to estimates.
+  const changeTargetCity = (id: string) => {
+    markTouched('rent', false); markTouched('home', false); markTouched('deposit', false)
+    setSecurityDeposit('')
+    setTargetCityId(id)
+  }
+
   // ─── Location helpers ──────────────────────────────────────────────────────
 
   const handleCurrentStateChange = (s: StateCode) => {
@@ -486,7 +539,7 @@ export default function RelocationIncomeCalculator() {
   const handleTargetStateChange = (s: StateCode) => {
     setTargetState(s)
     const cities = citiesForState(s)
-    setTargetCityId(cities[0]?.id ?? `other-${s}`)
+    changeTargetCity(cities[0]?.id ?? `other-${s}`)
   }
 
   const handleCostChange = (key: keyof LivingCosts, val: string) => {
@@ -575,16 +628,28 @@ export default function RelocationIncomeCalculator() {
     const minForCashflow = findMinIncome2(i1, targetState, filing, k1, k2, targetCityId, breakEvenNet)
     const minFor30Pct    = findMinIncome2(i1, targetState, filing, k1, k2, targetCityId, target30Net)
 
-    // ── FIX 1: one-time moving cost payback ───────────────────────────────
-    const totalMovingCost =
-      (parseFloat(movingTruck)     || 0) +
-      (parseFloat(securityDeposit) || 0) +
-      (parseFloat(furnitureBudget) || 0) +
-      (parseFloat(miscMoving)      || 0)
-
-    // Use the best applicable flexibility (two if available, else one)
-    const bestFlex = i2 > 0 ? flexTwo : flexOne
-    const monthsToPayBack = bestFlex > 0 ? Math.ceil(totalMovingCost / bestFlex) : null
+    // Before-and-after comparison. Income now defaults to the income after the move.
+    const c1 = parseMoney(curIncome1) || i1
+    const c2 = curIncome2.trim() === '' ? i2 : parseMoney(curIncome2)
+    const item = (key: string, amount: number): Item => ({ amount, estimated: !touched[key] && amount > 0 })
+    const move = compareMove({
+      filing, k401Pct1: k1, k401Pct2: k2,
+      currentIncome1: c1, currentIncome2: c2, offerIncome1: i1, offerIncome2: i2,
+      currentState, currentCityId, targetState, targetCityId,
+      currentHousing: item('curHousing', parseFloat(curHousing) || 0),
+      targetHousing:  housingMode === 'rent' ? item('rent', housingCost) : { amount: housingCost, estimated: true },
+      currentLiving:  item('curLiving', parseFloat(curLiving) || 0),
+      targetLiving:   { amount: totalLiving, estimated: !costsManuallyEdited },
+      oneTime: {
+        movers:            item('movers',  parseFloat(movingTruck)     || 0),
+        travel:            item('travel',  parseFloat(miscMoving)      || 0),
+        setup:             item('setup',   parseFloat(furnitureBudget) || 0),
+        leaseBreak:        item('leaseBreak', parseFloat(leaseBreak)   || 0),
+        fees:              item('fees',    parseFloat(moveFees)        || 0),
+        overlapMonths:     parseFloat(overlapMonths) || 0,
+        refundableDeposit: item('deposit', parseFloat(securityDeposit) || 0),
+      },
+    })
 
     // ── FIX 3: sales tax note ─────────────────────────────────────────────
     const salesTaxNote = getSalesTaxNote(currentState, targetState)
@@ -616,8 +681,8 @@ export default function RelocationIncomeCalculator() {
       targetCitySlug:  targetCityId,
       currentCityName: currentCity?.name ?? currentState.toUpperCase(),
       hasTwoIncomes: i2 > 0,
-      totalMovingCost,
-      monthsToPayBack,
+      move,
+      hasCurrentIncome: c1 !== i1 || c2 !== i2,
       salesTaxNote,
     })
   }, [
@@ -626,6 +691,7 @@ export default function RelocationIncomeCalculator() {
     housingMode, monthlyRent, rentersInsurance,
     homePrice, downPct, mortgageRate, termYears, hoa,
     movingTruck, securityDeposit, furnitureBudget, miscMoving,
+    leaseBreak, overlapMonths, moveFees, curIncome1, curIncome2, curHousing, curLiving, costsManuallyEdited, touched,
     costs,
   ])
 
@@ -656,6 +722,9 @@ export default function RelocationIncomeCalculator() {
     setHousingMode('rent'); setMonthlyRent(''); setRentersInsurance('20')
     setHomePrice(''); setDownPct('10'); setMortgageRate('6.75'); setTermYears('30'); setHoa('0')
     setMovingTruck('1500'); setSecurityDeposit(''); setFurnitureBudget('2000'); setMiscMoving('500')
+    setLeaseBreak('0'); setOverlapMonths('0'); setMoveFees('0')
+    setCurIncome1(''); setCurIncome2(''); setCurHousing(''); setCurLiving('')
+    touchedRef.current = {}; setTouchedState({})
     setCosts(getPrefillCosts(findCity('raleigh-nc'), 'couple', 0))
     setCostsManuallyEdited(false)
     setResults(null); setError('')
@@ -674,6 +743,8 @@ export default function RelocationIncomeCalculator() {
       housingMode, monthlyRent, rentersInsurance,
       homePrice, downPct, mortgageRate, termYears, hoa,
       movingTruck, securityDeposit, furnitureBudget, miscMoving,
+      leaseBreak, overlapMonths, moveFees, curIncome1, curIncome2, curHousing, curLiving,
+      typed: Object.keys(touchedRef.current).filter(k => touchedRef.current[k]),
     })
 
     const shareText = results
@@ -764,7 +835,7 @@ export default function RelocationIncomeCalculator() {
         <SectionLabel>Income</SectionLabel>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <FieldLabel>Income 1 (annual)</FieldLabel>
+            <FieldLabel>Income 1 after the move (annual)</FieldLabel>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
               <input type="text" placeholder="95,000" value={income1}
@@ -775,11 +846,33 @@ export default function RelocationIncomeCalculator() {
 
           {showIncome2 && (
             <div>
-              <FieldLabel>Income 2 (annual, optional)</FieldLabel>
+              <FieldLabel>Income 2 after the move (annual, optional)</FieldLabel>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
                 <input type="text" placeholder="68,000" value={income2}
                   onChange={e => setIncome2(e.target.value)}
+                  className={`${inputCls} pl-6`} />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <FieldLabel>Income 1 now (annual, optional)</FieldLabel>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+              <input type="text" placeholder="same as after the move" value={curIncome1}
+                onChange={e => setCurIncome1(e.target.value)}
+                className={`${inputCls} pl-6`} />
+            </div>
+          </div>
+
+          {showIncome2 && (
+            <div>
+              <FieldLabel>Income 2 now (annual, optional)</FieldLabel>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+                <input type="text" placeholder="same as after the move" value={curIncome2}
+                  onChange={e => setCurIncome2(e.target.value)}
                   className={`${inputCls} pl-6`} />
               </div>
             </div>
@@ -857,7 +950,7 @@ export default function RelocationIncomeCalculator() {
             </div>
             <div>
               <FieldLabel>City (optional)</FieldLabel>
-              <select value={targetCityId} onChange={e => setTargetCityId(e.target.value)} className={selectCls}>
+              <select value={targetCityId} onChange={e => changeTargetCity(e.target.value)} className={selectCls}>
                 {targetCities.map(c => (
                   <option key={c.id} value={c.id}>{cityLabel(c)}</option>
                 ))}
@@ -865,6 +958,32 @@ export default function RelocationIncomeCalculator() {
             </div>
           </div>
         </div>
+
+        <Divider />
+
+        {/* ── WHAT YOU PAY NOW ── */}
+        <SectionLabel>What you pay now</SectionLabel>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <FieldLabel>Current rent or mortgage / mo</FieldLabel>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+              <input id="in-curHousing" type="number" min={0} value={curHousing}
+                onChange={e => { markTouched('curHousing'); setCurHousing(e.target.value) }} className={`${inputCls} pl-6`} />
+            </div>
+          </div>
+          <div>
+            <FieldLabel>Current other living costs / mo</FieldLabel>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+              <input id="in-curLiving" type="number" min={0} value={curLiving}
+                onChange={e => { markTouched('curLiving'); setCurLiving(e.target.value) }} className={`${inputCls} pl-6`} />
+            </div>
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+          Pre-filled from the current city&apos;s Census rent and BEA price levels. Enter what you really pay for a better comparison.
+        </p>
 
         <Divider />
 
@@ -893,8 +1012,8 @@ export default function RelocationIncomeCalculator() {
               <FieldLabel>Monthly rent</FieldLabel>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                <input type="text" placeholder="1,579" value={monthlyRent}
-                  onChange={e => setMonthlyRent(e.target.value)} className={`${inputCls} pl-6`} />
+                <input id="in-rent" type="text" placeholder="1,579" value={monthlyRent}
+                  onChange={e => { markTouched('rent'); setMonthlyRent(e.target.value) }} className={`${inputCls} pl-6`} />
               </div>
             </div>
             <div>
@@ -912,8 +1031,8 @@ export default function RelocationIncomeCalculator() {
               <FieldLabel>Home price</FieldLabel>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                <input type="text" placeholder="450,000" value={homePrice}
-                  onChange={e => setHomePrice(e.target.value)} className={`${inputCls} pl-6`} />
+                <input id="in-home" type="text" placeholder="450,000" value={homePrice}
+                  onChange={e => { markTouched('home'); setHomePrice(e.target.value) }} className={`${inputCls} pl-6`} />
               </div>
             </div>
             <div>
@@ -963,7 +1082,7 @@ export default function RelocationIncomeCalculator() {
         <div className="flex items-center justify-between mb-3">
           <SectionLabel>One-time moving costs</SectionLabel>
           <span className="text-[11px] text-slate-400 dark:text-slate-500 italic -mt-3">
-            Used to calculate your payback period
+            Used for first-year impact and cash needed
           </span>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -971,38 +1090,59 @@ export default function RelocationIncomeCalculator() {
             <FieldLabel>Movers / truck</FieldLabel>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-              <input type="number" min={0} value={movingTruck}
-                onChange={e => setMovingTruck(e.target.value)} className={`${inputCls} pl-6`} />
+              <input id="in-movers" type="number" min={0} value={movingTruck}
+                onChange={e => { markTouched('movers'); setMovingTruck(e.target.value) }} className={`${inputCls} pl-6`} />
             </div>
           </div>
           <div>
-            <FieldLabel>Security deposit</FieldLabel>
+            <FieldLabel>Security deposit (refundable)</FieldLabel>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-              <input type="number" min={0} value={securityDeposit}
+              <input id="in-deposit" type="number" min={0} value={securityDeposit}
                 placeholder="auto 2× rent"
-                onChange={e => setSecurityDeposit(e.target.value)} className={`${inputCls} pl-6`} />
+                onChange={e => { markTouched('deposit'); setSecurityDeposit(e.target.value) }} className={`${inputCls} pl-6`} />
             </div>
           </div>
           <div>
             <FieldLabel>Furniture &amp; setup</FieldLabel>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-              <input type="number" min={0} value={furnitureBudget}
-                onChange={e => setFurnitureBudget(e.target.value)} className={`${inputCls} pl-6`} />
+              <input id="in-setup" type="number" min={0} value={furnitureBudget}
+                onChange={e => { markTouched('setup'); setFurnitureBudget(e.target.value) }} className={`${inputCls} pl-6`} />
             </div>
           </div>
           <div>
-            <FieldLabel>Misc (travel, storage)</FieldLabel>
+            <FieldLabel>Travel &amp; storage</FieldLabel>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-              <input type="number" min={0} value={miscMoving}
-                onChange={e => setMiscMoving(e.target.value)} className={`${inputCls} pl-6`} />
+              <input id="in-travel" type="number" min={0} value={miscMoving}
+                onChange={e => { markTouched('travel'); setMiscMoving(e.target.value) }} className={`${inputCls} pl-6`} />
+            </div>
+          </div>
+          <div>
+            <FieldLabel>Lease break fee</FieldLabel>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+              <input id="in-leaseBreak" type="number" min={0} value={leaseBreak}
+                onChange={e => { markTouched('leaseBreak'); setLeaseBreak(e.target.value) }} className={`${inputCls} pl-6`} />
+            </div>
+          </div>
+          <div>
+            <FieldLabel>Months paying both homes</FieldLabel>
+            <input type="number" min={0} step={0.5} value={overlapMonths}
+              onChange={e => setOverlapMonths(e.target.value)} className={inputCls} />
+          </div>
+          <div>
+            <FieldLabel>Fees not returned (application, broker)</FieldLabel>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+              <input id="in-fees" type="number" min={0} value={moveFees}
+                onChange={e => { markTouched('fees'); setMoveFees(e.target.value) }} className={`${inputCls} pl-6`} />
             </div>
           </div>
         </div>
         <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
-          Total shown in results. Payback = how many months of monthly flexibility it takes to recover the upfront hit.
+          The refundable deposit counts toward the cash you need but not toward what the move costs. Everything else is spent.
         </p>
 
         <Divider />
@@ -1030,6 +1170,7 @@ export default function RelocationIncomeCalculator() {
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
                 <input
+                  id={`in-cost-${key}`}
                   type="number" min={0} value={costs[key]}
                   onChange={e => handleCostChange(key, e.target.value)}
                   className={`${inputCls} pl-6`}
@@ -1064,6 +1205,14 @@ export default function RelocationIncomeCalculator() {
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
               Results, {results.currentCityName} → {results.targetCityName}
             </p>
+
+            <MoveSummary
+              move={results.move}
+              fromName={results.currentCityName}
+              toName={results.targetCityName}
+              hasCurrentIncome={results.hasCurrentIncome}
+              inputIds={MOVE_INPUT_IDS}
+            />
 
             {/* Card 1: Verdict */}
             <div className={`rounded-2xl bg-white ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 shadow-[0_6px_24px_rgba(15,23,42,0.08)] overflow-hidden border-t-4 ${verdictBorderColor(results.verdictOne)}`}>
@@ -1206,49 +1355,6 @@ export default function RelocationIncomeCalculator() {
                 Bar shows each category as a share of gross monthly income ({fmt(results.grossMonthlyOne)}/mo).
               </p>
             </div>
-
-            {/* Card NEW: One-time moving costs (FIX 1) */}
-            {results.totalMovingCost > 0 && (
-              <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 shadow-[0_6px_24px_rgba(15,23,42,0.08)] border-l-4 border-amber-400">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-amber-500" />
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">The moving tax</h3>
-                </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-                  The upfront cash hit before your new budget rhythm begins
-                </p>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <StatCard
-                    label="Total one-time costs"
-                    value={fmt(results.totalMovingCost)}
-                    sub="movers, deposit, furnishing, misc"
-                  />
-                  <StatCard
-                    label="Payback period"
-                    value={
-                      results.monthsToPayBack === null
-                        ? 'Never (budget is negative)'
-                        : results.monthsToPayBack <= 1
-                        ? '< 1 month'
-                        : `${results.monthsToPayBack} months`
-                    }
-                    sub={
-                      results.monthsToPayBack === null
-                        ? 'Improve flexibility first'
-                        : `at ${fmt(results.hasTwoIncomes ? results.flexibilityTwo : results.flexibilityOne)}/mo surplus`
-                    }
-                  />
-                  <StatCard
-                    label="Savings needed before moving"
-                    value={fmt(results.totalMovingCost)}
-                    sub="have this liquid before you give notice"
-                  />
-                </div>
-                <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
-                  Payback = how many months of monthly flexibility it takes to recover the upfront cash. Does not include down payment if buying.
-                </p>
-              </div>
-            )}
 
             {/* Card 4: Minimum second income */}
             <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 shadow-[0_6px_24px_rgba(15,23,42,0.08)] border-l-4 border-violet-500">

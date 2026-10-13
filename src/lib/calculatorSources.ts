@@ -22,6 +22,8 @@ const LOCAL_SOURCES_LINK: SourceRef = { label: "Local income taxes modeled and t
 
 const HOUSING_NOTE =
   "City rent, home-price and property-tax defaults come from the Census Bureau American Community Survey 2020-2024 (tables B25113, B25109, B25058, B25064, B25077 and B25103). City price levels for housing, goods, utilities and other services come from BEA Regional Price Parities 2024. Insurance and closing-cost defaults, and the dollar budgets for groceries, utilities, transportation, healthcare and childcare, are planning assumptions, not government data; the price-level indexes only scale them by city.";
+const MOVE_NOTE =
+  "The move comparison subtracts what the household keeps now from what it would keep after the move, and splits the change into pay, taxes, housing and other costs. First-year impact is twelve months of that change minus the one-time costs that are spent; a refundable deposit and a down payment count toward cash needed but not toward cost. Ranges move only the figures this site estimated, by 10% for housing, 15% for living costs and 25% for one-time costs. Those spreads, the one-time cost defaults and the living-cost budgets are planning assumptions, not government data.";
 const INTERNATIONAL_NOTE =
   "International tax and cost figures are planning assumptions last reviewed in March 2026. They were not part of the October 2026 U.S. tax refresh; verify them locally before a major decision.";
 
@@ -61,10 +63,10 @@ const PAYROLL_PROGRAMS_LINK: SourceRef = { label: "Employee-paid state payroll p
 const TAXES = [RP_2025_32, PUB_15, FORM_8959, STATE_SOURCES_LINK, LOCAL_SOURCES_LINK, PAYROLL_PROGRAMS_LINK];
 
 export const CALCULATOR_INFO: Readonly<Record<string, CalculatorInfo>> = Object.freeze({
-  "/": { name: "US Relocation & Take-Home Calculator", taxDriven: true, sources: TAXES, notes: [HOUSING_NOTE],
-    exclusions: [...US_TAX_EXCLUSIONS, "Moving costs and one-time relocation expenses are not included."] },
-  "/one-income-relocation-calculator": { name: "One vs Two Income Relocation", taxDriven: true, sources: TAXES, notes: [HOUSING_NOTE],
-    exclusions: [...US_TAX_EXCLUSIONS, "Two earners' Social Security wage bases are not tracked separately when incomes are combined for a joint return."] },
+  "/": { name: "US Relocation & Take-Home Calculator", taxDriven: true, sources: TAXES, notes: [HOUSING_NOTE, MOVE_NOTE],
+    exclusions: [...US_TAX_EXCLUSIONS, "Moving costs not entered default to planning averages, and the date the lease or home sale closes is not modeled."] },
+  "/one-income-relocation-calculator": { name: "One vs Two Income Relocation", taxDriven: true, sources: TAXES, notes: [HOUSING_NOTE, MOVE_NOTE],
+    exclusions: [...US_TAX_EXCLUSIONS, "Taxes follow the state and city you move to; working in a different state or city from where you live is not modeled."] },
   "/paycheck-calculator": { name: "Paycheck Calculator", taxDriven: true, sources: TAXES,
     exclusions: [...US_TAX_EXCLUSIONS, "Health-premium and HSA pre-tax deductions, additional withholding and bonus withholding rules are not modeled; this estimates the tax owed for the year, not employer withholding."] },
   "/income-tax-calculator": { name: "Income Tax Calculator", taxDriven: true, sources: [RP_2025_32, STATE_SOURCES_LINK],
