@@ -13,6 +13,7 @@ import type { FilingStatus } from '@/lib/tax'
 import { TAX_YEAR } from '@/lib/taxYear2026'
 import TaxAssumptionsNote from './TaxAssumptionsNote'
 import MoveSummary, { MOVE_INPUT_IDS } from './MoveSummary'
+import { buildFireLink } from '@/lib/fireLink'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -53,6 +54,7 @@ interface Results {
   // Before-and-after comparison of the move
   move:                 MoveResult
   hasCurrentIncome:     boolean
+  fireHref:             string | undefined
   // ── NEW: sales-tax purchasing-power note ─────────────────────────────
   salesTaxNote:         string | null
 }
@@ -683,6 +685,15 @@ export default function RelocationIncomeCalculator() {
       hasTwoIncomes: i2 > 0,
       move,
       hasCurrentIncome: c1 !== i1 || c2 !== i2,
+      fireHref: findCity(targetCityId)
+        ? buildFireLink({
+            income: c1 + c2, state: currentState, filing, k401Pct: k1,
+            expenses: (parseFloat(curHousing) || 0) + (parseFloat(curLiving) || 0),
+            movedIncome: i1 + i2, movedState: targetState, movedCityId: targetCityId,
+            movedExpenses: housingCost + totalLiving,
+            movedCost: move.expected.spentOneTime,
+          })
+        : undefined,
       salesTaxNote,
     })
   }, [
@@ -1211,6 +1222,7 @@ export default function RelocationIncomeCalculator() {
               fromName={results.currentCityName}
               toName={results.targetCityName}
               hasCurrentIncome={results.hasCurrentIncome}
+              fireHref={results.fireHref}
               inputIds={MOVE_INPUT_IDS}
             />
 

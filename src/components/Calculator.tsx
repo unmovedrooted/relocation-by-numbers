@@ -18,6 +18,7 @@ import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import MoveSummary from "./MoveSummary";
 import { compareMove, type Item } from "../lib/relocationMove";
+import { buildFireLink } from "../lib/fireLink";
 
 const MOVE_INPUT_CLS =
   "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800";
@@ -790,6 +791,20 @@ export default function Calculator({
     moversCost, travelCost, setupCost, leaseBreakCost, overlapMonths, moveFeesCost, depositCost,
   ]);
 
+  // Hand the move to the FIRE calculator: spending and pay now and after, plus the one-time costs that are spent.
+  const fireHref = useMemo(() => {
+    if (!move || currentHousingActual === null || !findCity(toCityId)) return undefined;
+    const salaryN = n(salary);
+    return buildFireLink({
+      income: currentSalary.trim() === "" ? salaryN : nz(currentSalary),
+      state: fromState, filing, k401Pct: nz(k401Pct),
+      expenses: currentHousingActual + currentEssentialNonHousing,
+      movedIncome: salaryN, movedState: toState, movedCityId: toCityId,
+      movedExpenses: results.activeHousing + targetEssentialNonHousing,
+      movedCost: move.expected.spentOneTime,
+    });
+  }, [move, currentHousingActual, currentEssentialNonHousing, targetEssentialNonHousing, results.activeHousing, salary, currentSalary, fromState, toState, toCityId, filing, k401Pct]);
+
   const verdict = useMemo(
     () => getVerdict(results.pct, trueMonthlyLeftover, results.netToMonthly, nz(netWorth), n(homePrice)),
     [results.pct, trueMonthlyLeftover, results.netToMonthly, netWorth, homePrice]
@@ -1312,6 +1327,7 @@ export default function Calculator({
               toName={findCity(toCityId)?.name || stateName}
               hasCurrentIncome={currentSalary.trim() !== "" && nz(currentSalary) !== n(salary)}
               inputIds={MOVE_IDS}
+              fireHref={fireHref}
             />
           )}
 

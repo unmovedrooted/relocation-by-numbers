@@ -29,7 +29,7 @@ export const MOVE_INPUT_IDS: Record<string, string> = {
 const signed = (n: number) => (n >= 0 ? '+' : '−') + fmt(Math.abs(n))
 
 export default function MoveSummary({
-  move, fromName, toName, hasCurrentIncome, inputIds,
+  move, fromName, toName, hasCurrentIncome, inputIds, fireHref,
 }: {
   move: MoveResult
   fromName: string
@@ -37,6 +37,8 @@ export default function MoveSummary({
   hasCurrentIncome: boolean
   /** DOM ids of the inputs for each estimated figure, so "enter yours" can jump to them. */
   inputIds: Record<string, string>
+  /** Link to the FIRE calculator prefilled with this move. */
+  fireHref?: string
 }) {
   const e = move.expected
   const rows = [
@@ -132,6 +134,15 @@ export default function MoveSummary({
         <p className="mt-4 text-[11px] text-slate-400 dark:text-slate-500">
           The range changes only figures this site estimated: housing by 10%, living costs by 15% and one-time costs by 25%, in the worse direction for the low end and the better direction for the high end. Figures you typed do not move. These spreads are planning assumptions.
         </p>
+
+        {fireHref && (
+          <a
+            href={fireHref}
+            className="mt-4 inline-flex items-center rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-700"
+          >
+            See your FIRE number after this move →
+          </a>
+        )}
 
         {estimated.length > 0 && (
           <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200">

@@ -22,6 +22,7 @@ import { STATES, type StateCode } from "@/lib/states";
 import { findCity, citiesForState } from "@/lib/cities";
 import { estimateNetAnnual, effectiveTaxRatePct } from "@/lib/wageTax";
 import type { FilingStatus } from "@/lib/tax";
+import { parseFireLink } from "@/lib/fireLink";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIRE MODE
@@ -69,6 +70,14 @@ type Inputs = {
   phase2StartsYear: number;
   moveCompareOn:    boolean;
   movedExpensesMonthly: number;
+  /** Gross income after the move; 0 means unchanged. */
+  movedIncome:      number;
+  /** State after the move; "" means unchanged. */
+  movedState:       StateChoice;
+  /** City whose local taxes apply after the move; "" uses the state's largest city. */
+  movedCityId:      string;
+  /** One-time moving costs that are spent, taken from savings in the moved scenario. */
+  movedCost:        number;
   // ── New: tax treatment ──────────────────────────────
   taxTreatment401k:       "traditional" | "roth";
   taxTreatmentIra:        "traditional" | "roth";
@@ -247,6 +256,7 @@ const BASE_DEFAULTS: Inputs = {
   inflationPct: 2.5, salaryGrowthPct: 3,
   phase2StartsYear: 10,
   moveCompareOn: true, movedExpensesMonthly: 2800,
+  movedIncome: 0, movedState: "", movedCityId: "", movedCost: 0,
   taxTreatment401k: "traditional", taxTreatmentIra: "traditional",
   brokerageTaxMode: "simple", brokerageTaxEfficiency: "high", brokerageTaxDragPct: 0.3,
   employerMatchPct: 0, employerMatchCapPct: 6,
@@ -1118,6 +1128,28 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   const [pinnedCompareCityId, setPinnedCompareCityId] = useState<string | null>(null);
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
   const [activeResultTab, setActiveResultTab] = useState<"milestone" | "move" | "savings">("milestone");
+  const [linkedMove, setLinkedMove] = useState(false);
+
+  // A move handed over from a relocation calculator through the URL prefills the current and moved scenarios.
+  useEffect(() => {
+    const link = parseFireLink(new URLSearchParams(window.location.search));
+    if (!link) return;
+    setInputs(s => ({
+      ...s,
+      income: link.income,
+      state: link.state,
+      filingStatus: link.filing,
+      k401Pct: link.k401Pct,
+      expensesMonthly: link.expenses,
+      moveCompareOn: true,
+      movedExpensesMonthly: link.movedExpenses,
+      movedIncome: link.movedIncome,
+      movedState: link.movedState,
+      movedCityId: link.movedCityId,
+      movedCost: link.movedCost,
+    }));
+    setLinkedMove(true);
+  }, []);
 
   // ── Core derived values ───────────────────────────────────────────────────
   const annualExp = useMemo(() => annualExpenses(inputs), [inputs]);
@@ -1209,10 +1241,29 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   }, [mode, inputs, netAnnual]);
 
   // ── Move impact ───────────────────────────────────────────────────────────
+  // Take-home pay after the move: new income and, if it changes, the new state and city's taxes.
+  const movedNetAnnual = useMemo(() => {
+    const gross = inputs.movedIncome > 0 ? inputs.movedIncome : inputs.income;
+    const state = inputs.movedState || inputs.state;
+    if (!state) return Math.max(0, gross);
+    return estimateNetAnnual({
+      grossAnnual: gross,
+      state: state as StateCode,
+      filing: inputs.filingStatus,
+      k401Pct: inputs.k401Pct,
+      cityId: inputs.movedState && inputs.movedCityId ? inputs.movedCityId : getBaselineCityIdForState(state),
+    });
+  }, [inputs.movedIncome, inputs.income, inputs.movedState, inputs.state, inputs.movedCityId, inputs.filingStatus, inputs.k401Pct]);
+
   const movedResult = useMemo(() => {
     if (!inputs.moveCompareOn) return null;
-    return simulateYearsToFI(inputs, netAnnual, mode, { expensesAnnualBase: annualMovedExpenses(inputs) });
-  }, [inputs, netAnnual, mode]);
+    // One-time costs come out of savings before the clock starts.
+    const cost = Math.max(0, inputs.movedCost);
+    const movedInputs: Inputs = inputs.advanced
+      ? { ...inputs, balBrokerage: Math.max(0, applyBrokerageAutofill(inputs).balBrokerage - cost), contribBrokerage: applyBrokerageAutofill(inputs).contribBrokerage }
+      : { ...inputs, currentPortfolio: Math.max(0, inputs.currentPortfolio - cost) };
+    return simulateYearsToFI(movedInputs, movedNetAnnual, mode, { expensesAnnualBase: annualMovedExpenses(inputs) });
+  }, [inputs, movedNetAnnual, mode]);
   const movedFiAge    = useMemo(() => !movedResult || movedResult.yearsToFI === null ? null : inputs.age + movedResult.yearsToFI, [inputs.age, movedResult]);
   const moveDeltaYears = useMemo(() => fiAge === null || movedFiAge === null ? null : fiAge - movedFiAge, [fiAge, movedFiAge]);
 
@@ -1656,9 +1707,24 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               </div>
               {inputs.moveCompareOn && (
                 <>
+                  {linkedMove && (
+                    <div className="mt-4 rounded-xl border border-sky-300/25 bg-sky-300/10 p-3 text-xs leading-5 text-sky-100">
+                      Prefilled from your move: income, state, spending, and one-time costs. Set your age and savings above for your own timeline.
+                    </div>
+                  )}
                   <div className="mt-4 grid gap-4 sm:grid-cols-2">
                     <Field label="Monthly expenses after moving" value={inputs.movedExpensesMonthly} onChange={v => setInputs(s => ({ ...s, movedExpensesMonthly: clamp(v, 0, 200_000) }))} prefix="$" />
                     <div className="self-end text-xs text-slate-400">Annual: <span className="font-semibold text-slate-200">{money(annualMovedExpenses(inputs), 0)}</span></div>
+                    <Field label="Income after moving (0 = same)" value={inputs.movedIncome} onChange={v => setInputs(s => ({ ...s, movedIncome: clamp(v, 0, 10_000_000) }))} prefix="$" />
+                    <Field label="One-time moving costs (spent)" info="Taken out of savings before your timeline starts. Refundable deposits and a down payment are not costs." value={inputs.movedCost} onChange={v => setInputs(s => ({ ...s, movedCost: clamp(v, 0, 10_000_000) }))} prefix="$" />
+                    <label className="block text-sm sm:col-span-2">
+                      <div className="mb-1 text-xs font-medium text-slate-300">State after moving</div>
+                      <select value={inputs.movedState} onChange={e => setInputs(s => ({ ...s, movedState: e.target.value as StateChoice, movedCityId: "" }))}
+                        className="h-11 w-full rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-slate-100">
+                        <option value="" className="bg-slate-900">Same state</option>
+                        {STATES.map(st => <option key={st.code} value={st.code} className="bg-slate-900">{st.name}</option>)}
+                      </select>
+                    </label>
                   </div>
                   <div className="mt-4 rounded-xl border border-emerald-300/25 bg-emerald-300/10 p-4">
                     <div className="text-xs font-semibold tracking-widest text-emerald-100">MOVE IMPACT</div>
