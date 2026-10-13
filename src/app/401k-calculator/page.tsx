@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import Link from "next/link";
 import Retirement401kCalculator from "@/components/Retirement401kCalculator";
+import CalculatorSources from "@/components/CalculatorSources";
 
 const SITE_URL = "https://www.relocationbynumbers.com";
 const PAGE_PATH = "/401k-calculator";
@@ -183,6 +184,7 @@ export default function Page() {
           </section>
         </section>
 
+        <CalculatorSources path="/401k-calculator" />
         <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
           <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400">

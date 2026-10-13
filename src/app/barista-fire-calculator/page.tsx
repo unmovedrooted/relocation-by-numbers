@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import FireCalculator from "@/components/FireCalculator";
 import { SEOFAQItem } from "@/components/SeoFAQ";
+import CalculatorSources from "@/components/CalculatorSources";
 import { parseIncomeParam } from "@/lib/incomeParam";
 
 export const metadata: Metadata = {
@@ -216,6 +217,7 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
         </section>
 
+        <CalculatorSources path="/barista-fire-calculator" tone="dark" />
         <footer className="pt-2">
           <div className="mb-3 text-xs text-slate-400">Assumptions updated: March 2026</div>
           <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">

@@ -14,7 +14,7 @@ export default function TaxAssumptionsNote({ states, includePayrollNote = false,
   return (
     <div className={`text-xs leading-5 text-slate-500 dark:text-slate-400 ${className}`}>
       <div>
-        {TAX_YEAR} tax rules, checked {taxRulesVerifiedLabel()} against IRS and state tax agency publications.{" "}
+        {TAX_YEAR} tax rules from IRS and state government publications, checked {taxRulesVerifiedLabel()}.{" "}
         <Link href="/methodology" className="underline underline-offset-2">Methodology and sources</Link>
       </div>
       {includePayrollNote && <div className="mt-1">{PAYROLL_PROGRAMS_NOTE}</div>}

@@ -4,6 +4,7 @@ import AdSlot from "@/components/AdSlot";
 import FireCalculator from "@/components/FireCalculator";
 import { SEOFAQItem } from "@/components/SeoFAQ";
 import { parseIncomeParam } from "@/lib/incomeParam";
+import CalculatorSources from "@/components/CalculatorSources";
 
 export const metadata: Metadata = {
   title: "Savings Rate for FIRE Calculator | How Saving More Accelerates Financial Independence",
@@ -209,6 +210,7 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
         </section>
 
+        <CalculatorSources path="/savings-rate-for-fire" tone="dark" />
         <footer className="pt-2">
           <div className="mb-3 text-xs text-slate-400">Assumptions updated: March 2026</div>
           <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">

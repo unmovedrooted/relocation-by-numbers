@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { STATES } from "../../lib/states";
 import { STATE_RULE_NOTES, taxRulesVerifiedLabel, PAYROLL_PROGRAMS_NOTE, TAX_YEAR } from "../../lib/taxRuleNotes";
+import { CALCULATOR_INFO, LOCAL_TAX_SOURCES, STATE_TAX_SOURCES } from "../../lib/calculatorSources";
+import type { StateCode } from "../../lib/states";
 
 export const metadata: Metadata = {
   title: "Methodology & Data Sources",
@@ -144,7 +146,7 @@ export default function MethodologyPage() {
 
           <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
             <p>
-              The U.S. calculators use {TAX_YEAR} tax rules, last checked {taxRulesVerifiedLabel()}. They estimate
+              The U.S. calculators use {TAX_YEAR} tax rules taken from government sources (the IRS, state tax agencies and legislatures, and city or county governments), last checked {taxRulesVerifiedLabel()}. They estimate
               the tax owed for the year on wages for a resident with the standard deduction. They do not estimate
               paycheck withholding, which follows different employer formulas.
             </p>
@@ -198,6 +200,58 @@ export default function MethodologyPage() {
                 ))}
               </ul>
             </div>
+          </div>
+        </section>
+
+        <section id="state-sources" className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            State and local tax sources
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
+            The documents each state&apos;s rules were read from, checked {taxRulesVerifiedLabel()}. States with held or
+            derived figures are listed above.
+          </p>
+          <ul className="mt-3 grid gap-x-8 gap-y-2 text-sm leading-6 text-slate-600 dark:text-slate-400 sm:grid-cols-2">
+            {STATES.map((st) => (
+              <li key={st.code}>
+                <span className="font-medium text-slate-800 dark:text-slate-200">{st.name}: </span>
+                {STATE_TAX_SOURCES[st.code as StateCode].map((src, i) => (
+                  <span key={src.url}>
+                    {i > 0 ? "; " : ""}
+                    <a href={src.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{src.label}</a>
+                  </span>
+                ))}
+              </li>
+            ))}
+          </ul>
+          <h3 className="mt-5 font-semibold text-slate-900 dark:text-slate-100">Local income taxes</h3>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-600 dark:text-slate-400">
+            {LOCAL_TAX_SOURCES.map((src) => (
+              <li key={src.url}>
+                <a href={src.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{src.label}</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section id="exclusions-by-tool" className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            What each tool leaves out
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
+            The same limits shown at the bottom of each calculator page.
+          </p>
+          <div className="mt-3 space-y-4">
+            {Object.entries(CALCULATOR_INFO).map(([path, info]) => (
+              <div key={path}>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+                  <Link href={path} className="underline underline-offset-2">{info.name}</Link>
+                </h3>
+                <ul className="mt-1 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                  {info.exclusions.map((item) => <li key={item}>{item}</li>)}
+                </ul>
+              </div>
+            ))}
           </div>
         </section>
 

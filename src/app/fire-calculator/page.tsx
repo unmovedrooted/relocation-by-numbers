@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import AdSlot from "@/components/AdSlot";
 import FireCalculator from "@/components/FireCalculator";
+import CalculatorSources from "@/components/CalculatorSources";
 import { parseIncomeParam } from "@/lib/incomeParam";
 
 export const metadata: Metadata = {
@@ -228,6 +229,7 @@ export default async function FireCalculatorPage({ searchParams }: PageProps) {
           Planning estimate only. Not tax, legal, or financial advice.
         </p>
       </div>
+    <CalculatorSources path="/fire-calculator" tone="dark" />
     </main>
   );
 }

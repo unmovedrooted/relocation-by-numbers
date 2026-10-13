@@ -60,29 +60,70 @@ export default function AboutPage() {
       </section>
 
       <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-  <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-    Why this site exists
-  </h2>
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+          Why this site exists
+        </h2>
 
-  <div className="mt-4 space-y-4 text-slate-700 dark:text-slate-300 text-base leading-7">
-    <p>
-      When researching relocation and financial independence, the information
-      needed to make a real decision was often split across multiple tools.
-      One site showed cost of living. Another estimated taxes. Another handled
-      retirement or FIRE math. Very few tools connected the pieces in a way that
-      reflected how a move can change everyday affordability.
-    </p>
+        <div className="mt-4 space-y-4 text-slate-700 dark:text-slate-300 text-base leading-7">
+          <p>
+            I kept asking one question while looking at a move:{" "}
+            <span className="font-semibold text-slate-900 dark:text-slate-100">
+              will this leave my household better off, now and at retirement?
+            </span>{" "}
+            I couldn&apos;t find one place that answered it. Cost-of-living sites left out taxes.
+            Tax calculators left out rent. Retirement and FIRE tools didn&apos;t care where you
+            lived. Getting a real answer meant stitching together several tools and hoping their
+            assumptions matched.
+          </p>
 
-    <p>
-      I built this after seeing how hard it was to compare relocation decisions
-      across taxes, housing, and long-term planning in one place. Relocation By
-      Numbers was built to bring those pieces together in one place. The idea is
-      not to replace detailed personal budgeting or professional advice. The idea
-      is to give people a stronger planning starting point before they move,
-      negotiate salary, compare offers, or rethink where they want to live.
-    </p>
-  </div>
-</section>
+          <p>
+            So I built the place I couldn&apos;t find. Relocation By Numbers puts taxes, housing and
+            long-term planning in the same calculation, and it shows its sources and limits so you can
+            check the work. It is not a replacement for detailed personal budgeting or professional
+            advice. It is a stronger planning starting point before you move, negotiate a salary, compare
+            offers, or rethink where you want to live.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+          How the numbers are kept honest
+        </h2>
+
+        <div className="mt-4 space-y-4 text-slate-700 dark:text-slate-300 text-base leading-7">
+          <ul className="list-disc pl-6 space-y-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
+            <li>
+              U.S. federal, state and local tax figures come from government sources (the IRS, state tax agencies,
+              legislatures and city or county governments), and the date they were last checked is shown on the
+              calculators. Each calculator page lists its sources and what it
+              leaves out.
+            </li>
+            <li>
+              When a state has not published a figure for the tax year, the page says so and names the figure that
+              is being held or calculated instead of presenting it as published.
+            </li>
+            <li>
+              The tax rules are refreshed each year when the IRS and the states release their new figures, usually in
+              the fall.
+            </li>
+            <li>
+              City rent, home-price and cost-of-living defaults are planning estimates, not figures from a single
+              published government dataset, so treat them as a starting point and enter your own numbers where you
+              can.
+            </li>
+          </ul>
+          <p>
+            The full list of sources and limits is on the{" "}
+            <Link
+              href="/methodology"
+              className="font-medium text-slate-900 dark:text-slate-100 underline underline-offset-4 hover:no-underline"
+            >
+              methodology page
+            </Link>.
+          </p>
+        </div>
+      </section>
 
       <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
         <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">

@@ -4,6 +4,7 @@ import FireCalculator from "@/components/FireCalculator";
 import AdSlot from "@/components/AdSlot";
 import { SEOFAQItem } from "@/components/SeoFAQ";
 import { parseIncomeParam } from "@/lib/incomeParam";
+import CalculatorSources from "@/components/CalculatorSources";
 
 export const metadata: Metadata = {
   title: "Chubby FIRE Calculator | Comfortable Early Retirement Number",
@@ -183,6 +184,7 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
         </section>
 
+        <CalculatorSources path="/chubby-fire-calculator" tone="dark" />
         <footer className="pt-2">
           <div className="mb-3 text-xs text-slate-400">Assumptions updated: July 2026</div>
           <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">

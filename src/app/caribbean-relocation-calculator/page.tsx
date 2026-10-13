@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import CaribbeanRelocationCalculator from "@/components/CaribbeanRelocationCalculator";
+import CalculatorSources from "@/components/CalculatorSources";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -324,6 +325,7 @@ export default function Page() {
         </div>
       </section>
 
+      <CalculatorSources path="/caribbean-relocation-calculator" />
       <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
         <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
