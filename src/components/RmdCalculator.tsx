@@ -4,13 +4,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from "recharts";
 import { STATES, type StateCode } from "../lib/states";
 import { type FilingStatus } from "../lib/tax";
+import { estimatedBirthYear, rmdStartAge } from "../lib/rmdRules";
+import { TAX_YEAR } from "../lib/taxYear2026";
 import { withdrawalIncomeTax } from "../lib/retirementTax";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 
 // ─────────────────────────────────────────────────────────────────────────
-// IRS Uniform Lifetime Table (2022 update, in effect for 2025). Distribution
+// IRS Uniform Lifetime Table (2022 update; Pub. 590-B 2025 Appendix B). Distribution
 // period (divisor) by age. RMD = prior year-end balance / divisor. Used by
 // most account owners; a different table applies only if your sole
 // beneficiary is a spouse more than 10 years younger. Verified vs IRS Pub
@@ -23,7 +25,7 @@ const UNIFORM_LIFETIME: Record<number, number> = {
   101: 6.0, 102: 5.6, 103: 5.2, 104: 4.9, 105: 4.6, 106: 4.3, 107: 4.1, 108: 3.9, 109: 3.7, 110: 3.5,
   111: 3.4, 112: 3.3, 113: 3.1, 114: 3.0, 115: 2.9, 116: 2.8, 117: 2.7, 118: 2.5, 119: 2.3, 120: 2.0,
 };
-const RMD_AGE = 73;
+// The age RMDs begin depends on birth year (73 for 1951-1959, 75 for 1960 and later); see src/lib/rmdRules.ts.
 function divisorForAge(age: number): number | null {
   if (age < 72) return null;
   const a = Math.min(120, Math.round(age));
@@ -68,6 +70,7 @@ export default function RmdCalculator() {
   const hasMounted = useRef(false);
 
   const [age, setAge] = useState("73");
+  const [birthYear, setBirthYear] = useState("");
   const [balance, setBalance] = useState("500000");
   const [expectedReturnPct, setExpectedReturnPct] = useState("5");
   const [filing, setFiling] = useState<FilingStatus>("single");
@@ -79,6 +82,7 @@ export default function RmdCalculator() {
   useEffect(() => {
     const qs = getQS();
     const vAge = qs.get("age"); if (vAge) setAge(vAge);
+    const vBy = qs.get("by"); if (vBy) setBirthYear(vBy);
     const vBal = qs.get("balance"); if (vBal) setBalance(vBal);
     const vR = qs.get("return"); if (vR) setExpectedReturnPct(vR);
     const vF = qs.get("filing") as FilingStatus | null; if (vF === "single" || vF === "married") setFiling(vF);
@@ -89,18 +93,22 @@ export default function RmdCalculator() {
     if (!hasMounted.current) { hasMounted.current = true; return; }
     const qs = new URLSearchParams();
     if (age) qs.set("age", age);
+    if (birthYear) qs.set("by", birthYear);
     if (balance) qs.set("balance", balance);
     if (expectedReturnPct) qs.set("return", expectedReturnPct);
     qs.set("filing", filing);
     qs.set("state", state);
     setQS(qs);
-  }, [age, balance, expectedReturnPct, filing, state]);
+  }, [age, birthYear, balance, expectedReturnPct, filing, state]);
 
   const results = useMemo(() => {
     const ageN = Math.round(nz(age));
     const bal0 = Math.max(0, nz(balance));
     const r = nz(expectedReturnPct) / 100;
-    const required = ageN >= RMD_AGE;
+    const birthYearN = Math.round(nz(birthYear));
+    const birthYearUsed = birthYearN >= 1900 && birthYearN <= TAX_YEAR ? birthYearN : estimatedBirthYear(ageN, TAX_YEAR);
+    const startRmdAge = rmdStartAge(birthYearUsed);
+    const required = ageN >= startRmdAge;
 
     // This-year RMD (if required now).
     let thisYearRmd = 0;
@@ -115,11 +123,11 @@ export default function RmdCalculator() {
     }
 
     // Projection from the later of current age or RMD age, forward to 95.
-    const startAge = Math.max(ageN, RMD_AGE);
+    const startAge = Math.max(ageN, startRmdAge);
     let bal = bal0;
-    // If not yet 73, grow the balance up to the RMD age first (no withdrawals).
-    if (ageN < RMD_AGE) {
-      for (let a = ageN; a < RMD_AGE; a++) bal *= 1 + r;
+    // If not yet at the RMD age, grow the balance up to it first (no withdrawals).
+    if (ageN < startRmdAge) {
+      for (let a = ageN; a < startRmdAge; a++) bal *= 1 + r;
     }
     const schedule: RmdRow[] = [];
     for (let a = startAge; a <= 95 && bal > 1; a++) {
@@ -130,9 +138,9 @@ export default function RmdCalculator() {
       bal = (bal - rmd) * (1 + r);
     }
 
-    const firstRmd = ageN < RMD_AGE ? schedule[0] : null;
-    return { ageN, bal0, required, thisYearRmd, thisYearDivisor, thisYearTax, schedule, firstRmd, startAge };
-  }, [age, balance, expectedReturnPct, filing, state]);
+    const firstRmd = ageN < startRmdAge ? schedule[0] : null;
+    return { ageN, bal0, required, thisYearRmd, thisYearDivisor, thisYearTax, schedule, firstRmd, startAge, startRmdAge, birthYearUsed };
+  }, [age, birthYear, balance, expectedReturnPct, filing, state]);
 
   const inputsReady = results.bal0 > 0 && results.ageN > 0;
   const stateName = STATES.find((s) => s.code === state)?.name ?? state;
@@ -154,8 +162,8 @@ export default function RmdCalculator() {
       );
     } else if (results.firstRmd) {
       rows.push(
-        { Metric: "RMDs begin at age", Value: RMD_AGE },
-        { Metric: "Est. first RMD (at 73)", Value: money(results.firstRmd.rmd) },
+        { Metric: "RMDs begin at age", Value: results.startRmdAge },
+        { Metric: `Est. first RMD (at ${results.startRmdAge})`, Value: money(results.firstRmd.rmd) },
       );
     }
     for (const row of results.schedule.slice(0, 12)) {
@@ -165,8 +173,8 @@ export default function RmdCalculator() {
   }, [results, stateName, rmdPct]);
 
   const handleExportCsv = () => downloadCsv("rmd-schedule", exportRows);
-  const handleExportPdf = () => downloadPdfReport({ filename: "rmd-schedule", title: "Required Minimum Distribution Schedule", subtitle: results.required ? `This year's RMD: ${money(results.thisYearRmd)}` : `RMDs begin at age ${RMD_AGE}`, rows: exportRows as PdfRow[], footerNote: "Uniform Lifetime Table estimates. Not tax advice. relocationbynumbers.com" });
-  const getCurrentScenario = () => ({ label: "RMD", url: typeof window !== "undefined" ? window.location.pathname + window.location.search : "/", subtitle: results.required ? `${money(results.thisYearRmd, 0)} this year` : `starts at ${RMD_AGE}`, source: "RMD" });
+  const handleExportPdf = () => downloadPdfReport({ filename: "rmd-schedule", title: "Required Minimum Distribution Schedule", subtitle: results.required ? `This year's RMD: ${money(results.thisYearRmd)}` : `RMDs begin at age ${results.startRmdAge}`, rows: exportRows as PdfRow[], footerNote: "Uniform Lifetime Table estimates. Not tax advice. relocationbynumbers.com" });
+  const getCurrentScenario = () => ({ label: "RMD", url: typeof window !== "undefined" ? window.location.pathname + window.location.search : "/", subtitle: results.required ? `${money(results.thisYearRmd, 0)} this year` : `starts at ${results.startRmdAge}`, source: "RMD" });
 
   return (
     <div className="text-slate-900 dark:text-slate-100">
@@ -177,6 +185,7 @@ export default function RmdCalculator() {
             <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Your account</div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm"><div className={labelHeadCls}>Your age</div><input className={inputCls} type="number" min="1" value={age} onChange={(e) => setAge(e.target.value)} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Birth year (optional)<InfoTip text="RMDs begin at 73 if you were born 1951 to 1959 and at 75 if you were born in 1960 or later. Leave blank to estimate your birth year from your age; someone aged 66 could be born in either 1959 or 1960." /></div><input className={inputCls} type="number" min="1900" value={birthYear} onChange={(e) => setBirthYear(e.target.value)} placeholder={String(estimatedBirthYear(Math.round(nz(age)), TAX_YEAR))} /></label>
               <label className="text-sm"><div className={labelHeadCls}>Prior year-end balance<InfoTip text="Your traditional (pre-tax) IRA / 401(k) balance as of December 31 last year. Roth IRAs, and, from 2024, Roth 401(k)s, have no RMDs." /></div><input className={inputCls} type="number" min="0" value={balance} onChange={(e) => setBalance(e.target.value)} placeholder=" " /></label>
               <label className="text-sm"><div className={labelHeadCls}>Expected annual return (%)<InfoTip text="Used to project future balances and RMDs. RMDs are recalculated each year from that year's balance and divisor." /></div><input className={inputCls} type="number" step="0.1" value={expectedReturnPct} onChange={(e) => setExpectedReturnPct(e.target.value)} placeholder=" " /></label>
             </div>
@@ -211,9 +220,9 @@ export default function RmdCalculator() {
               ) : (
                 <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 text-amber-800 shadow-[0_10px_30px_rgba(15,23,42,0.06)] dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-300">
                   <div className="text-xs font-semibold uppercase tracking-[0.14em] opacity-80">No RMD required yet</div>
-                  <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">RMDs begin at age {RMD_AGE}</div>
+                  <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">RMDs begin at age {results.startRmdAge}</div>
                   <p className="mt-2 text-sm leading-5 opacity-90">
-                    In {RMD_AGE - results.ageN} year{RMD_AGE - results.ageN === 1 ? "" : "s"}. At {(nz(expectedReturnPct)).toFixed(1)}% growth, your first RMD is projected at about <span className="font-semibold">{money(results.firstRmd?.rmd ?? 0)}</span>.
+                    In {results.startRmdAge - results.ageN} year{results.startRmdAge - results.ageN === 1 ? "" : "s"}. At {(nz(expectedReturnPct)).toFixed(1)}% growth, your first RMD is projected at about <span className="font-semibold">{money(results.firstRmd?.rmd ?? 0)}</span>.
                   </p>
                 </div>
               )}
@@ -255,7 +264,7 @@ export default function RmdCalculator() {
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                RMDs from traditional IRAs and 401(k)s must begin by April 1 of the year after you turn {RMD_AGE} (then by December 31 each year after). Missing one triggers a 25% penalty (10% if corrected promptly). This uses the Uniform Lifetime Table; a spouse more than 10 years younger as sole beneficiary uses a different table. Roth IRAs have no lifetime RMDs. Estimates only, not tax advice.
+                RMDs from traditional IRAs and 401(k)s must begin by April 1 of the year after you turn {results.startRmdAge} (then by December 31 each year after). Missing one triggers a 25% penalty (10% if corrected promptly). This uses the Uniform Lifetime Table; a spouse more than 10 years younger as sole beneficiary uses a different table. Roth IRAs have no lifetime RMDs. Estimates only, not tax advice.
               </div>
             </>
           )}
@@ -274,7 +283,7 @@ export default function RmdCalculator() {
                 <button type="button" onClick={async () => {
                   try {
                     const shareUrl = new URL(window.location.href);
-                    const shareText = results.required ? `My RMD this year: ${money(results.thisYearRmd, 0)}.` : `My RMDs begin at age ${RMD_AGE}.`;
+                    const shareText = results.required ? `My RMD this year: ${money(results.thisYearRmd, 0)}.` : `My RMDs begin at age ${results.startRmdAge}.`;
                     const nav = window.navigator as unknown as { share?: (d: { title?: string; text?: string; url?: string }) => Promise<void>; clipboard: { writeText: (t: string) => Promise<void> } };
                     if (typeof nav.share === "function") { await nav.share({ title: "My RMD", text: shareText, url: shareUrl.toString() }); setShareStatus("shared"); }
                     else { await nav.clipboard.writeText(shareUrl.toString()); setShareStatus("copied"); }

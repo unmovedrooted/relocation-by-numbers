@@ -8,13 +8,13 @@ const PAGE_PATH = "/rmd-calculator";
 const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 
 export const metadata: Metadata = {
-  title: "RMD Calculator, Required Minimum Distribution (2025)",
+  title: "RMD Calculator, Required Minimum Distribution (2026)",
   description:
     "Free RMD calculator. Find your required minimum distribution from a traditional IRA or 401(k) using the IRS Uniform Lifetime Table, plus a multi-year schedule and an estimate of the tax you'll owe.",
   keywords: [
     "rmd calculator",
     "required minimum distribution calculator",
-    "rmd calculator 2025",
+    "rmd calculator 2026",
     "ira rmd calculator",
     "401k rmd calculator",
     "uniform lifetime table",
@@ -24,11 +24,11 @@ export const metadata: Metadata = {
     type: "website",
     url: CANONICAL,
     siteName: "Relocation by Numbers",
-    title: "RMD Calculator, Required Minimum Distribution (2025)",
+    title: "RMD Calculator, Required Minimum Distribution (2026)",
     description: "Your required minimum distribution from a traditional IRA/401(k), with a multi-year schedule and tax estimate.",
     locale: "en_US",
   },
-  twitter: { card: "summary", title: "RMD Calculator, Required Minimum Distribution (2025)", description: "Required minimum distribution with a multi-year schedule and tax estimate.", site: "@relocationbynumbers" },
+  twitter: { card: "summary", title: "RMD Calculator, Required Minimum Distribution (2026)", description: "Required minimum distribution with a multi-year schedule and tax estimate.", site: "@relocationbynumbers" },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" } },
 };
 
@@ -46,7 +46,7 @@ const webAppSchema = {
     "This year's RMD from the Uniform Lifetime Table",
     "Multi-year RMD schedule by age",
     "Estimated income tax on each distribution",
-    "SECURE 2.0 age-73 start",
+    "SECURE 2.0 start age by birth year (73 or 75)",
     "PDF and CSV export, shareable links",
   ],
   author: { "@type": "Organization", name: "Relocation by Numbers", url: SITE_URL },
@@ -57,7 +57,7 @@ const faqSchema = {
   "@type": "FAQPage",
   mainEntity: [
     { "@type": "Question", name: "What is a required minimum distribution (RMD)?", acceptedAnswer: { "@type": "Answer", text: "An RMD is the minimum amount you must withdraw each year from a traditional IRA or 401(k) once you reach the required age. It's calculated by dividing your prior year-end balance by a life-expectancy factor from the IRS Uniform Lifetime Table." } },
-    { "@type": "Question", name: "At what age do RMDs start?", acceptedAnswer: { "@type": "Answer", text: "Under SECURE 2.0, RMDs begin at age 73 for people who reach 72 after 2022. The starting age rises to 75 in 2033. Your first RMD can be delayed to April 1 of the year after you turn 73, but then you'd take two that year." } },
+    { "@type": "Question", name: "At what age do RMDs start?", acceptedAnswer: { "@type": "Answer", text: "Under SECURE 2.0, RMDs begin at age 73 if you were born from 1951 through 1959, and at age 75 if you were born in 1960 or later. Your first RMD can be delayed to April 1 of the year after you reach your starting age, but then you'd take two that year." } },
     { "@type": "Question", name: "How is the RMD amount calculated?", acceptedAnswer: { "@type": "Answer", text: "Divide your December 31 prior-year account balance by the distribution period (divisor) for your age from the IRS Uniform Lifetime Table. For example, at age 73 the divisor is 26.5, so a $500,000 balance yields an RMD of about $18,868." } },
     { "@type": "Question", name: "Do Roth accounts have RMDs?", acceptedAnswer: { "@type": "Answer", text: "Roth IRAs have no required minimum distributions during the owner's lifetime. As of 2024, Roth 401(k)s also no longer require RMDs. RMDs apply to traditional (pre-tax) IRAs and 401(k)s." } },
     { "@type": "Question", name: "What happens if I miss an RMD?", acceptedAnswer: { "@type": "Answer", text: "The penalty is 25% of the amount you failed to withdraw, reduced to 10% if you correct it promptly. RMDs are also taxed as ordinary income in the year you take them." } },
@@ -76,7 +76,7 @@ const breadcrumbSchema = {
 
 const FAQ_ITEMS = [
   { q: "What is an RMD?", a: "The minimum you must withdraw each year from a traditional IRA/401(k) once you reach the required age, your prior year-end balance divided by an IRS Uniform Lifetime Table factor." },
-  { q: "At what age do RMDs start?", a: "Age 73 under SECURE 2.0 (rising to 75 in 2033). The first can be delayed to April 1 of the following year, but then you take two that year." },
+  { q: "At what age do RMDs start?", a: "Age 73 if you were born 1951 to 1959, and age 75 if you were born in 1960 or later (SECURE 2.0). The first can be delayed to April 1 of the following year, but then you take two that year." },
   { q: "How is it calculated?", a: "December 31 prior-year balance ÷ the age divisor. At 73 the divisor is 26.5, so $500,000 gives about an $18,868 RMD." },
   { q: "Do Roth accounts have RMDs?", a: "No, Roth IRAs never require lifetime RMDs, and as of 2024 neither do Roth 401(k)s. RMDs apply to traditional pre-tax accounts." },
   { q: "What if I miss one?", a: "A 25% penalty on the shortfall (10% if corrected promptly), and the RMD is taxed as ordinary income when taken." },
@@ -97,7 +97,7 @@ export default function Page() {
               Find your required minimum distribution from a traditional IRA or 401(k) using the IRS Uniform Lifetime
               Table, plus a multi-year schedule and the tax you&apos;ll owe.
             </p>
-            <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">SECURE 2.0 age-73 start · Uniform Lifetime Table · tax estimate.</p>
+            <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">SECURE 2.0 start age (73 or 75 by birth year) · Uniform Lifetime Table · tax estimate.</p>
             <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">
               <Link href="/methodology" className="font-medium text-slate-700 underline underline-offset-4 hover:no-underline dark:text-slate-300">See methodology</Link>
               <span className="mx-2" aria-hidden="true">·</span>
@@ -134,7 +134,7 @@ export default function Page() {
                     { title: "Official divisors", body: "IRS Uniform Lifetime Table (2022 update)." },
                     { title: "Multi-year view", body: "See how RMDs rise as the divisor shrinks." },
                     { title: "Tax estimate", body: "Ordinary income tax, federal + state." },
-                    { title: "Age-73 start", body: "SECURE 2.0 timing, rising to 75 in 2033." },
+                    { title: "Start age by birth year", body: "73 if born 1951 to 1959; 75 if born in 1960 or later." },
                   ].map((item) => (
                     <div key={item.title} className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
                       <div className="text-sm font-semibold text-slate-900 dark:text-white">{item.title}</div>
