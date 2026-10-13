@@ -6,9 +6,12 @@ import { addPreviewIraContributions } from "./previewIraContributions";
 import { addPreviewMedicare, type MedicareEditorState } from "./previewMedicare";
 import { verifiedRetirementLocation } from "./verifiedLocation";
 import { validateOregonLocalContract, type OregonLocalContract } from "./oregonLocalTax";
+import { STATE_CONTRACT_FIELD, contractFlagsFor } from "./stateContracts";
+import { STATES } from "../states";
 
 export const PREVIEW_DEFAULTS: Record<string, string> = {
   state: "fl", cityId: "",
+  moveOn: "", moveYear: "2040", moveState: "", moveCityId: "",
   orMetro: "", orMultnomah: "", orLocalAdjustments: "",
   "one-pensionType": "unspecified", "two-pensionType": "unspecified",
   "one-hawaiiPensionTreatment": "unknown", "two-hawaiiPensionTreatment": "unknown",
@@ -65,6 +68,15 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
   if (location.state === "me" && values.meContract !== "confirmed") throw new RangeError("Confirm the restricted Maine planning assumptions.");
   if (location.state === "nd" && values.ndContract !== "confirmed") throw new RangeError("Confirm the restricted North Dakota planning assumptions.");
   if (location.state === "or" && values.orContract !== "confirmed") throw new RangeError("Confirm the restricted Oregon planning assumptions.");
+  // A planned move: the destination goes through the same location checks and confirmations as the resident state.
+  const moveLocation = values.moveOn === "yes" ? verifiedRetirementLocation(values.moveState ?? "", values.moveCityId ?? "") : null;
+  if (moveLocation) {
+    if (moveLocation.state === location.state) throw new RangeError("Choose a destination state different from the resident state.");
+    if (moveLocation.state in STATE_CONTRACT_FIELD && values[`${moveLocation.state}Contract`] !== "confirmed") {
+      const name = STATES.find(item => item.code === moveLocation.state)?.name ?? moveLocation.state;
+      throw new RangeError(`Confirm the restricted ${name} planning assumptions for the destination state.`);
+    }
+  }
   const number = (key: string, min = 0, max = 1e9) => {
     const raw = values[key];
     if (typeof raw !== "string" || !raw.trim()) throw new RangeError(`Please enter ${key.replaceAll("-", " ")}.`);
@@ -82,7 +94,7 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
   };
   const startYear = number("startYear", 2026, 2126);
   const hawaiiPensionTreatment = (id: string): HouseholdIncome["hawaiiPensionTreatment"] => {
-    if (location.state !== "hi") return undefined;
+    if (location.state !== "hi" && moveLocation?.state !== "hi") return undefined;
     const value = values[`${id}-hawaiiPensionTreatment`] ?? "unknown";
     if (!["unknown", "exempt", "taxable"].includes(value)) throw new RangeError("Choose a valid Hawaii pension treatment.");
     if (number(`${id}-pension`) > 0 && value === "unknown") {
@@ -91,6 +103,11 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
     return value as HouseholdIncome["hawaiiPensionTreatment"];
   };
   const endYear = number("endYear", startYear, 2126);
+  const moveYear = moveLocation ? number("moveYear", startYear, endYear) : 0;
+  if (moveLocation && !Number.isInteger(moveYear)) throw new RangeError("The move year must be a whole year.");
+  const oregonLocal = location.state === "or" || moveLocation?.state === "or"
+    ? validateOregonLocalContract({ metro: values.orMetro, multnomah: values.orMultnomah, adjustments: values.orLocalAdjustments } as OregonLocalContract)
+    : undefined;
   if (!Number.isInteger(startYear) || !Number.isInteger(endYear)) throw new RangeError("Years must be whole numbers.");
   if (values.household !== "single" && values.household !== "married") throw new RangeError("Choose one or two people.");
   const ids = values.household === "single" ? ["one"] : ["one", "two"];
@@ -146,9 +163,9 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
     ...(location.state === "hi" ? { hawaiiContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "me" ? { maineContract: "verified-law-precredit" as const } : {}),
     ...(location.state === "nd" ? { northDakotaContract: "verified-law-precredit" as const } : {}),
-    ...(location.state === "or" ? { oregonContract: "verified-law-precredit" as const,
-      oregonLocal: validateOregonLocalContract({ metro: values.orMetro, multnomah: values.orMultnomah,
-        adjustments: values.orLocalAdjustments } as OregonLocalContract) } : {}),
+    ...(location.state === "or" ? { oregonContract: "verified-law-precredit" as const, oregonLocal } : {}),
+    ...(moveLocation ? { ...contractFlagsFor(moveLocation.state),
+      move: { year: moveYear, state: moveLocation.state, cityId: moveLocation.cityId, ...(moveLocation.state === "or" ? { oregonLocal } : {}) } } : {}),
     people: ids.map(id => ({ id, birthDate: date(`${id}-birth`), blind: false, eligibleForSeniorDeduction: true,
       iraBasis: 0, iraAdditionalTaxExceptionAmount: 0, rothAdditionalTaxExceptionAmount: 0,
       roth: { firstContributionYear: null, regularContributionBasis: 0, conversions: [] } })),
@@ -168,6 +185,15 @@ export function buildPreviewInput(values: Record<string, string>, editor?: Accou
   const workplace = saving ? addPreviewContributions(assembled, saving) : assembled;
   const withIra = saving?.ira ? addPreviewIraContributions(workplace, saving.ira) : workplace;
   return medicare ? addPreviewMedicare(withIra, medicare) : withIra;
+}
+
+/** The plan with a planned move, and the same plan with the household staying put. Null when no move is set. */
+export function calculatePreviewMoveComparison(values: Record<string, string>, editor?: AccountEditorState, saving?: ContributionEditorState, medicare?: MedicareEditorState) {
+  if (values.moveOn !== "yes") return null;
+  return {
+    withMove: calculatePreview(values, editor, saving, medicare),
+    stay: calculatePreview({ ...values, moveOn: "" }, editor, saving, medicare),
+  };
 }
 
 export function calculatePreview(values: Record<string, string>, editor?: AccountEditorState, saving?: ContributionEditorState, medicare?: MedicareEditorState) {

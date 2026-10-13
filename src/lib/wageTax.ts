@@ -5,6 +5,7 @@ import { CONTRIBUTION_LIMITS_2026, FEDERAL_2026, PAYROLL_2026, TAX_YEAR } from "
 import { statePayrollLines, statePayrollTotal, type PayrollLine } from "./statePayrollPrograms";
 import type { CityIncomeBase } from "./retirementPlan/cityIncomeTax";
 import type { HouseholdTaxInput } from "./retirementPlan/householdTax";
+import { CONTRACTS } from "./retirementPlan/stateContracts";
 import { alabamaTax } from "./retirementPlan/alabamaTax";
 import { arizonaTax } from "./retirementPlan/arizonaTax";
 import { arkansasTax } from "./retirementPlan/arkansasTax";
@@ -132,7 +133,6 @@ function ficaTax(earnerWages: readonly number[], filing: FilingStatus): number {
 
 // ─── State and local income tax ──────────────────────────────────────────────
 
-const VERIFIED = "verified-law-precredit" as const;
 const BIRTH_DATE = "1986-06-30"; // age 40 in 2026: no age-based additions apply
 // The state functions require a location they can rate (a county or city) and reject others. The state tax
 // does not depend on it, so a neutral location is used when the real city is not one they rate, and the local
@@ -141,20 +141,7 @@ export const NEUTRAL_CITY: Partial<Record<StateCode, string>> = {
   pa: "allentown-pa", in: "indianapolis-in", md: "baltimore-md", ny: "ny-outside-nyc-yonkers",
 };
 
-export const CONTRACTS = {
-  newYorkContract: "enacted-law-precredit",
-  marylandContract: VERIFIED, indianaContract: VERIFIED, dcContract: VERIFIED, illinoisContract: VERIFIED,
-  newJerseyContract: VERIFIED, coloradoContract: VERIFIED, newMexicoContract: VERIFIED, minnesotaContract: VERIFIED,
-  utahContract: VERIFIED, pennsylvaniaContract: VERIFIED, connecticutContract: VERIFIED, vermontContract: VERIFIED,
-  montanaContract: VERIFIED, rhodeIslandContract: VERIFIED, californiaContract: VERIFIED, virginiaContract: VERIFIED,
-  arizonaContract: VERIFIED, georgiaContract: VERIFIED, northCarolinaContract: VERIFIED, southCarolinaContract: VERIFIED,
-  ohioContract: VERIFIED, massachusettsContract: VERIFIED, iowaContract: VERIFIED, mississippiContract: VERIFIED,
-  missouriContract: VERIFIED, washingtonContract: VERIFIED, alabamaContract: VERIFIED, arkansasContract: VERIFIED,
-  delawareContract: VERIFIED, kansasContract: VERIFIED, kentuckyContract: VERIFIED, nebraskaContract: VERIFIED,
-  westVirginiaContract: VERIFIED, idahoContract: VERIFIED, louisianaContract: VERIFIED, michiganContract: VERIFIED,
-  oklahomaContract: VERIFIED, wisconsinContract: VERIFIED, hawaiiContract: VERIFIED, maineContract: VERIFIED,
-  northDakotaContract: VERIFIED, oregonContract: VERIFIED,
-} as const;
+export { CONTRACTS };
 
 const ZERO_ACCOUNT_INCOME = Object.freeze({
   retirementOrdinary: 0, investmentOrdinary: 0, esppCompensation: 0, qualifiedDividends: 0,

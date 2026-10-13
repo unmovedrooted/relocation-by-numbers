@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const source = readFileSync("src/components/RetirementPlanPreview.tsx", "utf8");
+// The state-specific disclosures live in RetirementStateFields.tsx, shared by the resident state and a planned move.
+const source = ["RetirementPlanPreview.tsx", "RetirementStateFields.tsx"].map(file => readFileSync(`src/components/${file}`, "utf8")).join("\n");
 
 describe("retirement planning disclosures", () => {
   it("describes the implemented parameters rather than superseded ones", () => {
@@ -16,7 +17,7 @@ describe("retirement planning disclosures", () => {
   });
 
   it("distinguishes omitted local taxes from a verified zero liability", () => {
-    expect(source).toContain('["oh", "mi"].includes(values.state)');
+    expect(source).toContain('["oh", "mi"].includes(state)');
     expect(source).toContain("a zero local-tax amount is not a finding that you owe none");
     expect(source).toContain("Portland Arts Tax remains omitted");
     expect(source).toContain("Oregon local-tax jurisdictions");
