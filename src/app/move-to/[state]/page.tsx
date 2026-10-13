@@ -208,7 +208,7 @@ export default async function MoveToStatePage({ params }: Props) {
           </p>
 
           <div className="text-xs text-slate-500 dark:text-slate-400">
-            Assumptions updated: March 2026
+            Assumptions updated: October 2026
           </div>
 
           <div className="pt-1">

@@ -247,7 +247,7 @@ export default function Page() {
             </p>
 
             <div className="mt-4 text-xs text-slate-500 dark:text-slate-400">
-              Assumptions updated: March 2026
+              Assumptions updated: October 2026
             </div>
 
             <div className="mt-3">

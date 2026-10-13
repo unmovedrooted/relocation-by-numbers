@@ -191,7 +191,7 @@ export default async function FireWithSalaryPage({
             {pageCopy.intro}
           </p>
 
-          <p className="text-xs text-slate-400">Assumptions updated: March 2026</p>
+          <p className="text-xs text-slate-400">Assumptions updated: October 2026</p>
 
           <div className="flex flex-wrap gap-2 pt-1">
             <Link

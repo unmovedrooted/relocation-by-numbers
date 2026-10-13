@@ -41,7 +41,7 @@ export default function MethodologyPage() {
           </p>
 
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Assumptions updated: March 2026
+            Assumptions updated: October 2026
           </p>
         </header>
 

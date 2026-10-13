@@ -93,7 +93,7 @@ export default function Page() {
         <Calculator monetization="home" />
 
         <div className="text-center text-xs text-slate-500 dark:text-slate-400">
-          Assumptions updated: March 2026
+          Assumptions updated: October 2026
         </div>
 
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (

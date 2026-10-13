@@ -221,7 +221,7 @@ export default async function CityFirePage({ params }: PageProps) {
           </p>
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-400">
-            <span>Assumptions updated: March 2026</span>
+            <span>Assumptions updated: October 2026</span>
             <span className="hidden sm:inline">•</span>
             <Link href="/methodology" className="underline underline-offset-4 hover:no-underline">
               See methodology
@@ -437,7 +437,7 @@ export default async function CityFirePage({ params }: PageProps) {
         </section>
 
         <footer className="pt-2">
-          <div className="mb-3 text-xs text-slate-400">Assumptions updated: March 2026</div>
+          <div className="mb-3 text-xs text-slate-400">Assumptions updated: October 2026</div>
           <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
             <Link href="/about" className="transition hover:text-white">About</Link>
             <span>•</span>

@@ -72,7 +72,7 @@ export default async function FireCalculatorPage({ searchParams }: PageProps) {
           </p>
 
           <p className="max-w-4xl text-xs leading-6 text-slate-500">
-            Assumptions updated: March 2026
+            Assumptions updated: October 2026
           </p>
 
           <div className="pt-1">

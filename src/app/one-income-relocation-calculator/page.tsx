@@ -199,6 +199,8 @@ export default function Page() {
               Can you actually afford<br className="hidden sm:block" /> this move on one income?
             </h1>
 
+            <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">Assumptions updated: October 2026</p>
+
             {/* Emotional hook */}
             <p className="mx-auto mt-4 max-w-xl text-base text-slate-500 dark:text-slate-400 sm:text-lg">
               Most people underestimate how tight a move feels on one income.
@@ -418,7 +420,6 @@ export default function Page() {
               </p>
             </div>
             <p className="mt-4 text-xs text-slate-400 dark:text-slate-500">
-              Assumptions updated March 2026 ·{' '}
               <Link href="/methodology" className="underline underline-offset-2 hover:no-underline">
                 See methodology
               </Link>
@@ -488,7 +489,7 @@ export default function Page() {
           </section>
 
           <p className="text-center text-xs text-slate-400 dark:text-slate-600">
-            Planning estimates only · Tax figures based on 2026 federal brackets and each state&apos;s published rules; employee-paid state payroll programs (such as CA SDI or NY PFL) are included where the state has them · Assumptions updated March 2026
+            Planning estimates only · Tax figures based on 2026 federal brackets and each state&apos;s published rules; employee-paid state payroll programs (such as CA SDI or NY PFL) are included where the state has them · Assumptions updated: October 2026
           </p>
         </div>
 

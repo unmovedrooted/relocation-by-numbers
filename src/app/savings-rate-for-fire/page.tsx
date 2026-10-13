@@ -57,7 +57,7 @@ export default async function Page({ searchParams }: PageProps) {
             Higher savings grow the portfolio faster while lower spending shrinks the target.
           </p>
 
-          <div className="text-xs text-slate-400">Assumptions updated: March 2026</div>
+          <div className="text-xs text-slate-400">Assumptions updated: October 2026</div>
 
           <div className="pt-1">
             <Link
@@ -212,7 +212,7 @@ export default async function Page({ searchParams }: PageProps) {
 
         <CalculatorSources path="/savings-rate-for-fire" tone="dark" />
         <footer className="pt-2">
-          <div className="mb-3 text-xs text-slate-400">Assumptions updated: March 2026</div>
+          <div className="mb-3 text-xs text-slate-400">Assumptions updated: October 2026</div>
           <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
             <Link href="/about" className="transition hover:text-white">About</Link>
             <span>•</span>

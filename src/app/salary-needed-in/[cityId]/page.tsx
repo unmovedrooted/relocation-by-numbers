@@ -169,7 +169,7 @@ export default async function Page({ params }: Props) {
             tighter estimate uses a 40% housing-share threshold.
           </p>
 
-          <div className="text-xs text-slate-500">Assumptions updated: March 2026</div>
+          <div className="text-xs text-slate-500">Assumptions updated: October 2026</div>
 
           <div className="pt-1">
             <Link

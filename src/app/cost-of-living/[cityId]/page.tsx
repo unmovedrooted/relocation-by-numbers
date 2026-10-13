@@ -185,7 +185,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
           </p>
 
           <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-            Assumptions updated: March 2026
+            Assumptions updated: October 2026
           </div>
 
           <div className="mt-5 flex flex-wrap justify-center gap-3">
@@ -449,7 +449,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
 
         <div className="mt-8 text-center">
           <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
-            Assumptions updated: March 2026
+            Assumptions updated: October 2026
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <Link href="/about" className="transition hover:text-slate-900 hover:dark:text-slate-100">About</Link>

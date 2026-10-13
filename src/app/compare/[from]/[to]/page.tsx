@@ -287,7 +287,7 @@ export default async function ComparePage({ params }: PageProps) {
         </header>
 
         <div className="text-center text-xs text-slate-500 dark:text-slate-400">
-          Assumptions updated: March 2026
+          Assumptions updated: October 2026
         </div>
 
         <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
@@ -459,7 +459,7 @@ export default async function ComparePage({ params }: PageProps) {
 
         <div className="mt-8 text-center">
           <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
-            Assumptions updated: March 2026
+            Assumptions updated: October 2026
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <Link href="/about" className="transition hover:text-slate-900 hover:dark:text-slate-100">

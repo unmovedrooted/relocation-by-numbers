@@ -294,6 +294,8 @@ export default function ExplorePage() {
                 Compare States, Cities &amp; FIRE Paths in One Place
               </h1>
 
+              <p className="text-xs text-slate-400">Assumptions updated: October 2026</p>
+
               <p className="max-w-3xl text-base leading-7 text-slate-300 sm:text-lg">
                 Explore relocation comparisons, cost of living guides, salary tools,
                 FIRE calculators, and mortgage tools to find places where your money
@@ -401,7 +403,7 @@ export default function ExplorePage() {
           </div>
 
           <div className="flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-            <div>Assumptions updated: March 2026</div>
+            <div>Government data and 2026 tax rules</div>
             <div className="flex flex-wrap items-center gap-2">
               <Link href="/about" className="transition hover:text-white">About</Link>
               <span>•</span>

@@ -1194,7 +1194,7 @@ export default function RelocationIncomeCalculator() {
             See if this move works →
           </button>
           <p className="mt-2 text-center text-xs text-slate-400 dark:text-slate-500">
-            Assumptions updated: March 2026 · Planning estimates only
+            Assumptions updated: October 2026 · Planning estimates only
           </p>
         </div>
 
