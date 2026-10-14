@@ -27,6 +27,7 @@ import { AUSTRIA_TAX_YEAR_LABEL, austriaTax } from "./countryTaxRules/austria";
 import { BELGIUM_TAX_YEAR_LABEL, belgiumTax } from "./countryTaxRules/belgium";
 import { BRAZIL_TAX_YEAR_LABEL, brazilTax } from "./countryTaxRules/brazil";
 import { BULGARIA_TAX_YEAR_LABEL, bulgariaTax } from "./countryTaxRules/bulgaria";
+import { BOLIVIA_TAX_YEAR_LABEL, boliviaTax } from "./countryTaxRules/bolivia";
 import { CANADA_PROVINCES, CANADA_TAX_YEAR_LABEL, canadaTax } from "./countryTaxRules/canada";
 import { CHILE_TAX_YEAR_LABEL, chileTax } from "./countryTaxRules/chile";
 import { COLOMBIA_TAX_YEAR_LABEL, colombiaTax } from "./countryTaxRules/colombia";
@@ -1688,34 +1689,20 @@ PY: ({ annualIncome, isRetired, incomeScenario }) => {
   };
 },
 
-BO: ({ annualIncome, isRetired }) => {
-  if (isRetired) {
-    return {
-      effectiveRate: 0.05,
-      model: "flat",
-      confidence: "placeholder",
-      label: "Bolivia RC-IVA, retirement income (simplified estimate)",
-      missingFactor: "Bolivia's RC-IVA system is non-standard, retirement and foreign income treatment not well-documented.",
-      note: "Simplified 5% effective rate applied for retirement income. Bolivia's tax system is non-standard, RC-IVA applies at 13% on net salary after deductions, but retirement and foreign-source income treatment varies significantly. Verify with a local advisor before planning.",
-    };
-  }
-  if (annualIncome < 10000) {
-    return {
-      effectiveRate: 0.05,
-      model: "flat",
-      confidence: "placeholder",
-      label: "Bolivia RC-IVA, lower income (simplified estimate)",
-      missingFactor: "RC-IVA deductions for minimum wages and VAT receipts not modelled.",
-      note: "Simplified 5% effective rate applied. Bolivia's RC-IVA is nominally 13% but deductions for minimum wages and VAT receipts significantly reduce effective liability at lower incomes. Foreign-source income treatment varies. Verify with a local advisor.",
-    };
-  }
+BO: ({ annualIncome, isRetired, incomeScenario }) => {
+  // Rules in countryTaxRules/bolivia.ts: RC-IVA 13% after AFP 12.71% and two minimum wages, charged above four minimum wages (BOB 3,300). Income is in bolivianos.
+  const scenario = isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local";
+  const { incomeTax, contributions } = boliviaTax(annualIncome, scenario);
+  const exempt = scenario !== "local";
   return {
-    effectiveRate: 0.10,
-    model: "flat",
+    effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
+    model: exempt ? "none" : "flat",
     confidence: "placeholder",
-    label: "Bolivia RC-IVA, simplified planning estimate",
-    missingFactor: "RC-IVA is 13% flat on net salary after deductions, this is a conservative approximation.",
-    note: "Simplified 10% effective rate applied. Bolivia uses RC-IVA (flat 13% on net salary after deductions for minimum wages and VAT receipts) rather than a standard progressive income tax. Foreign-source income, self-employment, and business income are treated differently. Verify with a local advisor.",
+    label: exempt ? "Bolivia, foreign-source income (territorial system)" : `Bolivia RC-IVA + AFP (${BOLIVIA_TAX_YEAR_LABEL}, planning estimate)`,
+    missingFactor: exempt ? "Assumes all income is from outside Bolivia; Bolivian-source pay is taxed under RC-IVA." : "The 13% invoice credit, which can cancel the tax, is not modelled; the Servicio de Impuestos Nacionales pages were not reachable and sources disagreed.",
+    note: exempt
+      ? "Bolivia taxes only Bolivian-source income, so a remote salary paid from abroad or a foreign pension is shown as untaxed. Whether Bolivian pensions are exempt was not confirmed. Income must be passed in bolivianos."
+      : "Planning estimate from adviser summaries: the employee's AFP contribution of 12.71%, then RC-IVA of 13% on the net salary above two minimum wages (the minimum wage is BOB 3,300 a month in 2026), charged only when the net monthly salary exceeds four minimum wages. The credit for invoices handed to the employer is not modelled and can cancel the tax. Income must be passed in bolivianos.",
   };
 },
 

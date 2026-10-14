@@ -1165,3 +1165,18 @@ describe("Venezuela (placeholder rates on a USD-equivalent threshold)", () => {
     expect(rate("VE", 30_000 * 621.47)).toBe(0.12);
   });
 });
+
+describe("Bolivia (RC-IVA after AFP, planning estimate in bolivianos)", () => {
+  it("BOB 240,000 a year (20,000 a month) employee", () => {
+    // AFP 2,542; net 17,458; RC-IVA 13% x (17,458 - 6,600) = 1,411.54
+    expect(rate("BO", 240_000)).toBeCloseTo((2_542 + 0.13 * (17_458 - 6_600)) / 20_000, 8);
+  });
+
+  it("a salary whose net is under four minimum wages pays only the AFP", () => {
+    expect(rate("BO", 12 * 15_000)).toBeCloseTo(0.1271, 8);
+  });
+
+  it("a foreign pension is untaxed", () => {
+    expect(rate("BO", 240_000, "retired")).toBe(0);
+  });
+});
