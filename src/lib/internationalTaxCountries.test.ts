@@ -630,3 +630,22 @@ describe("Italy (2026 IRPEF with 33% second bracket, deductions, INPS)", () => {
     expect(rate("IT", 8_000, "retired")).toBe(0);
   });
 });
+
+describe("Japan (NTA rates, employment income table, basic deduction, social insurance)", () => {
+  it("JPY 6,000,000 employee", () => {
+    // employment income B x 3.2 - 440,000 = 4,360,000; social insurance 0.05565 x 6M + 0.0915 x 6M = 882,900
+    // national: (4,360,000 - 882,900 - 1,040,000) = 2,437,100 -> (97,500 + 48,710) x 1.021; resident: 10% x 3,047,100 + 5,000
+    const national = (97_500 + 48_710) * 1.021;
+    const resident = 304_710 + 5_000;
+    expect(rate("JP", 6_000_000)).toBeCloseTo((national + resident + 882_900) / 6_000_000, 8);
+  });
+
+  it("JPY 3,000,000 retiree: pension deduction JPY 1.1 million, no social insurance", () => {
+    // income 1,900,000; taxable 860,000 -> 43,000 x 1.021; resident 10% x 1,470,000 + 5,000
+    expect(rate("JP", 3_000_000, "retired")).toBeCloseTo((43_000 * 1.021 + 152_000) / 3_000_000, 8);
+  });
+
+  it("JPY 1,000,000 remote worker pays no national or resident tax", () => {
+    expect(rate("JP", 1_000_000, "remote")).toBe(0);
+  });
+});

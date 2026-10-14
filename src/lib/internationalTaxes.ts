@@ -40,6 +40,7 @@ import { GERMANY_TAX_YEAR_LABEL, germanyTax } from "./countryTaxRules/germany";
 import { GREECE_TAX_YEAR_LABEL, greeceTax } from "./countryTaxRules/greece";
 import { IRELAND_TAX_YEAR_LABEL, irelandTax } from "./countryTaxRules/ireland";
 import { ITALY_NEW_RESIDENT_FLAT_TAX, ITALY_TAX_YEAR_LABEL, italyTax } from "./countryTaxRules/italy";
+import { JAPAN_TAX_YEAR_LABEL, japanTax } from "./countryTaxRules/japan";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
 export type FilingStatus = "single" | "married";
@@ -851,28 +852,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // Local inhabitant tax: flat 10% of income.
   // No joint filing.
   // -------------------------------------------------------------------------
-  JP: ({ annualIncome, isRetired }) => {
-    const nationalRate = progressiveTax(annualIncome, [
-      { upTo: 1950000, rate: 0.05 },
-      { upTo: 3300000, rate: 0.10 },
-      { upTo: 6950000, rate: 0.20 },
-      { upTo: 9000000, rate: 0.23 },
-      { upTo: 18000000, rate: 0.33 },
-      { upTo: 40000000, rate: 0.40 },
-      { upTo: Infinity, rate: 0.45 },
-    ]);
-    const reconstructionSurtax = nationalRate * 0.021;
-    const localTax = 0.10;
-    // Pension income deduction approximation for retirees
-    const pensionDeduction = isRetired ? -0.02 : 0;
-
+  JP: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/japan.ts: NTA rates, employment and pension deductions, basic deduction, social insurance.
+    const { nationalTax, residentTax, socialInsurance } = japanTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
+    const effective = annualIncome > 0 ? (nationalTax + residentTax + socialInsurance) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(nationalRate + reconstructionSurtax + localTax + pensionDeduction),
+      effectiveRate: clampRate(effective),
       model: "country-plus-local",
       confidence: "simplified",
-      label: "Japan national + surtax + local inhabitant tax (2024)",
-      missingFactor: "Employee social insurance (~14–15% combined) not included.",
-      note: "National brackets, reconstruction surtax, and local inhabitant tax (flat 10%) are structurally correct. Major omission: employee social insurance premiums total approximately 14–15% of gross salary (health ~5%, pension ~9.15%, employment ~0.6%), this is the dominant real-world deduction for employed residents and is not modelled. Employment income deduction (kyuyo shotoku kojo) also not applied, which means this estimate may overstate income tax on employment income. Income must be passed in JPY.",
+      label: `Japan national tax + resident tax + social insurance (${JAPAN_TAX_YEAR_LABEL})`,
+      missingFactor: "Dependants and other deductions, long-term care premiums and the 2026-27 higher employment-deduction minimum not modelled; basic deduction middle rows and social insurance rates not read on a government page.",
+      note: "Uses the National Tax Agency's rates (5% to 45%, plus the 2.1% reconstruction surtax), the employment income deduction (retirees: the public pension deduction for age 65 and over), the basic deduction (about JPY 1.04 million at lower incomes after the reform effective 1 December 2026), and a 10% resident tax on income after a JPY 430,000 deduction plus about JPY 5,000. Employees also pay about 14.7% in social insurance (health 4.95%, child-support levy 0.115%, pension 9.15% up to JPY 650,000 a month, employment 0.5%), which is deductible. Retirees and remote workers paid abroad are shown without social insurance premiums (National Health Insurance and National Pension are not modelled). Income must be passed in yen.",
     };
   },
 
