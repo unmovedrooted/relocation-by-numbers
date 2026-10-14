@@ -45,6 +45,7 @@ import { INDONESIA_NOTE, INDONESIA_TAX_YEAR_LABEL, indonesiaTax } from "./countr
 import { LATVIA_TAX_YEAR_LABEL, latviaTax } from "./countryTaxRules/latvia";
 import { MALAYSIA_TAX_YEAR_LABEL, malaysiaTax } from "./countryTaxRules/malaysia";
 import { MALTA_TAX_YEAR_LABEL, maltaTax } from "./countryTaxRules/malta";
+import { MEXICO_TAX_YEAR_LABEL, mexicoTax } from "./countryTaxRules/mexico";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -494,26 +495,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 ISR brackets (same structure as prior years, inflation-indexed).
   // No joint filing. Same brackets for all statuses.
   // -------------------------------------------------------------------------
-  MX: ({ annualIncome }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 8952.49, rate: 0.0192 },
-      { upTo: 75984.55, rate: 0.064 },
-      { upTo: 133536.07, rate: 0.1088 },
-      { upTo: 155229.80, rate: 0.16 },
-      { upTo: 185852.57, rate: 0.1792 },
-      { upTo: 374837.88, rate: 0.2136 },
-      { upTo: 590795.99, rate: 0.2352 },
-      { upTo: 1127926.45, rate: 0.30 },
-      { upTo: 1503902.46, rate: 0.32 },
-      { upTo: Infinity, rate: 0.35 },
-    ]);
+  MX: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/mexico.ts: SAT Anexo 8 RMF 2026 annual tariff, IMSS employee share.
+    const { isr, imss } = mexicoTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(rate),
+      effectiveRate: clampRate(annualIncome > 0 ? (isr + imss) / annualIncome : 0),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Mexico ISR federal income tax (2024)",
-      missingFactor: "IMSS social security and state payroll taxes not included.",
-      note: "ISR brackets are 2024 federal figures. Not modelled: IMSS social security (~2-3% employee share on capped base), INFONAVIT housing fund contributions, or state payroll taxes. The ISR system also has a large employer-side subsidy (subsidio al empleo) at lower incomes that reduces employee liability, not reflected here. Income must be passed in MXN.",
+      label: `Mexico ISR + IMSS (${MEXICO_TAX_YEAR_LABEL})`,
+      missingFactor: "Employment subsidy, exempt benefits (aguinaldo) and personal deductions not modelled; IMSS rates come from summaries rather than the Ley del Seguro Social.",
+      note: "Uses the SAT's 2026 annual tariff (Anexo 8 of the 2026 tax resolution, limits raised 13.21% from 2025; 1.92% to 35%) and the employee's IMSS share (about 2.4% of salary, capped at 25 UMA a day). Pensions are treated as fully taxable, and remote workers paid abroad pay no IMSS. Not modelled: the subsidy for low incomes, exempt benefits such as the 30-day aguinaldo, personal deductions and INFONAVIT. Income must be passed in pesos.",
     };
   },
 

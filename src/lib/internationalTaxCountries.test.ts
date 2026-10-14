@@ -723,3 +723,22 @@ describe("Malta (2026 single and married computations, Class 1)", () => {
     expect(rate("MT", 14_000, "retired")).toBeCloseTo(300 / 14_000, 10);
   });
 });
+
+describe("Mexico (SAT 2026 annual tariff, IMSS)", () => {
+  it("MXN 500,000 employee", () => {
+    const isr = 67_981.92 + (500_000 - 424_353.98) * 0.2352;
+    const imss = 0.02375 * 500_000 + 0.004 * (500_000 - 3 * 117.31 * 365);
+    expect(rate("MX", 500_000)).toBeCloseTo((isr + imss) / 500_000, 8);
+  });
+
+  it("MXN 100,000 remote worker: second band, no IMSS", () => {
+    expect(rate("MX", 100_000, "remote")).toBeCloseTo((5_051.37 + (100_000 - 86_022.12) * 0.1088) / 100_000, 8);
+  });
+
+  it("IMSS stops growing at the 25 UMA cap", () => {
+    const base = rate("MX", 2_000_000) * 2_000_000;
+    const higher = rate("MX", 3_000_000) * 3_000_000;
+    // from MXN 2M to 3M the extra cost is tax only: 34% to 5,107,703
+    expect(higher - base).toBeCloseTo(1_000_000 * 0.34, 4);
+  });
+});
