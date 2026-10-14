@@ -1215,14 +1215,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // Social contributions: 18.5% working; not on pension income.
   // -------------------------------------------------------------------------
   HU: ({ annualIncome, isRetired }) => {
+    // Hungarian Tax Authority (NAV), 2026: personal income tax (SZJA) 15% and employee contributions 18.5% (10% pension,
+    // 7% health, 1.5% labour market), both on gross pay (https://nav.gov.hu/ado/jarulek/Fizetendo_jarulekok_2026._januar_1-jetol, read 2026-10-14).
     const socialOverlay = isRetired ? 0 : 0.185;
     return {
       effectiveRate: clampRate(annualIncome > 0 ? 0.15 + socialOverlay : 0),
       model: "flat",
       confidence: "partial",
-      label: "Hungary 15% SZJA flat + social contributions (2024)",
-      missingFactor: "Flat rate is exact; family allowance credit for parents not modelled.",
-      note: "The 15% flat SZJA rate is legislated and exact. Employee social contributions (18.5%: pension 10%, health services 7%, labour market 1.5%) are correctly applied to employment income and waived on pension. The family allowance (kedvezmény) credit for parents is not modelled. No joint filing. Income must be passed in HUF.",
+      label: "Hungary 15% SZJA flat + social contributions (2026)",
+      missingFactor: "Exemptions for under-25s and mothers, and family tax credits, not modelled.",
+      note: "The 2026 rules from the Hungarian Tax Authority: 15% personal income tax and 18.5% employee contributions (pension 10%, health 7%, labour market 1.5%), both on gross pay, with no ceiling. Retirees are assumed to pay neither. Not modelled: the under-25 relief (up to HUF 715,765 a month of tax-free income), the exemptions for mothers of two or more children and of mothers under 30, and family tax credits. Income must be passed in forints.",
     };
   },
 

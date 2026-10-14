@@ -553,3 +553,10 @@ describe("Hong Kong (IRD 2026-27 allowances, MPF deduction)", () => {
     expect(married).toBeLessThan(single);
   });
 });
+
+describe("Hungary (NAV 2026: 15% SZJA + 18.5% contributions on gross)", () => {
+  it("is 33.5% for an employee and 15% for a retiree", () => {
+    expect(rate("HU", 12_000_000)).toBeCloseTo(0.335, 10);
+    expect(rate("HU", 12_000_000, "retired")).toBeCloseTo(0.15, 10);
+  });
+});

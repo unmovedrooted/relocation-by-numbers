@@ -32,3 +32,4 @@ Rule modules live in `src/lib/countryTaxRules/`. Countries that have no module y
 | Greece | Refreshed: Ministry of Finance 2026 reform scale (9/20/26/34/39/44%), EUR 777 tax reduction; EFKA 13.87% and ceiling not re-read; child rates and youth rates not modelled | Ministry of Finance, TEKA |
 | Guyana | Refreshed: GRA 2026 notice (allowance GYD 1,680,000 or one third, 25%/35% at GYD 3,360,000, NIS 5.6% to GYD 280,000 a month). The old model treated GYD income as US dollars | Guyana Revenue Authority |
 | Hong Kong | Refreshed: IRD 2026-27 allowances (HK$145,000 / HK$290,000), MPF deduction and cost, standard rate on net income; removed an unexplained 15% cut for retirees. MPF cap and dependant allowances not re-read | IRD |
+| Hungary | Confirmed unchanged for 2026 (NAV): 15% SZJA + 18.5% employee contributions on gross; label and note updated; under-25 and mothers' exemptions not modelled | NAV |
