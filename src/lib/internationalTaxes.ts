@@ -47,6 +47,7 @@ import { MALAYSIA_TAX_YEAR_LABEL, malaysiaTax } from "./countryTaxRules/malaysia
 import { MALTA_TAX_YEAR_LABEL, maltaTax } from "./countryTaxRules/malta";
 import { MEXICO_TAX_YEAR_LABEL, mexicoTax } from "./countryTaxRules/mexico";
 import { NETHERLANDS_TAX_YEAR_LABEL, netherlandsTax } from "./countryTaxRules/netherlands";
+import { NEW_ZEALAND_TAX_YEAR_LABEL, newZealandTax } from "./countryTaxRules/newZealand";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -811,21 +812,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // Budget 2024 increased the 17.5% bracket threshold from NZD 48k to NZD 53.5k
   // and the 30% bracket from NZD 70k to NZD 78.1k (effective 31 Jul 2024).
   // -------------------------------------------------------------------------
-  NZ: ({ annualIncome }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 14000, rate: 0.105 },
-      { upTo: 53500, rate: 0.175 }, // raised from $48k (Budget 2024)
-      { upTo: 78100, rate: 0.30 }, // raised from $70k (Budget 2024)
-      { upTo: 180000, rate: 0.33 },
-      { upTo: Infinity, rate: 0.39 },
-    ]);
+  NZ: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/newZealand.ts (same as the Asia calculator).
+    const { incomeTax, acc } = newZealandTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(rate),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + acc) / annualIncome : 0),
       model: "progressive-country",
       confidence: "partial",
-      label: "New Zealand PAYE (2024-25, Budget 2024 thresholds)",
-      missingFactor: "ACC levies (~1.6% on employment income) not included.",
-      note: "2024-25 brackets including Budget 2024 threshold increases are correct. ACC levies (~1.6% on employment income up to ~NZD 142,283) are not included, these add approximately 1–1.6 pp to the effective rate for employees. No joint filing. NZ Super is taxable at the same rates. Income must be passed in NZD.",
+      label: `New Zealand income tax + ACC levy (${NEW_ZEALAND_TAX_YEAR_LABEL})`,
+      missingFactor: "KiwiSaver, tax credits and student-loan repayments not modelled; the ACC rate comes from payroll summaries.",
+      note: "Uses Inland Revenue's resident rates (10.5% to NZD 15,600, 17.5% to 53,500, 30% to 78,100, 33% to 180,000, 39% above) and, for employees, the ACC earners' levy of 1.75% up to NZD 156,641 (2026-27, from payroll summaries of the ACC regulations). NZ Superannuation is taxed at the same rates with no levy; remote workers paid abroad pay no ACC levy. Not modelled: KiwiSaver, low-income and family credits, student-loan repayments. Income must be passed in NZD.",
     };
   },
 

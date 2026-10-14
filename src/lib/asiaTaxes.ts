@@ -18,6 +18,7 @@
 import { AUSTRALIA_TAX_YEAR_LABEL, australiaTax } from "./countryTaxRules/australia";
 import { INDONESIA_NOTE, INDONESIA_TAX_YEAR_LABEL, indonesiaTax } from "./countryTaxRules/indonesia";
 import { MALAYSIA_TAX_YEAR_LABEL, malaysiaTax } from "./countryTaxRules/malaysia";
+import { NEW_ZEALAND_TAX_YEAR_LABEL, newZealandTax } from "./countryTaxRules/newZealand";
 import { NO_US_OVERLAY, US_SELF_EMPLOYED_KEY, US_SELF_EMPLOYED_QUESTION, US_TAX_STATUS_KEY, US_TAX_STATUS_QUESTION, withUsTaxAbroad } from "./internationalTaxes";
 
 export type FilingStatus = "single" | "married";
@@ -922,30 +923,18 @@ return {
   // -------------------------------------------------------------------------
   // NEW ZEALAND, NZD
   // -------------------------------------------------------------------------
-  NZ: ({ annualIncome }) => {
-    const taxAmount = progressiveTaxAmount(annualIncome, [
-      { upTo: 14000, rate: 0.105 },
-      { upTo: 53500, rate: 0.175 },
-      { upTo: 78100, rate: 0.3 },
-      { upTo: 180000, rate: 0.33 },
-      { upTo: Infinity, rate: 0.39 },
-    ]);
-
-    const incomeTaxRate = effectiveRateFromTax(taxAmount, annualIncome);
-const accIncomeCap = 142283;
-const accTaxableIncome = Math.min(annualIncome, accIncomeCap);
-const accLevyAmount = accTaxableIncome * 0.016;
-const socialContributionRate = effectiveRateFromTax(accLevyAmount, annualIncome);
-const rates = combineRates(incomeTaxRate, socialContributionRate);
-
+  NZ: ({ annualIncome, isRetired, incomeScenario = "local" }) => {
+    // Rules in countryTaxRules/newZealand.ts (same as the International estimator).
+    const { incomeTax, acc } = newZealandTax(annualIncome, isRetired ? "retired" : incomeScenario);
+    const rates = combineRates(effectiveRateFromTax(incomeTax, annualIncome), effectiveRateFromTax(acc, annualIncome));
     return {
-  ...rates,
-  model: "progressive-country",
-  confidence: "partial",
-  label: "New Zealand PAYE (2024-25)",
-  missingFactor: "Low-income tax credits and other individual adjustments not included.",
-  note: "2024-25 brackets included. ACC earner levy is estimated at 1.6% up to the income cap. Income must be passed in NZD.",
-};
+      ...rates,
+      model: "progressive-country",
+      confidence: "partial",
+      label: `New Zealand income tax + ACC levy (${NEW_ZEALAND_TAX_YEAR_LABEL})`,
+      missingFactor: "KiwiSaver, tax credits and student-loan repayments not modelled; the ACC rate comes from payroll summaries.",
+      note: "Uses Inland Revenue's resident rates (10.5% to NZD 15,600, 17.5% to 53,500, 30% to 78,100, 33% to 180,000, 39% above) and, for employees, the ACC earners' levy of 1.75% up to NZD 156,641 (2026-27, from payroll summaries of the ACC regulations). NZ Superannuation is taxed at the same rates with no levy; remote workers paid abroad pay no ACC levy. Not modelled: KiwiSaver, low-income and family credits, student-loan repayments. Income must be passed in NZD.",
+    };
   },
 
 };

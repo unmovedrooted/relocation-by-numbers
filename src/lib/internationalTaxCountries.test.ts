@@ -763,3 +763,23 @@ describe("Netherlands (Belastingdienst 2026 box 1 and credits)", () => {
       .toBeCloseTo(gross / 100_000, 8);
   });
 });
+
+describe("New Zealand (IRD rates, ACC levy) in both calculators", () => {
+  const asia = (income: number, scenario: "local" | "remote" | "retired" = "local") =>
+    estimateAsiaTax({ countryCode: "NZ", annualIncome: income, filing: "single", isRetired: scenario === "retired", incomeScenario: scenario }).effectiveRate;
+
+  it("NZD 100,000 employee", () => {
+    // 1,638 + 6,632.50 + 7,380 + 7,227 = 22,877.50; ACC 1.75% = 1,750
+    expect(rate("NZ", 100_000)).toBeCloseTo(24_627.5 / 100_000, 8);
+    expect(asia(100_000)).toBeCloseTo(24_627.5 / 100_000, 8);
+  });
+
+  it("NZD 40,000 superannuitant pays tax only", () => {
+    // 1,638 + 24,400 x 17.5% = 5,908
+    expect(rate("NZ", 40_000, "retired")).toBeCloseTo(5_908 / 40_000, 8);
+  });
+
+  it("the ACC levy stops at the NZD 156,641 cap", () => {
+    expect((rate("NZ", 200_000) - rate("NZ", 200_000, "remote")) * 200_000).toBeCloseTo(0.0175 * 156_641, 4);
+  });
+});
