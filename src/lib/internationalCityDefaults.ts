@@ -386,7 +386,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 900, groceries: 240, utilities: 90, transport: 50, healthcare: 70 },
     housing: { depositMonths: 8, lastMonthRentDefault: 0, furnishedSetupCost: 800, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 160, flight: 1000, shipping: 480, temporaryStay: 1000, adminFees: 200, emergencyBuffer: 2600 },
-    sources: { rent: "Planning estimate. No official city rent series was searched or found for India yet.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -398,7 +398,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 800, groceries: 210, utilities: 85, transport: 45, healthcare: 65 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 740, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 160, flight: 1000, shipping: 470, temporaryStay: 950, adminFees: 190, emergencyBuffer: 2400 },
-    sources: { rent: "Planning estimate. No official city rent series was searched or found for India yet.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -410,7 +410,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1400, groceries: 260, utilities: 95, transport: 55, healthcare: 75 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 860, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 160, flight: 1000, shipping: 490, temporaryStay: 1100, adminFees: 210, emergencyBuffer: 2800 },
-    sources: { rent: "Planning estimate. No official city rent series was searched or found for India yet.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -422,7 +422,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 750, groceries: 220, utilities: 80, transport: 42, healthcare: 62 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 720, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 160, flight: 1010, shipping: 460, temporaryStay: 900, adminFees: 185, emergencyBuffer: 2300 },
-    sources: { rent: "Planning estimate. No official city rent series was searched or found for India yet.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -434,7 +434,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 700, groceries: 210, utilities: 78, transport: 40, healthcare: 60 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 700, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 160, flight: 1010, shipping: 455, temporaryStay: 880, adminFees: 180, emergencyBuffer: 2200 },
-    sources: { rent: "Planning estimate. No official city rent series was searched or found for India yet.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
 
@@ -450,7 +450,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1900, groceries: 420, utilities: 150, transport: 80, healthcare: 110 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 1300, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 250, flight: 1000, shipping: 600, temporaryStay: 1900, adminFees: 310, emergencyBuffer: 4500 },
-    sources: { rent: "Planning estimate. No official city rent series was searched or found for China yet.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -462,7 +462,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 2000, groceries: 440, utilities: 160, transport: 85, healthcare: 115 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 1350, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 250, flight: 1000, shipping: 610, temporaryStay: 2000, adminFees: 320, emergencyBuffer: 4700 },
-    sources: { rent: "Planning estimate. No official city rent series was searched or found for China yet.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -474,7 +474,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1750, groceries: 400, utilities: 145, transport: 75, healthcare: 105 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 1250, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 250, flight: 1010, shipping: 595, temporaryStay: 1800, adminFees: 300, emergencyBuffer: 4300 },
-    sources: { rent: "Planning estimate. No official city rent series was searched or found for China yet.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -486,7 +486,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1550, groceries: 380, utilities: 138, transport: 70, healthcare: 100 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 1180, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 250, flight: 1010, shipping: 585, temporaryStay: 1700, adminFees: 290, emergencyBuffer: 4100 },
-    sources: { rent: "Planning estimate. No official city rent series was searched or found for China yet.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -498,7 +498,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1200, groceries: 330, utilities: 120, transport: 58, healthcare: 88 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 1050, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 250, flight: 1020, shipping: 570, temporaryStay: 1450, adminFees: 270, emergencyBuffer: 3700 },
-    sources: { rent: "Planning estimate. No official city rent series was searched or found for China yet.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
 
@@ -750,7 +750,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 3800,
     },
     sources: {
-      rent: "Planning estimate for cities other than Seoul. Seoul uses the Korea Real Estate Board figure.",
+      rent: "Planning estimate. The Korea Real Estate Board figure found is for Seoul only; none was found for Busan.",
       groceries: "Planning assumption, not from an official source.",
       utilities: "Planning assumption, not from an official source.",
       transport: "Planning assumption, not from an official source.",
@@ -1009,7 +1009,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 2200,
     },
     sources: {
-      rent: "Planning estimate. No official city rent series was searched or found for Vietnam yet.",
+      rent: "Planning estimate. Planning estimate base. Vietnam's General Statistics Office living-standards survey was searched and no city rent figure was found.",
       groceries: "Planning assumption, not from an official source.",
       utilities: "Planning assumption, not from an official source.",
       transport: "Planning assumption, not from an official source.",
