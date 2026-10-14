@@ -374,3 +374,42 @@ describe("Denmark (skat.dk 2026)", () => {
     expect(rate("DK", 300_000, "retired")).toBeCloseTo((0.1201 * 245_900 + 0.25049 * 245_900) / 300_000, 8);
   });
 });
+
+describe("Estonia (EMTA 2026)", () => {
+  it("employee earning EUR 40,000", () => {
+    // contributions 3.6% = 1,440; taxable 40,000 - 1,440 - 8,400 = 30,160; tax 22% = 6,635.20
+    expect(rate("EE", 40_000)).toBeCloseTo((6_635.2 + 1_440) / 40_000, 10);
+  });
+
+  it("a pensioner has the higher exemption and no contributions", () => {
+    // (30,000 - 9,312) x 22% = 4,551.36
+    expect(rate("EE", 30_000, "retired")).toBeCloseTo(4_551.36 / 30_000, 10);
+  });
+
+  it("pays no income tax within the exemption", () => {
+    expect(rate("EE", 8_000, "retired")).toBe(0);
+  });
+});
+
+describe("Ecuador (SRI table for fiscal year 2026)", () => {
+  it("matches the SRI fixed amounts at each bracket", () => {
+    // remote income is taxed with no IESS; the SRI table prints each row's fixed amount rounded to whole dollars
+    for (const [base, fixed] of [[15_549, 167], [20_188, 631], [26_700, 1_412], [46_575, 4_965], [62_005, 8_823], [82_679, 15_025]] as const) {
+      expect(Math.abs(rate("EC", base, "remote") * base - fixed), String(base)).toBeLessThan(1);
+    }
+  });
+
+  it("top band is 37% above $109,956 with $24,572 fixed", () => {
+    const base = 150_000;
+    expect(rate("EC", base, "remote") * base).toBeCloseTo(24_572 + 0.37 * (base - 109_956), 0);
+  });
+
+  it("employee earning $60,000: IESS 9.45% = 5,670 deducted", () => {
+    // base 54,330 -> 4,965 + 25% x (54,330 - 46,575) = 6,903.75
+    expect(Math.abs(rate("EC", 60_000) * 60_000 - (6_903.75 + 5_670))).toBeLessThan(1);
+  });
+
+  it("is free of tax below the exempt amount", () => {
+    expect(rate("EC", 12_000, "remote")).toBe(0);
+  });
+});

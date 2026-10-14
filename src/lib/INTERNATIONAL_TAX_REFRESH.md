@@ -24,3 +24,5 @@ Rule modules live in `src/lib/countryTaxRules/`. Countries that have no module y
 | Cyprus | Not refreshed: the 2026 reform raised the tax-free amount to EUR 22,000 (Law 244(I)/2025, confirmed from a search summary) but the official scale could not be read (the Tax Department site moved and blocks downloads). Still shows 2024 figures | Tax Department |
 | Czech Republic | Refreshed: Financial Administration 2026 (15%/23% at CZK 1,762,812, credit 30,840); insurance rates and the 48x cap are statutory/derived, not re-read | Financni sprava |
 | Denmark | Refreshed: skat.dk 2026 (new 7.5% middle and top brackets, personal allowance DKK 54,100), Skatteministeriet average municipal rate 25.049%, employment allowance. Church tax and your municipality's rate not included | skat.dk, Skatteministeriet |
+| Ecuador | Refreshed: SRI table for fiscal year 2026 read from the PDF (exempt $12,208, new 37% band above $109,956), IESS 9.45% deducted. Personal-expense rebate not modelled | SRI |
+| Estonia | Refreshed: EMTA 2026 (22%, basic exemption EUR 8,400 that no longer shrinks), 1.6% + 2% contributions deducted | EMTA, Riigi Teataja |

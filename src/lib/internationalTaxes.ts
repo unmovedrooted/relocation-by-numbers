@@ -34,6 +34,7 @@ import { COSTA_RICA_TAX_YEAR_LABEL, costaRicaTax } from "./countryTaxRules/costa
 import { CROATIA_TAX_YEAR_LABEL, croatiaTax } from "./countryTaxRules/croatia";
 import { CZECH_TAX_YEAR_LABEL, czechTax } from "./countryTaxRules/czechRepublic";
 import { DENMARK_TAX_YEAR_LABEL, denmarkTax } from "./countryTaxRules/denmark";
+import { ESTONIA_TAX_YEAR_LABEL, estoniaTax } from "./countryTaxRules/estonia";
 
 export type FilingStatus = "single" | "married";
 
@@ -1331,17 +1332,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // No joint filing.
   // -------------------------------------------------------------------------
   EE: ({ annualIncome, isRetired }) => {
-    // Using 20% for 2024 (22% from Jan 2025, noted)
-    const flatRate = 0.20;
-    // Employee social: ~3.6% (unemployment 1.6% + funded pension 2%)
-    const socialOverlay = isRetired ? 0 : 0.036;
+    // Rules in countryTaxRules/estonia.ts: EMTA 2026 rate (22%), EUR 8,400 basic exemption, 1.6% + 2% contributions.
+    const { incomeTax, contributions } = estoniaTax(annualIncome, isRetired);
+    const effective = annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(annualIncome > 0 ? flatRate + socialOverlay : 0),
+      effectiveRate: clampRate(effective),
       model: "flat",
-      confidence: "simplified",
-      label: "Estonia flat income tax + contributions (2024/2025)",
-      missingFactor: "Rate rises to 22% from Jan 2025; basic exemption not modelled at lower incomes.",
-      note: "The flat rate is 20% for income earned in 2024, rising to 22% from 1 January 2025, for forward-looking relocation planning the 22% figure is more relevant and should be used. Employee contributions (~3.6%, unemployment 1.6% + funded pension 2%) are correctly excluded for retirees. The basic exemption (up to €7,848/yr, tapering above €25,200) is not modelled, this understates take-home at lower incomes. Income must be passed in EUR.",
+      confidence: "partial",
+      label: `Estonia flat income tax + contributions (${ESTONIA_TAX_YEAR_LABEL})`,
+      missingFactor: "Higher voluntary pension contribution (4% or 6%) and exemption application rules not modelled.",
+      note: "Income tax is a flat 22% of pay after employee contributions and the basic exemption of EUR 700 a month (EUR 8,400 a year; EUR 9,312 from pensionable age), which from 2026 no longer shrinks as income rises (Estonian Tax and Customs Board). Employees pay 1.6% unemployment insurance and by default 2% to the funded pension, both deducted before tax; members may choose 4% or 6%. There is no 2% security tax on wages. Income must be passed in euros.",
     };
   },
 
@@ -1825,36 +1825,34 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       note: "Brackets and rebates (primary ZAR 17,235; secondary ZAR 9,444 for 65+) are correct 2024-25 SARS figures, the rebates are a real strength of this model. Key omissions: medical scheme tax credits (MTC) reduce tax by ZAR 364/mo for the primary member, which is meaningful at lower incomes. UIF (1% employee, capped at UIF benefit ceiling) is also excluded. The retirement fund deduction (up to 27.5% of taxable income, max ZAR 350,000/yr) can substantially reduce taxable income for contributing residents. Income must be passed in ZAR.",
     };
   },
-EC: ({ annualIncome, isRetired }) => {
-  if (isRetired && annualIncome < 14000) {
-    return {
-      effectiveRate: 0,
-      model: "progressive-country",
-      confidence: "simplified",
-      label: "Ecuador IR, below taxable threshold",
-      missingFactor: "IESS social security for foreign residents not modelled.",
-      note: "Retirement income below Ecuador's basic deduction threshold (~$11,722/yr). Zero income tax modelled. Ecuador is dollarized, no FX complexity. Verify residency-based tax treatment with a local advisor.",
-    };
-  }
-  const brackets = [
-    { upTo: 11722,    rate: 0 },
-    { upTo: 14930,    rate: 0.05 },
-    { upTo: 19670,    rate: 0.10 },
-    { upTo: 26330,    rate: 0.12 },
-    { upTo: 35080,    rate: 0.15 },
-    { upTo: 46750,    rate: 0.20 },
-    { upTo: 62330,    rate: 0.25 },
-    { upTo: 83120,    rate: 0.30 },
-    { upTo: Infinity, rate: 0.35 },
-  ];
-  const rate = progressiveTax(annualIncome, brackets);
+EC: ({ annualIncome, isRetired, incomeScenario }) => {
+  // SRI table for fiscal year 2026 (Resolution NAC-DGERCGC25-00000043), in US dollars:
+  // https://www.sri.gob.ec/o/sri-portlet-biblioteca-alfresco-internet/descargar/58a7f4f6-ab51-48b6-b9ff-a8e97e1a28ef/Tablas%20de%20c%C3%A1lculo%20de%20Impuesto%20a%20la%20Renta.pdf (read 2026-10-14).
+  // Employees pay 9.45% to IESS, which is deducted before income tax.
+  const employee = !isRetired && incomeScenario !== "remote";
+  const iess = employee ? 0.0945 * annualIncome : 0;
+  const base = Math.max(0, annualIncome - iess);
+  const rate = progressiveTax(base, [
+    { upTo: 12208, rate: 0 },
+    { upTo: 15549, rate: 0.05 },
+    { upTo: 20188, rate: 0.10 },
+    { upTo: 26700, rate: 0.12 },
+    { upTo: 35136, rate: 0.15 },
+    { upTo: 46575, rate: 0.20 },
+    { upTo: 62005, rate: 0.25 },
+    { upTo: 82679, rate: 0.30 },
+    { upTo: 109956, rate: 0.35 },
+    { upTo: Infinity, rate: 0.37 },
+  ]);
+  const incomeTax = rate * base;
+  const effective = annualIncome > 0 ? (incomeTax + iess) / annualIncome : 0;
   return {
-    effectiveRate: clampRate(rate),
+    effectiveRate: clampRate(effective),
     model: "progressive-country",
     confidence: "simplified",
-    label: "Ecuador IR, progressive (simplified, 2024 brackets)",
-    missingFactor: "IESS social security contributions for foreign residents not modelled.",
-    note: `Effective rate ${(clampRate(rate) * 100).toFixed(1)}%. Ecuador is dollarized, no FX conversion needed. 2024 IR brackets applied with basic personal deduction of ~$11,722/yr. IESS social security contributions for foreign residents vary by residency type and are not modelled. Verify with a local tax advisor.`,
+    label: "Ecuador income tax + IESS (2026 SRI table)",
+    missingFactor: "Personal-expense rebate (up to 18%) and the 13th and 14th salaries not modelled.",
+    note: "Uses the Servicio de Rentas Internas table for fiscal year 2026 (exempt to $12,208, then 5% to 37%, with a new top 37% band above $109,956). Employees pay 9.45% to IESS, which is deducted before income tax; retirees and remote workers are assumed to pay none. Ecuador is dollarized, so no currency conversion is needed. Not modelled: the personal-expense rebate (18% of declared expenses up to a cap), the extra salaries and dependants.",
   };
 },
 
