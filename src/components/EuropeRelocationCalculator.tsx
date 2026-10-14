@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore, useCallback } from "react";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import FireAbroadLink from "./FireAbroadLink";
+import { grossForNet } from "@/lib/grossForNet";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
 import {
   INTERNATIONAL_COUNTRIES,
@@ -866,9 +867,17 @@ const requiredNetMonthly =
     ? (housingTotal + livingCosts) / targetComfortRatio
     : 0;
 
+// Solved against the destination’s own tax scale at the income needed, not the rate at your current income.
 const requiredGrossMonthly =
   targetTaxRate < 1
-    ? requiredNetMonthly / (1 - targetTaxRate)
+    ? grossForNet(requiredNetMonthly * 12, (grossUsd) => estimateInternationalTax({
+        countryCode: toCountry,
+        annualIncome: convertUsdToLocal(grossUsd, toCountry),
+        filing,
+        isRetired: mode === "retired",
+        incomeScenario,
+        answers: conditionalAnswers,
+      }).effectiveRate) / 12
     : 0;
 
 const requiredAnnualIncome = requiredGrossMonthly * 12;
@@ -933,7 +942,7 @@ const readinessRecommendation =
     const totalMonthlyOutflow = housingTotal + livingCosts;
     const monthsCovered =
   totalMonthlyOutflow > 0
-    ? convertLocalToUsd(nonNegative(currentSavings), fromCountry) / totalMonthlyOutflow
+    ? Math.max(0, convertLocalToUsd(nonNegative(currentSavings), fromCountry) - upfrontCashNeeded) / totalMonthlyOutflow
     : 0;
 
     const currentProfile = getCountryByCode(fromCountry);
@@ -1043,7 +1052,7 @@ readinessRecommendation,
       { Metric: "Monthly flexibility after expenses", Value: displayAmount(results.monthlyFlexibility) },
       { Metric: "Comfort score", Value: `${results.comfort.band} · ${results.comfort.label}` },
       { Metric: "Upfront cash needed", Value: displayAmount(results.upfrontCashNeeded) },
-      { Metric: "Savings runway", Value: `${results.monthsCovered.toFixed(1)} months` },
+      { Metric: "Savings runway (after upfront costs)", Value: `${results.monthsCovered.toFixed(1)} months` },
       { Metric: "Cost-of-living-adjusted comparable income", Value: displayAmount(results.comparableSalary) },
       { Metric: `${toCityLabel} vs ${fromCityLabel} cost difference`, Value: `${Math.abs(results.relativeDifference * 100).toFixed(1)}% ${results.relativeDifference >= 0 ? "more" : "less"} expensive` },
     ];
@@ -1470,7 +1479,7 @@ readinessRecommendation,
               <div>Total: <span className="font-bold">{displayAmount(results.livingCosts, 2)}</span></div>
 
               <div className="mt-2">Upfront cash needed: <span className="font-semibold">{displayAmount(results.upfrontCashNeeded)}</span></div>
-              <div>Months covered by savings: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
+              <div>Months covered by savings after upfront costs: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
               <div className="mt-2">Housing % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
             </div>
 

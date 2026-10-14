@@ -125,3 +125,22 @@ Re-running `liveCalculatorMath.audit.test.ts` now shows all four reproduced defe
 4. **Zero-rate affordability:** `solveMaxHomePrice` handles a 0% rate as straight-line principal. The $10k/month, 28%, 20% down, 10-year case gives $420,000 (was $0).
 
 Not changed, awaiting a product decision: Barista FIRE's part-time income before the semi-retirement date; the Chubby and Fat FIRE pages loading the standard preset; and the source-level concerns in the "Additional issues" list. The audit test remains observational and records values, so it does not fail if a defect returns.
+
+## Second round of corrections (2026-10-14, owner decisions applied)
+
+Decisions: Barista part-time income is extra earnings from today; Chubby and Fat FIRE get preset spending; the ten smaller issues are fixed.
+
+- **Barista FIRE:** kept as extra income from today. The field is now labelled "after tax" with an explanation, so no untaxed gross figure is added. The audit row now records $56,000 ($32,000 plus the $24,000 extra earnings) as the intended result.
+- **Chubby and Fat FIRE:** their pages start at $10,000 and $20,000 a month with an income and portfolio that make the target reachable (Chubby $250,000 income, $250,000 portfolio; Fat $500,000 income, $750,000 portfolio). The inputs remain editable and "Reset" restores them.
+- **Issue 1 (Coast target):** growth now uses the return for each year between the coast age and retirement (Phase 1 then Phase 2), less brokerage tax drag on the taxable share, and the target is grossed up for the withdrawal tax on traditional accounts.
+- **Issue 2 (Coast readiness):** spending is inflated each year and contributions stop at the coast age.
+- **Issue 3 (simple-mode 401(k)):** the deferral is now saved in a 401(k) bucket (grown with salary) because take-home pay already excludes it.
+- **Issue 4 (net income growth):** left as an approximation (take-home grows at the salary-growth rate) and disclosed in "How this estimate works".
+- **Issue 5 (HSA):** the CA/NJ drag uses a fixed $1,000 marginal-rate probe so it does not vanish at zero own contribution; the contribution tooltip states the payroll-funding assumption.
+- **Issue 6 (contribution timing):** kept (start of year) and disclosed in the FIRE methodology note; the HSA tool already states it.
+- **Issue 7 (salary needed):** Europe and International now solve for the gross that produces the needed net with `src/lib/grossForNet.ts` (bisection against the destination's tax scale), with unit tests.
+- **Issue 8 (South America scaling):** destination inputs are no longer multiplied by city multipliers; the origin estimate uses the origin/destination multiplier ratio, as Europe does.
+- **Issue 9 (household counts):** Asia and South America floor adult and child counts like Europe and International.
+- **Issue 10 (savings coverage):** all five regional calculators now compute months covered as savings after upfront costs divided by monthly outflow, and say so in the label.
+
+Validation: type check, lint (0 errors) and 1,984 tests pass; FIRE, Europe, South America and HSA pages load without console errors. The live-calculator audit now carries regression assertions for the fixed FIRE cases.

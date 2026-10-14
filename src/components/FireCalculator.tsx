@@ -20,7 +20,7 @@ import {
 
 import { STATES, type StateCode } from "@/lib/states";
 import { findCity, citiesForState } from "@/lib/cities";
-import { estimateNetAnnual, effectiveTaxRatePct } from "@/lib/wageTax";
+import { estimateNetAnnual, effectiveTaxRatePct, EMPLOYEE_401K_LIMIT } from "@/lib/wageTax";
 import type { FilingStatus } from "@/lib/tax";
 import { parseFireAbroadLink, parseFireLink } from "@/lib/fireLink";
 
@@ -275,11 +275,26 @@ const MODE_OVERRIDES: Record<FireMode, Partial<Inputs>> = {
   barista:  { expensesMonthly: 5000, baristaPartTimeIncome: 24000 },
 };
 
-function defaultsForMode(mode: FireMode, initialIncome: number): Inputs {
+// Chubby and Fat FIRE share the standard engine; their pages start from a spending level that matches the page text
+// (Chubby about $100,000 to $150,000 a year, Fat $200,000 or more) with an income and portfolio that make it reachable.
+type SpendingPreset = "chubby" | "fat";
+const SPENDING_PRESETS: Record<SpendingPreset, Partial<Inputs>> = {
+  chubby: { income: 250000, expensesMonthly: 10000, currentPortfolio: 250000 },
+  fat:    { income: 500000, expensesMonthly: 20000, currentPortfolio: 750000 },
+};
+
+function presetFromPathname(p: string): SpendingPreset | undefined {
+  if (p.includes("chubby-fire")) return "chubby";
+  if (p.includes("fat-fire")) return "fat";
+  return undefined;
+}
+
+function defaultsForMode(mode: FireMode, initialIncome: number, spending?: SpendingPreset): Inputs {
   return {
     ...BASE_DEFAULTS,
     ...MODE_OVERRIDES[mode],
-    income: initialIncome > 0 ? initialIncome : BASE_DEFAULTS.income,
+    ...(spending ? SPENDING_PRESETS[spending] : {}),
+    income: initialIncome > 0 ? initialIncome : (spending ? SPENDING_PRESETS[spending].income ?? BASE_DEFAULTS.income : BASE_DEFAULTS.income),
   };
 }
 
@@ -382,9 +397,11 @@ function initBuckets(i: Inputs, netAnnualBase: number): {
   if (!i.advanced) {
     const autoInvest = Math.max(0, netAnnualBase - annualExpenses(i));
     const contrib    = i.yearlyInvestment > 0 ? i.yearlyInvestment : autoInvest;
+    // Take-home pay already excludes the 401(k) deferral, so the deferral is saved too (it grows with salary; see growBuckets).
+    const deferral = i.state ? Math.min((Number(i.income) || 0) * ((Number(i.k401Pct) || 0) / 100), EMPLOYEE_401K_LIMIT) : 0;
     return {
       start:         { b401k: 0, bIra: 0, bBrokerage: i.currentPortfolio },
-      annualContrib: { b401k: 0, bIra: 0, bBrokerage: contrib },
+      annualContrib: { b401k: deferral, bIra: 0, bBrokerage: contrib },
       employerMatch: 0,
     };
   }
@@ -413,7 +430,8 @@ function growBuckets(
   const r    = returnForYear(i, yearIndex);
   const drag = getBrokerageTaxDrag(i);
 
-  const c401k      = pastCoast ? 0 : annualContrib.b401k + employerMatch;
+  const salaryGrowth = i.advanced ? 1 : Math.pow(1 + (Number(i.salaryGrowthPct) || 0) / 100, Math.max(0, yearIndex));
+  const c401k      = pastCoast ? 0 : annualContrib.b401k * salaryGrowth + employerMatch;
   const cIra       = pastCoast ? 0 : annualContrib.bIra;
   // Simple mode with an explicit yearly investment uses that amount; with it blank, the automatic amount is used.
   const useConfigured = i.advanced || (Number(i.yearlyInvestment) || 0) > 0;
@@ -441,12 +459,37 @@ function returnForYear(i: Inputs, yearIndex: number): number {
 // and it is discounted at the nominal return. (Discounting at the real return as well would count inflation twice.)
 function calcCoastFireNumber(i: Inputs): number {
   const swr  = (Number(i.withdrawalRatePct) || 0) / 100;
-  const r    = VOLATILITY_PRESETS[i.volatility].phase1 / 100;
   const infl = (Number(i.inflationPct) || 0) / 100;
   const yrs  = Math.max(0, i.targetRetirementAge - i.coastAge);
   const retirementAnnualExpenses = annualExpenses(i) * Math.pow(1 + infl, yrs);
   const futureFireNumber = swr > 0 ? retirementAnnualExpenses / swr : Infinity;
-  return futureFireNumber / Math.pow(1 + r, yrs);
+
+  // Growth from the coast age to retirement uses the return for each of those calendar years (Phase 1, then Phase 2),
+  // less the brokerage tax drag on the share of the portfolio held in a taxable account.
+  const { brokerage: brokerageShare, traditional: traditionalShare } = portfolioShares(i);
+  const drag = getBrokerageTaxDrag(i) * brokerageShare;
+  const startYear = Math.max(0, i.coastAge - i.age);
+  let growth = 1;
+  for (let k = 0; k < yrs; k++) growth *= 1 + Math.max(-0.99, returnForYear(i, startYear + k) - drag);
+
+  // The FIRE number is spendable money, so traditional accounts need a larger balance to leave it after the withdrawal tax.
+  const wTax = (Number(i.withdrawalTaxRatePct) || 0) / 100;
+  const spendableFraction = Math.max(0.01, 1 - wTax * traditionalShare);
+  return futureFireNumber / spendableFraction / growth;
+}
+
+// Rough split of the portfolio between taxable and traditional accounts, from balances and yearly contributions.
+// Simple mode is entirely taxable.
+function portfolioShares(i: Inputs): { brokerage: number; traditional: number } {
+  if (!i.advanced) return { brokerage: 1, traditional: 0 };
+  const { balBrokerage, contribBrokerage } = applyBrokerageAutofill(i);
+  const brokerage   = Math.max(0, balBrokerage) + Math.max(0, contribBrokerage);
+  const traditional =
+    (i.taxTreatment401k === "traditional" ? Math.max(0, i.bal401k) + Math.max(0, i.contrib401k) : 0) +
+    (i.taxTreatmentIra === "traditional" ? Math.max(0, i.balIra) + Math.max(0, i.contribIra) : 0);
+  const total = brokerage + traditional + (i.taxTreatment401k === "traditional" ? 0 : Math.max(0, i.bal401k) + Math.max(0, i.contrib401k))
+    + (i.taxTreatmentIra === "traditional" ? 0 : Math.max(0, i.balIra) + Math.max(0, i.contribIra));
+  return total > 0 ? { brokerage: brokerage / total, traditional: traditional / total } : { brokerage: 1, traditional: 0 };
 }
 
 // ── Core simulation, all 4 modes ────────────────────────────────────────────
@@ -530,9 +573,11 @@ function simulateYearsToCoast(i: Inputs, netAnnualBase: number): number | null {
     const netY = netAnnualBase * Math.pow(1 + (i.salaryGrowthPct / 100), years);
     let autoContrib = 0;
     if (!i.advanced && (Number(i.yearlyInvestment) || 0) <= 0) {
-      autoContrib = Math.max(0, netY - annualExpenses(i));
+      autoContrib = Math.max(0, netY - annualExpenses(i) * Math.pow(1 + (Number(i.inflationPct) || 0) / 100, years));
     }
-    buckets = growBuckets(buckets, i, years, annualContrib, employerMatch, false, autoContrib);
+    // Contributions stop at the coast age, as in the main projection.
+    const pastCoastAge = i.age + years >= i.coastAge;
+    buckets = growBuckets(buckets, i, years, annualContrib, employerMatch, pastCoastAge, autoContrib);
     years++;
     if (totalFromBuckets(buckets) >= target) return years;
   }
@@ -1120,8 +1165,9 @@ function DecisionEngineCard({ result }: { result: DecisionEngineResult }) {
 export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: FireCalculatorProps) {
   const pathname = usePathname();
   const mode     = modeFromPathname(pathname);
+  const spendingPreset = presetFromPathname(pathname);
 
-  const [inputs, setInputs] = useState<Inputs>(() => defaultsForMode(mode, initialIncome));
+  const [inputs, setInputs] = useState<Inputs>(() => defaultsForMode(mode, initialIncome, spendingPreset));
   const [openFaq,  setOpenFaq]  = useState<number | null>(0);
   const [pinnedCompareCityId, setPinnedCompareCityId] = useState<string | null>(null);
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
@@ -1483,7 +1529,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 className={["rounded-xl border px-3 py-2 text-xs font-medium", inputs.advanced ? "border-violet-300/40 bg-violet-300/10 text-violet-100" : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"].join(" ")}>
                 {inputs.advanced ? "Advanced: ON" : "Advanced: OFF"}
               </button>
-              <button onClick={() => setInputs(defaultsForMode(mode, initialIncome))}
+              <button onClick={() => setInputs(defaultsForMode(mode, initialIncome, spendingPreset))}
                 className="rounded-xl border border-red-300/40 bg-red-300/10 px-3 py-2 text-xs font-medium text-red-200 hover:bg-red-300/20">
                 ↺ Reset
               </button>
@@ -1511,7 +1557,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="rounded-xl border border-amber-300/20 bg-amber-300/10 p-4 sm:col-span-2">
                 <div className="mb-3 text-xs font-semibold tracking-widest text-amber-200">BARISTA FIRE SETTINGS</div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Expected annual part-time income" info="Income from part-time or flexible work. This reduces the gap your portfolio must cover."
+                  <Field label="Expected annual part-time income (after tax)" info="Your take-home (after-tax) income from part-time or flexible work. It is counted as extra income you earn from today, which speeds up saving, and it reduces the yearly gap your portfolio must cover."
                     value={inputs.baristaPartTimeIncome}
                     onChange={v => setInputs(s => ({ ...s, baristaPartTimeIncome: clamp(v, 0, 500000) }))}
                     prefix="$" />
@@ -1973,7 +2019,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
                 <div className="font-semibold text-white mb-2">How this estimate works</div>
                 <div className="text-xs leading-5 text-slate-400">
-                  {MODE_NOTES[mode]} Returns use your selected volatility preset. Inflation and salary growth compound annually. This is a planning estimate, not financial or tax advice.
+                  {MODE_NOTES[mode]} Returns use your selected volatility preset. Inflation and salary growth compound annually, and take-home pay is grown at the salary-growth rate rather than recalculated through each year’s tax brackets. Contributions are added at the start of each year, so monthly saving would grow slightly less. This is a planning estimate, not financial or tax advice.
                 </div>
               </div>
             </div>

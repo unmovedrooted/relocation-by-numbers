@@ -218,7 +218,12 @@ export default function HsaCalculator() {
     const federalSaved = breakdownFull.federal - breakdownReduced.federal;
     const ficaSaved = breakdownFull.fica - breakdownReduced.fica;
     const rawStateSaved = breakdownFull.state - breakdownReduced.state;
-    const stateMarginalRateApprox = yourContributionAmount > 0 ? rawStateSaved / yourContributionAmount : 0;
+    // Marginal state rate on the next dollars of income, measured on a fixed $1,000 step so the drag on CA/NJ earnings
+    // does not disappear when your own contribution is zero (employer money and an existing balance still earn taxable growth).
+    const probe = Math.min(1000, grossFull);
+    const stateMarginalRateApprox = probe > 0
+      ? (breakdownFull.state - estimateNetBreakdown({ grossAnnual: grossFull - probe, state, filing, k401Pct: 0 }).state) / probe
+      : 0;
 
     const isNonConforming = HSA_NONCONFORMING_STATES.has(state);
     const stateSaved = isNonConforming ? 0 : rawStateSaved;
@@ -341,7 +346,7 @@ export default function HsaCalculator() {
               <label className="text-sm">
                 <div className={labelHeadCls}>
                   Your annual contribution
-                  <InfoTip text={`${TAX_YEAR} limit: ${money(coverageType === "family" ? HSA_LIMITS.family : HSA_LIMITS.self)}${nz(age) >= 55 ? ` + ${money(HSA_LIMITS.catchUp55)} catch-up (55+) = ${money(results.contributionLimit)}` : ""}.`} />
+                  <InfoTip text={`${TAX_YEAR} limit: ${money(coverageType === "family" ? HSA_LIMITS.family : HSA_LIMITS.self)}${nz(age) >= 55 ? ` + ${money(HSA_LIMITS.catchUp55)} catch-up (55+) = ${money(results.contributionLimit)}` : ""}. The tax savings shown assume you contribute through payroll (a cafeteria plan), which avoids income tax and FICA. A contribution you make directly and deduct on your return saves income tax but not FICA.`} />
                 </div>
                 <input className={inputCls} type="number" min="0" value={yourContribution} onChange={(e) => setYourContribution(e.target.value)} placeholder=" " />
               </label>

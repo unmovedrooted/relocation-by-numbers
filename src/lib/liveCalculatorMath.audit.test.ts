@@ -33,7 +33,7 @@ function componentFunctions(file: string, names: string[], globals: Record<strin
 describe("live calculator mathematical observations (not a full-page certification)", () => {
   it("executes FIRE mode and calculation functions, recording independent references", () => {
     const fire = componentFunctions("FireCalculator", ["defaultsForMode", "modeFromPathname", "simulateYearsToFI", "calcCoastFireNumber", "buildProjection", "calcEmployerMatch"]);
-    const base = { ...fire.defaultsForMode("standard", 100000), currentPortfolio: 0, expensesMonthly: 4000,
+    const base = { ...fire.defaultsForMode("standard", 100000), currentPortfolio: 0, expensesMonthly: 4000, k401Pct: 0,
       yearlyInvestment: 12000, inflationPct: 0, salaryGrowthPct: 0, maxYears: 1, brokerageTaxMode: "drag", brokerageTaxDragPct: 0 };
     const rows: Array<{ check: string; reference: number | string; actual: number | string }> = [];
     const add = (check: string, reference: number | string, actual: number | string) => rows.push({ check, reference, actual });
@@ -42,7 +42,7 @@ describe("live calculator mathematical observations (not a full-page certificati
     }
     const auto = { ...base, yearlyInvestment: 0, baristaPartTimeIncome: 24000 };
     add("Standard: automatic contribution $80k net less $48k spending", 32000, fire.simulateYearsToFI(auto, 80000, "standard").endPortfolio);
-    add("Barista: pre-FI contribution with no extra current part-time income", 32000, fire.simulateYearsToFI(auto, 80000, "barista").endPortfolio);
+    add("Barista: $32k saving plus $24k extra after-tax part-time income earned from today (owner decision)", 56000, fire.simulateYearsToFI(auto, 80000, "barista").endPortfolio);
     const coast = { ...base, age: 40, coastAge: 40, targetRetirementAge: 65, inflationPct: 2.5, volatility: "moderate", phase2StartsYear: 200 };
     add("Coast target: $48k spending, 4% SWR, 25y, 7% nominal, 2.5% inflation", 1200000 * (1.025 / 1.07) ** 25, fire.calcCoastFireNumber(coast));
     add("Coast target: same scenario, zero inflation", 1200000 / 1.07 ** 25, fire.calcCoastFireNumber({ ...coast, inflationPct: 0 }));
@@ -65,6 +65,12 @@ describe("live calculator mathematical observations (not a full-page certificati
     console.log(JSON.stringify(rows, null, 2));
     expect(rows).toHaveLength(82);
     for (const row of rows) if (typeof row.actual === "number") expect(Number.isFinite(row.actual)).toBe(true);
+    // Regression guards for defects fixed after the first review: these must keep matching their references.
+    for (const row of rows) {
+      if (/explicit $12k|^Coast target|^Standard: automatic|^Employer match|^Already FI/.test(row.check) && typeof row.actual === "number") {
+        expect(row.actual).toBeCloseTo(row.reference as number, 4);
+      }
+    }
   });
 
   it("checks standalone accumulation, withdrawal, RMD and housing functions", () => {

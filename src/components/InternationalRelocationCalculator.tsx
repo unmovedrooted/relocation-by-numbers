@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import FireAbroadLink from "./FireAbroadLink";
+import { grossForNet } from "@/lib/grossForNet";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
 import {
   INTERNATIONAL_COUNTRIES,
@@ -497,8 +498,16 @@ export default function InternationalRelocationCalculator() {
     const requiredNetMonthly = housingTotal + livingCosts > 0
       ? (housingTotal + livingCosts) / targetComfortRatio
       : 0;
+    // Solved against the destination’s own tax scale at the income needed, not the rate at your current income.
     const requiredGrossMonthly = targetTaxRate < 1
-      ? requiredNetMonthly / (1 - targetTaxRate)
+      ? grossForNet(requiredNetMonthly * 12, (grossUsd) => estimateInternationalTax({
+        countryCode: toCountry,
+        annualIncome: convertUsdToLocal(grossUsd, toCountry),
+        filing,
+        isRetired: mode === "retired",
+        incomeScenario,
+        answers: conditionalAnswers,
+      }).effectiveRate) / 12
       : 0;
     const requiredAnnualIncome = requiredGrossMonthly * 12;
 
@@ -556,7 +565,7 @@ const readinessRecommendation =
       furnitureAdj + destToUsd(nonNegative(emergencyCashBuffer));
 
     const totalMonthlyOutflow = housingTotal + livingCosts;
-    const monthsCovered = totalMonthlyOutflow > 0 ? convertLocalToUsd(nonNegative(currentSavings), fromCountry) / totalMonthlyOutflow : 0;
+    const monthsCovered = totalMonthlyOutflow > 0 ? Math.max(0, convertLocalToUsd(nonNegative(currentSavings), fromCountry) - upfrontCashNeeded) / totalMonthlyOutflow : 0;
 
     const currentProfile = getCountryByCode(fromCountry);
     const fromIndex = currentCityDefaults?.costIndex ?? currentProfile?.monthlyCostIndexSingle ?? 1;
@@ -616,7 +625,7 @@ const readinessRecommendation =
       { Metric: "Monthly flexibility after expenses", Value: displayAmount(results.monthlyFlexibility) },
       { Metric: "Comfort score", Value: `${results.comfort.band} · ${results.comfort.label}` },
       { Metric: "Upfront cash needed", Value: displayAmount(results.upfrontCashNeeded) },
-      { Metric: "Savings runway", Value: `${results.monthsCovered.toFixed(1)} months` },
+      { Metric: "Savings runway (after upfront costs)", Value: `${results.monthsCovered.toFixed(1)} months` },
       { Metric: "Cost-of-living-adjusted comparable income", Value: displayAmount(results.comparableSalary) },
       { Metric: `${toCityLabel} vs ${fromCityLabel} cost difference`, Value: `${Math.abs(results.relativeDifference * 100).toFixed(1)}% ${results.relativeDifference >= 0 ? "more" : "less"} expensive` },
     ];
@@ -1129,7 +1138,7 @@ const readinessRecommendation =
                 <div className="pt-1">Total: <span className="font-bold text-slate-900 dark:text-slate-100">{displayAmount(results.livingCosts, 2)}</span></div>
               </div>
               <div className="mt-2">Upfront cash needed: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.upfrontCashNeeded)}</span></div>
-              <div>Months covered by savings: <span className="font-semibold text-slate-900 dark:text-slate-100">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
+              <div>Months covered by savings after upfront costs: <span className="font-semibold text-slate-900 dark:text-slate-100">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
               <div className="mt-2">Housing % of net (target): <span className="font-semibold text-slate-900 dark:text-slate-100">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
             </div>
 
@@ -1341,7 +1350,7 @@ const readinessRecommendation =
                     <div className="pt-1">Upfront cash = deposit + first month + last month</div>
                     <div className="pl-4">+ visa + flight + shipping + temporary housing</div>
                     <div className="pl-4">+ admin fees + furniture + emergency buffer</div>
-                    <div className="pt-1">Months covered = savings ÷ (housing + living costs)</div>
+                    <div className="pt-1">Months covered = (savings − upfront costs) ÷ (housing + living costs)</div>
                     <div className="pt-1">Comfortable income target = (housing + living costs) ÷ 70% ÷ (1 − target tax rate) × 12</div>
                     <div className="pt-1">Comparable salary = your salary × (destination cost index ÷ origin cost index)</div>
                   </div>

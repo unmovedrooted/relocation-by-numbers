@@ -538,8 +538,8 @@ export default function AsiaRelocationCalculator() {
     const netMonthlyTo   = grossMonthly * (1 - targetTaxRate);
     const monthlyIncomeDiff = netMonthlyTo - netMonthlyFrom;
 
-    const adultCount = Math.max(1, nz(adults));
-    const childCount = Math.max(0, nz(children));
+    const adultCount = Math.max(1, Math.floor(nz(adults)));
+    const childCount = Math.max(0, Math.floor(nz(children)));
 
     const familyGroceries      = nz(groceries)      * (1 + (adultCount - 1) * 0.55 + childCount * 0.35);
     const familyTransportation = nz(transportation) * (1 + (adultCount - 1) * 0.35 + childCount * 0.15);
@@ -595,7 +595,7 @@ export default function AsiaRelocationCalculator() {
 
     const totalMonthlyOutflow = housingTotal + livingCosts;
     const monthsCovered = totalMonthlyOutflow > 0
-      ? convertLocalToUsd(nz(currentSavings), fromCountry) / totalMonthlyOutflow
+      ? Math.max(0, convertLocalToUsd(nz(currentSavings), fromCountry) - upfrontCashNeeded) / totalMonthlyOutflow
       : 0;
 
     const currentProfile = getCountryByCode(fromCountry);
@@ -654,7 +654,7 @@ export default function AsiaRelocationCalculator() {
       { Metric: "Monthly flexibility after expenses", Value: displayAmount(results.monthlyFlexibility) },
       { Metric: "Comfort score", Value: `${results.comfort.band} · ${results.comfort.label}` },
       { Metric: "Upfront cash needed", Value: displayAmount(results.upfrontCashNeeded) },
-      { Metric: "Savings runway", Value: `${results.monthsCovered.toFixed(1)} months` },
+      { Metric: "Savings runway (after upfront costs)", Value: `${results.monthsCovered.toFixed(1)} months` },
       { Metric: "Cost-of-living-adjusted comparable income", Value: displayAmount(results.comparableSalary) },
       { Metric: `${toCityLabel} vs ${fromCityLabel} cost difference`, Value: `${Math.abs(results.relativeDifference * 100).toFixed(1)}% ${results.relativeDifference >= 0 ? "more" : "less"} expensive` },
     ];
@@ -1035,7 +1035,7 @@ export default function AsiaRelocationCalculator() {
               <div className="mt-2 font-semibold">Monthly living costs</div>
               <div>Total: <span className="font-bold">{displayAmount(results.livingCosts, 2)}</span></div>
               <div className="mt-2">Upfront cash needed: <span className="font-semibold">{displayAmount(results.upfrontCashNeeded)}</span></div>
-              <div>Months covered by savings: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
+              <div>Months covered by savings after upfront costs: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
               <div className="mt-2">Housing % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
               <div>Essential costs % of net:{" "}<span className="font-semibold">{Number.isFinite(results.totalPctOfNet) ? `${results.totalPctOfNet.toFixed(1)}%` : "—"}</span></div>
             </div>
@@ -1096,7 +1096,7 @@ export default function AsiaRelocationCalculator() {
                   <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.upfrontCashNeeded, 0)}</span>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <span>Months covered by savings</span>
+                  <span>Months covered by savings after upfront costs</span>
                   <span className="font-semibold text-slate-900 dark:text-slate-100">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span>
                 </div>
               </div>

@@ -478,8 +478,8 @@ const grossMonthly = annualIncome / 12;
     const netMonthlyTo = grossMonthly * (1 - targetTaxRate);
     const monthlyIncomeDiff = netMonthlyTo - netMonthlyFrom;
 
-    const adultCount = Math.max(1, nz(adults));
-    const childCount = Math.max(0, nz(children));
+    const adultCount = Math.max(1, Math.floor(nz(adults)));
+    const childCount = Math.max(0, Math.floor(nz(children)));
   const familyGroceries =
   destinationInputToUsd(nz(groceries), "groceries") *
   (1 + (adultCount - 1) * 0.55 + childCount * 0.35);
@@ -496,10 +496,12 @@ const familyUtilities =
   destinationInputToUsd(nz(utilities), "utilities") *
   (1 + (adultCount - 1) * 0.25 + childCount * 0.15);
 
-const groceriesAdj = familyGroceries * toCityMultipliers.groceries;
-const transportationAdj = familyTransportation * toCityMultipliers.transit;
-const utilitiesAdj = familyUtilities * toCityMultipliers.utilities;
-const rentTo = destinationInputToUsd(nz(destinationRent), "rent") * toCityMultipliers.housing;
+// Destination inputs are already destination-city figures (they start from that city’s defaults), so the destination city’s
+// multipliers are not applied again; they only scale the origin estimate below.
+const groceriesAdj = familyGroceries;
+const transportationAdj = familyTransportation;
+const utilitiesAdj = familyUtilities;
+const rentTo = destinationInputToUsd(nz(destinationRent), "rent");
 
 const estimatedHomePrice = estimateHomePriceFromRent(rentTo);
 const buyMonthlyPI = housingMode === "buy"
@@ -513,9 +515,10 @@ const buyMonthlyPI = housingMode === "buy"
 const housingLine = housingMode === "buy" ? buyMonthlyPI : rentTo;
 const downPaymentUsd = housingMode === "buy" ? estimatedHomePrice * (nz(buyDownPct) / 100) : 0;
 
-const groceriesFrom = familyGroceries * fromCityMultipliers.groceries;
-const transportationFrom = familyTransportation * fromCityMultipliers.transit;
-const utilitiesFrom = familyUtilities * fromCityMultipliers.utilities;
+const cityRatio = (fromValue: number, toValue: number) => (toValue > 0 ? fromValue / toValue : 1);
+const groceriesFrom = familyGroceries * cityRatio(fromCityMultipliers.groceries, toCityMultipliers.groceries);
+const transportationFrom = familyTransportation * cityRatio(fromCityMultipliers.transit, toCityMultipliers.transit);
+const utilitiesFrom = familyUtilities * cityRatio(fromCityMultipliers.utilities, toCityMultipliers.utilities);
 
     const carCost = calculateSouthAmericaCarCost(
       needCar,
@@ -554,7 +557,7 @@ const utilitiesFrom = familyUtilities * fromCityMultipliers.utilities;
     const totalMonthlyOutflow = housingTotal + livingCosts;
     // FIX 5: Convert savings from origin currency to USD before dividing
     const monthsCovered = totalMonthlyOutflow > 0
-  ? originToUsd(nz(currentSavings)) / totalMonthlyOutflow
+  ? Math.max(0, originToUsd(nz(currentSavings)) - upfrontCashNeeded) / totalMonthlyOutflow
   : 0;
 
     const currentProfile = getCountryByCode(fromCountry);
@@ -627,7 +630,7 @@ recommendation,
       { Metric: "Monthly flexibility after expenses", Value: displayAmount(results.monthlyFlexibility) },
       { Metric: "Comfort score", Value: `${results.comfort.band} · ${results.comfort.label}` },
       { Metric: "Upfront cash needed", Value: displayAmount(results.upfrontCashNeeded) },
-      { Metric: "Savings runway", Value: `${results.monthsCovered.toFixed(1)} months` },
+      { Metric: "Savings runway (after upfront costs)", Value: `${results.monthsCovered.toFixed(1)} months` },
       { Metric: "Cost-of-living-adjusted comparable income", Value: displayAmount(results.comparableSalary) },
       { Metric: `${toCityLabel} vs ${fromCityLabel} cost difference`, Value: `${Math.abs(results.relativeDifference * 100).toFixed(1)}% ${results.relativeDifference >= 0 ? "more" : "less"} expensive` },
     ];
@@ -835,10 +838,10 @@ recommendation,
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">
               Estimated Living Costs
-              <InfoTip text="Base estimates for a single adult in the destination city. Adjusted automatically for family size and city-level cost multipliers. Edit to match your actual expectations." />
+              <InfoTip text="Base estimates for a single adult in the destination city. Adjusted automatically for family size. Edit to match your actual expectations." />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <CalculatorImmediateNumberField id="south-america-groceries" label={`Groceries (${destinationInputCurrency}/month, base single adult)`} info={<InfoTip text="Adjusted for family size and destination city cost index." />} className={inputCls} value={groceries} onChange={setGroceries} placeholder=" " helpText={<>Adjusted: {displayAmount(results.groceriesAdj, 0)}</>} />
+              <CalculatorImmediateNumberField id="south-america-groceries" label={`Groceries (${destinationInputCurrency}/month, base single adult)`} info={<InfoTip text="Adjusted for family size." />} className={inputCls} value={groceries} onChange={setGroceries} placeholder=" " helpText={<>Adjusted: {displayAmount(results.groceriesAdj, 0)}</>} />
               <CalculatorImmediateNumberField id="south-america-utilities" label={`Utilities (${destinationInputCurrency}/month, base single adult)`} info={<InfoTip text="Only counted if utilities are not included in your rent." />} className={inputCls} value={utilities} onChange={setUtilities} placeholder=" " helpText={<>Adjusted: {displayAmount(results.utilitiesAdj, 0)}</>} />
               <CalculatorImmediateNumberField id="south-america-transportation" label={`Transportation (${destinationInputCurrency}/month, base single adult)`} info={<InfoTip text="Adjusted for family size and destination city transit costs." />} className={inputCls} value={transportation} onChange={setTransportation} placeholder=" " helpText={<>Adjusted: {displayAmount(results.transportationAdj, 0)}</>} />
               <CalculatorImmediateNumberField id="south-america-healthcare" label={`Healthcare (${destinationInputCurrency}/month, base single adult)`} info={<InfoTip text="Adjusted for family size. Covers insurance and out-of-pocket estimates." />} className={inputCls} value={healthcare} onChange={setHealthcare} placeholder=" " helpText={<>Adjusted: {displayAmount(results.healthcareAdj, 0)}</>} />
@@ -852,7 +855,7 @@ recommendation,
                 <CalculatorImmediateNumberField id="south-america-car-cost-monthly" label={`Monthly car estimate (${destinationInputCurrency}/month)`} wrapperClassName="mt-3" className={inputCls} min={0} value={carCostMonthly} onChange={setCarCostMonthly} placeholder=" " />
               ) : null}
             </div>
-            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Base values auto-populate from city defaults. Adjusted totals reflect family size and city cost multipliers.</div>
+            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Base values auto-populate from city defaults. Adjusted totals reflect family size.</div>
           </div>
 
           {/* One-Time Moving Costs */}
@@ -912,7 +915,7 @@ recommendation,
               <div className="mt-2 font-semibold">Monthly living costs</div>
               <div>Total: <span className="font-bold">{displayAmount(results.livingCosts, 2)}</span></div>
               <div className="mt-2">Upfront cash needed: <span className="font-semibold">{displayAmount(results.upfrontCashNeeded)}</span></div>
-              <div>Months covered by savings: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
+              <div>Months covered by savings after upfront costs: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
               <div className="mt-2">Essential costs % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
             </div>
             <div className="mt-4 border-t border-slate-200 dark:border-slate-800 pt-3 text-xs text-slate-500 dark:text-slate-400 space-y-1">
