@@ -6,8 +6,8 @@ import { getStateRuleNote, PAYROLL_PROGRAMS_NOTE, taxRulesVerifiedLabel, TAX_YEA
  * Tax year, verification date and any held or derived state figures for the states a calculator is using.
  * Shows only what applies, so a calculator on a fully published state shows a single short line.
  */
-export default function TaxAssumptionsNote({ states, includePayrollNote = false, className = "" }: { states: Array<StateCode | undefined>; includePayrollNote?: boolean; className?: string }) {
-  const unique = [...new Set(states.filter((s): s is StateCode => Boolean(s)))];
+export default function TaxAssumptionsNote({ states, includePayrollNote = false, omitStates = [], className = "" }: { states: Array<StateCode | undefined>; includePayrollNote?: boolean; /** States whose note is shown elsewhere on the page. */ omitStates?: StateCode[]; className?: string }) {
+  const unique = [...new Set(states.filter((s): s is StateCode => Boolean(s) && !omitStates.includes(s as StateCode)))];
   const notes = unique
     .map((code) => ({ code, name: STATES.find((s) => s.code === code)?.name ?? code.toUpperCase(), note: getStateRuleNote(code) }))
     .filter((item) => item.note !== null);

@@ -1342,7 +1342,7 @@ export default function Calculator({
             <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
               Planning estimates only
             </div>
-            <TaxAssumptionsNote states={[fromState, toState]} includePayrollNote className="mb-3" />
+            <TaxAssumptionsNote states={[fromState, toState]} omitStates={["ny"]} className="mb-3" />
             <div className="mb-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
               <div>Current city: <span className="font-semibold text-slate-900 dark:text-slate-100">{currentCityLabel}</span></div>
               <div>Target city: <span className="font-semibold text-slate-900 dark:text-slate-100">{targetCityLabel}</span></div>

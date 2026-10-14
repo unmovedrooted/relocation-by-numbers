@@ -2,6 +2,7 @@ import Calculator from "@/components/Calculator";
 import Link from "next/link";
 import CalculatorSources from "@/components/CalculatorSources";
 import type { Metadata } from "next";
+import { getStateRuleNote, PAYROLL_PROGRAMS_NOTE } from "@/lib/taxRuleNotes";
 
 export const metadata: Metadata = {
   title: "Relocation Calculator by State | Compare Salary, Taxes & Cost of Living",
@@ -71,6 +72,15 @@ export default function Page() {
             See how far your salary really goes after state income taxes, housing costs,
             and everyday expenses, before you move.
           </p>
+
+          <div className="mx-auto mt-3 max-w-2xl space-y-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+            <p>{PAYROLL_PROGRAMS_NOTE}</p>
+            {getStateRuleNote("ny") && (
+              <p>
+                <span className="font-medium text-slate-600 dark:text-slate-300">New York:</span> {getStateRuleNote("ny")!.note}
+              </p>
+            )}
+          </div>
 
           <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm">
             <Link
