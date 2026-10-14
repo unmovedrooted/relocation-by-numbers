@@ -22,7 +22,7 @@ import { STATES, type StateCode } from "@/lib/states";
 import { findCity, citiesForState } from "@/lib/cities";
 import { estimateNetAnnual, effectiveTaxRatePct } from "@/lib/wageTax";
 import type { FilingStatus } from "@/lib/tax";
-import { parseFireLink } from "@/lib/fireLink";
+import { parseFireAbroadLink, parseFireLink } from "@/lib/fireLink";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIRE MODE
@@ -78,6 +78,8 @@ type Inputs = {
   movedCityId:      string;
   /** One-time moving costs that are spent, taken from savings in the moved scenario. */
   movedCost:        number;
+  /** The move is to a place outside the U.S.: no state income tax after it (federal tax still applies; foreign taxes are not modeled). */
+  movedAbroad:      boolean;
   // ── New: tax treatment ──────────────────────────────
   taxTreatment401k:       "traditional" | "roth";
   taxTreatmentIra:        "traditional" | "roth";
@@ -256,7 +258,7 @@ const BASE_DEFAULTS: Inputs = {
   inflationPct: 2.5, salaryGrowthPct: 3,
   phase2StartsYear: 10,
   moveCompareOn: true, movedExpensesMonthly: 2800,
-  movedIncome: 0, movedState: "", movedCityId: "", movedCost: 0,
+  movedIncome: 0, movedState: "", movedCityId: "", movedCost: 0, movedAbroad: false,
   taxTreatment401k: "traditional", taxTreatmentIra: "traditional",
   brokerageTaxMode: "simple", brokerageTaxEfficiency: "high", brokerageTaxDragPct: 0.3,
   employerMatchPct: 0, employerMatchCapPct: 6,
@@ -1129,10 +1131,18 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
   const [activeResultTab, setActiveResultTab] = useState<"milestone" | "move" | "savings">("milestone");
   const [linkedMove, setLinkedMove] = useState(false);
+  const [abroadLabel, setAbroadLabel] = useState("");
 
   // A move handed over from a relocation calculator through the URL prefills the current and moved scenarios.
   useEffect(() => {
-    const link = parseFireLink(new URLSearchParams(window.location.search));
+    const query = new URLSearchParams(window.location.search);
+    const abroad = parseFireAbroadLink(query);
+    if (abroad) {
+      setInputs(s => ({ ...s, moveCompareOn: true, movedExpensesMonthly: abroad.movedExpenses, movedAbroad: true, movedState: "", movedIncome: 0, movedCost: 0 }));
+      setAbroadLabel(abroad.label);
+      return;
+    }
+    const link = parseFireLink(query);
     if (!link) return;
     setInputs(s => ({
       ...s,
@@ -1244,7 +1254,8 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   // Take-home pay after the move: new income and, if it changes, the new state and city's taxes.
   const movedNetAnnual = useMemo(() => {
     const gross = inputs.movedIncome > 0 ? inputs.movedIncome : inputs.income;
-    const state = inputs.movedState || inputs.state;
+    // Abroad: a U.S. taxpayer who leaves the state pays federal tax only, modeled with a state that has no income tax.
+    const state = inputs.movedAbroad ? "tx" : inputs.movedState || inputs.state;
     if (!state) return Math.max(0, gross);
     return estimateNetAnnual({
       grossAnnual: gross,
@@ -1253,7 +1264,7 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
       k401Pct: inputs.k401Pct,
       cityId: inputs.movedState && inputs.movedCityId ? inputs.movedCityId : getBaselineCityIdForState(state),
     });
-  }, [inputs.movedIncome, inputs.income, inputs.movedState, inputs.state, inputs.movedCityId, inputs.filingStatus, inputs.k401Pct]);
+  }, [inputs.movedIncome, inputs.income, inputs.movedAbroad, inputs.movedState, inputs.state, inputs.movedCityId, inputs.filingStatus, inputs.k401Pct]);
 
   const movedResult = useMemo(() => {
     if (!inputs.moveCompareOn) return null;
@@ -1707,6 +1718,12 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               </div>
               {inputs.moveCompareOn && (
                 <>
+                  {abroadLabel && (
+                    <div className="mt-4 rounded-xl border border-sky-300/25 bg-sky-300/10 p-3 text-xs leading-5 text-sky-100">
+                      Prefilled from your {abroadLabel} estimate: monthly spending there, in US dollars. Set your income, state, current spending and savings above.
+                      Taxes after the move are U.S. federal only; taxes owed to another country are not included.
+                    </div>
+                  )}
                   {linkedMove && (
                     <div className="mt-4 rounded-xl border border-sky-300/25 bg-sky-300/10 p-3 text-xs leading-5 text-sky-100">
                       Prefilled from your move: income, state, spending, and one-time costs. Set your age and savings above for your own timeline.
@@ -1717,19 +1734,26 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     <div className="self-end text-xs text-slate-400">Annual: <span className="font-semibold text-slate-200">{money(annualMovedExpenses(inputs), 0)}</span></div>
                     <Field label="Income after moving (0 = same)" value={inputs.movedIncome} onChange={v => setInputs(s => ({ ...s, movedIncome: clamp(v, 0, 10_000_000) }))} prefix="$" />
                     <Field label="One-time moving costs (spent)" info="Taken out of savings before your timeline starts. Refundable deposits and a down payment are not costs." value={inputs.movedCost} onChange={v => setInputs(s => ({ ...s, movedCost: clamp(v, 0, 10_000_000) }))} prefix="$" />
-                    <label className="block text-sm sm:col-span-2">
+                    <label className="flex items-start gap-2 text-sm sm:col-span-2">
+                      <input type="checkbox" checked={inputs.movedAbroad} onChange={e => setInputs(s => ({ ...s, movedAbroad: e.target.checked }))} />
+                      <span className="text-xs text-slate-300">The move is outside the U.S. (federal tax only after the move; foreign taxes are not included)</span>
+                    </label>
+                    {!inputs.movedAbroad && <label className="block text-sm sm:col-span-2">
                       <div className="mb-1 text-xs font-medium text-slate-300">State after moving</div>
                       <select value={inputs.movedState} onChange={e => setInputs(s => ({ ...s, movedState: e.target.value as StateChoice, movedCityId: "" }))}
                         className="h-11 w-full rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-slate-100">
                         <option value="" className="bg-slate-900">Same state</option>
                         {STATES.map(st => <option key={st.code} value={st.code} className="bg-slate-900">{st.name}</option>)}
                       </select>
-                    </label>
+                    </label>}
                   </div>
                   <div className="mt-4 rounded-xl border border-emerald-300/25 bg-emerald-300/10 p-4">
                     <div className="text-xs font-semibold tracking-widest text-emerald-100">MOVE IMPACT</div>
                     <div className="mt-3 grid gap-2 text-sm text-emerald-50">
                       <div className="flex justify-between gap-3"><span className="text-emerald-100/80">Current FIRE age</span><span className="font-semibold">{fiAge ?? "—"}</span></div>
+                      {movedResult && Number.isFinite(movedResult.fireNumber) && (
+                        <div className="flex justify-between gap-3"><span className="text-emerald-100/80">FIRE number after move (at that age, future dollars)</span><span className="font-semibold">{money(movedResult.fireNumber, 0)}</span></div>
+                      )}
                       <div className="flex justify-between gap-3"><span className="text-emerald-100/80">FIRE age after move</span><span className="font-semibold">{movedFiAge ?? "—"}</span></div>
                       {moveDeltaYears !== null && (
                         <div className="flex justify-between gap-3">

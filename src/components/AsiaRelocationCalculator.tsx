@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import SavedScenariosPanel from "./SavedScenariosPanel";
+import FireAbroadLink from "./FireAbroadLink";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
 import {
   INTERNATIONAL_COUNTRIES,
@@ -1201,6 +1202,7 @@ export default function AsiaRelocationCalculator() {
             </div>
           </div>
 
+          <FireAbroadLink monthlySpendingUsd={results.housingTotal + results.livingCosts} destination={toCityLabel} />
           <SavedScenariosPanel getCurrentScenario={() => ({
             label: `${fromCityLabel} → ${toCityLabel}`,
             url: typeof window !== "undefined" ? window.location.pathname + window.location.search : "/",

@@ -81,3 +81,35 @@ export function parseFireLink(p: URLSearchParams): FireMoveLink | null {
     movedCost: n.movedCost,
   };
 }
+
+/**
+ * A destination abroad handed to the FIRE calculator: what a month there costs, in US dollars. Everything else
+ * (income, savings, current spending) stays the person's own on the FIRE page.
+ */
+export type FireAbroadLink = Readonly<{
+  movedExpenses: number;
+  /** City or country, shown on the FIRE page. */
+  label: string;
+}>;
+
+/** Keeps place names to letters, digits, spaces and basic punctuation, so a link cannot inject markup or odd characters. */
+export function cleanPlaceLabel(raw: string): string {
+  return raw.replace(/[^\p{L}\p{N} ,.'()&-]/gu, "").replace(/\s+/g, " ").trim().slice(0, 60);
+}
+
+export function buildFireAbroadLink(m: FireAbroadLink, path = "/fire-calculator"): string {
+  const p = new URLSearchParams();
+  p.set("abroad", "1");
+  p.set("movedExpenses", String(Math.round(m.movedExpenses)));
+  p.set("label", cleanPlaceLabel(m.label));
+  return `${path}?${p.toString()}`;
+}
+
+export function parseFireAbroadLink(p: URLSearchParams): FireAbroadLink | null {
+  if (p.get("abroad") !== "1") return null;
+  const movedExpenses = num(p, "movedExpenses");
+  if (movedExpenses === null || movedExpenses <= 0) return null;
+  const label = cleanPlaceLabel(p.get("label") ?? "");
+  if (!label) return null;
+  return { movedExpenses, label };
+}

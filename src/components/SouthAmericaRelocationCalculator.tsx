@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore, useCallback } from 
 import CalculatorImmediateNumberField from "./calculator-form/CalculatorImmediateNumberField";
 import CalculatorSelect from "./calculator-form/CalculatorSelect";
 import SavedScenariosPanel from "./SavedScenariosPanel";
+import FireAbroadLink from "./FireAbroadLink";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
 import {
   INTERNATIONAL_COUNTRIES,
@@ -1036,6 +1037,7 @@ recommendation,
             </div>
           </div>
 
+          <FireAbroadLink monthlySpendingUsd={results.housingTotal + results.livingCosts} destination={toCityLabel} />
           <SavedScenariosPanel getCurrentScenario={() => ({
             label: `${fromCityLabel} → ${toCityLabel}`,
             url: typeof window !== "undefined" ? window.location.pathname + window.location.search : "/",
