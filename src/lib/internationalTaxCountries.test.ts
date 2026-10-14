@@ -809,3 +809,18 @@ describe("Panama (DGI scale, territorial system, 11% contributions)", () => {
     expect(rate("PA", 60_000, "remote")).toBe(0);
   });
 });
+
+describe("Paraguay (DNIT IRP scale, PYG 80 million threshold, IPS 9%)", () => {
+  it("PYG 200,000,000 employee", () => {
+    // IPS 18,000,000; net 182,000,000: 4,000,000 + 9,000,000 + 3,200,000
+    expect(rate("PY", 200_000_000)).toBeCloseTo(34_200_000 / 200_000_000, 10);
+  });
+
+  it("PYG 60,000,000 employee pays only IPS", () => {
+    expect(rate("PY", 60_000_000)).toBeCloseTo(0.09, 10);
+  });
+
+  it("a foreign pension is untaxed", () => {
+    expect(rate("PY", 200_000_000, "retired")).toBe(0);
+  });
+});

@@ -50,6 +50,7 @@ import { NETHERLANDS_TAX_YEAR_LABEL, netherlandsTax } from "./countryTaxRules/ne
 import { NEW_ZEALAND_TAX_YEAR_LABEL, newZealandTax } from "./countryTaxRules/newZealand";
 import { NORWAY_TAX_YEAR_LABEL, norwayTax } from "./countryTaxRules/norway";
 import { PANAMA_TAX_YEAR_LABEL, panamaTax } from "./countryTaxRules/panama";
+import { PARAGUAY_TAX_YEAR_LABEL, paraguayTax } from "./countryTaxRules/paraguay";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -1750,37 +1751,20 @@ UY: ({ annualIncome, isRetired }) => {
   };
 },
 
-PY: ({ annualIncome, isRetired }) => {
-  if (isRetired) {
-    return {
-      effectiveRate: 0,
-      model: "flat",
-      confidence: "simplified",
-      label: "Paraguay IRP, retirement income (territorial system)",
-      missingFactor: "Territorial system means foreign pension income generally not taxed in Paraguay.",
-      note: "Paraguay taxes only Paraguay-source income. Foreign pension and retirement income is generally not subject to IRP for resident individuals. Effective rate modelled as 0%. Verify your specific situation with a local advisor.",
-    };
-  }
-  const THRESHOLD = 12000;
-  if (annualIncome <= THRESHOLD) {
-    return {
-      effectiveRate: 0,
-      model: "flat",
-      confidence: "simplified",
-      label: "Paraguay IRP, below threshold",
-      missingFactor: "Territorial system means foreign-source remote salary typically not taxed at all.",
-      note: "Income below Paraguay's IRP personal deduction threshold (~$12,000/yr). Zero tax modelled. Paraguay also taxes only Paraguay-source income, remote workers retaining a foreign salary typically owe zero Paraguayan income tax regardless of income level.",
-    };
-  }
-  const tax = (annualIncome - THRESHOLD) * 0.10;
-  const effectiveRate = clampRate(annualIncome > 0 ? tax / annualIncome : 0);
+PY: ({ annualIncome, isRetired, incomeScenario }) => {
+  // Rules in countryTaxRules/paraguay.ts: DNIT IRP scale (8/9/10%), PYG 80 million threshold, IPS 9%. Income is in guaranies.
+  const scenario = isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local";
+  const { incomeTax, contributions } = paraguayTax(annualIncome, scenario);
+  const exempt = scenario !== "local";
   return {
-    effectiveRate,
-    model: "flat",
+    effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
+    model: exempt ? "none" : "progressive-country",
     confidence: "simplified",
-    label: "Paraguay IRP, flat 10% above threshold (simplified)",
-    missingFactor: "Territorial system: foreign-source remote salary likely not taxed, this models local-source income only.",
-    note: `Effective rate ${(effectiveRate * 100).toFixed(1)}%. Paraguay's IRP is a flat 10% on income above ~$12,000/yr. Critically: Paraguay taxes only Paraguay-source income. If you retain a foreign remote salary, your effective Paraguayan rate is likely 0%, this model assumes local-source income for conservatism. Verify with a local advisor.`,
+    label: exempt ? "Paraguay, foreign-source income (territorial system)" : `Paraguay IRP + IPS (${PARAGUAY_TAX_YEAR_LABEL})`,
+    missingFactor: exempt ? "Assumes all income is from outside Paraguay; Paraguay-source salary is taxed on the local scale." : "Deductible expenses not modelled; how the PYG 80 million threshold works above it was not settled by the sources, and the DNIT brochure is from 2024.",
+    note: exempt
+      ? "Paraguay taxes only Paraguay-source income, so a remote salary paid from abroad or a foreign pension is shown as untaxed. If you earn income in Paraguay, use the employee scenario. Income must be passed in guaranies."
+      : "Uses the DNIT's IRP scale for personal services (8% on net income to PYG 50 million, 9% to 150 million, 10% above), with no IRP at gross income of PYG 80 million or less, plus the employee's 9% IPS social security. Above the threshold the whole net income is taxed on the scale (conservative). Not modelled: deductible expenses. Income must be passed in guaranies.",
   };
 },
 
