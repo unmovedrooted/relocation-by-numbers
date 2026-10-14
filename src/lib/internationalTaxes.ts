@@ -24,6 +24,7 @@ import { FEDERAL_2026, PAYROLL_2026, FOREIGN_EARNED_INCOME_EXCLUSION_2026 } from
 import { USD_TO_LOCAL } from "./internationalFx";
 import { AUSTRALIA_TAX_YEAR_LABEL, australiaTax } from "./countryTaxRules/australia";
 import { AUSTRIA_TAX_YEAR_LABEL, austriaTax } from "./countryTaxRules/austria";
+import { BELGIUM_TAX_YEAR_LABEL, belgiumTax } from "./countryTaxRules/belgium";
 
 export type FilingStatus = "single" | "married";
 
@@ -675,38 +676,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // Married / legally cohabiting: income splitting may apply (complex).
   // Employee social insurance: ~13.07% on working income.
   // -------------------------------------------------------------------------
-  BE: ({ annualIncome, filing, isRetired }) => {
-    // National personal allowance (forfaitaire beroepskosten) approximation:
-    // Employment income deduction ~30% up to EUR 5,520 (simplified as flat deduction)
-    const employmentDeduction = isRetired ? 0 : Math.min(annualIncome * 0.30, 5520);
-    // Married: Belgium allows some income transfer between spouses (quotient conjugal)
-    // Simplified: modest deduction equivalent for married filers
-    const marriedDeduction = filing === "married" ? 3800 : 0;
-    const taxable = Math.max(0, annualIncome - employmentDeduction - marriedDeduction);
-
-    // 2024 Belgian national brackets
-    const nationalRate = progressiveTax(taxable, [
-      { upTo: 15820, rate: 0.25 },
-      { upTo: 27920, rate: 0.40 },
-      { upTo: 48320, rate: 0.45 },
-      { upTo: Infinity, rate: 0.50 },
-    ]);
-
-    const nationalTax = nationalRate * taxable;
-    // Communal surcharge: average ~7% of national tax (ranges 0–9% by municipality)
-    const communalSurcharge = annualIncome > 0 ? (nationalTax * 0.07) / annualIncome : 0;
-    const incomeTaxRate = annualIncome > 0 ? nationalTax / annualIncome : 0;
-
-    // Employee social insurance ~13.07% on working income
-    const socialOverlay = isRetired ? 0 : 0.1307;
-
+  BE: ({ annualIncome, isRetired }) => {
+    // Rules in countryTaxRules/belgium.ts: FPS Finance income year 2026 brackets, EUR 11,180 allowance, 6,070 expense cap.
+    const { nationalTax, communalSurcharge, socialSecurity } = belgiumTax(annualIncome, isRetired);
+    const effective = annualIncome > 0 ? (nationalTax + communalSurcharge + socialSecurity) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(incomeTaxRate + communalSurcharge + socialOverlay),
+      effectiveRate: clampRate(effective),
       model: "country-plus-local",
       confidence: "simplified",
-      label: "Belgium income tax + communal surcharge (2024)",
-      missingFactor: "Communal surcharge (0–9%) averaged at 7%; full quotient conjugal not modelled.",
-      note: "Uses 2024 Belgian national brackets with employment income deduction (~30% up to EUR 5,520), average communal surcharge (7% of national tax), and employee social insurance (~13.07%). Married income splitting (quotient conjugal) is simplified, real benefit for couples with unequal incomes is larger. The extensive Belgian tax credit system (tax-free allowance, family credits) is not fully modelled. Income must be passed in EUR.",
+      label: `Belgium income tax + communal surcharge (${BELGIUM_TAX_YEAR_LABEL})`,
+      missingFactor: "Communal surcharge (0–9%) averaged at 7%; marital quotient and dependants not modelled.",
+      note: "Brackets (25%/40%/45%/50%), the EUR 11,180 basic allowance and the 30% employee expense forfait (capped at EUR 6,070) are the FPS Finance figures for income year 2026. Employee social security is 13.07% of gross pay. The communal surcharge is an assumed 7% average of national tax; it is set by your municipality. Married and cohabiting filers are treated as single earners, because the marital quotient and allowances for dependants are not modelled. Income must be passed in euros.",
     };
   },
 

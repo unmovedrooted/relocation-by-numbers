@@ -84,3 +84,22 @@ describe("Austria (BMF 2026 tariff, credits and Dachverband 2026 social-insuranc
     expect(rate("AT", 13_000, "retired")).toBe(0);
   });
 });
+
+describe("Belgium (FPS Finance income year 2026)", () => {
+  it("employee earning EUR 60,000", () => {
+    // social 13.07% = 7,842; net 52,158; forfait min(30% x 52,158, 6,070) = 6,070; taxable 46,088
+    // brackets 25% x 16,720 + 40% x 12,790 + 45% x 16,578 = 4,180 + 5,116 + 7,460.10 = 16,756.10; less 25% x 11,180 = 2,795 -> 13,961.10
+    // communal 7% = 977.277
+    expect(rate("BE", 60_000)).toBeCloseTo((13_961.1 + 977.277 + 7_842) / 60_000, 10);
+  });
+
+  it("charges nothing on the tax-free allowance for a pensioner", () => {
+    expect(rate("BE", 11_000, "retired")).toBe(0);
+  });
+
+  it("applies the top rate only above EUR 51,070 of taxable income", () => {
+    // pensioner (no social contributions or forfait) on EUR 80,000, taxable 80,000:
+    // 4,180 + 5,116 + 9,702 + 14,465 = 33,463; less 2,795 = 30,668; communal 2,146.76
+    expect(rate("BE", 80_000, "retired")).toBeCloseTo((30_668 + 2_146.76) / 80_000, 10);
+  });
+});
