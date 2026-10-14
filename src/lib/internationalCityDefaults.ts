@@ -218,7 +218,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1100, groceries: 300, utilities: 110, transport: 55, healthcare: 90 },
     housing: { depositMonths: 2, lastMonthRentDefault: 0, furnishedSetupCost: 900, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 180, flight: 950, shipping: 450, temporaryStay: 1200, adminFees: 220, emergencyBuffer: 2800 },
-    sources: { rent: "Planning estimate. No official city rent series was found (the Philippine Statistics Authority's survey tables could not be read).", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. No official city rent series was found (the Philippine Statistics Authority's survey tables could not be read). Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): PHP 34,117 a month in the city centre, PHP 17,660 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -230,7 +230,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 800, groceries: 250, utilities: 95, transport: 45, healthcare: 75 },
     housing: { depositMonths: 2, lastMonthRentDefault: 0, furnishedSetupCost: 750, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 180, flight: 980, shipping: 430, temporaryStay: 950, adminFees: 200, emergencyBuffer: 2400 },
-    sources: { rent: "Planning estimate. No official city rent series was found (the Philippine Statistics Authority's survey tables could not be read).", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. No official city rent series was found (the Philippine Statistics Authority's survey tables could not be read). Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): PHP 31,873 a month in the city centre, PHP 19,050 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -242,7 +242,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 650, groceries: 220, utilities: 85, transport: 38, healthcare: 65 },
     housing: { depositMonths: 2, lastMonthRentDefault: 0, furnishedSetupCost: 650, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 180, flight: 1000, shipping: 420, temporaryStay: 850, adminFees: 180, emergencyBuffer: 2000 },
-    sources: { rent: "Planning estimate. No official city rent series was found (the Philippine Statistics Authority's survey tables could not be read).", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. No official city rent series was found (the Philippine Statistics Authority's survey tables could not be read). Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): PHP 17,300 a month in the city centre, PHP 10,760 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -254,7 +254,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1600, groceries: 340, utilities: 125, transport: 60, healthcare: 100 },
     housing: { depositMonths: 2, lastMonthRentDefault: 0, furnishedSetupCost: 1000, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 180, flight: 950, shipping: 450, temporaryStay: 1400, adminFees: 230, emergencyBuffer: 3000 },
-    sources: { rent: "Planning estimate. No official city rent series was found (the Philippine Statistics Authority's survey tables could not be read).", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. No official city rent series was found (the Philippine Statistics Authority's survey tables could not be read). Market reference, not an official figure (Lamudi listings, Fort Bonifacio one-bedroom condo, checked 14 October 2026): PHP 40,000 a month asking.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -266,7 +266,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 580, groceries: 200, utilities: 80, transport: 35, healthcare: 60 },
     housing: { depositMonths: 2, lastMonthRentDefault: 0, furnishedSetupCost: 600, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 180, flight: 1010, shipping: 410, temporaryStay: 780, adminFees: 170, emergencyBuffer: 1900 },
-    sources: { rent: "Planning estimate. No official city rent series was found (the Philippine Statistics Authority's survey tables could not be read).", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. No official city rent series was found (the Philippine Statistics Authority's survey tables could not be read). Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): PHP 19,583 a month in the city centre, PHP 15,700 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
 
@@ -343,10 +343,10 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     city: "Hong Kong (Central)",
     currency: "HKD",
     costIndex: 1.26,
-    monthlyDefaults: { rent: 3000, groceries: 620, utilities: 180, transport: 120, healthcare: 120 },
+    monthlyDefaults: { rent: 2534, groceries: 620, utilities: 180, transport: 120, healthcare: 120 },
     housing: { depositMonths: 2, lastMonthRentDefault: 0, furnishedSetupCost: 1800, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 300, flight: 950, shipping: 600, temporaryStay: 2600, adminFees: 350, emergencyBuffer: 7000 },
-    sources: { rent: "Planning estimate. Hong Kong's Rating and Valuation Department publishes average domestic rents by class, but the monthly files could not be read here; no official figure by region has been applied.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Rating and Valuation Department (Hong Kong), Hong Kong Property Review Monthly Supplement October 2026, average rent of private flats under 40 square metres in Hong Kong Island (not Central specifically), August 2026 provisional: HK$568 per square metre a month, times an assumed 35 square metres = HK$19,880, converted at the Treasury rate", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -355,10 +355,10 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     city: "Hong Kong (Kowloon)",
     currency: "HKD",
     costIndex: 1.08,
-    monthlyDefaults: { rent: 2400, groceries: 560, utilities: 165, transport: 110, healthcare: 110 },
+    monthlyDefaults: { rent: 2342, groceries: 560, utilities: 165, transport: 110, healthcare: 110 },
     housing: { depositMonths: 2, lastMonthRentDefault: 0, furnishedSetupCost: 1600, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 300, flight: 950, shipping: 580, temporaryStay: 2200, adminFees: 320, emergencyBuffer: 6200 },
-    sources: { rent: "Planning estimate. Hong Kong's Rating and Valuation Department publishes average domestic rents by class, but the monthly files could not be read here; no official figure by region has been applied.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Rating and Valuation Department (Hong Kong), Hong Kong Property Review Monthly Supplement October 2026, average rent of private flats under 40 square metres in Kowloon, August 2026 provisional: HK$525 per square metre a month, times an assumed 35 square metres = HK$18,375, converted at the Treasury rate", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -367,10 +367,10 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     city: "Hong Kong (New Territories)",
     currency: "HKD",
     costIndex: 0.90,
-    monthlyDefaults: { rent: 1800, groceries: 500, utilities: 150, transport: 100, healthcare: 100 },
+    monthlyDefaults: { rent: 1735, groceries: 500, utilities: 150, transport: 100, healthcare: 100 },
     housing: { depositMonths: 2, lastMonthRentDefault: 0, furnishedSetupCost: 1400, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 300, flight: 950, shipping: 560, temporaryStay: 1800, adminFees: 290, emergencyBuffer: 5400 },
-    sources: { rent: "Planning estimate. Hong Kong's Rating and Valuation Department publishes average domestic rents by class, but the monthly files could not be read here; no official figure by region has been applied.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Rating and Valuation Department (Hong Kong), Hong Kong Property Review Monthly Supplement October 2026, average rent of private flats under 40 square metres in the New Territories, August 2026 provisional: HK$389 per square metre a month, times an assumed 35 square metres = HK$13,615, converted at the Treasury rate", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
 
@@ -386,7 +386,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 900, groceries: 240, utilities: 90, transport: 50, healthcare: 70 },
     housing: { depositMonths: 8, lastMonthRentDefault: 0, furnishedSetupCost: 800, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 160, flight: 1000, shipping: 480, temporaryStay: 1000, adminFees: 200, emergencyBuffer: 2600 },
-    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): INR 29,720 a month in the city centre, INR 16,691 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -398,7 +398,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 800, groceries: 210, utilities: 85, transport: 45, healthcare: 65 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 740, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 160, flight: 1000, shipping: 470, temporaryStay: 950, adminFees: 190, emergencyBuffer: 2400 },
-    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): INR 25,960 a month in the city centre, INR 14,865 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -410,7 +410,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1400, groceries: 260, utilities: 95, transport: 55, healthcare: 75 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 860, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 160, flight: 1000, shipping: 490, temporaryStay: 1100, adminFees: 210, emergencyBuffer: 2800 },
-    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): INR 58,609 a month in the city centre, INR 34,095 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -422,7 +422,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 750, groceries: 220, utilities: 80, transport: 42, healthcare: 62 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 720, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 160, flight: 1010, shipping: 460, temporaryStay: 900, adminFees: 185, emergencyBuffer: 2300 },
-    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): INR 21,857 a month in the city centre, INR 12,438 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -434,7 +434,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 700, groceries: 210, utilities: 78, transport: 40, healthcare: 60 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 700, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 160, flight: 1010, shipping: 455, temporaryStay: 880, adminFees: 180, emergencyBuffer: 2200 },
-    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. India's official surveys were searched and no city rent figure was found; the available rents come from private consultants and were not used. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): INR 17,067 a month in the city centre, INR 9,714 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
 
@@ -450,7 +450,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1900, groceries: 420, utilities: 150, transport: 80, healthcare: 110 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 1300, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 250, flight: 1000, shipping: 600, temporaryStay: 1900, adminFees: 310, emergencyBuffer: 4500 },
-    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): CNY 6,952 a month in the city centre, CNY 3,947 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -462,7 +462,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 2000, groceries: 440, utilities: 160, transport: 85, healthcare: 115 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 1350, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 250, flight: 1000, shipping: 610, temporaryStay: 2000, adminFees: 320, emergencyBuffer: 4700 },
-    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): CNY 6,280 a month in the city centre, CNY 3,560 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -474,7 +474,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1750, groceries: 400, utilities: 145, transport: 75, healthcare: 105 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 1250, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 250, flight: 1010, shipping: 595, temporaryStay: 1800, adminFees: 300, emergencyBuffer: 4300 },
-    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): CNY 5,095 a month in the city centre, CNY 3,192 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -486,7 +486,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1550, groceries: 380, utilities: 138, transport: 70, healthcare: 100 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 1180, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 250, flight: 1010, shipping: 585, temporaryStay: 1700, adminFees: 290, emergencyBuffer: 4100 },
-    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): CNY 3,611 a month in the city centre, CNY 1,860 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -498,7 +498,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1200, groceries: 330, utilities: 120, transport: 58, healthcare: 88 },
     housing: { depositMonths: 3, lastMonthRentDefault: 0, furnishedSetupCost: 1050, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 250, flight: 1020, shipping: 570, temporaryStay: 1450, adminFees: 270, emergencyBuffer: 3700 },
-    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. Planning estimate base. China's National Bureau of Statistics publishes house prices but no rent series that was found; private estimates were not used. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): CNY 3,144 a month in the city centre, CNY 1,690 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
 
@@ -514,7 +514,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 2300, groceries: 520, utilities: 180, transport: 95, healthcare: 140 },
     housing: { depositMonths: 1, lastMonthRentDefault: 0, furnishedSetupCost: 1600, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 380, flight: 900, shipping: 620, temporaryStay: 2200, adminFees: 330, emergencyBuffer: 5800 },
-    sources: { rent: "Planning estimate. No official rent series was found; the available figures are listing-based and differ by about 50%.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. No official rent series was found; the available figures are listing-based and differ by about 50%. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): QAR 6,914 a month in the city centre, QAR 4,293 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -526,7 +526,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 2500, groceries: 540, utilities: 190, transport: 100, healthcare: 145 },
     housing: { depositMonths: 1, lastMonthRentDefault: 0, furnishedSetupCost: 1700, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 380, flight: 900, shipping: 625, temporaryStay: 2300, adminFees: 340, emergencyBuffer: 6000 },
-    sources: { rent: "Planning estimate. No official rent series was found; the available figures are listing-based and differ by about 50%.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. No official rent series was found; the available figures are listing-based and differ by about 50%. Market reference, not an official figure (Yellowkey, 4 February 2026, one-bedroom ranges, not averages): QAR 6,500 to 9,000 unfurnished, 8,000 to 11,000 furnished.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -538,7 +538,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1700, groceries: 450, utilities: 155, transport: 80, healthcare: 120 },
     housing: { depositMonths: 1, lastMonthRentDefault: 0, furnishedSetupCost: 1300, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 380, flight: 900, shipping: 600, temporaryStay: 1800, adminFees: 300, emergencyBuffer: 4800 },
-    sources: { rent: "Planning estimate. No official rent series was found; the available figures are listing-based and differ by about 50%.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. No official rent series was found; the available figures are listing-based and differ by about 50%. Market reference, not an official figure (Yellowkey, 4 February 2026, one-bedroom ranges, not averages): QAR 3,500 to 5,500 unfurnished, 4,500 to 7,000 furnished.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
 
@@ -554,7 +554,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1600, groceries: 360, utilities: 140, transport: 85, healthcare: 130 },
     housing: { depositMonths: 1, lastMonthRentDefault: 0, furnishedSetupCost: 1200, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 350, flight: 880, shipping: 580, temporaryStay: 1800, adminFees: 310, emergencyBuffer: 4500 },
-    sources: { rent: "Planning estimate. The General Authority for Statistics publishes a rent price index, not an average rent for Riyadh, Jeddah or other cities.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. The General Authority for Statistics publishes a rent price index, not an average rent for Riyadh, Jeddah or other cities. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): SAR 4,455 a month in the city centre, SAR 3,129 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -566,7 +566,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1450, groceries: 340, utilities: 130, transport: 80, healthcare: 120 },
     housing: { depositMonths: 1, lastMonthRentDefault: 0, furnishedSetupCost: 1150, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 350, flight: 900, shipping: 570, temporaryStay: 1700, adminFees: 295, emergencyBuffer: 4200 },
-    sources: { rent: "Planning estimate. The General Authority for Statistics publishes a rent price index, not an average rent for Riyadh, Jeddah or other cities.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. The General Authority for Statistics publishes a rent price index, not an average rent for Riyadh, Jeddah or other cities. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): SAR 2,991 a month in the city centre, SAR 1,990 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -578,7 +578,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1300, groceries: 320, utilities: 125, transport: 75, healthcare: 115 },
     housing: { depositMonths: 1, lastMonthRentDefault: 0, furnishedSetupCost: 1080, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 350, flight: 900, shipping: 560, temporaryStay: 1600, adminFees: 280, emergencyBuffer: 4000 },
-    sources: { rent: "Planning estimate. The General Authority for Statistics publishes a rent price index, not an average rent for Riyadh, Jeddah or other cities.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. The General Authority for Statistics publishes a rent price index, not an average rent for Riyadh, Jeddah or other cities. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): SAR 2,167 a month in the city centre, SAR 1,394 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -590,7 +590,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 900, groceries: 260, utilities: 100, transport: 60, healthcare: 95 },
     housing: { depositMonths: 1, lastMonthRentDefault: 0, furnishedSetupCost: 880, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 350, flight: 920, shipping: 540, temporaryStay: 1200, adminFees: 250, emergencyBuffer: 3200 },
-    sources: { rent: "Planning estimate. The General Authority for Statistics publishes a rent price index, not an average rent for Riyadh, Jeddah or other cities.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. The General Authority for Statistics publishes a rent price index, not an average rent for Riyadh, Jeddah or other cities. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): SAR 1,167 a month in the city centre, SAR 933 outside the centre. Very few contributors, treat as provisional.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -602,7 +602,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1000, groceries: 275, utilities: 108, transport: 64, healthcare: 100 },
     housing: { depositMonths: 1, lastMonthRentDefault: 0, furnishedSetupCost: 920, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 350, flight: 910, shipping: 545, temporaryStay: 1300, adminFees: 258, emergencyBuffer: 3400 },
-    sources: { rent: "Planning estimate. The General Authority for Statistics publishes a rent price index, not an average rent for Riyadh, Jeddah or other cities.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. The General Authority for Statistics publishes a rent price index, not an average rent for Riyadh, Jeddah or other cities. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): SAR 2,100 a month in the city centre, SAR 1,965 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
 
@@ -618,7 +618,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1500, groceries: 340, utilities: 130, transport: 75, healthcare: 120 },
     housing: { depositMonths: 1, lastMonthRentDefault: 0, furnishedSetupCost: 1150, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 300, flight: 870, shipping: 560, temporaryStay: 1700, adminFees: 290, emergencyBuffer: 4200 },
-    sources: { rent: "Planning estimate. No current official rent figure was found.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. No current official rent figure was found. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): OMR 262 a month in the city centre, OMR 174 outside the centre.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -630,7 +630,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 1050, groceries: 270, utilities: 105, transport: 58, healthcare: 95 },
     housing: { depositMonths: 1, lastMonthRentDefault: 0, furnishedSetupCost: 900, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 300, flight: 900, shipping: 540, temporaryStay: 1300, adminFees: 255, emergencyBuffer: 3400 },
-    sources: { rent: "Planning estimate. No current official rent figure was found.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. No current official rent figure was found. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): OMR 95 a month in the city centre, OMR 80 outside the centre. Very few contributors, treat as provisional.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
   {
@@ -642,7 +642,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     monthlyDefaults: { rent: 880, groceries: 240, utilities: 95, transport: 50, healthcare: 85 },
     housing: { depositMonths: 1, lastMonthRentDefault: 0, furnishedSetupCost: 820, utilitiesIncludedDefault: "no" },
     startupCosts: { visa: 300, flight: 890, shipping: 530, temporaryStay: 1150, adminFees: 240, emergencyBuffer: 3000 },
-    sources: { rent: "Planning estimate. No current official rent figure was found.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
+    sources: { rent: "Planning estimate. No current official rent figure was found. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): OMR 190 a month in the city centre, OMR 148 outside the centre. Very few contributors, treat as provisional.", groceries: "Planning assumption, not from an official source.", utilities: "Planning assumption, not from an official source.", transport: "Planning assumption, not from an official source.", healthcare: "Planning assumption, not from an official source.", startup: "Planning assumption, not from an official source." },
     updatedAt: "2026-04-09",
   },
 
@@ -676,7 +676,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 3000,
     },
     sources: {
-      rent: "Planning estimate. INEGI's household survey (ENIGH 2024) has a rent line for Ciudad de Mexico, but the figure could not be read from the tables retrieved.",
+      rent: "Planning estimate. INEGI's household survey (ENIGH 2024) has a rent line for Ciudad de Mexico, but the figure could not be read from the tables retrieved. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): MXN 18,970 a month in the city centre, MXN 12,106 outside the centre.",
       groceries: "Planning assumption. Official reference (household average): INEGI, ENIGH 2024: households spent 15,891 pesos a month on average, 37.7% (about 5,990 pesos) on food, beverages and tobacco.",
       utilities: "Planning assumption, not from an official source.",
       transport: "Planning assumption. Official reference (household average): INEGI, ENIGH 2024: 19.5% (about 3,100 pesos a month) of household spending went to transport and communications.",
@@ -750,7 +750,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 3800,
     },
     sources: {
-      rent: "Planning estimate. The Korea Real Estate Board figure found is for Seoul only; none was found for Busan.",
+      rent: "Planning estimate. The Korea Real Estate Board figure found is for Seoul only; none was found for Busan. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): KRW 965,714 a month in the city centre, KRW 489,750 outside the centre.",
       groceries: "Planning assumption, not from an official source.",
       utilities: "Planning assumption, not from an official source.",
       transport: "Planning assumption, not from an official source.",
@@ -787,7 +787,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 5200,
     },
     sources: {
-      rent: "Planning estimate. Japan's Statistics Bureau publishes rents in the Housing and Land Survey, but a monthly Tokyo figure could not be retrieved here.",
+      rent: "Planning estimate. Japan's Statistics Bureau publishes rents in the Housing and Land Survey, but a monthly Tokyo figure could not be retrieved here. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): JPY 202,375 a month in the city centre, JPY 109,456 outside the centre.",
       groceries: "Planning assumption. Official reference (household average): Statistics Bureau of Japan, Family Income and Expenditure Survey 2025: two-or-more-person households spent 314,001 yen a month on consumption in total (the food line was not read).",
       utilities: "Planning assumption, not from an official source.",
       transport: "Planning assumption, not from an official source.",
@@ -861,7 +861,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 2800,
     },
     sources: {
-      rent: "Planning estimate. The National Statistical Office's household survey rent line for Bangkok could not be retrieved.",
+      rent: "Planning estimate. The National Statistical Office's household survey rent line for Bangkok could not be retrieved. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): THB 22,745 a month in the city centre, THB 11,571 outside the centre.",
       groceries: "Planning assumption, not from an official source.",
       utilities: "Planning assumption, not from an official source.",
       transport: "Planning assumption, not from an official source.",
@@ -898,7 +898,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 2500,
     },
     sources: {
-      rent: "Planning estimate. The Department of Statistics Malaysia publishes a national average rent for renting households (about RM910 in its 2022 survey, read provisionally), which is not comparable to a Kuala Lumpur apartment, so it was not applied.",
+      rent: "Planning estimate. The Department of Statistics Malaysia publishes a national average rent for renting households (about RM910 in its 2022 survey, read provisionally), which is not comparable to a Kuala Lumpur apartment, so it was not applied. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): MYR 2,525 a month in the city centre, MYR 1,518 outside the centre.",
       groceries: "Planning assumption, not from an official source.",
       utilities: "Planning assumption. Official reference (household average): Department of Statistics Malaysia, Household Expenditure Survey 2022: households spent RM5,150 a month on average, 23.2% of it on housing, water, electricity, gas and other fuels.",
       transport: "Planning assumption, not from an official source.",
@@ -935,7 +935,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 6000,
     },
     sources: {
-      rent: "Planning estimate. Dubai and Abu Dhabi publish rental indices, but no official average monthly rent was retrievable; market-report figures were not used.",
+      rent: "Planning estimate. Dubai and Abu Dhabi publish rental indices, but no official average monthly rent was retrievable; market-report figures were not used. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): AED 8,842 a month in the city centre, AED 5,560 outside the centre.",
       groceries: "Planning assumption, not from an official source.",
       utilities: "Planning assumption, not from an official source.",
       transport: "Planning assumption, not from an official source.",
@@ -972,7 +972,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 5400,
     },
     sources: {
-      rent: "Planning estimate. Dubai and Abu Dhabi publish rental indices, but no official average monthly rent was retrievable; market-report figures were not used.",
+      rent: "Planning estimate. Dubai and Abu Dhabi publish rental indices, but no official average monthly rent was retrievable; market-report figures were not used. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): AED 7,222 a month in the city centre, AED 5,140 outside the centre.",
       groceries: "Planning assumption, not from an official source.",
       utilities: "Planning assumption, not from an official source.",
       transport: "Planning assumption, not from an official source.",
@@ -1009,7 +1009,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 2200,
     },
     sources: {
-      rent: "Planning estimate. Planning estimate base. Vietnam's General Statistics Office living-standards survey was searched and no city rent figure was found.",
+      rent: "Planning estimate. Planning estimate base. Vietnam's General Statistics Office living-standards survey was searched and no city rent figure was found. Market reference, not an official figure (Numbeo, one-bedroom, checked 14 October 2026): VND 15,216,740 a month in the city centre, VND 7,733,836 outside the centre.",
       groceries: "Planning assumption, not from an official source.",
       utilities: "Planning assumption, not from an official source.",
       transport: "Planning assumption, not from an official source.",
