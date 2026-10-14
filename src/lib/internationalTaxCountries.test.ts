@@ -335,3 +335,20 @@ describe("Croatia (Porezna uprava 2026: 20% to EUR 60,000, 30% above, 20% pensio
     expect(rate("HR", 7_000, "retired")).toBe(0);
   });
 });
+
+describe("Czech Republic (Financial Administration 2026)", () => {
+  it("employee earning CZK 1,200,000", () => {
+    // tax 15% x 1,200,000 = 180,000 less credit 30,840 = 149,160; social 7.1% = 85,200; health 4.5% = 54,000
+    expect(rate("CZ", 1_200_000)).toBeCloseTo((149_160 + 85_200 + 54_000) / 1_200_000, 10);
+  });
+
+  it("applies 23% above 36 times the average wage (CZK 1,762,812)", () => {
+    // CZK 2,000,000: 15% x 1,762,812 + 23% x 237,188 = 264,421.8 + 54,553.24 = 318,975.04, less credit 30,840 = 288,135.04
+    // social 7.1% x 2,000,000 = 142,000; health 90,000
+    expect(rate("CZ", 2_000_000)).toBeCloseTo((288_135.04 + 142_000 + 90_000) / 2_000_000, 8);
+  });
+
+  it("a pensioner pays only income tax, after the basic credit", () => {
+    expect(rate("CZ", 400_000, "retired")).toBeCloseTo((60_000 - 30_840) / 400_000, 10);
+  });
+});

@@ -32,6 +32,7 @@ import { CHILE_TAX_YEAR_LABEL, chileTax } from "./countryTaxRules/chile";
 import { COLOMBIA_TAX_YEAR_LABEL, colombiaTax } from "./countryTaxRules/colombia";
 import { COSTA_RICA_TAX_YEAR_LABEL, costaRicaTax } from "./countryTaxRules/costaRica";
 import { CROATIA_TAX_YEAR_LABEL, croatiaTax } from "./countryTaxRules/croatia";
+import { CZECH_TAX_YEAR_LABEL, czechTax } from "./countryTaxRules/czechRepublic";
 
 export type FilingStatus = "single" | "married";
 
@@ -1240,22 +1241,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // Social + health contributions: ~11% employee share on working income.
   // -------------------------------------------------------------------------
   CZ: ({ annualIncome, isRetired }) => {
-    // 2024 threshold: 36× average monthly wage (approx CZK 43,967/mo)
-    const higherRateThreshold = 1582812;
-    const baseTax = Math.min(annualIncome, higherRateThreshold) * 0.15
-      + Math.max(0, annualIncome - higherRateThreshold) * 0.23;
-    const incomeTaxRate = annualIncome > 0 ? baseTax / annualIncome : 0;
-
-    // Employee social + health: ~6.5% social + 4.5% health = 11%
-    const socialOverlay = isRetired ? 0 : 0.11;
-
+    // Rules in countryTaxRules/czechRepublic.ts: Financni sprava 2026 rates, threshold and basic credit.
+    const { incomeTax, insurance } = czechTax(annualIncome, isRetired);
+    const effective = annualIncome > 0 ? (incomeTax + insurance) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(incomeTaxRate + socialOverlay),
-      model: "flat",
-      confidence: "simplified",
-      label: "Czech Republic PIT (15%/23%) + social contributions (2024)",
-      missingFactor: "Health and social bases differ; non-taxable base not applied at lower incomes.",
-      note: "Income tax rates and 2024 threshold are correct. The 11% social/health overlay is a composite: social insurance 6.5% and health 4.5% are correct rates but apply to different bases (health has no cap; social caps at 48× average wage ~CZK 2,110,416). The employee social base also excludes certain income types. Result is a reasonable ballpark but could be off by 1–3 pp depending on income composition. No joint filing. Income must be passed in CZK.",
+      effectiveRate: clampRate(effective),
+      model: "progressive-country",
+      confidence: "partial",
+      label: `Czech Republic PIT (15%/23%) + social and health insurance (${CZECH_TAX_YEAR_LABEL})`,
+      missingFactor: "Child, spouse and mortgage credits and deductions not modelled.",
+      note: "Income tax is 15% up to CZK 1,762,812 (36 times the 2026 average wage) and 23% above, less the CZK 30,840 basic taxpayer credit, on gross pay (the Financial Administration's 2026 figures). Employees also pay 7.1% social insurance (pension 6.5%, sickness 0.6%) up to 48 times the average wage and 4.5% health insurance with no cap; those rates are the statutory ones and the cap is derived from the official average wage, not read from a 2026 table. Not modelled: credits for children, a spouse or students, and mortgage-interest and pension-savings deductions. Income must be passed in koruna.",
     };
   },
 
