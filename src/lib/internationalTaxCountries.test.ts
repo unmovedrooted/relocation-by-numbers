@@ -855,3 +855,25 @@ describe("Philippines (BIR graduated rates, SSS/PhilHealth/Pag-IBIG)", () => {
     expect(ph(300_000, "retired")).toBeCloseTo(0.15 * 50_000 / 300_000, 10);
   });
 });
+
+describe("Poland (PIT scale with the PLN 3,600 reduction, ZUS, health)", () => {
+  it("PLN 150,000 employee reaches the 32% band at PLN 120,000 of base", () => {
+    // ZUS 16,890 + 3,675 = 20,565; health 9% x 129,435 = 11,649.15; base 150,000 - 20,565 - 3,000 = 126,435: 10,800 + 32% x 6,435
+    expect(rate("PL", 150_000)).toBeCloseTo((20_565 + 11_649.15 + 12_859.2) / 150_000, 8);
+  });
+
+  it("PLN 60,000 pension: scale less PLN 3,600, plus 9% health", () => {
+    expect(rate("PL", 60_000, "retired")).toBeCloseTo(0.15, 10);
+  });
+
+  it("the ZUS pension and disability contributions stop at the annual cap", () => {
+    const a = rate("PL", 400_000) * 400_000;
+    const b = rate("PL", 500_000) * 500_000;
+    // above the cap each extra zloty costs 2.45% sickness, health 9% x (1 - 0.0245) and 32% PIT on the base left after those
+    const extra = 100_000;
+    const zus = 0.0245 * extra;
+    const health = 0.09 * (extra - zus);
+    const pit = 0.32 * (extra - zus);
+    expect(b - a).toBeCloseTo(zus + health + pit, 4);
+  });
+});

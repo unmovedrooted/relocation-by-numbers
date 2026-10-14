@@ -52,6 +52,7 @@ import { NORWAY_TAX_YEAR_LABEL, norwayTax } from "./countryTaxRules/norway";
 import { PANAMA_TAX_YEAR_LABEL, panamaTax } from "./countryTaxRules/panama";
 import { PARAGUAY_TAX_YEAR_LABEL, paraguayTax } from "./countryTaxRules/paraguay";
 import { PERU_TAX_YEAR_LABEL, peruTax } from "./countryTaxRules/peru";
+import { POLAND_TAX_YEAR_LABEL, polandTax } from "./countryTaxRules/poland";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -1093,31 +1094,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 PIT. Free amount PLN 30,000. Joint income splitting for married.
   // Social/health contributions: ~23% working; not on pension income.
   // -------------------------------------------------------------------------
-  PL: ({ annualIncome, filing, isRetired }) => {
-    const freeAmount = 30000;
-    const taxablePerUnit = filing === "married"
-      ? Math.max(0, annualIncome / 2 - freeAmount)
-      : Math.max(0, annualIncome - freeAmount);
-
-    const ratePerUnit = progressiveTax(taxablePerUnit, [
-      { upTo: 120000, rate: 0.12 },
-      { upTo: Infinity, rate: 0.32 },
-    ]);
-
-    const taxPerUnit = ratePerUnit * taxablePerUnit;
-    const totalIncomeTax = filing === "married" ? taxPerUnit * 2 : taxPerUnit;
-    const incomeTaxRate = annualIncome > 0 ? totalIncomeTax / annualIncome : 0;
-
-    // Social + health contributions (~23% combined employee share on working income)
-    const socialOverlay = isRetired ? 0 : 0.23;
-
+  PL: ({ annualIncome, filing, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/poland.ts: PIT scale with the PLN 3,600 reduction, ZUS (annual cap PLN 282,600), health 9%.
+    const { incomeTax, contributions } = polandTax(annualIncome, filing === "married" ? "married" : "single", isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(incomeTaxRate + socialOverlay),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
       model: "progressive-country",
-      confidence: isRetired ? "partial" : "simplified",
-      label: "Poland PIT + social contributions (2024)",
-      missingFactor: isRetired ? "Free amount (PLN 30,000) applied; pension income modelled simply." : "Health contribution (składka zdrowotna, 9%) changed under 2022 reform, complex interaction with income tax.",
-      note: "PIT brackets and PLN 30,000 free amount are correct. The ~23% social/health overlay is a rough composite, the actual breakdown is: ZUS pension 9.76%, disability 1.5%, sickness 2.45%, health contribution (składka zdrowotna) 9% with no cap. The health contribution changed significantly in 2022 (Polski Ład reform) and is no longer deductible from income tax, this is a major source of real-world complexity not captured here. Result could be off by 3–6 pp depending on income level and contribution base. Income must be passed in PLN.",
+      confidence: "simplified",
+      label: `Poland PIT + ZUS + health contribution (${POLAND_TAX_YEAR_LABEL})`,
+      missingFactor: "Family and youth reliefs and the child credit not modelled; the PIT scale and the PLN 3,000 costs allowance come from tax summaries rather than podatki.gov.pl.",
+      note: "Uses the general PIT scale (12% to PLN 120,000 less PLN 3,600, then PLN 10,800 plus 32%), employee ZUS contributions of 13.71% (pension and disability capped at PLN 282,600 a year, deductible from the PIT base) and the 9% health contribution (not deductible); married couples are modelled as two equal earners. Pensions carry the health contribution but no ZUS; remote workers paid abroad pay neither here. Income must be passed in zloty.",
     };
   },
 
