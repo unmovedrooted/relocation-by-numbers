@@ -28,6 +28,7 @@ import { BELGIUM_TAX_YEAR_LABEL, belgiumTax } from "./countryTaxRules/belgium";
 import { BRAZIL_TAX_YEAR_LABEL, brazilTax } from "./countryTaxRules/brazil";
 import { BULGARIA_TAX_YEAR_LABEL, bulgariaTax } from "./countryTaxRules/bulgaria";
 import { CANADA_PROVINCES, CANADA_TAX_YEAR_LABEL, canadaTax } from "./countryTaxRules/canada";
+import { CHILE_TAX_YEAR_LABEL, chileTax } from "./countryTaxRules/chile";
 
 export type FilingStatus = "single" | "married";
 
@@ -1675,29 +1676,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 UTM-based brackets. UTM value CLP 67,294 (2024).
   // No joint filing.
   // -------------------------------------------------------------------------
-  CL: ({ annualIncome }) => {
-    const utmValue = 67294;
-    const incomeUTM = annualIncome / utmValue;
-
-    const taxUTM = progressiveTax(incomeUTM, [
-      { upTo: 13.5, rate: 0.00 },
-      { upTo: 30, rate: 0.04 },
-      { upTo: 50, rate: 0.08 },
-      { upTo: 70, rate: 0.135 },
-      { upTo: 90, rate: 0.23 },
-      { upTo: 120, rate: 0.304 },
-      { upTo: 150, rate: 0.355 },
-      { upTo: Infinity, rate: 0.40 },
-    ]) * incomeUTM;
-
-    const effectiveRate = incomeUTM > 0 ? taxUTM / incomeUTM : 0;
+  CL: ({ annualIncome, incomeScenario }) => {
+    // Rules in countryTaxRules/chile.ts: SII 2026 monthly table in UTM, 90 UF contribution ceiling.
+    const { incomeTax, contributions } = chileTax(annualIncome, incomeScenario === "remote" ? "remote" : incomeScenario === "retired" ? "retired" : "local");
+    const effective = annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(effectiveRate),
+      effectiveRate: clampRate(effective),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Chile UTM-based income tax (2024)",
-      missingFactor: "Employment income deduction (up to 30%) not applied, overstates employee tax.",
-      note: "UTM brackets are 2024 figures. Key omission: employment income receives a deduction of up to 30% (capped at 8 UTM/mo), not modelled, meaning this estimate overstates income tax for employees. AFP mandatory pension contributions (~10% employee, treated as a savings mechanism) are separately deducted before the tax base in practice but excluded here. The net result for an employee can be meaningfully lower than shown. Income must be passed in CLP.",
+      label: `Chile wage income tax + pension and health contributions (${CHILE_TAX_YEAR_LABEL})`,
+      missingFactor: "Pension fund commission, unemployment insurance and the annual tax return not modelled.",
+      note: "Uses the Servicio de Impuestos Internos 2026 monthly table (exempt to 13.5 UTM, then 4% to 40%), computed monthly from annual pay divided by 12 with the October 2026 UTM of CLP 72,151. Employees also pay 10% pension and 7% health on pay up to the 90 UF ceiling (CLP 3.7 million a month), which are deducted before income tax; pensioners pay the 7% health contribution; remote work for a foreign employer is assumed to pay no Chilean contributions. The old model applied monthly thresholds to annual income. Not modelled: the pension fund's commission, unemployment insurance, voluntary savings and the annual return. Income must be passed in pesos.",
     };
   },
 

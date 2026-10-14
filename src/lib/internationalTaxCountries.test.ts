@@ -209,3 +209,36 @@ describe("Canada (CRA 2026 federal and provincial tables, CPP, CPP2, EI)", () =>
     expect(bpa(400_000)).toBe(0);
   });
 });
+
+import { chileMonthlyTax, CHILE_CONTRIBUTION_CEILING } from "./countryTaxRules/chile";
+
+describe("Chile (SII 2026 monthly table, 90 UF ceiling)", () => {
+  it("matches the SII table row for a monthly base of CLP 1,660,000", () => {
+    // 4% x 1,660,000 less the table's amount to subtract, 38,961 = 27,439 (the table rounds to whole pesos)
+    expect(Math.abs(chileMonthlyTax(1_660_000) - 27_439)).toBeLessThan(1);
+  });
+
+  it("matches the SII table row for CLP 4,000,000: 13.5% less 323,958", () => {
+    expect(Math.abs(chileMonthlyTax(4_000_000) - (0.135 * 4_000_000 - 323_958))).toBeLessThan(1);
+  });
+
+  it("is exempt up to 13.5 UTM", () => {
+    expect(chileMonthlyTax(974_000)).toBe(0);
+  });
+
+  it("employee earning CLP 2,000,000 a month", () => {
+    // contributions 17% = 340,000; base 1,660,000; tax 27,438.46; total 367,438.46
+    expect(rate("CL", 24_000_000)).toBeCloseTo(367_438.46 / 2_000_000, 5);
+  });
+
+  it("stops contributions at the 90 UF ceiling", () => {
+    const monthly = 10_000_000;
+    const contributions = 0.17 * CHILE_CONTRIBUTION_CEILING;
+    const tax = chileMonthlyTax(monthly - contributions);
+    expect(rate("CL", monthly * 12)).toBeCloseTo((tax + contributions) / monthly, 6);
+  });
+
+  it("charges remote income no contributions", () => {
+    expect(rate("CL", 24_000_000, "remote")).toBeCloseTo(chileMonthlyTax(2_000_000) / 2_000_000, 6);
+  });
+});
