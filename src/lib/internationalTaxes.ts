@@ -42,6 +42,7 @@ import { IRELAND_TAX_YEAR_LABEL, irelandTax } from "./countryTaxRules/ireland";
 import { ITALY_NEW_RESIDENT_FLAT_TAX, ITALY_TAX_YEAR_LABEL, italyTax } from "./countryTaxRules/italy";
 import { JAPAN_TAX_YEAR_LABEL, japanTax } from "./countryTaxRules/japan";
 import { LATVIA_TAX_YEAR_LABEL, latviaTax } from "./countryTaxRules/latvia";
+import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
 export type FilingStatus = "single" | "married";
@@ -1303,21 +1304,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // Employee social: ~19.5% (GPM +12.5% social), reduced on pension.
   // No joint filing.
   // -------------------------------------------------------------------------
-  LT: ({ annualIncome, isRetired }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 101094, rate: 0.20 },
-      { upTo: Infinity, rate: 0.32 },
-    ]);
-    // Employee social insurance ~12.52% (pension) + health 6.98% = ~19.5%
-    const socialOverlay = isRetired ? 0 : 0.125;
-
+  LT: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/lithuania.ts: 2026 GPM bands (20/25/32%), NPD formula, 19.5% employee contributions.
+    const { incomeTax, contributions } = lithuaniaTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
+    const effective = annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(rate + socialOverlay),
+      effectiveRate: clampRate(effective),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Lithuania progressive income tax + contributions (2024)",
-      missingFactor: "Full social package (~19.5% incl. health) understated at 12.5% here.",
-      note: "Brackets are 2024 figures. The social overlay here uses only 12.5% (pension portion), the full employee social package is approximately 19.5% including health insurance (6.98%), making this a material understatement of total deductions for employed residents. Non-taxable minimum (~€7,140/yr, income-tested) is also not applied. For a remote worker paying home-country social insurance, the income tax component alone may be the relevant figure. Income must be passed in EUR.",
+      label: `Lithuania income tax + social contributions (${LITHUANIA_TAX_YEAR_LABEL})`,
+      missingFactor: "Dependants' NPD, pensioner NPD rules and the VMI pages themselves (blocked to the fetch tool) not read; NPD and employee rates come from secondary summaries.",
+      note: "Uses the 2026 rules as summarised from the State Tax Inspectorate: income tax of 20% up to EUR 83,237, 25% to EUR 138,729 and 32% above, after the non-taxable amount of 747 - 0.49 x (monthly pay - 1,153) a month (EUR 8,964 a year at lower pay, none from about EUR 32,000). Employees pay 19.5% contributions (social insurance 12.52% and health 6.98%) up to EUR 99,422, which are not deductible. Retirees and remote workers paid abroad pay no contributions. Income must be passed in euros.",
     };
   },
 

@@ -666,3 +666,19 @@ describe("Latvia (VID 2026 rates, EUR 550 minimum, 10.5% contributions)", () => 
     expect(rate("LV", 20_000, "retired")).toBeCloseTo(0.255 * 13_400 / 20_000, 8);
   });
 });
+
+describe("Lithuania (2026 GPM bands, NPD, 19.5% contributions)", () => {
+  it("EUR 30,000 employee", () => {
+    // NPD 8,964 - 0.49 x 16,164 = 1,043.64; tax 20% x 28,956.36; contributions 5,850
+    expect(rate("LT", 30_000)).toBeCloseTo((0.2 * 28_956.36 + 5_850) / 30_000, 8);
+  });
+
+  it("EUR 100,000 employee: no NPD, 25% band, contributions capped at 43 VDU", () => {
+    const tax = 0.2 * 83_237.4 + 0.25 * (100_000 - 83_237.4);
+    expect(rate("LT", 100_000)).toBeCloseTo((tax + 0.195 * 99_422.45) / 100_000, 8);
+  });
+
+  it("EUR 15,000 pension: tax only", () => {
+    expect(rate("LT", 15_000, "retired")).toBeCloseTo(0.2 * (15_000 - (8_964 - 0.49 * 1_164)) / 15_000, 8);
+  });
+});
