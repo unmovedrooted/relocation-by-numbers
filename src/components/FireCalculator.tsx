@@ -415,7 +415,9 @@ function growBuckets(
 
   const c401k      = pastCoast ? 0 : annualContrib.b401k + employerMatch;
   const cIra       = pastCoast ? 0 : annualContrib.bIra;
-  const cBrokerage = pastCoast ? 0 : (i.advanced ? annualContrib.bBrokerage : autoContrib);
+  // Simple mode with an explicit yearly investment uses that amount; with it blank, the automatic amount is used.
+  const useConfigured = i.advanced || (Number(i.yearlyInvestment) || 0) > 0;
+  const cBrokerage = pastCoast ? 0 : (useConfigured ? annualContrib.bBrokerage : autoContrib);
 
  const brokerageReturn = Math.max(-0.99, r - drag);
 
@@ -434,24 +436,18 @@ function returnForYear(i: Inputs, yearIndex: number): number {
   return (y >= switchAt ? p.phase2 : p.phase1) / 100;
 }
 
-// ── Coast FIRE number (fixed real-return formula) ─────────────────────────────
+// ── Coast FIRE number ─────────────────────────────────────────────────────────
+// Nominal throughout: spending is inflated to the retirement date, the FIRE number is that spending / withdrawal rate,
+// and it is discounted at the nominal return. (Discounting at the real return as well would count inflation twice.)
 function calcCoastFireNumber(i: Inputs): number {
   const swr  = (Number(i.withdrawalRatePct) || 0) / 100;
   const r    = VOLATILITY_PRESETS[i.volatility].phase1 / 100;
   const infl = (Number(i.inflationPct) || 0) / 100;
   const yrs  = Math.max(0, i.targetRetirementAge - i.coastAge);
-  const currentAnnualExpenses = annualExpenses(i);
-const retirementAnnualExpenses =
-  currentAnnualExpenses * Math.pow(1 + infl, yrs);
-
-const futureFireNumber =
-  swr > 0 ? retirementAnnualExpenses / swr : Infinity;
-  // Correct real return: ((1 + nominal) / (1 + inflation)) - 1
-  const realReturn = ((1 + r) / (1 + infl)) - 1;
-  return futureFireNumber / Math.pow(1 + realReturn, yrs);
+  const retirementAnnualExpenses = annualExpenses(i) * Math.pow(1 + infl, yrs);
+  const futureFireNumber = swr > 0 ? retirementAnnualExpenses / swr : Infinity;
+  return futureFireNumber / Math.pow(1 + r, yrs);
 }
-
-
 
 // ── Core simulation, all 4 modes ────────────────────────────────────────────
 function simulateYearsToFI(

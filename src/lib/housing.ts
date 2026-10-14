@@ -189,7 +189,7 @@ export function solveMaxHomePrice({
   targetDTI = 28,
   baseHomePrice = 400_000,
 }: SolveMaxHomePriceOpts): number {
-  if (grossMonthly <= 0 || annualRate <= 0 || termYears <= 0) return 0;
+  if (grossMonthly <= 0 || annualRate < 0 || termYears <= 0) return 0;
 
   const dpFrac = downPct / 100;
   const r      = annualRate / 100 / 12;
@@ -205,7 +205,7 @@ export function solveMaxHomePrice({
     const pi  =
       loan > 0 && r > 0
         ? (loan * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
-        : 0;
+        : loan > 0 ? loan / n : 0; // zero-rate loan: straight-line principal
     const tax = (mid * (propertyTaxRate / 100)) / 12;
     const ins = baseHomePrice > 0 ? insuranceMonthly * (mid / baseHomePrice) : insuranceMonthly;
 

@@ -128,9 +128,11 @@ export default function Retirement401kCalculator() {
     const overLimit = Math.max(0, yourContribUncapped - limit);
 
     // Employer match: matchRate% of your contribution, on the first capPct% of salary.
-    const matchedPct = Math.min(yourPct, capPct);
+    // Uses the contribution actually made after the IRS limit, not the percentage requested.
+    const effectivePct = sal > 0 ? (yourContrib / sal) * 100 : 0;
+    const matchedPct = Math.min(effectivePct, capPct);
     const employerContrib = sal * (matchedPct / 100) * (matchRate / 100);
-    const missedMatchPct = Math.max(0, capPct - yourPct);
+    const missedMatchPct = Math.max(0, capPct - effectivePct);
     const missedMatchAnnual = sal * (missedMatchPct / 100) * (matchRate / 100);
 
     const totalAnnual = yourContrib + employerContrib;
