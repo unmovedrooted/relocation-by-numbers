@@ -993,3 +993,21 @@ describe("South Korea (2026 scale, deductions, credits, local tax, insurance)", 
     expect(rate("KR", 10_000_000, "remote")).toBe(0);
   });
 });
+
+describe("Spain (national scale, Madrid scale, social security, personal minimum)", () => {
+  const es = (income: number, scenario: "local" | "remote" | "retired" = "local") =>
+    estimateInternationalTax({ countryCode: "ES", annualIncome: income, filing: "single", isRetired: scenario === "retired", incomeScenario: scenario, answers: { es_region: "MD" } }).effectiveRate;
+
+  it("EUR 50,000 employee in Madrid", () => {
+    // SS 3,250; base 44,750; national 6,129.50; Madrid 5,948.365; personal minimum relief 527.25 + 499.50
+    expect(es(50_000)).toBeCloseTo((6_129.5 + 5_948.365 - 1_026.75 + 3_250) / 50_000, 8);
+  });
+
+  it("a pension of EUR 6,000 pays nothing after the EUR 2,000 expense and the personal minimum", () => {
+    expect(es(6_000, "retired")).toBe(0);
+  });
+
+  it("a remote worker pays no Spanish social security", () => {
+    expect(es(50_000, "remote")).toBeLessThan(es(50_000));
+  });
+});

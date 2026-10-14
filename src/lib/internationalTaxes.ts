@@ -316,7 +316,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 national (estatal) + autonomous community average overlay.
   // Conditional: Beckham Law (Régimen de Impatriados), answers.es_beckham
   // -------------------------------------------------------------------------
-  ES: ({ annualIncome, filing, incomeScenario = "local", answers }) => {
+  ES: ({ annualIncome, filing, isRetired, incomeScenario = isRetired ? "retired" : "local", answers }) => {
     if ((incomeScenario === "remote" || incomeScenario === "local") && answers?.es_beckham === "yes") {
       // Beckham Law: 24% flat up to €600k, 47% flat on the excess (not 30%,
       // verified against current AEAT/Beckham Law guidance). Blend the two
@@ -335,19 +335,28 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       };
     }
 
-    // 2024 national (estatal) IRPF brackets. These are exactly half the total;
-    // the autonomous community (tramo autonómico) adds the other half.
+    // National (estatal) IRPF scale: 9.5% to 24.5%, unchanged for 2026 (summaries of the AEAT scale). The autonomous
+    // community (tramo autonomico) adds its own scale. Employees pay 6.5% social security up to the 2026 maximum base of
+    // EUR 5,101.20 a month (BOE Orden PJC/297/2026; the 6.5% rate is from summaries), which is deductible together with
+    // the EUR 2,000 general work expense. The low-income work reduction (up to EUR 6,498) uses the 2023 reform figures and
+    // was not verified for 2026. The personal minimum (EUR 5,550, EUR 6,700 at 65 or over) is relieved at the scale's first rates.
+    const retiredEs = incomeScenario === "retired";
+    const ssContrib = incomeScenario === "local" ? 0.065 * Math.min(Math.max(0, annualIncome), 5101.2 * 12) : 0;
+    const netWork = Math.max(0, annualIncome - ssContrib - 2000);
+    const workReduction = !retiredEs && netWork <= 19747.5 ? (netWork <= 14047.5 ? 6498 : Math.max(0, 6498 - 1.14 * (netWork - 14047.5))) : 0;
     const jointDeduction = filing === "married" ? 3400 : 0;
-    const taxable = Math.max(0, annualIncome - jointDeduction);
+    const taxable = Math.max(0, netWork - workReduction - jointDeduction);
+    const personalMinimum = retiredEs ? 6700 : 5550;
 
-    const nationalRate = progressiveTax(taxable, [
+    const NATIONAL_BRACKETS = [
       { upTo: 12450, rate: 0.095 },
       { upTo: 20200, rate: 0.12 },
       { upTo: 35200, rate: 0.15 },
       { upTo: 60000, rate: 0.185 },
       { upTo: 300000, rate: 0.225 },
       { upTo: Infinity, rate: 0.245 },
-    ]);
+    ];
+    const nationalRate = progressiveTax(taxable, NATIONAL_BRACKETS);
 
     // Autonomous community brackets (tramo autonómico) 2024.
     // Each comunidad autónoma sets its own rates independently.
@@ -469,26 +478,29 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       ? progressiveTax(taxable, communityBrackets)
       : nationalRate * 0.95; // fallback weighted average
 
-    const totalTaxOnTaxable = (nationalRate + communityRate) * taxable;
-    const effectiveRate = annualIncome > 0 ? totalTaxOnTaxable / annualIncome : 0;
+    const minimumRelief = (communityBrackets
+      ? progressiveTax(personalMinimum, NATIONAL_BRACKETS) + progressiveTax(personalMinimum, communityBrackets)
+      : progressiveTax(personalMinimum, NATIONAL_BRACKETS) * 1.95) * personalMinimum;
+    const totalTaxOnTaxable = Math.max(0, (nationalRate + communityRate) * taxable - minimumRelief);
+    const effectiveRate = annualIncome > 0 ? (totalTaxOnTaxable + ssContrib) / annualIncome : 0;
 
     return {
       effectiveRate: clampRate(effectiveRate),
       model: "progressive-country",
       confidence: hasRegion ? "partial" : "simplified",
       label: hasRegion
-        ? `Spain IRPF, ${REGION_NAMES[region] ?? region} (2024)`
-        : "Spain IRPF estimate (2024, select region to improve)",
+        ? `Spain IRPF + social security, ${REGION_NAMES[region] ?? region} (2026 national scale)`
+        : "Spain IRPF + social security estimate (2026 national scale, select region to improve)",
       missingFactor: hasRegion
         ? (isForalTerritory
           ? `${REGION_NAMES[region]} has a separate foral system, rates are approximate.`
-          : "Major personal deductions (pension contributions, mortgage) not modelled.")
+          : "Regional scales are 2024 figures not re-read for 2026; family minimums and deductions (pension contributions, mortgage) not modelled.")
         : "Autonomous region matters, Madrid vs Catalonia can differ by 5–8 pp.",
       note: hasRegion
         ? (isForalTerritory
           ? `${REGION_NAMES[region]} operates under a separate foral tax system with its own administration. These brackets approximate the foral rates, consult a local advisor for accurate figures. Personal deductions not modelled.`
-          : `2024 national IRPF combined with ${REGION_NAMES[region]} autonomous community rates. Personal deductions (pension contributions, mortgage interest, childcare) can reduce taxable income and are not modelled. Income must be passed in EUR.`)
-        : "National brackets are 2024 IRPF figures. The autonomous community overlay is a broad average, actual combined rates range from ~19% effective (Madrid) to 47%+ top marginal (Catalonia). Select your region above to significantly improve accuracy. Income must be passed in EUR.",
+          : `National IRPF scale (9.5% to 24.5%) combined with ${REGION_NAMES[region]} autonomous community rates (2024 figures, not re-read for 2026), after employee social security (6.5% up to a base of EUR 5,101.20 a month), the EUR 2,000 work expense, the low-income work reduction and the personal minimum. Family minimums, pension contributions, mortgage interest and childcare are not modelled. Income must be passed in EUR.`)
+        : "The national IRPF scale (9.5% to 24.5%) is unchanged for 2026 and is applied after employee social security, the work expense and the personal minimum. The autonomous community overlay is a broad average, actual combined rates range from ~19% effective (Madrid) to 47%+ top marginal (Catalonia). Select your region above to significantly improve accuracy. Income must be passed in EUR.",
     };
   },
 
