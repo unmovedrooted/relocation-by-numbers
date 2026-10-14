@@ -1126,3 +1126,20 @@ describe("Turkey (2026 wage scale, SGK, stamp tax, minimum-wage exemption)", () 
     expect(rate("TR", 500_000, "retired")).toBe(0);
   });
 });
+
+describe("United Kingdom (GOV.UK 2026-27 rates and employee NI)", () => {
+  it("GBP 60,000 employee", () => {
+    // taxable 47,430: 20% x 37,700 + 40% x 9,730 = 11,432; NI 8% x 37,700 + 2% x 9,730 = 3,210.60
+    expect(rate("GB", 60_000)).toBeCloseTo(14_642.6 / 60_000, 8);
+  });
+
+  it("GBP 30,000 pension pays tax but no NI", () => {
+    expect(rate("GB", 30_000, "retired")).toBeCloseTo(0.2 * 17_430 / 30_000, 8);
+  });
+
+  it("the allowance is gone at GBP 125,140", () => {
+    const tax = 0.2 * 37_700 + 0.4 * (125_140 - 37_700);
+    const ni = 0.08 * 37_700 + 0.02 * (125_140 - 50_270);
+    expect(rate("GB", 125_140)).toBeCloseTo((tax + ni) / 125_140, 8);
+  });
+});

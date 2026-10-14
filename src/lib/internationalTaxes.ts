@@ -247,6 +247,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // No NI on pension income. No joint filing, married = same as single.
   // -------------------------------------------------------------------------
   GB: ({ annualIncome, isRetired }) => {
+    // GOV.UK, tax year 6 April 2026 to 5 April 2027 (read 2026-10-14): personal allowance 12,570 tapering to zero at 125,140; 20% to 50,270;
+    // 40% to 125,140; 45% above. Employee Class 1 NI: 8% from the primary threshold of 12,570 to the upper limit of 50,270 and 2% above.
     const personalAllowance = 12570;
     // Allowance tapers: £1 lost per £2 earned above £100,000
     const taperThreshold = 100000;
@@ -264,7 +266,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     ]) * taxable;
     const incomeTaxRate = annualIncome > 0 ? incomeTaxAmount / annualIncome : 0;
 
-    // Employee NI 2024-25: 8% on £12,570–£50,270 band, 2% above
+    // Employee NI 2026-27: 8% on £12,570–£50,270 band, 2% above
     let niRate = 0;
     if (!isRetired && annualIncome > 0) {
       const niLower = 12570;
@@ -278,9 +280,9 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       effectiveRate: clampRate(incomeTaxRate + niRate),
       model: "progressive-country",
       confidence: "partial",
-      label: "UK income tax + employee NI (2024-25)",
+      label: "UK income tax + employee NI (2026-27)",
       missingFactor: "Scotland uses different rates; pension contribution relief not modelled.",
-      note: "Brackets, personal allowance taper, and NI rates are 2024-25 HMRC figures. Employee NI: 8% on £12,570–£50,270, 2% above. No NI on pensions. Main omissions: Scotland uses different rates; tax-free pension lump sums, marriage allowance transfers, and pension contribution relief not modelled.",
+      note: "Rates, personal allowance (and its taper) and National Insurance are the 2026-27 figures on GOV.UK: personal allowance £12,570, basic rate 20% to £50,270, higher rate 40% to £125,140 and 45% above; employee NI 8% on £12,570 to £50,270 and 2% above, none on pensions. The thresholds are frozen, so they match 2025-26. Main omissions: Scotland uses different rates; tax-free pension lump sums, the marriage allowance and pension contribution relief are not modelled. Income must be passed in pounds.",
     };
   },
 
