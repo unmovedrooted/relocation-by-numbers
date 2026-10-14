@@ -66,25 +66,25 @@ export default function MoveSummary({
           {fromName} → {toName}, comparing what you keep each month now and after the move.
         </p>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-3">
           <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4">
             <p className="text-xs text-slate-500 dark:text-slate-400">Monthly change</p>
-            <p className={`mt-1 text-2xl font-semibold ${tone(e.monthlyChange)}`}>{signed(e.monthlyChange)}</p>
+            <p className={`mt-1 whitespace-nowrap text-xl font-semibold tabular-nums sm:text-2xl ${tone(e.monthlyChange)}`}>{signed(e.monthlyChange)}</p>
             <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">Range {signed(move.low.monthlyChange)} to {signed(move.high.monthlyChange)}</p>
           </div>
           <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4">
             <p className="text-xs text-slate-500 dark:text-slate-400">First-year impact</p>
-            <p className={`mt-1 text-2xl font-semibold ${tone(e.firstYearImpact)}`}>{signed(e.firstYearImpact)}</p>
+            <p className={`mt-1 whitespace-nowrap text-xl font-semibold tabular-nums sm:text-2xl ${tone(e.firstYearImpact)}`}>{signed(e.firstYearImpact)}</p>
             <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">12 months of change minus {fmt(e.spentOneTime)} spent. Range {signed(move.low.firstYearImpact)} to {signed(move.high.firstYearImpact)}</p>
           </div>
           <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4">
             <p className="text-xs text-slate-500 dark:text-slate-400">Cash needed upfront</p>
-            <p className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{fmt(e.cashUpfront)}</p>
+            <p className="mt-1 whitespace-nowrap text-xl font-semibold tabular-nums sm:text-2xl text-slate-900 dark:text-white">{fmt(e.cashUpfront)}</p>
             <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">Includes a refundable deposit. Range {fmt(move.high.cashUpfront)} to {fmt(move.low.cashUpfront)}</p>
           </div>
           <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4">
             <p className="text-xs text-slate-500 dark:text-slate-400">Time to earn back the cost</p>
-            <p className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{recover(e.monthsToRecover)}</p>
+            <p className="mt-1 whitespace-nowrap text-xl font-semibold tabular-nums sm:text-2xl text-slate-900 dark:text-white">{recover(e.monthsToRecover)}</p>
             <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">Best case {recover(move.high.monthsToRecover)}, worst case {recover(move.low.monthsToRecover)}</p>
           </div>
         </div>

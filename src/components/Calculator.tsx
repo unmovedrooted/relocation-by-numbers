@@ -16,8 +16,11 @@ import TaxAssumptionsNote from "./TaxAssumptionsNote";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
+import MoveSummary from "./MoveSummary";
 import { compareMove, type Item } from "../lib/relocationMove";
-import { buildFireLink } from "../lib/fireLink";
+
+/** Inputs the "enter yours" buttons in the move card can jump to on this page. */
+const MOVE_IDS: Record<string, string> = { currentHousing: "in-curHousing", targetHousing: "in-rent" };
 
 type Mode = "rent" | "buy";
 
@@ -781,20 +784,6 @@ export default function Calculator({
     moversCost, travelCost, setupCost, leaseBreakCost, overlapMonths, moveFeesCost, depositCost,
   ]);
 
-  // Hand the move to the FIRE calculator: spending and pay now and after, plus the one-time costs that are spent.
-  const fireHref = useMemo(() => {
-    if (!move || currentHousingActual === null || !findCity(toCityId)) return undefined;
-    const salaryN = n(salary);
-    return buildFireLink({
-      income: currentSalary.trim() === "" ? salaryN : nz(currentSalary),
-      state: fromState, filing, k401Pct: nz(k401Pct),
-      expenses: currentHousingActual + currentEssentialNonHousing,
-      movedIncome: salaryN, movedState: toState, movedCityId: toCityId,
-      movedExpenses: results.activeHousing + targetEssentialNonHousing,
-      movedCost: move.expected.spentOneTime,
-    });
-  }, [move, currentHousingActual, currentEssentialNonHousing, targetEssentialNonHousing, results.activeHousing, salary, currentSalary, fromState, toState, toCityId, filing, k401Pct]);
-
   const verdict = useMemo(
     () => getVerdict(results.pct, trueMonthlyLeftover, results.netToMonthly, nz(netWorth), n(homePrice)),
     [results.pct, trueMonthlyLeftover, results.netToMonthly, netWorth, homePrice]
@@ -1276,17 +1265,20 @@ export default function Calculator({
               />
             </div>
           )}
+
+          {move && (
+            <MoveSummary
+              move={move}
+              fromName={currentCityLabel}
+              toName={findCity(toCityId)?.name || stateName}
+              hasCurrentIncome={false}
+              inputIds={MOVE_IDS}
+            />
+          )}
         </div>
 
         {/* ══════════════════════════ RESULTS ══════════════════════════ */}
         <div className="space-y-3">
-
-          {fireHref && (
-            <div className="flex flex-wrap gap-x-5 gap-y-1 px-1 text-sm">
-              <a href={fireHref} className="font-medium text-violet-600 underline underline-offset-2 hover:no-underline dark:text-violet-400">See your FIRE number after this move →</a>
-              <a href={`/retirement-state-tax?from=${fromState}&to=${toState}`} className="font-medium text-violet-600 underline underline-offset-2 hover:no-underline dark:text-violet-400">How would retirement income be taxed there? →</a>
-            </div>
-          )}
 
           {/* ── 1. BOTTOM LINE VERDICT ── */}
           <div className={`rounded-2xl border p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ${vs.border} ${vs.bg}`}>
