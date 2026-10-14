@@ -837,12 +837,14 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
       };
     }
 
+    // Comprehensive-income table and the CNY 60,000 basic deduction: State Taxation Administration, Individual Income Tax Law
+    // (https://fgk.chinatax.gov.cn/zcfgk/c100009/c5193028/content.html); the table is unchanged for 2026 (read 2026-10-14).
+    // Employee social insurance (pension 8%, medical 2%, unemployment 0.5%) is deducted before income tax. The old model
+    // invented a CNY 20,000 "additional deduction"; the real special additional deductions (children, housing, elder care)
+    // depend on the household, so none is applied.
     const standardDeduction = 60000;
-    const additionalDeduction = isRetired ? 0 : 20000;
-    const taxable = Math.max(
-      0,
-      annualIncome - standardDeduction - additionalDeduction
-    );
+    const socialRate = isRetired || isNonResident ? 0 : 0.105;
+    const taxable = Math.max(0, annualIncome - standardDeduction - socialRate * annualIncome);
 
     const taxAmount = progressiveTaxAmount(taxable, [
       { upTo: 36000, rate: 0.03 },
@@ -855,7 +857,7 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
     ]);
 
     const incomeTaxRate = effectiveRateFromTax(taxAmount, annualIncome);
-    const socialContributionRate = isRetired || isNonResident ? 0 : 0.105;
+    const socialContributionRate = socialRate;
     const rates = combineRates(incomeTaxRate, socialContributionRate);
     const hasAnswer = !!residency;
 
@@ -864,11 +866,11 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
       model: "progressive-country",
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
-        ? "China IIT + social insurance (2024)"
-        : "China IIT + social insurance (2024, select residency status)",
+        ? "China IIT + social insurance (2026)"
+        : "China IIT + social insurance (2026, select residency status)",
       missingFactor:
-        "Housing fund and regional social base variations not fully captured.",
-      note: "2024 comprehensive income brackets with standard deduction and simplified deductions. Income must be passed in CNY.",
+        "Housing fund, city social-insurance bases and family deductions not modelled.",
+      note: "Uses the State Taxation Administration's comprehensive-income table (3% to 45%), the CNY 60,000 basic deduction, and employee social insurance of 10.5% (pension 8%, medical 2%, unemployment 0.5%) deducted before tax. Not modelled: the housing provident fund (5% to 12% by city), each city's minimum and maximum social-insurance base, the special additional deductions for children, housing and elder care, and the separate tax treatment of year-end bonuses. Income must be passed in CNY.",
     };
   },
 

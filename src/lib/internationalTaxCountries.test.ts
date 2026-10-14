@@ -242,3 +242,49 @@ describe("Chile (SII 2026 monthly table, 90 UF ceiling)", () => {
     expect(rate("CL", 24_000_000, "remote")).toBeCloseTo(chileMonthlyTax(2_000_000) / 2_000_000, 6);
   });
 });
+
+describe("China (State Taxation Administration comprehensive-income table)", () => {
+  const cn = (income: number, answers: Record<string, string> = {}) =>
+    estimateAsiaTax({ countryCode: "CN", annualIncome: income, filing: "single", isRetired: false, answers });
+
+  it("employee earning CNY 300,000", () => {
+    // social 10.5% = 31,500; taxable 300,000 - 60,000 - 31,500 = 208,500; tax 20% x 208,500 - 16,920 = 24,780
+    expect(cn(300_000).effectiveRate).toBeCloseTo((24_780 + 31_500) / 300_000, 10);
+  });
+
+  it("charges nothing on income within the basic deduction and social insurance", () => {
+    // 60,000 + 10.5% x 60,000 exceeds... income 60,000: taxable 0
+    expect(cn(60_000).incomeTaxRate).toBe(0);
+  });
+
+  it("a non-resident remote worker owes nothing", () => {
+    expect(estimateAsiaTax({ countryCode: "CN", annualIncome: 300_000, filing: "single", isRetired: false, incomeScenario: "remote", answers: { cn_residency: "non_resident" } }).effectiveRate).toBe(0);
+  });
+});
+
+import { colombiaTaxOnUvt } from "./countryTaxRules/colombia";
+
+describe("Colombia (DIAN 2026 UVT of COP 52,374)", () => {
+  it("table at 4,100 UVT: 19% x 610 + 28% x 2,400 = 787.9 UVT", () => {
+    expect(colombiaTaxOnUvt(4_100)).toBeCloseTo(0.19 * 610 + 0.28 * 2_400, 9);
+  });
+
+  it("employee earning COP 120,000,000", () => {
+    // contributions 8% = 9,600,000; net 110,400,000; exempt 25% = 27,600,000 (below 790 UVT = 41,375,460 and 40% of net)
+    // taxable 82,800,000 = 1,580.9 UVT: tax 19% x (1,580.9 - 1,090) UVT
+    const taxableUvt = 82_800_000 / 52_374;
+    const tax = 0.19 * (taxableUvt - 1_090) * 52_374;
+    expect(rate("CO", 120_000_000)).toBeCloseTo((tax + 9_600_000) / 120_000_000, 9);
+  });
+
+  it("caps the 25% exemption at 790 UVT: COP 400,000,000 salary", () => {
+    const net = 400_000_000 * 0.92;
+    const taxable = net - 790 * 52_374;
+    const tax = colombiaTaxOnUvt(taxable / 52_374) * 52_374;
+    expect(rate("CO", 400_000_000)).toBeCloseTo((tax + 400_000_000 * 0.08) / 400_000_000, 9);
+  });
+
+  it("charges nothing on remote income below the first bracket", () => {
+    expect(rate("CO", 40_000_000, "remote")).toBe(0);
+  });
+});

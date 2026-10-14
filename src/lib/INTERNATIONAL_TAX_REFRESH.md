@@ -17,3 +17,5 @@ Rule modules live in `src/lib/countryTaxRules/`. Countries that have no module y
 | Bulgaria | Refreshed: flat 10% after contributions, NOI 2026 insurable-income caps in euros. 2026 contribution rates assumed equal to the 2025 table | NOI |
 | Canada | Refreshed: CRA 2026 federal and all provincial/territorial brackets, credits, CPP/CPP2/EI, Ontario surtax and Health Premium, Quebec abatement. Provincial age/spouse credits not modelled; Quebec QPP/QPIP approximated; Alberta credit rate unverified | CRA, Revenu Quebec |
 | Chile | Refreshed: SII 2026 monthly table (the old code applied monthly thresholds to annual income), 90 UF contribution ceiling. AFP commission and unemployment insurance not modelled | SII, Superintendencia de Pensiones |
+| China | Refreshed: STA comprehensive-income table (unchanged for 2026), social insurance deducted; removed an invented CNY 20,000 deduction. Housing fund and city bases not modelled | State Taxation Administration |
+| Colombia | UVT 2026 (COP 52,374) verified from DIAN; table, 25% exemption caps and 4%+4% contributions are the Law 2277 rules, statute text not reachable to re-read | DIAN |

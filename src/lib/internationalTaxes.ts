@@ -29,6 +29,7 @@ import { BRAZIL_TAX_YEAR_LABEL, brazilTax } from "./countryTaxRules/brazil";
 import { BULGARIA_TAX_YEAR_LABEL, bulgariaTax } from "./countryTaxRules/bulgaria";
 import { CANADA_PROVINCES, CANADA_TAX_YEAR_LABEL, canadaTax } from "./countryTaxRules/canada";
 import { CHILE_TAX_YEAR_LABEL, chileTax } from "./countryTaxRules/chile";
+import { COLOMBIA_TAX_YEAR_LABEL, colombiaTax } from "./countryTaxRules/colombia";
 
 export type FilingStatus = "single" | "married";
 
@@ -1583,28 +1584,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 UVT-based brackets. UVT value COP 47,065 (2024).
   // No joint filing.
   // -------------------------------------------------------------------------
-  CO: ({ annualIncome }) => {
-    const uvtValue = 47065;
-    const incomeUVT = annualIncome / uvtValue;
-
-    const taxUVT = progressiveTax(incomeUVT, [
-      { upTo: 1090, rate: 0.00 },
-      { upTo: 1700, rate: 0.19 },
-      { upTo: 4100, rate: 0.28 },
-      { upTo: 8670, rate: 0.33 },
-      { upTo: 18970, rate: 0.35 },
-      { upTo: 31000, rate: 0.37 },
-      { upTo: Infinity, rate: 0.39 },
-    ]) * incomeUVT;
-
-    const effectiveRate = incomeUVT > 0 ? taxUVT / incomeUVT : 0;
+  CO: ({ annualIncome, incomeScenario }) => {
+    // Rules in countryTaxRules/colombia.ts: DIAN 2026 UVT (COP 52,374), article 241 table, 25% exemption and caps.
+    const { incomeTax, contributions } = colombiaTax(annualIncome, incomeScenario === "remote" ? "remote" : incomeScenario === "retired" ? "retired" : "local");
+    const effective = annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(effectiveRate),
+      effectiveRate: clampRate(effective),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Colombia UVT-based income tax (2024)",
-      missingFactor: "Employment income deduction (25% up to 2,880 UVT) not applied.",
-      note: "UVT brackets are 2024 figures (UVT COP 47,065). Key omission: employee health (4%) and pension (4% employee / 12% employer) contributions add approximately 8% to the total burden for locally-employed residents, not modelled. The large personal deduction (25% of net income up to 2,880 UVT) for employment income is also not applied, meaning this model overstates income tax for employees. For remote workers paying foreign social contributions, income tax alone is the relevant figure. Income must be passed in COP.",
+      label: `Colombia income tax + health and pension (${COLOMBIA_TAX_YEAR_LABEL})`,
+      missingFactor: "Dependants, solidarity pension contribution and non-labor income not modelled.",
+      note: "The 2026 UVT of COP 52,374 is from DIAN Resolution 238 of 2025. The progressive table (0% to 39%), the 25% exempt labor income capped at 790 UVT, the 40% / 1,340 UVT limit, and the 4% health and 4% pension employee contributions are the law as amended by Law 2277 of 2022; the statute text could not be reached to re-read, so treat those as the long-standing rules rather than newly verified. Pensioners pay health only; remote work for a foreign employer is assumed to pay neither contribution. Not modelled: the extra 1% solidarity pension contribution above four minimum wages, dependants and other deductions. Income must be passed in pesos.",
     };
   },
 
