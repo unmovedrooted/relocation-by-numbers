@@ -27,6 +27,7 @@ import { AUSTRIA_TAX_YEAR_LABEL, austriaTax } from "./countryTaxRules/austria";
 import { BELGIUM_TAX_YEAR_LABEL, belgiumTax } from "./countryTaxRules/belgium";
 import { BRAZIL_TAX_YEAR_LABEL, brazilTax } from "./countryTaxRules/brazil";
 import { BULGARIA_TAX_YEAR_LABEL, bulgariaTax } from "./countryTaxRules/bulgaria";
+import { CANADA_PROVINCES, CANADA_TAX_YEAR_LABEL, canadaTax } from "./countryTaxRules/canada";
 
 export type FilingStatus = "single" | "married";
 
@@ -506,54 +507,25 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // -------------------------------------------------------------------------
   // Province top marginal rates (approximate 2024 combined federal+provincial max effective)
   // Used when answers.ca_province is set.
-  CA: ({ annualIncome, filing, isRetired, answers }) => {
-    // 2025 federal brackets
-    const federalRate = progressiveTax(annualIncome, [
-      { upTo: 57375, rate: 0.15 },
-      { upTo: 114750, rate: 0.205 },
-      { upTo: 177882, rate: 0.26 },
-      { upTo: 253414, rate: 0.29 },
-      { upTo: Infinity, rate: 0.33 },
-    ]);
-
-    // Province-specific marginal rate overlays (2024 combined avg effective additions)
-    const PROVINCE_OVERLAY: Record<string, number> = {
-      AB: 0.10,   // Alberta, lowest: no surtax
-      BC: 0.145,  // British Columbia
-      MB: 0.175,  // Manitoba
-      NB: 0.195,  // New Brunswick
-      NL: 0.215,  // Newfoundland
-      NS: 0.21,   // Nova Scotia
-      NT: 0.135,  // Northwest Territories
-      NU: 0.115,  // Nunavut
-      ON: 0.1316, // Ontario (incl. surtax effect avg)
-      PE: 0.185,  // Prince Edward Island
-      QC: 0.2575, // Quebec, highest
-      SK: 0.145,  // Saskatchewan
-      YT: 0.15,   // Yukon
-    };
-
-    const province = answers?.ca_province ?? "";
-    const provincialOverlay = PROVINCE_OVERLAY[province] ?? 0.13; // fallback: broad average
-    const hasProvince = !!PROVINCE_OVERLAY[province];
-
-    // Credits modeled as effective rate reductions
-    const spousalCredit = filing === "married" && annualIncome > 0 ? 2600 / annualIncome : 0;
-    const ageCredit = isRetired && annualIncome > 0 ? 1900 / annualIncome : 0;
-
+  CA: ({ annualIncome, filing, isRetired, incomeScenario, answers }) => {
+    // Rules in countryTaxRules/canada.ts: CRA 2026 federal and provincial brackets, credits, CPP/CPP2/EI.
+    const chosen = answers?.ca_province ?? "";
+    const known = Boolean(CANADA_PROVINCES[chosen]);
+    const scenario = isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local";
+    const r = canadaTax(annualIncome, { province: chosen, scenario, married: filing === "married" });
+    const total = r.federalTax + r.provincialTax + r.surtaxAndPremium + r.payroll;
+    const provinceName = CANADA_PROVINCES[r.province].name;
     return {
-      effectiveRate: clampRate(federalRate + provincialOverlay - spousalCredit - ageCredit),
+      effectiveRate: clampRate(annualIncome > 0 ? total / annualIncome : 0),
       model: "country-plus-province",
-      confidence: hasProvince ? "partial" : "simplified",
-      label: hasProvince
-        ? `Canada federal + ${province} provincial estimate (2025)`
-        : "Canada federal + provincial estimate (2025, select province)",
-      missingFactor: hasProvince
-        ? "CPP contributions (~5.95% up to CAD 68,500) not included."
-        : "Province can swing combined rate by 10–15 pp, select province for accuracy.",
-      note: hasProvince
-        ? `Federal brackets are exact 2025 figures. ${province} provincial rate applied. CPP contributions (~5.95% on earnings up to CAD 68,500) are not modelled. Provincial credits and deductions vary and are not fully captured.`
-        : "Federal brackets are 2025 figures. Provincial overlay (~13% average) is the dominant source of uncertainty: Alberta ~10%, Ontario ~13.2%, British Columbia ~14.5%, Quebec ~25.75%. The real combined rate can differ by 10–15 pp depending on province. Select your province above to improve accuracy.",
+      confidence: known ? "partial" : "simplified",
+      label: known
+        ? `Canada federal + ${provinceName} estimate (${CANADA_TAX_YEAR_LABEL})`
+        : `Canada federal + provincial estimate (${CANADA_TAX_YEAR_LABEL}, select province; Ontario shown)`,
+      missingFactor: known
+        ? "Provincial age, spouse and low-income credits not modelled."
+        : "Province can swing the combined rate by several points; select yours (Ontario is used until you do).",
+      note: `Federal and provincial brackets are the Canada Revenue Agency's 2026 tables. Credits are valued at each government's lowest rate: the basic personal amount, base CPP and EI, and for employees the Canada employment amount; retirees get the federal age amount and married filers the federal spouse amount (as if the spouse has no income). Employees pay CPP (5.95% up to $74,600 with the $3,500 exemption), CPP2 (4% from $74,600 to $85,000) and EI (1.63% up to $68,900). Remote income is assumed to come from a foreign employer and so to pay no CPP or EI. Ontario adds its surtax and Health Premium. Quebec residents get the 16.5% federal abatement, and the QPP and QPIP are approximated by CPP and EI. Not modelled: provincial age, spouse and pension credits, low-income tax reductions, the Alberta credit-rate rules, the pension income amount. Income must be passed in Canadian dollars.`,
     };
   },
 

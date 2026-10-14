@@ -145,3 +145,67 @@ describe("Bulgaria (NOI 2026 insurable-income caps, 10% flat tax after contribut
     expect(rate("BG", 20_000, "retired")).toBeCloseTo(0.1, 10);
   });
 });
+
+import { CANADA_PROVINCES, canadaTax, ontarioHealthPremium } from "./countryTaxRules/canada";
+
+describe("Canada (CRA 2026 federal and provincial tables, CPP, CPP2, EI)", () => {
+  it("Ontario employee earning CAD 100,000", () => {
+    // CPP earnings 71,100: CPP 4,230.45, base credit 3,519.45, enhanced deduction 711.00; CPP2 416.00; EI 1,123.07
+    // taxable 100,000 - 711 - 416 = 98,873
+    // federal: 14% x 58,523 + 20.5% x 40,350 = 16,464.97; credits (16,452 + 3,519.45 + 1,123.07 + 1,501) x 14% = 3,163.37 -> 13,301.60
+    // Ontario: 5.05% x 53,891 + 9.15% x 44,982 = 6,837.35; credits (12,989 + 3,519.45 + 1,123.07) x 5.05% = 890.41 -> 5,946.94
+    // surtax 20% x (5,946.94 - 5,818) = 25.79; Health Premium 750
+    const r = canadaTax(100_000, { province: "ON", scenario: "local", married: false });
+    expect(r.federalTax).toBeCloseTo(13_301.6, 1);
+    expect(r.provincialTax).toBeCloseTo(5_946.94, 1);
+    expect(r.surtaxAndPremium).toBeCloseTo(25.79 + 750, 1);
+    expect(r.payroll).toBeCloseTo(4_230.45 + 416 + 1_123.07, 2);
+    expect(rate("CA", 100_000)).toBeCloseTo((13_301.6 + 5_946.94 + 775.79 + 5_769.52) / 100_000, 5);
+  });
+
+  it("Alberta has a lower combined rate than Ontario at CAD 100,000", () => {
+    const ab = estimateInternationalTax({ countryCode: "CA", annualIncome: 100_000, filing: "single", isRetired: false, answers: { ca_province: "AB" } });
+    const on = estimateInternationalTax({ countryCode: "CA", annualIncome: 100_000, filing: "single", isRetired: false, answers: { ca_province: "ON" } });
+    expect(ab.effectiveRate).toBeLessThan(on.effectiveRate);
+    expect(ab.label).toContain("Alberta");
+  });
+
+  it("falls back to Ontario and says so when no province is chosen", () => {
+    const r = estimateInternationalTax({ countryCode: "CA", annualIncome: 100_000, filing: "single", isRetired: false });
+    expect(r.label).toContain("select province");
+    expect(r.effectiveRate).toBeCloseTo(rate("CA", 100_000), 10);
+  });
+
+  it("remote income pays no CPP or EI", () => {
+    expect(canadaTax(100_000, { province: "ON", scenario: "remote", married: false }).payroll).toBe(0);
+  });
+
+  it("a retiree on CAD 40,000 in British Columbia gets the age amount and pays no CPP or EI", () => {
+    const r = canadaTax(40_000, { province: "BC", scenario: "retired", married: false });
+    expect(r.payroll).toBe(0);
+    // federal: 14% x 40,000 = 5,600 less 14% x (16,452 + age 9,208) = 3,592.40 -> 2,007.60
+    expect(r.federalTax).toBeCloseTo(2_007.6, 1);
+  });
+
+  it("Quebec residents get the 16.5% federal abatement", () => {
+    const qc = canadaTax(100_000, { province: "QC", scenario: "local", married: false });
+    const on = canadaTax(100_000, { province: "ON", scenario: "local", married: false });
+    expect(qc.federalTax).toBeCloseTo(on.federalTax * (1 - 0.165), 6);
+  });
+
+  it("the Ontario Health Premium follows the schedule", () => {
+    expect(ontarioHealthPremium(20_000)).toBe(0);
+    expect(ontarioHealthPremium(22_000)).toBeCloseTo(120, 6);
+    expect(ontarioHealthPremium(30_000)).toBe(300);
+    expect(ontarioHealthPremium(60_000)).toBe(600);
+    expect(ontarioHealthPremium(100_000)).toBe(750);
+    expect(ontarioHealthPremium(300_000)).toBe(900);
+  });
+
+  it("Manitoba's basic personal amount phases out between CAD 200,000 and 400,000", () => {
+    const bpa = CANADA_PROVINCES.MB.bpa;
+    expect(bpa(200_000)).toBe(15_780);
+    expect(bpa(300_000)).toBeCloseTo(7_890, 6);
+    expect(bpa(400_000)).toBe(0);
+  });
+});
