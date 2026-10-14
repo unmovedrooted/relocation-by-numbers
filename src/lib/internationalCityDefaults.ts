@@ -136,7 +136,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     amountUnit: "local",
     costIndex: 1.22,
     monthlyDefaults: {
-      rent: 2800,
+      rent: 2280,
       groceries: 520,
       utilities: 210,
       transport: 220,
@@ -157,7 +157,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 5500,
     },
     sources: {
-      rent: "City default estimate",
+      rent: "Office for National Statistics, Price Index of Private Rents: average London monthly rent, March 2026 (all property types, GBP)",
       groceries: "City default estimate",
       utilities: "City default estimate",
       transport: "City default estimate",
