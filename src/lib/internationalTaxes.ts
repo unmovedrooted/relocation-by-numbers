@@ -33,6 +33,7 @@ import { COLOMBIA_TAX_YEAR_LABEL, colombiaTax } from "./countryTaxRules/colombia
 import { COSTA_RICA_TAX_YEAR_LABEL, costaRicaTax } from "./countryTaxRules/costaRica";
 import { CROATIA_TAX_YEAR_LABEL, croatiaTax } from "./countryTaxRules/croatia";
 import { CZECH_TAX_YEAR_LABEL, czechTax } from "./countryTaxRules/czechRepublic";
+import { DENMARK_TAX_YEAR_LABEL, denmarkTax } from "./countryTaxRules/denmark";
 
 export type FilingStatus = "single" | "married";
 
@@ -1060,34 +1061,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // Bottom tax + health tax (~12.5%) + top tax (15% above DKK 588,900).
   // Municipal tax average ~25.1%.
   // -------------------------------------------------------------------------
-  DK: ({ annualIncome, isRetired }) => {
-    if (annualIncome <= 0) return { effectiveRate: 0, model: "progressive-country", confidence: "partial", label: "Denmark income tax (2024)", missingFactor: "", note: "Enter income to calculate." };
-
-    // AM-bidrag 8% (not on pension)
-    const amBidragAmount = isRetired ? 0 : annualIncome * 0.08;
-    const taxableAfterAM = Math.max(0, annualIncome - amBidragAmount);
-
-    // Personal allowance (personfradrag) ~DKK 49,700 applied as deduction
-    const personalAllowance = 49700;
-    const taxable = Math.max(0, taxableAfterAM - personalAllowance);
-
-    // Bottom tax: 12.01%, Top tax: 15% above DKK 588,900 (2024 threshold)
-    const bottomTax = taxable * 0.1201;
-    const topTaxBase = Math.max(0, taxable - 588900);
-    const topTax = topTaxBase * 0.15;
-    // Municipal average ~25.1% on taxable income (after personal allowance)
-    const municipalTax = taxable * 0.251;
-
-    const totalTax = amBidragAmount + bottomTax + topTax + municipalTax;
-    const effectiveRate = totalTax / annualIncome;
-
+  DK: ({ annualIncome, filing, isRetired }) => {
+    // Rules in countryTaxRules/denmark.ts: skat.dk 2026 brackets and allowances, Skatteministeriet average municipal rate.
+    if (annualIncome <= 0) return { effectiveRate: 0, model: "progressive-country", confidence: "partial", label: `Denmark income tax (${DENMARK_TAX_YEAR_LABEL})`, missingFactor: "", note: "Enter income to calculate." };
+    const { total } = denmarkTax(annualIncome, { retired: isRetired, married: filing === "married" });
     return {
-      effectiveRate: clampRate(effectiveRate),
+      effectiveRate: clampRate(total / annualIncome),
       model: "progressive-country",
-      confidence: isRetired ? "partial" : "partial",
-      label: "Denmark income tax + AM-bidrag + municipal (2024)",
-      missingFactor: "Municipal rate varies by kommune (Copenhagen 23.5%+); church tax (~0.7%) not included.",
-      note: "Structure is correct: AM-bidrag (8% on gross, not on pensions), personal allowance (DKK 49,700), bottom tax (12.01%), average municipal (25.1%), top tax (15% above DKK 588,900). Main omissions: church tax (~0.7%, opt-in) and the share-income tax (aktieindkomstskat) on dividends. Municipal rate varies by kommune, Copenhagen is 23.5%, some rural communes are 26%+. Income must be passed in DKK.",
+      confidence: "partial",
+      label: `Denmark income tax + AM-bidrag + municipal (${DENMARK_TAX_YEAR_LABEL})`,
+      missingFactor: "Your municipality's rate (23.4% to 26.3%) and church tax (about 0.9% for members) not included.",
+      note: "Uses skat.dk's 2026 rules: AM-bidrag 8% (not on pensions), bottom tax 12.01% and the average municipal rate of 25.05% above the DKK 54,100 personal allowance, the new 7.5% middle-bracket tax above DKK 641,200, 7.5% top-bracket tax above DKK 777,900 and 5% additional top-bracket tax above DKK 2,592,700 (all after AM-bidrag), less the employment allowance (12.75%, max DKK 63,471) and job allowance for employees. A married filer is given both personal allowances. Not modelled: church tax, the transport deduction and other deductions. Income must be passed in kroner.",
     };
   },
 

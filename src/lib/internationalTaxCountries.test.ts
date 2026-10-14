@@ -352,3 +352,25 @@ describe("Czech Republic (Financial Administration 2026)", () => {
     expect(rate("CZ", 400_000, "retired")).toBeCloseTo((60_000 - 30_840) / 400_000, 10);
   });
 });
+
+describe("Denmark (skat.dk 2026)", () => {
+  it("employee earning DKK 600,000", () => {
+    // AM 48,000; personal income 552,000; employment allowance min(70,380, 63,471) = 63,471; job allowance min(14,256, 3,100) = 3,100
+    // taxable 485,429; municipal 25.049% x (485,429 - 54,100) = 108,043.60; bottom 12.01% x (552,000 - 54,100) = 59,797.79
+    expect(rate("DK", 600_000)).toBeCloseTo((48_000 + 108_043.601 + 59_797.79) / 600_000, 6);
+  });
+
+  it("adds the 7.5% middle and top brackets above DKK 777,900 of personal income", () => {
+    // gross 1,000,000: AM 80,000; personal 920,000; employment allowance 63,471; job 3,100; taxable 853,429
+    // municipal 25.049% x 799,329 = 200,224.1 (rounded); bottom 12.01% x 865,900 = 103,995.59; middle 7.5% x 278,800 = 20,910; top 7.5% x 142,100 = 10,657.5
+    const municipal = 0.25049 * (853_429 - 54_100);
+    const bottom = 0.1201 * (920_000 - 54_100);
+    const total = 80_000 + municipal + bottom + 20_910 + 10_657.5;
+    expect(rate("DK", 1_000_000)).toBeCloseTo(total / 1_000_000, 8);
+  });
+
+  it("a pensioner pays no AM-bidrag and gets no employment allowance", () => {
+    // pension 300,000: bottom 12.01% x 245,900 = 29,533.59; municipal 25.049% x 245,900 = 61,595.0
+    expect(rate("DK", 300_000, "retired")).toBeCloseTo((0.1201 * 245_900 + 0.25049 * 245_900) / 300_000, 8);
+  });
+});
