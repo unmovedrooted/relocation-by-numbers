@@ -938,3 +938,20 @@ describe("Slovakia (2026 four-rate scale, non-taxable part, contributions)", () 
     expect(rate("SK", 100_000, "remote")).toBeGreaterThan(rate("SK", 80_000, "remote"));
   });
 });
+
+describe("Slovenia (2026 scale, general relief, 23.1% contributions)", () => {
+  it("EUR 50,000 employee", () => {
+    // contributions 11,550; base 38,450 less relief 5,551.93 = 32,898.07
+    const tax = 0.16 * 9_721.43 + 0.26 * (28_592.44 - 9_721.43) + 0.33 * (32_898.07 - 28_592.44);
+    expect(rate("SI", 50_000)).toBeCloseTo((tax + 11_550) / 50_000, 8);
+  });
+
+  it("EUR 20,000 pension", () => {
+    // base 14,448.07 after the relief
+    expect(rate("SI", 20_000, "retired")).toBeCloseTo((0.16 * 9_721.43 + 0.26 * (14_448.07 - 9_721.43)) / 20_000, 8);
+  });
+
+  it("a very low pension pays nothing", () => {
+    expect(rate("SI", 6_000, "retired")).toBe(0);
+  });
+});

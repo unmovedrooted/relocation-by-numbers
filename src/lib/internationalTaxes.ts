@@ -56,6 +56,7 @@ import { POLAND_TAX_YEAR_LABEL, polandTax } from "./countryTaxRules/poland";
 import { PORTUGAL_TAX_YEAR_LABEL, portugalTax } from "./countryTaxRules/portugal";
 import { ROMANIA_TAX_YEAR_LABEL, romaniaTax } from "./countryTaxRules/romania";
 import { SLOVAKIA_TAX_YEAR_LABEL, slovakiaTax } from "./countryTaxRules/slovakia";
+import { SLOVENIA_TAX_YEAR_LABEL, sloveniaTax } from "./countryTaxRules/slovenia";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -1303,22 +1304,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // above EUR 105,965 from 2024.
   // No joint filing.
   // -------------------------------------------------------------------------
-  SI: ({ annualIncome }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 9135, rate: 0.16 },
-      { upTo: 27480, rate: 0.26 },
-      { upTo: 54961, rate: 0.33 },
-      { upTo: 82441, rate: 0.39 },
-      { upTo: 105965, rate: 0.43 }, // 2023 bracket
-      { upTo: Infinity, rate: 0.50 }, // New top bracket from 2024
-    ]);
+  SI: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/slovenia.ts: 2026 scale (UL RS 104/25), general relief, 23.1% employee contributions.
+    const { incomeTax, contributions } = sloveniaTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(rate),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Slovenia Dohodnina (2024, incl. new 50% top bracket)",
-      missingFactor: "Employee social contributions (~22.1%) and general relief not included.",
-      note: "Brackets are 2024 figures including the new 50% top bracket (introduced 2024). Key omission: employee social contributions total approximately 22.1% (pension 15.5%, health 6.36%, unemployment 0.14%, parental care 0.1%), a major component of total deductions for employed residents, not modelled here. The general tax relief (splošna olajšava, up to €5,000/yr) is also not applied. Income must be passed in EUR.",
+      label: `Slovenia income tax + social contributions (${SLOVENIA_TAX_YEAR_LABEL})`,
+      missingFactor: "Dependants' and young-employee reliefs not modelled; the scale and rates come from adviser summaries of the Official Gazette notice because FURS pages were not fetched.",
+      note: "Uses the 2026 scale (16% to EUR 9,721, 26% to 28,592, 33% to 57,185, 39% to 82,346, 50% above, from the Official Gazette notice 104/25), the general relief of EUR 5,551.93 plus the low-income supplement, and employee contributions of 23.1% (including the 1% long-term care contribution since 2025), which are deductible. Retirees and remote workers paid abroad pay no contributions here. Not modelled: the young-employee relief, dependants and the compulsory health contribution for people without employer cover. Income must be passed in euros.",
     };
   },
 
