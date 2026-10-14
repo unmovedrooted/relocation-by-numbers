@@ -659,9 +659,16 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
   HK: ({ annualIncome, filing, isRetired, answers }) => {
     const workLocation = answers?.hk_work_location ?? "";
 
+    // Inland Revenue Department, 2026-27: basic allowance HK$145,000 and married person's allowance HK$290,000 (2026-27 Budget,
+    // https://www.ird.gov.hk/eng/tax/budget.htm); progressive rates 2% to 17% on bands of HK$50,000; standard rate 15% on the first
+    // HK$5 million of net income and 16% above (https://www.gov.hk/en/residents/taxes/taxfiling/taxrates/salariesrates.htm);
+    // mandatory MPF contributions of 5% of pay up to HK$18,000 a year are deductible (cap not re-read for 2026-27).
+    // Read 2026-10-14. The old model also cut retirees' tax by 15% with no basis; that is removed.
     function computeHkTax(income: number): number {
-      const basicAllowance = filing === "married" ? 264000 : 132000;
-      const taxable = Math.max(0, income - basicAllowance);
+      const basicAllowance = filing === "married" ? 290000 : 145000;
+      const mpf = isRetired ? 0 : Math.min(0.05 * income, 18000);
+      const net = income - mpf;
+      const taxable = Math.max(0, net - basicAllowance);
 
       const progressiveAmount = progressiveTaxAmount(taxable, [
         { upTo: 50000, rate: 0.02 },
@@ -672,12 +679,10 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
       ]);
 
       const standardAmount =
-  income <= 5000000
-    ? income * 0.15
-    : 5000000 * 0.15 + (income - 5000000) * 0.16;
-      const taxAmount = Math.min(progressiveAmount, standardAmount);
-
-      return isRetired ? taxAmount * 0.85 : taxAmount;
+  net <= 5000000
+    ? net * 0.15
+    : 5000000 * 0.15 + (net - 5000000) * 0.16;
+      return Math.min(progressiveAmount, standardAmount);
     }
 
     if (workLocation === "outside_hk") {
@@ -714,7 +719,8 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
 
     const taxAmount = computeHkTax(annualIncome);
     const incomeTaxRate = effectiveRateFromTax(taxAmount, annualIncome);
-    const rates = combineRates(incomeTaxRate, 0);
+    const mpfRate = isRetired || annualIncome <= 0 ? 0 : Math.min(0.05 * annualIncome, 18000) / annualIncome;
+    const rates = combineRates(incomeTaxRate, mpfRate);
     const hasAnswer = workLocation === "in_hk";
 
     return {
@@ -722,11 +728,11 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
       model: "progressive-country",
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
-        ? "Hong Kong Salaries Tax (2024-25)"
-        : "Hong Kong Salaries Tax (2024-25, select work location)",
+        ? "Hong Kong Salaries Tax + MPF (2026-27)"
+        : "Hong Kong Salaries Tax + MPF (2026-27, select work location)",
       missingFactor:
-        "MPF mandatory pension contributions not included.",
-      note: "Salaries Tax is the lower of progressive rates or 15% standard rate. Income must be passed in HKD.",
+        "Dependant allowances and other deductions not modelled.",
+      note: "Salaries Tax is the lower of the progressive rates (2% to 17% on bands of HK$50,000) and the standard rate (15% on the first HK$5 million of net income, 16% above), after the 2026-27 basic allowance of HK$145,000 (HK$290,000 for a married person) and the deduction for mandatory MPF contributions (5% of pay, up to HK$18,000 a year, which is also counted as a cost). Retirees pay no MPF. Not modelled: allowances for children and dependants and other deductions. Income must be passed in HKD.",
     };
   },
 

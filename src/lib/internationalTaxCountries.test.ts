@@ -529,3 +529,27 @@ describe("Guyana (GRA 2026 notice)", () => {
     expect(rate("GY", 3_000_000, "remote") * 3_000_000).toBeCloseTo(330_000, 4);
   });
 });
+
+describe("Hong Kong (IRD 2026-27 allowances, MPF deduction)", () => {
+  const hk = (income: number, filing: "single" | "married" = "single", isRetired = false) =>
+    estimateAsiaTax({ countryCode: "HK", annualIncome: income, filing, isRetired, answers: { hk_work_location: "in_hk" } });
+
+  it("employee earning HK$600,000, single", () => {
+    // MPF 5% = 30,000 capped at 18,000; net 582,000; chargeable 582,000 - 145,000 = 437,000
+    // progressive: 1,000 + 3,000 + 5,000 + 7,000 + 17% x 237,000 = 40,290 -> 56,290 (below 15% x 582,000 = 87,300)
+    expect(hk(600_000).effectiveRate).toBeCloseTo((56_290 + 18_000) / 600_000, 10);
+  });
+
+  it("the standard rate caps tax at a very high income: HK$20,000,000", () => {
+    // net 19,982,000; standard 15% x 5,000,000 + 16% x 14,982,000 = 750,000 + 2,397,120 = 3,147,120
+    expect(hk(20_000_000).incomeTaxRate * 20_000_000).toBeCloseTo(3_147_120, 4);
+  });
+
+  it("the married allowance is HK$290,000", () => {
+    const single = hk(400_000).incomeTaxRate * 400_000;
+    const married = hk(400_000, "married").incomeTaxRate * 400_000;
+    // net 382,000: single chargeable 237,000 -> 16,000 + 17% x 37,000 = 22,290; married chargeable 92,000 pays less
+    expect(single).toBeCloseTo(22_290, 4);
+    expect(married).toBeLessThan(single);
+  });
+});
