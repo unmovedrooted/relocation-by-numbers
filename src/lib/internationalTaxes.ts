@@ -35,6 +35,7 @@ import { CROATIA_TAX_YEAR_LABEL, croatiaTax } from "./countryTaxRules/croatia";
 import { CZECH_TAX_YEAR_LABEL, czechTax } from "./countryTaxRules/czechRepublic";
 import { DENMARK_TAX_YEAR_LABEL, denmarkTax } from "./countryTaxRules/denmark";
 import { ESTONIA_TAX_YEAR_LABEL, estoniaTax } from "./countryTaxRules/estonia";
+import { FRANCE_TAX_YEAR_LABEL, franceTax } from "./countryTaxRules/france";
 
 export type FilingStatus = "single" | "married";
 
@@ -697,29 +698,18 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // Single = 1 part, married/PACS = 2 parts.
   // Social charges: CSG+CRDS 9.7% on earned income; 6.6% (reduced) on pensions.
   // -------------------------------------------------------------------------
-  FR: ({ annualIncome, filing, isRetired }) => {
-    const parts = filing === "married" ? 2 : 1;
-    const incomePerPart = annualIncome / parts;
-
-    const taxPerPart = progressiveTax(incomePerPart, [
-      { upTo: 11294, rate: 0.00 },
-      { upTo: 28797, rate: 0.11 },
-      { upTo: 82341, rate: 0.30 },
-      { upTo: 177106, rate: 0.41 },
-      { upTo: Infinity, rate: 0.45 },
-    ]) * incomePerPart;
-
-    const incomeTaxRate = annualIncome > 0 ? (taxPerPart * parts) / annualIncome : 0;
-    // CSG+CRDS: 9.7% on earned, 6.6% on pensions (reduced rate for eligible retirees)
-    const socialCharges = isRetired ? 0.066 : 0.097;
-
+  FR: ({ annualIncome, filing, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/france.ts: 2026 scale (law 2026-103), decote, 10% allowance, Urssaf and Agirc-Arrco rates.
+    const scenario = isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local";
+    const { incomeTax, contributions } = franceTax(annualIncome, { scenario, married: filing === "married" });
+    const effective = annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(incomeTaxRate + socialCharges),
+      effectiveRate: clampRate(effective),
       model: "progressive-country",
       confidence: "simplified",
-      label: "France IR + CSG/CRDS (2024)",
-      missingFactor: "Child parts (quotient familial) and tax credits not modelled, real rate lower for families.",
-      note: "National brackets and 2-part quotient familial for married/PACS filers are structurally correct. Key omissions: child parts (each child adds 0.5 part, significantly reducing tax for families), the large array of tax credits (childcare, energy, home employment), and flat-rate social charges on investment income. The quotient familial system is one of the most family-sensitive in the world, this model understates the benefit for households with children. Income must be passed in EUR.",
+      label: `France IR + social contributions + CSG/CRDS (${FRANCE_TAX_YEAR_LABEL})`,
+      missingFactor: "Child parts, credits and reductions not modelled; pensioner rates approximate.",
+      note: "Uses the 2026 income tax scale (11% to 45%, indexed 0.9% by law 2026-103) with the 2-part quotient for married or PACS filers, the décote, and the standard 10% allowance for expenses (EUR 509 to 14,555), applied after employee contributions and the deductible CSG. Employees pay old-age insurance (6.9% to the EUR 48,060 ceiling, 0.4% on all pay), Agirc-Arrco 3.15%, CEG 0.86%, CET 0.14%, and CSG/CRDS 9.7% on 98.25% of pay; the rates above the ceiling are the standard published shares, not re-read. Remote work for a foreign employer is assumed to pay no French contributions. Not modelled: child parts (each child adds half a part), credits and reductions, the exceptional high-income contribution, and the reduced CSG for low pensions. Income must be passed in euros.",
     };
   },
 

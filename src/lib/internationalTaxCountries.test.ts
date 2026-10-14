@@ -413,3 +413,37 @@ describe("Ecuador (SRI table for fiscal year 2026)", () => {
     expect(rate("EC", 12_000, "remote")).toBe(0);
   });
 });
+
+import { franceBracketTax, franceEmployeeContributions } from "./countryTaxRules/france";
+
+describe("France (2026 scale on 2025 income, Urssaf and Agirc-Arrco 2026 rates)", () => {
+  it("scale at EUR 29,579 per part: 11% x 17,979 = 1,977.69", () => {
+    expect(franceBracketTax(29_579)).toBeCloseTo(1_977.69, 6);
+  });
+
+  it("employee contributions on EUR 60,000", () => {
+    // old-age 6.9% x 48,060 = 3,316.14 + 0.4% x 60,000 = 240; Agirc-Arrco 3.15% x 48,060 = 1,513.89 + 8.64% x 11,940 = 1,031.616;
+    // CEG 0.86% x 48,060 = 413.316 + 1.08% x 11,940 = 128.952; CET 0.14% x 60,000 = 84
+    expect(franceEmployeeContributions(60_000)).toBeCloseTo(6_727.914, 3);
+  });
+
+  it("employee earning EUR 60,000, single", () => {
+    // CSG/CRDS 9.7% x 58,950 = 5,718.15; deductible CSG 6.8% x 58,950 = 4,008.6
+    // net imposable 60,000 - 6,727.914 - 4,008.6 = 49,263.486; allowance 10% = 4,926.3486; taxable 44,337.1374
+    // tax 1,977.69 + 30% x (44,337.1374 - 29,579) = 4,427.4412 -> 6,405.1312; no decote (above 1,982)
+    const total = 6_405.1312 + 6_727.914 + 5_718.15;
+    expect(rate("FR", 60_000)).toBeCloseTo(total / 60_000, 5);
+  });
+
+  it("the decote reduces a small bill: single, taxable EUR 17,000", () => {
+    // remote (no contributions): income 18,889 -> net imposable 18,889, allowance 10% = 1,888.9, taxable 17,000.1
+    // tax 11% x (17,000.1 - 11,600) = 594.0, below 1,982, so the decote of 897 - 45.25% x 594.0 = 628.2 cancels it entirely
+    expect(rate("FR", 18_889, "remote")).toBe(0);
+  });
+
+  it("married filers use two parts", () => {
+    const single = rate("FR", 150_000, "remote", "single");
+    const married = rate("FR", 150_000, "remote", "married");
+    expect(married).toBeLessThan(single);
+  });
+});
