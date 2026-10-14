@@ -1075,3 +1075,38 @@ describe("Taiwan (2026 deductions and brackets, labour and health insurance)", (
     expect(tw(300_000, "retired")).toBeCloseTo(0.05 * 63_000 / 300_000, 10);
   });
 });
+
+describe("Thailand (Revenue Department scale, deductions, social security) in both calculators", () => {
+  const th = (income: number, scenario: "local" | "remote" | "retired" = "local") =>
+    estimateAsiaTax({ countryCode: "TH", annualIncome: income, filing: "single", isRetired: scenario === "retired", incomeScenario: scenario, answers: { th_residency: "resident_remit" } }).effectiveRate;
+
+  it("THB 1,200,000 employee", () => {
+    // contributions 10,500; deductions 100,000 + 60,000 + 10,500; taxable 1,029,500
+    const tax = 7_500 + 20_000 + 37_500 + 50_000 + 0.25 * 29_500;
+    const expected = (tax + 10_500) / 1_200_000;
+    expect(th(1_200_000)).toBeCloseTo(expected, 8);
+    expect(rate("TH", 1_200_000)).toBeCloseTo(expected, 8);
+  });
+
+  it("THB 200,000 pension: below the first bracket", () => {
+    expect(rate("TH", 200_000, "retired")).toBe(0);
+  });
+});
+
+describe("Vietnam (Law 109/2025 scale, deduction, insurance) in both calculators", () => {
+  const vn = (income: number, scenario: "local" | "remote" | "retired" = "local") =>
+    estimateAsiaTax({ countryCode: "VN", annualIncome: income, filing: "single", isRetired: scenario === "retired", incomeScenario: scenario, answers: { vn_residency: "resident" } }).effectiveRate;
+
+  it("VND 600,000,000 employee", () => {
+    // insurance 10.5% x 561,600,000 cap = 58,968,000; taxable 600,000,000 - 58,968,000 - 186,000,000 = 355,032,000
+    const insurance = 0.105 * 561_600_000;
+    const taxable = 600_000_000 - insurance - 186_000_000;
+    const tax = 0.05 * 120_000_000 + 0.10 * (taxable - 120_000_000);
+    expect(vn(600_000_000)).toBeCloseTo((tax + insurance) / 600_000_000, 8);
+    expect(rate("VN", 600_000_000)).toBeCloseTo((tax + insurance) / 600_000_000, 8);
+  });
+
+  it("VND 150,000,000 pension is below the personal deduction", () => {
+    expect(rate("VN", 150_000_000, "retired")).toBe(0);
+  });
+});

@@ -61,6 +61,8 @@ import { SOUTH_AFRICA_TAX_YEAR_LABEL, southAfricaTax } from "./countryTaxRules/s
 import { SOUTH_KOREA_TAX_YEAR_LABEL, southKoreaTax } from "./countryTaxRules/southKorea";
 import { SWEDEN_TAX_YEAR_LABEL, swedenTax } from "./countryTaxRules/sweden";
 import { SWITZERLAND_TAX_YEAR_LABEL, switzerlandTax } from "./countryTaxRules/switzerland";
+import { THAILAND_TAX_YEAR_LABEL, thailandTax } from "./countryTaxRules/thailand";
+import { VIETNAM_TAX_YEAR_LABEL, vietnamTax } from "./countryTaxRules/vietnam";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -1479,30 +1481,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 progressive PIT. Personal allowance THB 60,000 + earned income
   // deduction (50% of income up to THB 100,000 max). No joint filing.
   // -------------------------------------------------------------------------
-  TH: ({ annualIncome }) => {
-    // Personal + employment deductions: up to ~THB 160,000 simplified
-    const deductions = Math.min(annualIncome * 0.5, 100000) + 60000;
-    const taxable = Math.max(0, annualIncome - deductions);
-
-    const rate = progressiveTax(taxable, [
-      { upTo: 150000, rate: 0.00 },
-      { upTo: 300000, rate: 0.05 },
-      { upTo: 500000, rate: 0.10 },
-      { upTo: 750000, rate: 0.15 },
-      { upTo: 1000000, rate: 0.20 },
-      { upTo: 2000000, rate: 0.25 },
-      { upTo: 5000000, rate: 0.30 },
-      { upTo: Infinity, rate: 0.35 },
-    ]);
-
-    const effectiveRate = annualIncome > 0 ? (rate * taxable) / annualIncome : 0;
+  TH: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/thailand.ts (same as the Asia calculator).
+    const { incomeTax, contributions } = thailandTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(effectiveRate),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Thailand PIT (2024, with standard deductions)",
-      missingFactor: "Foreign-income remittance rules changed Jan 2024, treatment depends on timing.",
-      note: "Brackets and standard deductions are 2024 figures. Critical planning caveat: Thailand shifted to taxing foreign-source income remitted to Thailand from 1 January 2024, regardless of the year it was earned. Previously, income earned in a prior year and remitted later was exempt. This change significantly affects remote workers and investors, the actual tax treatment depends on your specific income type, residency status (≥180 days), and remittance timing in ways this model cannot capture. Income must be passed in THB.",
+      label: `Thailand PIT + social security (${THAILAND_TAX_YEAR_LABEL})`,
+      missingFactor: "Foreign-income remittance rules changed Jan 2024, treatment depends on timing; family allowances not modelled.",
+      note: "Revenue Department scale after the 50% expense deduction (up to THB 100,000), the THB 60,000 personal allowance and employee social security of 5% on pay up to THB 17,500 a month (at most THB 875 a month from 2026). Critical planning caveat: Thailand taxes foreign-source income remitted to Thailand from 1 January 2024, regardless of the year it was earned, and the actual treatment depends on your income type, residency (180 days or more) and remittance timing. Income must be passed in THB.",
     };
   },
 
@@ -1511,28 +1499,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 progressive. Annual personal allowance VND 132M, dependent VND 52.8M.
   // No joint filing.
   // -------------------------------------------------------------------------
-  VN: ({ annualIncome }) => {
-    const personalAllowance = 132000000;
-    const taxable = Math.max(0, annualIncome - personalAllowance);
-
-    const rate = progressiveTax(taxable, [
-      { upTo: 60000000, rate: 0.05 },
-      { upTo: 120000000, rate: 0.10 },
-      { upTo: 216000000, rate: 0.15 },
-      { upTo: 384000000, rate: 0.20 },
-      { upTo: 624000000, rate: 0.25 },
-      { upTo: 960000000, rate: 0.30 },
-      { upTo: Infinity, rate: 0.35 },
-    ]);
-
-    const effectiveRate = annualIncome > 0 ? (rate * taxable) / annualIncome : 0;
+  VN: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/vietnam.ts (same as the Asia calculator).
+    const { incomeTax, contributions } = vietnamTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(effectiveRate),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Vietnam PIT (2024)",
-      missingFactor: "Social insurance (~10.5% combined) and dependent relief not modelled.",
-      note: "Brackets and personal allowance (VND 132M/yr) are 2024 figures. Key gaps: employee social insurance (~10.5% combined: social 8%, health 1.5%, unemployment 1%) is a significant deduction for locally-employed residents, not modelled. Dependent relief (VND 52.8M per dependent) is also excluded, which understates take-home for families. For remote workers maintaining foreign employment contracts, Vietnam PIT exposure depends on the tax treaty with your home country and actual days of residency. Income must be passed in VND.",
+      label: `Vietnam PIT + social insurance (${VIETNAM_TAX_YEAR_LABEL})`,
+      missingFactor: "Dependant deductions not modelled; figures come from advisers' summaries of Law 109/2025.",
+      note: "Law 109/2025 as summarised by advisers: five brackets of 5% to 35% after the VND 15.5 million monthly personal deduction and employee social insurance of 10.5%. Retirees and remote workers paid abroad pay no insurance here. For remote workers on foreign contracts, PIT exposure depends on the tax treaty with your home country and your days of residence. Income must be passed in VND.",
     };
   },
 

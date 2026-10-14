@@ -18,6 +18,8 @@
 import { AUSTRALIA_TAX_YEAR_LABEL, australiaTax } from "./countryTaxRules/australia";
 import { INDONESIA_NOTE, INDONESIA_TAX_YEAR_LABEL, indonesiaTax } from "./countryTaxRules/indonesia";
 import { MALAYSIA_TAX_YEAR_LABEL, malaysiaTax } from "./countryTaxRules/malaysia";
+import { THAILAND_TAX_YEAR_LABEL, thailandTax } from "./countryTaxRules/thailand";
+import { VIETNAM_TAX_YEAR_LABEL, vietnamTax } from "./countryTaxRules/vietnam";
 import { NEW_ZEALAND_TAX_YEAR_LABEL, newZealandTax } from "./countryTaxRules/newZealand";
 import { PHILIPPINES_TAX_YEAR_LABEL, philippinesTax } from "./countryTaxRules/philippines";
 import { NO_US_OVERLAY, US_SELF_EMPLOYED_KEY, US_SELF_EMPLOYED_QUESTION, US_TAX_STATUS_KEY, US_TAX_STATUS_QUESTION, withUsTaxAbroad } from "./internationalTaxes";
@@ -326,7 +328,7 @@ return {
   // -------------------------------------------------------------------------
   // THAILAND, THB
   // -------------------------------------------------------------------------
-  TH: ({ annualIncome, incomeScenario = "local", answers }) => {
+  TH: ({ annualIncome, isRetired, incomeScenario = "local", answers }) => {
     const residency = answers?.th_residency ?? "";
 
     if (
@@ -352,22 +354,10 @@ return {
       };
     }
 
-    const deductions = Math.min(annualIncome * 0.5, 100000) + 60000;
-    const taxable = Math.max(0, annualIncome - deductions);
-
-    const taxAmount = progressiveTaxAmount(taxable, [
-      { upTo: 150000, rate: 0.0 },
-      { upTo: 300000, rate: 0.05 },
-      { upTo: 500000, rate: 0.1 },
-      { upTo: 750000, rate: 0.15 },
-      { upTo: 1000000, rate: 0.2 },
-      { upTo: 2000000, rate: 0.25 },
-      { upTo: 5000000, rate: 0.3 },
-      { upTo: Infinity, rate: 0.35 },
-    ]);
-
-    const incomeTaxRate = effectiveRateFromTax(taxAmount, annualIncome);
-    const rates = combineRates(incomeTaxRate, 0);
+    // Rules in countryTaxRules/thailand.ts: Revenue Department scale, deductions, social security to THB 875 a month.
+    const { incomeTax, contributions } = thailandTax(annualIncome, isRetired ? "retired" : incomeScenario);
+    const incomeTaxRate = effectiveRateFromTax(incomeTax, annualIncome);
+    const rates = combineRates(incomeTaxRate, effectiveRateFromTax(contributions, annualIncome));
     const hasAnswer = !!residency;
 
     return {
@@ -375,12 +365,12 @@ return {
       model: "progressive-country",
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
-        ? "Thailand PIT, resident, taxable income (2024)"
-        : "Thailand PIT (2024, select residency/remittance status)",
+        ? `Thailand PIT + social security, resident (${THAILAND_TAX_YEAR_LABEL})`
+        : `Thailand PIT + social security (${THAILAND_TAX_YEAR_LABEL}, select residency/remittance status)`,
       missingFactor: hasAnswer
-        ? "Social security contributions are not included."
+        ? "Allowances for spouse, children and parents and fund deductions not modelled."
         : "Foreign-income remittance/residency rules changed Jan 2024, treatment depends on your situation.",
-      note: "Brackets and standard deductions are 2024 figures. Income must be passed in THB.",
+      note: "Revenue Department scale (0% to THB 150,000, then 5% to 35% above THB 5 million) after the 50% expense deduction (up to THB 100,000), the THB 60,000 personal allowance and employee social security of 5% on pay up to THB 17,500 a month (at most THB 875 a month from 2026, deductible); retirees and remote workers paid abroad pay no social security here. Income must be passed in THB.",
     };
   },
 
@@ -412,28 +402,17 @@ return {
         ...rates,
         model: "flat",
         confidence: "partial",
-        label: "Vietnam, non-resident income tax (20% flat, 2024)",
+        label: "Vietnam, non-resident income tax (20% flat)",
         missingFactor:
           "Applies to Vietnam-source income only; no personal allowance available.",
         note: "Non-residents pay a flat 20% tax on Vietnam-source income. Income must be passed in VND.",
       };
     }
 
-    const personalAllowance = 132000000;
-    const taxable = Math.max(0, annualIncome - personalAllowance);
-
-    const taxAmount = progressiveTaxAmount(taxable, [
-      { upTo: 60000000, rate: 0.05 },
-      { upTo: 120000000, rate: 0.1 },
-      { upTo: 216000000, rate: 0.15 },
-      { upTo: 384000000, rate: 0.2 },
-      { upTo: 624000000, rate: 0.25 },
-      { upTo: 960000000, rate: 0.3 },
-      { upTo: Infinity, rate: 0.35 },
-    ]);
-
-    const incomeTaxRate = effectiveRateFromTax(taxAmount, annualIncome);
-    const rates = combineRates(incomeTaxRate, 0);
+    // Rules in countryTaxRules/vietnam.ts: Law 109/2025 five-bracket scale, VND 186 million personal deduction, insurance 10.5%.
+    const { incomeTax, contributions } = vietnamTax(annualIncome, incomeScenario);
+    const incomeTaxRate = effectiveRateFromTax(incomeTax, annualIncome);
+    const rates = combineRates(incomeTaxRate, effectiveRateFromTax(contributions, annualIncome));
     const hasAnswer = !!residency;
 
     return {
@@ -441,12 +420,12 @@ return {
       model: "progressive-country",
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
-        ? "Vietnam PIT, resident (2024)"
-        : "Vietnam PIT (2024, select residency status)",
+        ? `Vietnam PIT + social insurance, resident (${VIETNAM_TAX_YEAR_LABEL})`
+        : `Vietnam PIT + social insurance (${VIETNAM_TAX_YEAR_LABEL}, select residency status)`,
       missingFactor: hasAnswer
-        ? "Social insurance and dependent relief not modelled."
+        ? "Dependant deductions (VND 6.2 million a month each) not modelled; figures come from advisers' summaries of Law 109/2025."
         : "Non-residents on foreign-source remote income may owe nothing.",
-      note: "Brackets and personal allowance are 2024 figures. Income must be passed in VND.",
+      note: "Law 109/2025 as summarised by advisers: five brackets of 5%, 10%, 20%, 30% and 35% on taxable income (monthly limits of VND 10, 30, 60 and 100 million), after the VND 15.5 million monthly personal deduction and employee social insurance of 10.5% (up to 20 times the VND 2.34 million base salary), which is deductible. Retirees and remote workers paid abroad pay no insurance here. One source lists different middle rates, so treat this as an estimate. Income must be passed in VND.",
     };
   },
 
