@@ -160,3 +160,7 @@ ATO resident-rate page retrieval failed in the browsing tool. No Australian resu
 Next: (1) capture current official calculator/workbook outputs for matching profiles; (2) finish the route register's pending independent scenario tests, prioritizing retirement and Jamaica; (3) add Colombia/Portugal/Japan and representative complex US states/cities; (4) run the same fixtures through page UI and FX flows; (5) correct only approved findings with regression assertions. Do not infer completion from the green existing test suite.
 
 No commit or push performed.
+
+## Decision on Finding 2 (2026-10-14)
+
+The owner chose to keep the standard deduction and disclose it. The retirement, RMD and withdrawal calculators now say the age-65 extra deduction and the temporary senior deduction are not applied, so tax may be overstated. The Complete Plan engine still applies them.

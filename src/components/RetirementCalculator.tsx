@@ -563,7 +563,7 @@ export default function RetirementCalculator() {
                       </>
                     ) : (
                       <>
-                        ≈ <span className="font-semibold">{money(results.afterTaxMonthlyIncome)}/mo</span> after an estimated {(results.incomeEffectiveTaxRate * 100).toFixed(1)}% income tax in {stateName} (traditional). Roth would be tax-free.
+                        ≈ <span className="font-semibold">{money(results.afterTaxMonthlyIncome)}/mo</span> after an estimated {(results.incomeEffectiveTaxRate * 100).toFixed(1)}% income tax in {stateName} (traditional). Roth would be tax-free. Tax uses the standard deduction for a filer under 65; the extra deduction at 65+ and the temporary senior deduction are not applied, so tax may be overstated.
                       </>
                     )}
                   </p>
