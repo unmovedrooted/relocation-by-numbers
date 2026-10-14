@@ -17,6 +17,15 @@ export const BB_TAX_CONFIG: CountryTaxConfig = {
 
   sources: [
     {
+      title: "Policy Note OGC No. 001/2026: Reduction of Personal Income Tax Rates",
+      url: "https://bra.gov.bb/News/Policy-Notes/Reduction-of-Personal-Income-Tax-R",
+      type: "tax_agency",
+      publisher: "Barbados Revenue Authority",
+      dateChecked: "2026-10-14",
+      notes:
+        "Confirms rates of 11.5% on income from BBD 25,000 to 75,000 and 27.5% above, from income year 2026. The pensioner allowance of BBD 75,000 is from the budget summary, not this note.",
+    },
+    {
       title: "PwC Barbados 2026/2027 Budget Insights",
       url: "https://www.pwc.com/bb/en/publications/assets/barbados-2026-2027-budget.pdf",
       type: "tax_firm",

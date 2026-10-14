@@ -99,6 +99,7 @@ export const DO_TAX_CONFIG: CountryTaxConfig = {
       kind: "territorial",
       confidence: "high",
       notes: [
+        "Adviser summaries report that Law 30-26 introduces a new income tax scale from fiscal year 2027; for 2026 the DGII's existing scale (exempt to DOP 416,220; 15% to 624,329; 20% to 867,123; 25% above) still applies.",
         "The Dominican Republic follows a territorial concept, and Dominican-source income is subject to tax.",
         "For this calculator, local earned income is modeled using the published progressive annual brackets.",
         "This estimate does not model Christmas bonus exemptions or employer withholding specifics.",

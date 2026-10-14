@@ -122,7 +122,8 @@ export const TT_TAX_CONFIG: CountryTaxConfig = {
       notes: [
         "For planning purposes, retirement, pension, and similar non-working income is modeled using the resident personal income tax schedule.",
         "The IRD states that the TTD 90,000 personal allowance is also available to non-residents receiving pension income accruing or derived from Trinidad and Tobago.",
-        "This estimate does not model pension-specific exemptions, NIS, or health surcharge.",
+        "KPMG's summary of the 2026 budget reports an income tax exemption for private pensions from 1 January 2026 (conditions and limits were not published in that summary), which this estimate does not apply, so tax on private pension income may be overstated.",
+        "This estimate does not model other pension-specific exemptions, NIS, or health surcharge.",
       ],
       getAllowance: () => 90000,
       getBrackets: () => [

@@ -12,10 +12,19 @@ export const CW_TAX_CONFIG: CountryTaxConfig = {
   modelStatus: "partial",
   badgeLabel: "Simplified estimate",
   disclaimer:
-    "This estimate covers personal income tax only. Curaçao uses a progressive personal income tax system, but this file does not yet rely on a fully verified official current bracket table from a primary public source. Use this as a planning estimate only.",
+    "This estimate covers personal income tax only, using the Belastingdienst Curaçao's 2026 bracket table (9.75% to 46.5%). It does not model social premiums, deductions, the penshonado regime or other special regimes. Use this as a planning estimate.",
   tags: ["progressive"],
 
   sources: [
+    {
+      title: "Schijven tarief 2026",
+      url: "https://belastingdienst.cw/wp-content/uploads/2026/01/Schijven-tarief-2026.pdf",
+      type: "tax_agency",
+      publisher: "Belastingdienst Curaçao",
+      dateChecked: "2026-10-14",
+      notes:
+        "Official 2026 table: 9.75% to XCG 39,094; 15% to 52,127; 23% to 78,190; 30% to 110,769; 37.5% to 162,894; 46.5% above (cumulative tax amounts check against these rates).",
+    },
     {
       title: "Curaçao Payroll & Benefits Guide",
       url: "https://www.papayaglobal.com/countrypedia/country/curacao/",
@@ -47,9 +56,11 @@ export const CW_TAX_CONFIG: CountryTaxConfig = {
       ],
       getAllowance: () => 0,
       getBrackets: () => [
-        { upTo: 50000, rate: 0.0975 },
-        { upTo: 100000, rate: 0.20 },
-        { upTo: 200000, rate: 0.30 },
+        { upTo: 39094, rate: 0.0975 },
+        { upTo: 52127, rate: 0.15 },
+        { upTo: 78190, rate: 0.23 },
+        { upTo: 110769, rate: 0.30 },
+        { upTo: 162894, rate: 0.375 },
         { upTo: null, rate: 0.465 },
       ],
       sources: [
@@ -75,9 +86,11 @@ export const CW_TAX_CONFIG: CountryTaxConfig = {
       ],
       getAllowance: () => 0,
       getBrackets: () => [
-        { upTo: 50000, rate: 0.0975 },
-        { upTo: 100000, rate: 0.20 },
-        { upTo: 200000, rate: 0.30 },
+        { upTo: 39094, rate: 0.0975 },
+        { upTo: 52127, rate: 0.15 },
+        { upTo: 78190, rate: 0.23 },
+        { upTo: 110769, rate: 0.30 },
+        { upTo: 162894, rate: 0.375 },
         { upTo: null, rate: 0.465 },
       ],
       sources: [
@@ -103,9 +116,11 @@ export const CW_TAX_CONFIG: CountryTaxConfig = {
       ],
       getAllowance: () => 0,
       getBrackets: () => [
-        { upTo: 50000, rate: 0.0975 },
-        { upTo: 100000, rate: 0.20 },
-        { upTo: 200000, rate: 0.30 },
+        { upTo: 39094, rate: 0.0975 },
+        { upTo: 52127, rate: 0.15 },
+        { upTo: 78190, rate: 0.23 },
+        { upTo: 110769, rate: 0.30 },
+        { upTo: 162894, rate: 0.375 },
         { upTo: null, rate: 0.465 },
       ],
       sources: [
