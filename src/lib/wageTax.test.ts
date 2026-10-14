@@ -118,7 +118,7 @@ describe("state income tax: hand-calculated expected results, single filer", () 
     ["az", 100_000, 2_097.5, "ARS 43-1041(H) indexed deduction 16,100 (derived); 2.5% flat"],
     ["ar", 150_000, 5_349.71, "Act 1 of 2026S1 / HB 1001 upper table (2% of first 4,700, 3.7% above) on 147,530; $29 credit"],
     ["ca", 100_000, 5_054.98, "FTB 2025 Form 540 Schedule X on 94,294 (std ded 5,706), less 153 exemption credit"],
-    ["co", 100_000, 3_691.6, "4.4% of federal taxable income 83,900"],
+    ["co", 100_000, 3_691.6, "4.4% of federal taxable income 83,900 (Colorado DOR booklet, Oct 2025: rate currently 4.4%; Legislative Council expects no 2026 trigger)"],
     ["dc", 100_000, 5_531.5, "DC D-40ES 2026 schedule on 83,900"],
     ["ga", 100_000, 4_241.5, "HB 463: 4.99% of AGI less 15,000"],
     ["hi", 100_000, 5_796.26, "Act 46 (2024) 2026 schedule on 90,856 (std ded 8,000, exemption 1,144)"],
@@ -154,7 +154,7 @@ describe("state income tax: hand-calculated expected results, single filer", () 
     ["wv", 100_000, 3_690.9, "WV SB 392: 1,950.50 + 4.58% over 60,000 on 98,000"],
     ["wi", 100_000, 4_427.52, "WI 1-ES 2026 Schedule A on 94,925.60 (std deduction phase-out, 700 exemption)"],
     ["id", 100_000, 4_185, "Idaho 5.3% above the derived 4,938 zero bracket on 83,900"],
-    ["de", 100_000, 5_259, "Delaware brackets and deduction as encoded; not independently confirmed (see STATE-WAGE-RULES-DRAFT.md)"],
+    ["de", 100_000, 5_259, "Delaware Division of Revenue 2026 PIT-EST schedule (2.2/3.9/4.8/5.2/5.55/6.6%), 3,250 standard deduction, 110 credit; checked 2026-10-14"],
     ["ct", 100_000, 4_975, "CT brackets on 100,000 (IP 2026(7)) plus the 225 add-back as encoded by the planner"],
   ];
 
@@ -233,7 +233,7 @@ describe("local income taxes", () => {
     expect(local("oh", "cincinnati-oh", 100_000, "single", 10)).toBeCloseTo(1_800, 2);
   });
   it("taxes Philadelphia compensation without removing deferrals", () => {
-    expect(local("pa", "philadelphia-pa", 100_000, "single", 10)).toBeCloseTo(3_740, 2);
+    expect(local("pa", "philadelphia-pa", 100_000, "single", 10)).toBeCloseTo(3_737.5, 2);
     expect(local("pa", "pittsburgh-pa", 100_000, "single", 10)).toBeCloseTo(3_000, 2);
   });
   it("applies Detroit's 2.4% to income after deferrals and the 600 exemption", () => {

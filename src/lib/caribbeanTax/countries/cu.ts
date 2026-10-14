@@ -12,10 +12,19 @@ export const CU_TAX_CONFIG: CountryTaxConfig = {
   modelStatus: "partial",
   badgeLabel: "Simplified estimate",
   disclaimer:
-    "This estimate covers personal income tax only. Cuba has an official progressive personal income tax system, but the exact current bracket thresholds were not fully confirmed from the official pages reviewed here. This file uses a simplified progressive planning model and should be re-checked against the current statutory scale before final launch.",
+    "This estimate covers personal income tax only. Cuba's official figures (Law 174 of 2025, article 65, via state media) are an exempt minimum of CUP 39,120, ten brackets starting at 5% on the first CUP 25,000 of taxable income and rising to 50% above CUP 1,000,000. The middle brackets were not available in text, so the bands between are a simplified planning model. Check the ONAT DJ 08 model for the exact scale.",
   tags: ["progressive"],
 
   sources: [
+    {
+      title: "Conozca sobre la nueva escala progresiva (Juventud Rebelde)",
+      url: "https://www.juventudrebelde.cu/cuba/2025-01-04/conozca-sobre-la-nueva-escala-progresiva-para-la-declaracion-jurada-del-impuesto-sobre-ingresos-personales",
+      type: "secondary_summary",
+      publisher: "Juventud Rebelde (state newspaper), citing ONAT and Law 174 of 2025",
+      dateChecked: "2026-10-14",
+      notes:
+        "States the exempt minimum of CUP 39,120, the maximum rate of 50% and that the scale applies to 2024 income; the bracket table itself is not in the text.",
+    },
     {
       title: "Conozca los resultados de la campaña de declaración jurada",
       url: "https://www.onat.gob.cu/home/noticias/366",
@@ -51,17 +60,17 @@ export const CU_TAX_CONFIG: CountryTaxConfig = {
       confidence: "simplified",
       notes: [
         "Cuba local earned income is modeled as a progressive personal income tax system.",
-        "ONAT confirms that a new progressive scale applies, but this file does not yet rely on a fully verified official bracket table.",
+        "The CUP 39,120 exempt minimum, the 5% start on the first CUP 25,000 and the 50% top rate above CUP 1,000,000 come from Law 174 as reported by state media; the middle brackets are simplified.",
         "For planning purposes, this calculator uses a simplified progressive schedule and should be treated as an estimate, not a final statutory computation.",
       ],
-      getAllowance: () => 0,
+      getAllowance: () => 39120,
       getBrackets: () => [
-        { upTo: 50000, rate: 0.05 },
+        { upTo: 25000, rate: 0.05 },
         { upTo: 100000, rate: 0.10 },
         { upTo: 200000, rate: 0.15 },
         { upTo: 500000, rate: 0.20 },
         { upTo: 1000000, rate: 0.30 },
-        { upTo: null, rate: 0.35 },
+        { upTo: null, rate: 0.50 },
       ],
       sources: [
         {
@@ -93,14 +102,14 @@ export const CU_TAX_CONFIG: CountryTaxConfig = {
         "The official materials reviewed confirm a progressive personal income tax framework, but they did not cleanly confirm a separate territorial or remote-income exemption model for this calculator.",
         "This is a conservative estimate and should be re-checked if you later model Cuba's residency and foreign-source rules in more detail.",
       ],
-      getAllowance: () => 0,
+      getAllowance: () => 39120,
       getBrackets: () => [
-        { upTo: 50000, rate: 0.05 },
+        { upTo: 25000, rate: 0.05 },
         { upTo: 100000, rate: 0.10 },
         { upTo: 200000, rate: 0.15 },
         { upTo: 500000, rate: 0.20 },
         { upTo: 1000000, rate: 0.30 },
-        { upTo: null, rate: 0.35 },
+        { upTo: null, rate: 0.50 },
       ],
       sources: [
         {
@@ -123,14 +132,14 @@ export const CU_TAX_CONFIG: CountryTaxConfig = {
         "The official materials reviewed did not provide a clear pension-specific exemption map suitable for live calculator logic.",
         "Use this as a planning estimate rather than a specialist retirement tax determination.",
       ],
-      getAllowance: () => 0,
+      getAllowance: () => 39120,
       getBrackets: () => [
-        { upTo: 50000, rate: 0.05 },
+        { upTo: 25000, rate: 0.05 },
         { upTo: 100000, rate: 0.10 },
         { upTo: 200000, rate: 0.15 },
         { upTo: 500000, rate: 0.20 },
         { upTo: 1000000, rate: 0.30 },
-        { upTo: null, rate: 0.35 },
+        { upTo: null, rate: 0.50 },
       ],
       sources: [
         {

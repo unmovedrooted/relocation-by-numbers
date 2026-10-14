@@ -482,7 +482,7 @@ return {
     confidence: "verified",
     label: "No personal income tax",
     missingFactor: "No personal income tax, this estimate is exact.",
-    note: "The UAE does not levy personal income tax on employment or investment income. A 9% corporate tax applies to businesses with profits above AED 375,000, which can matter for freelancers who operate through a company.",
+    note: "The UAE does not levy personal income tax on employment or investment income; the Federal Tax Authority states that corporate tax does not apply to an individual's salary. A 9% corporate tax applies to businesses with profits above AED 375,000, which can matter for freelancers who operate through a company.",
   }),
 
   // -------------------------------------------------------------------------
@@ -848,7 +848,7 @@ return {
     confidence: "verified",
     label: "No personal income tax",
     missingFactor: "No personal income tax on employment income, this estimate is exact.",
-    note: "Qatar does not levy personal income tax on salaries and wages. Self-employed people carrying on commercial activity for profit are taxed at the 10% corporate rate, which is not modelled here.",
+    note: "Qatar does not levy personal income tax on salaries and wages (General Tax Authority). Self-employed people carrying on commercial activity for profit are taxed at the 10% corporate rate, which is not modelled here.",
   }),
 
   // -------------------------------------------------------------------------
@@ -862,7 +862,7 @@ return {
     confidence: "verified",
     label: "No personal income tax on employment income",
     missingFactor: "No personal income tax, expatriates pay no income tax in Saudi Arabia.",
-    note: "Saudi Arabia does not levy personal income tax on employment income. Expatriates with dependants pay an annual levy of SAR 4,800 per dependant, which is not modelled.",
+    note: "Saudi Arabia does not levy personal income tax on employment income (ZATCA's income tax page covers business activity and non-resident income; the no-salary-tax position rests on secondary sources). Expatriates with dependants pay an annual levy of SAR 4,800 per dependant, which is not modelled.",
   }),
 
   // -------------------------------------------------------------------------

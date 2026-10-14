@@ -13,9 +13,9 @@ import type { HouseholdTaxInput } from "./householdTax";
  *   after retirement, meeting the plan's or IRA's age/service conditions,
  *   e.g. age 59 1/2 for an IRA) is excluded from PA gross income, while an
  *   early distribution (codes 1/2) remains taxable.
- * - City of Philadelphia Department of Revenue: the resident Wage Tax rate
- *   of 3.74% effective July 1, 2025 (dropping to 3.735% on July 1, 2026,
- *   not modeled here).
+ * - City of Philadelphia Department of Revenue Tax Rate History: the resident Wage Tax rate is
+ *   3.74% to June 30, 2026 and 3.735% from July 1, 2026 to June 30, 2027 (checked 2026-10-14), so tax
+ *   year 2026 uses the blend 3.7375% and later years hold 3.735%; the city's planned further cuts are not applied.
  *   https://www.phila.gov/services/payments-assistance-taxes/taxes/income-taxes/earnings-tax-employees/
  * - Allentown School District's own published rate: a combined city+school
  *   resident Earned Income Tax rate of 1.975% for Allentown.
@@ -60,13 +60,17 @@ const STATE_RATE = .0307;
 /** Every Pennsylvania cityId this planner rates; every other Pennsylvania
  * location, including "other-pa", is unsupported. */
 const LOCAL_RATES: Record<string, number> = {
-  "philadelphia-pa": .0374,
+  "philadelphia-pa": .037375, // 2026 blend; see philadelphiaRate
   "pittsburgh-pa": .03,
   "allentown-pa": .01975,
 };
 
-function localTaxAmount(cityId: string, wages: number) {
-  const rate = LOCAL_RATES[cityId];
+function philadelphiaRate(year: number) {
+  return year <= 2026 ? .037375 : .03735;
+}
+
+function localTaxAmount(cityId: string, wages: number, year: number) {
+  const rate = cityId === "philadelphia-pa" ? philadelphiaRate(year) : LOCAL_RATES[cityId];
   if (rate === undefined) throw new RangeError("Choose a supported Pennsylvania location; this planner rates only Philadelphia, Pittsburgh and Allentown.");
   return wages * rate;
 }
@@ -86,7 +90,7 @@ export function pennsylvaniaTax(
   const paAgi = federalAgi + federalOnlyDeductions - taxableBenefits - pensionSubtraction(input) - excludableRetirementOrdinary;
   const taxable = Math.max(0, paAgi);
   const stateTax = taxable * STATE_RATE;
-  const localTax = localTaxAmount(input.cityId ?? "", wages);
+  const localTax = localTaxAmount(input.cityId ?? "", wages, input.year);
   return {
     stateTax, localTax, paAgi,
     warning: "Pennsylvania pre-credit estimate: enacted flat 3.07% state rate (reviewed 2026-09-23), with NO standard "

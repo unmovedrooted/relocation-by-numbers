@@ -12,7 +12,7 @@ export const HT_TAX_CONFIG: CountryTaxConfig = {
   modelStatus: "partial",
   badgeLabel: "Simplified estimate",
   disclaimer:
-    "This estimate covers personal income tax only. Haiti's official tax pages confirm a five-band progressive salary scale from 0% to 30%, but the exact bracket thresholds were not clearly published on the official pages reviewed here. This file uses a secondary threshold summary and should be re-checked against the current statutory barème before final launch.",
+    "This estimate covers personal income tax only. Haiti's Ministry of Economy and Finance (MEF) states that the 2005 decree scale has a 0% band to HTG 60,000 a year; the upper limits of the other bands (HTG 240,000, 480,000 and 1,000,000) are implied by the MEF note's ratios and match secondary summaries, so they are not stated by an official page. The 10% special salary allowance is not modelled. The MEF validated a new scale in May 2026 (0% to HTG 360,000, then 12/18/25/30%) planned for 1 October 2026, which this model does not use until it is published in law.",
   tags: ["progressive"],
 
   sources: [
@@ -41,7 +41,25 @@ export const HT_TAX_CONFIG: CountryTaxConfig = {
       publisher: "Global Expansion",
       dateChecked: "2026-04-08",
       notes:
-        "Used as a secondary source for the practical annual threshold summary: 0% to 20,000 HTG, 10% to 100,000, 15% to 250,000, 25% to 750,000, and 30% above.",
+        "Earlier source for thresholds (0% to 20,000 HTG, 10% to 100,000, 15% to 250,000, 25% to 750,000); superseded because it conflicts with the MEF figure of a 0% band to 60,000 HTG.",
+    },
+    {
+      title: "Revising Haiti's personal income tax (IRPP) schedule (2026)",
+      url: "https://www.haitidocs.org/doc/mef-2026-irpp-bareme-revision",
+      type: "tax_agency",
+      publisher: "Ministère de l'Économie et des Finances, Haïti",
+      dateChecked: "2026-10-14",
+      notes:
+        "States the 0% band to HTG 60,000 under the 2005 decree, the ratios implying the HTG 240,000, 480,000 and 1,000,000 limits, and the proposed 2026 scale (validated May 2026, planned for 1 October 2026).",
+    },
+    {
+      title: "Les Traitements et Salaires",
+      url: "https://dgi.gouv.ht/dgi_sev/les-traitements-et-salaires/",
+      type: "tax_agency",
+      publisher: "Direction Générale des Impôts, Haïti",
+      dateChecked: "2026-10-14",
+      notes:
+        "States the 10% special allowance on gross salary before the article 149 scale is applied (not modelled).",
     },
   ],
 
@@ -52,13 +70,13 @@ export const HT_TAX_CONFIG: CountryTaxConfig = {
       notes: [
         "Haiti local earned income is modeled as a five-band progressive personal income tax schedule.",
         "The official DGI pages confirm that salaries are taxed under a progressive five-band scale from 0% to 30%, and that individuals domiciled in Haiti are within the filing scope.",
-        "Because the exact official thresholds were not clearly published on the DGI pages reviewed here, this estimate uses secondary threshold cutoffs and should be treated as a planning model.",
+        "The 0% band to HTG 60,000 is from the MEF; the upper band limits are implied by the MEF note and match secondary summaries. The 10% salary allowance and the proposed 2026 scale are not modelled.",
       ],
-      getAllowance: () => 20000,
+      getAllowance: () => 60000,
       getBrackets: () => [
-        { upTo: 80000, rate: 0.10 },
-        { upTo: 230000, rate: 0.15 },
-        { upTo: 730000, rate: 0.25 },
+        { upTo: 180000, rate: 0.10 },
+        { upTo: 420000, rate: 0.15 },
+        { upTo: 940000, rate: 0.25 },
         { upTo: null, rate: 0.30 },
       ],
       sources: [
@@ -78,7 +96,7 @@ export const HT_TAX_CONFIG: CountryTaxConfig = {
           publisher: "Global Expansion",
           dateChecked: "2026-04-08",
           notes:
-            "Provides the threshold breakdown used for this planning estimate.",
+            "Older secondary figures; superseded by the MEF 0% band to HTG 60,000. The upper band limits match secondary summaries.",
         },
       ],
     },
@@ -91,11 +109,11 @@ export const HT_TAX_CONFIG: CountryTaxConfig = {
         "The DGI confirms that individuals domiciled in Haiti are in scope for income tax, but the specific foreign-source treatment was not cleanly detailed on the official pages reviewed here.",
         "This is a conservative estimate and should not be read as a confirmed territorial or remittance-basis rule.",
       ],
-      getAllowance: () => 20000,
+      getAllowance: () => 60000,
       getBrackets: () => [
-        { upTo: 80000, rate: 0.10 },
-        { upTo: 230000, rate: 0.15 },
-        { upTo: 730000, rate: 0.25 },
+        { upTo: 180000, rate: 0.10 },
+        { upTo: 420000, rate: 0.15 },
+        { upTo: 940000, rate: 0.25 },
         { upTo: null, rate: 0.30 },
       ],
       sources: [
@@ -115,7 +133,7 @@ export const HT_TAX_CONFIG: CountryTaxConfig = {
           publisher: "Global Expansion",
           dateChecked: "2026-04-08",
           notes:
-            "Provides the threshold breakdown used for this conservative planning estimate.",
+            "Older secondary figures; superseded by the MEF 0% band to HTG 60,000. The upper band limits match secondary summaries.",
         },
       ],
     },
@@ -128,11 +146,11 @@ export const HT_TAX_CONFIG: CountryTaxConfig = {
         "The official materials reviewed did not provide a clear pension-specific exemption map, so this file does not assume retirement income is exempt.",
         "Use this as a planning estimate rather than a pension-specialist determination.",
       ],
-      getAllowance: () => 20000,
+      getAllowance: () => 60000,
       getBrackets: () => [
-        { upTo: 80000, rate: 0.10 },
-        { upTo: 230000, rate: 0.15 },
-        { upTo: 730000, rate: 0.25 },
+        { upTo: 180000, rate: 0.10 },
+        { upTo: 420000, rate: 0.15 },
+        { upTo: 940000, rate: 0.25 },
         { upTo: null, rate: 0.30 },
       ],
       sources: [
@@ -152,7 +170,7 @@ export const HT_TAX_CONFIG: CountryTaxConfig = {
           publisher: "Global Expansion",
           dateChecked: "2026-04-08",
           notes:
-            "Provides the bracket thresholds used in this simplified planning model.",
+            "Older secondary figures; superseded by the MEF 0% band to HTG 60,000. The upper band limits match secondary summaries.",
         },
       ],
     },

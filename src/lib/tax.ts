@@ -456,7 +456,7 @@ const LOCAL_TAX_RULES: Record<string, LocalTaxRule> = {
       { upTo: Number.POSITIVE_INFINITY, rate: 0.03876 },
     ],
   },
-  "philadelphia-pa": { type: "flat", rate: 0.0375 },
+  "philadelphia-pa": { type: "flat", rate: 0.037375 }, // 2026 blend of 3.74% (to June 30) and 3.735% (from July 1), Philadelphia Dept. of Revenue
   "pittsburgh-pa":   { type: "flat", rate: 0.03   }, // 1% city + 2% school district resident EIT (excludes ~$52/yr LST). Verified 2025.
   "kansas-city-mo":  { type: "flat", rate: 0.01   },
   "st-louis-mo":     { type: "flat", rate: 0.01   }, // St. Louis earnings tax, resident. Verified 2025.

@@ -7,7 +7,6 @@ import { isAllowedCompareRoute } from "../lib/compare";
 import {
   estimateNetAnnual,
   estimateNetBreakdown,
-  TAX_YEAR,
   type TaxBreakdown,
 } from "../lib/wageTax";
 import type { FilingStatus } from "../lib/tax";

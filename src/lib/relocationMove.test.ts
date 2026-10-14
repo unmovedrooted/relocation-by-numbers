@@ -3,7 +3,6 @@ import { compareMove, householdNetAnnual, RANGE_SPREAD, type Item, type MoveInpu
 
 const entered = (amount: number): Item => ({ amount, estimated: false });
 const est = (amount: number): Item => ({ amount, estimated: true });
-const zero = entered(0);
 
 // Texas has no state income tax and no local wage tax, so a Texas-to-Texas move isolates the arithmetic.
 const base: MoveInputs = {
