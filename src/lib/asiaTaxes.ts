@@ -494,9 +494,14 @@ const rates = combineRates(incomeTaxRate, socialContributionRate);
   // -------------------------------------------------------------------------
   // INDONESIA, IDR
   // -------------------------------------------------------------------------
-  ID: ({ annualIncome }) => {
-    const ptkp = 54000000; // single
-const taxable = Math.max(0, annualIncome - ptkp);
+  ID: ({ annualIncome, filing, isRetired }) => {
+    // Directorate General of Taxes (pajak.go.id), read 2026-10-14: Article 17 layers 5% to IDR 60 million, 15%, 25%, 30% and 35% above
+    // IDR 5 billion; PTKP IDR 54 million for a single person and IDR 58.5 million for a married person with no dependants;
+    // occupational cost allowance (biaya jabatan) of 5% of gross pay, at most IDR 6 million a year. For pensioners the
+    // equivalent pension allowance is 5% up to IDR 2.4 million a year (standard rule, not re-read).
+    const ptkp = filing === "married" ? 58500000 : 54000000;
+    const occupationalCost = Math.min(annualIncome * 0.05, isRetired ? 2400000 : 6000000);
+    const taxable = Math.max(0, annualIncome - occupationalCost - ptkp);
 
 const taxAmount = progressiveTaxAmount(taxable, [
       { upTo: 60000000, rate: 0.05 },
@@ -513,9 +518,9 @@ const taxAmount = progressiveTaxAmount(taxable, [
       ...rates,
       model: "progressive-country",
       confidence: "simplified",
-      label: "Indonesia PPh income tax (2024)",
+      label: "Indonesia PPh income tax (2026 rules)",
       missingFactor: "BPJS health and employment contributions are not included.",
-note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is applied for single filers. Income must be passed in IDR.",
+      note: "Uses the Article 17 layers (5% to 35%), the PTKP non-taxable amount (IDR 54 million single, IDR 58.5 million married) and the occupational-cost allowance (5%, at most IDR 6 million), as published by the Directorate General of Taxes. The monthly TER withholding tables are a payment method and give the same annual tax. Not modelled: BPJS pension, old-age and health contributions (about 4% of pay up to wage ceilings), dependants' PTKP and the temporary 2026 PPh 21 incentives for some sectors. Income must be passed in IDR.",
     };
   },
 

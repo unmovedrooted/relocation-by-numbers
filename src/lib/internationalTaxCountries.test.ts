@@ -579,3 +579,20 @@ describe("India new regime (Income Tax Department, AY 2026-27 slabs, 87A rebate)
     expect(inr(1_475_000).incomeTaxRate * 1_475_000).toBeCloseTo(93_600, 6);
   });
 });
+
+describe("Indonesia (DJP Article 17 layers, PTKP, occupational cost)", () => {
+  const idr = (income: number, filing: "single" | "married" = "single") => estimateAsiaTax({ countryCode: "ID", annualIncome: income, filing, isRetired: false });
+
+  it("IDR 300,000,000 a year, single", () => {
+    // biaya jabatan 6,000,000; taxable 300,000,000 - 6,000,000 - 54,000,000 = 240,000,000: 5% x 60M + 15% x 180M = 30,000,000
+    expect(idr(300_000_000).effectiveRate).toBeCloseTo(0.10, 10);
+  });
+
+  it("the married PTKP of IDR 58.5 million lowers the tax by 15% x 4.5M", () => {
+    expect((idr(300_000_000).effectiveRate - idr(300_000_000, "married").effectiveRate) * 300_000_000).toBeCloseTo(675_000, 4);
+  });
+
+  it("pays nothing below PTKP plus the cost allowance", () => {
+    expect(idr(50_000_000).effectiveRate).toBe(0);
+  });
+});
