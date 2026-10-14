@@ -13,7 +13,7 @@ import {
   getInternationalCityByCode,
 } from "@/lib/internationalCities";
 import {
-  getCityDefaultsByCode,
+  getCityDefaultsLocal,
 } from "@/lib/internationalCityDefaults";
 import {
   estimateInternationalTax,
@@ -567,13 +567,13 @@ const [carCostMonthly, setCarCostMonthly] = useState<string>(initial.carCostMont
   const fromCityLabel = getInternationalCityByCode(fromCityCode)?.name ?? "Current city";
   const toCityLabel   = getInternationalCityByCode(toCityCode)?.name  ?? "Target city";
 
-  const currentCityDefaults  = useMemo(() => getCityDefaultsByCode(fromCityCode), [fromCityCode]);
-  const targetCityDefaults   = useMemo(() => getCityDefaultsByCode(toCityCode), [toCityCode]);
+  const currentCityDefaults  = useMemo(() => getCityDefaultsLocal(fromCityCode), [fromCityCode]);
+  const targetCityDefaults   = useMemo(() => getCityDefaultsLocal(toCityCode), [toCityCode]);
   const fromCityMultipliers  = useMemo(() => getCityCostMultipliers(fromCityCode), [fromCityCode]);
   const toCityMultipliers    = useMemo(() => getCityCostMultipliers(toCityCode), [toCityCode]);
 
   function applyCityDefaults(cityCode: string) {
-    const d = getCityDefaultsByCode(cityCode);
+    const d = getCityDefaultsLocal(cityCode);
     if (!d) return false;
     const patch = createEuropeCityPresetPatch(d);
     setDestinationRent(patch.destinationRent);

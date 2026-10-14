@@ -1,8 +1,16 @@
+import { convertUsdAmountToLocal } from "./internationalFx";
+
+/**
+ * Every money amount in a row is in U.S. dollars unless the row says amountUnit: "local", in which case the amounts are in the row's
+ * own currency (Lisbon, Porto, London and Toronto were written that way and the Europe calculator's tests rely on it).
+ * Use getCityDefaultsUsd for dollar maths and getCityDefaultsLocal for calculator fields typed in the destination currency.
+ */
 export type InternationalCityDefaults = {
   code: string;
   countryCode: string;
   city: string;
   currency: string;
+  amountUnit?: "usd" | "local";
   costIndex: number;
 
  monthlyDefaults: {
@@ -49,6 +57,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     countryCode: "PT",
     city: "Lisbon",
     currency: "EUR",
+    amountUnit: "local",
     costIndex: 0.95,
     monthlyDefaults: {
       rent: 2200,
@@ -86,6 +95,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     countryCode: "PT",
     city: "Porto",
     currency: "EUR",
+    amountUnit: "local",
     costIndex: 0.82,
     monthlyDefaults: {
       rent: 1700,
@@ -123,6 +133,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     countryCode: "GB",
     city: "London",
     currency: "GBP",
+    amountUnit: "local",
     costIndex: 1.22,
     monthlyDefaults: {
       rent: 2800,
@@ -160,6 +171,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     countryCode: "CA",
     city: "Toronto",
     currency: "CAD",
+    amountUnit: "local",
     costIndex: 1.08,
     monthlyDefaults: {
       rent: 2500,
@@ -1417,4 +1429,36 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
 
 export function getCityDefaultsByCode(code: string) {
   return INTERNATIONAL_CITY_DEFAULTS.find((city) => city.code === code) ?? null;
+}
+type Money = Pick<InternationalCityDefaults, "monthlyDefaults" | "housing" | "startupCosts">;
+
+function mapAmounts(d: InternationalCityDefaults, convert: (v: number) => number): InternationalCityDefaults {
+  const c = (v: number) => Math.round(convert(v));
+  const m = d.monthlyDefaults;
+  return {
+    ...d,
+    monthlyDefaults: { ...m, rent: c(m.rent), groceries: c(m.groceries), utilities: c(m.utilities), transport: c(m.transport), healthcare: c(m.healthcare), ...(m.car === undefined ? {} : { car: c(m.car) }) },
+    housing: { ...d.housing, lastMonthRentDefault: c(d.housing.lastMonthRentDefault), furnishedSetupCost: c(d.housing.furnishedSetupCost) },
+    startupCosts: {
+      visa: c(d.startupCosts.visa), flight: c(d.startupCosts.flight), shipping: c(d.startupCosts.shipping),
+      temporaryStay: c(d.startupCosts.temporaryStay), adminFees: c(d.startupCosts.adminFees), emergencyBuffer: c(d.startupCosts.emergencyBuffer),
+    },
+  } satisfies InternationalCityDefaults & Money;
+}
+
+/** Amounts in U.S. dollars, for dollar maths (Asia calculator, compare engine). */
+export function getCityDefaultsUsd(code: string): InternationalCityDefaults | null {
+  const d = getCityDefaultsByCode(code);
+  if (!d) return null;
+  if (d.amountUnit !== "local") return d;
+  const rate = convertUsdAmountToLocal(1, d.countryCode);
+  return mapAmounts(d, (v) => v / rate);
+}
+
+/** Amounts in the destination country's currency, for calculator fields typed in local currency (Europe, International). */
+export function getCityDefaultsLocal(code: string): InternationalCityDefaults | null {
+  const d = getCityDefaultsByCode(code);
+  if (!d) return null;
+  if (d.amountUnit === "local") return d;
+  return mapAmounts(d, (v) => convertUsdAmountToLocal(v, d.countryCode));
 }

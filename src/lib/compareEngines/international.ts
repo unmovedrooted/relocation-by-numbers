@@ -17,13 +17,13 @@
  * intentionally always uses that shared fallback rather than replicating
  * each region's dedicated engine + conditional-question UI. Housing and
  * living costs reuse the exact same city/country default data as every
- * regional calculator (getCityDefaultsByCode, getCityCostMultipliers), so
+ * regional calculator (getCityDefaultsUsd, getCityCostMultipliers), so
  * only the *tax* precision is simplified, for an exact scenario with a
  * country-specific tax engine and follow-up questions, the page links back
  * to the matching full regional calculator.
  */
 import { estimateInternationalTax, US_SELF_EMPLOYED_KEY, US_TAX_STATUS_KEY, type FilingStatus } from "../internationalTaxes";
-import { getCityDefaultsByCode } from "../internationalCityDefaults";
+import { getCityDefaultsUsd } from "../internationalCityDefaults";
 import { getCityCostMultipliers } from "../internationalCityCosts";
 import { getCountryByCode } from "../internationalCountries";
 import { getInternationalCityByCode } from "../internationalCities";
@@ -102,7 +102,7 @@ export function computeIntlCityResult(input: IntlCompareInput): IntlCompareResul
   const netAnnualUsd = salaryReady ? grossAnnualUsd * (1 - (taxEstimate?.effectiveRate ?? 0)) : 0;
   const netMonthly = netAnnualUsd / 12;
 
-  const cityDefaults = cityCode ? getCityDefaultsByCode(cityCode) : undefined;
+  const cityDefaults = cityCode ? getCityDefaultsUsd(cityCode) : undefined;
   const multipliers = cityCode ? getCityCostMultipliers(cityCode) : null;
 
   let rent: number;

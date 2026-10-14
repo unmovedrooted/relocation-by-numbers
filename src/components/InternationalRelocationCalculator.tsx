@@ -13,7 +13,7 @@ import {
   getInternationalCityByCode,
 } from "@/lib/internationalCities";
 import {
-  getCityDefaultsByCode,
+  getCityDefaultsLocal,
 } from "@/lib/internationalCityDefaults";
 import {
   estimateInternationalTax,
@@ -233,9 +233,9 @@ export default function InternationalRelocationCalculator() {
   const toCityLabel   = getInternationalCityByCode(toCityCode)?.name ?? "Target city";
   const isUSDomesticRoute = fromCountry === "US" && toCountry === "US";
 
-  const selectedCityDefaults = useMemo(() => getCityDefaultsByCode(toCityCode), [toCityCode]);
-  const currentCityDefaults  = useMemo(() => getCityDefaultsByCode(fromCityCode), [fromCityCode]);
-  const targetCityDefaults   = useMemo(() => getCityDefaultsByCode(toCityCode), [toCityCode]);
+  const selectedCityDefaults = useMemo(() => getCityDefaultsLocal(toCityCode), [toCityCode]);
+  const currentCityDefaults  = useMemo(() => getCityDefaultsLocal(fromCityCode), [fromCityCode]);
+  const targetCityDefaults   = useMemo(() => getCityDefaultsLocal(toCityCode), [toCityCode]);
   const fromCityMultipliers  = useMemo(() => getCityCostMultipliers(fromCityCode), [fromCityCode]);
   const toCityMultipliers    = useMemo(() => getCityCostMultipliers(toCityCode), [toCityCode]);
 
@@ -635,7 +635,7 @@ const readinessRecommendation =
   };
 
   function resetInputsKeepContext() {
-    const cityDefaults    = getCityDefaultsByCode(toCityCode);
+    const cityDefaults    = getCityDefaultsLocal(toCityCode);
     const countryDefaults = getCountryByCode(toCountry);
     setSalary(""); setRetirementIncome("");
     setConditionalAnswers({});
