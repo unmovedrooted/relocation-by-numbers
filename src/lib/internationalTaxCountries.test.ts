@@ -1011,3 +1011,30 @@ describe("Spain (national scale, Madrid scale, social security, personal minimum
     expect(es(50_000, "remote")).toBeLessThan(es(50_000));
   });
 });
+
+describe("Suriname (SRD 108,000 tax-free, 8/18/28/38%, AOV 4%)", () => {
+  it("SRD 300,000 employee", () => {
+    // taxable 192,000: 3,360 + 7,560 + 11,760 + 38% x 66,000 = 47,760; AOV 12,000
+    expect(rate("SR", 300_000)).toBeCloseTo(59_760 / 300_000, 10);
+  });
+
+  it("a pension below the tax-free amount pays nothing", () => {
+    expect(rate("SR", 100_000, "retired")).toBe(0);
+  });
+});
+
+describe("Sweden (Skatteverket 2026 allowance, municipal and state tax)", () => {
+  it("SEK 600,000 employee: minimum allowance, no state tax", () => {
+    const allowance = 0.293 * 59_200;
+    expect(rate("SE", 600_000)).toBeCloseTo(0.3238 * (600_000 - allowance) / 600_000, 8);
+  });
+
+  it("SEK 900,000 employee pays state tax above the skiktgrans", () => {
+    const taxable = 900_000 - 0.293 * 59_200;
+    expect(rate("SE", 900_000)).toBeCloseTo((0.3238 * taxable + 0.2 * (taxable - 643_000)) / 900_000, 8);
+  });
+
+  it("the basic allowance joins up at its break points", () => {
+    expect(rate("SE", 25_042)).toBeCloseTo(0, 4);
+  });
+});

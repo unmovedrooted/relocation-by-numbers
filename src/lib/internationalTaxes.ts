@@ -59,6 +59,7 @@ import { SLOVAKIA_TAX_YEAR_LABEL, slovakiaTax } from "./countryTaxRules/slovakia
 import { SLOVENIA_TAX_YEAR_LABEL, sloveniaTax } from "./countryTaxRules/slovenia";
 import { SOUTH_AFRICA_TAX_YEAR_LABEL, southAfricaTax } from "./countryTaxRules/southAfrica";
 import { SOUTH_KOREA_TAX_YEAR_LABEL, southKoreaTax } from "./countryTaxRules/southKorea";
+import { SWEDEN_TAX_YEAR_LABEL, swedenTax } from "./countryTaxRules/sweden";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -1000,37 +1001,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // National state tax: 20% on income above ~SEK 598,500 (2024).
   // No joint filing. Social insurance not modeled (employer-side).
   // -------------------------------------------------------------------------
-  SE: ({ annualIncome }) => {
-    if (annualIncome <= 0) {
-      return {
-        effectiveRate: 0,
-        model: "progressive-country",
-        confidence: "simplified",
-        label: "Sweden income tax (2024)",
-        missingFactor: "Jobbskatteavdrag (earned income credit) not modelled.",
-        note: "Enter income to calculate.",
-      };
-    }
-
-    const basicAllowance = 36500;
-    const taxable = Math.max(0, annualIncome - basicAllowance);
-
-    const municipalRate = 0.3237;
-    const municipalTax = taxable * municipalRate;
-
-    const nationalThreshold = 598500;
-    const nationalTax = Math.max(0, taxable - nationalThreshold) * 0.20;
-
-    const totalTax = municipalTax + nationalTax;
-    const effectiveRate = annualIncome > 0 ? totalTax / annualIncome : 0;
-
+  SE: ({ annualIncome, isRetired }) => {
+    // Rules in countryTaxRules/sweden.ts: Skatteverket 2026 grundavdrag, 32.38% average municipal tax, state tax over SEK 643,000.
+    const tax = swedenTax(annualIncome, !!isRetired);
     return {
-      effectiveRate: clampRate(effectiveRate),
+      effectiveRate: clampRate(annualIncome > 0 ? tax / annualIncome : 0),
       model: "progressive-country",
-      confidence: "simplified",
-      label: "Sweden municipal + national income tax (2024)",
-      missingFactor: "Jobbskatteavdrag (earned income credit) not modelled, may overstate by 3–5 pp.",
-      note: "Municipal average (32.37%) and national threshold (SEK 598,500) are correct for 2024. Key omission: the jobbskatteavdrag (earned income tax credit) reduces income tax for employed residents, it is income-dependent and can be worth SEK 20,000–35,000/yr, meaning this model overstates effective income tax on employment income by roughly 3–5 pp at mid-range incomes. Municipal rates vary: Stockholm 29.83%, Gothenburg 32.35%. Income must be passed in SEK.",
+      confidence: "partial",
+      label: `Sweden municipal + state income tax (${SWEDEN_TAX_YEAR_LABEL})`,
+      missingFactor: "Jobbskatteavdrag (earned income tax credit) not modelled; it lowers tax on employment income by up to about SEK 52,000 a year, roughly 3-5 points at middle incomes.",
+      note: "Uses Skatteverket's 2026 figures: the basic allowance (SEK 17,400 to 45,600 under age 66; set at SEK 117,500 for people 66 and over), the average municipal tax of 32.38% and state tax of 20% on taxable income above SEK 643,000. The jobbskatteavdrag, which Skatteverket's page gives no formula for, is not applied, so tax on employment income is overstated, and the 7% pension fee is returned as a tax reduction and left out. Municipal rates range from about 28.9% to 35.7%. Income must be passed in kronor.",
     };
   },
 
@@ -1765,32 +1745,22 @@ GY: ({ annualIncome, isRetired, incomeScenario }) => {
   };
 },
 
-SR: ({ annualIncome, isRetired }) => {
-  if (isRetired) {
-    return {
-      effectiveRate: 0.06,
-      model: "flat",
-      confidence: "placeholder",
-      label: "Suriname income tax, retirement income (simplified estimate)",
-      missingFactor: "Suriname expat tax rules are not well-documented, treat as rough estimate.",
-      note: "Simplified 6% effective rate applied for retirement income. Suriname's tax rules for foreign residents and retirees are not well-documented in mainstream expat resources. Treat as a rough planning estimate only. Verify with a local advisor.",
-    };
-  }
-  const brackets = [
-    { upTo: 5000,     rate: 0 },
-    { upTo: 10000,    rate: 0.08 },
-    { upTo: 18000,    rate: 0.18 },
-    { upTo: 30000,    rate: 0.28 },
-    { upTo: Infinity, rate: 0.38 },
-  ];
-  const rate = progressiveTax(annualIncome, brackets);
+SR: ({ annualIncome, isRetired, incomeScenario }) => {
+  // Suriname wage tax scale as given in 2026 guides (not on the Belastingdienst pages, which list no figures): a tax-free amount of
+  // SRD 108,000, then 8%, 18%, 28% and 38% in bands of SRD 42,000, plus a 4% AOV (old-age) premium for resident employees.
+  // Income is in Surinamese dollars; the old code compared SRD income with USD-sized thresholds.
+  const g = Math.max(0, annualIncome);
+  const taxable = Math.max(0, g - 108_000);
+  const tax = 0.08 * Math.min(taxable, 42_000) + 0.18 * Math.max(0, Math.min(taxable, 84_000) - 42_000)
+    + 0.28 * Math.max(0, Math.min(taxable, 126_000) - 84_000) + 0.38 * Math.max(0, taxable - 126_000);
+  const aov = !isRetired && incomeScenario !== "remote" ? 0.04 * g : 0;
   return {
-    effectiveRate: clampRate(rate),
+    effectiveRate: clampRate(g > 0 ? (tax + aov) / g : 0),
     model: "progressive-country",
     confidence: "placeholder",
-    label: "Suriname income tax, simplified progressive estimate",
-    missingFactor: "Limited public expat tax data, brackets are approximate and may be outdated.",
-    note: `Effective rate ${(clampRate(rate) * 100).toFixed(1)}%. Simplified brackets converted to approximate USD at 36.5 SRD/USD. Suriname has limited publicly available expat tax data, this is a planning estimate only. Social security contributions not modelled. Verify with a local advisor before making decisions.`,
+    label: "Suriname income tax + AOV premium (2026 guides, unofficial)",
+    missingFactor: "The Belastingdienst Suriname pages list no figures; the scale and the 4% AOV premium come from 2026 advisers' guides that agree with each other. Deductions and allowances not modelled.",
+    note: "Uses the wage-tax scale as published in 2026 guides: SRD 108,000 tax-free, then 8% (to SRD 150,000), 18% (to 192,000), 28% (to 234,000) and 38% above, plus a 4% AOV premium for resident employees (retirees and remote workers paid abroad pay none here). The official Belastingdienst and Wet Inkomstenbelasting pages could not be used to confirm these figures. Income must be passed in Surinamese dollars (SRD).",
   };
 },
 
