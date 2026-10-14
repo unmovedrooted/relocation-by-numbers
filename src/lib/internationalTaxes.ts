@@ -1699,6 +1699,11 @@ SR: ({ annualIncome, isRetired, incomeScenario }) => {
 },
 
 VE: ({ annualIncome, isRetired }) => {
+  // ISLR for residents is a progressive scale in tax units (6% to 34%, with a 774 unit standard deduction and a 10 unit rebate), but the
+  // tax unit has been readjusted repeatedly (Bs. 9 to 43 in June 2025, with later readjustments reported) and the bolivar's exchange rate
+  // is volatile, so the scale cannot be applied reliably; the planning rates below stay simplified and are marked as placeholders.
+  // Income is in bolivares: the low-income test now compares it with USD 15,000 converted at the Treasury rate (it compared it with 15,000 bolivares).
+  const lowIncomeLimit = 15000 * (USD_TO_LOCAL.VE ?? 1);
   if (isRetired) {
     return {
       effectiveRate: 0.05,
@@ -1709,7 +1714,7 @@ VE: ({ annualIncome, isRetired }) => {
       note: "Venezuela's tax, FX, and economic environment makes all estimates highly unreliable. Simplified 5% flat rate applied. Exchange rate volatility and inflation can invalidate planning figures quickly. Verify all assumptions with an independent local advisor before making any decisions.",
     };
   }
-  if (annualIncome < 15000) {
+  if (annualIncome < lowIncomeLimit) {
     return {
       effectiveRate: 0.06,
       model: "flat",

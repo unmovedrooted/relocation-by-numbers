@@ -1157,3 +1157,10 @@ describe("Uruguay (BPS 2026 IRPF scale in pesos, contributions, credit)", () => 
     expect(rate("UY", 3_600_000, "retired")).toBe(0);
   });
 });
+
+describe("Venezuela (placeholder rates on a USD-equivalent threshold)", () => {
+  it("compares bolivar income with USD 15,000 at the Treasury rate", () => {
+    expect(rate("VE", 5_000 * 621.47)).toBe(0.06);
+    expect(rate("VE", 30_000 * 621.47)).toBe(0.12);
+  });
+});
