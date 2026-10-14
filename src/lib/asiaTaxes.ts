@@ -15,6 +15,7 @@
 // Tax Summaries, and each country's official tax authority publications.
 // ---------------------------------------------------------------------------
 
+import { AUSTRALIA_TAX_YEAR_LABEL, australiaTax } from "./countryTaxRules/australia";
 import { NO_US_OVERLAY, US_SELF_EMPLOYED_KEY, US_SELF_EMPLOYED_QUESTION, US_TAX_STATUS_KEY, US_TAX_STATUS_QUESTION, withUsTaxAbroad } from "./internationalTaxes";
 
 export type FilingStatus = "single" | "married";
@@ -916,27 +917,21 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
   // -------------------------------------------------------------------------
   // AUSTRALIA, AUD
   // -------------------------------------------------------------------------
-  AU: ({ annualIncome, isRetired }) => {
-    const taxAmount = progressiveTaxAmount(annualIncome, [
-      { upTo: 18200, rate: 0.0 },
-      { upTo: 45000, rate: 0.19 },
-      { upTo: 135000, rate: 0.325 },
-      { upTo: 190000, rate: 0.37 },
-      { upTo: Infinity, rate: 0.45 },
-    ]);
-
-    const incomeTaxRate = effectiveRateFromTax(taxAmount, annualIncome);
-    const socialContributionRate = isRetired ? 0.01 : 0.02;
-    const rates = combineRates(incomeTaxRate, socialContributionRate);
+  AU: ({ annualIncome }) => {
+    // Rules in countryTaxRules/australia.ts: ATO 2026-27 resident rates, low income tax offset, 2% Medicare levy.
+    const { incomeTax, medicareLevy } = australiaTax(annualIncome);
+    const rates = combineRates(
+      effectiveRateFromTax(incomeTax, annualIncome),
+      annualIncome > 0 ? medicareLevy / annualIncome : 0,
+    );
 
     return {
       ...rates,
       model: "progressive-country",
       confidence: "partial",
-      label: "Australia income tax + Medicare Levy (2024-25)",
-      missingFactor:
-        "LITO not applied.",
-      note: "2024-25 brackets and Medicare Levy included. Income must be passed in AUD.",
+      label: `Australia income tax + Medicare Levy (${AUSTRALIA_TAX_YEAR_LABEL})`,
+      missingFactor: "Medicare levy low-income reduction, surcharge and HELP repayments not applied.",
+      note: "Resident rates, low income tax offset and the 2% Medicare levy are from the Australian Taxation Office for 2026-27. Employer superannuation is paid on top of salary and is not deducted. Income must be passed in Australian dollars.",
     };
   },
 

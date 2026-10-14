@@ -22,6 +22,7 @@
 
 import { FEDERAL_2026, PAYROLL_2026, FOREIGN_EARNED_INCOME_EXCLUSION_2026 } from "./taxYear2026";
 import { USD_TO_LOCAL } from "./internationalFx";
+import { AUSTRALIA_TAX_YEAR_LABEL, australiaTax } from "./countryTaxRules/australia";
 
 export type FilingStatus = "single" | "married";
 
@@ -911,23 +912,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024-25 rates (Stage 3 tax cuts enacted from 1 July 2024).
   // No joint filing. Medicare Levy: 2% working, 1% retired.
   // -------------------------------------------------------------------------
-  AU: ({ annualIncome, isRetired }) => {
-    // 2024-25 brackets (Stage 3 cuts, new thresholds effective 1 Jul 2024)
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 18200, rate: 0.00 },
-      { upTo: 45000, rate: 0.19 },
-      { upTo: 135000, rate: 0.325 }, // raised from $120k under Stage 3
-      { upTo: 190000, rate: 0.37 },
-      { upTo: Infinity, rate: 0.45 },
-    ]);
-    const medicareLevy = isRetired ? 0.01 : 0.02;
+  AU: ({ annualIncome }) => {
+    // Rules in countryTaxRules/australia.ts: ATO 2026-27 resident rates, low income tax offset, 2% Medicare levy.
+    const { incomeTax, medicareLevy } = australiaTax(annualIncome);
+    const effective = annualIncome > 0 ? (incomeTax + medicareLevy) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(rate + medicareLevy),
+      effectiveRate: clampRate(effective),
       model: "progressive-country",
       confidence: "partial",
-      label: "Australia income tax + Medicare Levy (2024-25)",
-      missingFactor: "LITO (low income tax offset) not applied; state/territory taxes not applicable.",
-      note: "2024-25 brackets (Stage 3 tax cuts) and Medicare Levy are correct. Minor omission: the Low Income Tax Offset (LITO, up to $700) and Low and Middle Income Tax Offset (LMITO, now expired) are not modelled, effect is small at planning incomes. Superannuation contributions (11.5% employer-side in 2024-25) are not a deduction from employment income. Income must be passed in AUD.",
+      label: `Australia income tax + Medicare Levy (${AUSTRALIA_TAX_YEAR_LABEL})`,
+      missingFactor: "Medicare levy low-income reduction, surcharge and HELP repayments not applied.",
+      note: "Resident rates, low income tax offset and the 2% Medicare levy are from the Australian Taxation Office for 2026-27. Employer superannuation is paid on top of salary and is not deducted. Not modelled: the Medicare levy's reduction for low incomes, the Medicare levy surcharge, HELP/HECS repayments, other offsets and deductions. Income must be passed in Australian dollars.",
     };
   },
 
@@ -1698,23 +1693,34 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
   // -------------------------------------------------------------------------
   // ARGENTINA, ARS
-  // Progressive brackets. Updated frequently due to inflation, approximate 2024.
-  // Retired: approximate pension exemption threshold.
+  // Impuesto a las Ganancias, personas humanas. Annual scale of article 94 and the personal deductions of article 30,
+  // both ARCA (formerly AFIP) tables for the 2026 annual settlement, updated by INDEC inflation each year:
+  //   https://www.afip.gob.ar/gananciasYBienes/ganancias/personas-humanas-sucesiones-indivisas/declaracion-jurada/documentos/Tabla-Art-94-LIG-liquidacion-anual-y-final-2026.pdf
+  //   https://www.afip.gob.ar/gananciasYBienes/ganancias/personas-humanas-sucesiones-indivisas/deducciones/documentos/Deducciones-personales-art-30-liq-anual-2026.pdf
+  // Read 2026-10-13. Employees and retirees take special deduction apartado 2 (4.8 x the non-taxable amount); self-employed
+  // take apartado 1 (3.5 x). Employees' mandatory contributions (11% pension, 3% health, 3% PAMI) are deductible.
   // -------------------------------------------------------------------------
-  AR: ({ annualIncome, isRetired }) => {
-    // 2024 approximate thresholds (highly inflation-adjusted, verify annually)
-    const pensionExemption = isRetired ? 1800000 : 0;
-    const taxable = Math.max(0, annualIncome - pensionExemption);
+  AR: ({ annualIncome, filing, incomeScenario }) => {
+    const nonTaxable = 6019671.36;
+    const spouse = 5669323.06;
+    const specialEmployeeOrRetiree = 28894422.56;
+    const specialSelfEmployed = 21068849.78;
+    const employee = incomeScenario === "local";
+    const selfEmployed = incomeScenario === "remote";
+    const contributions = employee ? annualIncome * 0.17 : 0;
+    const special = selfEmployed ? specialSelfEmployed : specialEmployeeOrRetiree;
+    const deductions = nonTaxable + special + (filing === "married" ? spouse : 0);
+    const taxable = Math.max(0, annualIncome - contributions - deductions);
 
     const rate = progressiveTax(taxable, [
-      { upTo: 419253, rate: 0.05 },
-      { upTo: 838506, rate: 0.09 },
-      { upTo: 1257759, rate: 0.12 },
-      { upTo: 1677012, rate: 0.15 },
-      { upTo: 2514769, rate: 0.19 },
-      { upTo: 3354259, rate: 0.23 },
-      { upTo: 5031388, rate: 0.27 },
-      { upTo: 6708518, rate: 0.31 },
+      { upTo: 2336953.69, rate: 0.05 },
+      { upTo: 4673907.36, rate: 0.09 },
+      { upTo: 7010861.05, rate: 0.12 },
+      { upTo: 10516291.59, rate: 0.15 },
+      { upTo: 21032583.18, rate: 0.19 },
+      { upTo: 31548874.77, rate: 0.23 },
+      { upTo: 47323312.16, rate: 0.27 },
+      { upTo: 70984968.25, rate: 0.31 },
       { upTo: Infinity, rate: 0.35 },
     ]);
 
@@ -1722,10 +1728,10 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     return {
       effectiveRate: clampRate(effectiveRate),
       model: "progressive-country",
-      confidence: "placeholder",
-      label: "Argentina Impuesto a las Ganancias (approx. 2024)",
-      missingFactor: "Brackets updated quarterly for inflation, this figure is likely outdated.",
-      note: "Argentina's tax brackets are updated very frequently due to inflation, these are approximate 2024 figures and will be outdated. Always verify current-year thresholds via AFIP. Retirees: approximate pension exemption threshold applied. Income must be passed in ARS.",
+      confidence: "simplified",
+      label: "Argentina Impuesto a las Ganancias (2026 annual scale)",
+      missingFactor: "Monotributo, wealth and other taxes, and ceilings on contributions are not modelled.",
+      note: "Scale and deductions are the ARCA tables for the 2026 annual settlement (article 94 scale; article 30 non-taxable amount, spouse and special deduction), which ARCA updates with inflation, so verify them each year. Employees: 17% mandatory contributions are deducted and the special deduction is 4.8 times the non-taxable amount; remote or self-employed income takes the 3.5 times deduction and no employee contributions; retirees take the 4.8 times deduction. Children, rent, mortgage-interest and other deductions are not modelled. Income must be passed in pesos, and an exchange rate that moves a lot makes the dollar result swing.",
     };
   },
 
