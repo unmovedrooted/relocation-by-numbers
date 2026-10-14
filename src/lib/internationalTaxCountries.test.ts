@@ -1060,3 +1060,18 @@ describe("Switzerland (ESTV Form 58c federal scale, benchmark cantonal rate, AHV
     expect(rate("CH", 100_000, "local", "married")).toBeLessThan(rate("CH", 100_000, "local", "single"));
   });
 });
+
+describe("Taiwan (2026 deductions and brackets, labour and health insurance)", () => {
+  const tw = (income: number, scenario: "local" | "remote" | "retired" = "local") =>
+    estimateAsiaTax({ countryCode: "TW", annualIncome: income, filing: "single", isRetired: scenario === "retired", incomeScenario: scenario, answers: { tw_residency: "resident" } }).effectiveRate;
+
+  it("TWD 1,200,000 employee", () => {
+    // taxable 1,200,000 - 136,000 - 101,000 - 227,000 = 736,000: 5% x 610,000 + 12% x 126,000 = 45,620
+    // insurance: labour 0.13 x 0.2 x 45,800 x 12 = 14,289.6; health 0.0517 x 0.3 x 100,000 x 12 = 18,612
+    expect(tw(1_200_000)).toBeCloseTo((45_620 + 14_289.6 + 18_612) / 1_200_000, 8);
+  });
+
+  it("TWD 300,000 pension: only the 5% band, no insurance", () => {
+    expect(tw(300_000, "retired")).toBeCloseTo(0.05 * 63_000 / 300_000, 10);
+  });
+});

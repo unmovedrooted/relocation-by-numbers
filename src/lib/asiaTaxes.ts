@@ -573,18 +573,21 @@ return {
         ...rates,
         model: "flat",
         confidence: "partial",
-        label: "Taiwan, non-resident income tax (18% flat, 2024)",
+        label: "Taiwan, non-resident income tax (18% flat)",
         missingFactor:
           "Applies to Taiwan-source income only.",
         note: "Non-residents pay 18% flat tax on Taiwan-source income. Income must be passed in TWD.",
       };
     }
 
-    const standardDeduction = filing === "married" ? 262000 : 131000;
-    const personalExemption = filing === "married" ? 194000 : 97000;
+    // Ministry of Finance announcement of 27 November 2025 for income year 115 (2026), reported by TVBS: exemption NT$101,000,
+    // standard deduction NT$136,000 (NT$272,000 for a couple), salary special deduction NT$227,000, brackets 5% to NT$610,000, 12% to
+    // 1,380,000, 20% to 2,770,000, 30% to 5,190,000, 40% above (the Ministry's own release was not fetched).
+    const standardDeduction = filing === "married" ? 272000 : 136000;
+    const personalExemption = filing === "married" ? 202000 : 101000;
     const employmentDeduction = isRetired
       ? 0
-      : Math.min(annualIncome * 0.2, 218000);
+      : Math.min(annualIncome, 227000);
 
     const taxable = Math.max(
       0,
@@ -592,15 +595,21 @@ return {
     );
 
     const taxAmount = progressiveTaxAmount(taxable, [
-      { upTo: 560000, rate: 0.05 },
-      { upTo: 1260000, rate: 0.12 },
-      { upTo: 2520000, rate: 0.2 },
-      { upTo: 4720000, rate: 0.3 },
+      { upTo: 610000, rate: 0.05 },
+      { upTo: 1380000, rate: 0.12 },
+      { upTo: 2770000, rate: 0.2 },
+      { upTo: 5190000, rate: 0.3 },
       { upTo: Infinity, rate: 0.4 },
     ]);
 
     const incomeTaxRate = effectiveRateFromTax(taxAmount, annualIncome);
-    const socialContributionRate = isRetired ? 0 : 0.025;
+    // Employee share of labour insurance (13% x 20%, insured salary capped at NT$45,800 a month) and national health insurance (5.17% x 30%,
+    // capped at NT$219,500 a month), from insurer summaries (not re-read); retirees and remote workers pay none here.
+    const monthly = annualIncome / 12;
+    const insurance = isRetired || incomeScenario === "remote" || annualIncome <= 0
+      ? 0
+      : 12 * (0.13 * 0.2 * Math.min(monthly, 45800) + 0.0517 * 0.3 * Math.min(monthly, 219500));
+    const socialContributionRate = annualIncome > 0 ? insurance / annualIncome : 0;
     const rates = combineRates(incomeTaxRate, socialContributionRate);
     const hasAnswer = !!residency;
 
@@ -609,11 +618,11 @@ return {
       model: "progressive-country",
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
-        ? "Taiwan individual income tax, resident (2024)"
-        : "Taiwan individual income tax (2024, select residency status)",
+        ? "Taiwan individual income tax + insurance, resident (2026)"
+        : "Taiwan individual income tax + insurance (2026, select residency status)",
       missingFactor:
-        "Special deductions not modelled.",
-      note: "2024 brackets with standard deduction, personal exemption, and employment income deduction applied. Income must be passed in TWD.",
+        "Dependants, itemised and special deductions not modelled; the 2026 figures come from a news report of the Ministry of Finance announcement.",
+      note: "2026 income-year figures announced by the Ministry of Finance: personal exemption NT$101,000, standard deduction NT$136,000 (NT$272,000 for couples), salary special deduction up to NT$227,000, and brackets of 5% to NT$610,000, 12%, 20%, 30% and 40% above NT$5.19 million. Employees also pay about 2.6% for labour insurance (on up to NT$45,800 a month) and 1.55% for health insurance (on up to NT$219,500 a month); retirees and remote workers paid abroad pay none here. Income must be passed in TWD.",
     };
   },
 
