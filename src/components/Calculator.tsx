@@ -16,18 +16,8 @@ import TaxAssumptionsNote from "./TaxAssumptionsNote";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
-import MoveSummary from "./MoveSummary";
 import { compareMove, type Item } from "../lib/relocationMove";
 import { buildFireLink } from "../lib/fireLink";
-
-const MOVE_INPUT_CLS =
-  "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800";
-
-/** Input ids for the "enter yours" buttons in the move summary. */
-const MOVE_IDS: Record<string, string> = {
-  currentHousing: "in-curHousing", targetHousing: "in-rent", movers: "in-movers", travel: "in-travel",
-  setup: "in-setup", leaseBreak: "in-leaseBreak", fees: "in-fees", refundableDeposit: "in-deposit",
-};
 
 type Mode = "rent" | "buy";
 
@@ -1188,35 +1178,6 @@ export default function Calculator({
                 />
               </label>
 
-              <details className="sm:col-span-2 rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
-                <summary className="cursor-pointer text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  Job offer and moving costs <span className="font-normal text-slate-400 dark:text-slate-500">(optional, adds first-year impact and cash needed)</span>
-                </summary>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <label className="text-sm sm:col-span-2">
-                    <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Salary now <span className="font-normal text-slate-400">(blank = same as the salary above, which is the salary after the move)</span></div>
-                    <input className={MOVE_INPUT_CLS} type="number" value={currentSalary} onChange={(e) => setCurrentSalary(e.target.value)} placeholder="e.g. 120000" />
-                  </label>
-                  {([
-                    ["in-movers", "Movers or truck", moversCost, setMoversCost, "1500 estimated"],
-                    ["in-travel", "Travel and storage", travelCost, setTravelCost, "500 estimated"],
-                    ["in-setup", "Furniture and setup", setupCost, setSetupCost, "2000 estimated"],
-                    ["in-leaseBreak", "Lease break fee", leaseBreakCost, setLeaseBreakCost, "0"],
-                    ["in-fees", mode === "buy" ? "Closing and other fees" : "Application and broker fees", moveFeesCost, setMoveFeesCost, mode === "buy" ? "about 3% of price estimated" : "0"],
-                    ["in-deposit", "Security deposit (refundable)", depositCost, setDepositCost, mode === "rent" ? "2 months of rent estimated" : "not applicable"],
-                  ] as [string, string, string, (v: string) => void, string][]).map(([id, label, value, set, ph]) => (
-                    <label key={id} className="text-sm">
-                      <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">{label}</div>
-                      <input id={id} className={MOVE_INPUT_CLS} type="number" min={0} value={value} onChange={(e) => set(e.target.value)} placeholder={ph} />
-                    </label>
-                  ))}
-                  <label className="text-sm">
-                    <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Months paying both homes</div>
-                    <input className={MOVE_INPUT_CLS} type="number" min={0} step={0.5} value={overlapMonths} onChange={(e) => setOverlapMonths(e.target.value)} placeholder="0" />
-                  </label>
-                </div>
-              </details>
-
               {fromCityId && toCityId && !compareRouteAllowed ? (
                 <div className="sm:col-span-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
                   Compare pages are currently available only when at least one selected city is a major city.
@@ -1320,16 +1281,11 @@ export default function Calculator({
         {/* ══════════════════════════ RESULTS ══════════════════════════ */}
         <div className="space-y-3">
 
-          {move && (
-            <MoveSummary
-              move={move}
-              fromName={currentCityLabel}
-              toName={findCity(toCityId)?.name || stateName}
-              hasCurrentIncome={currentSalary.trim() !== "" && nz(currentSalary) !== n(salary)}
-              inputIds={MOVE_IDS}
-              fireHref={fireHref}
-              retirementHref={`/retirement-state-tax?from=${fromState}&to=${toState}`}
-            />
+          {fireHref && (
+            <div className="flex flex-wrap gap-x-5 gap-y-1 px-1 text-sm">
+              <a href={fireHref} className="font-medium text-violet-600 underline underline-offset-2 hover:no-underline dark:text-violet-400">See your FIRE number after this move →</a>
+              <a href={`/retirement-state-tax?from=${fromState}&to=${toState}`} className="font-medium text-violet-600 underline underline-offset-2 hover:no-underline dark:text-violet-400">How would retirement income be taxed there? →</a>
+            </div>
           )}
 
           {/* ── 1. BOTTOM LINE VERDICT ── */}
