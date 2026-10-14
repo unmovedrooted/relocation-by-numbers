@@ -46,6 +46,7 @@ import { LATVIA_TAX_YEAR_LABEL, latviaTax } from "./countryTaxRules/latvia";
 import { MALAYSIA_TAX_YEAR_LABEL, malaysiaTax } from "./countryTaxRules/malaysia";
 import { MALTA_TAX_YEAR_LABEL, maltaTax } from "./countryTaxRules/malta";
 import { MEXICO_TAX_YEAR_LABEL, mexicoTax } from "./countryTaxRules/mexico";
+import { NETHERLANDS_TAX_YEAR_LABEL, netherlandsTax } from "./countryTaxRules/netherlands";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -575,37 +576,23 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // (no AOW premium), then 49.50%.
   // 30% ruling: not modeled here, flagged in notes.
   // -------------------------------------------------------------------------
-  NL: ({ annualIncome, isRetired, answers }) => {
-    const brackets = isRetired
-      ? [
-        { upTo: 38441, rate: 0.1936 }, // No AOW premium for retirees
-        { upTo: Infinity, rate: 0.495 },
-      ]
-      : [
-        { upTo: 75518, rate: 0.3697 }, // Income tax + national insurance combined
-        { upTo: Infinity, rate: 0.495 },
-      ];
+  NL: ({ annualIncome, filing, isRetired, answers }) => {
+    // Rules in countryTaxRules/netherlands.ts: Belastingdienst 2026 box 1 tariffs and tax credits.
     const ruling30 = answers?.nl_30pct_ruling === "yes";
-    let effectiveRate = progressiveTax(annualIncome, brackets);
-    if (ruling30 && !isRetired) {
-      // 30% ruling: 30% of salary is tax-free, so taxable base = 70%
-      const taxableWithRuling = annualIncome * 0.70;
-      effectiveRate = progressiveTax(taxableWithRuling, brackets) * 0.70;
-    }
-
+    const tax = netherlandsTax(annualIncome, !!isRetired, ruling30);
+    // Single-person elderly credit of EUR 540 for retirees without a partner.
+    const singleElderly = isRetired && filing !== "married" && annualIncome > 0 ? Math.min(540, tax) : 0;
     return {
-      effectiveRate: clampRate(effectiveRate),
+      effectiveRate: clampRate(annualIncome > 0 ? (tax - singleElderly) / annualIncome : 0),
       model: "progressive-country",
       confidence: ruling30 ? "partial" : "simplified",
       label: ruling30
-        ? "Netherlands Box 1 + 30% ruling (2024)"
-        : "Netherlands Box 1 income tax (2024)",
+        ? `Netherlands Box 1 + 30% ruling (${NETHERLANDS_TAX_YEAR_LABEL})`
+        : `Netherlands Box 1 income tax and premiums (${NETHERLANDS_TAX_YEAR_LABEL})`,
       missingFactor: ruling30
-        ? "Box 2/3 taxes and exact ruling cap (€246,000/yr salary limit) not modelled."
-        : "30% ruling not modelled, can reduce effective rate substantially for qualifying expats.",
-      note: ruling30
-        ? "30% ruling applied: 30% of salary treated as tax-free expense allowance, reducing the taxable base to 70%. The ruling has a maximum salary of €246,000/yr (2024) and lasts up to 5 years. Box 2 (substantial interest) and Box 3 (notional return on savings) are not included."
-        : "Box 1 rate structure is correct (combined income tax + national insurance). The 30% ruling for qualifying expats (tax-free allowance on 30% of salary for up to 5 years) can reduce effective rates substantially, select above if you qualify. Box 2 and Box 3 taxes are not included. Income must be passed in EUR.",
+        ? "Box 2/3 taxes, health-insurance premiums and the ruling's salary cap not modelled."
+        : "30% ruling, health-insurance premiums, box 2 and box 3 not modelled; the AOW-age general credit comes from secondary sources.",
+      note: "Uses the Belastingdienst's 2026 box 1 tariffs (35.75% to EUR 38,883, 37.56% to EUR 78,426, 49.50% above, with the combined income tax and national-insurance premiums), less the general tax credit (up to EUR 3,115) and the labour credit (up to EUR 5,685); retirees at AOW age pay 17.85% in the first bracket and get the elderly credit (EUR 2,067, plus EUR 540 if single) instead of the labour credit. The 30% ruling, if selected, taxes only 70% of pay. Not modelled: the flat health-insurance premium and pensioners' income-related health premium, box 2 and box 3 tax, and credits transferred between partners. Income must be passed in euros." + (ruling30 ? " The ruling's salary cap is not applied." : ""),
     };
   },
 

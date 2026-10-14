@@ -742,3 +742,24 @@ describe("Mexico (SAT 2026 annual tariff, IMSS)", () => {
     expect(higher - base).toBeCloseTo(1_000_000 * 0.34, 4);
   });
 });
+
+describe("Netherlands (Belastingdienst 2026 box 1 and credits)", () => {
+  it("EUR 60,000 employee", () => {
+    const gross = 0.3575 * 38_883 + 0.3756 * (60_000 - 38_883);
+    const general = 3_115 - 0.06398 * (60_000 - 29_736);
+    const labour = 5_685 - 0.0651 * (60_000 - 45_592);
+    expect(rate("NL", 60_000)).toBeCloseTo((gross - general - labour) / 60_000, 8);
+  });
+
+  it("EUR 30,000 single retiree: 17.85%, AOW general credit and elderly credits", () => {
+    const general = 1_556 * (1 - (30_000 - 29_736) / (78_426 - 29_736));
+    expect(rate("NL", 30_000, "retired")).toBeCloseTo((0.1785 * 30_000 - general - 2_067 - 540) / 30_000, 8);
+  });
+
+  it("the 30% ruling taxes 70% of pay", () => {
+    const base = 100_000 * 0.7;
+    const gross = 0.3575 * 38_883 + 0.3756 * (base - 38_883) - (3_115 - 0.06398 * (base - 29_736)) - (5_685 - 0.0651 * (base - 45_592));
+    expect(estimateInternationalTax({ countryCode: "NL", annualIncome: 100_000, filing: "single", isRetired: false, answers: { nl_30pct_ruling: "yes" } }).effectiveRate)
+      .toBeCloseTo(gross / 100_000, 8);
+  });
+});
