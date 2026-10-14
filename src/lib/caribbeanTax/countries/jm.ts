@@ -17,13 +17,22 @@ export const JM_TAX_CONFIG: CountryTaxConfig = {
 
   sources: [
     {
+      title: "Increase in Income Tax Threshold Now in Effect",
+      url: "https://jis.gov.jm/increase-in-income-tax-threshold-now-in-effect/",
+      type: "government",
+      publisher: "Jamaica Information Service (reporting Tax Administration Jamaica)",
+      dateChecked: "2026-10-14",
+      notes:
+        "Threshold of JMD 1,902,360 from April 1, 2026, up from JMD 1,799,376.",
+    },
+    {
       title: "Jamaica - Individual - Taxes on personal income",
       url: "https://taxsummaries.pwc.com/jamaica/individual/taxes-on-personal-income",
       type: "tax_firm",
       publisher: "PwC",
       dateChecked: "2026-04-08",
       notes:
-        "Used for resident/non-resident treatment, rates, and tax-free threshold schedule.",
+        "Used for resident/non-resident treatment and the 25% / 30% rates.",
     },
     {
       title: "Jamaica 2026/27 Budget Review",
@@ -42,10 +51,10 @@ export const JM_TAX_CONFIG: CountryTaxConfig = {
       confidence: "high",
       notes: [
         "Jamaica local earned income is modeled using the resident personal income tax schedule.",
-        "For the 2026 calendar-year planning model, this calculator uses a blended annual tax-free threshold of JMD 1,978,212, reflecting the April 1, 2026 threshold increase.",
+        "This calculator uses the annual tax-free threshold of JMD 1,902,360 that Tax Administration Jamaica announced effective April 1, 2026 (up from JMD 1,799,376). Averaged over calendar 2026 the threshold works out to about JMD 1,876,614, and the Government's stated target is JMD 2,000,000.",
         "Chargeable income up to JMD 6 million is taxed at 25%, and chargeable income above JMD 6 million is taxed at 30%. This estimate does not model NIS, NHT, or education tax.",
       ],
-      getAllowance: () => 1978212,
+      getAllowance: () => 1902360,
       getBrackets: () => [
         { upTo: 6000000, rate: 0.25 },
         { upTo: null, rate: 0.30 },
@@ -80,7 +89,7 @@ export const JM_TAX_CONFIG: CountryTaxConfig = {
         "PwC states that resident and domiciled individuals are generally taxed on worldwide income, while non-domiciled individuals are generally not taxable on foreign-source income unless it is remitted to Jamaica.",
         "For planning purposes, remote or foreign-source income is modeled under the same resident progressive schedule, and the UI should present this as a conservative estimate rather than a domicile-specific ruling.",
       ],
-      getAllowance: () => 1978212,
+      getAllowance: () => 1902360,
       getBrackets: () => [
         { upTo: 6000000, rate: 0.25 },
         { upTo: null, rate: 0.30 },
@@ -106,7 +115,7 @@ export const JM_TAX_CONFIG: CountryTaxConfig = {
         "Jamaica's residency and domicile rules can change the treatment of foreign-source income, so this scenario is modeled conservatively rather than as an exemption case.",
         "This estimate does not model pension-specific carve-outs, foreign tax credits, NIS, NHT, or education tax.",
       ],
-      getAllowance: () => 1978212,
+      getAllowance: () => 1902360,
       getBrackets: () => [
         { upTo: 6000000, rate: 0.25 },
         { upTo: null, rate: 0.30 },
