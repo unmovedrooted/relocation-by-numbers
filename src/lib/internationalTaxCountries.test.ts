@@ -908,3 +908,33 @@ describe("Romania (10% tax after CAS 25% and CASS 10%)", () => {
     expect(rate("RO", 30_000, "retired")).toBe(0);
   });
 });
+
+describe("Singapore (IRAS resident scale and earned income relief)", () => {
+  it("SGD 100,000 under 60", () => {
+    // taxable 99,000: 200 + 350 + 2,800 + 11.5% x 19,000 = 5,535
+    expect(rate("SG", 100_000)).toBeCloseTo(5_535 / 100_000, 10);
+  });
+
+  it("SGD 100,000 retiree with the SGD 8,000 relief", () => {
+    // taxable 92,000: 200 + 350 + 2,800 + 11.5% x 12,000 = 4,730
+    expect(rate("SG", 100_000, "retired")).toBeCloseTo(4_730 / 100_000, 10);
+  });
+});
+
+describe("Slovakia (2026 four-rate scale, non-taxable part, contributions)", () => {
+  it("EUR 60,000 employee", () => {
+    // social 5,640; base 54,360 (no non-taxable part); 19% x 43,983.32 + 25% x 10,376.68; health 3,000
+    const tax = 0.19 * 43_983.32 + 0.25 * (54_360 - 43_983.32);
+    expect(rate("SK", 60_000)).toBeCloseTo((tax + 5_640 + 3_000) / 60_000, 8);
+  });
+
+  it("EUR 30,000 employee uses the shrinking non-taxable part", () => {
+    // social 2,820; base 27,180; non-taxable 14,661.11 - 9,060 = 5,601.11
+    const tax = 0.19 * (27_180 - 5_601.11);
+    expect(rate("SK", 30_000)).toBeCloseTo((tax + 2_820 + 1_500) / 30_000, 8);
+  });
+
+  it("the non-taxable part is continuous at its thresholds", () => {
+    expect(rate("SK", 100_000, "remote")).toBeGreaterThan(rate("SK", 80_000, "remote"));
+  });
+});

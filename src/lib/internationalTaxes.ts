@@ -55,6 +55,7 @@ import { PERU_TAX_YEAR_LABEL, peruTax } from "./countryTaxRules/peru";
 import { POLAND_TAX_YEAR_LABEL, polandTax } from "./countryTaxRules/poland";
 import { PORTUGAL_TAX_YEAR_LABEL, portugalTax } from "./countryTaxRules/portugal";
 import { ROMANIA_TAX_YEAR_LABEL, romaniaTax } from "./countryTaxRules/romania";
+import { SLOVAKIA_TAX_YEAR_LABEL, slovakiaTax } from "./countryTaxRules/slovakia";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -889,6 +890,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // as $8,000 for retirees. NSman and other personal reliefs not modeled.
   // -------------------------------------------------------------------------
   SG: ({ annualIncome, isRetired }) => {
+    // IRAS resident scale (YA 2024 onwards, read 2026-10-14 at iras.gov.sg) and earned income relief by age (SGD 1,000 under 55; SGD 8,000 at 60 and over).
     const earnedIncomeRelief = isRetired ? 8000 : 1000;
     const taxable = Math.max(0, annualIncome - earnedIncomeRelief);
 
@@ -913,9 +915,9 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       effectiveRate: clampRate(effectiveRate),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Singapore resident progressive (2024 YA)",
-      missingFactor: "CPF contributions (~20% employee) not modelled; residency status affects rate.",
-      note: "2024 YA resident rates with basic earned income relief applied. Key gaps: non-residents pay a flat 15% or progressive rates, whichever is higher, this model assumes tax residency which requires ≥183 days in Singapore. CPF contributions (~20% employee up to SGD 6,800/mo) are a significant real deduction but partly a savings mechanism. Various personal reliefs (NSman, parent, spouse) can reduce tax by thousands of dollars. Income must be passed in SGD.",
+      label: "Singapore resident progressive (YA 2026 rates)",
+      missingFactor: "CPF contributions (citizens and permanent residents only) and personal reliefs not modelled; residency status affects the rate.",
+      note: "The Inland Revenue Authority of Singapore's resident rates (0% to SGD 20,000 up to 24% above SGD 1 million, unchanged since YA 2024) with the earned income relief by age (SGD 1,000 under 55, SGD 8,000 at 60 and over). This assumes tax residency (183 days or more); non-residents pay the higher of 15% flat or the resident scale on employment income, and 24% on pensions. Citizens and permanent residents also pay employee CPF of 20% (age 55 and under) on monthly pay up to SGD 8,000 from 2026, partly a savings mechanism and not included; employment pass holders pay no CPF. No YA 2026 rebate is listed by IRAS and none is applied. Other reliefs (spouse, parent, NSman) are not modelled. Income must be passed in SGD.",
     };
   },
 
@@ -1326,20 +1328,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // Employee social + health: ~13.4%.
   // No joint filing.
   // -------------------------------------------------------------------------
-  SK: ({ annualIncome, isRetired }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 47537.98, rate: 0.19 },
-      { upTo: Infinity, rate: 0.25 },
-    ]);
-    // Employee: social 9.4% + health 4% = 13.4%
-    const socialOverlay = isRetired ? 0 : 0.134;
+  SK: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/slovakia.ts: 2026 four-rate scale, non-taxable part, social 9.4% and health 5%.
+    const { incomeTax, contributions } = slovakiaTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(rate + socialOverlay),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Slovakia progressive income tax + contributions (2024)",
-      missingFactor: "Health contributions (4%) uncapped; non-taxable base (€5,646) not applied.",
-      note: "Income tax thresholds are 2024 figures. Employee contributions (social 9.4% + health 4%) are correctly excluded for retirees. Key nuance: health contributions (4%) have no ceiling; social contributions (9.4%) cap at a monthly assessment base of ~€9,128 (2024). Above this cap the social portion drops out, making the total burden lower for high earners than this model shows. The non-taxable base (€5,646.48/yr) is also not applied. Income must be passed in EUR.",
+      label: `Slovakia income tax + contributions (${SLOVAKIA_TAX_YEAR_LABEL})`,
+      missingFactor: "Spouse allowance, child bonus and the tax exemption of state pensions not modelled; figures come from advisers' summaries of Act 261/2025 because the Financial Administration pages were unreachable.",
+      note: "Uses the 2026 consolidation package: income tax of 19% to EUR 43,983, 25% to 60,349, 30% to 75,010 and 35% above, after the non-taxable part of the base (EUR 5,966.73, falling to zero at EUR 43,983), employee social insurance of 9.4% (deductible, capped at a monthly base of EUR 16,764) and health insurance of 5% (4% before 2026). Retirees and remote workers paid abroad are shown without contributions; Slovak state pensions are largely tax-exempt, which is not modelled. Income must be passed in euros.",
     };
   },
 
