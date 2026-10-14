@@ -971,3 +971,25 @@ describe("South Africa (SARS 2026/27 table, rebates, UIF)", () => {
     expect(rate("ZA", 99_000, "remote")).toBe(0);
   });
 });
+
+describe("South Korea (2026 scale, deductions, credits, local tax, insurance)", () => {
+  it("KRW 50,000,000 employee", () => {
+    // employment deduction 12,000,000 + 5% x 5,000,000 = 12,250,000
+    const health = 0.03595 * 50_000_000;
+    const insurance = 2_375_000 + health + 0.1314 * health + 450_000;
+    const taxable = 50_000_000 - 12_250_000 - 1_500_000 - insurance;
+    const scale = 0.06 * 14_000_000 + 0.15 * (taxable - 14_000_000);
+    const credit = Math.min(715_000 + 0.3 * (scale - 1_300_000), Math.max(660_000, 740_000 - (50_000_000 - 33_000_000) * 0.008)) + 130_000;
+    const determined = scale - credit;
+    expect(rate("KR", 50_000_000)).toBeCloseTo((determined * 1.1 + insurance) / 50_000_000, 8);
+  });
+
+  it("KRW 20,000,000 pension: pension deduction, no credits or premiums", () => {
+    // deduction 6,300,000 + 10% x 6,000,000 = 6,900,000; taxable 20,000,000 - 6,900,000 - 1,500,000 = 11,600,000 at 6%
+    expect(rate("KR", 20_000_000, "retired")).toBeCloseTo((0.06 * 11_600_000 * 1.1) / 20_000_000, 8);
+  });
+
+  it("a small salary paid from abroad pays nothing", () => {
+    expect(rate("KR", 10_000_000, "remote")).toBe(0);
+  });
+});

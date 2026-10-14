@@ -58,6 +58,7 @@ import { ROMANIA_TAX_YEAR_LABEL, romaniaTax } from "./countryTaxRules/romania";
 import { SLOVAKIA_TAX_YEAR_LABEL, slovakiaTax } from "./countryTaxRules/slovakia";
 import { SLOVENIA_TAX_YEAR_LABEL, sloveniaTax } from "./countryTaxRules/slovenia";
 import { SOUTH_AFRICA_TAX_YEAR_LABEL, southAfricaTax } from "./countryTaxRules/southAfrica";
+import { SOUTH_KOREA_TAX_YEAR_LABEL, southKoreaTax } from "./countryTaxRules/southKorea";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -849,27 +850,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 national brackets. Local income tax = 10% surcharge on national tax.
   // No joint filing.
   // -------------------------------------------------------------------------
-  KR: ({ annualIncome, isRetired }) => {
-    const nationalRate = progressiveTax(annualIncome, [
-      { upTo: 14000000, rate: 0.06 },
-      { upTo: 50000000, rate: 0.15 },
-      { upTo: 88000000, rate: 0.24 },
-      { upTo: 150000000, rate: 0.35 },
-      { upTo: 300000000, rate: 0.38 },
-      { upTo: 500000000, rate: 0.40 },
-      { upTo: 1000000000, rate: 0.42 },
-      { upTo: Infinity, rate: 0.45 },
-    ]);
-    const localSurtax = nationalRate * 0.10;
-    const pensionDeduction = isRetired ? -0.02 : 0;
-
+  KR: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/southKorea.ts: NTS employment credit, scale, employment and pension deductions, insurance.
+    const { incomeTax, localTax, insurance } = southKoreaTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(nationalRate + localSurtax + pensionDeduction),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + localTax + insurance) / annualIncome : 0),
       model: "country-plus-local",
       confidence: "simplified",
-      label: "South Korea national + local surtax (2024)",
-      missingFactor: "National Health Insurance and pension contributions (~8% combined) not included.",
-      note: "National brackets and 10% local surtax are correct. Key omissions: National Health Insurance (~3.545% employee) and National Pension (~4.5% employee up to KRW 5,900,000/mo) together add approximately 8% to the total burden for most employees, a material gap. Employment income deduction (near income) also not applied, which overstates income tax on employment income at lower incomes. Income must be passed in KRW.",
+      label: `South Korea income tax + local tax + social insurance (${SOUTH_KOREA_TAX_YEAR_LABEL})`,
+      missingFactor: "Dependants, card spending, insurance, medical, education and housing deductions not modelled; the rate scale, deductions and insurance rates come from summaries rather than a full read of the law.",
+      note: "Uses the 2026 scale (6% to 45%) after the employment income deduction (retirees: the pension income deduction), the KRW 1.5 million basic deduction and deductible insurance premiums, less the National Tax Service's employment income tax credit and the KRW 130,000 standard credit, plus local income tax of 10% of the tax. Employees pay about 9.7% in social insurance (pension 4.75% up to a monthly base of KRW 6.37 million, health 3.595%, long-term care 13.14% of the health premium, employment 0.9%). Retirees and remote workers paid abroad are shown without premiums. Income must be passed in won.",
     };
   },
 
