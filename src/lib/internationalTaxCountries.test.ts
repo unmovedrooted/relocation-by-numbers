@@ -1000,8 +1000,9 @@ describe("Spain (national scale, Madrid scale, social security, personal minimum
     estimateInternationalTax({ countryCode: "ES", annualIncome: income, filing: "single", isRetired: scenario === "retired", incomeScenario: scenario, answers: { es_region: "MD" } }).effectiveRate;
 
   it("EUR 50,000 employee in Madrid", () => {
-    // SS 3,250; base 44,750; national 6,129.50; Madrid 5,948.365; personal minimum relief 527.25 + 499.50
-    expect(es(50_000)).toBeCloseTo((6_129.5 + 5_948.365 - 1_026.75 + 3_250) / 50_000, 8);
+    // SS 3,250; base 44,750; national 6,129.50; Madrid 2026 scale; personal minimum relief at the first national and Madrid rates
+    const madrid = 13_362.22 * 0.085 + (19_004.63 - 13_362.22) * 0.107 + (35_425.68 - 19_004.63) * 0.128 + (44_750 - 35_425.68) * 0.174;
+    expect(es(50_000)).toBeCloseTo((6_129.5 + madrid - (527.25 + 5_550 * 0.085) + 3_250) / 50_000, 8);
   });
 
   it("a pension of EUR 6,000 pays nothing after the EUR 2,000 expense and the personal minimum", () => {
