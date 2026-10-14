@@ -27,7 +27,7 @@ const initialize = (query = "") => createEuropeInitialState(
 describe("Europe calculator URL state", () => {
   it("initializes the effective Lisbon defaults without a post-hydration jump", () => {
     expect(initialize()).toEqual(EUROPE_CALCULATOR_DEFAULT_STATE);
-    expect(initialize().depositRequired).toBe("4400");
+    expect(initialize().depositRequired).toBe("2090");
   });
 
   it("hydrates direct URL values without allowing Lisbon presets to overwrite them", () => {
@@ -95,7 +95,7 @@ describe("Europe calculator URL state", () => {
     expect(lisbon).toBeDefined();
     const patch = createEuropeCityPresetPatch(lisbon!);
     expect(patch).toMatchObject({
-      destinationRent: "2200", depositRequired: "4400", firstMonthRent: "2200",
+      destinationRent: "1045", depositRequired: "2090", firstMonthRent: "1045",
       groceries: "420", utilities: "150", transportation: "45", healthcare: "120",
       visaCost: "250", flightCost: "650", furnitureSetup: "1200",
     });
@@ -130,14 +130,14 @@ describe("Europe calculator URL state", () => {
       state.depositRequired, state.firstMonthRent, state.lastMonthRent, state.visaCost, state.flightCost,
       state.shippingCost, state.temporaryStay, state.adminFees, state.furnitureSetup, state.emergencyCashBuffer,
     ].reduce((sum, value) => sum + Number(value), 0) / rate;
-    // The Lisbon defaults are euro amounts (rent 2,200; utilities 150; groceries, transport and healthcare 585;
-    // upfront costs 16,200), converted at the Treasury rate of 0.881 euro per dollar (2026-09-30).
+    // The Lisbon defaults are euro amounts (rent 1,045 from INE; utilities 150; groceries, transport and healthcare 585;
+    // upfront costs 12,735), converted at the Treasury rate of 0.881 euro per dollar (2026-09-30).
     expect(rate).toBe(0.881);
-    expect(rent).toBeCloseTo(2200 / 0.881, 6);
+    expect(rent).toBeCloseTo(1045 / 0.881, 6);
     expect(utilities).toBeCloseTo(150 / 0.881, 6);
     expect(living).toBeCloseTo(585 / 0.881, 6);
-    expect(housing).toBeCloseTo(2350 / 0.881, 6);
-    expect(upfront).toBeCloseTo(16200 / 0.881, 6);
+    expect(housing).toBeCloseTo(1195 / 0.881, 6);
+    expect(upfront).toBeCloseTo(12735 / 0.881, 6);
     for (const result of [rent, utilities, living, housing, upfront]) {
       expect(Number.isFinite(result)).toBe(true);
     }

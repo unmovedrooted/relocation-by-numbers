@@ -79,3 +79,13 @@ Rule modules live in `src/lib/countryTaxRules/`. Countries that have no module y
 | Bolivia (update) | Replaced the 5% / 10% placeholders (and a 10,000 test that compared bolivianos with dollars) with an RC-IVA planning model: AFP 12.71%, 13% on net salary above two minimum wages (BOB 3,300 from DS 5516), charged above four. Remote and foreign-pension income untaxed. Still marked placeholder: the SIN pages were unreachable, the invoice credit is not modelled and sources disagree | Servicio de Impuestos Nacionales (not reachable) |
 | Cyprus (update) | Refreshed to the scale in force from 1 Jan 2026 (Law 244(I)/2025: 0% to EUR 22,000, 20/25/30% bands, 35% above 72,000) with employee social insurance 8.8% and GESY 2.65% deducted; from adviser guides because the Tax Department pages were not fetched; the social insurance ceiling differs across sources (EUR 68,904 used) | Cyprus Tax Department (via summaries) |
 | Finland (update) | Rebuilt: the old model used a 21.5% municipal rate (the pre-2024-reform level) and a 2024 state scale. Now the 2026 state scale (Veronmaksajat table), a 7.5% average municipal rate (calculator-site figure), health contributions 1.10% / 1.49% and 0.88% daily allowance, and about 7.75% employee contributions. The earned income deduction, basic deduction and work income credit are still not modelled (tax on wages overstated by about 2-4 points); vero.fi could not be fetched | Veronmaksajat, Finnish Government decree 1026/2025 (via search extracts) |
+
+## City cost defaults (src/lib/internationalCityDefaults.ts)
+
+| City | What changed | Source |
+|---|---|---|
+| U.S. (10 cities) | Rent now the ACS 2020-2024 recent-mover median gross rent | Census Bureau |
+| London | Rent GBP 2,280 (was 2,800) | ONS Price Index of Private Rents, March 2026 |
+| Lisbon, Porto | Rent EUR 1,045 and EUR 608 (was 2,200 and 1,700): INE median new-contract rent per square metre for Q1 2026 (Lisbon municipality 17.42, Porto metropolitan area 10.13) times an assumed 60 square metres | Statistics Portugal (INE) |
+| Toronto | Rent CAD 2,720 (was 2,500): average asking rent of a two-bedroom, Toronto area, Q3 2025 | Statistics Canada |
+| All other cities | Rent labelled as a planning estimate without an official city figure; groceries, utilities, transport, healthcare and startup labelled planning assumptions (they said "City default estimate"). Official city rent found but not yet applied: none; not retrievable with the tools used: Hong Kong (RVD rents on data.gov.hk), Singapore (HDB median rents by town, URA index), others not yet searched | |
