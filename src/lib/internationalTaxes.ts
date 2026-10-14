@@ -37,6 +37,7 @@ import { DENMARK_TAX_YEAR_LABEL, denmarkTax } from "./countryTaxRules/denmark";
 import { ESTONIA_TAX_YEAR_LABEL, estoniaTax } from "./countryTaxRules/estonia";
 import { FRANCE_TAX_YEAR_LABEL, franceTax } from "./countryTaxRules/france";
 import { GERMANY_TAX_YEAR_LABEL, germanyTax } from "./countryTaxRules/germany";
+import { GREECE_TAX_YEAR_LABEL, greeceTax } from "./countryTaxRules/greece";
 
 export type FilingStatus = "single" | "married";
 
@@ -1230,24 +1231,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // reduced rates on pension income (~6%).
   // No joint filing.
   // -------------------------------------------------------------------------
-  GR: ({ annualIncome, isRetired }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 10000, rate: 0.09 },
-      { upTo: 20000, rate: 0.22 },
-      { upTo: 30000, rate: 0.28 },
-      { upTo: 40000, rate: 0.36 },
-      { upTo: Infinity, rate: 0.44 },
-    ]);
-    // Social contributions: ~13.87% employee share (working); ~6% on pensions
-    const socialOverlay = isRetired ? 0.06 : 0.1387;
-
+  GR: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/greece.ts: 2026 reform scale (Ministry of Finance), EUR 777 tax reduction, EFKA contributions.
+    const { incomeTax, contributions } = greeceTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
+    const effective = annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(rate + socialOverlay),
+      effectiveRate: clampRate(effective),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Greece income tax + social contributions (2024)",
-      missingFactor: isRetired ? "Pension social contributions (~6%) included; solidarity surcharge not modelled." : "EFKA social contributions (~13.87%) included; solidarity surcharge (2.2–10%) not modelled.",
-      note: "Brackets and social contribution rates are 2024 figures. Key gaps: the special solidarity contribution (εισφορά αλληλεγγύης) on incomes above €12,000 adds 2.2–10% in additional tax, not modelled. EFKA (social insurance) contributions have a monthly cap (~€6,500/mo) and different rates for self-employed vs employed. The 13.87% employee figure is the employed rate; self-employed pay a different graduated amount. Real effective rate for high earners or self-employed can differ significantly. Income must be passed in EUR.",
+      label: `Greece income tax + EFKA contributions (${GREECE_TAX_YEAR_LABEL} reform scale)`,
+      missingFactor: "Child reductions and the youth rates not modelled; EFKA rates not re-read on an EFKA page.",
+      note: "Uses the 2026 scale from the Ministry of Finance for a taxpayer without children (9% to EUR 10,000, 20% to 20,000, 26% to 30,000, 34% to 40,000, 39% to 60,000, 44% above) and the EUR 777 tax reduction that falls by EUR 20 per EUR 1,000 of income above EUR 12,000. Employees pay 13.87% EFKA contributions up to the maximum insurable earnings, deducted before tax; pensioners are assumed to pay 6%. The special solidarity contribution no longer applies to private-sector income. Not modelled: lower rates and larger reductions for families with children, the youth rates (zero up to age 25, 9% for 26 to 30) and the new-resident regimes. Income must be passed in euros.",
     };
   },
 

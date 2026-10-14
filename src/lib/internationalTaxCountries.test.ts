@@ -490,3 +490,25 @@ describe("Germany (section 32a EStG 2026, BMAS 2026 social-insurance values)", (
     expect(rate("DE", 30_000, "retired")).toBeCloseTo((tax + 3_705) / 30_000, 8);
   });
 });
+
+import { greeceBracketTax } from "./countryTaxRules/greece";
+
+describe("Greece (2026 reform scale, EUR 777 reduction)", () => {
+  it("scale at EUR 40,000 is 8,900: 9% x 10,000 + 20% x 10,000 + 26% x 10,000 + 34% x 10,000", () => {
+    expect(greeceBracketTax(40_000)).toBeCloseTo(900 + 2_000 + 2_600 + 3_400, 6);
+  });
+
+  it("scale above EUR 60,000 uses 44%", () => {
+    expect(greeceBracketTax(70_000)).toBeCloseTo(8_900 + 0.39 * 20_000 + 0.44 * 10_000, 6);
+  });
+
+  it("employee earning EUR 30,000", () => {
+    // EFKA 13.87% = 4,161; taxable 25,839: 900 + 2,000 + 26% x 5,839 = 4,418.14; reduction 777 - 20 x 13.839 = 500.22 -> 3,917.92
+    expect(rate("GR", 30_000)).toBeCloseTo((3_917.92 + 4_161) / 30_000, 5);
+  });
+
+  it("the reduction wipes out tax on a low income: EUR 12,000 remote", () => {
+    // 9% x 10,000 + 20% x 2,000 = 1,300, less reduction 777 -> 523
+    expect(rate("GR", 12_000, "remote") * 12_000).toBeCloseTo(523, 6);
+  });
+});
