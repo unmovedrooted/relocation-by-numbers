@@ -16,7 +16,7 @@ import { getCityDefaultsByCode } from "@/lib/internationalCityDefaults";
 import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
 import { estimateInternationalTax, NO_US_OVERLAY, US_SELF_EMPLOYED_KEY, US_TAX_STATUS_KEY, usTaxAbroadAddition } from "@/lib/internationalTaxes";
 import UsTaxQuestion from "./UsTaxQuestion";
-import { USD_TO_LOCAL } from "@/lib/internationalFx";
+import { USD_TO_LOCAL, COUNTRY_CURRENCY } from "@/lib/internationalFx";
 import {
   CARIBBEAN_COUNTRIES,
   isCaribbeanCountryCode,
@@ -68,24 +68,7 @@ const CARIBBEAN_COST_DEFAULTS: Record<string, {
 // ---------------------------------------------------------------------------
 // CURRENCY MAP
 // ---------------------------------------------------------------------------
-const COUNTRY_TO_CURRENCY: Record<string, string> = {
-  US: "USD", GB: "GBP", PT: "EUR", ES: "EUR", MX: "MXN", CA: "CAD",
-  DE: "EUR", NL: "EUR", CR: "CRC", FR: "EUR", IT: "EUR", IE: "EUR",
-  AU: "AUD", NZ: "NZD", JP: "JPY", KR: "KRW", AE: "AED", SG: "SGD",
-  CH: "CHF", DK: "DKK", SE: "SEK", NO: "NOK", FI: "EUR", PL: "PLN",
-  CZ: "CZK", HU: "HUF", GR: "EUR", TR: "TRY", HR: "EUR", EE: "EUR",
-  LV: "EUR", LT: "EUR", RO: "RON", BG: "EUR", SI: "EUR", SK: "EUR",
-  MT: "EUR", CY: "EUR", PA: "USD", CO: "COP", BR: "BRL", AR: "ARS",
-  CL: "CLP", PE: "PEN", TH: "THB", VN: "VND", MY: "MYR", ID: "IDR",
-  ZA: "ZAR", AT: "EUR", BE: "EUR",
-  AG: "XCD", AW: "AWG", BB: "BBD", BL: "EUR",
-  "BQ-BO": "USD", "BQ-SA": "USD", "BQ-SE": "USD",
-  BS: "BSD", CU: "CUP", CW: "XCG", DM: "XCD", DO: "DOP",
-  GD: "XCD", GP: "EUR", HT: "HTG", JM: "JMD", KN: "XCD",
-  KY: "KYD", LC: "XCD", MF: "EUR", MQ: "EUR", MS: "XCD",
-  PR: "USD", SX: "XCG", TC: "USD", TT: "TTD", VC: "XCD",
-  VG: "USD", VI: "USD",
-};
+const COUNTRY_TO_CURRENCY = COUNTRY_CURRENCY;
 
 // ---------------------------------------------------------------------------
 // TYPES

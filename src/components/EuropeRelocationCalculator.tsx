@@ -22,7 +22,7 @@ import {
   type ConditionalQuestion,
 } from "@/lib/internationalTaxes";
 import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
-import { USD_TO_LOCAL } from "@/lib/internationalFx";
+import { USD_TO_LOCAL, COUNTRY_CURRENCY } from "@/lib/internationalFx";
 import { buildEuropeSearchParams, createEuropeCityPresetPatch, createEuropeInitialState } from "@/lib/europeCalculatorState";
 import { estimateMortgageMonthly } from "@/lib/mortgage";
 import { estimateHomePriceFromRent, DEFAULT_TAX_INSURANCE_PCT } from "@/lib/compareEngines/homePrice";
@@ -318,17 +318,7 @@ function convertUsdToLocal(amountUsd: number, countryCode: string): number {
   return amountUsd * rate;
 }
 
-const COUNTRY_TO_CURRENCY: Record<string, string> = {
-  US: "USD", GB: "GBP", PT: "EUR", ES: "EUR", MX: "MXN", CA: "CAD",
-  DE: "EUR", NL: "EUR", CR: "CRC", FR: "EUR", IT: "EUR", IE: "EUR",
-  AU: "AUD", NZ: "NZD", JP: "JPY", KR: "KRW", AE: "AED", SG: "SGD",
-  CH: "CHF", DK: "DKK", SE: "SEK", NO: "NOK", FI: "EUR", PL: "PLN",
-  CZ: "CZK", HU: "HUF", GR: "EUR", TR: "TRY", HR: "EUR", EE: "EUR",
-  LV: "EUR", LT: "EUR", RO: "RON", BG: "EUR", SI: "EUR", SK: "EUR",
-  MT: "EUR", CY: "EUR", PA: "USD", CO: "COP", BR: "BRL", AR: "ARS",
-  CL: "CLP", PE: "PEN", TH: "THB", VN: "VND", MY: "MYR", ID: "IDR",
-  ZA: "ZAR", AT: "EUR", BE: "EUR",
-};
+const COUNTRY_TO_CURRENCY = COUNTRY_CURRENCY;
 
 // ---------------------------------------------------------------------------
 // TYPES

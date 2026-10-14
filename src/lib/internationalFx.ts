@@ -129,3 +129,20 @@ export function convertUsdAmountToLocal(
   const rate = USD_TO_LOCAL[countryCode] ?? 1;
   return amountUsd * rate;
 }
+
+/**
+ * ISO 4217 currency for each country code in USD_TO_LOCAL, shared by every international calculator so a country's amounts
+ * are never converted to local currency and then labelled USD. Ecuador, Panama and the U.S. territories use the dollar.
+ */
+export const COUNTRY_CURRENCY: Record<string, string> = {
+  US: "USD", GB: "GBP", CA: "CAD", MX: "MXN", AE: "AED", KR: "KRW", SG: "SGD", AU: "AUD", NZ: "NZD", PH: "PHP", TW: "TWD",
+  CR: "CRC", CH: "CHF", DK: "DKK", SE: "SEK", NO: "NOK", PL: "PLN", CZ: "CZK", HU: "HUF", EC: "USD", BO: "BOB",
+  GY: "GYD", SR: "SRD", VE: "VES", UY: "UYU", PY: "PYG", TR: "TRY", RO: "RON", PA: "USD", CO: "COP", BR: "BRL",
+  DO: "DOP", AR: "ARS", CL: "CLP", PE: "PEN", MY: "MYR", ID: "IDR", ZA: "ZAR", TH: "THB", JM: "JMD", BB: "BBD",
+  TT: "TTD", KY: "KYD", BS: "BSD", AG: "XCD", DM: "XCD", GD: "XCD", KN: "XCD", LC: "XCD", MS: "XCD", VC: "XCD",
+  CW: "XCG", SX: "XCG", AW: "AWG", HT: "HTG", CU: "CUP", PR: "USD", TC: "USD", VG: "USD", VI: "USD",
+  "BQ-BO": "USD", "BQ-SA": "USD", "BQ-SE": "USD", BL: "EUR", GP: "EUR", MF: "EUR", MQ: "EUR",
+  SA: "SAR", QA: "QAR", OM: "OMR", JP: "JPY", VN: "VND", HK: "HKD", IN: "INR", CN: "CNY",
+  PT: "EUR", ES: "EUR", DE: "EUR", FR: "EUR", IT: "EUR", NL: "EUR", IE: "EUR", AT: "EUR", BE: "EUR", FI: "EUR",
+  GR: "EUR", HR: "EUR", EE: "EUR", LV: "EUR", LT: "EUR", SI: "EUR", SK: "EUR", MT: "EUR", CY: "EUR", BG: "EUR",
+};
