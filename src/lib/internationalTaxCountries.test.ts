@@ -893,3 +893,18 @@ describe("Portugal (Portal das Financas 2026 scale, specific deduction, 11% cont
     expect(rate("PT", 100_000, "local", "married")).toBeLessThan(rate("PT", 100_000, "local", "single"));
   });
 });
+
+describe("Romania (10% tax after CAS 25% and CASS 10%)", () => {
+  it("RON 120,000 employee: 41.5% in total", () => {
+    // contributions 42,000; tax 10% x 78,000 = 7,800
+    expect(rate("RO", 120_000)).toBeCloseTo(0.415, 10);
+  });
+
+  it("RON 60,000 pension: only the part above RON 36,000 a year is charged", () => {
+    expect(rate("RO", 60_000, "retired")).toBeCloseTo(4_800 / 60_000, 10);
+  });
+
+  it("a pension below RON 3,000 a month pays nothing", () => {
+    expect(rate("RO", 30_000, "retired")).toBe(0);
+  });
+});

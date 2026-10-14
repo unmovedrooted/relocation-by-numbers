@@ -54,6 +54,7 @@ import { PARAGUAY_TAX_YEAR_LABEL, paraguayTax } from "./countryTaxRules/paraguay
 import { PERU_TAX_YEAR_LABEL, peruTax } from "./countryTaxRules/peru";
 import { POLAND_TAX_YEAR_LABEL, polandTax } from "./countryTaxRules/poland";
 import { PORTUGAL_TAX_YEAR_LABEL, portugalTax } from "./countryTaxRules/portugal";
+import { ROMANIA_TAX_YEAR_LABEL, romaniaTax } from "./countryTaxRules/romania";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -1262,17 +1263,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // on gross (employee). Retired: CASS 10% health only on pension income.
   // No joint filing.
   // -------------------------------------------------------------------------
-  RO: ({ annualIncome, isRetired }) => {
-    // Working: CAS 25% pension + CASS 10% health + 10% income tax = 45% total
-    // Retired: CASS 10% health + 10% income tax = 20% (simplified)
-    const socialOverlay = isRetired ? 0.10 : 0.35;
+  RO: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/romania.ts: 10% income tax after 25% CAS and 10% CASS; pensions taxed above RON 3,000 a month.
+    const { incomeTax, contributions } = romaniaTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(annualIncome > 0 ? 0.10 + socialOverlay : 0),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
       model: "flat",
-      confidence: "partial",
-      label: "Romania 10% flat income tax + social contributions (2024)",
-      missingFactor: "Social contributions (CAS 25% + CASS 10%) are explicitly modelled, main caveat is CASS floors/ceilings.",
-      note: "The 10% flat income tax is exact. Social contributions are explicitly modelled: CAS 25% (pension) + CASS 10% (health) for working income; CASS 10% health only on pension. The combined rate is legislated and relatively stable. Main omission: CASS has a minimum floor (1× minimum wage, ~RON 3,300/yr) and a ceiling (60× minimum wage), the ceiling affects very high earners only. No joint filing. Income must be passed in RON.",
+      confidence: "simplified",
+      label: `Romania 10% income tax + CAS/CASS contributions (${ROMANIA_TAX_YEAR_LABEL})`,
+      missingFactor: "The personal deduction and the minimum-wage tax exemption are not modelled; rates come from payroll summaries rather than ANAF.",
+      note: "Employees pay CAS (pension) 25% and CASS (health) 10% of gross pay, and 10% income tax on the remainder, about 41.5% in total (the old model charged 45%). The part of a pension above RON 3,000 a month pays 10% tax and 10% CASS. Remote workers paid abroad are shown with the 10% tax only. Not modelled: the personal deduction, the RON 200 minimum-wage exemption and the self-employed regime. Income must be passed in lei.",
     };
   },
 
