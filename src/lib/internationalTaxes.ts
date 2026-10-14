@@ -30,6 +30,7 @@ import { BULGARIA_TAX_YEAR_LABEL, bulgariaTax } from "./countryTaxRules/bulgaria
 import { CANADA_PROVINCES, CANADA_TAX_YEAR_LABEL, canadaTax } from "./countryTaxRules/canada";
 import { CHILE_TAX_YEAR_LABEL, chileTax } from "./countryTaxRules/chile";
 import { COLOMBIA_TAX_YEAR_LABEL, colombiaTax } from "./countryTaxRules/colombia";
+import { COSTA_RICA_TAX_YEAR_LABEL, costaRicaTax } from "./countryTaxRules/costaRica";
 
 export type FilingStatus = "single" | "married";
 
@@ -671,21 +672,18 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 Impuesto sobre la Renta brackets (employment income).
   // No joint filing.
   // -------------------------------------------------------------------------
-  CR: ({ annualIncome, isRetired }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 929000, rate: 0.00 },
-      { upTo: 1390000, rate: 0.10 },
-      { upTo: 2435000, rate: 0.15 },
-      { upTo: 4870000, rate: 0.20 },
-      { upTo: Infinity, rate: 0.25 },
-    ]);
+  CR: ({ annualIncome, filing, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/costaRica.ts: Hacienda 2026 monthly brackets, CCSS 2026 worker rates.
+    const scenario = isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local";
+    const { incomeTax, workerCharges } = costaRicaTax(annualIncome, scenario, filing === "married");
+    const effective = annualIncome > 0 ? (incomeTax + workerCharges) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(rate),
+      effectiveRate: clampRate(effective),
       model: "progressive-country",
-      confidence: isRetired ? "partial" : "simplified",
-      label: "Costa Rica income tax (2024)",
-      missingFactor: isRetired ? "Pension income taxed at same brackets; CCSS not applicable to pension." : "CCSS employee contributions (~9%) not included for local employment.",
-      note: "Income tax brackets are 2024 figures. Key omission: CCSS (Caja Costarricense de Seguro Social) employee contributions are approximately 9% of gross salary on top of income tax. For a remote worker paying foreign social security, this may not apply, but for locally-employed residents it materially increases total deductions. Income must be passed in CRC.",
+      confidence: "simplified",
+      label: `Costa Rica income tax + CCSS (${COSTA_RICA_TAX_YEAR_LABEL})`,
+      missingFactor: "Digital-nomad exemption, children's credits and the 13th-month bonus not modelled.",
+      note: "Monthly brackets (no tax to CRC 918,000, then 10%, 15%, 20%, 25%) and the CRC 2,590 spouse credit are the Ministerio de Hacienda figures for fiscal period 2026, applied to annual pay divided by 12. Employees also pay CCSS health 5.50% and pension 4.33% plus 1% to the Banco Popular (10.83%). Costa Rica taxes income from work done in the country, so remote income is taxed here (with no CCSS); digital nomad visa holders have a separate exemption that is not modelled. Pensioners are assumed to pay no CCSS. Income must be passed in colones.",
     };
   },
 

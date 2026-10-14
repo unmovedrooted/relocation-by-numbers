@@ -288,3 +288,29 @@ describe("Colombia (DIAN 2026 UVT of COP 52,374)", () => {
     expect(rate("CO", 40_000_000, "remote")).toBe(0);
   });
 });
+
+import { costaRicaMonthlyTax } from "./countryTaxRules/costaRica";
+
+describe("Costa Rica (Hacienda 2026 monthly brackets, CCSS 2026)", () => {
+  it("salary of CRC 2,000,000 a month", () => {
+    // 10% x (1,347,000 - 918,000) = 42,900 + 15% x (2,000,000 - 1,347,000) = 97,950 -> 140,850
+    expect(costaRicaMonthlyTax(2_000_000)).toBeCloseTo(140_850, 6);
+    // worker charges 10.83% = 216,600
+    expect(rate("CR", 24_000_000)).toBeCloseTo((140_850 + 216_600) / 2_000_000, 8);
+  });
+
+  it("top bracket: 25% above CRC 4,727,000 a month", () => {
+    // 42,900 + 15% x 1,017,000 + 20% x 2,363,000 + 25% x 273,000 = 42,900 + 152,550 + 472,600 + 68,250
+    expect(costaRicaMonthlyTax(5_000_000)).toBeCloseTo(736_300, 6);
+  });
+
+  it("pays nothing below the exempt amount", () => {
+    expect(rate("CR", 9_000_000, "remote")).toBe(0);
+  });
+
+  it("gives a married filer the CRC 2,590 monthly spouse credit", () => {
+    const single = rate("CR", 24_000_000, "remote", "single") * 24_000_000;
+    const married = rate("CR", 24_000_000, "remote", "married") * 24_000_000;
+    expect(single - married).toBeCloseTo(2_590 * 12, 6);
+  });
+});

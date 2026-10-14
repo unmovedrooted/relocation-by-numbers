@@ -19,3 +19,4 @@ Rule modules live in `src/lib/countryTaxRules/`. Countries that have no module y
 | Chile | Refreshed: SII 2026 monthly table (the old code applied monthly thresholds to annual income), 90 UF contribution ceiling. AFP commission and unemployment insurance not modelled | SII, Superintendencia de Pensiones |
 | China | Refreshed: STA comprehensive-income table (unchanged for 2026), social insurance deducted; removed an invented CNY 20,000 deduction. Housing fund and city bases not modelled | State Taxation Administration |
 | Colombia | UVT 2026 (COP 52,374) verified from DIAN; table, 25% exemption caps and 4%+4% contributions are the Law 2277 rules, statute text not reachable to re-read | DIAN |
+| Costa Rica | Refreshed: Hacienda 2026 monthly brackets (read from the PDF; the old code applied monthly thresholds to annual income), CCSS 2026 worker rates (IVM 4.33%) | Hacienda, CCSS |
