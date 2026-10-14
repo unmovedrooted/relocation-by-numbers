@@ -1180,3 +1180,19 @@ describe("Bolivia (RC-IVA after AFP, planning estimate in bolivianos)", () => {
     expect(rate("BO", 240_000, "retired")).toBe(0);
   });
 });
+
+describe("Cyprus (2026 scale, social insurance, GESY)", () => {
+  it("EUR 50,000 employee", () => {
+    // social 4,400; GESY 1,325; taxable 44,275: 2,000 + 2,500 + 30% x 2,275
+    expect(rate("CY", 50_000)).toBeCloseTo((2_000 + 2_500 + 0.3 * 2_275 + 4_400 + 1_325) / 50_000, 8);
+  });
+
+  it("EUR 30,000 retiree pays tax and 1.7% GESY", () => {
+    // GESY 510; taxable 29,490: 20% x 7,490
+    expect(rate("CY", 30_000, "retired")).toBeCloseTo((0.2 * 7_490 + 510) / 30_000, 8);
+  });
+
+  it("income under EUR 22,000 pays no income tax", () => {
+    expect(rate("CY", 20_000, "remote")).toBe(0);
+  });
+});

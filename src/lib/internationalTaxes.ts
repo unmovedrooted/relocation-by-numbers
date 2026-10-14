@@ -28,6 +28,7 @@ import { BELGIUM_TAX_YEAR_LABEL, belgiumTax } from "./countryTaxRules/belgium";
 import { BRAZIL_TAX_YEAR_LABEL, brazilTax } from "./countryTaxRules/brazil";
 import { BULGARIA_TAX_YEAR_LABEL, bulgariaTax } from "./countryTaxRules/bulgaria";
 import { BOLIVIA_TAX_YEAR_LABEL, boliviaTax } from "./countryTaxRules/bolivia";
+import { CYPRUS_TAX_YEAR_LABEL, cyprusTax } from "./countryTaxRules/cyprus";
 import { CANADA_PROVINCES, CANADA_TAX_YEAR_LABEL, canadaTax } from "./countryTaxRules/canada";
 import { CHILE_TAX_YEAR_LABEL, chileTax } from "./countryTaxRules/chile";
 import { COLOMBIA_TAX_YEAR_LABEL, colombiaTax } from "./countryTaxRules/colombia";
@@ -1370,23 +1371,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 progressive. No joint filing.
   // GHS (GESY) health levy: 2.65% on working income; 1.7% on pension.
   // -------------------------------------------------------------------------
-  CY: ({ annualIncome, isRetired }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 19500, rate: 0.00 },
-      { upTo: 28000, rate: 0.20 },
-      { upTo: 36300, rate: 0.25 },
-      { upTo: 60000, rate: 0.30 },
-      { upTo: Infinity, rate: 0.35 },
-    ]);
-    // GHS (GESY) contribution: 2.65% working, 1.7% pension
-    const ghsRate = isRetired ? 0.017 : 0.0265;
+  CY: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/cyprus.ts: Law 244(I)/2025 scale from 2026, social insurance 8.8%, GESY.
+    const { incomeTax, contributions } = cyprusTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(rate + ghsRate),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Cyprus income tax + GHS contribution (2024)",
-      missingFactor: "Special Defence Contribution (SDC) on dividends/interest not included.",
-      note: "Income tax brackets and GHS (GESY) rates are 2024 figures correctly applied. Key omission: the Special Defence Contribution (SDC) applies to Cyprus tax residents on passive income, dividends (17%), interest (30%), rents (2.25% on 75% of gross). For retirees or remote workers with significant investment/rental income this is a material gap. Cyprus non-domicile status (non-dom) exempts SDC on dividends and interest for 17 years, not modelled. Income must be passed in EUR.",
+      label: `Cyprus income tax + social insurance + GESY (${CYPRUS_TAX_YEAR_LABEL})`,
+      missingFactor: "New-resident exemptions, the 5% option on foreign pensions and the special defence contribution are not modelled; figures come from adviser guides because the Tax Department pages were not fetched.",
+      note: "Uses the scale in force from 1 January 2026 (0% to EUR 22,000, 20% to 32,000, 25% to 42,000, 30% to 72,000, 35% above) after employee social insurance of 8.8% (up to about EUR 68,904) and GESY of 2.65%, both deductible; retirees pay GESY at 1.7% (not re-read) and no social insurance, and remote workers paid abroad pay neither here. Not modelled: the 20% employment deduction, the 50% new-resident exemption, the flat 5% option on foreign pensions, the non-dom regime and the special defence contribution on passive income. Income must be passed in euros.",
     };
   },
 
