@@ -798,3 +798,14 @@ describe("Norway (Skatteetaten 2026 rates, deductions, trygdeavgift)", () => {
     expect(rate("NO", 80_000)).toBe(0);
   });
 });
+
+describe("Panama (DGI scale, territorial system, 11% contributions)", () => {
+  it("USD 60,000 employee", () => {
+    // 5,850 + 25% x 10,000 = 8,350; contributions 6,600
+    expect(rate("PA", 60_000)).toBeCloseTo(14_950 / 60_000, 10);
+  });
+
+  it("a remote salary paid from abroad is untaxed", () => {
+    expect(rate("PA", 60_000, "remote")).toBe(0);
+  });
+});

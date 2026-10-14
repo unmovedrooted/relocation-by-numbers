@@ -894,9 +894,9 @@ return {
     effectiveRate: 0,
     model: "none",
     confidence: "verified",
-    label: "No personal income tax",
-    missingFactor: "No personal income tax on employment income, this estimate is exact.",
-    note: "Oman does not levy personal income tax on salaries and wages.",
+    label: "No personal income tax (until 2028)",
+    missingFactor: "A 5% personal income tax on income above OMR 42,000 starts on 1 January 2028 (Royal Decree 56/2025, per news reports; the Tax Authority page was not read).",
+    note: "Oman does not levy personal income tax on salaries and wages in 2026 or 2027. Royal Decree 56/2025 introduces a 5% tax on individuals with annual income above OMR 42,000 from 1 January 2028; the executive regulations were still to be issued, so the exact calculation is not yet known. Omani nationals also pay social security, which is not modelled here.",
   }),
 
   // -------------------------------------------------------------------------

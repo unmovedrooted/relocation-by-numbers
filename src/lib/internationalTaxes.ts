@@ -49,6 +49,7 @@ import { MEXICO_TAX_YEAR_LABEL, mexicoTax } from "./countryTaxRules/mexico";
 import { NETHERLANDS_TAX_YEAR_LABEL, netherlandsTax } from "./countryTaxRules/netherlands";
 import { NEW_ZEALAND_TAX_YEAR_LABEL, newZealandTax } from "./countryTaxRules/newZealand";
 import { NORWAY_TAX_YEAR_LABEL, norwayTax } from "./countryTaxRules/norway";
+import { PANAMA_TAX_YEAR_LABEL, panamaTax } from "./countryTaxRules/panama";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -1411,19 +1412,20 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 progressive. Territorial system, foreign-source income not taxed.
   // No joint filing.
   // -------------------------------------------------------------------------
-  PA: ({ annualIncome }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 11000, rate: 0.00 },
-      { upTo: 50000, rate: 0.15 },
-      { upTo: Infinity, rate: 0.25 },
-    ]);
+  PA: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/panama.ts: DGI tariff on Panama-source income, CSS and educational insurance.
+    const scenario = isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local";
+    const { incomeTax, contributions } = panamaTax(annualIncome, scenario);
+    const exempt = scenario !== "local";
     return {
-      effectiveRate: clampRate(rate),
-      model: "progressive-country",
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
+      model: exempt ? "none" : "progressive-country",
       confidence: "partial",
-      label: "Panama income tax (2024, territorial system)",
-      missingFactor: "Foreign-source income generally not taxed, this estimate may not apply.",
-      note: "Brackets are 2024 figures and simple enough to be reliably modelled. Most important planning note: Panama's territorial system means foreign-sourced income (remote salaries paid by a non-Panamanian employer for work performed outside Panama) is generally not taxed in Panama at all, making this estimate irrelevant for most remote workers. Social security contributions (~9.75% employee up to a monthly ceiling) are not included. Income in USD.",
+      label: exempt ? "Panama, foreign-source income (territorial system)" : `Panama income tax + CSS (${PANAMA_TAX_YEAR_LABEL})`,
+      missingFactor: exempt ? "Assumes all income is from outside Panama; Panama-source income is taxed on the local scale." : "Deductions (medical, school, mortgage interest) and thirteenth-month payments not modelled.",
+      note: exempt
+        ? "Panama taxes only income earned in Panama, so a remote salary paid from abroad or a foreign pension is shown as untaxed here. If any of your income is earned in Panama, use the employee scenario. Income in U.S. dollars."
+        : "Uses the DGI scale (0% to B/. 11,000, 15% to B/. 50,000, 25% above) and employee contributions of 11% (social security 9.75% and educational insurance 1.25%). Not modelled: the deductions the DGI allows and thirteenth-month payments. Income in U.S. dollars.",
     };
   },
 
