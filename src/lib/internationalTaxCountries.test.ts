@@ -447,3 +447,46 @@ describe("France (2026 scale on 2025 income, Urssaf and Agirc-Arrco 2026 rates)"
     expect(married).toBeLessThan(single);
   });
 });
+
+import { germanyIncomeTaxSingle, germanySolidarity } from "./countryTaxRules/germany";
+
+describe("Germany (section 32a EStG 2026, BMAS 2026 social-insurance values)", () => {
+  it("tariff at the zone boundaries", () => {
+    expect(germanyIncomeTaxSingle(12_348)).toBe(0);
+    // y = 0.5: (914.51 x 0.5 + 1,400) x 0.5 = 928.6275 -> taxable 17,348
+    expect(germanyIncomeTaxSingle(17_348)).toBe(928);
+    // z = 1.0: (173.10 + 2,397) + 1,034.87 = 3,604.97 -> taxable 27,799
+    expect(germanyIncomeTaxSingle(27_799)).toBe(3_604);
+    // 0.42 x 100,000 - 11,135.63 = 30,864.37
+    expect(germanyIncomeTaxSingle(100_000)).toBe(30_864);
+    // 0.45 x 300,000 - 19,470.38 = 115,529.62
+    expect(germanyIncomeTaxSingle(300_000)).toBe(115_529);
+  });
+
+  it("solidarity surcharge: nothing below EUR 20,350, then phased in at 11.9% of the excess", () => {
+    expect(germanySolidarity(20_350, false)).toBe(0);
+    expect(germanySolidarity(21_000, false)).toBeCloseTo(0.119 * 650, 6);
+    // the phase-in meets the full 5.5% where 11.9% x (t - 20,350) = 5.5% x t, at t = 37,837
+    expect(germanySolidarity(30_000, false)).toBeCloseTo(0.119 * 9_650, 6);
+    expect(germanySolidarity(40_000, false)).toBeCloseTo(0.055 * 40_000, 6);
+    expect(germanySolidarity(40_700, true)).toBe(0);
+  });
+
+  it("employee earning EUR 70,000", () => {
+    // social: pension 9.3% = 6,510; unemployment 1.3% = 910; health 8.75% x 69,750 = 6,103.125; care 1.8% x 69,750 = 1,255.5 -> 14,778.625
+    // taxable 70,000 - 1,230 - 36 - (6,510 + 6,103.125 + 1,255.5) = 54,865.375 -> 54,865; z = 3.7066
+    // tax (173.10 x 3.7066 + 2,397) x 3.7066 + 1,034.87 = 12,297.79 -> 12,297; no solidarity surcharge
+    expect(Math.abs(rate("DE", 70_000) * 70_000 - (12_297 + 14_778.625))).toBeLessThan(1.5);
+  });
+
+  it("splitting halves the tax base for married filers", () => {
+    expect(rate("DE", 150_000, "remote", "married")).toBeLessThan(rate("DE", 150_000, "remote", "single"));
+  });
+
+  it("pensioners pay health and care but no pension or unemployment insurance", () => {
+    // pension EUR 30,000: health 2,625 + care 1,080 = 3,705; taxable 30,000 - 36 - 3,705 = 26,259
+    const taxable = 26_259;
+    const tax = germanyIncomeTaxSingle(taxable);
+    expect(rate("DE", 30_000, "retired")).toBeCloseTo((tax + 3_705) / 30_000, 8);
+  });
+});

@@ -36,6 +36,7 @@ import { CZECH_TAX_YEAR_LABEL, czechTax } from "./countryTaxRules/czechRepublic"
 import { DENMARK_TAX_YEAR_LABEL, denmarkTax } from "./countryTaxRules/denmark";
 import { ESTONIA_TAX_YEAR_LABEL, estoniaTax } from "./countryTaxRules/estonia";
 import { FRANCE_TAX_YEAR_LABEL, franceTax } from "./countryTaxRules/france";
+import { GERMANY_TAX_YEAR_LABEL, germanyTax } from "./countryTaxRules/germany";
 
 export type FilingStatus = "single" | "married";
 
@@ -543,47 +544,24 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // Solidarity surcharge: 5.5% of income tax where tax > €17,543 (single)
   // or > €35,086 (joint). Church tax not modeled.
   // -------------------------------------------------------------------------
-  DE: ({ annualIncome, filing, isRetired, answers }) => {
-    const taxablePerUnit = filing === "married" ? annualIncome / 2 : annualIncome;
-
-    // 2024 German brackets (basic allowance €11,604)
-    const ratePerUnit = progressiveTax(taxablePerUnit, [
-      { upTo: 12096, rate: 0.00 },
-      { upTo: 17006, rate: 0.14 },
-      { upTo: 66761, rate: 0.24 },
-      { upTo: 277826, rate: 0.42 },
-      { upTo: Infinity, rate: 0.45 },
-    ]);
-
-    const taxPerUnit = ratePerUnit * taxablePerUnit;
-    const totalTax = filing === "married" ? taxPerUnit * 2 : taxPerUnit;
-    const baseTaxRate = annualIncome > 0 ? totalTax / annualIncome : 0;
-
-    // Solidarity surcharge applies if income tax > threshold
-    const solidarityThresholdTax = filing === "married" ? 35086 : 17543;
-    const solidarity = totalTax > solidarityThresholdTax ? baseTaxRate * 0.055 : 0;
-
-    // Church tax conditional (applies to registered members, ~8-9% of income tax)
+  DE: ({ annualIncome, filing, isRetired, incomeScenario, answers }) => {
+    // Rules in countryTaxRules/germany.ts: section 32a EStG 2026 tariff, solidarity surcharge, 2026 social-insurance values.
+    const scenario = isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local";
+    const married = filing === "married";
+    const { incomeTax, solidarity, socialInsurance } = germanyTax(annualIncome, { scenario, married });
+    // Church tax conditional (applies to registered members, 8-9% of income tax)
     const churchTaxApplies = answers?.de_church_tax === "yes";
-    const churchTax = churchTaxApplies ? (baseTaxRate + solidarity) * 0.085 : 0;
-
-    // Scenario-split confidence: retirees have no social insurance gap; workers do.
-    const isWorker = !isRetired;
-    const confidence: TaxConfidence = isWorker ? "simplified" : "partial";
-
+    const churchTax = churchTaxApplies ? 0.085 * incomeTax : 0;
+    const effective = annualIncome > 0 ? (incomeTax + solidarity + churchTax + socialInsurance) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(baseTaxRate + solidarity + churchTax),
+      effectiveRate: clampRate(effective),
       model: "progressive-country",
-      confidence,
+      confidence: "partial",
       label: churchTaxApplies
-        ? "Germany Einkommensteuer + Soli + Kirchensteuer (2024)"
-        : "Germany Einkommensteuer + Soli (2024)",
-      missingFactor: isWorker
-        ? "Employee social insurance (~20% combined) not included, major gap for workers."
-        : "Church tax (~8-9% of income tax) not included unless selected above.",
-      note: isWorker
-        ? "National brackets and Ehegattensplitting are structurally correct. Major omissions: employee social insurance contributions total approximately 20% (health ~7.3%, pension ~9.3%, unemployment ~1.3%, long-term care ~1.7%), these dramatically increase the real total burden for working residents. This estimate understates total deductions from gross income for an employed person by a wide margin."
-        : `Retirees do not pay social insurance on pension income, so this estimate is more reliable for retired residents. Church tax (${churchTaxApplies ? "included at 8.5% of income tax" : "not included, select above if applicable"}) and investment income (Abgeltungsteuer 25%) are not modelled.`,
+        ? `Germany Einkommensteuer + Soli + Kirchensteuer + social insurance (${GERMANY_TAX_YEAR_LABEL})`
+        : `Germany Einkommensteuer + Soli + social insurance (${GERMANY_TAX_YEAR_LABEL})`,
+      missingFactor: "Child allowances, the taxable share of pensions and low-income reductions not modelled.",
+      note: "Income tax follows the section 32a EStG 2026 tariff (basic allowance EUR 12,348, 42% above EUR 69,878, 45% above EUR 277,825) with income splitting for married filers, plus the 5.5% solidarity surcharge above the EUR 20,350 (EUR 40,700 joint) limit. Employees pay pension 9.3%, unemployment 1.3%, health 7.3% plus 1.45% of additional contribution, and care 1.8% (0.6 points more if childless), up to the 2026 ceilings of EUR 101,400 and EUR 69,750; pension, health and care contributions reduce taxable income. Pensioners pay health and care contributions on the pension (assumed 8.75% and 3.6%) and 100% of the pension is treated as taxable. Church tax is added if you select it. Not modelled: child allowances and Kindergeld, the 13th salary and low-income reductions. Income must be passed in euros.",
     };
   },
 
