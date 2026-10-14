@@ -99,6 +99,7 @@ describe("financial logic audit: known-answer scenarios", () => {
 
   it("documents the two mortgage helpers' different percentage units", () => {
     expect(estimatePercentMortgage(400_000, { downPct: 20, rate: 7, years: 30 })).toBe(2_129);
+    expect(estimatePercentMortgage(120_000, { downPct: 0, rate: 0, years: 10 })).toBe(1_000); // zero-rate loan is straight-line principal
     expect(estimateDecimalMortgage(400_000, { downPct: 0.2, rate: 0.07, years: 30 })).toBe(2_129);
   });
 

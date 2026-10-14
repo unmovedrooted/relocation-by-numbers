@@ -33,7 +33,8 @@ export function estimateMortgageMonthly(
   const r    = rate / 12;
   const n    = years * 12;
 
-  if (loan <= 0 || r <= 0 || n <= 0) return null;
+  if (loan <= 0 || r < 0 || n <= 0) return null;
+  if (r === 0) return Math.round(loan / n); // interest-free loan: straight-line principal
   const pmt = (loan * r) / (1 - Math.pow(1 + r, -n));
   return Number.isFinite(pmt) ? Math.round(pmt) : null;
 }
