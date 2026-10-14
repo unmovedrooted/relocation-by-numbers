@@ -1050,7 +1050,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     currency: "USD",
     costIndex: 1.85,
     monthlyDefaults: {
-      rent: 5227,
+      rent: 2354,
       groceries: 700,
       utilities: 260,
       transport: 140,
@@ -1071,7 +1071,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 6500,
     },
     sources: {
-      rent: "Housing assumption",
+      rent: "U.S. Census Bureau, 2020-2024 American Community Survey 5-year estimates: median gross rent of households that moved in the past 12 months (includes basic utilities)",
       groceries: "Grocery assumption",
       utilities: "Utilities assumption",
       transport: "Transit assumption",
@@ -1087,7 +1087,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     currency: "USD",
     costIndex: 1.45,
     monthlyDefaults: {
-      rent: 2800,
+      rent: 2151,
       groceries: 620,
       utilities: 220,
       transport: 170,
@@ -1108,7 +1108,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 5200,
     },
     sources: {
-      rent: "Housing assumption",
+      rent: "U.S. Census Bureau, 2020-2024 American Community Survey 5-year estimates: median gross rent of households that moved in the past 12 months (includes basic utilities)",
       groceries: "Grocery assumption",
       utilities: "Utilities assumption",
       transport: "Transit assumption",
@@ -1124,7 +1124,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     currency: "USD",
     costIndex: 1.22,
     monthlyDefaults: {
-      rent: 2600,
+      rent: 2210,
       groceries: 540,
       utilities: 210,
       transport: 125,
@@ -1145,7 +1145,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 4500,
     },
     sources: {
-      rent: "Housing assumption",
+      rent: "U.S. Census Bureau, 2020-2024 American Community Survey 5-year estimates: median gross rent of households that moved in the past 12 months (includes basic utilities)",
       groceries: "Grocery assumption",
       utilities: "Utilities assumption",
       transport: "Transit assumption",
@@ -1161,7 +1161,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     currency: "USD",
     costIndex: 1.05,
     monthlyDefaults: {
-      rent: 2200,
+      rent: 1571,
       groceries: 500,
       utilities: 210,
       transport: 115,
@@ -1182,7 +1182,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 4000,
     },
     sources: {
-      rent: "Housing assumption",
+      rent: "U.S. Census Bureau, 2020-2024 American Community Survey 5-year estimates: median gross rent of households that moved in the past 12 months (includes basic utilities)",
       groceries: "Grocery assumption",
       utilities: "Utilities assumption",
       transport: "Transit assumption",
@@ -1198,7 +1198,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     currency: "USD",
     costIndex: 0.96,
     monthlyDefaults: {
-      rent: 2000,
+      rent: 1746,
       groceries: 460,
       utilities: 190,
       transport: 110,
@@ -1219,7 +1219,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 3600,
     },
     sources: {
-      rent: "Housing assumption",
+      rent: "U.S. Census Bureau, 2020-2024 American Community Survey 5-year estimates: median gross rent of households that moved in the past 12 months (includes basic utilities)",
       groceries: "Grocery assumption",
       utilities: "Utilities assumption",
       transport: "Transit assumption",
@@ -1235,7 +1235,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     currency: "USD",
     costIndex: 1.02,
     monthlyDefaults: {
-      rent: 2100,
+      rent: 1670,
       groceries: 470,
       utilities: 195,
       transport: 115,
@@ -1256,7 +1256,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 3700,
     },
     sources: {
-      rent: "Housing assumption",
+      rent: "U.S. Census Bureau, 2020-2024 American Community Survey 5-year estimates: median gross rent of households that moved in the past 12 months (includes basic utilities)",
       groceries: "Grocery assumption",
       utilities: "Utilities assumption",
       transport: "Transit assumption",
@@ -1272,7 +1272,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     currency: "USD",
     costIndex: 0.93,
     monthlyDefaults: {
-      rent: 1900,
+      rent: 1483,
       groceries: 455,
       utilities: 190,
       transport: 110,
@@ -1293,7 +1293,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 3400,
     },
     sources: {
-      rent: "Housing assumption",
+      rent: "U.S. Census Bureau, 2020-2024 American Community Survey 5-year estimates: median gross rent of households that moved in the past 12 months (includes basic utilities)",
       groceries: "Grocery assumption",
       utilities: "Utilities assumption",
       transport: "Transit assumption",
@@ -1309,7 +1309,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     currency: "USD",
     costIndex: 1.18,
     monthlyDefaults: {
-      rent: 2500,
+      rent: 2001,
       groceries: 540,
       utilities: 210,
       transport: 120,
@@ -1330,7 +1330,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 4300,
     },
     sources: {
-      rent: "Housing assumption",
+      rent: "U.S. Census Bureau, 2020-2024 American Community Survey 5-year estimates: median gross rent of households that moved in the past 12 months (includes basic utilities)",
       groceries: "Grocery assumption",
       utilities: "Utilities assumption",
       transport: "Transit assumption",
@@ -1346,7 +1346,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     currency: "USD",
     costIndex: 0.98,
     monthlyDefaults: {
-      rent: 2000,
+      rent: 1596,
       groceries: 460,
       utilities: 190,
       transport: 105,
@@ -1367,7 +1367,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 3500,
     },
     sources: {
-      rent: "Housing assumption",
+      rent: "U.S. Census Bureau, 2020-2024 American Community Survey 5-year estimates: median gross rent of households that moved in the past 12 months (includes basic utilities)",
       groceries: "Grocery assumption",
       utilities: "Utilities assumption",
       transport: "Transit assumption",
@@ -1383,7 +1383,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     currency: "USD",
     costIndex: 0.92,
     monthlyDefaults: {
-      rent: 1900,
+      rent: 1606,
       groceries: 450,
       utilities: 185,
       transport: 105,
@@ -1404,7 +1404,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
       emergencyBuffer: 3300,
     },
     sources: {
-      rent: "Housing assumption",
+      rent: "U.S. Census Bureau, 2020-2024 American Community Survey 5-year estimates: median gross rent of households that moved in the past 12 months (includes basic utilities)",
       groceries: "Grocery assumption",
       utilities: "Utilities assumption",
       transport: "Transit assumption",
