@@ -34,6 +34,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/rent-vs-buy-calculator",
     "/housing-affordability-calculator",
     "/compare-cities",
+    "/retirement-state-tax",
     "/one-income-relocation-calculator",
     "/fire-calculator",
     "/fire-number-calculator",
