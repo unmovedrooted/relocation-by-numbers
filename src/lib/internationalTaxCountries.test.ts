@@ -824,3 +824,20 @@ describe("Paraguay (DNIT IRP scale, PYG 80 million threshold, IPS 9%)", () => {
     expect(rate("PY", 200_000_000, "retired")).toBe(0);
   });
 });
+
+describe("Peru (UIT S/ 5,500, 7 UIT deduction, scale, 13% pension)", () => {
+  it("PEN 100,000 employee", () => {
+    // net 61,500 = 11.18 UIT: 8% x 27,500 + 14% x 34,000 = 2,200 + 4,760 = 6,960; pension 13,000
+    expect(rate("PE", 100_000)).toBeCloseTo((6_960 + 13_000) / 100_000, 8);
+  });
+
+  it("PEN 38,500 pays no income tax", () => {
+    expect(rate("PE", 38_500, "retired")).toBe(0);
+  });
+
+  it("PEN 400,000 remote worker reaches the 30% band", () => {
+    // net 361,500 = 65.73 UIT: 8% x 27,500 + 14% x 82,500 + 17% x 82,500 + 20% x 55,000 + 30% x (361,500 - 247,500)
+    const tax = 2_200 + 11_550 + 14_025 + 11_000 + 0.3 * 114_000;
+    expect(rate("PE", 400_000, "remote")).toBeCloseTo(tax / 400_000, 8);
+  });
+});

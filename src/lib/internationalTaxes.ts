@@ -51,6 +51,7 @@ import { NEW_ZEALAND_TAX_YEAR_LABEL, newZealandTax } from "./countryTaxRules/new
 import { NORWAY_TAX_YEAR_LABEL, norwayTax } from "./countryTaxRules/norway";
 import { PANAMA_TAX_YEAR_LABEL, panamaTax } from "./countryTaxRules/panama";
 import { PARAGUAY_TAX_YEAR_LABEL, paraguayTax } from "./countryTaxRules/paraguay";
+import { PERU_TAX_YEAR_LABEL, peruTax } from "./countryTaxRules/peru";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -1536,26 +1537,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 UIT-based brackets. UIT value PEN 5,150 (2024).
   // No joint filing.
   // -------------------------------------------------------------------------
-  PE: ({ annualIncome }) => {
-    const uitValue = 5150;
-    const incomeUIT = annualIncome / uitValue;
-
-    const taxUIT = progressiveTax(incomeUIT, [
-      { upTo: 5, rate: 0.08 },
-      { upTo: 20, rate: 0.14 },
-      { upTo: 35, rate: 0.17 },
-      { upTo: 45, rate: 0.20 },
-      { upTo: Infinity, rate: 0.30 },
-    ]) * incomeUIT;
-
-    const effectiveRate = incomeUIT > 0 ? taxUIT / incomeUIT : 0;
+  PE: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/peru.ts: 2026 UIT S/ 5,500, 7 UIT deduction, article 53 scale, 13% pension.
+    const { incomeTax, contributions } = peruTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(effectiveRate),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Peru UIT-based income tax (2024)",
-      missingFactor: "7 UIT employment deduction (~PEN 36,050) not applied, overstates employee tax.",
-      note: "UIT brackets are 2024 figures (UIT PEN 5,150). Key omission: employment income receives a deduction of 7 UIT (~PEN 36,050/yr) before the progressive scale applies, not modelled, so this estimate overstates income tax for employees, particularly at lower incomes. EsSalud health contributions are employer-only (~9%) and do not reduce employee take-home. Income must be passed in PEN.",
+      label: `Peru income tax + pension (${PERU_TAX_YEAR_LABEL})`,
+      missingFactor: "Extra 3 UIT deduction for spending, gratificaciones and pensioners' health contribution not modelled; SUNAT pages not read directly.",
+      note: "Uses the 2026 tax unit (UIT S/ 5,500): labour income less 7 UIT (S/ 38,500) taxed at 8% to 5 UIT, 14% to 20 UIT, 17% to 35 UIT, 20% to 45 UIT and 30% above, plus the employee's pension contribution of about 13% (ONP, or AFP with fees). Retirees and remote workers paid abroad pay no pension contribution here. Not modelled: the additional 3 UIT deduction for certain expenses and the two yearly gratificaciones. Income must be passed in soles.",
     };
   },
 
