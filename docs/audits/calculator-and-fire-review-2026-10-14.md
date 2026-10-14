@@ -144,3 +144,7 @@ Decisions: Barista part-time income is extra earnings from today; Chubby and Fat
 - **Issue 10 (savings coverage):** all five regional calculators now compute months covered as savings after upfront costs divided by monthly outflow, and say so in the label.
 
 Validation: type check, lint (0 errors) and 1,984 tests pass; FIRE, Europe, South America and HSA pages load without console errors. The live-calculator audit now carries regression assertions for the fixed FIRE cases.
+
+## Issue 4 fixed (2026-10-14)
+
+FIRE take-home pay is no longer grown at the salary-growth rate. `makeNetPath` in `FireCalculator.tsx` recomputes it for every future year through the same tax engine: gross pay grows at the salary-growth rate, and the tax rules (brackets, standard deduction, payroll wage base, 401(k) limit) are assumed to be indexed to inflation, so each year's gross is deflated, taxed at today's scale, and scaled back up. Pay that outgrows inflation moves into higher brackets; pay that grows exactly with inflation keeps the same tax rate. The same path drives the main projection, Coast readiness, the decision scenarios, the city comparisons and the moved scenario (taxed in the new state and city). The "How this estimate works" note was updated. Known-answer tests are in `liveCalculatorMath.audit.test.ts`. The index assumption is the one remaining simplification: actual future brackets and state rules may differ.
