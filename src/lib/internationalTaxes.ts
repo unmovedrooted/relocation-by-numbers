@@ -38,6 +38,7 @@ import { ESTONIA_TAX_YEAR_LABEL, estoniaTax } from "./countryTaxRules/estonia";
 import { FRANCE_TAX_YEAR_LABEL, franceTax } from "./countryTaxRules/france";
 import { GERMANY_TAX_YEAR_LABEL, germanyTax } from "./countryTaxRules/germany";
 import { GREECE_TAX_YEAR_LABEL, greeceTax } from "./countryTaxRules/greece";
+import { IRELAND_TAX_YEAR_LABEL, irelandTax } from "./countryTaxRules/ireland";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
 export type FilingStatus = "single" | "married";
@@ -787,41 +788,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   //   married person's credit €1,875 additional (married), age credit €245 (65+).
   // Retired: USC and PRSI waived.
   // -------------------------------------------------------------------------
-  IE: ({ annualIncome, filing, isRetired }) => {
-    const standardBand = filing === "married" ? 51000 : 42000;
-    const grossTaxAmount = progressiveTax(annualIncome, [
-      { upTo: standardBand, rate: 0.20 },
-      { upTo: Infinity, rate: 0.40 },
-    ]) * annualIncome;
-
-    // 2025 tax credits, applied directly against tax liability
-    const personalCredit = 1875;
-    const payeCredit = isRetired ? 0 : 1875; // working only
-    const marriedCredit = filing === "married" ? 1875 : 0;
-    const ageCredit = isRetired ? 245 : 0;     // 65+ age credit
-    const totalCredits = personalCredit + payeCredit + marriedCredit + ageCredit;
-
-    const netTaxAmount = Math.max(0, grossTaxAmount - totalCredits);
-    const payeRate = annualIncome > 0 ? netTaxAmount / annualIncome : 0;
-
-    // 2025 USC bands
-    const uscRate = isRetired ? 0 : progressiveTax(annualIncome, [
-      { upTo: 13000, rate: 0.00 },
-      { upTo: 25760, rate: 0.02 },
-      { upTo: 70044, rate: 0.04 },
-      { upTo: Infinity, rate: 0.08 },
-    ]);
-
-    // PRSI: 4.1% from Oct 2024
-    const prsi = isRetired ? 0 : 0.041;
-
+  IE: ({ annualIncome, filing, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/ireland.ts: Revenue 2026 bands, credits and USC; PRSI 4.35% from October 2026.
+    const { incomeTax, usc, prsi } = irelandTax(annualIncome, filing === "married" ? "married" : "single", isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
+    const effective = annualIncome > 0 ? (incomeTax + usc + prsi) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(payeRate + uscRate + prsi),
+      effectiveRate: clampRate(effective),
       model: "progressive-country",
-      confidence: "partial",
-      label: "Ireland PAYE + USC + PRSI + tax credits (2025)",
-      missingFactor: "Home carer credit, rent credit, and other personal reliefs not modelled.",
-      note: "2025 rate structure with key tax credits applied: personal credit (€1,875), PAYE employee credit (€1,875 for workers), married person's credit (€1,875), and age credit (€245 for 65+). USC and PRSI correctly excluded for retirees. Remaining omissions: home carer credit (€1,800), rent tax credit (€1,000), medical/tuition expenses, and pension contribution relief, these reduce tax further for eligible filers. Income must be passed in EUR.",
+      confidence: "simplified",
+      label: `Ireland income tax + USC + PRSI (${IRELAND_TAX_YEAR_LABEL})`,
+      missingFactor: "Second-earner band increase, home carer, rent and medical credits, and pension relief not modelled; PRSI rate not read on a gov.ie page.",
+      note: "Uses Revenue's 2026 rules: 20% on the first EUR 44,000 (EUR 53,000 for a married couple with one income) and 40% above, less the personal credit (EUR 2,000 single, EUR 4,000 married), the employee credit (EUR 2,000) and, for retirees, the age credit (EUR 245 or EUR 490). USC is 0.5%, 2%, 3% and 8% by band and applies to pensions too; the reduced USC rate for people 70 and over is not applied. Employees pay PRSI at 4.35% (from October 2026, 4.2% before); retirees and remote workers paid abroad pay none. Income must be passed in euros.",
     };
   },
 

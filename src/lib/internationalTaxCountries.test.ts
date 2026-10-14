@@ -596,3 +596,19 @@ describe("Indonesia (DJP Article 17 layers, PTKP, occupational cost)", () => {
     expect(idr(50_000_000).effectiveRate).toBe(0);
   });
 });
+
+describe("Ireland (Revenue 2026 bands, credits, USC; PRSI 4.35%)", () => {
+  it("EUR 60,000 employee, single", () => {
+    // tax 8,800 + 6,400 - credits 4,000 = 11,200; USC 60.06 + 333.76 + 939 = 1,332.82; PRSI 2,610
+    expect(rate("IE", 60_000)).toBeCloseTo(15_142.82 / 60_000, 8);
+  });
+
+  it("EUR 30,000 retiree, single: age credit, USC, no PRSI", () => {
+    // tax 6,000 - (2,000 + 245) = 3,755; USC 60.06 + 333.76 + 39 = 432.82
+    expect(rate("IE", 30_000, "retired")).toBeCloseTo(4_187.82 / 30_000, 8);
+  });
+
+  it("pays nothing at EUR 12,000", () => {
+    expect(rate("IE", 12_000)).toBe(0);
+  });
+});
