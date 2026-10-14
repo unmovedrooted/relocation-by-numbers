@@ -60,6 +60,7 @@ import { SLOVENIA_TAX_YEAR_LABEL, sloveniaTax } from "./countryTaxRules/slovenia
 import { SOUTH_AFRICA_TAX_YEAR_LABEL, southAfricaTax } from "./countryTaxRules/southAfrica";
 import { SOUTH_KOREA_TAX_YEAR_LABEL, southKoreaTax } from "./countryTaxRules/southKorea";
 import { SWEDEN_TAX_YEAR_LABEL, swedenTax } from "./countryTaxRules/sweden";
+import { SWITZERLAND_TAX_YEAR_LABEL, switzerlandTax } from "./countryTaxRules/switzerland";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -932,45 +933,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // Cantonal + municipal overlay: Zurich mid-range benchmark (~13%).
   // Range is wide: Zug ~18% total, Zurich ~27%, Geneva ~37%.
   // -------------------------------------------------------------------------
-  CH: ({ annualIncome, filing }) => {
-    const singleBrackets = [
-      { upTo: 17800, rate: 0.00 },
-      { upTo: 31600, rate: 0.077 },
-      { upTo: 41400, rate: 0.088 },
-      { upTo: 55200, rate: 0.11 },
-      { upTo: 72500, rate: 0.13 },
-      { upTo: 103600, rate: 0.133 },
-      { upTo: 134600, rate: 0.134 },
-      { upTo: 176000, rate: 0.135 },
-      { upTo: Infinity, rate: 0.1197 },
-    ];
-    const marriedBrackets = [
-      { upTo: 28300, rate: 0.00 },
-      { upTo: 50900, rate: 0.02 },
-      { upTo: 58400, rate: 0.03 },
-      { upTo: 75300, rate: 0.04 },
-      { upTo: 90300, rate: 0.05 },
-      { upTo: 103400, rate: 0.06 },
-      { upTo: 114700, rate: 0.07 },
-      { upTo: 124000, rate: 0.08 },
-      { upTo: 131700, rate: 0.09 },
-      { upTo: 137300, rate: 0.10 },
-      { upTo: 141200, rate: 0.105 },
-      { upTo: 145000, rate: 0.11 },
-      { upTo: Infinity, rate: 0.115 },
-    ];
-    const federalRate = progressiveTax(annualIncome, filing === "married" ? marriedBrackets : singleBrackets);
-    // Zurich mid-range cantonal + municipal overlay. Married scale is inherently
-    // lower at the federal level; no additional married discount applied.
-    const cantonalOverlay = 0.13;
-
+  CH: ({ annualIncome, filing, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/switzerland.ts: ESTV Form 58c federal scale for 2026, benchmark cantonal rate, AHV/ALV.
+    const { federal, cantonal, contributions } = switzerlandTax(annualIncome, filing === "married" ? "married" : "single", isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(federalRate + cantonalOverlay),
+      effectiveRate: clampRate(annualIncome > 0 ? (federal + cantonal + contributions) / annualIncome : 0),
       model: "country-plus-province",
       confidence: "simplified",
-      label: "Switzerland federal + cantonal estimate (2024 mid-range)",
-      missingFactor: "Rate varies widely by canton, Zug ~18% total, Zurich ~27%, Geneva ~37%.",
-      note: "Federal brackets are exact 2024 Swiss figures (separate single/married scales). Cantonal and municipal rates use a mid-range overlay (~13%) benchmarked to Zurich. Actual combined rates range from ~18% (Zug) to ~37% (Geneva, Vaud), this estimate can be off by 10+ pp depending on location. Swiss social insurance contributions not included. Income must be passed in CHF.",
+      label: `Switzerland federal tax + cantonal benchmark + AHV/ALV (${SWITZERLAND_TAX_YEAR_LABEL})`,
+      missingFactor: "Cantonal and municipal rates vary a lot (about 8% of taxable income in Zug to 22% in Geneva); pillar-2 pension, health premiums and church tax not modelled.",
+      note: "Federal tax comes from the Federal Tax Administration's 2026 table (Form 58c, separate single and married scales, 0.77% to 13.2% marginal), applied after the employee's AHV/IV/EO contributions of 5.3% and ALV of 1.1% (up to CHF 148,200), the professional-expense allowance and an insurance allowance. Cantonal and municipal tax is a flat 13% of taxable income, a Zurich-like benchmark; the real figure runs from roughly 8% to 22% by canton, so this can be off by 5 points or more. Not modelled: pillar-2 pension contributions, health-insurance premiums, church tax, wealth tax and lump-sum taxation. The old model used federal rates about ten times too high. Income must be passed in francs.",
     };
   },
 

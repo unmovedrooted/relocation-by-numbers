@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { estimateInternationalTax } from "./internationalTaxes";
+import { switzerlandFederalTax } from "./countryTaxRules/switzerland";
 
 // Known-answer tests for countries refreshed against the national tax authority's own tables.
 // Each expected value is worked by hand from the published table named beside it.
@@ -1036,5 +1037,26 @@ describe("Sweden (Skatteverket 2026 allowance, municipal and state tax)", () => 
 
   it("the basic allowance joins up at its break points", () => {
     expect(rate("SE", 25_042)).toBeCloseTo(0, 4);
+  });
+});
+
+describe("Switzerland (ESTV Form 58c federal scale, benchmark cantonal rate, AHV/ALV)", () => {
+  it("CHF 100,000 single employee", () => {
+    // AHV 5,300 + ALV 1,100; professional 3,000; insurance 1,800; taxable 88,800
+    // federal 1,502.95 + 6.6% x 6,700 = 1,945.15 (the form shows 2,684.35 at CHF 100,000, which this scale reproduces)
+    expect(rate("CH", 100_000)).toBeCloseTo((1_945.24 + 0.13 * 88_800 + 6_400) / 100_000, 5);
+  });
+
+  it("reproduces the form's tax amounts at sampled incomes", () => {
+    const points: Array<[number, "single" | "married", number]> = [
+      [100_000, "single", 2_684.35], [150_300, "single", 7_108.55], [200_000, "single", 12_903.35], [250_000, "single", 19_503.35],
+      [100_000, "married", 1_816], [150_300, "married", 5_441], [200_000, "married", 11_880], [250_000, "married", 18_380],
+      [941_200, "single", 108_238], [941_200, "married", 108_236],
+    ];
+    for (const [income, filing, tax] of points) expect(switzerlandFederalTax(income, filing)).toBeCloseTo(tax, 0);
+  });
+
+  it("married couples use the married scale", () => {
+    expect(rate("CH", 100_000, "local", "married")).toBeLessThan(rate("CH", 100_000, "local", "single"));
   });
 });
