@@ -285,9 +285,10 @@ const fmtPct = (v: number, d = 1) => (Number.isFinite(v) ? `${v.toFixed(d)}%` : 
 // ═══════════════════════════════════════════════════════════════════════
 
 function calcMonthlyPI(principal: number, annualRate: number, termYears: number) {
-  if (principal <= 0 || annualRate <= 0 || termYears <= 0) return 0;
+  if (principal <= 0 || annualRate < 0 || termYears <= 0) return 0;
   const r = annualRate / 100 / 12;
   const N = termYears * 12;
+  if (r === 0) return principal / N; // interest-free loan: straight-line principal
   return (principal * r * Math.pow(1 + r, N)) / (Math.pow(1 + r, N) - 1);
 }
 
@@ -308,7 +309,7 @@ function calcAutoPMI(loan: number, homePrice: number, downPct: number) {
 // Solving B(m) = 0.8·homePrice algebraically:
 //   m = log((target − PMT/r) / (L − PMT/r)) / log(1+r)
 function calcPMIDropOff(loan: number, homePrice: number, annualRate: number, monthlyPayment: number): number | null {
-  if (!loan || !homePrice || !annualRate || !monthlyPayment) return null;
+  if (!loan || !homePrice || !(annualRate >= 0) || !monthlyPayment) return null;
   const target = homePrice * 0.80;
   if (loan <= target) return 0; // already below 80% LTV
 
@@ -337,7 +338,7 @@ function calcPMIDropOff(loan: number, homePrice: number, annualRate: number, mon
 }
 
 function buildSchedule(principal: number, annualRate: number, termYears: number, extraMonthly = 0) {
-  if (principal <= 0 || annualRate <= 0 || termYears <= 0) return [];
+  if (principal <= 0 || annualRate < 0 || termYears <= 0) return [];
   const r    = annualRate / 100 / 12;
   const base = calcMonthlyPI(principal, annualRate, termYears);
   const pmt  = base + extraMonthly;

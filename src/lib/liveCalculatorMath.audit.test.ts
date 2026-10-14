@@ -2,9 +2,10 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
-import { solveMaxHomePrice } from "./housing";
+import { solveMaxHomePrice, US_STATE_DEFAULTS } from "./housing";
 import { CONTRIBUTION_LIMITS_2026 } from "./taxYear2026";
 import { EMPLOYEE_401K_LIMIT, estimateNetAnnual, estimateNetBreakdown } from "./wageTax";
+import { compareMove } from "./relocationMove";
 
 // Audit harness: execute the actual component-local functions without moving or
 // editing production code. Imports and the React component are not executed.
@@ -29,6 +30,65 @@ function componentFunctions(file: string, names: string[], globals: Record<strin
   return runInNewContext(ts.transpileModule(code, { compilerOptions: { target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.React } }).outputText,
     { process: { env: {} }, CONTRIBUTION_LIMITS_2026, EMPLOYEE_401K_LIMIT, estimateNetAnnual, estimateNetBreakdown, ...globals });
 }
+
+describe("additional live calculator known-answer audit", () => {
+  const mortgage = () => componentFunctions("MortgageCalculator", ["calcMonthlyPI", "calcTotalInterest", "buildSchedule", "calcRefi", "calcAutoPMI", "calcPMIDropOff"], { US_STATE_DEFAULTS });
+  it("matches independently calculated positive-rate mortgage payments and amortization", () => {
+    const m = mortgage();
+    const principal = 300000, rate = 0.065 / 12, months = 360;
+    const expected = principal / ((1 - (1 + rate) ** -months) / rate);
+    expect(m.calcMonthlyPI(principal, 6.5, 30)).toBeCloseTo(expected, 8);
+    const rows = m.buildSchedule(principal, 6.5, 30);
+    expect(rows).toHaveLength(months);
+    expect(rows.reduce((sum: number, row: { principal: number }) => sum + row.principal, 0)).toBeCloseTo(principal, 5);
+    expect(rows[359].balance).toBeCloseTo(0, 5);
+    expect(m.buildSchedule(principal, 6.5, 30, 200).length).toBeLessThan(months);
+    expect(m.calcAutoPMI(80000, 100000, 20)).toBe(0);
+    expect(m.calcAutoPMI(95000, 100000, 5)).toBe(95);
+  });
+  it("main mortgage zero-rate payment is $1,000", () => {
+    expect(mortgage().calcMonthlyPI(120000, 0, 10)).toBe(1000);
+  });
+  it("zero-rate total interest is zero", () => {
+    expect(mortgage().calcTotalInterest(120000, 0, 10)).toBe(0);
+  });
+  it("zero-rate amortization has 120 payments", () => {
+    expect(mortgage().buildSchedule(120000, 0, 10)).toHaveLength(120);
+  });
+  it("zero-rate PMI paydown reaches 80% in ten months", () => {
+    expect(mortgage().calcPMIDropOff(90000, 100000, 0, 1000)).toBe(10);
+  });
+  it("refinancing at an unchanged rate and term loses exactly the closing costs", () => {
+    const result = mortgage().calcRefi(120000, 6, 120, 6, 10, 3000);
+    expect(result.monthlySavings).toBe(0);
+    expect(result.totalSavings).toBe(-3000);
+    expect(result.breakEvenMonths).toBeNull();
+  });
+  it.each([0, 1, 10, 30])("retirement accumulation matches annuity-due math over %i years", years => {
+    const r = componentFunctions("RetirementCalculator", ["computeProjection", "realReturnRate"]);
+    const result = r.computeProjection({ startingBalance: 50000, annualContribution: 6000, realReturn: 0.05, years });
+    const expected = 50000 * 1.05 ** years + 6000 * 1.05 * ((1.05 ** years - 1) / 0.05);
+    expect(result.projectedBalance).toBeCloseTo(expected, 6);
+    expect(result.totalContributed).toBe(years * 6000);
+    expect(result.annualIncome).toBeCloseTo(expected * 0.04, 6);
+    expect(result.monthlyIncome).toBeCloseTo(expected * 0.04 / 12, 6);
+    expect(r.realReturnRate(7, 3)).toBeCloseTo(1.07 / 1.03 - 1, 12);
+  });
+  it.each([50000, 100000, 150000, 250000])("relocation cash accounting at salary %i isolates deposits from expenses", salary => {
+    const item = (amount: number) => ({ amount, estimated: false });
+    const result = compareMove({ filing: "single", k401Pct1: 0, k401Pct2: 0,
+      currentIncome1: salary, offerIncome1: salary, currentIncome2: 0, offerIncome2: 0,
+      currentState: "fl", targetState: "fl", currentCityId: "", targetCityId: "",
+      currentHousing: item(2000), targetHousing: item(1500), currentLiving: item(1000), targetLiving: item(1000),
+      oneTime: { movers: item(1000), travel: item(200), setup: item(300), leaseBreak: item(0), fees: item(100),
+        overlapMonths: 1, refundableDeposit: item(1500), downPayment: item(10000) } });
+    expect(result.expected).toEqual({ monthlyChange: 500, firstYearImpact: 2900, spentOneTime: 3100,
+      cashUpfront: 14600, monthsToRecover: 7 });
+    expect(result.low).toEqual(result.expected);
+    expect(result.high).toEqual(result.expected);
+    expect(Object.values(result.breakdown).reduce((sum, value) => sum + value, 0)).toBe(500);
+  });
+});
 
 describe("live calculator mathematical observations (not a full-page certification)", () => {
   it("recomputes FIRE take-home pay each year with inflation-indexed tax rules", () => {
