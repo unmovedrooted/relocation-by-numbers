@@ -29,6 +29,7 @@ import { BRAZIL_TAX_YEAR_LABEL, brazilTax } from "./countryTaxRules/brazil";
 import { BULGARIA_TAX_YEAR_LABEL, bulgariaTax } from "./countryTaxRules/bulgaria";
 import { BOLIVIA_TAX_YEAR_LABEL, boliviaTax } from "./countryTaxRules/bolivia";
 import { CYPRUS_TAX_YEAR_LABEL, cyprusTax } from "./countryTaxRules/cyprus";
+import { FINLAND_TAX_YEAR_LABEL, finlandTax } from "./countryTaxRules/finland";
 import { CANADA_PROVINCES, CANADA_TAX_YEAR_LABEL, canadaTax } from "./countryTaxRules/canada";
 import { CHILE_TAX_YEAR_LABEL, chileTax } from "./countryTaxRules/chile";
 import { COLOMBIA_TAX_YEAR_LABEL, colombiaTax } from "./countryTaxRules/colombia";
@@ -1072,31 +1073,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // State progressive + municipal average ~21.5% + health insurance premium ~1.5%.
   // No joint filing.
   // -------------------------------------------------------------------------
-  FI: ({ annualIncome }) => {
-    // 2024 Finnish state (valtionvero) brackets
-    const stateRate = progressiveTax(annualIncome, [
-      { upTo: 22900, rate: 0.00 },
-      { upTo: 33900, rate: 0.1264 },
-      { upTo: 49500, rate: 0.19 },
-      { upTo: 91300, rate: 0.3025 },
-      { upTo: 150000, rate: 0.34 },
-      { upTo: Infinity, rate: 0.355 },
-    ]);
-
-    // Municipal tax: average ~21.5% (varies commune to commune)
-    const municipalRate = 0.215;
-    // Health insurance premium contribution: ~1.5% on earned income
-    const healthRate = 0.015;
-
-    const effectiveRate = stateRate + municipalRate + healthRate;
-
+  FI: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/finland.ts: 2026 state scale, 7.5% average municipal tax, health contributions, employee contributions.
+    const { incomeTax, contributions } = finlandTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(effectiveRate),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
       model: "country-plus-local",
       confidence: "simplified",
-      label: "Finland state + municipal + health insurance (2024)",
-      missingFactor: "Municipal rate varies 18–23%; employee pension contributions (~7.15%) not included.",
-      note: "State brackets are 2024 figures. Municipal average (21.5%) and health insurance premium (1.5%) are correctly applied. Key gaps: municipal rates span 18% (Helsinki) to 23%+ in some rural municipalities, a 5 pp spread on a large portion of income. Employee pension (TyEL, ~7.15%) and unemployment (0.79%) contributions are not modelled. The earned income deduction (ansiotulovähennys) and work income tax credit would reduce effective rates for employed residents, meaning this model somewhat overstates income tax on employment income. Income must be passed in EUR.",
+      label: `Finland state + municipal tax + contributions (${FINLAND_TAX_YEAR_LABEL})`,
+      missingFactor: "The earned income deduction, basic deduction and work income tax credit are not modelled, so tax on wages is overstated by about 2-4 points; the state scale and municipal average come from a taxpayers' association and calculator sites because vero.fi could not be fetched.",
+      note: "Uses the 2026 state scale (12.64% from the first euro, 19%, 30.25%, 33.25% and 37.5% above EUR 52,100), an average municipal rate of 7.5% (it ranges from about 4.4% to 10.9% since the 2024 care-services reform; the old model used the pre-reform 21.5%), health insurance contributions of 1.10% (1.49% for pensions) plus 0.88% daily allowance on wages, and employee pension and unemployment contributions of about 7.75% which are deducted. Not modelled: the earned income deduction, basic deduction, work income tax credit, church tax and the broadcasting tax. Income must be passed in euros.",
     };
   },
 

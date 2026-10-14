@@ -1196,3 +1196,21 @@ describe("Cyprus (2026 scale, social insurance, GESY)", () => {
     expect(rate("CY", 20_000, "remote")).toBe(0);
   });
 });
+
+describe("Finland (2026 state scale, municipal average, contributions; deductions not modelled)", () => {
+  it("EUR 50,000 employee", () => {
+    // contributions 7.75% = 3,875; base 46,125; state 9,066.90; municipal 7.5%; health 1.10% of base + 0.88% of pay
+    const base = 46_125;
+    const state = 2_780.8 + 2_014 + 2_268.75 + 0.3325 * (base - 40_100);
+    expect(rate("FI", 50_000)).toBeCloseTo((state + 0.075 * base + 3_875 + 0.011 * base + 0.0088 * 50_000) / 50_000, 8);
+  });
+
+  it("the state scale reproduces the published tax at its limits", () => {
+    const at = (income: number) => rate("FI", income, "remote") * income;
+    expect(at(22_000) - 0.075 * 22_000 - 0.011 * 22_000).toBeCloseTo(2_780.8, 2);
+  });
+
+  it("a pension pays the higher health contribution and no employee contributions", () => {
+    expect(rate("FI", 20_000, "retired")).toBeCloseTo((0.1264 * 20_000 + 0.075 * 20_000 + 0.0149 * 20_000) / 20_000, 8);
+  });
+});
