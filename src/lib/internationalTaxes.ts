@@ -41,7 +41,9 @@ import { GREECE_TAX_YEAR_LABEL, greeceTax } from "./countryTaxRules/greece";
 import { IRELAND_TAX_YEAR_LABEL, irelandTax } from "./countryTaxRules/ireland";
 import { ITALY_NEW_RESIDENT_FLAT_TAX, ITALY_TAX_YEAR_LABEL, italyTax } from "./countryTaxRules/italy";
 import { JAPAN_TAX_YEAR_LABEL, japanTax } from "./countryTaxRules/japan";
+import { INDONESIA_NOTE, INDONESIA_TAX_YEAR_LABEL, indonesiaTax } from "./countryTaxRules/indonesia";
 import { LATVIA_TAX_YEAR_LABEL, latviaTax } from "./countryTaxRules/latvia";
+import { MALAYSIA_TAX_YEAR_LABEL, malaysiaTax } from "./countryTaxRules/malaysia";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -1678,26 +1680,20 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 progressive. Each spouse files separately, no joint filing.
   // Employee EPF: 11% (compulsory, partly savings, not modeled).
   // -------------------------------------------------------------------------
-  MY: ({ annualIncome }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 5000, rate: 0.00 },
-      { upTo: 20000, rate: 0.01 },
-      { upTo: 35000, rate: 0.03 },
-      { upTo: 50000, rate: 0.06 },
-      { upTo: 70000, rate: 0.11 },
-      { upTo: 100000, rate: 0.19 },
-      { upTo: 400000, rate: 0.25 },
-      { upTo: 600000, rate: 0.26 },
-      { upTo: 2000000, rate: 0.28 },
-      { upTo: Infinity, rate: 0.30 },
-    ]);
+  MY: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/malaysia.ts (same as the Asia calculator).
+    const scenario = isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local";
+    const { incomeTax, contributions } = malaysiaTax(annualIncome, scenario);
+    const exempt = scenario !== "local";
     return {
-      effectiveRate: clampRate(rate),
-      model: "progressive-country",
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
+      model: exempt ? "none" : "progressive-country",
       confidence: "simplified",
-      label: "Malaysia income tax (2024)",
-      missingFactor: "Personal relief system (potentially MYR 20–30k deductible) not modelled.",
-      note: "Brackets are 2024 figures and structurally correct. Key omission: Malaysia has an extensive personal relief system, individual relief MYR 9,000, lifestyle relief MYR 2,500, EPF contributions relief up to MYR 4,000, medical relief up to MYR 10,000, and others, that can reduce taxable income by MYR 20,000–30,000+ for most residents, potentially dropping the effective rate by 3–6 pp at mid-range incomes. SOCSO (1.75% employee) and EIS (0.4% employee) add modestly but are capped. Income must be passed in MYR.",
+      label: exempt ? "Malaysia, foreign-sourced or pension income" : `Malaysia income tax + EPF/SOCSO (${MALAYSIA_TAX_YEAR_LABEL})`,
+      missingFactor: exempt ? "The exemption for foreign-sourced income runs to 2036 and has conditions; verify it before planning." : "Spouse, child and other reliefs not modelled; contribution rates not re-read.",
+      note: exempt
+        ? "Malaysia taxes individuals on income arising in Malaysia: foreign-sourced income received by a resident individual is exempt (through 2036) and approved pensions are exempt, so no Malaysian income tax is shown. Check the conditions. Income must be passed in MYR."
+        : "Uses the LHDN resident rates (0% to 30%), the MYR 9,000 individual relief, EPF relief up to MYR 4,000, the MYR 400 rebate at low incomes, and employee EPF (11%), SOCSO and EIS (0.7%). Income must be passed in MYR.",
     };
   },
 
@@ -1706,21 +1702,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 PPh Orang Pribadi progressive brackets.
   // No joint filing (per-NPWP individual).
   // -------------------------------------------------------------------------
-  ID: ({ annualIncome }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 60000000, rate: 0.05 },
-      { upTo: 250000000, rate: 0.15 },
-      { upTo: 500000000, rate: 0.25 },
-      { upTo: 5000000000, rate: 0.30 },
-      { upTo: Infinity, rate: 0.35 },
-    ]);
+  ID: ({ annualIncome, filing, isRetired }) => {
+    // Rules in countryTaxRules/indonesia.ts (same as the Asia calculator).
+    const tax = indonesiaTax(annualIncome, filing === "married" ? "married" : "single", !!isRetired);
     return {
-      effectiveRate: clampRate(rate),
+      effectiveRate: clampRate(annualIncome > 0 ? tax / annualIncome : 0),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Indonesia PPh income tax (2024)",
-      missingFactor: "PTKP non-taxable threshold (IDR 54M/yr) not applied, overstates at lower incomes.",
-      note: "Brackets are 2024 figures. Key omission: the PTKP (Penghasilan Tidak Kena Pajak) non-taxable threshold of IDR 54M/yr for a single individual is not applied, meaning this model overstates income tax at lower incomes by the equivalent of IDR 54M taxed at the first bracket rate. BPJS health (1% employee) and employment contributions are also excluded. For high incomes where the PTKP is a small fraction, the estimate is reasonably accurate. Income must be passed in IDR.",
+      label: `Indonesia PPh income tax (${INDONESIA_TAX_YEAR_LABEL} rules)`,
+      missingFactor: "BPJS health and employment contributions are not included.",
+      note: INDONESIA_NOTE,
     };
   },
 

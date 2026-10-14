@@ -682,3 +682,28 @@ describe("Lithuania (2026 GPM bands, NPD, 19.5% contributions)", () => {
     expect(rate("LT", 15_000, "retired")).toBeCloseTo(0.2 * (15_000 - (8_964 - 0.49 * 1_164)) / 15_000, 8);
   });
 });
+
+describe("Malaysia (LHDN resident rates, reliefs, EPF) in both calculators", () => {
+  const asia = (income: number, scenario: "local" | "remote" | "retired" = "local") =>
+    estimateAsiaTax({ countryCode: "MY", annualIncome: income, filing: "single", isRetired: scenario === "retired", incomeScenario: scenario }).effectiveRate;
+
+  it("MYR 100,000 employee", () => {
+    // EPF 11,000; SOCSO/EIS 504; chargeable 87,000: tax 3,700 + 19% x 17,000 = 6,930
+    expect(rate("MY", 100_000)).toBeCloseTo(18_434 / 100_000, 8);
+    expect(asia(100_000)).toBeCloseTo(18_434 / 100_000, 8);
+  });
+
+  it("MYR 30,000 employee: the MYR 400 rebate wipes out the income tax", () => {
+    // chargeable 17,700: 1% x 12,700 = 127, less the rebate; contributions 3,300 + 210
+    expect(rate("MY", 30_000)).toBeCloseTo(3_510 / 30_000, 8);
+  });
+
+  it("shows no tax on remote or pension income", () => {
+    expect(rate("MY", 100_000, "remote")).toBe(0);
+    expect(asia(100_000, "retired")).toBe(0);
+  });
+
+  it("Indonesia gives the same answer in the International calculator", () => {
+    expect(rate("ID", 300_000_000)).toBeCloseTo(0.10, 10);
+  });
+});

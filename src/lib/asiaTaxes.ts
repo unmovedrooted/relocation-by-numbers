@@ -16,6 +16,8 @@
 // ---------------------------------------------------------------------------
 
 import { AUSTRALIA_TAX_YEAR_LABEL, australiaTax } from "./countryTaxRules/australia";
+import { INDONESIA_NOTE, INDONESIA_TAX_YEAR_LABEL, indonesiaTax } from "./countryTaxRules/indonesia";
+import { MALAYSIA_TAX_YEAR_LABEL, malaysiaTax } from "./countryTaxRules/malaysia";
 import { NO_US_OVERLAY, US_SELF_EMPLOYED_KEY, US_SELF_EMPLOYED_QUESTION, US_TAX_STATUS_KEY, US_TAX_STATUS_QUESTION, withUsTaxAbroad } from "./internationalTaxes";
 
 export type FilingStatus = "single" | "married";
@@ -449,68 +451,32 @@ return {
   // -------------------------------------------------------------------------
   // MALAYSIA, MYR
   // -------------------------------------------------------------------------
-  MY: ({ annualIncome, incomeScenario = "local" }) => {
-    if (incomeScenario === "remote") {
-      return {
-        incomeTaxRate: 0,
-        socialContributionRate: 0,
-        effectiveRate: 0,
-        model: "none",
-        confidence: "simplified",
-        label: "Malaysia, remote worker",
-        missingFactor:
-          "Foreign-source income exemption should be verified before planning.",
-        note: "Malaysia generally uses territorial taxation for individuals. Income must be passed in MYR.",
-      };
-    }
-
-    const taxAmount = progressiveTaxAmount(annualIncome, [
-      { upTo: 5000, rate: 0.0 },
-      { upTo: 20000, rate: 0.01 },
-      { upTo: 35000, rate: 0.03 },
-      { upTo: 50000, rate: 0.06 },
-      { upTo: 70000, rate: 0.11 },
-      { upTo: 100000, rate: 0.19 },
-      { upTo: 400000, rate: 0.25 },
-      { upTo: 600000, rate: 0.26 },
-      { upTo: 2000000, rate: 0.28 },
-      { upTo: Infinity, rate: 0.3 },
-    ]);
-
-    const incomeTaxRate = effectiveRateFromTax(taxAmount, annualIncome);
-    const socialContributionRate = 0.11;
-const rates = combineRates(incomeTaxRate, socialContributionRate);
-
+  MY: ({ annualIncome, isRetired, incomeScenario = "local" }) => {
+    // Rules in countryTaxRules/malaysia.ts: LHDN resident rates, reliefs, EPF 11%; foreign-sourced and pension income exempt.
+    const scenario = isRetired ? "retired" : incomeScenario;
+    const { incomeTax, contributions } = malaysiaTax(annualIncome, scenario);
+    const rates = combineRates(effectiveRateFromTax(incomeTax, annualIncome), effectiveRateFromTax(contributions, annualIncome));
+    const exempt = scenario !== "local";
     return {
-  ...rates,
-  model: "progressive-country",
-  confidence: "simplified",
-  label: "Malaysia income tax (2024, local employment)",
-  missingFactor: "Personal relief system not modelled.",
-  note: "Brackets are 2024 figures. EPF employee contribution is estimated at 11%. Personal reliefs are not modelled. Income must be passed in MYR.",
-};
+      ...rates,
+      model: exempt ? "none" : "progressive-country",
+      confidence: "simplified",
+      label: exempt ? "Malaysia, foreign-sourced or pension income" : `Malaysia income tax + EPF/SOCSO (${MALAYSIA_TAX_YEAR_LABEL}, local employment)`,
+      missingFactor: exempt
+        ? "The exemption for foreign-sourced income runs to 2036 and has conditions; verify it before planning."
+        : "Spouse, child and other reliefs, the EPF/insurance cap and the contribution rates (not re-read) are not modelled.",
+      note: exempt
+        ? "Malaysia taxes individuals on income arising in Malaysia: foreign-sourced income received by a resident individual is exempt (through 2036) and approved pensions are exempt, so no Malaysian income tax or contributions are shown. Check the conditions and the source of your income. Income must be passed in MYR."
+        : "Uses the LHDN resident rates (0% to 30%), the MYR 9,000 individual relief, the EPF relief (up to MYR 4,000) and the MYR 400 rebate at chargeable income of MYR 35,000 or less, plus employee EPF (11%), SOCSO and EIS (0.7% on pay up to MYR 6,000 a month). Not modelled: spouse, child, parent, lifestyle and medical reliefs. Income must be passed in MYR.",
+    };
   },
 
   // -------------------------------------------------------------------------
   // INDONESIA, IDR
   // -------------------------------------------------------------------------
   ID: ({ annualIncome, filing, isRetired }) => {
-    // Directorate General of Taxes (pajak.go.id), read 2026-10-14: Article 17 layers 5% to IDR 60 million, 15%, 25%, 30% and 35% above
-    // IDR 5 billion; PTKP IDR 54 million for a single person and IDR 58.5 million for a married person with no dependants;
-    // occupational cost allowance (biaya jabatan) of 5% of gross pay, at most IDR 6 million a year. For pensioners the
-    // equivalent pension allowance is 5% up to IDR 2.4 million a year (standard rule, not re-read).
-    const ptkp = filing === "married" ? 58500000 : 54000000;
-    const occupationalCost = Math.min(annualIncome * 0.05, isRetired ? 2400000 : 6000000);
-    const taxable = Math.max(0, annualIncome - occupationalCost - ptkp);
-
-const taxAmount = progressiveTaxAmount(taxable, [
-      { upTo: 60000000, rate: 0.05 },
-      { upTo: 250000000, rate: 0.15 },
-      { upTo: 500000000, rate: 0.25 },
-      { upTo: 5000000000, rate: 0.3 },
-      { upTo: Infinity, rate: 0.35 },
-    ]);
-
+    // Rules in countryTaxRules/indonesia.ts (DJP Article 17 layers, PTKP, occupational-cost allowance).
+    const taxAmount = indonesiaTax(annualIncome, filing === "married" ? "married" : "single", !!isRetired);
     const incomeTaxRate = effectiveRateFromTax(taxAmount, annualIncome);
     const rates = combineRates(incomeTaxRate, 0);
 
@@ -518,9 +484,9 @@ const taxAmount = progressiveTaxAmount(taxable, [
       ...rates,
       model: "progressive-country",
       confidence: "simplified",
-      label: "Indonesia PPh income tax (2026 rules)",
+      label: `Indonesia PPh income tax (${INDONESIA_TAX_YEAR_LABEL} rules)`,
       missingFactor: "BPJS health and employment contributions are not included.",
-      note: "Uses the Article 17 layers (5% to 35%), the PTKP non-taxable amount (IDR 54 million single, IDR 58.5 million married) and the occupational-cost allowance (5%, at most IDR 6 million), as published by the Directorate General of Taxes. The monthly TER withholding tables are a payment method and give the same annual tax. Not modelled: BPJS pension, old-age and health contributions (about 4% of pay up to wage ceilings), dependants' PTKP and the temporary 2026 PPh 21 incentives for some sectors. Income must be passed in IDR.",
+      note: INDONESIA_NOTE,
     };
   },
 
