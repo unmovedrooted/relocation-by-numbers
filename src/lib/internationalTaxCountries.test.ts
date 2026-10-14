@@ -560,3 +560,22 @@ describe("Hungary (NAV 2026: 15% SZJA + 18.5% contributions on gross)", () => {
     expect(rate("HU", 12_000_000, "retired")).toBeCloseTo(0.15, 10);
   });
 });
+
+describe("India new regime (Income Tax Department, AY 2026-27 slabs, 87A rebate)", () => {
+  const inr = (income: number) => estimateAsiaTax({ countryCode: "IN", annualIncome: income, filing: "single", isRetired: false, answers: { in_regime: "new_regime" } });
+
+  it("pays no income tax up to INR 12,75,000 of salary: rebate wipes out INR 50,000", () => {
+    // taxable 1,200,000: base 20,000 + 40,000 = 60,000, rebate 60,000
+    expect(inr(1_275_000).incomeTaxRate).toBe(0);
+  });
+
+  it("marginal relief just above: INR 12,80,000 salary", () => {
+    // taxable 1,205,000: base 60,750 would exceed the 5,000 over the limit, so tax is 5,000 plus 4% cess = 5,200
+    expect(inr(1_280_000).incomeTaxRate * 1_280_000).toBeCloseTo(5_200, 6);
+  });
+
+  it("no relief higher up: INR 14,75,000 salary", () => {
+    // taxable 1,400,000: 20,000 + 40,000 + 15% x 200,000 = 90,000 -> excess 200,000 so no relief; cess 3,600 -> 93,600
+    expect(inr(1_475_000).incomeTaxRate * 1_475_000).toBeCloseTo(93_600, 6);
+  });
+});

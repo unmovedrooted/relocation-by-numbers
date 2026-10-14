@@ -801,8 +801,13 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
 { upTo: Infinity, rate: 0.30 },
     ]);
 
-    const cess = baseTaxAmount * 0.04;
-    const totalTax = baseTaxAmount + cess;
+    // Section 87A rebate (Income Tax Department / PIB, Budget 2025): up to INR 60,000 when income under the new regime is INR 12,00,000
+    // or less, so no tax; above that, tax cannot exceed the income over INR 12,00,000 (marginal relief). Read 2026-10-14.
+    const afterRebate = taxable <= 1200000
+      ? Math.max(0, baseTaxAmount - 60000)
+      : Math.min(baseTaxAmount, taxable - 1200000);
+    const cess = afterRebate * 0.04;
+    const totalTax = afterRebate + cess;
 
     const incomeTaxRate = effectiveRateFromTax(totalTax, annualIncome);
     const socialContributionRate = isRetired ? 0 : 0.06;
@@ -814,11 +819,11 @@ note: "Brackets are 2024 figures. PTKP non-taxable threshold of IDR 54M is appli
       model: "progressive-country",
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
-        ? "India New Tax Regime + EPF + Cess (2024-25)"
-        : "India New Tax Regime + EPF + Cess (2024-25, select regime)",
+        ? "India New Tax Regime + EPF + Cess (FY 2025-26, AY 2026-27)"
+        : "India New Tax Regime + EPF + Cess (FY 2025-26, select regime)",
       missingFactor:
         "EPF estimated at ~6% of gross; actual depends on salary structure.",
-      note: "New Tax Regime with standard deduction, cess, and EPF estimate. Income must be passed in INR.",
+      note: "New Tax Regime slabs (nil to INR 4 lakh, then 5% to 30% at INR 24 lakh), the INR 75,000 standard deduction for salaried people, the section 87A rebate (no tax up to INR 12 lakh of income, with marginal relief just above) and 4% cess, as published by the Income Tax Department for AY 2026-27; the 2026-27 slabs were not separately found. EPF is a rough 6% estimate. Surcharge on incomes above INR 50 lakh is not applied. Income must be passed in INR.",
     };
   },
 
