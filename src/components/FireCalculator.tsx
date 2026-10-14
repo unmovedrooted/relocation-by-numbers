@@ -383,10 +383,49 @@ function calcSpendableFromBuckets(i: Inputs, b: Buckets): number {
   return sp401k + spIra + b.bBrokerage;
 }
 
+// Take-home pay by year. A number is a flat starting take-home that grows at the salary-growth rate (used by tests and
+// simple callers); a function returns the take-home for a given number of years from now (see makeNetPath).
+type NetBasis = number | ((yearsFromNow: number) => number);
+
+function netAt(basis: NetBasis, yearsFromNow: number, i: Inputs): number {
+  if (typeof basis === "function") return basis(yearsFromNow);
+  return basis * Math.pow(1 + (Number(i.salaryGrowthPct) || 0) / 100, Math.max(0, yearsFromNow));
+}
+
+// Take-home pay for each future year, recomputed through the tax engine: gross pay grows at the salary-growth rate, and the
+// tax rules (brackets, deductions, payroll wage base, 401(k) limit) are assumed to be indexed to inflation, so each year’s
+// pay is taxed at today’s scale in today’s dollars and scaled back up. Pay that grows faster than inflation therefore moves
+// into higher brackets; pay that grows slower does not.
+function makeNetPath(a: {
+  gross: number; state: StateChoice; filing: FilingStatus; k401Pct: number; cityId?: string;
+  salaryGrowthPct: number; inflationPct: number;
+}): (yearsFromNow: number) => number {
+  const salG = (Number(a.salaryGrowthPct) || 0) / 100;
+  const infl = (Number(a.inflationPct) || 0) / 100;
+  const cache = new Map<number, number>();
+  return (yearsFromNow: number) => {
+    const y = Math.max(0, Math.round(yearsFromNow));
+    const hit = cache.get(y);
+    if (hit !== undefined) return hit;
+    const grossY = Math.max(0, a.gross) * Math.pow(1 + salG, y);
+    let net: number;
+    if (!a.state) net = grossY;
+    else {
+      const index = Math.pow(1 + infl, y);
+      net = estimateNetAnnual({
+        grossAnnual: y === 0 ? a.gross : grossY / index,
+        state: a.state as StateCode, filing: a.filing, k401Pct: a.k401Pct, cityId: a.cityId,
+      }) * (y === 0 ? 1 : index);
+    }
+    cache.set(y, net);
+    return net;
+  };
+}
+
 // Starting balances and per-bucket annual contributions.
 // Simple mode: everything goes into the brokerage bucket (no account distinction).
 // Advanced mode: each account is seeded from user inputs.
-function initBuckets(i: Inputs, netAnnualBase: number): {
+function initBuckets(i: Inputs, netBasis: NetBasis): {
   start: Buckets;
   annualContrib: Buckets;
   employerMatch: number;
@@ -395,7 +434,7 @@ function initBuckets(i: Inputs, netAnnualBase: number): {
   const match = calcEmployerMatch(i);
 
   if (!i.advanced) {
-    const autoInvest = Math.max(0, netAnnualBase - annualExpenses(i));
+    const autoInvest = Math.max(0, netAt(netBasis, 0, i) - annualExpenses(i));
     const contrib    = i.yearlyInvestment > 0 ? i.yearlyInvestment : autoInvest;
     // Take-home pay already excludes the 401(k) deferral, so the deferral is saved too (it grows with salary; see growBuckets).
     const deferral = i.state ? Math.min((Number(i.income) || 0) * ((Number(i.k401Pct) || 0) / 100), EMPLOYEE_401K_LIMIT) : 0;
@@ -431,7 +470,9 @@ function growBuckets(
   const drag = getBrokerageTaxDrag(i);
 
   const salaryGrowth = i.advanced ? 1 : Math.pow(1 + (Number(i.salaryGrowthPct) || 0) / 100, Math.max(0, yearIndex));
-  const c401k      = pastCoast ? 0 : annualContrib.b401k * salaryGrowth + employerMatch;
+  // Simple mode: the deferral grows with salary but stays within the (inflation-indexed) 401(k) limit.
+  const deferral  = i.advanced ? annualContrib.b401k : Math.min(annualContrib.b401k * salaryGrowth, Math.max(annualContrib.b401k, EMPLOYEE_401K_LIMIT * Math.pow(1 + (Number(i.inflationPct) || 0) / 100, Math.max(0, yearIndex))));
+  const c401k      = pastCoast ? 0 : deferral + employerMatch;
   const cIra       = pastCoast ? 0 : annualContrib.bIra;
   // Simple mode with an explicit yearly investment uses that amount; with it blank, the automatic amount is used.
   const useConfigured = i.advanced || (Number(i.yearlyInvestment) || 0) > 0;
@@ -495,13 +536,12 @@ function portfolioShares(i: Inputs): { brokerage: number; traditional: number } 
 // ── Core simulation, all 4 modes ────────────────────────────────────────────
 function simulateYearsToFI(
   i: Inputs,
-  netAnnualBase: number,
+  netAnnualBase: NetBasis,
   mode: FireMode = "standard",
   override?: { expensesAnnualBase?: number }
 ) {
   const swr  = (Number(i.withdrawalRatePct) || 0) / 100;
   const infl = (Number(i.inflationPct) || 0) / 100;
-  const salG = (Number(i.salaryGrowthPct) || 0) / 100;
 
   const rawExpenses  = override?.expensesAnnualBase ?? annualExpenses(i);
   const baseExpenses = mode === "barista"
@@ -525,7 +565,7 @@ function simulateYearsToFI(
 }
 
 while (years < i.maxYears) {
-  const netY = netAnnualBase * Math.pow(1 + salG, years);
+  const netY = netAt(netAnnualBase, years, i);
   const ageY = i.age + years;
   const pastCoast = mode === "coast" && ageY >= i.coastAge;
 
@@ -559,7 +599,7 @@ return {
 // ── Years until coast-ready ───────────────────────────────────────────────────
 // Coast uses raw total portfolio (not spendable) because the coast number
 // is an accumulation threshold, not a retirement spending threshold.
-function simulateYearsToCoast(i: Inputs, netAnnualBase: number): number | null {
+function simulateYearsToCoast(i: Inputs, netAnnualBase: NetBasis): number | null {
   const target = calcCoastFireNumber(i);
   if (!Number.isFinite(target)) return null;
 
@@ -570,7 +610,7 @@ function simulateYearsToCoast(i: Inputs, netAnnualBase: number): number | null {
 
   let years = 0;
   while (years < i.maxYears) {
-    const netY = netAnnualBase * Math.pow(1 + (i.salaryGrowthPct / 100), years);
+    const netY = netAt(netAnnualBase, years, i);
     let autoContrib = 0;
     if (!i.advanced && (Number(i.yearlyInvestment) || 0) <= 0) {
       autoContrib = Math.max(0, netY - annualExpenses(i) * Math.pow(1 + (Number(i.inflationPct) || 0) / 100, years));
@@ -586,11 +626,10 @@ function simulateYearsToCoast(i: Inputs, netAnnualBase: number): number | null {
 
 // ── Projection builders ───────────────────────────────────────────────────────
 function buildProjectionWithExpenses(
-  i: Inputs, netAnnualBase: number, yearsToFI: number | null,
+  i: Inputs, netAnnualBase: NetBasis, yearsToFI: number | null,
   baseExpenses: number, mode: FireMode = "standard"
 ): ChartPoint[] {
   const infl = (Number(i.inflationPct) || 0) / 100;
-  const salG = (Number(i.salaryGrowthPct) || 0) / 100;
   const swr  = (Number(i.withdrawalRatePct) || 0) / 100;
 
   const { start, annualContrib, employerMatch } = initBuckets(i, netAnnualBase);
@@ -624,7 +663,7 @@ function buildProjectionWithExpenses(
 
   for (let y = 1; y <= stopAt; y++) {
     const effExpY   = effBase * Math.pow(1 + infl, y - 1);
-    const netY      = netAnnualBase * Math.pow(1 + salG, y - 1);
+    const netY      = netAt(netAnnualBase, y - 1, i);
     const ageY      = i.age + (y - 1);
     const pastCoast = mode === "coast" && ageY >= i.coastAge;
 
@@ -639,7 +678,7 @@ function buildProjectionWithExpenses(
   return pts;
 }
 
-function buildProjection(i: Inputs, netAnnualBase: number, yearsToFI: number | null, mode: FireMode = "standard") {
+function buildProjection(i: Inputs, netAnnualBase: NetBasis, yearsToFI: number | null, mode: FireMode = "standard") {
   return buildProjectionWithExpenses(i, netAnnualBase, yearsToFI, annualExpenses(i), mode);
 }
 
@@ -720,7 +759,7 @@ function getDecisionScenarioCopy(
 
 function makeDecisionRunner(
   mode: FireMode,
-  netAnnual: number
+  netAnnual: NetBasis
 ): (overrideInputs: Inputs) => DecisionProjectionOutput {
   return (overrideInputs: Inputs): DecisionProjectionOutput => {
     
@@ -747,9 +786,10 @@ function makeDecisionRunner(
 function buildDecisionEngine(
   inputs: Inputs,
   mode: FireMode,
-  netAnnual: number
+  netBasis: NetBasis
 ): DecisionEngineResult {
-  const runProjection = makeDecisionRunner(mode, netAnnual);
+  const netAnnual = netAt(netBasis, 0, inputs);
+  const runProjection = makeDecisionRunner(mode, netBasis);
   const baselineOutput = runProjection(inputs);
 
   const baseline: DecisionScenarioResult = {
@@ -1217,6 +1257,13 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
     });
   }, [inputs.income, inputs.state, inputs.filingStatus, inputs.k401Pct]);
 
+  // Take-home pay in each future year, taxed year by year (see makeNetPath).
+  const netPath = useMemo(() => makeNetPath({
+    gross: inputs.income, state: inputs.state, filing: inputs.filingStatus, k401Pct: inputs.k401Pct,
+    cityId: inputs.state ? getBaselineCityIdForState(inputs.state) : undefined,
+    salaryGrowthPct: inputs.salaryGrowthPct, inflationPct: inputs.inflationPct,
+  }), [inputs.income, inputs.state, inputs.filingStatus, inputs.k401Pct, inputs.salaryGrowthPct, inputs.inflationPct]);
+
   const estTaxRate = useMemo(() => {
     if (!inputs.state) return 0;
     return effectiveTaxRatePct(netAnnual, inputs.income);
@@ -1225,12 +1272,12 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   const savingsRate = useMemo(() => clamp((netAnnual - annualExp) / Math.max(1, netAnnual), -1, 1), [netAnnual, annualExp]);
 
   // ── Standard simulation ───────────────────────────────────────────────────
-  const result = useMemo(() => simulateYearsToFI(inputs, netAnnual, mode), [inputs, netAnnual, mode]);
+  const result = useMemo(() => simulateYearsToFI(inputs, netPath, mode), [inputs, netPath, mode]);
 
   const fiAge  = useMemo(() => result.yearsToFI === null ? null : inputs.age + result.yearsToFI, [inputs.age, result.yearsToFI]);
   const fiYear = useMemo(() => result.yearsToFI === null ? null : new Date().getFullYear() + result.yearsToFI, [result.yearsToFI]);
 
-  const projection = useMemo(() => buildProjection(inputs, netAnnual, result.yearsToFI, mode), [inputs, netAnnual, result.yearsToFI, mode]);
+  const projection = useMemo(() => buildProjection(inputs, netPath, result.yearsToFI, mode), [inputs, netPath, result.yearsToFI, mode]);
 
  const crossoverPoint = useMemo(() => {
   return projection.find((p) =>
@@ -1256,7 +1303,7 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
 
   // ── Coast-specific ────────────────────────────────────────────────────────
   const coastFireNumber = useMemo(() => mode === "coast" ? calcCoastFireNumber(inputs) : null, [mode, inputs]);
-  const yearsToCoast    = useMemo(() => mode === "coast" ? simulateYearsToCoast(inputs, netAnnual) : null, [mode, inputs, netAnnual]);
+  const yearsToCoast    = useMemo(() => mode === "coast" ? simulateYearsToCoast(inputs, netPath) : null, [mode, inputs, netPath]);
   const isCoastReady    = useMemo(() => coastFireNumber !== null && result.startPortfolio >= coastFireNumber, [coastFireNumber, result.startPortfolio]);
   const coastProgress   = useMemo(() => {
     if (!coastFireNumber || !Number.isFinite(coastFireNumber)) return 0;
@@ -1267,16 +1314,16 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   const fullFireForLean = useMemo(() => {
     if (mode !== "lean") return null;
     const fullExp = annualExpensesFromMonthly(inputs.expensesMonthly * 1.5);
-    return simulateYearsToFI(inputs, netAnnual, "standard", { expensesAnnualBase: fullExp });
-  }, [mode, inputs, netAnnual]);
+    return simulateYearsToFI(inputs, netPath, "standard", { expensesAnnualBase: fullExp });
+  }, [mode, inputs, netPath]);
   const fullFiAgeForLean = useMemo(() => fullFireForLean?.yearsToFI == null ? null : inputs.age + fullFireForLean.yearsToFI, [fullFireForLean, inputs.age]);
   const leanYearsSaved   = useMemo(() => fiAge !== null && fullFiAgeForLean !== null ? fullFiAgeForLean - fiAge : null, [fiAge, fullFiAgeForLean]);
 
   // ── Barista-specific: full FIRE without income reduction ──────────────────
   const fullFireForBarista = useMemo(() => {
     if (mode !== "barista") return null;
-    return simulateYearsToFI(inputs, netAnnual, "standard");
-  }, [mode, inputs, netAnnual]);
+    return simulateYearsToFI(inputs, netPath, "standard");
+  }, [mode, inputs, netPath]);
   const fullFiAgeForBarista = useMemo(() => fullFireForBarista?.yearsToFI == null ? null : inputs.age + fullFireForBarista.yearsToFI, [fullFireForBarista, inputs.age]);
   const baristaYearsSaved   = useMemo(() => fullFiAgeForBarista !== null && fiAge !== null ? fullFiAgeForBarista - fiAge : null, [fiAge, fullFiAgeForBarista]);
 
@@ -1286,27 +1333,23 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
     return [0, 12000, 24000, 36000, 48000, 60000].map(pt => {
       const effExp   = Math.max(0, annualExpenses(inputs) - pt);
       const fireNum  = swr > 0 ? effExp / swr : Infinity;
-      const sim      = simulateYearsToFI({ ...inputs, baristaPartTimeIncome: pt }, netAnnual, "barista");
+      const sim      = simulateYearsToFI({ ...inputs, baristaPartTimeIncome: pt }, netPath, "barista");
       const ageAtFI  = sim.yearsToFI === null ? null : inputs.age + sim.yearsToFI;
       return { pt, effExp, fireNum, yearsToFI: sim.yearsToFI, ageAtFI, isCurrent: pt === (Number(inputs.baristaPartTimeIncome) || 0) };
     });
-  }, [mode, inputs, netAnnual]);
+  }, [mode, inputs, netPath]);
 
   // ── Move impact ───────────────────────────────────────────────────────────
   // Take-home pay after the move: new income and, if it changes, the new state and city's taxes.
-  const movedNetAnnual = useMemo(() => {
-    const gross = inputs.movedIncome > 0 ? inputs.movedIncome : inputs.income;
-    // Abroad: a U.S. taxpayer who leaves the state pays federal tax only, modeled with a state that has no income tax.
-    const state = inputs.movedAbroad ? "tx" : inputs.movedState || inputs.state;
-    if (!state) return Math.max(0, gross);
-    return estimateNetAnnual({
-      grossAnnual: gross,
-      state: state as StateCode,
-      filing: inputs.filingStatus,
-      k401Pct: inputs.k401Pct,
-      cityId: inputs.movedState && inputs.movedCityId ? inputs.movedCityId : getBaselineCityIdForState(state),
-    });
-  }, [inputs.movedIncome, inputs.income, inputs.movedAbroad, inputs.movedState, inputs.state, inputs.movedCityId, inputs.filingStatus, inputs.k401Pct]);
+  // Abroad: a U.S. taxpayer who leaves the state pays federal tax only, modeled with a state that has no income tax.
+  // The moved scenario’s take-home pay, taxed year by year in the new state and city.
+  const movedState = ((inputs.movedAbroad ? "tx" : inputs.movedState || inputs.state) || "") as StateChoice;
+  const movedNetPath = useMemo(() => makeNetPath({
+    gross: inputs.movedIncome > 0 ? inputs.movedIncome : inputs.income,
+    state: movedState, filing: inputs.filingStatus, k401Pct: inputs.k401Pct,
+    cityId: movedState ? (inputs.movedState && inputs.movedCityId ? inputs.movedCityId : getBaselineCityIdForState(movedState)) : undefined,
+    salaryGrowthPct: inputs.salaryGrowthPct, inflationPct: inputs.inflationPct,
+  }), [inputs.movedIncome, inputs.income, movedState, inputs.movedState, inputs.movedCityId, inputs.filingStatus, inputs.k401Pct, inputs.salaryGrowthPct, inputs.inflationPct]);
 
   const movedResult = useMemo(() => {
     if (!inputs.moveCompareOn) return null;
@@ -1315,8 +1358,8 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
     const movedInputs: Inputs = inputs.advanced
       ? { ...inputs, balBrokerage: Math.max(0, applyBrokerageAutofill(inputs).balBrokerage - cost), contribBrokerage: applyBrokerageAutofill(inputs).contribBrokerage }
       : { ...inputs, currentPortfolio: Math.max(0, inputs.currentPortfolio - cost) };
-    return simulateYearsToFI(movedInputs, movedNetAnnual, mode, { expensesAnnualBase: annualMovedExpenses(inputs) });
-  }, [inputs, movedNetAnnual, mode]);
+    return simulateYearsToFI(movedInputs, movedNetPath, mode, { expensesAnnualBase: annualMovedExpenses(inputs) });
+  }, [inputs, movedNetPath, mode]);
   const movedFiAge    = useMemo(() => !movedResult || movedResult.yearsToFI === null ? null : inputs.age + movedResult.yearsToFI, [inputs.age, movedResult]);
   const moveDeltaYears = useMemo(() => fiAge === null || movedFiAge === null ? null : fiAge - movedFiAge, [fiAge, movedFiAge]);
 
@@ -1331,7 +1374,7 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
         return { cityId, cityName: city.name, state: city.state.toUpperCase(), ageAtFI: fiAge, yearsToFI: result.yearsToFI, isBaseline: true, deltaYears: 0 };
       }
       const adjExp   = expenseAdjustedForCity(baseExp, cityId, baselineCityId);
-      const sim      = simulateYearsToFI(inputs, netAnnual, mode, { expensesAnnualBase: adjExp });
+      const sim      = simulateYearsToFI(inputs, netPath, mode, { expensesAnnualBase: adjExp });
       const ageAtFI  = sim.yearsToFI === null ? null : inputs.age + sim.yearsToFI;
       const delta    = sim.yearsToFI !== null && result.yearsToFI !== null ? result.yearsToFI - sim.yearsToFI : null;
       return { cityId, cityName: city.name, state: city.state.toUpperCase(), ageAtFI, yearsToFI: sim.yearsToFI, isBaseline: false, deltaYears: delta };
@@ -1341,7 +1384,7 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
       if (b!.isBaseline) return 1;
       return (b!.deltaYears ?? -999) - (a!.deltaYears ?? -999);
     });
-  }, [inputs, netAnnual, mode, fiAge, result.yearsToFI]);
+  }, [inputs, netPath, mode, fiAge, result.yearsToFI]);
 
   const bestMoveRow = useMemo(() => viralCityResults.find(r => !r!.isBaseline && (r!.deltaYears ?? 0) > 0) ?? null, [viralCityResults]);
 
@@ -1354,11 +1397,11 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
     if (!pinnedCompareCityId) return null;
     const baselineCityId = getBaselineCityIdForState(inputs.state);
     const adjExp  = expenseAdjustedForCity(annualExpenses(inputs), pinnedCompareCityId, baselineCityId);
-    const sim     = simulateYearsToFI(inputs, netAnnual, mode, { expensesAnnualBase: adjExp });
+    const sim     = simulateYearsToFI(inputs, netPath, mode, { expensesAnnualBase: adjExp });
     const ageAtFI = sim.yearsToFI === null ? null : inputs.age + sim.yearsToFI;
-    const pts     = buildProjectionWithExpenses(inputs, netAnnual, sim.yearsToFI, adjExp, mode);
+    const pts     = buildProjectionWithExpenses(inputs, netPath, sim.yearsToFI, adjExp, mode);
     return { city: findCity(pinnedCompareCityId), adjustedExpenses: adjExp, sim, yearsToFI: sim.yearsToFI, ageAtFI, projectionPoints: pts };
-  }, [pinnedCompareCityId, inputs, netAnnual, mode]);
+  }, [pinnedCompareCityId, inputs, netPath, mode]);
 
   const comparisonYearsSaved = useMemo(() => {
     if (!fiAge || !proposedComparison?.ageAtFI) return null;
@@ -1397,11 +1440,11 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
     return [10, 20, 30, 40, 50, 60, 70].map(rPct => {
       const r            = rPct / 100;
       const impliedExp   = Math.max(0, netAnnual * (1 - r));
-      const sim          = netAnnual > 0 ? simulateYearsToFI(inputs, netAnnual, mode, { expensesAnnualBase: impliedExp }) : null;
+      const sim          = netAnnual > 0 ? simulateYearsToFI(inputs, netPath, mode, { expensesAnnualBase: impliedExp }) : null;
       const ageAtFI      = sim?.yearsToFI == null ? null : inputs.age + sim.yearsToFI;
       return { savingsRatePct: rPct, impliedExpenses: impliedExp, yearsToFI: sim?.yearsToFI ?? null, ageAtFI };
     });
-  }, [inputs, netAnnual, mode]);
+  }, [inputs, netAnnual, netPath, mode]);
 
   const currentSavingsRatePct  = useMemo(() => Math.round(savingsRate * 100), [savingsRate]);
   const nearestSavingsRateRow  = useMemo(() => [10,20,30,40,50,60,70].reduce((c, r) => Math.abs(r - currentSavingsRatePct) < Math.abs(c - currentSavingsRatePct) ? r : c, 10), [currentSavingsRatePct]);
@@ -1419,8 +1462,8 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
 
   // ── Decision engine (all modes) ───────────────────────────────────────────
 const decisionEngine = useMemo(
-  () => buildDecisionEngine(inputs, mode, netAnnual),
-  [inputs, mode, netAnnual]
+  () => buildDecisionEngine(inputs, mode, netPath),
+  [inputs, mode, netPath]
 );
 
 const reportInputs = useMemo<FireReportInputs>(() => ({
@@ -2019,7 +2062,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
                 <div className="font-semibold text-white mb-2">How this estimate works</div>
                 <div className="text-xs leading-5 text-slate-400">
-                  {MODE_NOTES[mode]} Returns use your selected volatility preset. Inflation and salary growth compound annually, and take-home pay is grown at the salary-growth rate rather than recalculated through each year’s tax brackets. Contributions are added at the start of each year, so monthly saving would grow slightly less. This is a planning estimate, not financial or tax advice.
+                  {MODE_NOTES[mode]} Returns use your selected volatility preset. Inflation and salary growth compound annually, and take-home pay is recalculated each year through the tax engine, with pay growing at the salary-growth rate and the tax brackets, deductions and 401(k) limit indexed to inflation. Contributions are added at the start of each year, so monthly saving would grow slightly less. This is a planning estimate, not financial or tax advice.
                 </div>
               </div>
             </div>

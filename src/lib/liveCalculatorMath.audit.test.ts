@@ -4,7 +4,7 @@ import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import { solveMaxHomePrice } from "./housing";
 import { CONTRIBUTION_LIMITS_2026 } from "./taxYear2026";
-import { EMPLOYEE_401K_LIMIT, estimateNetBreakdown } from "./wageTax";
+import { EMPLOYEE_401K_LIMIT, estimateNetAnnual, estimateNetBreakdown } from "./wageTax";
 
 // Audit harness: execute the actual component-local functions without moving or
 // editing production code. Imports and the React component are not executed.
@@ -27,10 +27,27 @@ function componentFunctions(file: string, names: string[], globals: Record<strin
   }
   const code = declarations.map(node => node.getText(ast)).join("\n") + memo + `\n({${names.join(",")}})`;
   return runInNewContext(ts.transpileModule(code, { compilerOptions: { target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.React } }).outputText,
-    { process: { env: {} }, CONTRIBUTION_LIMITS_2026, EMPLOYEE_401K_LIMIT, estimateNetBreakdown, ...globals });
+    { process: { env: {} }, CONTRIBUTION_LIMITS_2026, EMPLOYEE_401K_LIMIT, estimateNetAnnual, estimateNetBreakdown, ...globals });
 }
 
 describe("live calculator mathematical observations (not a full-page certification)", () => {
+  it("recomputes FIRE take-home pay each year with inflation-indexed tax rules", () => {
+    const fire = componentFunctions("FireCalculator", ["makeNetPath"]);
+    const args = { gross: 100000, state: "ny", filing: "single", k401Pct: 8, cityId: undefined, salaryGrowthPct: 3, inflationPct: 2.5 };
+    const path = fire.makeNetPath(args);
+    expect(path(0)).toBeCloseTo(estimateNetAnnual({ grossAnnual: 100000, state: "ny", filing: "single", k401Pct: 8 }), 6);
+    // Year 10: gross 100,000 * 1.03^10, taxed at today’s scale after deflating by 1.025^10, then scaled back up.
+    const index = 1.025 ** 10;
+    expect(path(10)).toBeCloseTo(estimateNetAnnual({ grossAnnual: (100000 * 1.03 ** 10) / index, state: "ny", filing: "single", k401Pct: 8 }) * index, 4);
+    // When pay grows exactly with inflation, take-home grows exactly with inflation too.
+    const flat = fire.makeNetPath({ ...args, salaryGrowthPct: 2.5 });
+    expect(flat(20)).toBeCloseTo(flat(0) * 1.025 ** 20, 4);
+    // Pay that outgrows inflation moves into higher brackets, so take-home grows slower than the simple growth rate.
+    expect(path(30)).toBeLessThan(path(0) * 1.03 ** 30);
+    // No state chosen: no tax is modelled, so take-home is the gross pay.
+    expect(fire.makeNetPath({ ...args, state: "" })(5)).toBeCloseTo(100000 * 1.03 ** 5, 6);
+  });
+
   it("executes FIRE mode and calculation functions, recording independent references", () => {
     const fire = componentFunctions("FireCalculator", ["defaultsForMode", "modeFromPathname", "simulateYearsToFI", "calcCoastFireNumber", "buildProjection", "calcEmployerMatch"]);
     const base = { ...fire.defaultsForMode("standard", 100000), currentPortfolio: 0, expensesMonthly: 4000, k401Pct: 0,
