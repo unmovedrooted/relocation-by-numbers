@@ -48,6 +48,7 @@ import { MALTA_TAX_YEAR_LABEL, maltaTax } from "./countryTaxRules/malta";
 import { MEXICO_TAX_YEAR_LABEL, mexicoTax } from "./countryTaxRules/mexico";
 import { NETHERLANDS_TAX_YEAR_LABEL, netherlandsTax } from "./countryTaxRules/netherlands";
 import { NEW_ZEALAND_TAX_YEAR_LABEL, newZealandTax } from "./countryTaxRules/newZealand";
+import { NORWAY_TAX_YEAR_LABEL, norwayTax } from "./countryTaxRules/norway";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -1037,35 +1038,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 rates. Ordinary income tax 22% flat + bracket tax (trinnskatt).
   // No joint filing. Personal deduction (personfradrag): NOK 88,250.
   // -------------------------------------------------------------------------
-  NO: ({ annualIncome, isRetired }) => {
-    if (annualIncome <= 0) return { effectiveRate: 0, model: "progressive-country", confidence: isRetired ? "partial" : "simplified", label: "Norway income tax (2024)", missingFactor: "", note: "Enter income to calculate." };
-
-    const personalDeduction = 88250;
-    const taxable = Math.max(0, annualIncome - personalDeduction);
-
-    // Ordinary income (alminnelig inntekt) tax: 22%
-    const ordinaryTax = taxable * 0.22;
-
-    // Bracket tax (trinnskatt) on gross personal income (not after deduction)
-    const bracketTax = progressiveTax(annualIncome, [
-      { upTo: 208050, rate: 0.00 },
-      { upTo: 292850, rate: 0.017 },
-      { upTo: 670000, rate: 0.04 },
-      { upTo: 937900, rate: 0.136 },
-      { upTo: 1350000, rate: 0.166 },
-      { upTo: Infinity, rate: 0.176 },
-    ]) * annualIncome;
-
-    const totalTax = ordinaryTax + bracketTax;
-    const effectiveRate = annualIncome > 0 ? totalTax / annualIncome : 0;
-
+  NO: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/norway.ts: Skatteetaten 2026 bracket tax, allowances, national insurance, pensioner credit.
+    const { incomeTax, nationalInsurance } = norwayTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(effectiveRate),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + nationalInsurance) / annualIncome : 0),
       model: "progressive-country",
-      confidence: isRetired ? "partial" : "simplified",
-      label: "Norway ordinary income + bracket tax (2024)",
-      missingFactor: isRetired ? "Standard deduction (minstefradrag) not applied, slight overstatement." : "Employee National Insurance (7.9%) not included, adds ~6–7 pp for workers.",
-      note: "Structure is correct: 22% ordinary income tax on income after personal deduction (NOK 88,250) plus bracket tax (trinnskatt) on gross income. Main omission: employee National Insurance contribution (7.9% on income above NOK 69,650), this adds approximately 6–7 pp to the effective rate for employed residents. Standard deduction (minstefradrag, 46% of income up to NOK 109,950) is not applied here and would reduce income tax somewhat. Income must be passed in NOK.",
+      confidence: "partial",
+      label: `Norway income tax + bracket tax + national insurance (${NORWAY_TAX_YEAR_LABEL})`,
+      missingFactor: "Lower rates in northern Norway, housing and pension-savings deductions not modelled.",
+      note: "Uses Skatteetaten's 2026 rules: 22% ordinary income tax after the standard deduction (46% of wages up to NOK 95,700; 40% of pensions up to NOK 75,400) and the NOK 114,540 personal allowance, bracket tax of 1.7% to 17.8% on income above NOK 226,100, and national insurance of 7.6% on wages or 5.1% on pensions (capped at 25% of income above NOK 99,650). Pensioners also get the tax credit of up to NOK 37,100. Remote workers are assumed to be members of the national insurance scheme. Not modelled: the lower rates in Finnmark and northern Troms, the housing deductions and pension savings. Income must be passed in kroner.",
     };
   },
 

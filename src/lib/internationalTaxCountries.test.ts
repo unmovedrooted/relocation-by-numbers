@@ -783,3 +783,18 @@ describe("New Zealand (IRD rates, ACC levy) in both calculators", () => {
     expect((rate("NZ", 200_000) - rate("NZ", 200_000, "remote")) * 200_000).toBeCloseTo(0.0175 * 156_641, 4);
   });
 });
+
+describe("Norway (Skatteetaten 2026 rates, deductions, trygdeavgift)", () => {
+  it("NOK 700,000 employee", () => {
+    // ordinary 22% x (700,000 - 95,700 - 114,540) = 107,747.20; bracket 1,567.40 + 15,268; trygdeavgift 53,200
+    expect(rate("NO", 700_000)).toBeCloseTo((107_747.2 + 16_835.4 + 53_200) / 700_000, 8);
+  });
+
+  it("NOK 300,000 pensioner: the pensioner credit wipes out income tax, leaving 5.1% national insurance", () => {
+    expect(rate("NO", 300_000, "retired")).toBeCloseTo(0.051, 8);
+  });
+
+  it("NOK 80,000 income is below the national-insurance floor", () => {
+    expect(rate("NO", 80_000)).toBe(0);
+  });
+});
