@@ -12,3 +12,5 @@ Rule modules live in `src/lib/countryTaxRules/`. Countries that have no module y
 | Australia | Refreshed: 2026-27 rates, LITO, Medicare levy. The old code used a wrong 19%/32.5% mix | ATO |
 | Austria | Refreshed: BMF 2026 tariff (matches its EUR 40,000 example), credits, 2026 social-insurance values; 13th/14th salary not modelled | BMF, Dachverband |
 | Belgium | Refreshed: income year 2026 brackets, EUR 11,180 allowance (the old code omitted it), expense forfait cap 6,070. Marital quotient not modelled | FPS Finance |
+| Bolivia | Skipped for now: the tax authority's sources conflict on the current RC-IVA deduction (one vs two minimum wages) | SIN |
+| Brazil | Refreshed: Receita Federal 2026 table and Law 15.270 reducer (matches its R$ 6,000 example), INSS 2026 | Receita Federal, INSS |

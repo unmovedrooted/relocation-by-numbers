@@ -103,3 +103,28 @@ describe("Belgium (FPS Finance income year 2026)", () => {
     expect(rate("BE", 80_000, "retired")).toBeCloseTo((30_668 + 2_146.76) / 80_000, 10);
   });
 });
+
+describe("Brazil (Receita Federal 2026 table, Law 15.270 reducer, INSS 2026)", () => {
+  it("reproduces the Receita's own example: R$ 6,000 a month, simplified discount, tax R$ 394.54", () => {
+    // base 6,000 - 607.20 = 5,392.80; table 27.5% x 5,392.80 - 908.73 = 574.29; reducer 978.62 - 0.133145 x 6,000 = 179.75
+    expect(rate("BR", 72_000, "remote") * 72_000).toBeCloseTo(394.54 * 12, 1);
+  });
+
+  it("employee at R$ 6,000 a month adds INSS and uses it instead of the simplified discount", () => {
+    // INSS 121.575 + 115.3656 + 174.1716 + 230.4022 = 641.5144; base 5,358.4856; table 1,473.58354 - 908.73 = 564.85354; reducer 179.75 -> 385.10354
+    expect(rate("BR", 72_000)).toBeCloseTo((385.10354 + 641.5144) / 6_000, 6);
+  });
+
+  it("charges no income tax up to R$ 5,000 a month", () => {
+    expect(rate("BR", 60_000, "remote")).toBe(0);
+  });
+
+  it("caps INSS at the R$ 8,475.55 ceiling", () => {
+    // ceiling INSS = 121.575 + 115.3656 + 174.1716 + 14% x (8,475.55 - 4,354.27) = 577.0 ... 121.575+115.3656+174.1716+576.9792 = 988.0914
+    const high = rate("BR", 240_000) * 240_000; // R$ 20,000 a month, above the ceiling
+    const inss = 988.0914 * 12;
+    const base = 20_000 - 988.0914;
+    const table = 0.275 * base - 908.73;
+    expect(high).toBeCloseTo(table * 12 + inss, 1);
+  });
+});

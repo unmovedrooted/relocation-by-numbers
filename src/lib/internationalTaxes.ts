@@ -25,6 +25,7 @@ import { USD_TO_LOCAL } from "./internationalFx";
 import { AUSTRALIA_TAX_YEAR_LABEL, australiaTax } from "./countryTaxRules/australia";
 import { AUSTRIA_TAX_YEAR_LABEL, austriaTax } from "./countryTaxRules/austria";
 import { BELGIUM_TAX_YEAR_LABEL, belgiumTax } from "./countryTaxRules/belgium";
+import { BRAZIL_TAX_YEAR_LABEL, brazilTax } from "./countryTaxRules/brazil";
 
 export type FilingStatus = "single" | "married";
 
@@ -1636,28 +1637,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 IRPF brackets (updated May 2024, new exemption thresholds).
   // No joint filing. Pension income deduction for 65+.
   // -------------------------------------------------------------------------
-  BR: ({ annualIncome, isRetired }) => {
-    // From May 2024: monthly exemption BRL 2,824 (annual ~BRL 33,888)
-    const pensionDeduction = isRetired ? 33888 : 0;
-    const taxable = Math.max(0, annualIncome - pensionDeduction);
-
-    // 2024 IRPF brackets (effective from May 2024)
-    const rate = progressiveTax(taxable, [
-      { upTo: 33888, rate: 0.00 },
-      { upTo: 45012, rate: 0.075 },
-      { upTo: 55976, rate: 0.15 },
-      { upTo: 82596, rate: 0.225 },
-      { upTo: Infinity, rate: 0.275 },
-    ]);
-
-    const effectiveRate = annualIncome > 0 ? (rate * taxable) / annualIncome : 0;
+  BR: ({ annualIncome, incomeScenario }) => {
+    // Rules in countryTaxRules/brazil.ts: Receita Federal 2026 table and Law 15.270 reducer, INSS 2026 table.
+    const { incomeTax, inss } = brazilTax(annualIncome, { employee: incomeScenario === "local" });
+    const effective = annualIncome > 0 ? (incomeTax + inss) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(effectiveRate),
+      effectiveRate: clampRate(effective),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Brazil IRPF (2024, updated May 2024 thresholds)",
-      missingFactor: "INSS contributions (7.5–14% on a progressive schedule) not included.",
-      note: "IRPF brackets are the May 2024 revised figures. Retirees 65+ receive the correct pension deduction (~BRL 33,888/yr). Key omission: INSS (social security) contributions for employed residents range from 7.5% to 14% on a progressive schedule, capped at BRL 908/mo, a significant deduction for mid-income earners not modelled here. Brazil also has a large system of deductions (dependents, education, health expenses) that materially reduce taxable income for many filers. Income must be passed in BRL.",
+      label: `Brazil IRPF + INSS (${BRAZIL_TAX_YEAR_LABEL})`,
+      missingFactor: "13th salary, extra exemption for pensioners 65+, and the high-income minimum tax not modelled.",
+      note: "Uses the Receita Federal 2026 monthly table and the Law 15.270 reducer (no tax up to R$ 5,000 a month, phasing out at R$ 7,350), the R$ 607.20 simplified discount or INSS if larger, and the 2026 INSS table (7.5% to 14%, ceiling R$ 8,475.55) for employees. Remote and self-employed income pays no INSS here, since a contributor-individual contribution is a different regime. Calculated monthly from annual pay divided by 12. Not modelled: the 13th salary, the additional exemption for pensioners aged 65 or over, the minimum tax on incomes above R$ 600,000, dependants and health or education deductions. Income must be passed in reais.",
     };
   },
 
