@@ -841,3 +841,17 @@ describe("Peru (UIT S/ 5,500, 7 UIT deduction, scale, 13% pension)", () => {
     expect(rate("PE", 400_000, "remote")).toBeCloseTo(tax / 400_000, 8);
   });
 });
+
+describe("Philippines (BIR graduated rates, SSS/PhilHealth/Pag-IBIG)", () => {
+  const ph = (income: number, scenario: "local" | "remote" | "retired" = "local") =>
+    estimateAsiaTax({ countryCode: "PH", annualIncome: income, filing: "single", isRetired: scenario === "retired", incomeScenario: scenario, answers: { ph_residency: "citizen_resident" } }).effectiveRate;
+
+  it("PHP 1,200,000 employee", () => {
+    // contributions 21,000 + 30,000 + 2,400 = 53,400; taxable 1,146,600: 22,500 + 80,000 + 25% x 346,600 = 189,150
+    expect(ph(1_200_000)).toBeCloseTo(242_550 / 1_200_000, 8);
+  });
+
+  it("PHP 300,000 pension: only the 15% band applies", () => {
+    expect(ph(300_000, "retired")).toBeCloseTo(0.15 * 50_000 / 300_000, 10);
+  });
+});

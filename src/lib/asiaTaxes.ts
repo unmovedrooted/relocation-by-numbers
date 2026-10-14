@@ -19,6 +19,7 @@ import { AUSTRALIA_TAX_YEAR_LABEL, australiaTax } from "./countryTaxRules/austra
 import { INDONESIA_NOTE, INDONESIA_TAX_YEAR_LABEL, indonesiaTax } from "./countryTaxRules/indonesia";
 import { MALAYSIA_TAX_YEAR_LABEL, malaysiaTax } from "./countryTaxRules/malaysia";
 import { NEW_ZEALAND_TAX_YEAR_LABEL, newZealandTax } from "./countryTaxRules/newZealand";
+import { PHILIPPINES_TAX_YEAR_LABEL, philippinesTax } from "./countryTaxRules/philippines";
 import { NO_US_OVERLAY, US_SELF_EMPLOYED_KEY, US_SELF_EMPLOYED_QUESTION, US_TAX_STATUS_KEY, US_TAX_STATUS_QUESTION, withUsTaxAbroad } from "./internationalTaxes";
 
 export type FilingStatus = "single" | "married";
@@ -508,7 +509,7 @@ return {
   // -------------------------------------------------------------------------
   // PHILIPPINES, PHP
   // -------------------------------------------------------------------------
-  PH: ({ annualIncome, isRetired, answers }) => {
+  PH: ({ annualIncome, isRetired, incomeScenario = "local", answers }) => {
     const residency = answers?.ph_residency ?? "";
 
     if (residency === "non_resident_netb") {
@@ -526,18 +527,9 @@ return {
       };
     }
 
-    const taxAmount = progressiveTaxAmount(annualIncome, [
-      { upTo: 250000, rate: 0.0 },
-      { upTo: 400000, rate: 0.15 },
-      { upTo: 800000, rate: 0.2 },
-      { upTo: 2000000, rate: 0.25 },
-      { upTo: 8000000, rate: 0.3 },
-      { upTo: Infinity, rate: 0.35 },
-    ]);
-
-    const incomeTaxRate = effectiveRateFromTax(taxAmount, annualIncome);
-    const socialContributionRate = isRetired ? 0 : 0.05;
-    const rates = combineRates(incomeTaxRate, socialContributionRate);
+    // Rules in countryTaxRules/philippines.ts: BIR graduated rates, SSS/PhilHealth/Pag-IBIG employee contributions.
+    const { incomeTax, contributions } = philippinesTax(annualIncome, isRetired ? "retired" : incomeScenario);
+    const rates = combineRates(effectiveRateFromTax(incomeTax, annualIncome), effectiveRateFromTax(contributions, annualIncome));
     const hasAnswer = residency === "citizen_resident";
 
     return {
@@ -545,11 +537,11 @@ return {
       model: "progressive-country",
       confidence: hasAnswer ? "partial" : "simplified",
       label: hasAnswer
-        ? "Philippines TRAIN Law + contributions, citizen/resident alien (2024)"
-        : "Philippines TRAIN Law + contributions (2024, select residency status)",
+        ? `Philippines income tax + SSS/PhilHealth/Pag-IBIG, citizen/resident alien (${PHILIPPINES_TAX_YEAR_LABEL})`
+        : `Philippines income tax + SSS/PhilHealth/Pag-IBIG (${PHILIPPINES_TAX_YEAR_LABEL}, select residency status)`,
       missingFactor:
-        "13th-month pay exemption not modelled.",
-      note: "2024 TRAIN Law brackets. Income must be passed in PHP.",
+        "13th-month pay exemption (up to PHP 90,000) and the 8% option for self-employed not modelled; contribution rates come from payroll summaries.",
+      note: "Uses the BIR graduated rates (0% to PHP 250,000, then 15% to 35%) on income after mandatory contributions, with employee SSS (5% up to a PHP 35,000 monthly salary credit), PhilHealth (2.5% on pay between PHP 10,000 and 100,000 a month) and Pag-IBIG (PHP 200 a month). Retirees and remote workers paid abroad pay no Philippine contributions here. Income must be passed in PHP.",
     };
   },
 
