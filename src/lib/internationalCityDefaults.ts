@@ -158,9 +158,9 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     },
     sources: {
       rent: "Office for National Statistics, Price Index of Private Rents: average London monthly rent, March 2026 (all property types, GBP)",
-      groceries: "Planning assumption, not from an official source.",
+      groceries: "Planning assumption. Official reference (household average, not a single-adult budget): Office for National Statistics, Family Spending, year ending March 2025: UK households spent £73.70 a week (about £319 a month) on food and non-alcoholic drinks.",
       utilities: "Planning assumption, not from an official source.",
-      transport: "Planning assumption, not from an official source.",
+      transport: "Planning assumption. Official reference (household average): Office for National Statistics, Family Spending, year ending March 2025: UK households spent £96.40 a week (about £418 a month) on transport, including vehicle purchase and running costs.",
       healthcare: "Planning assumption, not from an official source.",
       startup: "Planning assumption, not from an official source.",
     },
@@ -677,9 +677,9 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     },
     sources: {
       rent: "Planning estimate. INEGI's household survey (ENIGH 2024) has a rent line for Ciudad de Mexico, but the figure could not be read from the tables retrieved.",
-      groceries: "Planning assumption, not from an official source.",
+      groceries: "Planning assumption. Official reference (household average): INEGI, ENIGH 2024: households spent 15,891 pesos a month on average, 37.7% (about 5,990 pesos) on food, beverages and tobacco.",
       utilities: "Planning assumption, not from an official source.",
-      transport: "Planning assumption, not from an official source.",
+      transport: "Planning assumption. Official reference (household average): INEGI, ENIGH 2024: 19.5% (about 3,100 pesos a month) of household spending went to transport and communications.",
       healthcare: "Planning assumption, not from an official source.",
       startup: "Planning assumption, not from an official source.",
     },
@@ -788,7 +788,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     },
     sources: {
       rent: "Planning estimate. Japan's Statistics Bureau publishes rents in the Housing and Land Survey, but a monthly Tokyo figure could not be retrieved here.",
-      groceries: "Planning assumption, not from an official source.",
+      groceries: "Planning assumption. Official reference (household average): Statistics Bureau of Japan, Family Income and Expenditure Survey 2025: two-or-more-person households spent 314,001 yen a month on consumption in total (the food line was not read).",
       utilities: "Planning assumption, not from an official source.",
       transport: "Planning assumption, not from an official source.",
       healthcare: "Planning assumption, not from an official source.",
@@ -825,9 +825,9 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     },
     sources: {
       rent: "Housing & Development Board via data.gov.sg, median rent by town and flat type, 2026 Q2: unweighted median across towns of the 4-room flat median (SGD 3,400), converted at the Treasury rate; private condominiums cost more",
-      groceries: "Planning assumption, not from an official source.",
+      groceries: "Planning assumption. Official reference (household average): Singapore Department of Statistics, Household Expenditure Survey 2023: S$1,422 a month per household on food and food-serving services, which includes eating out.",
       utilities: "Planning assumption, not from an official source.",
-      transport: "Planning assumption, not from an official source.",
+      transport: "Planning assumption. Official reference (household average): Singapore Department of Statistics, Household Expenditure Survey 2023: S$951 a month per household on transport.",
       healthcare: "Planning assumption, not from an official source.",
       startup: "Planning assumption, not from an official source.",
     },
@@ -900,7 +900,7 @@ export const INTERNATIONAL_CITY_DEFAULTS: InternationalCityDefaults[] = [
     sources: {
       rent: "Planning estimate. The Department of Statistics Malaysia publishes a national average rent for renting households (about RM910 in its 2022 survey, read provisionally), which is not comparable to a Kuala Lumpur apartment, so it was not applied.",
       groceries: "Planning assumption, not from an official source.",
-      utilities: "Planning assumption, not from an official source.",
+      utilities: "Planning assumption. Official reference (household average): Department of Statistics Malaysia, Household Expenditure Survey 2022: households spent RM5,150 a month on average, 23.2% of it on housing, water, electricity, gas and other fuels.",
       transport: "Planning assumption, not from an official source.",
       healthcare: "Planning assumption, not from an official source.",
       startup: "Planning assumption, not from an official source.",
