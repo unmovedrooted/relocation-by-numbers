@@ -877,3 +877,19 @@ describe("Poland (PIT scale with the PLN 3,600 reduction, ZUS, health)", () => {
     expect(b - a).toBeCloseTo(zus + health + pit, 4);
   });
 });
+
+describe("Portugal (Portal das Financas 2026 scale, specific deduction, 11% contributions)", () => {
+  it("EUR 40,000 employee", () => {
+    // taxable 35,412.91; tax 8,149.2576; contributions 4,400
+    expect(rate("PT", 40_000)).toBeCloseTo((8_149.2576 + 4_400) / 40_000, 6);
+  });
+
+  it("EUR 20,000 retiree", () => {
+    // taxable 15,412.91: 1,042.75 + 666.465 + 2,825.91 x 21.2%
+    expect(rate("PT", 20_000, "retired")).toBeCloseTo((1_042.75 + 666.465 + 2_825.91 * 0.212) / 20_000, 6);
+  });
+
+  it("the married split lowers the tax of a single high earner", () => {
+    expect(rate("PT", 100_000, "local", "married")).toBeLessThan(rate("PT", 100_000, "local", "single"));
+  });
+});

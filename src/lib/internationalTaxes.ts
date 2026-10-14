@@ -53,6 +53,7 @@ import { PANAMA_TAX_YEAR_LABEL, panamaTax } from "./countryTaxRules/panama";
 import { PARAGUAY_TAX_YEAR_LABEL, paraguayTax } from "./countryTaxRules/paraguay";
 import { PERU_TAX_YEAR_LABEL, peruTax } from "./countryTaxRules/peru";
 import { POLAND_TAX_YEAR_LABEL, polandTax } from "./countryTaxRules/poland";
+import { PORTUGAL_TAX_YEAR_LABEL, portugalTax } from "./countryTaxRules/portugal";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -278,7 +279,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 IRS brackets (Continente). Conditional: IFICI / NHR special regime.
   // Key: answers.pt_ifici (note: calculator may also pass pt_nhr, both checked)
   // -------------------------------------------------------------------------
-  PT: ({ annualIncome, isRetired, incomeScenario = isRetired ? "retired" : "local", answers }) => {
+  PT: ({ annualIncome, filing, isRetired, incomeScenario = isRetired ? "retired" : "local", answers }) => {
     const ificiAnswer = answers?.pt_ifici ?? answers?.pt_nhr;
 
     if (incomeScenario === "remote" && ificiAnswer === "yes") {
@@ -292,27 +293,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       };
     }
 
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 8059, rate: 0.1325 },
-      { upTo: 12160, rate: 0.18 },
-      { upTo: 17233, rate: 0.23 },
-      { upTo: 22407, rate: 0.26 },
-      { upTo: 28321, rate: 0.3288 },
-      { upTo: 41629, rate: 0.37 },
-      { upTo: 44987, rate: 0.435 },
-      { upTo: 83696, rate: 0.45 },
-      { upTo: Infinity, rate: 0.48 },
-    ]);
-
-    const retiredAdj = isRetired ? -0.025 : 0;
+    // Rules in countryTaxRules/portugal.ts: Portal das Financas article 68 CIRS scale for 2026, specific deduction, 11% contributions.
+    const { incomeTax, contributions } = portugalTax(annualIncome, filing === "married" ? "married" : "single", isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
 
     return {
-      effectiveRate: clampRate(rate + retiredAdj),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Portugal IRS estimate (2024 Continente brackets)",
-      missingFactor: "Personal deductions and household splitting not modelled, real rate is often lower.",
-      note: "National brackets are current (2024 Continente). Not modelled: household income splitting (declaração conjunta), personal deductions (health, education, housing interest), solidarity surcharges above €80k, and Madeira/Azores rates. Real effective rate can be materially lower once deductions are applied.",
+      label: `Portugal IRS + social security (${PORTUGAL_TAX_YEAR_LABEL}, Continente)`,
+      missingFactor: "Personal deductions (health, education, housing), dependants and IRS Jovem not modelled; the specific deduction and social security rate were not re-read on an official page.",
+      note: "Uses the 2026 mainland scale from the Portal das Finanças (12.5% to 48%), after the specific deduction (EUR 4,587.09, or the 11% employee social security if larger), the 2.5% and 5% solidarity surcharge above EUR 80,000 and EUR 250,000, and the joint-filing split for married couples (one earner). Retirees and remote workers paid abroad pay no social security here. Not modelled: deductions, dependants, IRS Jovem, the Azores and Madeira reductions, and the NHR/IFICI regimes beyond the planning rate. Income must be passed in euros.",
     };
   },
 
