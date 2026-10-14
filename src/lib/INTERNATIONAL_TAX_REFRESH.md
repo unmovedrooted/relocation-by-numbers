@@ -14,3 +14,4 @@ Rule modules live in `src/lib/countryTaxRules/`. Countries that have no module y
 | Belgium | Refreshed: income year 2026 brackets, EUR 11,180 allowance (the old code omitted it), expense forfait cap 6,070. Marital quotient not modelled | FPS Finance |
 | Bolivia | Skipped for now: the tax authority's sources conflict on the current RC-IVA deduction (one vs two minimum wages) | SIN |
 | Brazil | Refreshed: Receita Federal 2026 table and Law 15.270 reducer (matches its R$ 6,000 example), INSS 2026 | Receita Federal, INSS |
+| Bulgaria | Refreshed: flat 10% after contributions, NOI 2026 insurable-income caps in euros. 2026 contribution rates assumed equal to the 2025 table | NOI |

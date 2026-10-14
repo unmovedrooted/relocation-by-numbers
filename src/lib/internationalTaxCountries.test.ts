@@ -128,3 +128,20 @@ describe("Brazil (Receita Federal 2026 table, Law 15.270 reducer, INSS 2026)", (
     expect(high).toBeCloseTo(table * 12 + inss, 1);
   });
 });
+
+describe("Bulgaria (NOI 2026 insurable-income caps, 10% flat tax after contributions)", () => {
+  it("salary below the cap: EUR 20,000", () => {
+    // contributions 11.58% = 2,316; tax 10% x 17,684 = 1,768.40
+    expect(rate("BG", 20_000)).toBeCloseTo((1_768.4 + 2_316) / 20_000, 10);
+  });
+
+  it("salary above the cap: contributions stop at 7 x 2,111.64 + 5 x 2,300 = 26,281.48", () => {
+    // contributions 0.1158 x 26,281.48 = 3,043.4 (3,043.3 rounded); tax 10% x (50,000 - contributions)
+    const social = 0.1158 * 26_281.48;
+    expect(rate("BG", 50_000)).toBeCloseTo((0.1 * (50_000 - social) + social) / 50_000, 10);
+  });
+
+  it("a pensioner pays the flat 10% with no contributions", () => {
+    expect(rate("BG", 20_000, "retired")).toBeCloseTo(0.1, 10);
+  });
+});

@@ -26,6 +26,7 @@ import { AUSTRALIA_TAX_YEAR_LABEL, australiaTax } from "./countryTaxRules/austra
 import { AUSTRIA_TAX_YEAR_LABEL, austriaTax } from "./countryTaxRules/austria";
 import { BELGIUM_TAX_YEAR_LABEL, belgiumTax } from "./countryTaxRules/belgium";
 import { BRAZIL_TAX_YEAR_LABEL, brazilTax } from "./countryTaxRules/brazil";
+import { BULGARIA_TAX_YEAR_LABEL, bulgariaTax } from "./countryTaxRules/bulgaria";
 
 export type FilingStatus = "single" | "married";
 
@@ -1466,14 +1467,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // No joint filing.
   // -------------------------------------------------------------------------
   BG: ({ annualIncome, isRetired }) => {
-    const socialOverlay = isRetired ? 0 : 0.1378;
+    // Rules in countryTaxRules/bulgaria.ts: flat 10% after employee contributions, 2026 insurable-income caps (NOI).
+    const { incomeTax, socialContributions } = bulgariaTax(annualIncome, isRetired);
+    const effective = annualIncome > 0 ? (incomeTax + socialContributions) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(annualIncome > 0 ? 0.10 + socialOverlay : 0),
+      effectiveRate: clampRate(effective),
       model: "flat",
       confidence: "partial",
-      label: "Bulgaria 10% flat income tax + social contributions (2024)",
-      missingFactor: "Social contributions (~13.78%) not applied to pension income; ceiling applies.",
-      note: "The 10% flat SZOD rate is legislated and exact. Employee social contributions (~13.78%: pension 12.9%, health 3.2%, unemployment 0.4%, employee share only) are correctly excluded for retirees. Social contributions have a ceiling on monthly insurable income (set each year); above this only income tax applies. Annual revenue tax deduction (10% of gross for self-employed) is not modelled. Income must be passed in euros (Bulgaria adopted the euro on 2026-01-01).",
+      label: `Bulgaria 10% flat income tax + social contributions (${BULGARIA_TAX_YEAR_LABEL})`,
+      missingFactor: "2026 contribution rates assumed equal to the 2025 table; contribution categories simplified.",
+      note: "Income tax is a flat 10% of pay after the employee's social contributions. Contributions are 8.38% (state pension and benefits, for people born after 1959) plus 3.2% health insurance, up to the 2026 maximum insurable income of EUR 2,111.64 a month (EUR 2,300 from August), per the National Social Security Institute; the 2025 rates are assumed unchanged because the 2026 table was not found. Retirees pay no contributions. Voluntary pension funds, labour-category rates and the exemption of Bulgarian state pensions are not modelled. Income must be passed in euros (Bulgaria adopted the euro on 1 January 2026).",
     };
   },
 
