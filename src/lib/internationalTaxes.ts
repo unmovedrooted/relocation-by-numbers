@@ -31,6 +31,7 @@ import { CANADA_PROVINCES, CANADA_TAX_YEAR_LABEL, canadaTax } from "./countryTax
 import { CHILE_TAX_YEAR_LABEL, chileTax } from "./countryTaxRules/chile";
 import { COLOMBIA_TAX_YEAR_LABEL, colombiaTax } from "./countryTaxRules/colombia";
 import { COSTA_RICA_TAX_YEAR_LABEL, costaRicaTax } from "./countryTaxRules/costaRica";
+import { CROATIA_TAX_YEAR_LABEL, croatiaTax } from "./countryTaxRules/croatia";
 
 export type FilingStatus = "single" | "married";
 
@@ -1330,19 +1331,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024: Two-band national tax (20% / 30%). Surtax abolished Jan 2024.
   // Previously had local surtax up to 18%, removed from 2024.
   // -------------------------------------------------------------------------
-  HR: ({ annualIncome }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 50400, rate: 0.20 },
-      { upTo: Infinity, rate: 0.30 },
-    ]);
-    // Surtax abolished from 1 January 2024, rate now national only
+  HR: ({ annualIncome, isRetired }) => {
+    // Rules in countryTaxRules/croatia.ts: Porezna uprava 2026 threshold (EUR 60,000), default rates, allowance, MIO.
+    const { incomeTax, contributions } = croatiaTax(annualIncome, isRetired);
+    const effective = annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(rate),
+      effectiveRate: clampRate(effective),
       model: "progressive-country",
       confidence: "partial",
-      label: "Croatia income tax (2024, surtax abolished)",
-      missingFactor: "Employee social contributions (~20%) not included.",
-      note: "Brackets are correct: the local surtax (prireza) was abolished from 1 January 2024, so the national rate is now the complete income tax. Main omission: employee social contributions (~20% combined, pension pillar I 15%, pension pillar II 5%, health 16.5%, though health is employer-side) are not included. For a planning-level net income figure, the two national brackets are reliable. Income must be passed in EUR.",
+      label: `Croatia income tax + pension contribution (${CROATIA_TAX_YEAR_LABEL})`,
+      missingFactor: "Your municipality's own rate (up to 23% / 33% in Zagreb) and dependants' allowances not modelled.",
+      note: "The Tax Administration's 2026 rules: 20% up to EUR 60,000 a year and 30% above, on gross pay less the 20% pension contribution and the EUR 600 monthly personal allowance. Municipalities and cities set their own rates within bands (the default, used here, is 20% and 30%; Zagreb may charge up to 23% and 33%), so the true rate can be a few points higher. Health insurance is paid by the employer. Not modelled: higher allowances for dependants and disability, and the cap on monthly contributions. Income must be passed in euros.",
     };
   },
 

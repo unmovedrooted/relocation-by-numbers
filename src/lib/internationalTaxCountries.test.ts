@@ -314,3 +314,24 @@ describe("Costa Rica (Hacienda 2026 monthly brackets, CCSS 2026)", () => {
     expect(single - married).toBeCloseTo(2_590 * 12, 6);
   });
 });
+
+describe("Croatia (Porezna uprava 2026: 20% to EUR 60,000, 30% above, 20% pension, EUR 7,200 allowance)", () => {
+  it("employee earning EUR 50,000", () => {
+    // MIO 10,000; base 50,000 - 10,000 - 7,200 = 32,800; tax 20% = 6,560
+    expect(rate("HR", 50_000)).toBeCloseTo((6_560 + 10_000) / 50_000, 10);
+  });
+
+  it("employee earning EUR 100,000 reaches the 30% rate", () => {
+    // MIO 20,000; base 72,800; tax 20% x 60,000 + 30% x 12,800 = 12,000 + 3,840 = 15,840
+    expect(rate("HR", 100_000)).toBeCloseTo((15_840 + 20_000) / 100_000, 10);
+  });
+
+  it("a pensioner pays no contribution and keeps the allowance", () => {
+    // base 30,000 - 7,200 = 22,800; tax 4,560
+    expect(rate("HR", 30_000, "retired")).toBeCloseTo(4_560 / 30_000, 10);
+  });
+
+  it("pays nothing within the allowance", () => {
+    expect(rate("HR", 7_000, "retired")).toBe(0);
+  });
+});
