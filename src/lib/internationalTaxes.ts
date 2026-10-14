@@ -39,6 +39,7 @@ import { FRANCE_TAX_YEAR_LABEL, franceTax } from "./countryTaxRules/france";
 import { GERMANY_TAX_YEAR_LABEL, germanyTax } from "./countryTaxRules/germany";
 import { GREECE_TAX_YEAR_LABEL, greeceTax } from "./countryTaxRules/greece";
 import { IRELAND_TAX_YEAR_LABEL, irelandTax } from "./countryTaxRules/ireland";
+import { ITALY_NEW_RESIDENT_FLAT_TAX, ITALY_TAX_YEAR_LABEL, italyTax } from "./countryTaxRules/italy";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
 export type FilingStatus = "single" | "married";
@@ -696,32 +697,30 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
   // -------------------------------------------------------------------------
   // ITALY, EUR
-  // 2024 IRPEF. No joint filing. Regional (~1.23-3.33%) + municipal (~0-0.9%)
+  // 2026 IRPEF (countryTaxRules/italy.ts). No joint filing. Regional (~1.23-3.33%) + municipal (~0-0.9%)
   // surtax modeled at 2% combined average.
   // -------------------------------------------------------------------------
-  IT: ({ annualIncome, answers }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 28000, rate: 0.23 },
-      { upTo: 50000, rate: 0.35 },
-      { upTo: Infinity, rate: 0.43 },
-    ]);
+  IT: ({ annualIncome, answers, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/italy.ts: 2026 IRPEF (33% second bracket), employee and pension deductions, INPS 9.19%.
+    const itTax = italyTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     if (answers?.it_flat_tax === "yes") {
       // Flat Tax for New Residents: €100,000/yr on all foreign-source income (fixed sum, not rate-based)
       // On Italian-source income: standard IRPEF rates apply.
       // Simplified: model as a flat €100k annual tax on foreign income (very high earner regime).
-      const flatTaxAmount = 100000; // EUR, fixed annual substitute tax
+      const flatTaxAmount = ITALY_NEW_RESIDENT_FLAT_TAX; // EUR, fixed annual substitute tax (EUR 300,000 for options from 2026)
       const effectiveRate = annualIncome > 0 ? flatTaxAmount / annualIncome : 0;
       return {
         effectiveRate: clampRate(effectiveRate),
         model: "flat",
         confidence: "partial",
-        label: "Italy Flat Tax for New Residents (€100k substitute tax)",
+        label: "Italy Flat Tax for New Residents (€300k substitute tax, options from 2026)",
         missingFactor: "Italian-source income still subject to standard IRPEF; regime lasts 15 years max.",
-        note: "Italy's Flat Tax for New Residents: a fixed €100,000/yr substitute tax on all foreign-source income, regardless of the actual amount. Italian-source income is taxed at standard IRPEF rates (not modelled here). This regime lasts up to 15 years. Most relevant for high-income individuals with significant foreign income. Eligibility requires not having been Italian tax resident in 9 of the prior 10 years.",
+        note: "Italy's Flat Tax for New Residents: a fixed €300,000/yr substitute tax for options exercised from 1 January 2026 (€100,000 or €200,000 for earlier arrivals; the amount comes from the 2026 budget law as reported by tax publications, not read on a government page) on all foreign-source income, regardless of the actual amount. Italian-source income is taxed at standard IRPEF rates (not modelled here). This regime lasts up to 15 years. Most relevant for high-income individuals with significant foreign income. Eligibility requires not having been Italian tax resident in 9 of the prior 10 years.",
       };
     }
 
-    // Regional (addizionale regionale) surtax rates 2024 (% of taxable income).
+    // Regional (addizionale regionale) surtax rates (% of taxable income); the base rate is 1.23% and regions may add up to 2.1 points
+    // (Chamber of Deputies). The per-region rates below were set earlier and were not re-read for 2026.
     // Ranges from 1.23% (minimum, applies to regions not yet having set higher rates)
     // to 3.33% (Lazio / historically higher regions). Plus municipal (0–0.9%).
     const IT_REGION_SURTAX: Record<string, number> = {
@@ -764,18 +763,19 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     };
 
     return {
-      effectiveRate: clampRate(rate + regionalSurtax + municipalSurtax),
+      effectiveRate: clampRate(annualIncome > 0
+        ? (itTax.irpef + (itTax.irpef > 0 ? (regionalSurtax + municipalSurtax) * itTax.taxable : 0) + itTax.inps) / annualIncome : 0),
       model: "country-plus-local",
       confidence: hasItRegion ? "partial" : "simplified",
       label: hasItRegion
-        ? `Italy IRPEF + ${IT_REGION_NAMES[itRegion] ?? itRegion} surtax (2024)`
-        : "Italy IRPEF + regional/municipal surtax (2024, select region)",
+        ? `Italy IRPEF + INPS + ${IT_REGION_NAMES[itRegion] ?? itRegion} surtax (${ITALY_TAX_YEAR_LABEL})`
+        : `Italy IRPEF + INPS + regional/municipal surtax (${ITALY_TAX_YEAR_LABEL}, select region)`,
       missingFactor: hasItRegion
-        ? "INPS social contributions (~9.2%) and personal deductions not modelled."
+        ? "Family and other deductions, the 2025 low-income relief and the INPS 1% surcharge above about EUR 56,000 not modelled; the INPS rate and regional rates were not re-read."
         : "Regional surtax varies 1.2–3.3%, Lazio/Calabria vs Bolzano can differ by ~2 pp.",
       note: hasItRegion
-        ? `2024 IRPEF brackets with ${IT_REGION_NAMES[itRegion] ?? itRegion} regional surtax (${(IT_REGION_SURTAX[itRegion]! * 100).toFixed(2)}%) and average municipal surtax (0.5%). INPS employee social contributions (~9.2%) not included. Personal deductions (healthcare, mortgage interest) not modelled. Income must be passed in EUR.`
-        : "National IRPEF brackets are 2024 figures. Regional surtax ranges from 1.23% (Basilicata, autonomous regions) to 3.33% (Lazio, Calabria). Municipal surtax adds 0–0.9%. Select your region above to use the exact surtax rate. Italy's Flat Tax for New Residents (€100k/yr) is a separate regime, use the question above to model it. Income must be passed in EUR.",
+        ? `2026 IRPEF (23% to EUR 28,000, 33% to EUR 50,000, 43% above, less the employee or pension deduction), employee INPS contributions of 9.19% (deductible; none for retirees or remote workers paid abroad), ${IT_REGION_NAMES[itRegion] ?? itRegion} regional surtax (${(IT_REGION_SURTAX[itRegion]! * 100).toFixed(2)}%) and an average municipal surtax (0.5%). Family deductions and the low-income relief are not modelled. Income must be passed in EUR.`
+        : "2026 IRPEF with the employee or pension deduction and INPS contributions of 9.19% (not for retirees). Regional surtax ranges from 1.23% (Basilicata, autonomous regions) to 3.33% (Lazio, Calabria). Municipal surtax adds 0–0.9%. Select your region above to use the exact surtax rate. Italy's Flat Tax for New Residents (€300k/yr) is a separate regime, use the question above to model it. Income must be passed in EUR.",
     };
   },
 

@@ -612,3 +612,21 @@ describe("Ireland (Revenue 2026 bands, credits, USC; PRSI 4.35%)", () => {
     expect(rate("IE", 12_000)).toBe(0);
   });
 });
+
+describe("Italy (2026 IRPEF with 33% second bracket, deductions, INPS)", () => {
+  // No region selected: 2.0% regional fallback + 0.5% municipal.
+  it("EUR 40,000 employee", () => {
+    // INPS 3,676; taxable 36,324; gross 6,440 + 0.33 x 8,324 = 9,186.92; deduction 1,910 x 13,676 / 22,000; surtax 2.5% x 36,324
+    const irpef = 9_186.92 - 1_910 * 13_676 / 22_000;
+    expect(rate("IT", 40_000)).toBeCloseTo((irpef + 0.025 * 36_324 + 3_676) / 40_000, 8);
+  });
+
+  it("EUR 20,000 retiree: pension deduction, no INPS", () => {
+    // gross 4,600; deduction 700 + 1,255 x 8,000 / 19,500; surtax 500
+    expect(rate("IT", 20_000, "retired")).toBeCloseTo((4_600 - (700 + 1_255 * 8_000 / 19_500) + 500) / 20_000, 8);
+  });
+
+  it("a EUR 8,000 pension pays nothing", () => {
+    expect(rate("IT", 8_000, "retired")).toBe(0);
+  });
+});
