@@ -17,6 +17,15 @@ export const SX_TAX_CONFIG: CountryTaxConfig = {
 
   sources: [
     {
+      title: "Loonbelastingtabellen 2026 (AB 2026, no. 11, Bijlage II)",
+      url: "https://www.sintmaartengov.org/Documents/Official%20Publications/AB%202026,%20no.%2011%20Bijlage%20II%20TABEL%20LOONBELASTING%202026.pdf",
+      type: "government",
+      publisher: "Government of Sint Maarten (Tax Office)",
+      dateChecked: "2026-10-14",
+      notes:
+        "Official 2026 scale: 0% to CG 21,200; 12.5% to 40,700; 20% to 61,000; 26.25% to 84,700; 33.75% to 127,000; 40% to 179,500; 47.5% above. Basic deduction CG 2,381 and acquisition costs CG 500 a year (41.67 a month) are used as the allowance. The 6.5% employee AOV/AWW premium and the low-income exemption (no tax at a base up to CG 27,281) are not modelled.",
+    },
+    {
       title: "2025 Tax Return Form A",
       url: "https://www.sintmaartengov.org/Documents/Income%20Tax%20Forms/Aangifte%20IB%202025%20ModeL%201A-%20Version%202025.pdf",
       type: "government",
@@ -54,13 +63,14 @@ export const SX_TAX_CONFIG: CountryTaxConfig = {
         "The government confirms current annual tax tables are published, but this file does not yet rely on a fully extracted official bracket schedule.",
         "This simplified planning model uses an approximate progressive ladder and should be replaced with the official table once parsed directly.",
       ],
-      getAllowance: () => 0,
+      getAllowance: () => 2881,
       getBrackets: () => [
-        { upTo: 35000, rate: 0.10 },
-        { upTo: 50000, rate: 0.16 },
-        { upTo: 75000, rate: 0.21 },
-        { upTo: 125000, rate: 0.27 },
-        { upTo: 250000, rate: 0.32 },
+        { upTo: 21200, rate: 0 },
+        { upTo: 40700, rate: 0.125 },
+        { upTo: 61000, rate: 0.20 },
+        { upTo: 84700, rate: 0.2625 },
+        { upTo: 127000, rate: 0.3375 },
+        { upTo: 179500, rate: 0.40 },
         { upTo: null, rate: 0.475 },
       ],
       sources: [
@@ -84,13 +94,14 @@ export const SX_TAX_CONFIG: CountryTaxConfig = {
         "The official 2025 return form includes reporting of income from sources abroad and a request for prevention of double taxation, so this calculator does not treat Sint Maarten as territorial for resident taxpayers.",
         "This remains a conservative planning estimate until the full official current tax table is mapped.",
       ],
-      getAllowance: () => 0,
+      getAllowance: () => 2881,
       getBrackets: () => [
-        { upTo: 35000, rate: 0.10 },
-        { upTo: 50000, rate: 0.16 },
-        { upTo: 75000, rate: 0.21 },
-        { upTo: 125000, rate: 0.27 },
-        { upTo: 250000, rate: 0.32 },
+        { upTo: 21200, rate: 0 },
+        { upTo: 40700, rate: 0.125 },
+        { upTo: 61000, rate: 0.20 },
+        { upTo: 84700, rate: 0.2625 },
+        { upTo: 127000, rate: 0.3375 },
+        { upTo: 179500, rate: 0.40 },
         { upTo: null, rate: 0.475 },
       ],
       sources: [
@@ -114,13 +125,14 @@ export const SX_TAX_CONFIG: CountryTaxConfig = {
         "However, Sint Maarten's official return form clearly shows a penshonado regime with 5% and 10% options and fictitious-income fields, so retirement taxation can be materially different for qualifying individuals.",
         "This scenario should be shown with caution until the penshonado rules are modeled directly.",
       ],
-      getAllowance: () => 0,
+      getAllowance: () => 2881,
       getBrackets: () => [
-        { upTo: 35000, rate: 0.10 },
-        { upTo: 50000, rate: 0.16 },
-        { upTo: 75000, rate: 0.21 },
-        { upTo: 125000, rate: 0.27 },
-        { upTo: 250000, rate: 0.32 },
+        { upTo: 21200, rate: 0 },
+        { upTo: 40700, rate: 0.125 },
+        { upTo: 61000, rate: 0.20 },
+        { upTo: 84700, rate: 0.2625 },
+        { upTo: 127000, rate: 0.3375 },
+        { upTo: 179500, rate: 0.40 },
         { upTo: null, rate: 0.475 },
       ],
       sources: [

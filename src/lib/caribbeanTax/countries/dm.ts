@@ -41,6 +41,7 @@ export const DM_TAX_CONFIG: CountryTaxConfig = {
       kind: "progressive",
       confidence: "high",
       notes: [
+        "The 2026 budget address (4 August 2026) proposes replacing the 15% / 25% / 35% bands with a flat 10% from 1 January 2027 and taxing only income earned in Dominica; it is not law yet, so the bands below still apply for 2026.",
         "Dominica resident individuals are modeled with the standard resident allowance and progressive personal income tax rates.",
         "The official Inland Revenue page states that resident individuals must furnish returns and that income from different sources must be totalled before allowable deductions are claimed.",
         "This estimate does not attempt to model mortgage interest relief, student loan relief, donation deductions, or payroll-side obligations.",

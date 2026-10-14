@@ -17,6 +17,15 @@ export const LC_TAX_CONFIG: CountryTaxConfig = {
 
   sources: [
     {
+      title: "Changes to the Personal Income Tax Regime (Act No. 19 of 2023), Tax Facts and Calculations brochure",
+      url: "https://www.govt.lc/media.govt.lc/www/pressroom/news/attachments/tax-facts---calculations-new-regime-version-2024-view-.pdf",
+      type: "tax_agency",
+      publisher: "Inland Revenue Department of Saint Lucia",
+      dateChecked: "2026-10-14",
+      notes:
+        "Official bands on chargeable income: 15% to XCD 15,000, 20% to 30,000, 30% above, with a personal allowance of XCD 25,000 that sits outside the cap on other allowances (stated for income years 2023 to 2025; the IRD's 2026 brochure could not be opened, and no change was reported in the 2026/27 budget). The earlier file applied the bands with no personal allowance, which overstated tax by up to XCD 6,000 or more.",
+    },
+    {
       title: "Saint Lucia - Individual - Taxes on personal income",
       url: "https://taxsummaries.pwc.com/saint-lucia/individual/taxes-on-personal-income",
       type: "tax_firm",
@@ -54,7 +63,7 @@ export const LC_TAX_CONFIG: CountryTaxConfig = {
         "This calculator applies 15% on the first XCD 15,000 of chargeable income, 20% on the next XCD 15,000, and 30% above XCD 30,000.",
         "This estimate does not attempt to model NIC contributions, payroll-side employer costs, or itemized deduction planning.",
       ],
-      getAllowance: () => 0,
+      getAllowance: () => 25000,
       getBrackets: () => [
         { upTo: 15000, rate: 0.15 },
         { upTo: 30000, rate: 0.20 },
@@ -81,7 +90,7 @@ export const LC_TAX_CONFIG: CountryTaxConfig = {
         "PwC states that a resident or ordinarily resident individual is taxable on income from all sources whether in or outside Saint Lucia. A resident but not ordinarily resident individual is taxable on foreign income only to the extent it is remitted to Saint Lucia.",
         "For planning purposes, remote or foreign-source income is modeled under the same progressive resident schedule, and the UI should present this as a conservative estimate rather than a remittance-basis ruling.",
       ],
-      getAllowance: () => 0,
+      getAllowance: () => 25000,
       getBrackets: () => [
         { upTo: 15000, rate: 0.15 },
         { upTo: 30000, rate: 0.20 },
@@ -117,7 +126,7 @@ export const LC_TAX_CONFIG: CountryTaxConfig = {
         "Because resident individuals can be taxable on worldwide income and some foreign income rules depend on ordinary residence and remittance, this calculator does not assume retirement income is exempt by default.",
         "This estimate does not model pension-specific relief, remittance-basis edge cases, or treaty interactions.",
       ],
-      getAllowance: () => 0,
+      getAllowance: () => 25000,
       getBrackets: () => [
         { upTo: 15000, rate: 0.15 },
         { upTo: 30000, rate: 0.20 },

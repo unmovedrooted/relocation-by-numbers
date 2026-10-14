@@ -17,6 +17,15 @@ export const GD_TAX_CONFIG: CountryTaxConfig = {
 
   sources: [
     {
+      title: "Income Tax (Amendment) Order 2018 (S.R.O. 25 of 2018)",
+      url: "https://grenadaparliament.gd/wp-content/uploads/2021/08/S.R.O.-25-of-2018-Income-Tax-Amendment-Order-1.pdf",
+      type: "government",
+      publisher: "Parliament of Grenada",
+      dateChecked: "2026-10-14",
+      notes:
+        "Replaces the 30% figure with 28% throughout the Fifth Schedule from 1 January 2019, so the top personal rate above XCD 60,000 is 28%, not 30%. The XCD 36,000 exemption and the 10% band to XCD 60,000 come from the Inland Revenue Division's 2016 notice and 2026 summaries, not a 2026 table.",
+    },
+    {
       title: "Grenada Inland Revenue Division - Income Tax",
       url: "https://ird.gd/taxes/income-tax",
       type: "tax_agency",
@@ -39,7 +48,7 @@ export const GD_TAX_CONFIG: CountryTaxConfig = {
       getAllowance: () => 36000,
       getBrackets: () => [
         { upTo: 24000, rate: 0.10 },
-        { upTo: null, rate: 0.30 },
+        { upTo: null, rate: 0.28 },
       ],
       sources: [
         {
@@ -65,7 +74,7 @@ export const GD_TAX_CONFIG: CountryTaxConfig = {
       getAllowance: () => 36000,
       getBrackets: () => [
         { upTo: 24000, rate: 0.10 },
-        { upTo: null, rate: 0.30 },
+        { upTo: null, rate: 0.28 },
       ],
       sources: [
         {
@@ -91,7 +100,7 @@ export const GD_TAX_CONFIG: CountryTaxConfig = {
       getAllowance: () => 36000,
       getBrackets: () => [
         { upTo: 24000, rate: 0.10 },
-        { upTo: null, rate: 0.30 },
+        { upTo: null, rate: 0.28 },
       ],
       sources: [
         {

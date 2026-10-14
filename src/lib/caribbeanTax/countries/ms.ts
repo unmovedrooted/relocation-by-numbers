@@ -17,6 +17,15 @@ export const MS_TAX_CONFIG: CountryTaxConfig = {
 
   sources: [
     {
+      title: "Income and Corporation Tax (Amendment) Act 2024 (Act No. 20 of 2024)",
+      url: "https://parliament.ms/wp-content/uploads/2026/05/Act-No.-20-of-2024-Income-and-Corporation-Tax-Amendment-Act-2024-For-Assent-23.07.2024-2.pdf",
+      type: "government",
+      publisher: "Parliament of Montserrat",
+      dateChecked: "2026-10-14",
+      notes:
+        "The Act sets the XCD 18,000 allowance for years from 1 January 2024. The rate bands used here (5% on income of 18,001 to 25,000; 20% to 35,000; 25% to 45,000; 30% to 150,000; 40% above) come from an Orbitax summary of the Act because the PDF text could not be read; the earlier file used 10% / 20% / 30% bands.",
+    },
+    {
       title: "Doing Business on Montserrat",
       url: "https://www.invest.gov.ms/doing-business-on-montserrat",
       type: "official_program",
@@ -56,9 +65,11 @@ export const MS_TAX_CONFIG: CountryTaxConfig = {
       ],
       getAllowance: () => 18000,
       getBrackets: () => [
-        { upTo: 18000, rate: 0.10 },
-        { upTo: 30000, rate: 0.20 },
-        { upTo: null, rate: 0.30 },
+        { upTo: 7000, rate: 0.05 },
+        { upTo: 17000, rate: 0.20 },
+        { upTo: 27000, rate: 0.25 },
+        { upTo: 132000, rate: 0.30 },
+        { upTo: null, rate: 0.40 },
       ],
       sources: [
         {
@@ -92,9 +103,11 @@ export const MS_TAX_CONFIG: CountryTaxConfig = {
       ],
       getAllowance: () => 18000,
       getBrackets: () => [
-        { upTo: 18000, rate: 0.10 },
-        { upTo: 30000, rate: 0.20 },
-        { upTo: null, rate: 0.30 },
+        { upTo: 7000, rate: 0.05 },
+        { upTo: 17000, rate: 0.20 },
+        { upTo: 27000, rate: 0.25 },
+        { upTo: 132000, rate: 0.30 },
+        { upTo: null, rate: 0.40 },
       ],
       sources: [
         {
@@ -119,9 +132,11 @@ export const MS_TAX_CONFIG: CountryTaxConfig = {
       ],
       getAllowance: () => 18000,
       getBrackets: () => [
-        { upTo: 18000, rate: 0.10 },
-        { upTo: 30000, rate: 0.20 },
-        { upTo: null, rate: 0.30 },
+        { upTo: 7000, rate: 0.05 },
+        { upTo: 17000, rate: 0.20 },
+        { upTo: 27000, rate: 0.25 },
+        { upTo: 132000, rate: 0.30 },
+        { upTo: null, rate: 0.40 },
       ],
       sources: [
         {
