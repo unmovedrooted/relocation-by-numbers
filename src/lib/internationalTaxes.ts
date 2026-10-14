@@ -2319,6 +2319,43 @@ export const US_TAX_STATUS_QUESTION: ConditionalQuestion = {
   ],
 };
 
+export const US_SELF_EMPLOYED_KEY = "us_self_employed";
+
+export const US_SELF_EMPLOYED_QUESTION: ConditionalQuestion = {
+  key: US_SELF_EMPLOYED_KEY,
+  label: "Are you self-employed or a freelancer?",
+  helpText:
+    "Only matters if you owe U.S. tax. The foreign earned income exclusion does not remove U.S. self-employment tax (15.3% on 92.35% of net earnings, 2026), unless the country has a Social Security agreement with the U.S. that puts you under its system.",
+  options: [
+    { value: "yes", label: "Yes, I am self-employed or a freelancer" },
+    { value: "no", label: "No, I am an employee or retired" },
+  ],
+};
+
+/**
+ * Countries with a U.S. Social Security (totalization) agreement in force, from the Social Security Administration's
+ * list at https://www.ssa.gov/international/agreements_overview.html (read 2026-10-13). Many of these assign a
+ * self-employed person's coverage to the country of residence, so the U.S. self-employment tax is treated as not owed;
+ * some agreements work differently, so the estimate says to confirm.
+ */
+export const SSA_AGREEMENT_COUNTRIES: ReadonlySet<string> = new Set([
+  "IT", "DE", "CH", "BE", "NO", "CA", "GB", "SE", "ES", "FR", "PT", "NL", "AT", "FI", "IE", "LU", "GR", "KR", "CL",
+  "AU", "JP", "DK", "CZ", "PL", "SK", "HU", "BR", "UY", "SI", "IS", "RO",
+]);
+
+/**
+ * U.S. self-employment tax for a year, 2026, in dollars: 12.4% Social Security on net earnings up to the wage base,
+ * 2.9% Medicare on all of it, and 0.9% Additional Medicare above the threshold. Net earnings are 92.35% of income.
+ * `deductible` is the half of the Social Security and Medicare parts that reduces income tax.
+ */
+export function usSelfEmploymentTax(incomeUsd: number, filing: FilingStatus): { tax: number; deductible: number } {
+  const earnings = Math.max(0, incomeUsd) * 0.9235;
+  const socialSecurity = Math.min(earnings, PAYROLL_2026.socialSecurityWageBase) * PAYROLL_2026.socialSecurityRate * 2;
+  const medicare = earnings * PAYROLL_2026.medicareRate * 2;
+  const additional = Math.max(0, earnings - PAYROLL_2026.additionalMedicareThreshold[filing]) * PAYROLL_2026.additionalMedicareRate;
+  return { tax: socialSecurity + medicare + additional, deductible: (socialSecurity + medicare) / 2 };
+}
+
 export function getConditionalQuestionsForCountry(
   countryCode: string,
   incomeScenario: IncomeScenario
@@ -2327,7 +2364,7 @@ export function getConditionalQuestionsForCountry(
     if (!q.when?.incomeScenario) return true;
     return q.when.incomeScenario.includes(incomeScenario);
   });
-  return NO_US_OVERLAY.has(countryCode) ? questions : [...questions, US_TAX_STATUS_QUESTION];
+  return NO_US_OVERLAY.has(countryCode) ? questions : [...questions, US_TAX_STATUS_QUESTION, US_SELF_EMPLOYED_QUESTION];
 }
 
 /**
@@ -2349,7 +2386,7 @@ export function usFederalTaxAbroad(incomeUsd: number, filing: FilingStatus, earn
  * Adds the U.S. tax a citizen or green-card holder still owes. The foreign tax is credited against U.S. tax on the
  * income that is not excluded, so the household pays the foreign tax plus any U.S. tax above it.
  */
-export const US_TAX_ABROAD_MISSING_FACTOR = "U.S. self-employment, Social Security and state taxes are not included.";
+export const US_TAX_ABROAD_MISSING_FACTOR = "U.S. state tax and income tax treaties are not included.";
 
 /**
  * The U.S. tax a citizen or green-card holder owes on top of the foreign tax, in dollars, with the note that explains it.
@@ -2357,15 +2394,24 @@ export const US_TAX_ABROAD_MISSING_FACTOR = "U.S. self-employment, Social Securi
  */
 export function usTaxAbroadAddition(args: {
   countryCode: string; annualIncome: number; filing: FilingStatus; incomeScenario: IncomeScenario; foreignTaxUsd: number;
+  /** Self-employed: adds U.S. self-employment tax unless the country has a Social Security agreement with the U.S. */
+  selfEmployed?: boolean;
 }): { addedUsd: number; note: string } {
   const incomeUsd = args.annualIncome / (USD_TO_LOCAL[args.countryCode] ?? 1);
   const earned = args.incomeScenario !== "retired";
   if (!(incomeUsd > 0)) return { addedUsd: 0, note: "" };
-  const { tax: usTax, excluded } = usFederalTaxAbroad(incomeUsd, args.filing, earned);
+  const selfEmployed = Boolean(args.selfEmployed) && earned;
+  const covered = SSA_AGREEMENT_COUNTRIES.has(args.countryCode);
+  const se = selfEmployed && !covered ? usSelfEmploymentTax(incomeUsd, args.filing) : { tax: 0, deductible: 0 };
+  // Half of the self-employment tax is deducted before income tax; the exclusion does not remove the tax itself.
+  const { tax: usTax, excluded } = usFederalTaxAbroad(incomeUsd - se.deductible, args.filing, earned);
   const foreignOnTaxedIncome = args.foreignTaxUsd * ((incomeUsd - excluded) / incomeUsd);
+  const seNote = !selfEmployed ? "" : covered
+    ? " Self-employment: this country has a Social Security agreement with the U.S., which for many agreements puts a self-employed resident under the local system only, so no U.S. self-employment tax is added; confirm the rule in your country's agreement."
+    : " Self-employment tax is added at 15.3% on 92.35% of income (2026 rates), since there is no Social Security agreement with this country, and it is not reduced by the exclusion or the foreign tax credit.";
   return {
-    addedUsd: Math.max(0, usTax - foreignOnTaxedIncome),
-    note: `U.S. tax added for a citizen or green-card holder: 2026 federal brackets${earned ? `, the $${FOREIGN_EARNED_INCOME_EXCLUSION_2026.toLocaleString("en-US")} foreign earned income exclusion` : ""} and a credit for foreign tax paid. It assumes the income is one person's, that you qualify for the exclusion (bona fide residence or 330 days abroad), and that U.S. state tax does not apply; treaties, totalization agreements and the Foreign Tax Credit's category limits are not modeled.`,
+    addedUsd: Math.max(0, usTax - foreignOnTaxedIncome) + se.tax,
+    note: seNote + ` ` + `U.S. tax added for a citizen or green-card holder: 2026 federal brackets${earned ? `, the $${FOREIGN_EARNED_INCOME_EXCLUSION_2026.toLocaleString("en-US")} foreign earned income exclusion` : ""} and a credit for foreign tax paid. It assumes the income is one person's, that you qualify for the exclusion (bona fide residence or 330 days abroad), and that U.S. state tax does not apply; income tax treaties and the Foreign Tax Credit's category limits are not modeled.`.trim(),
   };
 }
 
@@ -2375,11 +2421,12 @@ export function withUsTaxAbroad(
   annualIncome: number,
   filing: FilingStatus,
   incomeScenario: IncomeScenario,
+  selfEmployed = false,
 ): TaxEstimateResult {
   const incomeUsd = annualIncome / (USD_TO_LOCAL[countryCode] ?? 1);
   if (!(incomeUsd > 0)) return base;
   const foreignTaxUsd = base.effectiveRate * incomeUsd;
-  const { addedUsd, note } = usTaxAbroadAddition({ countryCode, annualIncome, filing, incomeScenario, foreignTaxUsd });
+  const { addedUsd, note } = usTaxAbroadAddition({ countryCode, annualIncome, filing, incomeScenario, foreignTaxUsd, selfEmployed });
   const confidence: TaxConfidence = base.confidence === "verified" ? "partial" : base.confidence;
   return {
     ...base,
@@ -2425,7 +2472,7 @@ export function estimateInternationalTax({
     answers,
   });
   if (answers[US_TAX_STATUS_KEY] === "yes" && !NO_US_OVERLAY.has(countryCode)) {
-    return withUsTaxAbroad(base, countryCode, annualIncome, filing, incomeScenario);
+    return withUsTaxAbroad(base, countryCode, annualIncome, filing, incomeScenario, answers[US_SELF_EMPLOYED_KEY] === "yes");
   }
   return base;
 }

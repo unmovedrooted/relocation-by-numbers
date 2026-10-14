@@ -14,7 +14,7 @@ import {
 } from "@/lib/internationalCities";
 import { getCityDefaultsByCode } from "@/lib/internationalCityDefaults";
 import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
-import { estimateInternationalTax, NO_US_OVERLAY, US_TAX_STATUS_KEY, usTaxAbroadAddition } from "@/lib/internationalTaxes";
+import { estimateInternationalTax, NO_US_OVERLAY, US_SELF_EMPLOYED_KEY, US_TAX_STATUS_KEY, usTaxAbroadAddition } from "@/lib/internationalTaxes";
 import UsTaxQuestion from "./UsTaxQuestion";
 import { USD_TO_LOCAL } from "@/lib/internationalFx";
 import {
@@ -620,6 +620,7 @@ export default function CaribbeanRelocationCalculator() {
             filing,
             incomeScenario,
             foreignTaxUsd: targetForeignTaxUsd,
+            selfEmployed: conditionalAnswers[US_SELF_EMPLOYED_KEY] === "yes",
           })
         : null;
     const targetAnnualTaxUsd = targetForeignTaxUsd + (usAbroad?.addedUsd ?? 0);
@@ -1355,6 +1356,8 @@ const relativeDifference =
             countryName={getCaribbeanCountryByCode(toCountry)?.name ?? toCountry}
             value={conditionalAnswers[US_TAX_STATUS_KEY] ?? ""}
             onChange={(v) => setConditionalAnswers((prev) => ({ ...prev, [US_TAX_STATUS_KEY]: v }))}
+            selfEmployed={conditionalAnswers[US_SELF_EMPLOYED_KEY] ?? ""}
+            onSelfEmployedChange={(v) => setConditionalAnswers((prev) => ({ ...prev, [US_SELF_EMPLOYED_KEY]: v }))}
             selectClassName={selectCls}
           />
 

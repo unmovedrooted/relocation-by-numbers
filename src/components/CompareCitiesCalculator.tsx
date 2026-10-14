@@ -220,6 +220,7 @@ export default function CompareCitiesCalculator() {
   const [mode, setMode] = useState<Mode>("rent");
   const [incomeMode, setIncomeMode] = useState<IncomeMode>("working");
   const [usTaxHolder, setUsTaxHolder] = useState(false);
+  const [selfEmployed, setSelfEmployed] = useState(false);
   const [intlHousingMode, setIntlHousingMode] = useState<IntlHousingMode>("rent");
 
   const [downPct, setDownPct] = useState<string>("20");
@@ -289,6 +290,7 @@ export default function CompareCitiesCalculator() {
     const vIncomeMode = qs.get("incomeMode");
     if (vIncomeMode === "working" || vIncomeMode === "retired") setIncomeMode(vIncomeMode);
     if (qs.get("usTax") === "yes") setUsTaxHolder(true);
+    if (qs.get("selfEmployed") === "yes") setSelfEmployed(true);
     const vIntlHousingMode = qs.get("intlHousingMode");
     if (vIntlHousingMode === "rent" || vIntlHousingMode === "buy") setIntlHousingMode(vIntlHousingMode);
     const vIntlDown = qs.get("intlDown"); if (vIntlDown) setIntlDownPct(vIntlDown);
@@ -373,6 +375,7 @@ export default function CompareCitiesCalculator() {
     } else {
       qs.set("incomeMode", incomeMode);
       if (usTaxHolder) qs.set("usTax", "yes");
+      if (usTaxHolder && selfEmployed) qs.set("selfEmployed", "yes");
       qs.set("intlHousingMode", intlHousingMode);
       if (intlHousingMode === "buy") {
         if (intlDownPct) qs.set("intlDown", intlDownPct);
@@ -389,7 +392,7 @@ export default function CompareCitiesCalculator() {
     }
     setQS(qs);
   }, [
-    region, originState, originCityId, grossAnnual, filing, k401Pct, mode, incomeMode, usTaxHolder,
+    region, originState, originCityId, grossAnnual, filing, k401Pct, mode, incomeMode, usTaxHolder, selfEmployed,
     downPct, ratePct, termYears, propertyTaxPct, homeInsMonthly, hoaMonthly, pmiAnnualPct,
     rentersInsMonthly, parkingMonthly, targets, intlTargets, caribTargets,
     intlHousingMode, intlDownPct, intlRatePct, intlTermYears,
@@ -501,11 +504,12 @@ export default function CompareCitiesCalculator() {
         filing,
         mode: incomeMode,
         usTaxHolder,
+        selfEmployed,
         housingMode: intlHousingMode,
         buy: intlBuyAssumptions,
       })
     );
-  }, [region, intlTargets, grossN, filing, incomeMode, usTaxHolder, intlHousingMode, intlBuyAssumptions]);
+  }, [region, intlTargets, grossN, filing, incomeMode, usTaxHolder, selfEmployed, intlHousingMode, intlBuyAssumptions]);
 
   const caribResults = useMemo(() => {
     if (region !== "caribbean") return [];
@@ -516,11 +520,12 @@ export default function CompareCitiesCalculator() {
         filing,
         mode: incomeMode,
         usTaxHolder,
+        selfEmployed,
         housingMode: intlHousingMode,
         buy: intlBuyAssumptions,
       })
     );
-  }, [region, caribTargets, grossN, filing, incomeMode, usTaxHolder, intlHousingMode, intlBuyAssumptions]);
+  }, [region, caribTargets, grossN, filing, incomeMode, usTaxHolder, selfEmployed, intlHousingMode, intlBuyAssumptions]);
 
   const activeResults = useMemo<CompareRow[]>(() => {
     if (region === "us") {
@@ -674,6 +679,12 @@ export default function CompareCitiesCalculator() {
               <label className="mb-2 flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
                 <input type="checkbox" className="mt-1" checked={usTaxHolder} onChange={(e) => setUsTaxHolder(e.target.checked)} />
                 <span>I am a U.S. citizen or green-card holder, so add the U.S. tax I still owe abroad (2026 federal brackets, the $132,900 foreign earned income exclusion for wages, and a credit for foreign tax).</span>
+              </label>
+            )}
+            {!isUs && usTaxHolder && (
+              <label className="mb-2 ml-6 flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+                <input type="checkbox" className="mt-1" checked={selfEmployed} onChange={(e) => setSelfEmployed(e.target.checked)} />
+                <span>I am self-employed or a freelancer (adds U.S. self-employment tax where the country has no Social Security agreement with the U.S.).</span>
               </label>
             )}
 

@@ -6,7 +6,7 @@ import CalculatorSelect from "./calculator-form/CalculatorSelect";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import FireAbroadLink from "./FireAbroadLink";
 import UsTaxQuestion from "./UsTaxQuestion";
-import { US_TAX_STATUS_KEY } from "@/lib/internationalTaxes";
+import { US_SELF_EMPLOYED_KEY, US_TAX_STATUS_KEY } from "@/lib/internationalTaxes";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
 import {
   INTERNATIONAL_COUNTRIES,
@@ -288,6 +288,7 @@ function SouthAmericaRelocationCalculatorContent({ initialSearch, urlReady }: { 
 
   const [mode, setMode] = useState<Mode>(initial.mode);
   const [usTaxStatus, setUsTaxStatus] = useState("");
+  const [usSelfEmployed, setUsSelfEmployed] = useState("");
   const [salary, setSalary] = useState<string>(initial.salary);
   const [retirementIncome, setRetirementIncome] = useState<string>(initial.retirementIncome);
   const [filing, setFiling] = useState<FilingStatus>(initial.filing);
@@ -480,7 +481,7 @@ const grossMonthly = annualIncome / 12;
     const annualIncomeForToTax = convertUsdToLocal(annualIncome, toCountry);
 
     const currentTaxEstimate = estimateInternationalTax({ countryCode: fromCountry, annualIncome: annualIncomeForFromTax, filing, isRetired: mode === "retired" });
-    const targetTaxEstimate = estimateInternationalTax({ countryCode: toCountry, annualIncome: annualIncomeForToTax, filing, isRetired: mode === "retired", answers: { [US_TAX_STATUS_KEY]: usTaxStatus } });
+    const targetTaxEstimate = estimateInternationalTax({ countryCode: toCountry, annualIncome: annualIncomeForToTax, filing, isRetired: mode === "retired", answers: { [US_TAX_STATUS_KEY]: usTaxStatus, [US_SELF_EMPLOYED_KEY]: usSelfEmployed } });
 
     const currentTaxRate = currentTaxEstimate.effectiveRate;
     const targetTaxRate = targetTaxEstimate.effectiveRate;
@@ -603,7 +604,7 @@ relativeDifference,
 recommendation,
     };
   }, [
-    mode, usTaxStatus, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
+    mode, usTaxStatus, usSelfEmployed, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
     fromCityMultipliers, toCityMultipliers, currentCityDefaults, targetCityDefaults,
     adults, children, needCar, carCostMonthly, furnished, utilitiesIncluded, utilities, destinationRent,
     groceries, transportation, healthcare, depositRequired, firstMonthRent, lastMonthRent,
@@ -787,7 +788,7 @@ recommendation,
             </div>
           </div>
 
-          <UsTaxQuestion countryCode={toCountry} countryName={getCountryByCode(toCountry)?.name ?? toCountry} value={usTaxStatus} onChange={setUsTaxStatus} selectClassName={selectCls} />
+          <UsTaxQuestion countryCode={toCountry} countryName={getCountryByCode(toCountry)?.name ?? toCountry} value={usTaxStatus} onChange={setUsTaxStatus} selfEmployed={usSelfEmployed} onSelfEmployedChange={setUsSelfEmployed} selectClassName={selectCls} />
 
           <VisaContextCard countryCode={toCountry} />
 

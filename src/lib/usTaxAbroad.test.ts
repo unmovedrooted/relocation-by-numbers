@@ -163,3 +163,49 @@ describe("Compare Cities with the U.S. tax box ticked", () => {
     expect(a.effTaxPct).toBe(b.effTaxPct);
   });
 });
+
+import { SSA_AGREEMENT_COUNTRIES, US_SELF_EMPLOYED_KEY, usSelfEmploymentTax } from "./internationalTaxes";
+
+describe("U.S. self-employment tax for freelancers abroad", () => {
+  it("matches a hand calculation: $100,000 single", () => {
+    // net earnings 92,350; Social Security 12.4% = 11,451.40; Medicare 2.9% = 2,678.15
+    const { tax, deductible } = usSelfEmploymentTax(100000, "single");
+    expect(tax).toBeCloseTo(14129.55, 6);
+    expect(deductible).toBeCloseTo(14129.55 / 2, 6);
+  });
+
+  it("caps Social Security at the wage base and adds Additional Medicare: $250,000 single", () => {
+    // net earnings 230,875; SS 184,500 x .124 = 22,878; Medicare 6,695.375; Additional (230,875 - 200,000) x .009 = 277.875
+    expect(usSelfEmploymentTax(250000, "single").tax).toBeCloseTo(22878 + 6695.375 + 277.875, 6);
+  });
+
+  it("adds it where there is no agreement: $100,000 freelance in the UAE is 14.13%", () => {
+    // the exclusion removes the income tax entirely, but not the self-employment tax
+    const r = estimateInternationalTax({
+      countryCode: "AE", annualIncome: 100000 * USD_TO_LOCAL.AE, filing: "single", isRetired: false, incomeScenario: "remote",
+      answers: { [US_TAX_STATUS_KEY]: "yes", [US_SELF_EMPLOYED_KEY]: "yes" },
+    });
+    expect(r.effectiveRate).toBeCloseTo(0.1412955, 6);
+    expect(r.note).toContain("Self-employment tax is added");
+  });
+
+  it("adds none in a country with a Social Security agreement, and says to confirm", () => {
+    expect(SSA_AGREEMENT_COUNTRIES.has("PT")).toBe(true);
+    const args = { countryCode: "PT", annualIncome: 100000 * USD_TO_LOCAL.PT, filing: "single" as const, isRetired: false, incomeScenario: "remote" as const };
+    const without = estimateInternationalTax({ ...args, answers: { [US_TAX_STATUS_KEY]: "yes" } });
+    const withSe = estimateInternationalTax({ ...args, answers: { [US_TAX_STATUS_KEY]: "yes", [US_SELF_EMPLOYED_KEY]: "yes" } });
+    expect(withSe.effectiveRate).toBeCloseTo(without.effectiveRate, 10);
+    expect(withSe.note).toContain("Social Security agreement");
+  });
+
+  it("does not apply to retirees", () => {
+    const args = { countryCode: "AE", annualIncome: 60000 * USD_TO_LOCAL.AE, filing: "single" as const, isRetired: true, incomeScenario: "retired" as const };
+    const a = estimateInternationalTax({ ...args, answers: { [US_TAX_STATUS_KEY]: "yes" } });
+    const b = estimateInternationalTax({ ...args, answers: { [US_TAX_STATUS_KEY]: "yes", [US_SELF_EMPLOYED_KEY]: "yes" } });
+    expect(b.effectiveRate).toBeCloseTo(a.effectiveRate, 10);
+  });
+
+  it("lists the 31 agreement countries from the SSA page", () => {
+    expect(SSA_AGREEMENT_COUNTRIES.size).toBe(31);
+  });
+});

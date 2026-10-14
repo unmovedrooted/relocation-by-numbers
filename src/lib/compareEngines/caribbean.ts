@@ -20,7 +20,7 @@ import { getCaribbeanCountryByCode } from "../caribbeanCountries";
 import { hasTaxConfig, getCountryTaxConfig } from "../caribbeanTax/index";
 import { estimateScenarioTax } from "../caribbeanTax/engine";
 import type { IncomeScenario, FilingStatus as CaribFilingStatus, CaribbeanTaxCode } from "../caribbeanTax/types";
-import { estimateInternationalTax, NO_US_OVERLAY, US_TAX_STATUS_KEY, usTaxAbroadAddition, type FilingStatus } from "../internationalTaxes";
+import { estimateInternationalTax, NO_US_OVERLAY, US_SELF_EMPLOYED_KEY, US_TAX_STATUS_KEY, usTaxAbroadAddition, type FilingStatus } from "../internationalTaxes";
 import { USD_TO_LOCAL } from "../internationalFx";
 import { estimateMortgageMonthly } from "../mortgage";
 import { estimateHomePriceFromRent, DEFAULT_TAX_INSURANCE_PCT } from "./homePrice";
@@ -42,6 +42,8 @@ export type CaribCompareInput = {
   mode: CaribCompareMode;
   /** A U.S. citizen or green-card holder, who still owes U.S. tax abroad. */
   usTaxHolder?: boolean;
+  /** Self-employed: adds U.S. self-employment tax where there is no Social Security agreement. */
+  selfEmployed?: boolean;
   /** Only relevant when mode === "working". Defaults to "remote", the
    *  calculator's own default salaryType, since compare view doesn't ask. */
   salaryType?: CaribSalaryType;
@@ -104,7 +106,7 @@ export function computeCaribCityResult(input: CaribCompareInput): CaribCompareRe
       });
       const foreignRate = result.isDisclaimer ? 0 : result.effectiveRate;
       const usAdded = input.usTaxHolder && !NO_US_OVERLAY.has(countryCode) && !result.isDisclaimer
-        ? usTaxAbroadAddition({ countryCode, annualIncome: localGross, filing, incomeScenario: scenario, foreignTaxUsd: foreignRate * grossAnnualUsd }).addedUsd
+        ? usTaxAbroadAddition({ countryCode, annualIncome: localGross, filing, incomeScenario: scenario, foreignTaxUsd: foreignRate * grossAnnualUsd, selfEmployed: input.selfEmployed }).addedUsd
         : 0;
       const totalRate = foreignRate + usAdded / grossAnnualUsd;
       effTaxPct = (result.isDisclaimer ? result.effectiveRate : totalRate) * 100;
@@ -120,7 +122,7 @@ export function computeCaribCityResult(input: CaribCompareInput): CaribCompareRe
         filing,
         isRetired: mode === "retired",
         incomeScenario: scenario,
-        answers: input.usTaxHolder ? { [US_TAX_STATUS_KEY]: "yes" } : {},
+        answers: input.usTaxHolder ? { [US_TAX_STATUS_KEY]: "yes", [US_SELF_EMPLOYED_KEY]: input.selfEmployed ? "yes" : "no" } : {},
       });
       effTaxPct = fallback.effectiveRate * 100;
       taxLabel = fallback.label;

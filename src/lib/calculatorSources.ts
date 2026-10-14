@@ -26,12 +26,13 @@ const MOVE_NOTE =
   "The move comparison subtracts what the household keeps now from what it would keep after the move, and splits the change into pay, taxes, housing and other costs. First-year impact is twelve months of that change minus the one-time costs that are spent; a refundable deposit and a down payment count toward cash needed but not toward cost. Ranges move only the figures this site estimated, by 10% for housing, 15% for living costs and 25% for one-time costs. Those spreads, the one-time cost defaults and the living-cost budgets are planning assumptions, not government data.";
 const TREASURY_FX: SourceRef = { label: "U.S. Treasury Reporting Rates of Exchange, as of September 30, 2026 (exchange rates)", url: "https://fiscaldata.treasury.gov/datasets/treasury-reporting-rates-exchange/treasury-reporting-rates-of-exchange" };
 const FEIE_2026: SourceRef = { label: "IRS Rev. Proc. 2025-32, section 3.39: 2026 foreign earned income exclusion ($132,900)", url: "https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" };
-const INTERNATIONAL_SOURCES = [TREASURY_FX, FEIE_2026, RP_2025_32] as const;
+const SSA_AGREEMENTS: SourceRef = { label: "Social Security Administration: U.S. international Social Security agreements (self-employment coverage)", url: "https://www.ssa.gov/international/agreements_overview.html" };
+const INTERNATIONAL_SOURCES = [TREASURY_FX, FEIE_2026, RP_2025_32, SSA_AGREEMENTS] as const;
 const INTERNATIONAL_NOTE =
   "Exchange rates are the U.S. Treasury's quarterly reporting rates (September 30, 2026), not live market rates. U.S. tax uses the 2026 IRS figures. Tax rules for other countries are 2024 and 2025 figures from the sources named in the code (each country's tax authority, OECD and PwC summaries), last reviewed in March 2026, and many are labeled simplified. Rent, grocery, utility, transport, healthcare and setup defaults are planning estimates labeled 'City default estimate': they are not from a government statistical source. Verify them locally before a major decision.";
 const INTERNATIONAL_EXCLUSIONS = [
   "Planning estimates only; visa, residency and tax-treaty effects are not modeled in full.",
-  "U.S. tax owed while living abroad (for citizens and green-card holders) is added only when you answer Yes to the U.S. tax question: 2026 federal brackets, the foreign earned income exclusion for wages and a credit for foreign tax. U.S. self-employment, Social Security and state taxes, treaties and totalization agreements are not modeled.",
+  "U.S. tax owed while living abroad (for citizens and green-card holders) is added only when you answer Yes to the U.S. tax question: 2026 federal brackets, the foreign earned income exclusion for wages and a credit for foreign tax. Freelancers also get U.S. self-employment tax unless the country has a Social Security agreement with the U.S. (31 countries, per the SSA). U.S. state tax, income tax treaties and the Foreign Tax Credit's category limits are not modeled.",
 ];
 
 const US_TAX_EXCLUSIONS = [
