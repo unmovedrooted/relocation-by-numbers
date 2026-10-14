@@ -23,6 +23,7 @@
 import { FEDERAL_2026, PAYROLL_2026, FOREIGN_EARNED_INCOME_EXCLUSION_2026 } from "./taxYear2026";
 import { USD_TO_LOCAL } from "./internationalFx";
 import { AUSTRALIA_TAX_YEAR_LABEL, australiaTax } from "./countryTaxRules/australia";
+import { AUSTRIA_TAX_YEAR_LABEL, austriaTax } from "./countryTaxRules/austria";
 
 export type FilingStatus = "single" | "married";
 
@@ -654,27 +655,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // unemployment 3%, accident 1%). Not on pension income.
   // -------------------------------------------------------------------------
   AT: ({ annualIncome, isRetired }) => {
-    // 2024 Austrian income tax brackets
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 11693, rate: 0.00 },
-      { upTo: 19134, rate: 0.20 },
-      { upTo: 32075, rate: 0.30 },
-      { upTo: 62080, rate: 0.40 },
-      { upTo: 93120, rate: 0.48 },
-      { upTo: 1000000, rate: 0.50 },
-      { upTo: Infinity, rate: 0.55 },
-    ]);
-
-    // Employee social insurance ~18.12% on working income; waived on pension
-    const socialOverlay = isRetired ? 0 : 0.1812;
-
+    // Rules in countryTaxRules/austria.ts: BMF 2026 tariff and credits, 2026 social-insurance values.
+    const { incomeTax, socialInsurance } = austriaTax(annualIncome, isRetired);
+    const effective = annualIncome > 0 ? (incomeTax + socialInsurance) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(rate + socialOverlay),
+      effectiveRate: clampRate(effective),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Austria Einkommensteuer + social insurance (2024)",
-      missingFactor: "Employee social insurance (~18.12%) included; commuter allowance and other deductions not modelled.",
-      note: "Uses 2024 Austrian income tax brackets with employee social insurance (~18.12% combined: health 3.87%, pension 10.25%, unemployment 3%, accident 1%) applied to working income. The traffic tax credit (Verkehrsabsetzbetrag), sole-earner credit, and pension credit are not modelled, effective rates may be somewhat overstated. No joint filing in Austria. Income must be passed in EUR.",
+      label: `Austria Einkommensteuer + social insurance (${AUSTRIA_TAX_YEAR_LABEL})`,
+      missingFactor: "13th/14th salary (taxed at 6%), pensioner health contribution and family credits not modelled.",
+      note: "2026 tariff and credits are the Federal Ministry of Finance figures, and social insurance uses the 2026 Dachverband values (health 3.87%, pension 10.25%, unemployment 3%, plus Chamber of Labour and housing levies of 0.5% each, up to the 2026 maximum base). Social insurance and the EUR 132 allowance reduce taxable income; employees get the Verkehrsabsetzbetrag (EUR 496) and pensioners the Pensionistenabsetzbetrag. Not modelled: the 13th and 14th salary, which are taxed at a flat 6% within limits and would lower the tax for most employees; reduced unemployment insurance at low pay; the pensioner health contribution; sole-earner and child credits; commuter allowance. Income must be passed in euros.",
     };
   },
 

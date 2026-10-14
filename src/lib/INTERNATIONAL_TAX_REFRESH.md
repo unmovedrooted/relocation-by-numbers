@@ -10,3 +10,4 @@ Rule modules live in `src/lib/countryTaxRules/`. Countries that have no module y
 | --- | --- | --- |
 | Argentina | Refreshed: 2026 annual scale and article 30 deductions | ARCA tables (afip.gob.ar) |
 | Australia | Refreshed: 2026-27 rates, LITO, Medicare levy. The old code used a wrong 19%/32.5% mix | ATO |
+| Austria | Refreshed: BMF 2026 tariff (matches its EUR 40,000 example), credits, 2026 social-insurance values; 13th/14th salary not modelled | BMF, Dachverband |

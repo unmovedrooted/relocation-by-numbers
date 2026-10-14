@@ -52,3 +52,35 @@ describe("Australia (ATO 2026-27 resident rates, LITO and 2% Medicare levy)", ()
     expect(a.effectiveRate).toBeCloseTo(22_520 / 100_000, 10);
   });
 });
+
+import { austriaBracketTax } from "./countryTaxRules/austria";
+
+describe("Austria (BMF 2026 tariff, credits and Dachverband 2026 social-insurance values)", () => {
+  it("reproduces the finance ministry's example: EUR 40,000 of taxable income is EUR 7,447.20 of tax", () => {
+    expect(austriaBracketTax(40_000)).toBeCloseTo(7447.2, 6);
+  });
+
+  it("employee earning EUR 60,000", () => {
+    // social 18.12% = 10,872; taxable 60,000 - 10,872 - 132 = 48,996
+    // tax 20% x 8,453 + 30% x 14,466 + 40% x 12,538 = 1,690.60 + 4,339.80 + 5,015.20 = 11,045.60, less credit 496 = 10,549.60
+    expect(rate("AT", 60_000)).toBeCloseTo((10_549.6 + 10_872) / 60_000, 10);
+  });
+
+  it("caps social insurance at the 2026 maximum base of EUR 97,020", () => {
+    // 12 x 6,930 + 13,860 = 97,020; social = 0.1812 x 97,020 = 17,579.98
+    const income = 200_000;
+    const social = 0.1812 * 97_020;
+    const base = income - social - 132;
+    const tax = austriaBracketTax(base) - 496;
+    expect(rate("AT", income)).toBeCloseTo((tax + social) / income, 10);
+  });
+
+  it("pensioner on EUR 30,000: no social insurance, credit phased to 1,020 x 1,494 / 9,880", () => {
+    // brackets 1,690.60 + 30% x 8,008 = 4,093.00; credit 154.2308
+    expect(rate("AT", 30_000, "retired")).toBeCloseTo((4_093 - (1_020 * 1_494) / 9_880) / 30_000, 10);
+  });
+
+  it("a pensioner below the first bracket pays nothing", () => {
+    expect(rate("AT", 13_000, "retired")).toBe(0);
+  });
+});
