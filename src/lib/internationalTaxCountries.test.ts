@@ -955,3 +955,19 @@ describe("Slovenia (2026 scale, general relief, 23.1% contributions)", () => {
     expect(rate("SI", 6_000, "retired")).toBe(0);
   });
 });
+
+describe("South Africa (SARS 2026/27 table, rebates, UIF)", () => {
+  it("ZAR 600,000 employee", () => {
+    // 125,599 + 36% x 69,800 = 150,727; less the primary rebate 17,820 = 132,907; UIF 1% x 212,544 cap = 2,125.44
+    expect(rate("ZA", 600_000)).toBeCloseTo((132_907 + 2_125.44) / 600_000, 8);
+  });
+
+  it("ZAR 300,000 retiree: both rebates apply", () => {
+    // 44,118 + 26% x 54,900 = 58,392; less 17,820 + 9,765
+    expect(rate("ZA", 300_000, "retired")).toBeCloseTo(30_807 / 300_000, 8);
+  });
+
+  it("the tax threshold under 65 is ZAR 99,000", () => {
+    expect(rate("ZA", 99_000, "remote")).toBe(0);
+  });
+});

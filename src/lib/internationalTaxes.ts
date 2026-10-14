@@ -57,6 +57,7 @@ import { PORTUGAL_TAX_YEAR_LABEL, portugalTax } from "./countryTaxRules/portugal
 import { ROMANIA_TAX_YEAR_LABEL, romaniaTax } from "./countryTaxRules/romania";
 import { SLOVAKIA_TAX_YEAR_LABEL, slovakiaTax } from "./countryTaxRules/slovakia";
 import { SLOVENIA_TAX_YEAR_LABEL, sloveniaTax } from "./countryTaxRules/slovenia";
+import { SOUTH_AFRICA_TAX_YEAR_LABEL, southAfricaTax } from "./countryTaxRules/southAfrica";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -1626,27 +1627,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024-25 SARS progressive. Primary rebate: ZAR 17,235 (ZAR 26,679 for 65+).
   // No joint filing.
   // -------------------------------------------------------------------------
-  ZA: ({ annualIncome, isRetired }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 237100, rate: 0.18 },
-      { upTo: 370500, rate: 0.26 },
-      { upTo: 512800, rate: 0.31 },
-      { upTo: 673000, rate: 0.36 },
-      { upTo: 857900, rate: 0.39 },
-      { upTo: 1817000, rate: 0.41 },
-      { upTo: Infinity, rate: 0.45 },
-    ]);
-    // 2024-25 rebates: primary ZAR 17,235; secondary (65+) additional ZAR 9,444
-    const rebateZAR = isRetired ? (17235 + 9444) : 17235;
-    const rebateRate = annualIncome > 0 ? rebateZAR / annualIncome : 0;
-
+  ZA: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/southAfrica.ts: SARS 2026/27 brackets, rebates, UIF.
+    const { incomeTax, uif } = southAfricaTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(Math.max(0, rate - rebateRate)),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + uif) / annualIncome : 0),
       model: "progressive-country",
-      confidence: "simplified",
-      label: "South Africa SARS income tax + rebate (2024-25)",
-      missingFactor: "Medical scheme credits and retirement fund deduction (up to 27.5%) not included.",
-      note: "Brackets and rebates (primary ZAR 17,235; secondary ZAR 9,444 for 65+) are correct 2024-25 SARS figures, the rebates are a real strength of this model. Key omissions: medical scheme tax credits (MTC) reduce tax by ZAR 364/mo for the primary member, which is meaningful at lower incomes. UIF (1% employee, capped at UIF benefit ceiling) is also excluded. The retirement fund deduction (up to 27.5% of taxable income, max ZAR 350,000/yr) can substantially reduce taxable income for contributing residents. Income must be passed in ZAR.",
+      confidence: "partial",
+      label: `South Africa SARS income tax + UIF (${SOUTH_AFRICA_TAX_YEAR_LABEL})`,
+      missingFactor: "Medical scheme credits and the retirement fund deduction (up to 27.5%) not modelled.",
+      note: "Uses SARS's 2026/27 table (18% to 45%, with the first bracket up to ZAR 245,100), the primary rebate of ZAR 17,820 and, for retirees (assumed 65 to 74), the secondary rebate of ZAR 9,765, plus UIF of 1% on pay up to ZAR 17,712 a month. The figures are subject to Parliament's process. Not modelled: medical scheme tax credits (ZAR 376 a month for each of the first two members), the retirement fund deduction and the additional medical credit. Income must be passed in rand.",
     };
   },
 EC: ({ annualIncome, isRetired, incomeScenario }) => {
