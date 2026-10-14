@@ -309,6 +309,6 @@ export type CaribbeanTaxCode =
 // Displayed throughout the UI to timestamp the data.
 // ---------------------------------------------------------------------------
 export const CARIBBEAN_TAX_ASSUMPTIONS_LABEL =
-  "Tax assumptions updated: March 2026"
+  "Tax assumptions updated: October 2026"
 
 export const TAX_YEAR_LABEL = "2026-Q2"

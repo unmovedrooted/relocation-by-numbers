@@ -1044,8 +1044,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "progressive-country",
       confidence: "partial",
       label: `Sweden municipal + state income tax (${SWEDEN_TAX_YEAR_LABEL})`,
-      missingFactor: "Jobbskatteavdrag (earned income tax credit) not modelled; it lowers tax on employment income by up to about SEK 52,000 a year, roughly 3-5 points at middle incomes.",
-      note: "Uses Skatteverket's 2026 figures: the basic allowance (SEK 17,400 to 45,600 under age 66; set at SEK 117,500 for people 66 and over), the average municipal tax of 32.38% and state tax of 20% on taxable income above SEK 643,000. The jobbskatteavdrag, which Skatteverket's page gives no formula for, is not applied, so tax on employment income is overstated, and the 7% pension fee is returned as a tax reduction and left out. Municipal rates range from about 28.9% to 35.7%. Income must be passed in kronor.",
+      missingFactor: "The jobbskatteavdrag is approximated from Skatteverket's 2026 tax table (within about SEK 1,000 to 2,000 a year); church fee, burial fee and municipal differences not modelled.",
+      note: "Uses Skatteverket's 2026 figures: the basic allowance (SEK 17,400 to 45,600 under age 66; set at SEK 117,500 for people 66 and over), the average municipal tax of 32.38% and state tax of 20% on taxable income above SEK 643,000. The jobbskatteavdrag (earned income tax credit, up to about SEK 52,400 a year for people under 66) is approximated from Skatteverket's official 2026 monthly tax table, and the 7% pension fee is returned as a tax reduction and left out. Municipal rates range from about 28.9% to 35.7%. Income must be passed in kronor.",
     };
   },
 
@@ -1081,8 +1081,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       model: "country-plus-local",
       confidence: "simplified",
       label: `Finland state + municipal tax + contributions (${FINLAND_TAX_YEAR_LABEL})`,
-      missingFactor: "The earned income deduction, basic deduction and work income tax credit are not modelled, so tax on wages is overstated by about 2-4 points; the state scale and municipal average come from a taxpayers' association and calculator sites because vero.fi could not be fetched.",
-      note: "Uses the 2026 state scale (12.64% from the first euro, 19%, 30.25%, 33.25% and 37.5% above EUR 52,100), an average municipal rate of 7.5% (it ranges from about 4.4% to 10.9% since the 2024 care-services reform; the old model used the pre-reform 21.5%), health insurance contributions of 1.10% (1.49% for pensions) plus 0.88% daily allowance on wages, and employee pension and unemployment contributions of about 7.75% which are deducted. Not modelled: the earned income deduction, basic deduction, work income tax credit, church tax and the broadcasting tax. Income must be passed in euros.",
+      missingFactor: "The pensioner income deduction, church tax and the credit's child increase are not modelled; the state scale, deductions and municipal average come from a taxpayers' association and extracts of the vero.fi guidance rather than a full read of vero.fi.",
+      note: "Uses the 2026 state scale (12.64% from the first euro, 19%, 30.25%, 33.25% and 37.5% above EUR 52,100), an average municipal rate of 7.5% (it ranges from about 4.4% to 10.9% since the 2024 care-services reform; the old model used the pre-reform 21.5%), health insurance contributions of 1.10% (1.49% for pensions) plus 0.88% daily allowance on wages, and employee pension and unemployment contributions of about 7.75% which are deducted. The basic deduction (EUR 4,265, falling to zero near EUR 28,000) and the work income tax credit (up to EUR 3,430) are applied; the pensioner income deduction, church tax and the broadcasting tax are not. Income must be passed in euros.",
     };
   },
 

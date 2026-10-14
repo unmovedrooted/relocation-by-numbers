@@ -110,7 +110,7 @@ function confidenceBadge(confidence: TaxConfidence) {
   }
 }
 
-const INT_TAX_LABEL = "Tax model updated March 2026 · figures are 2024, 2024–25, or 2025 by jurisdiction";
+const INT_TAX_LABEL = "Tax rules refreshed October 2026 · 2026 figures where available";
 
 const inputCls =
   "h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800";

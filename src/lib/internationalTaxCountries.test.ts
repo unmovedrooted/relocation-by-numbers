@@ -1028,16 +1028,29 @@ describe("Suriname (SRD 108,000 tax-free, 8/18/28/38%, AOV 4%)", () => {
 describe("Sweden (Skatteverket 2026 allowance, municipal and state tax)", () => {
   it("SEK 600,000 employee: minimum allowance, no state tax", () => {
     const allowance = 0.293 * 59_200;
-    expect(rate("SE", 600_000)).toBeCloseTo(0.3238 * (600_000 - allowance) / 600_000, 8);
+    // minus the full jobbskatteavdrag of SEK 52,403
+    expect(rate("SE", 600_000)).toBeCloseTo((0.3238 * (600_000 - allowance) - 52_403) / 600_000, 8);
   });
 
   it("SEK 900,000 employee pays state tax above the skiktgrans", () => {
     const taxable = 900_000 - 0.293 * 59_200;
-    expect(rate("SE", 900_000)).toBeCloseTo((0.3238 * taxable + 0.2 * (taxable - 643_000)) / 900_000, 8);
+    expect(rate("SE", 900_000)).toBeCloseTo((0.3238 * taxable + 0.2 * (taxable - 643_000) - 52_403) / 900_000, 8);
   });
 
   it("the basic allowance joins up at its break points", () => {
     expect(rate("SE", 25_042)).toBeCloseTo(0, 4);
+  });
+
+  it("reproduces Skatteverket's 2026 table 33 within SEK 3,000 a year at SEK 30,000 a month", () => {
+    // table 33 column 1: SEK 5,878 a month = 70,536 a year at a 32.51-33.00% municipal rate; scale the municipal part to 32.38%
+    const a = 360_000;
+    const ours = rate("SE", a) * a;
+    const tableAtAverage = 70_536 - (0.3275 - 0.3238) * (a - (0.77 * 59_200 - 0.1 * (a - 3.11 * 59_200)));
+    expect(Math.abs(ours - tableAtAverage)).toBeLessThan(3_000);
+  });
+
+  it("people 66 and over get no jobbskatteavdrag", () => {
+    expect(rate("SE", 600_000, "retired")).toBeGreaterThan(rate("SE", 600_000));
   });
 });
 
@@ -1197,20 +1210,29 @@ describe("Cyprus (2026 scale, social insurance, GESY)", () => {
   });
 });
 
-describe("Finland (2026 state scale, municipal average, contributions; deductions not modelled)", () => {
+describe("Finland (2026 state scale, deductions, credit, municipal average, contributions)", () => {
   it("EUR 50,000 employee", () => {
-    // contributions 7.75% = 3,875; base 46,125; state 9,066.90; municipal 7.5%; health 1.10% of base + 0.88% of pay
+    // contributions 7.75% = 3,875; base 46,125; basic deduction 0; state 9,066.90; municipal 7.5% x 46,125 = 3,459.38
+    // work credit: min(3,430, 18% x 47,500) = 3,430, less 2% x (46,125 - 35,000) = 222.50 -> 3,207.50
     const base = 46_125;
     const state = 2_780.8 + 2_014 + 2_268.75 + 0.3325 * (base - 40_100);
-    expect(rate("FI", 50_000)).toBeCloseTo((state + 0.075 * base + 3_875 + 0.011 * base + 0.0088 * 50_000) / 50_000, 8);
+    const tax = state + 0.075 * base - 3_207.5;
+    expect(rate("FI", 50_000)).toBeCloseTo((tax + 3_875 + 0.011 * base + 0.0088 * 50_000) / 50_000, 8);
   });
 
-  it("the state scale reproduces the published tax at its limits", () => {
-    const at = (income: number) => rate("FI", income, "remote") * income;
-    expect(at(22_000) - 0.075 * 22_000 - 0.011 * 22_000).toBeCloseTo(2_780.8, 2);
+  it("EUR 30,000 employee: the credit wipes out most of the state tax", () => {
+    // base 27,675; basic deduction 4,265 - 18% x 23,410 = 51.2 -> taxable 27,623.8
+    const base = 27_675;
+    const deduction = 4_265 - 0.18 * (base - 4_265);
+    const taxable = base - deduction;
+    const state = 2_780.8 + 0.19 * (taxable - 22_000);
+    const tax = state + 0.075 * taxable - 3_430;
+    expect(rate("FI", 30_000)).toBeCloseTo((tax + 2_325 + 0.011 * base + 0.0088 * 30_000) / 30_000, 8);
   });
 
-  it("a pension pays the higher health contribution and no employee contributions", () => {
-    expect(rate("FI", 20_000, "retired")).toBeCloseTo((0.1264 * 20_000 + 0.075 * 20_000 + 0.0149 * 20_000) / 20_000, 8);
+  it("a pension pays the higher health contribution, no employee contributions and no work credit", () => {
+    // 20,000 pension: basic deduction 4,265 - 18% x 15,735 = 1,432.7 -> taxable 18,567.3 at 12.64% + 7.5%
+    const taxable = 20_000 - (4_265 - 0.18 * (20_000 - 4_265));
+    expect(rate("FI", 20_000, "retired")).toBeCloseTo((0.1264 * taxable + 0.075 * taxable + 0.0149 * 20_000) / 20_000, 8);
   });
 });

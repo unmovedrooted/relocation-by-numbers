@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Calculator from "@/components/Calculator";
+import PairWorkedExample from "@/components/PairWorkedExample";
 import { findCity } from "@/lib/cities";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -301,6 +302,8 @@ export default async function ComparePage({ params }: PageProps) {
             <p>{routeContent.caution}</p>
           </div>
         </section>
+
+        <PairWorkedExample fromId={fromCity.id} toId={toCity.id} />
 
         <Calculator
           monetization="compare"

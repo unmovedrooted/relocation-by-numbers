@@ -86,7 +86,7 @@ export default function Page() {
         ) : null}
 
         <div className="text-center text-xs text-slate-500 dark:text-slate-400">
-          Assumptions updated: March 2026 · U.S. tax and exchange rates: October 2026
+          Assumptions updated: October 2026 · tax rules, exchange rates and rents
         </div>
 
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">

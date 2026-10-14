@@ -96,3 +96,15 @@ Rule modules live in `src/lib/countryTaxRules/`. Countries that have no module y
 | Hong Kong rent (user lookup, verified) | Central/Hong Kong Island HK$19,880, Kowloon HK$18,375, New Territories HK$13,615 a month: RVD August 2026 provisional average rent of flats under 40 square metres (HK$568, 525 and 389 per square metre, checked in the October 2026 Monthly Supplement) times an assumed 35 square metres. The Hong Kong Island figure is not Central specifically | Rating and Valuation Department |
 | Market references (not official) | Numbeo one-bedroom centre and outside-centre rents, Lamudi (Fort Bonifacio) and Yellowkey (Lusail, Al Wakrah) added to the source line of 34 cities as references only; rent numbers unchanged because they are not government sources. Abha, Salalah and Sohar have very few contributors | Numbeo, Lamudi, Yellowkey |
 | Market rents applied (user decision) | The 34 cities without an official rent now use the one-bedroom city-centre market figure supplied by the user (Numbeo; Lamudi for Bonifacio Global City; Yellowkey midpoints of the unfurnished one-bedroom range for Lusail and Al Wakrah), converted at the Treasury rate, each labelled in its source line as a market estimate, not an official average, with the outside-centre figure noted. The on-site international note now says which cities are official and which are market estimates. This departs from the government-sources rule by the user's choice | Numbeo, Lamudi, Yellowkey |
+
+## Step 2 outcomes (October 2026)
+
+| Item | Result |
+|---|---|
+| Sweden | Jobbskatteavdrag now modelled from Skatteverket's official 2026 table 33 (credit curve fitted to 11 anchors, within about SEK 1,000-2,000 a year); retirees get none |
+| Finland | Basic deduction (EUR 4,265, falling to zero near EUR 28,000) and work income tax credit (up to EUR 3,430) added from vero.fi guidance extracts; pensioner deduction and church tax not modelled |
+| Turkey, Cyprus | 2026 scales cross-checked: Turkey in PwC Turkey bulletin (cumulative amounts add up: 28,500, 70,500, 367,500, 1,697,500) from communique 585; Cyprus in PwC Tax Summaries and Bloomberg Tax reporting of the Tax Department guidance. Official pages not reachable |
+| Saudi Arabia, Qatar, UAE | Zero personal income tax on salaries re-checked in several secondary sources (no authority page returned). Notes added: UAE 9% corporate tax above AED 375,000; Qatar 10% on self-employed commercial activity; Saudi SAR 4,800 annual levy per expat dependant |
+| Puerto Rico | PwC (reviewed August 2026) confirms 0% to $9,000, 7% to $25,000, 14% to $41,500, 25% to $61,500, 33% above plus a 5% adjustment tax above $500,000; bills to change the scale are pending. The model stays "pending" because exemptions, residency and Act 60 treatment are not modelled |
+| Haiti, Cuba | Not confirmable: Haiti sources conflict on the rates; Cuba's 2026 scale (Law 181, Gaceta of 29 December 2025) was reported only as 5% from 25,000 CUP up to 50% above 1,000,000 CUP, without the middle bands. Both stay flagged as unverified |
+| USVI, French territories | USVI mirrors the U.S. system; French territories stay "coming soon" |

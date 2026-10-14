@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import RetirementPlanPreview from "@/components/RetirementPlanPreview";
+import FeedbackBox from "@/components/FeedbackBox";
 
 export const metadata: Metadata = {
   title: "Complete Retirement Plan",
@@ -10,5 +11,12 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <RetirementPlanPreview />;
+  return (
+    <>
+      <RetirementPlanPreview />
+      <div className="px-4 pb-8">
+        <FeedbackBox path="/complete-retirement-plan" name="complete retirement plan" />
+      </div>
+    </>
+  );
 }

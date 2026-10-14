@@ -5,6 +5,7 @@ import {
   ALLOWED_FIRE_CITY_PAGES,
   ALLOWED_CITY_DETAIL_PAGES,
   ALLOWED_COMPARE_ROUTES,
+  COMPARE_ORIGIN_HUBS,
   ALLOWED_STATE_CODES,
 } from "@/lib/seo-allowlists";
 
@@ -114,6 +115,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
   }));
 
+  const compareHubs = COMPARE_ORIGIN_HUBS.map((from) => ({
+    url: `${baseUrl}/compare/${from}`,
+    lastModified: now,
+    priority: 0.7,
+    changeFrequency: "monthly" as const,
+  }));
+
   const fireCities = ALLOWED_FIRE_CITY_PAGES
     .map((cityId) => findCity(cityId))
     .filter((city): city is NonNullable<typeof city> => Boolean(city));
@@ -175,6 +183,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...internationalCalculatorPages,
     ...salaryPages,
     ...rankingHubPages,
+    ...compareHubs,
     ...compareRoutes,
     ...fireInPages,
     ...costOfLivingPages,

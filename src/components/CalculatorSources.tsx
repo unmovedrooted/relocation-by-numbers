@@ -1,4 +1,5 @@
 import Link from "next/link";
+import FeedbackBox from "./FeedbackBox";
 import { CALCULATOR_INFO, SOURCES_REVIEWED_ON, type SourceRef } from "../lib/calculatorSources";
 import { taxRulesVerifiedLabel, TAX_YEAR } from "../lib/taxRuleNotes";
 
@@ -25,6 +26,7 @@ export default function CalculatorSources({ path, tone = "light" }: { path: stri
   const heading = tone === "dark" ? "text-white" : "text-slate-900 dark:text-slate-100";
   const linkClass = "underline underline-offset-2 hover:opacity-80";
   return (
+    <>
     <section aria-label={`Sources and limits for the ${info.name}`} className={`mx-auto my-6 w-full max-w-5xl rounded-2xl border p-5 text-xs leading-5 sm:text-sm sm:leading-6 ${box}`}>
       <h2 className={`text-sm font-semibold sm:text-base ${heading}`}>Sources and limits</h2>
       <p className="mt-1">
@@ -39,8 +41,8 @@ export default function CalculatorSources({ path, tone = "light" }: { path: stri
         <>
           <h3 className={`mt-3 font-medium ${heading}`}>Sources</h3>
           <ul className="mt-1 list-disc space-y-1 pl-5">
-            {info.sources.map((source) => (
-              <li key={source.url}><SourceLink source={source} linkClass={linkClass} /></li>
+            {info.sources.map((source, index) => (
+              <li key={`${source.url}-${index}`}><SourceLink source={source} linkClass={linkClass} /></li>
             ))}
           </ul>
         </>
@@ -57,5 +59,7 @@ export default function CalculatorSources({ path, tone = "light" }: { path: stri
         {info.exclusions.map((item) => <li key={item}>{item}</li>)}
       </ul>
     </section>
+    <FeedbackBox path={path} name={info.name} tone={tone} />
+    </>
   );
 }

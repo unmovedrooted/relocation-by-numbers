@@ -876,7 +876,7 @@ recommendation,
 
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-2 text-sm font-semibold">Results</div>
-            <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">Assumptions updated: March 2026 · Planning estimates only</div>
+            <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">Assumptions updated: October 2026 · Planning estimates only</div>
             <div className="mb-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
               <div>Current city: <span className="font-semibold">{fromCityLabel}</span></div>
               <div>Target city: <span className="font-semibold">{toCityLabel}</span></div>

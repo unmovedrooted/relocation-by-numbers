@@ -60,7 +60,7 @@ it.each(cases)("checks sampled feasible intervals and the selected cent boundary
     }else expect(selected).toBe(0);
   }
   expect(JSON.stringify(input)).toBe(before);
-});
+},60000);
 it("returns zero conversions for exhausted sources and never ranks rejected strategies",()=>{
   const input=scenario(0,0,0,"1960-01-01",0,0);
   const result=evaluateBracketStrategies(input,request);

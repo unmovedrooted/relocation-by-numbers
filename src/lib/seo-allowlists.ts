@@ -36,6 +36,12 @@ export const ALLOWED_COMPARE_ROUTES = [
   { from: "seattle-wa", to: "charlotte-nc" },
 ] as const;
 
+/** Origin cities that have a /compare/[from] hub (each has at least one indexed pair). Chicago has no pairs, so no hub. */
+export const COMPARE_ORIGIN_HUBS = ["nyc-ny", "la-ca", "seattle-wa", "boston-ma"] as const;
+
+/** Destinations listed on every hub; pairs outside ALLOWED_COMPARE_ROUTES link to the prefilled calculator instead. */
+export const COMPARE_HUB_DESTINATIONS = ["charlotte-nc", "austin-tx", "miami-fl", "dallas-tx"] as const;
+
 export const ALLOWED_STATE_CODES: StateCode[] = [
   "tx",
   "fl",

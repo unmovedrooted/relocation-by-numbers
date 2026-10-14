@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import FeedbackBox from "@/components/FeedbackBox";
 import Link from "next/link";
 import AdSlot from "@/components/AdSlot";
 import FireCalculator from "@/components/FireCalculator";
@@ -237,6 +238,8 @@ export default async function Page({ searchParams }: PageProps) {
             />
           </div>
         </section>
+
+        <FeedbackBox path="/how-much-do-i-need-to-retire" name="retirement number calculator" tone="dark" />
 
         <footer className="pt-2">
           <div className="mb-3 text-xs text-slate-400">Assumptions updated: October 2026</div>

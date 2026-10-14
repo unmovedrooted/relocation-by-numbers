@@ -28,6 +28,27 @@ export const metadata: Metadata = {
   },
 };
 
+const START_HERE = [
+  {
+    href: "/",
+    title: "Relocation calculator",
+    description: "See what a move does to your take-home pay, taxes, housing and monthly budget, between U.S. cities or abroad.",
+    cta: "Compare a move",
+  },
+  {
+    href: "/paycheck-calculator",
+    title: "Paycheck calculator",
+    description: "Turn a salary into take-home pay after federal, state and local taxes and payroll deductions.",
+    cta: "Calculate take-home pay",
+  },
+  {
+    href: "/fire-calculator",
+    title: "FIRE calculator",
+    description: "Find your financial independence number and how many years away it is, including after a move.",
+    cta: "Find your FIRE number",
+  },
+] as const;
+
 type HubLink = {
   href: string;
   title: string;
@@ -332,6 +353,28 @@ export default function ExplorePage() {
             </section>
           ) : null}
 
+          <section aria-labelledby="start-here" className="rounded-3xl border border-emerald-300/20 bg-emerald-300/[0.04] p-6">
+            <h2 id="start-here" className="text-2xl font-semibold tracking-tight text-white">
+              Start here
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-300">
+              New to the site? These three tools answer the questions people ask most. The full list of calculators is below.
+            </p>
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              {START_HERE.map((tool) => (
+                <Link
+                  key={tool.href}
+                  href={tool.href}
+                  className="group rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-emerald-300/40 hover:bg-black/30"
+                >
+                  <div className="text-base font-semibold text-white">{tool.title}</div>
+                  <p className="mt-2 text-sm leading-6 text-slate-300">{tool.description}</p>
+                  <div className="mt-3 text-sm font-medium text-emerald-200 group-hover:text-emerald-100">{tool.cta} →</div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
           <ExploreSavedScenarios />
 
           <ExploreCalculatorGrid />
@@ -391,7 +434,7 @@ export default function ExplorePage() {
                 },
                 {
                   q: "How often are the estimates updated?",
-                  a: "Tax brackets, cost of living defaults, and housing assumptions are reviewed and updated regularly. The most recent sitewide update was March 2026.",
+                  a: "Tax brackets, cost of living defaults, and housing assumptions are reviewed and updated regularly. The most recent sitewide update was October 2026.",
                 },
               ].map(({ q, a }) => (
                 <div key={q} className="rounded-2xl border border-white/10 bg-black/20 p-4">

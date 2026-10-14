@@ -81,6 +81,21 @@ export default function PrivacyPage() {
 
       <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
         <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+          Feedback box
+        </h2>
+
+        <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
+          <p>
+            Calculator pages have a short &ldquo;Was this helpful? What&apos;s missing?&rdquo; box. If you send it, we
+            receive the page it was sent from, your yes or no answer, and any message you type. We do not ask for your
+            email address and we do not send your calculator inputs. Please do not put names, account numbers or other
+            personal details in the message. We use feedback to decide what to fix or add.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Analytics and usage data
         </h2>
 
