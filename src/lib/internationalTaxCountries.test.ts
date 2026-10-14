@@ -512,3 +512,20 @@ describe("Greece (2026 reform scale, EUR 777 reduction)", () => {
     expect(rate("GR", 12_000, "remote") * 12_000).toBeCloseTo(523, 6);
   });
 });
+
+describe("Guyana (GRA 2026 notice)", () => {
+  it("employee earning GYD 6,000,000", () => {
+    // NIS 5.6% x 3,360,000 (ceiling) = 188,160; balance 5,811,840; allowance max(1,680,000, 1,937,280) = 1,937,280; chargeable 3,874,560
+    // tax 25% x 3,360,000 = 840,000 + 35% x 514,560 = 180,096 -> 1,020,096
+    expect(rate("GY", 6_000_000)).toBeCloseTo((1_020_096 + 188_160) / 6_000_000, 8);
+  });
+
+  it("pays nothing within the allowance", () => {
+    expect(rate("GY", 1_500_000, "remote")).toBe(0);
+  });
+
+  it("uses the 1,680,000 allowance at modest incomes: GYD 3,000,000 remote", () => {
+    // one third = 1,000,000 < 1,680,000; chargeable 1,320,000; tax 330,000
+    expect(rate("GY", 3_000_000, "remote") * 3_000_000).toBeCloseTo(330_000, 4);
+  });
+});

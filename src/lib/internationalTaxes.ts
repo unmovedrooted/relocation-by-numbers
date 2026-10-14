@@ -38,6 +38,7 @@ import { ESTONIA_TAX_YEAR_LABEL, estoniaTax } from "./countryTaxRules/estonia";
 import { FRANCE_TAX_YEAR_LABEL, franceTax } from "./countryTaxRules/france";
 import { GERMANY_TAX_YEAR_LABEL, germanyTax } from "./countryTaxRules/germany";
 import { GREECE_TAX_YEAR_LABEL, greeceTax } from "./countryTaxRules/greece";
+import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
 export type FilingStatus = "single" | "married";
 
@@ -1914,31 +1915,17 @@ BO: ({ annualIncome, isRetired }) => {
   };
 },
 
-GY: ({ annualIncome, isRetired }) => {
-  const ALLOWANCE = 4593; // ~G$960,000/yr at 209 GYD/USD
-  if (isRetired && annualIncome <= ALLOWANCE) {
-    return {
-      effectiveRate: 0,
-      model: "progressive-country",
-      confidence: "simplified",
-      label: "Guyana income tax, below personal allowance",
-      missingFactor: "NIS social insurance (~5.6%) not modelled.",
-      note: "Income below Guyana's personal allowance threshold (~$4,593 USD). Zero income tax modelled. NIS social insurance contributions not modelled. Guyana is the only English-speaking country in South America. Verify with a local advisor.",
-    };
-  }
-  const taxable = Math.max(0, annualIncome - ALLOWANCE);
-  const BAND1_LIMIT = 11480 - ALLOWANCE; // ~G$2.4M total at 209 GYD/USD
-  const tax = taxable <= BAND1_LIMIT
-    ? taxable * 0.28
-    : BAND1_LIMIT * 0.28 + (taxable - BAND1_LIMIT) * 0.40;
-  const effectiveRate = clampRate(annualIncome > 0 ? tax / annualIncome : 0);
+GY: ({ annualIncome, isRetired, incomeScenario }) => {
+  // Rules in countryTaxRules/guyana.ts: GRA 2026 notice (Income Tax (Amendment) Act No. 3 of 2026). Income is in Guyanese dollars.
+  const { incomeTax, nis } = guyanaTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
+  const effective = annualIncome > 0 ? (incomeTax + nis) / annualIncome : 0;
   return {
-    effectiveRate,
+    effectiveRate: clampRate(effective),
     model: "progressive-country",
     confidence: "simplified",
-    label: "Guyana income tax, progressive (simplified, USD-equivalent brackets)",
-    missingFactor: "NIS employee contributions (~5.6%) not included.",
-    note: `Effective rate ${(effectiveRate * 100).toFixed(1)}%. Two-rate system: 28% up to ~$11,480 USD, 40% above, after personal allowance of ~$4,593 USD. Brackets converted at 209 GYD/USD. NIS employee contributions (~5.6%) not modelled. Verify with a local advisor.`,
+    label: `Guyana income tax + NIS (${GUYANA_TAX_YEAR_LABEL})`,
+    missingFactor: "Child and insurance deductions not modelled.",
+    note: "Uses the Guyana Revenue Authority's 2026 rules: a personal allowance of GYD 1,680,000 or one third of income if greater, 25% on chargeable income up to GYD 3,360,000 and 35% above, and the 5.6% NIS contribution on pay up to GYD 280,000 a month, which is deducted before tax. Not modelled: the GYD 10,000 a month deduction per child, insurance premiums, second-job and overtime deductions. The old model treated the income as US dollars; income must now be passed in Guyanese dollars.",
   };
 },
 
