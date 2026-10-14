@@ -44,6 +44,7 @@ import { JAPAN_TAX_YEAR_LABEL, japanTax } from "./countryTaxRules/japan";
 import { INDONESIA_NOTE, INDONESIA_TAX_YEAR_LABEL, indonesiaTax } from "./countryTaxRules/indonesia";
 import { LATVIA_TAX_YEAR_LABEL, latviaTax } from "./countryTaxRules/latvia";
 import { MALAYSIA_TAX_YEAR_LABEL, malaysiaTax } from "./countryTaxRules/malaysia";
+import { MALTA_TAX_YEAR_LABEL, maltaTax } from "./countryTaxRules/malta";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
@@ -1411,30 +1412,16 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // MALTA, EUR
   // 2024: Real legislated separate single and married rate scales.
   // -------------------------------------------------------------------------
-  MT: ({ annualIncome, filing }) => {
-    const brackets =
-      filing === "married"
-        ? [
-          { upTo: 12700, rate: 0.00 },
-          { upTo: 21200, rate: 0.15 },
-          { upTo: 28700, rate: 0.25 },
-          { upTo: 60000, rate: 0.25 },
-          { upTo: Infinity, rate: 0.35 },
-        ]
-        : [
-          { upTo: 9100, rate: 0.00 },
-          { upTo: 14500, rate: 0.15 },
-          { upTo: 19500, rate: 0.25 },
-          { upTo: 60000, rate: 0.25 },
-          { upTo: Infinity, rate: 0.35 },
-        ];
+  MT: ({ annualIncome, filing, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/malta.ts: 2026 single and married computations, Class 1 social security.
+    const { incomeTax, contributions } = maltaTax(annualIncome, filing === "married" ? "married" : "single", isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
     return {
-      effectiveRate: clampRate(progressiveTax(annualIncome, brackets)),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
       model: "progressive-country",
-      confidence: "partial",
-      label: "Malta progressive income tax (2024, separate scales)",
-      missingFactor: "Social security contributions (~10%, capped) not modelled.",
-      note: "Both single and married tax scales are the legislated 2024 Malta IRD figures and are exact. Social security contributions (~10% employee, capped at a weekly maximum of ~€29.70) add a modest fixed amount at most income levels, not modelled. Malta's Global Residence Programme and Nomad Residence Permit do not change the income tax rate; standard scales apply. Income must be passed in EUR.",
+      confidence: "simplified",
+      label: `Malta income tax + social security (${MALTA_TAX_YEAR_LABEL})`,
+      missingFactor: "New parent and family computations not modelled; rate tables and the social security cap come from PwC and secondary summaries because the MTCA site blocked the fetch.",
+      note: "Uses the 2026 single computation (0% to EUR 12,000, 15% to 16,000, 25% to 60,000, 35% above) or the married computation (0% to EUR 15,000, 15% to 23,000, 25% to 60,000, 35% above, one earner). Employees pay Class 1 social security of 10% of pay up to EUR 55.93 a week; retirees and remote workers paid abroad pay none here. Not modelled: the family computations introduced for parents, remittance rules for non-domiciled residents and residence-programme rates. Income must be passed in euros.",
     };
   },
 

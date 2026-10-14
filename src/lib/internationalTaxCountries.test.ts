@@ -707,3 +707,19 @@ describe("Malaysia (LHDN resident rates, reliefs, EPF) in both calculators", () 
     expect(rate("ID", 300_000_000)).toBeCloseTo(0.10, 10);
   });
 });
+
+describe("Malta (2026 single and married computations, Class 1)", () => {
+  it("EUR 40,000 single employee", () => {
+    // 25% x 40,000 - 3,400 = 6,600; Class 1 capped at 55.93 x 52 = 2,908.36
+    expect(rate("MT", 40_000)).toBeCloseTo((6_600 + 2_908.36) / 40_000, 8);
+  });
+
+  it("EUR 30,000 married employee uses the married table", () => {
+    // 25% x 30,000 - 4,550 = 2,950
+    expect(rate("MT", 30_000, "local", "married")).toBeCloseTo((2_950 + 2_908.36) / 30_000, 8);
+  });
+
+  it("EUR 14,000 single retiree: 15% band less the 1,800 deduction, no contributions", () => {
+    expect(rate("MT", 14_000, "retired")).toBeCloseTo(300 / 14_000, 10);
+  });
+});
