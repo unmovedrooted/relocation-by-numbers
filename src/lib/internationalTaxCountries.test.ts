@@ -1110,3 +1110,19 @@ describe("Vietnam (Law 109/2025 scale, deduction, insurance) in both calculators
     expect(rate("VN", 150_000_000, "retired")).toBe(0);
   });
 });
+
+describe("Turkey (2026 wage scale, SGK, stamp tax, minimum-wage exemption)", () => {
+  it("TRY 1,200,000 employee", () => {
+    // SGK 180,000; base 1,020,000: 28,500 + 42,000 + 27% x 620,000 = 237,900; exemption = tax on 336,906 = 57,881.2; stamp 0.759% x 803,640
+    const tax = 237_900 - (28_500 + 0.2 * (336_906 - 190_000));
+    expect(rate("TR", 1_200_000)).toBeCloseTo((tax + 180_000 + 0.00759 * (1_200_000 - 396_360)) / 1_200_000, 8);
+  });
+
+  it("the minimum wage pays only its SGK contributions", () => {
+    expect(rate("TR", 33_030 * 12)).toBeCloseTo(0.15, 4);
+  });
+
+  it("a pension is shown as exempt", () => {
+    expect(rate("TR", 500_000, "retired")).toBe(0);
+  });
+});

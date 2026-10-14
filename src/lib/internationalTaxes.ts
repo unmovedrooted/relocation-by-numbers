@@ -62,6 +62,7 @@ import { SOUTH_KOREA_TAX_YEAR_LABEL, southKoreaTax } from "./countryTaxRules/sou
 import { SWEDEN_TAX_YEAR_LABEL, swedenTax } from "./countryTaxRules/sweden";
 import { SWITZERLAND_TAX_YEAR_LABEL, switzerlandTax } from "./countryTaxRules/switzerland";
 import { THAILAND_TAX_YEAR_LABEL, thailandTax } from "./countryTaxRules/thailand";
+import { TURKEY_TAX_YEAR_LABEL, turkeyTax } from "./countryTaxRules/turkey";
 import { VIETNAM_TAX_YEAR_LABEL, vietnamTax } from "./countryTaxRules/vietnam";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
@@ -1121,21 +1122,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 brackets (revised annually for inflation, verify each year).
   // No joint filing.
   // -------------------------------------------------------------------------
-  TR: ({ annualIncome }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 158000, rate: 0.15 },
-      { upTo: 330000, rate: 0.20 },
-      { upTo: 800000, rate: 0.27 },
-      { upTo: 4300000, rate: 0.35 },
-      { upTo: Infinity, rate: 0.40 },
-    ]);
+  TR: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/turkey.ts: 2026 wage scale, SGK 15%, stamp tax and the minimum-wage exemption.
+    const scenario = isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local";
+    const { incomeTax, stampTax, contributions } = turkeyTax(annualIncome, scenario);
     return {
-      effectiveRate: clampRate(rate),
+      effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + stampTax + contributions) / annualIncome : 0),
       model: "progressive-country",
-      confidence: "placeholder",
-      label: "Turkey progressive income tax (2024, thresholds unstable)",
-      missingFactor: "Brackets revised mid-year for inflation, figure may be significantly outdated.",
-      note: "⚠ Turkey's income tax brackets are revised annually and sometimes mid-year due to high inflation. These approximate 2024 thresholds may be significantly outdated. SGK employee social contributions (~14%: pension 9%, health 5%) are not included. Always verify current-year thresholds via the Turkish Revenue Administration (GİB) before using this for planning. This number should be treated as directional only. Income must be passed in TRY.",
+      confidence: "partial",
+      label: `Turkey income tax + SGK + stamp tax (${TURKEY_TAX_YEAR_LABEL})`,
+      missingFactor: "Pension exemptions depend on the pension and on transferring it to Turkey; the scale comes from news and adviser summaries of the 2026 revaluation, not the Revenue Administration communique.",
+      note: "Uses the 2026 wage scale (15% to TRY 190,000, 20% to 400,000, 27% to 1.5 million, 35% to 5.3 million, 40% above) after the employee's SGK and unemployment contributions (15% of pay up to a monthly ceiling of about TRY 297,000), less the minimum-wage exemption from income tax, plus stamp tax of 0.759% above the minimum wage. Remote workers paid abroad are taxed on the scale with no exemption; state pensions and foreign pensions brought into Turkey are generally exempt, so retirees are shown as paying nothing. Turkey revises its thresholds every year for inflation. Income must be passed in lira.",
     };
   },
 
