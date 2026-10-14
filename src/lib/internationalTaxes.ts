@@ -41,6 +41,7 @@ import { GREECE_TAX_YEAR_LABEL, greeceTax } from "./countryTaxRules/greece";
 import { IRELAND_TAX_YEAR_LABEL, irelandTax } from "./countryTaxRules/ireland";
 import { ITALY_NEW_RESIDENT_FLAT_TAX, ITALY_TAX_YEAR_LABEL, italyTax } from "./countryTaxRules/italy";
 import { JAPAN_TAX_YEAR_LABEL, japanTax } from "./countryTaxRules/japan";
+import { LATVIA_TAX_YEAR_LABEL, latviaTax } from "./countryTaxRules/latvia";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
 
 export type FilingStatus = "single" | "married";
@@ -1282,20 +1283,17 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // 2024 progressive. Employee social: ~10.5% (pension 10% + unemployment 0.5%).
   // No joint filing.
   // -------------------------------------------------------------------------
-  LV: ({ annualIncome, isRetired }) => {
-    const rate = progressiveTax(annualIncome, [
-      { upTo: 20004, rate: 0.20 },
-      { upTo: 78100, rate: 0.23 },
-      { upTo: Infinity, rate: 0.31 },
-    ]);
-    const socialOverlay = isRetired ? 0 : 0.105;
+  LV: ({ annualIncome, isRetired, incomeScenario }) => {
+    // Rules in countryTaxRules/latvia.ts: VID 2026 rates (25.5% / 33% / +3%), EUR 550 monthly non-taxable minimum, 10.5% employee contributions.
+    const { incomeTax, contributions } = latviaTax(annualIncome, isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local");
+    const effective = annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0;
     return {
-      effectiveRate: clampRate(rate + socialOverlay),
+      effectiveRate: clampRate(effective),
       model: "progressive-country",
       confidence: "simplified",
-      label: "Latvia progressive income tax + contributions (2024)",
-      missingFactor: "Untaxed minimum (€3,744/yr) and health contribution (1.8%) not applied.",
-      note: "Brackets are 2024 figures. Employee social contributions (10.5% composite: pension 10% + unemployment 0.5%) are correctly excluded for retirees. Key omission: the differentiated non-taxable minimum (up to €3,744/yr, tapering at higher incomes) is not applied, this understates take-home at lower to mid incomes. Health insurance contribution (1.8% employee) is also excluded. Income must be passed in EUR.",
+      label: `Latvia income tax + social contributions (${LATVIA_TAX_YEAR_LABEL})`,
+      missingFactor: "Dependants' relief and any separate pensioner minimum not modelled; the non-taxable minimum and contribution ceiling come from news summaries, not a VID page.",
+      note: "Uses the State Revenue Service's 2026 rates: 25.5% on income up to EUR 105,300 and 33% above, plus 3% on taxable income above EUR 200,000, after a non-taxable minimum of EUR 550 a month (EUR 6,600 a year). Employees pay 10.5% social contributions up to a EUR 105,300 base, deductible from taxable income; pensions are taxed the same way with no contributions, and remote workers paid abroad pay none. Income must be passed in euros.",
     };
   },
 

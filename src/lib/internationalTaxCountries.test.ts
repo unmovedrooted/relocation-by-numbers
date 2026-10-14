@@ -649,3 +649,20 @@ describe("Japan (NTA rates, employment income table, basic deduction, social ins
     expect(rate("JP", 1_000_000, "remote")).toBe(0);
   });
 });
+
+describe("Latvia (VID 2026 rates, EUR 550 minimum, 10.5% contributions)", () => {
+  it("EUR 50,000 employee", () => {
+    // contributions 5,250; taxable 50,000 - 5,250 - 6,600 = 38,150; tax 25.5% x 38,150 = 9,728.25
+    expect(rate("LV", 50_000)).toBeCloseTo((9_728.25 + 5_250) / 50_000, 8);
+  });
+
+  it("EUR 150,000 employee reaches the 33% band", () => {
+    // contributions 11,056.50 (cap 105,300); taxable 150,000 - 11,056.5 - 6,600 = 132,343.5
+    const tax = 0.255 * 105_300 + 0.33 * (132_343.5 - 105_300);
+    expect(rate("LV", 150_000)).toBeCloseTo((tax + 11_056.5) / 150_000, 8);
+  });
+
+  it("a EUR 20,000 pension pays tax only", () => {
+    expect(rate("LV", 20_000, "retired")).toBeCloseTo(0.255 * 13_400 / 20_000, 8);
+  });
+});
