@@ -219,6 +219,7 @@ export default function CompareCitiesCalculator() {
   const [k401Pct, setK401Pct] = useState<string>("10");
   const [mode, setMode] = useState<Mode>("rent");
   const [incomeMode, setIncomeMode] = useState<IncomeMode>("working");
+  const [usTaxHolder, setUsTaxHolder] = useState(false);
   const [intlHousingMode, setIntlHousingMode] = useState<IntlHousingMode>("rent");
 
   const [downPct, setDownPct] = useState<string>("20");
@@ -287,6 +288,7 @@ export default function CompareCitiesCalculator() {
     if (vRegion && REGIONS.some((r) => r.key === vRegion)) setRegion(vRegion);
     const vIncomeMode = qs.get("incomeMode");
     if (vIncomeMode === "working" || vIncomeMode === "retired") setIncomeMode(vIncomeMode);
+    if (qs.get("usTax") === "yes") setUsTaxHolder(true);
     const vIntlHousingMode = qs.get("intlHousingMode");
     if (vIntlHousingMode === "rent" || vIntlHousingMode === "buy") setIntlHousingMode(vIntlHousingMode);
     const vIntlDown = qs.get("intlDown"); if (vIntlDown) setIntlDownPct(vIntlDown);
@@ -370,6 +372,7 @@ export default function CompareCitiesCalculator() {
       }
     } else {
       qs.set("incomeMode", incomeMode);
+      if (usTaxHolder) qs.set("usTax", "yes");
       qs.set("intlHousingMode", intlHousingMode);
       if (intlHousingMode === "buy") {
         if (intlDownPct) qs.set("intlDown", intlDownPct);
@@ -386,7 +389,7 @@ export default function CompareCitiesCalculator() {
     }
     setQS(qs);
   }, [
-    region, originState, originCityId, grossAnnual, filing, k401Pct, mode, incomeMode,
+    region, originState, originCityId, grossAnnual, filing, k401Pct, mode, incomeMode, usTaxHolder,
     downPct, ratePct, termYears, propertyTaxPct, homeInsMonthly, hoaMonthly, pmiAnnualPct,
     rentersInsMonthly, parkingMonthly, targets, intlTargets, caribTargets,
     intlHousingMode, intlDownPct, intlRatePct, intlTermYears,
@@ -497,11 +500,12 @@ export default function CompareCitiesCalculator() {
         grossAnnualUsd: grossN,
         filing,
         mode: incomeMode,
+        usTaxHolder,
         housingMode: intlHousingMode,
         buy: intlBuyAssumptions,
       })
     );
-  }, [region, intlTargets, grossN, filing, incomeMode, intlHousingMode, intlBuyAssumptions]);
+  }, [region, intlTargets, grossN, filing, incomeMode, usTaxHolder, intlHousingMode, intlBuyAssumptions]);
 
   const caribResults = useMemo(() => {
     if (region !== "caribbean") return [];
@@ -511,11 +515,12 @@ export default function CompareCitiesCalculator() {
         grossAnnualUsd: grossN,
         filing,
         mode: incomeMode,
+        usTaxHolder,
         housingMode: intlHousingMode,
         buy: intlBuyAssumptions,
       })
     );
-  }, [region, caribTargets, grossN, filing, incomeMode, intlHousingMode, intlBuyAssumptions]);
+  }, [region, caribTargets, grossN, filing, incomeMode, usTaxHolder, intlHousingMode, intlBuyAssumptions]);
 
   const activeResults = useMemo<CompareRow[]>(() => {
     if (region === "us") {
@@ -664,6 +669,13 @@ export default function CompareCitiesCalculator() {
                 </div>
               )}
             </div>
+
+            {!isUs && (
+              <label className="mb-2 flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+                <input type="checkbox" className="mt-1" checked={usTaxHolder} onChange={(e) => setUsTaxHolder(e.target.checked)} />
+                <span>I am a U.S. citizen or green-card holder, so add the U.S. tax I still owe abroad (2026 federal brackets, the $132,900 foreign earned income exclusion for wages, and a credit for foreign tax).</span>
+              </label>
+            )}
 
             {!isUs && (
               <div className="mb-3 flex flex-wrap items-center gap-x-6 gap-y-2">

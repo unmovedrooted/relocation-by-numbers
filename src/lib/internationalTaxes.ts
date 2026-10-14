@@ -11,7 +11,7 @@
 //   CR=CRC, FR=EUR, IT=EUR, IE=EUR, AU=AUD, NZ=NZD, JP=JPY, KR=KRW,
 //   AE=AED, SG=SGD, CH=CHF, DK=DKK, SE=SEK, NO=NOK, FI=EUR, PL=PLN,
 //   CZ=CZK, HU=HUF, GR=EUR, TR=TRY, HR=EUR, EE=EUR, LV=EUR, LT=EUR,
-//   RO=RON, BG=BGN, SI=EUR, SK=EUR, MT=EUR, CY=EUR, PA=USD, CO=COP,
+//   RO=RON, BG=EUR (euro since 2026-01-01), SI=EUR, SK=EUR, MT=EUR, CY=EUR, PA=USD, CO=COP,
 //   BR=BRL, AR=ARS, CL=CLP, PE=PEN, TH=THB, VN=VND, MY=MYR, ID=IDR,
 //   ZA=ZAR, AT=EUR, BE=EUR, PH=PHP, TW=TWD
 //
@@ -1495,7 +1495,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   },
 
   // -------------------------------------------------------------------------
-  // BULGARIA, BGN
+  // BULGARIA, EUR (the euro replaced the lev on 2026-01-01)
   // Flat 10% income tax, lowest in EU. Employee social: ~13.78%.
   // No joint filing.
   // -------------------------------------------------------------------------
@@ -1507,7 +1507,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "partial",
       label: "Bulgaria 10% flat income tax + social contributions (2024)",
       missingFactor: "Social contributions (~13.78%) not applied to pension income; ceiling applies.",
-      note: "The 10% flat SZOD rate is legislated and exact. Employee social contributions (~13.78%: pension 12.9%, health 3.2%, unemployment 0.4%, employee share only) are correctly excluded for retirees. Social contributions have a monthly ceiling (~BGN 3,750/mo); above this only income tax applies. Annual revenue tax deduction (10% of gross for self-employed) is not modelled. Income must be passed in BGN.",
+      note: "The 10% flat SZOD rate is legislated and exact. Employee social contributions (~13.78%: pension 12.9%, health 3.2%, unemployment 0.4%, employee share only) are correctly excluded for retirees. Social contributions have a ceiling on monthly insurable income (set each year); above this only income tax applies. Annual revenue tax deduction (10% of gross for self-employed) is not modelled. Income must be passed in euros (Bulgaria adopted the euro on 2026-01-01).",
     };
   },
 

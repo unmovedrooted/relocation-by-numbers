@@ -20,7 +20,7 @@ import { getCaribbeanCountryByCode } from "../caribbeanCountries";
 import { hasTaxConfig, getCountryTaxConfig } from "../caribbeanTax/index";
 import { estimateScenarioTax } from "../caribbeanTax/engine";
 import type { IncomeScenario, FilingStatus as CaribFilingStatus, CaribbeanTaxCode } from "../caribbeanTax/types";
-import { estimateInternationalTax, type FilingStatus } from "../internationalTaxes";
+import { estimateInternationalTax, NO_US_OVERLAY, US_TAX_STATUS_KEY, usTaxAbroadAddition, type FilingStatus } from "../internationalTaxes";
 import { USD_TO_LOCAL } from "../internationalFx";
 import { estimateMortgageMonthly } from "../mortgage";
 import { estimateHomePriceFromRent, DEFAULT_TAX_INSURANCE_PCT } from "./homePrice";
@@ -40,6 +40,8 @@ export type CaribCompareInput = {
   grossAnnualUsd: number;
   filing: FilingStatus;
   mode: CaribCompareMode;
+  /** A U.S. citizen or green-card holder, who still owes U.S. tax abroad. */
+  usTaxHolder?: boolean;
   /** Only relevant when mode === "working". Defaults to "remote", the
    *  calculator's own default salaryType, since compare view doesn't ask. */
   salaryType?: CaribSalaryType;
@@ -100,18 +102,25 @@ export function computeCaribCityResult(input: CaribCompareInput): CaribCompareRe
         grossIncomeLocalCurrency: localGross,
         filingStatus: caribFiling,
       });
-      effTaxPct = result.effectiveRate * 100;
+      const foreignRate = result.isDisclaimer ? 0 : result.effectiveRate;
+      const usAdded = input.usTaxHolder && !NO_US_OVERLAY.has(countryCode) && !result.isDisclaimer
+        ? usTaxAbroadAddition({ countryCode, annualIncome: localGross, filing, incomeScenario: scenario, foreignTaxUsd: foreignRate * grossAnnualUsd }).addedUsd
+        : 0;
+      const totalRate = foreignRate + usAdded / grossAnnualUsd;
+      effTaxPct = (result.isDisclaimer ? result.effectiveRate : totalRate) * 100;
       taxLabel = result.isDisclaimer
         ? `${countryName}: ${result.notes[0] ?? "Tax model incomplete"}`
-        : `${countryName} ${scenario} income (${result.taxYearLabel})`;
+        : `${countryName} ${scenario} income (${result.taxYearLabel})${usAdded > 0 ? " + U.S. tax" : ""}`;
       taxConfidencePlaceholder = result.confidence === "pending" || result.isDisclaimer;
-      netAnnualUsd = result.isDisclaimer ? grossAnnualUsd : grossAnnualUsd * (1 - result.effectiveRate);
+      netAnnualUsd = result.isDisclaimer ? grossAnnualUsd : grossAnnualUsd * (1 - totalRate);
     } else {
       const fallback = estimateInternationalTax({
         countryCode,
         annualIncome: convertUsdToLocal(grossAnnualUsd, countryCode),
         filing,
         isRetired: mode === "retired",
+        incomeScenario: scenario,
+        answers: input.usTaxHolder ? { [US_TAX_STATUS_KEY]: "yes" } : {},
       });
       effTaxPct = fallback.effectiveRate * 100;
       taxLabel = fallback.label;

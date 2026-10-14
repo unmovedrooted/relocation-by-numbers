@@ -127,10 +127,39 @@ describe("exchange rates", () => {
     expect(USD_TO_LOCAL.PT).toBe(0.881);
     expect(USD_TO_LOCAL.GB).toBe(0.752);
     expect(USD_TO_LOCAL.JP).toBe(157.09);
-    expect(USD_TO_LOCAL.BG).toBeCloseTo(0.881 * 1.95583, 3);
+    // Bulgaria adopted the euro on 2026-01-01
+    expect(USD_TO_LOCAL.BG).toBe(USD_TO_LOCAL.PT);
   });
 
   it("use one dollar for dollarized places", () => {
     for (const code of ["US", "EC", "PA", "PR", "VI", "BQ-BO"]) expect(USD_TO_LOCAL[code]).toBe(1);
+  });
+});
+
+import { computeIntlCityResult } from "./compareEngines/international";
+import { computeCaribCityResult } from "./compareEngines/caribbean";
+
+describe("Compare Cities with the U.S. tax box ticked", () => {
+  const base = { grossAnnualUsd: 200000, filing: "single" as const, mode: "working" as const };
+
+  it("adds the U.S. tax to the UAE: $12,240 on $200,000 is 6.12%", () => {
+    const off = computeIntlCityResult({ ...base, countryCode: "AE" });
+    const on = computeIntlCityResult({ ...base, countryCode: "AE", usTaxHolder: true });
+    expect(off.effTaxPct).toBe(0);
+    expect(on.effTaxPct).toBeCloseTo(6.12, 6);
+    expect(on.netMonthly).toBeLessThan(off.netMonthly);
+  });
+
+  it("adds the same to a Caribbean country with no income tax (Cayman Islands)", () => {
+    const off = computeCaribCityResult({ ...base, countryCode: "KY" });
+    const on = computeCaribCityResult({ ...base, countryCode: "KY", usTaxHolder: true });
+    expect(off.effTaxPct).toBe(0);
+    expect(on.effTaxPct).toBeCloseTo(6.12, 6);
+  });
+
+  it("leaves the result alone when the box is not ticked", () => {
+    const a = computeIntlCityResult({ ...base, countryCode: "PT" });
+    const b = computeIntlCityResult({ ...base, countryCode: "PT", usTaxHolder: false });
+    expect(a.effTaxPct).toBe(b.effTaxPct);
   });
 });

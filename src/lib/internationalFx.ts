@@ -6,8 +6,7 @@
  * These are the official quarterly rates federal agencies use, not a live market rate: they can differ from today's
  * rate by several percent. Update them each quarter from the same dataset.
  *
- * Euro-area countries use the euro row. Bulgaria uses the euro row times the fixed conversion rate of 1.95583 lev per
- * euro. Territories and countries that use the U.S. dollar are 1. A few entries are not Treasury figures and say why
+ * Euro-area countries use the euro row, including Bulgaria, which adopted the euro on 2026-01-01. Territories and countries that use the U.S. dollar are 1. A few entries are not Treasury figures and say why
  * beside the number.
  */
 export const FX_SOURCE = {
@@ -52,7 +51,7 @@ export const USD_TO_LOCAL: Record<string, number> = {
   PY: 5837.37,
   TR: 49.001,
   RO: 4.648,
-  BG: 1.7231,
+  BG: 0.881,
   PA: 1,
   CO: 3325,
   BR: 5.205,

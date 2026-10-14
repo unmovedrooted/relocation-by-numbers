@@ -22,7 +22,7 @@
  * country-specific tax engine and follow-up questions, the page links back
  * to the matching full regional calculator.
  */
-import { estimateInternationalTax, type FilingStatus } from "../internationalTaxes";
+import { estimateInternationalTax, US_TAX_STATUS_KEY, type FilingStatus } from "../internationalTaxes";
 import { getCityDefaultsByCode } from "../internationalCityDefaults";
 import { getCityCostMultipliers } from "../internationalCityCosts";
 import { getCountryByCode } from "../internationalCountries";
@@ -47,6 +47,8 @@ export type IntlCompareInput = {
   grossAnnualUsd: number;
   filing: FilingStatus;
   mode: IntlMode;
+  /** A U.S. citizen or green-card holder, who still owes U.S. tax abroad. */
+  usTaxHolder?: boolean;
   /** Defaults to "rent". */
   housingMode?: IntlHousingMode;
   /** Only used when housingMode === "buy". */
@@ -90,6 +92,7 @@ export function computeIntlCityResult(input: IntlCompareInput): IntlCompareResul
         annualIncome: convertUsdToLocal(grossAnnualUsd, countryCode),
         filing,
         isRetired: mode === "retired",
+        answers: input.usTaxHolder ? { [US_TAX_STATUS_KEY]: "yes" } : {},
       })
     : null;
 

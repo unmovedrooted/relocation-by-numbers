@@ -188,7 +188,7 @@ const COUNTRY_TO_CURRENCY: Record<string, string> = {
   AU: "AUD", NZ: "NZD", JP: "JPY", KR: "KRW", AE: "AED", SG: "SGD",
   CH: "CHF", DK: "DKK", SE: "SEK", NO: "NOK", FI: "EUR", PL: "PLN",
   CZ: "CZK", HU: "HUF", GR: "EUR", TR: "TRY", HR: "EUR", EE: "EUR",
-  LV: "EUR", LT: "EUR", RO: "RON", BG: "BGN", SI: "EUR", SK: "EUR",
+  LV: "EUR", LT: "EUR", RO: "RON", BG: "EUR", SI: "EUR", SK: "EUR",
   MT: "EUR", CY: "EUR", PA: "USD", CO: "COP", BR: "BRL", AR: "ARS",
   CL: "CLP", PE: "PEN", TH: "THB", VN: "VND", MY: "MYR", ID: "IDR",
   ZA: "ZAR", AT: "EUR", BE: "EUR",
