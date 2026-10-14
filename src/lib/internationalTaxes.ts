@@ -63,6 +63,7 @@ import { SWEDEN_TAX_YEAR_LABEL, swedenTax } from "./countryTaxRules/sweden";
 import { SWITZERLAND_TAX_YEAR_LABEL, switzerlandTax } from "./countryTaxRules/switzerland";
 import { THAILAND_TAX_YEAR_LABEL, thailandTax } from "./countryTaxRules/thailand";
 import { TURKEY_TAX_YEAR_LABEL, turkeyTax } from "./countryTaxRules/turkey";
+import { URUGUAY_TAX_YEAR_LABEL, uruguayTax } from "./countryTaxRules/uruguay";
 import { VIETNAM_TAX_YEAR_LABEL, vietnamTax } from "./countryTaxRules/vietnam";
 import { LITHUANIA_TAX_YEAR_LABEL, lithuaniaTax } from "./countryTaxRules/lithuania";
 import { GUYANA_TAX_YEAR_LABEL, guyanaTax } from "./countryTaxRules/guyana";
@@ -1599,34 +1600,20 @@ EC: ({ annualIncome, isRetired, incomeScenario }) => {
   };
 },
 
-UY: ({ annualIncome, isRetired }) => {
-  if (isRetired) {
-    return {
-      effectiveRate: 0.06,
-      model: "flat",
-      confidence: "simplified",
-      label: "Uruguay IRPF, retirement income (simplified estimate)",
-      missingFactor: "7-year territorial exemption for new residents not modelled, may reduce rate to 0%.",
-      note: "Simplified flat 6% effective rate applied for retirement income. New tax residents may qualify for a 7-year territorial income exemption on foreign-source income, a major planning consideration. Verify eligibility with a local advisor.",
-    };
-  }
-  const brackets = [
-    { upTo: 9000,     rate: 0 },
-    { upTo: 16000,    rate: 0.10 },
-    { upTo: 28000,    rate: 0.15 },
-    { upTo: 48000,    rate: 0.24 },
-    { upTo: 75000,    rate: 0.25 },
-    { upTo: 110000,   rate: 0.27 },
-    { upTo: Infinity, rate: 0.31 },
-  ];
-  const rate = progressiveTax(annualIncome, brackets);
+UY: ({ annualIncome, isRetired, incomeScenario }) => {
+  // Rules in countryTaxRules/uruguay.ts: BPS Comunicado R 5/2026 scale (BPC UYU 6,864), contributions and credit. Income is in pesos.
+  const scenario = isRetired ? "retired" : incomeScenario === "remote" ? "remote" : "local";
+  const { incomeTax, contributions } = uruguayTax(annualIncome, scenario);
+  const exempt = scenario !== "local";
   return {
-    effectiveRate: clampRate(rate),
-    model: "progressive-country",
+    effectiveRate: clampRate(annualIncome > 0 ? (incomeTax + contributions) / annualIncome : 0),
+    model: exempt ? "none" : "progressive-country",
     confidence: "simplified",
-    label: "Uruguay IRPF, progressive (simplified, USD-equivalent brackets)",
-    missingFactor: "FONASA/BPS social contributions (~15–18%) not included; 7-year territorial exemption may apply.",
-    note: `Effective rate ${(clampRate(rate) * 100).toFixed(1)}%. Brackets converted to approximate USD at 39.5 UYU/USD. FONASA health and BPS social security contributions (~15–18% on employment income) are not modelled. New residents may qualify for a 7-year territorial tax exemption on foreign-source income. Verify with a local advisor.`,
+    label: exempt ? "Uruguay, foreign-source income (territorial system)" : `Uruguay IRPF + BPS contributions (${URUGUAY_TAX_YEAR_LABEL})`,
+    missingFactor: exempt ? "Assumes all income is from outside Uruguay; Uruguayan-source pay is taxed on the local scale." : "Dependants, aguinaldo and the contribution ceiling not modelled; the contribution rates and credit come from payroll summaries.",
+    note: exempt
+      ? "Uruguay taxes only Uruguay-source income, so a remote salary paid from abroad or a foreign pension is shown as untaxed. If you earn income in Uruguay, use the employee scenario. Income must be passed in pesos."
+      : "Uses the BPS 2026 IRPF scale (0% to 7 BPC a month, then 10% to 36%, with the BPC at UYU 6,864) on pay after the employee's contributions (retirement 15%, health 3% to 4.5%, FRL 0.125%), less a credit of 8% to 14% of those contributions. Not modelled: dependants' deductions, the thirteenth-month pay and new-resident tax holidays. Income must be passed in pesos.",
   };
 },
 

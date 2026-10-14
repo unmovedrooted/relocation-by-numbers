@@ -1143,3 +1143,17 @@ describe("United Kingdom (GOV.UK 2026-27 rates and employee NI)", () => {
     expect(rate("GB", 125_140)).toBeCloseTo((tax + ni) / 125_140, 8);
   });
 });
+
+describe("Uruguay (BPS 2026 IRPF scale in pesos, contributions, credit)", () => {
+  it("UYU 3,600,000 a year employee", () => {
+    // monthly 300,000: contributions 45,000 + 13,242.60 + 375 = 58,617.60; base 241,382.40; scale 40,783.20; credit 8% x 58,617.60
+    const contributions = 45_000 + (0.03 * 17_160 + 0.045 * (300_000 - 17_160)) + 375;
+    const base = 300_000 - contributions;
+    const tax = 0.10 * (68_640 - 48_048) + 0.15 * (102_960 - 68_640) + 0.24 * (205_920 - 102_960) + 0.25 * (base - 205_920);
+    expect(rate("UY", 3_600_000)).toBeCloseTo((tax - 0.08 * contributions + contributions) / 300_000, 8);
+  });
+
+  it("a foreign pension is untaxed", () => {
+    expect(rate("UY", 3_600_000, "retired")).toBe(0);
+  });
+});
