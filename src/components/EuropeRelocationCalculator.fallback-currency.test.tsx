@@ -10,10 +10,11 @@ const source = readFileSync(
 
 describe("Europe relocation fallback currency contract", () => {
   it("localizes USD fallback values before storing destination inputs", () => {
-    expect(convertUsdAmountToLocal(1400, "CZ")).toBe(32480);
-    expect(convertUsdAmountToLocal(1100, "HU")).toBe(401500);
-    expect(32480 / USD_TO_LOCAL.CZ).toBe(1400);
-    expect(401500 / USD_TO_LOCAL.HU).toBe(1100);
+    // Treasury rates of exchange, 2026-09-30: 20.981 koruna and 322.34 forint per dollar
+    expect(convertUsdAmountToLocal(1400, "CZ")).toBeCloseTo(29373.4, 6);
+    expect(convertUsdAmountToLocal(1100, "HU")).toBeCloseTo(354574, 6);
+    expect(convertUsdAmountToLocal(1400, "CZ") / USD_TO_LOCAL.CZ).toBeCloseTo(1400, 9);
+    expect(convertUsdAmountToLocal(1100, "HU") / USD_TO_LOCAL.HU).toBeCloseTo(1100, 9);
     expect(source).toContain("const local = (amountUsd: number) => String(convertUsdToLocal(amountUsd, countryCode))");
   });
 

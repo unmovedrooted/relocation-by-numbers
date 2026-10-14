@@ -14,7 +14,8 @@ import {
 } from "@/lib/internationalCities";
 import { getCityDefaultsByCode } from "@/lib/internationalCityDefaults";
 import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
-import { estimateInternationalTax } from "@/lib/internationalTaxes";
+import { estimateInternationalTax, NO_US_OVERLAY, US_TAX_STATUS_KEY, usTaxAbroadAddition } from "@/lib/internationalTaxes";
+import UsTaxQuestion from "./UsTaxQuestion";
 import { USD_TO_LOCAL } from "@/lib/internationalFx";
 import {
   CARIBBEAN_COUNTRIES,
@@ -605,12 +606,24 @@ export default function CaribbeanRelocationCalculator() {
 
     const targetIsDisclaimer = targetTaxEstimate?.isDisclaimer ?? true;
     const targetConfidence   = targetTaxEstimate?.confidence   ?? ("pending" as Confidence);
-    const targetTaxNotes     = targetTaxEstimate?.notes        ?? [];
-
-    const targetAnnualTaxUsd =
+    const targetForeignTaxUsd =
       targetTaxEstimate && !targetIsDisclaimer
         ? convertLocalToUsd(targetTaxEstimate.tax, toCountry)
         : 0;
+
+    // U.S. citizens and green-card holders still owe U.S. tax on worldwide income.
+    const usAbroad =
+      conditionalAnswers[US_TAX_STATUS_KEY] === "yes" && !NO_US_OVERLAY.has(toCountry) && !targetIsDisclaimer
+        ? usTaxAbroadAddition({
+            countryCode: toCountry,
+            annualIncome: convertUsdToLocal(annualIncome, toCountry),
+            filing,
+            incomeScenario,
+            foreignTaxUsd: targetForeignTaxUsd,
+          })
+        : null;
+    const targetAnnualTaxUsd = targetForeignTaxUsd + (usAbroad?.addedUsd ?? 0);
+    const targetTaxNotes = [...(targetTaxEstimate?.notes ?? []), ...(usAbroad ? [usAbroad.note] : [])];
 
     const targetTaxRate       = annualIncome > 0 ? targetAnnualTaxUsd / annualIncome : 0;
     const currentAnnualTaxUsd = annualIncome * currentTaxRate;
@@ -1337,6 +1350,14 @@ const relativeDifference =
         <div className="space-y-3">
 
           <RelocationVerdict results={results} toCityLabel={toCityLabel} displayAmount={displayAmount} />
+          <UsTaxQuestion
+            countryCode={toCountry}
+            countryName={getCaribbeanCountryByCode(toCountry)?.name ?? toCountry}
+            value={conditionalAnswers[US_TAX_STATUS_KEY] ?? ""}
+            onChange={(v) => setConditionalAnswers((prev) => ({ ...prev, [US_TAX_STATUS_KEY]: v }))}
+            selectClassName={selectCls}
+          />
+
           <VisaContextCard countryCode={toCountry} />
 
           {/* Main results */}

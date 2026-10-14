@@ -38,6 +38,9 @@ export const FEDERAL_2026 = Object.freeze({
   } as Record<FilingStatus, Bracket[]>,
 });
 
+/** IRS Rev. Proc. 2025-32, section 3.39: the foreign earned income exclusion for taxable years beginning in 2026 (IRC 911(b)(2)(D)(i)), per qualifying person. */
+export const FOREIGN_EARNED_INCOME_EXCLUSION_2026 = 132_900;
+
 /** IRS Publication 15 (2026) for the wage base; rates are statutory (IRC 3101, 3111); Additional Medicare thresholds per the Instructions for Form 8959. */
 export const PAYROLL_2026 = Object.freeze({
   source: "IRS Publication 15 (2026); Instructions for Form 8959",

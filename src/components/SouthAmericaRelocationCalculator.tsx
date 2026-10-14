@@ -5,6 +5,8 @@ import CalculatorImmediateNumberField from "./calculator-form/CalculatorImmediat
 import CalculatorSelect from "./calculator-form/CalculatorSelect";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import FireAbroadLink from "./FireAbroadLink";
+import UsTaxQuestion from "./UsTaxQuestion";
+import { US_TAX_STATUS_KEY } from "@/lib/internationalTaxes";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
 import {
   INTERNATIONAL_COUNTRIES,
@@ -285,6 +287,7 @@ function SouthAmericaRelocationCalculatorContent({ initialSearch, urlReady }: { 
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
 
   const [mode, setMode] = useState<Mode>(initial.mode);
+  const [usTaxStatus, setUsTaxStatus] = useState("");
   const [salary, setSalary] = useState<string>(initial.salary);
   const [retirementIncome, setRetirementIncome] = useState<string>(initial.retirementIncome);
   const [filing, setFiling] = useState<FilingStatus>(initial.filing);
@@ -477,7 +480,7 @@ const grossMonthly = annualIncome / 12;
     const annualIncomeForToTax = convertUsdToLocal(annualIncome, toCountry);
 
     const currentTaxEstimate = estimateInternationalTax({ countryCode: fromCountry, annualIncome: annualIncomeForFromTax, filing, isRetired: mode === "retired" });
-    const targetTaxEstimate = estimateInternationalTax({ countryCode: toCountry, annualIncome: annualIncomeForToTax, filing, isRetired: mode === "retired" });
+    const targetTaxEstimate = estimateInternationalTax({ countryCode: toCountry, annualIncome: annualIncomeForToTax, filing, isRetired: mode === "retired", answers: { [US_TAX_STATUS_KEY]: usTaxStatus } });
 
     const currentTaxRate = currentTaxEstimate.effectiveRate;
     const targetTaxRate = targetTaxEstimate.effectiveRate;
@@ -600,7 +603,7 @@ relativeDifference,
 recommendation,
     };
   }, [
-    mode, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
+    mode, usTaxStatus, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
     fromCityMultipliers, toCityMultipliers, currentCityDefaults, targetCityDefaults,
     adults, children, needCar, carCostMonthly, furnished, utilitiesIncluded, utilities, destinationRent,
     groceries, transportation, healthcare, depositRequired, firstMonthRent, lastMonthRent,
@@ -783,6 +786,8 @@ recommendation,
               <CalculatorImmediateNumberField id="south-america-children" label="Number of children" className={inputCls} value={children} onChange={setChildren} placeholder=" " />
             </div>
           </div>
+
+          <UsTaxQuestion countryCode={toCountry} countryName={getCountryByCode(toCountry)?.name ?? toCountry} value={usTaxStatus} onChange={setUsTaxStatus} selectClassName={selectCls} />
 
           <VisaContextCard countryCode={toCountry} />
 

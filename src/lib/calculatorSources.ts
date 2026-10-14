@@ -24,8 +24,15 @@ const HOUSING_NOTE =
   "City rent, home-price and property-tax defaults come from the Census Bureau American Community Survey 2020-2024 (tables B25113, B25109, B25058, B25064, B25077 and B25103). City price levels for housing, goods, utilities and other services come from BEA Regional Price Parities 2024. Insurance and closing-cost defaults, and the dollar budgets for groceries, utilities, transportation, healthcare and childcare, are planning assumptions, not government data; the price-level indexes only scale them by city.";
 const MOVE_NOTE =
   "The move comparison subtracts what the household keeps now from what it would keep after the move, and splits the change into pay, taxes, housing and other costs. First-year impact is twelve months of that change minus the one-time costs that are spent; a refundable deposit and a down payment count toward cash needed but not toward cost. Ranges move only the figures this site estimated, by 10% for housing, 15% for living costs and 25% for one-time costs. Those spreads, the one-time cost defaults and the living-cost budgets are planning assumptions, not government data.";
+const TREASURY_FX: SourceRef = { label: "U.S. Treasury Reporting Rates of Exchange, as of September 30, 2026 (exchange rates)", url: "https://fiscaldata.treasury.gov/datasets/treasury-reporting-rates-exchange/treasury-reporting-rates-of-exchange" };
+const FEIE_2026: SourceRef = { label: "IRS Rev. Proc. 2025-32, section 3.39: 2026 foreign earned income exclusion ($132,900)", url: "https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" };
+const INTERNATIONAL_SOURCES = [TREASURY_FX, FEIE_2026, RP_2025_32] as const;
 const INTERNATIONAL_NOTE =
-  "International tax and cost figures are planning assumptions last reviewed in March 2026. They were not part of the October 2026 U.S. tax refresh; verify them locally before a major decision.";
+  "Exchange rates are the U.S. Treasury's quarterly reporting rates (September 30, 2026), not live market rates. U.S. tax uses the 2026 IRS figures. Tax rules for other countries are 2024 and 2025 figures from the sources named in the code (each country's tax authority, OECD and PwC summaries), last reviewed in March 2026, and many are labeled simplified. Rent, grocery, utility, transport, healthcare and setup defaults are planning estimates labeled 'City default estimate': they are not from a government statistical source. Verify them locally before a major decision.";
+const INTERNATIONAL_EXCLUSIONS = [
+  "Planning estimates only; visa, residency and tax-treaty effects are not modeled in full.",
+  "U.S. tax owed while living abroad (for citizens and green-card holders) is added only when you answer Yes to the U.S. tax question: 2026 federal brackets, the foreign earned income exclusion for wages and a credit for foreign tax. U.S. self-employment, Social Security and state taxes, treaties and totalization agreements are not modeled.",
+];
 
 const US_TAX_EXCLUSIONS = [
   "Wages only: no self-employment, investment, capital-gain or other non-wage income.",
@@ -109,13 +116,13 @@ export const CALCULATOR_INFO: Readonly<Record<string, CalculatorInfo>> = Object.
     exclusions: ["Does not model income-tax effects (mortgage-interest or SALT deductions, investment taxes), PMI or moving costs.", "Results are highly sensitive to the appreciation and investment-return assumptions."] },
   "/housing-affordability-calculator": { name: "Housing Affordability", taxDriven: false, sources: [], notes: [HOUSING_NOTE],
     exclusions: ["A planning guideline, not lending advice; PMI is estimated automatically when the down payment is below 20%."] },
-  "/compare-cities": { name: "Compare Cities Side by Side", taxDriven: false, sources: [], notes: [INTERNATIONAL_NOTE],
-    exclusions: ["Housing and living costs use each destination's typical values and tax uses a simplified estimate; use the matching regional calculator for a country-specific breakdown.", "Tax assumes remote or foreign-sourced income where applicable."] },
-  "/international-relocation": { name: "International Relocation", taxDriven: false, sources: [], notes: [INTERNATIONAL_NOTE], exclusions: ["Planning estimates only; visa, residency and tax-treaty effects are not modeled in full."] },
-  "/europe-relocation-calculator": { name: "Europe Relocation", taxDriven: false, sources: [], notes: [INTERNATIONAL_NOTE], exclusions: ["Planning estimates only; visa, residency and tax-treaty effects are not modeled in full."] },
-  "/asia-relocation-calculator": { name: "Asia Relocation", taxDriven: false, sources: [], notes: [INTERNATIONAL_NOTE], exclusions: ["Planning estimates only; visa, residency and tax-treaty effects are not modeled in full."] },
-  "/caribbean-relocation-calculator": { name: "Caribbean Relocation", taxDriven: false, sources: [], notes: [INTERNATIONAL_NOTE], exclusions: ["Planning estimates only; visa, residency and tax-treaty effects are not modeled in full."] },
-  "/south-america-relocation-calculator": { name: "South America Relocation", taxDriven: false, sources: [], notes: [INTERNATIONAL_NOTE], exclusions: ["Planning estimates only; visa, residency and tax-treaty effects are not modeled in full."] },
+  "/compare-cities": { name: "Compare Cities Side by Side", taxDriven: false, sources: INTERNATIONAL_SOURCES, notes: [INTERNATIONAL_NOTE],
+    exclusions: ["U.S. tax owed while living abroad is not included here; the regional calculators ask about it.", "Housing and living costs use each destination's typical values and tax uses a simplified estimate; use the matching regional calculator for a country-specific breakdown.", "Tax assumes remote or foreign-sourced income where applicable."] },
+  "/international-relocation": { name: "International Relocation", taxDriven: false, sources: INTERNATIONAL_SOURCES, notes: [INTERNATIONAL_NOTE], exclusions: INTERNATIONAL_EXCLUSIONS },
+  "/europe-relocation-calculator": { name: "Europe Relocation", taxDriven: false, sources: INTERNATIONAL_SOURCES, notes: [INTERNATIONAL_NOTE], exclusions: INTERNATIONAL_EXCLUSIONS },
+  "/asia-relocation-calculator": { name: "Asia Relocation", taxDriven: false, sources: INTERNATIONAL_SOURCES, notes: [INTERNATIONAL_NOTE], exclusions: INTERNATIONAL_EXCLUSIONS },
+  "/caribbean-relocation-calculator": { name: "Caribbean Relocation", taxDriven: false, sources: INTERNATIONAL_SOURCES, notes: [INTERNATIONAL_NOTE], exclusions: INTERNATIONAL_EXCLUSIONS },
+  "/south-america-relocation-calculator": { name: "South America Relocation", taxDriven: false, sources: INTERNATIONAL_SOURCES, notes: [INTERNATIONAL_NOTE], exclusions: INTERNATIONAL_EXCLUSIONS },
 });
 
 /**

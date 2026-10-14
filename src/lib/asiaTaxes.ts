@@ -15,6 +15,8 @@
 // Tax Summaries, and each country's official tax authority publications.
 // ---------------------------------------------------------------------------
 
+import { NO_US_OVERLAY, US_TAX_STATUS_KEY, US_TAX_STATUS_QUESTION, withUsTaxAbroad } from "./internationalTaxes";
+
 export type FilingStatus = "single" | "married";
 
 export type IncomeScenario = "local" | "remote" | "retired";
@@ -1088,11 +1090,11 @@ export function getAsiaTaxQuestionsForCountry(
   countryCode: string,
   incomeScenario: IncomeScenario
 ): ConditionalQuestion[] {
-  const questions = ASIA_TAX_QUESTIONS[countryCode] ?? [];
-  return questions.filter((q) => {
+  const questions = (ASIA_TAX_QUESTIONS[countryCode] ?? []).filter((q) => {
     if (!q.when?.incomeScenario) return true;
     return q.when.incomeScenario.includes(incomeScenario);
   });
+  return NO_US_OVERLAY.has(countryCode) ? questions : [...questions, US_TAX_STATUS_QUESTION];
 }
 
 // ---------------------------------------------------------------------------
@@ -1120,7 +1122,11 @@ export function estimateAsiaTax({
     note: "Tax model not yet configured for this country.",
   };
 }
-  return estimator({ annualIncome, filing, isRetired, incomeScenario, answers });
+  const base = estimator({ annualIncome, filing, isRetired, incomeScenario, answers });
+  if (answers[US_TAX_STATUS_KEY] === "yes" && !NO_US_OVERLAY.has(countryCode)) {
+    return { ...base, ...withUsTaxAbroad(base, countryCode, annualIncome, filing, incomeScenario) };
+  }
+  return base;
 }
 
 // ---------------------------------------------------------------------------

@@ -130,11 +130,14 @@ describe("Europe calculator URL state", () => {
       state.depositRequired, state.firstMonthRent, state.lastMonthRent, state.visaCost, state.flightCost,
       state.shippingCost, state.temporaryStay, state.adminFees, state.furnitureSetup, state.emergencyCashBuffer,
     ].reduce((sum, value) => sum + Number(value), 0) / rate;
-    expect(rent).toBeCloseTo(2588.235294, 6);
-    expect(utilities).toBeCloseTo(176.470588, 6);
-    expect(living).toBeCloseTo(688.235294, 6);
-    expect(housing).toBeCloseTo(2764.705882, 6);
-    expect(upfront).toBeCloseTo(19058.823529, 6);
+    // The Lisbon defaults are euro amounts (rent 2,200; utilities 150; groceries, transport and healthcare 585;
+    // upfront costs 16,200), converted at the Treasury rate of 0.881 euro per dollar (2026-09-30).
+    expect(rate).toBe(0.881);
+    expect(rent).toBeCloseTo(2200 / 0.881, 6);
+    expect(utilities).toBeCloseTo(150 / 0.881, 6);
+    expect(living).toBeCloseTo(585 / 0.881, 6);
+    expect(housing).toBeCloseTo(2350 / 0.881, 6);
+    expect(upfront).toBeCloseTo(16200 / 0.881, 6);
     for (const result of [rent, utilities, living, housing, upfront]) {
       expect(Number.isFinite(result)).toBe(true);
     }

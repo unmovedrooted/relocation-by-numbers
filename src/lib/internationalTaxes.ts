@@ -20,6 +20,9 @@
 // Worldwide Tax Summaries, and each country's official tax authority.
 // ---------------------------------------------------------------------------
 
+import { FEDERAL_2026, PAYROLL_2026, FOREIGN_EARNED_INCOME_EXCLUSION_2026 } from "./taxYear2026";
+import { USD_TO_LOCAL } from "./internationalFx";
+
 export type FilingStatus = "single" | "married";
 
 export type IncomeScenario = "local" | "remote" | "retired";
@@ -162,58 +165,30 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
   // Federal brackets are applied to TAXABLE income (after std deduction).
   // -------------------------------------------------------------------------
   US: ({ annualIncome, filing, isRetired }) => {
-    // 2025 standard deductions (OBBB-adjusted)
-    const standardDeduction = filing === "married" ? 31500 : 15750;
+    // 2026 figures from IRS Rev. Proc. 2025-32 and Publication 15 (see taxYear2026.ts).
+    const standardDeduction = FEDERAL_2026.standardDeduction[filing];
     const taxable = Math.max(0, annualIncome - standardDeduction);
-
-    // 2025 IRS federal brackets (taxable income thresholds)
-    const brackets =
-      filing === "married"
-        ? [
-          { upTo: 23850, rate: 0.10 },
-          { upTo: 96950, rate: 0.12 },
-          { upTo: 206700, rate: 0.22 },
-          { upTo: 394600, rate: 0.24 },
-          { upTo: 501050, rate: 0.32 },
-          { upTo: 751600, rate: 0.35 },
-          { upTo: Infinity, rate: 0.37 },
-        ]
-        : [
-          { upTo: 11925, rate: 0.10 },
-          { upTo: 48475, rate: 0.12 },
-          { upTo: 103350, rate: 0.22 },
-          { upTo: 197300, rate: 0.24 },
-          { upTo: 250525, rate: 0.32 },
-          { upTo: 626350, rate: 0.35 },
-          { upTo: Infinity, rate: 0.37 },
-        ];
-
-    const federalTaxAmount = progressiveTax(taxable, brackets) * taxable;
+    const federalTaxAmount = progressiveTax(taxable, FEDERAL_2026.brackets[filing]) * taxable;
     const federalEffectiveRate = annualIncome > 0 ? federalTaxAmount / annualIncome : 0;
 
     let payrollEffectiveRate = 0;
-
     if (!isRetired && annualIncome > 0) {
-      // 2025 SS wage base
-      const socialSecurityWageBase = 176100;
-      const socialSecurityTax = Math.min(annualIncome, socialSecurityWageBase) * 0.062;
-      const medicareTax = annualIncome * 0.0145;
-      const additionalMedicareThreshold = filing === "married" ? 250000 : 200000;
+      const socialSecurityTax = Math.min(annualIncome, PAYROLL_2026.socialSecurityWageBase) * PAYROLL_2026.socialSecurityRate;
+      const medicareTax = annualIncome * PAYROLL_2026.medicareRate;
       const additionalMedicareTax =
-        Math.max(0, annualIncome - additionalMedicareThreshold) * 0.009;
-      payrollEffectiveRate =
-        (socialSecurityTax + medicareTax + additionalMedicareTax) / annualIncome;
+        Math.max(0, annualIncome - PAYROLL_2026.additionalMedicareThreshold[filing]) * PAYROLL_2026.additionalMedicareRate;
+      payrollEffectiveRate = (socialSecurityTax + medicareTax + additionalMedicareTax) / annualIncome;
     }
 
     return {
       effectiveRate: clampRate(federalEffectiveRate + payrollEffectiveRate),
       model: "progressive-country",
       confidence: "partial",
-      label: isRetired ? "US federal estimate (2025)" : "US federal + payroll estimate (2025)",
+      label: isRetired ? "US federal estimate (2026)" : "US federal + payroll estimate (2026)",
       missingFactor: "State income tax not included, adds 0–13% depending on state.",
       note: isRetired
-        ? "Brackets and standard deduction are exact 2025 IRS figures (OBBB-adjusted). State and local taxes are not included, these add 0–13% depending on state and can materially change the result."
-        : "Brackets and standard deduction are exact 2025 IRS figures (OBBB-adjusted). Payroll taxes included (SS 6.2% up to $176,100, Medicare 1.45%, Additional Medicare 0.9% above threshold). State and local taxes are not included, these add 0–13% depending on state.",
+        ? "Brackets and standard deduction are the 2026 IRS figures (Rev. Proc. 2025-32). State and local taxes are not included, these add 0–13% depending on state and can materially change the result."
+        : "Brackets and standard deduction are the 2026 IRS figures (Rev. Proc. 2025-32). Payroll taxes included (Social Security 6.2% up to the $184,500 wage base, Medicare 1.45%, Additional Medicare 0.9% above the threshold). State and local taxes are not included, these add 0–13% depending on state and can materially change the result.",
     };
   },
 
@@ -2328,15 +2303,92 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
   ],
 };
 
+/** Places where the U.S. tax a person owes abroad is not modeled: the United States itself and U.S. territories, which have their own rules. */
+export const NO_US_OVERLAY = new Set(["US", "PR", "VI", "GU", "AS", "MP"]);
+
+export const US_TAX_STATUS_KEY = "us_tax_status";
+
+export const US_TAX_STATUS_QUESTION: ConditionalQuestion = {
+  key: US_TAX_STATUS_KEY,
+  label: "Do you owe U.S. income tax while living there?",
+  helpText:
+    "U.S. citizens and green-card holders are taxed by the U.S. on worldwide income wherever they live, with credits for foreign tax paid and, for wages, an exclusion up to $132,900 in 2026 (IRS Rev. Proc. 2025-32). Choose Yes to add that to the estimate.",
+  options: [
+    { value: "yes", label: "Yes, I am a U.S. citizen or green-card holder" },
+    { value: "no", label: "No" },
+  ],
+};
+
 export function getConditionalQuestionsForCountry(
   countryCode: string,
   incomeScenario: IncomeScenario
 ): ConditionalQuestion[] {
-  const questions = COUNTRY_TAX_QUESTIONS[countryCode] ?? [];
-  return questions.filter((q) => {
+  const questions = (COUNTRY_TAX_QUESTIONS[countryCode] ?? []).filter((q) => {
     if (!q.when?.incomeScenario) return true;
     return q.when.incomeScenario.includes(incomeScenario);
   });
+  return NO_US_OVERLAY.has(countryCode) ? questions : [...questions, US_TAX_STATUS_QUESTION];
+}
+
+/**
+ * U.S. federal income tax on a year's income for someone living abroad, in dollars, and the part of the income the
+ * exclusion removed. Wages (earned income) can use the foreign earned income exclusion; retirement income cannot.
+ * The excluded amount still sets the rate on the rest (the stacking rule of the Foreign Earned Income Tax Worksheet).
+ */
+export function usFederalTaxAbroad(incomeUsd: number, filing: FilingStatus, earned: boolean): { tax: number; excluded: number } {
+  const income = Math.max(0, incomeUsd);
+  const brackets = FEDERAL_2026.brackets[filing];
+  const tax = (amount: number) => progressiveTax(amount, brackets) * Math.max(0, amount);
+  const standardDeduction = FEDERAL_2026.standardDeduction[filing];
+  const excluded = earned ? Math.min(income, FOREIGN_EARNED_INCOME_EXCLUSION_2026) : 0;
+  const taxable = Math.max(0, income - excluded - standardDeduction);
+  return { tax: tax(taxable + excluded) - (excluded > 0 ? tax(excluded) : 0), excluded };
+}
+
+/**
+ * Adds the U.S. tax a citizen or green-card holder still owes. The foreign tax is credited against U.S. tax on the
+ * income that is not excluded, so the household pays the foreign tax plus any U.S. tax above it.
+ */
+export const US_TAX_ABROAD_MISSING_FACTOR = "U.S. self-employment, Social Security and state taxes are not included.";
+
+/**
+ * The U.S. tax a citizen or green-card holder owes on top of the foreign tax, in dollars, with the note that explains it.
+ * `annualIncome` is in the destination's local currency; `foreignTaxUsd` is the foreign tax already estimated.
+ */
+export function usTaxAbroadAddition(args: {
+  countryCode: string; annualIncome: number; filing: FilingStatus; incomeScenario: IncomeScenario; foreignTaxUsd: number;
+}): { addedUsd: number; note: string } {
+  const incomeUsd = args.annualIncome / (USD_TO_LOCAL[args.countryCode] ?? 1);
+  const earned = args.incomeScenario !== "retired";
+  if (!(incomeUsd > 0)) return { addedUsd: 0, note: "" };
+  const { tax: usTax, excluded } = usFederalTaxAbroad(incomeUsd, args.filing, earned);
+  const foreignOnTaxedIncome = args.foreignTaxUsd * ((incomeUsd - excluded) / incomeUsd);
+  return {
+    addedUsd: Math.max(0, usTax - foreignOnTaxedIncome),
+    note: `U.S. tax added for a citizen or green-card holder: 2026 federal brackets${earned ? `, the $${FOREIGN_EARNED_INCOME_EXCLUSION_2026.toLocaleString("en-US")} foreign earned income exclusion` : ""} and a credit for foreign tax paid. It assumes the income is one person's, that you qualify for the exclusion (bona fide residence or 330 days abroad), and that U.S. state tax does not apply; treaties, totalization agreements and the Foreign Tax Credit's category limits are not modeled.`,
+  };
+}
+
+export function withUsTaxAbroad(
+  base: TaxEstimateResult,
+  countryCode: string,
+  annualIncome: number,
+  filing: FilingStatus,
+  incomeScenario: IncomeScenario,
+): TaxEstimateResult {
+  const incomeUsd = annualIncome / (USD_TO_LOCAL[countryCode] ?? 1);
+  if (!(incomeUsd > 0)) return base;
+  const foreignTaxUsd = base.effectiveRate * incomeUsd;
+  const { addedUsd, note } = usTaxAbroadAddition({ countryCode, annualIncome, filing, incomeScenario, foreignTaxUsd });
+  const confidence: TaxConfidence = base.confidence === "verified" ? "partial" : base.confidence;
+  return {
+    ...base,
+    effectiveRate: clampRate((foreignTaxUsd + addedUsd) / incomeUsd),
+    confidence,
+    label: `${base.label} + U.S. tax`,
+    missingFactor: US_TAX_ABROAD_MISSING_FACTOR,
+    note: `${base.note} ${note}`,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -2365,13 +2417,17 @@ export function estimateInternationalTax({
     };
   }
 
-  return estimator({
+  const base = estimator({
     annualIncome,
     filing,
     isRetired,
     incomeScenario,
     answers,
   });
+  if (answers[US_TAX_STATUS_KEY] === "yes" && !NO_US_OVERLAY.has(countryCode)) {
+    return withUsTaxAbroad(base, countryCode, annualIncome, filing, incomeScenario);
+  }
+  return base;
 }
 
 export function getTaxModelStatus(countryCode: string): {
