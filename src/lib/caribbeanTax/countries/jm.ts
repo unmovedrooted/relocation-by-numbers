@@ -52,11 +52,11 @@ export const JM_TAX_CONFIG: CountryTaxConfig = {
       notes: [
         "Jamaica local earned income is modeled using the resident personal income tax schedule.",
         "This calculator uses the annual tax-free threshold of JMD 1,902,360 that Tax Administration Jamaica announced effective April 1, 2026 (up from JMD 1,799,376). Averaged over calendar 2026 the threshold works out to about JMD 1,876,614, and the Government's stated target is JMD 2,000,000.",
-        "Chargeable income up to JMD 6 million is taxed at 25%, and chargeable income above JMD 6 million is taxed at 30%. This estimate does not model NIS, NHT, or education tax.",
+        "Income up to JMD 6 million is taxed at 25% after the tax-free threshold, and income above JMD 6 million is taxed at 30%; the 6 million boundary is measured on income before the threshold is deducted. This estimate does not model NIS, NHT, or education tax.",
       ],
       getAllowance: () => 1902360,
       getBrackets: () => [
-        { upTo: 6000000, rate: 0.25 },
+        { upTo: 6000000 - 1902360, rate: 0.25 }, // the JMD 6,000,000 boundary is on income before the allowance (TAJ: 30% applies to aggregate income above 6 million)
         { upTo: null, rate: 0.30 },
       ],
       sources: [
@@ -91,7 +91,7 @@ export const JM_TAX_CONFIG: CountryTaxConfig = {
       ],
       getAllowance: () => 1902360,
       getBrackets: () => [
-        { upTo: 6000000, rate: 0.25 },
+        { upTo: 6000000 - 1902360, rate: 0.25 }, // the JMD 6,000,000 boundary is on income before the allowance (TAJ: 30% applies to aggregate income above 6 million)
         { upTo: null, rate: 0.30 },
       ],
       sources: [
@@ -117,7 +117,7 @@ export const JM_TAX_CONFIG: CountryTaxConfig = {
       ],
       getAllowance: () => 1902360,
       getBrackets: () => [
-        { upTo: 6000000, rate: 0.25 },
+        { upTo: 6000000 - 1902360, rate: 0.25 }, // the JMD 6,000,000 boundary is on income before the allowance (TAJ: 30% applies to aggregate income above 6 million)
         { upTo: null, rate: 0.30 },
       ],
       sources: [

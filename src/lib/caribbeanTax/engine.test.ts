@@ -91,4 +91,11 @@ describe("estimateScenarioTax", () => {
       }
     }
   })
+
+  it("Jamaica: 25% above the JMD 1,902,360 threshold up to JMD 6m of income, 30% above 6m (TAJ aggregate-income rule)", () => {
+    const config = getCountryTaxConfig("JM")!
+    const tax = (income: number) => estimateScenarioTax({ config, scenario: "local", grossIncomeLocalCurrency: income }).tax
+    expect(tax(6_000_000)).toBeCloseTo((6_000_000 - 1_902_360) * 0.25, 2)
+    expect(tax(10_000_000)).toBeCloseTo((6_000_000 - 1_902_360) * 0.25 + 4_000_000 * 0.30, 2)
+  })
 })

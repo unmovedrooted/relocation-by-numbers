@@ -164,3 +164,7 @@ No commit or push performed.
 ## Decision on Finding 2 (2026-10-14)
 
 The owner chose to keep the standard deduction and disclose it. The retirement, RMD and withdrawal calculators now say the age-65 extra deduction and the temporary senior deduction are not applied, so tax may be overstated. The Complete Plan engine still applies them.
+
+## Resolution of Finding 1 (2026-10-14)
+
+Fixed in `src/lib/caribbeanTax/countries/jm.ts`: the 25% band now ends at JMD 6,000,000 minus the allowance (JMD 4,097,640 of taxable income), so the 30% rate starts at JMD 6m of income before the threshold. Basis: the TAJ press release on the 30% rate (FY2016/17, 30% applies to aggregate income above JMD 6 million, with a worked example) and the PwC Worldwide Tax Summary for Jamaica (income above JMD 6 million per year taxed at 30%). TAJ's 2025 technical advisory was retrieved but its text is not machine-readable, so the 2016 wording remains the only official statement read; the JMD 6m boundary has not been reported as changed. All four audit rows now show a zero difference, and a regression test was added to `src/lib/caribbeanTax/engine.test.ts`.
