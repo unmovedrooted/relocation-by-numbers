@@ -67,7 +67,9 @@ export default function PrivacyPage() {
             At that time, the site sends the financial assumptions needed to produce
             the report to our AI provider. These may include age, state, filing status,
             income, spending, savings rate, projected FIRE age, withdrawal assumptions,
-            and balances by account type. The information is used to create the report
+            return and inflation assumptions, yearly contributions, the calculator
+            you used (standard, Lean, Coast or Barista FIRE) with its settings such as
+            the Coast age or expected part-time income, and balances by account type. The information is used to create the report
             you requested.
           </p>
           <p>

@@ -24,6 +24,22 @@ export type FireReportInputs = {
   savingsRatePct: number;
   income: number;
   targetRetirementAge?: number;
+  /** Which calculator produced the numbers, so the report is read the right way (a Barista number is not a standard one). */
+  mode?: "standard" | "lean" | "coast" | "barista";
+  preset?: "chubby" | "fat";
+  coastAge?: number;
+  coastNumber?: number | null;
+  coastReady?: boolean;
+  yearsToCoast?: number | null;
+  baristaPartTimeIncome?: number;
+  /** Return and inflation assumptions, and how saving is configured. */
+  volatility?: "conservative" | "moderate" | "aggressive";
+  inflationPct?: number;
+  advanced?: boolean;
+  yearlyInvestment?: number;
+  contrib401k?: number;
+  contribIra?: number;
+  contribBrokerage?: number;
 };
 
 type Status = "idle" | "loading" | "streaming" | "done" | "error";
@@ -139,7 +155,9 @@ export default function FireReport({ inputs }: { inputs: FireReportInputs }) {
             </p>
             <p className="text-xs leading-5 text-slate-500">
               When you continue, your age, location, income, spending, tax assumptions,
-              and account balances shown here are sent to our AI provider solely to
+              account balances, the calculator mode and its settings (such as Coast age or
+              Barista part-time income), return and inflation assumptions, and yearly
+              contributions shown here are sent to our AI provider solely to
               generate this report. Do not include information you do not want transmitted.
             </p>
           </div>

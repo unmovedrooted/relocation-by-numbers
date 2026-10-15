@@ -1571,7 +1571,22 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
   savingsRatePct:       Math.round(savingsRate * 100),
   income:               inputs.income,
   targetRetirementAge:  inputs.targetRetirementAge,
-}), [inputs, fiAge, result.yearsToFI, netAnnual, savingsRate]);
+  mode,
+  ...(spendingPreset ? { preset: spendingPreset } : {}),
+  ...(mode === "coast" ? {
+    coastAge: inputs.coastAge,
+    coastNumber: coastFireNumber !== null && Number.isFinite(coastFireNumber) ? Math.round(coastFireNumber) : null,
+    coastReady: isCoastReady,
+    yearsToCoast,
+  } : {}),
+  ...(mode === "barista" ? { baristaPartTimeIncome: inputs.baristaPartTimeIncome } : {}),
+  volatility:           inputs.volatility,
+  inflationPct:         inputs.inflationPct,
+  advanced:             inputs.advanced,
+  ...(inputs.advanced
+    ? { contrib401k: inputs.contrib401k, contribIra: inputs.contribIra, contribBrokerage: inputs.contribBrokerage }
+    : { yearlyInvestment: inputs.yearlyInvestment }),
+}), [inputs, fiAge, result.yearsToFI, netAnnual, savingsRate, mode, spendingPreset, coastFireNumber, isCoastReady, yearsToCoast]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // SHARE HANDLER

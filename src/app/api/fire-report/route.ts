@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { buildPrompt, type ReportInputs } from "../../../lib/fireReportPrompt";
 
 const MAX_BODY_BYTES = 16_384;
 const PROVIDER_TIMEOUT_MS = 25_000;
@@ -16,29 +17,23 @@ const REQUIRED_KEYS = [
   "balBrokerage", "taxTreatment401k", "taxTreatmentIra", "netAnnual",
   "currentPortfolio", "savingsRatePct", "income",
 ] as const;
-const OPTIONAL_KEYS = ["targetRetirementAge"] as const;
+const OPTIONAL_KEYS = [
+  "targetRetirementAge", "mode", "preset", "coastAge", "coastNumber", "coastReady", "yearsToCoast",
+  "baristaPartTimeIncome", "volatility", "inflationPct", "advanced", "yearlyInvestment",
+  "contrib401k", "contribIra", "contribBrokerage",
+] as const;
 const ALLOWED_KEYS = new Set<string>([...REQUIRED_KEYS, ...OPTIONAL_KEYS]);
 
-type ReportInputs = {
-  age: number;
-  state: string;
-  filingStatus: "single" | "married";
-  fireAge: number | null;
-  yearsToFI: number | null;
-  expensesMonthly: number;
-  withdrawalRatePct: number;
-  withdrawalTaxRatePct: number;
-  bal401k: number;
-  balIra: number;
-  balBrokerage: number;
-  taxTreatment401k: "traditional" | "roth";
-  taxTreatmentIra: "traditional" | "roth";
-  netAnnual: number;
-  currentPortfolio: number;
-  savingsRatePct: number;
-  income: number;
-  targetRetirementAge?: number;
-};
+
+
+const MODES = ["standard", "lean", "coast", "barista"] as const;
+const PRESETS = ["chubby", "fat"] as const;
+const VOLATILITIES = ["conservative", "moderate", "aggressive"] as const;
+
+function oneOf<T extends string>(value: unknown, allowed: readonly T[], name: string): T {
+  if (typeof value !== "string" || !(allowed as readonly string[]).includes(value)) throw new Error(`Invalid ${name}`);
+  return value as T;
+}
 
 const safeHeaders = {
   "Cache-Control": "no-store",
@@ -94,7 +89,26 @@ function parseInputs(value: unknown): ReportInputs {
     ? undefined
     : boundedNumber(body.targetRetirementAge, "targetRetirementAge", 18, 100) as number;
 
+  const optional = <T,>(key: string, read: () => T): { [k: string]: T } | Record<string, never> =>
+    body[key] === undefined ? {} : { [key]: read() };
+  if (body.coastReady !== undefined && typeof body.coastReady !== "boolean") throw new Error("Invalid coastReady");
+  if (body.advanced !== undefined && typeof body.advanced !== "boolean") throw new Error("Invalid advanced");
+
   return {
+    ...optional("mode", () => oneOf(body.mode, MODES, "mode")),
+    ...optional("preset", () => oneOf(body.preset, PRESETS, "preset")),
+    ...optional("volatility", () => oneOf(body.volatility, VOLATILITIES, "volatility")),
+    ...optional("coastAge", () => boundedNumber(body.coastAge, "coastAge", 18, 100) as number),
+    ...optional("coastNumber", () => boundedNumber(body.coastNumber, "coastNumber", 0, 3_000_000_000, true)),
+    ...optional("yearsToCoast", () => boundedNumber(body.yearsToCoast, "yearsToCoast", 0, 100, true)),
+    ...optional("coastReady", () => body.coastReady as boolean),
+    ...optional("advanced", () => body.advanced as boolean),
+    ...optional("baristaPartTimeIncome", () => boundedNumber(body.baristaPartTimeIncome, "baristaPartTimeIncome", 0, 10_000_000) as number),
+    ...optional("inflationPct", () => boundedNumber(body.inflationPct, "inflationPct", -10, 50) as number),
+    ...optional("yearlyInvestment", () => boundedNumber(body.yearlyInvestment, "yearlyInvestment", 0, 100_000_000) as number),
+    ...optional("contrib401k", () => boundedNumber(body.contrib401k, "contrib401k", 0, 100_000_000) as number),
+    ...optional("contribIra", () => boundedNumber(body.contribIra, "contribIra", 0, 100_000_000) as number),
+    ...optional("contribBrokerage", () => boundedNumber(body.contribBrokerage, "contribBrokerage", 0, 100_000_000) as number),
     age: boundedNumber(body.age, "age", 18, 100) as number,
     state: body.state.toLowerCase(),
     filingStatus: body.filingStatus,
@@ -188,37 +202,6 @@ async function readBoundedBody(request: Request): Promise<string> {
     result += decoder.decode(value, { stream: true });
   }
   return result + decoder.decode();
-}
-
-function buildPrompt(inputs: ReportInputs): string {
-  const annualSpend = inputs.expensesMonthly * 12;
-  const fireNumber = annualSpend / (inputs.withdrawalRatePct / 100);
-  const totalPortfolio = inputs.bal401k + inputs.balIra + inputs.balBrokerage || inputs.currentPortfolio;
-  const alreadyFI = (inputs.yearsToFI ?? 1) <= 0;
-  const yearsToMedicare = Math.max(0, 65 - (inputs.fireAge ?? inputs.age));
-  const yearsToRMD = Math.max(0, 73 - (inputs.fireAge ?? inputs.age));
-
-  return `Generate a personalized withdrawal strategy report for this person:
-
-**Situation:**
-- Age ${inputs.age}, filing ${inputs.filingStatus}, state ${inputs.state.toUpperCase()}
-- Gross income $${inputs.income.toLocaleString()}/yr; net $${Math.round(inputs.netAnnual).toLocaleString()}/yr
-- Savings rate ${inputs.savingsRatePct}%; monthly spending $${inputs.expensesMonthly.toLocaleString()}
-- FIRE number $${Math.round(fireNumber).toLocaleString()} at ${inputs.withdrawalRatePct}%
-- ${alreadyFI ? `Already financially independent; FIRE age ${inputs.fireAge}` : `Projected FIRE age ${inputs.fireAge}; ${inputs.yearsToFI} years away`}
-
-**Portfolio:**
-- 401(k), ${inputs.taxTreatment401k}: $${inputs.bal401k.toLocaleString()}
-- IRA, ${inputs.taxTreatmentIra}: $${inputs.balIra.toLocaleString()}
-- Taxable brokerage: $${inputs.balBrokerage.toLocaleString()}
-- Total: $${totalPortfolio.toLocaleString()}; estimated traditional-account withdrawal tax ${inputs.withdrawalTaxRatePct}%
-
-**Timeline:** ${yearsToMedicare} years to Medicare and ${yearsToRMD} years to RMDs.
-${inputs.targetRetirementAge ? `Target retirement age: ${inputs.targetRetirementAge}.` : ""}
-
-Cover withdrawal order, Roth conversion opportunities, tax-bracket management,
-the healthcare bridge, first-five-year sequence risk, and the three largest risks.
-Use only the supplied values and do not infer identifying information.`;
 }
 
 export async function POST(request: Request) {

@@ -42,3 +42,22 @@ describe("FIRE report request validation", () => {
     expect(await response.json()).toEqual({ error: "Report service unavailable" });
   });
 });
+
+describe("FIRE report mode-aware fields", () => {
+  afterEach(() => delete process.env.ANTHROPIC_API_KEY);
+
+  it("accepts the new optional fields", async () => {
+    // Without a provider key a valid body reaches the key check and returns 503, which proves validation passed.
+    const body = { ...validBody, mode: "coast", coastAge: 40, coastNumber: 524713, coastReady: false, yearsToCoast: null,
+      volatility: "moderate", inflationPct: 2.5, advanced: false, yearlyInvestment: 12000, targetRetirementAge: 65 };
+    expect((await POST(request(body))).status).toBe(503);
+    expect((await POST(request({ ...validBody, mode: "barista", baristaPartTimeIncome: 24000, preset: "fat" }))).status).toBe(503);
+    expect((await POST(request({ ...validBody, advanced: true, contrib401k: 1, contribIra: 2, contribBrokerage: 3 }))).status).toBe(503);
+  });
+  it.each([
+    { mode: "retire" }, { preset: "huge" }, { volatility: "wild" }, { coastAge: 5 }, { coastReady: "yes" },
+    { advanced: 1 }, { baristaPartTimeIncome: -1 }, { inflationPct: 500 }, { contribIra: 1e12 }, { yearsToCoast: 500 },
+  ])("rejects invalid optional field %o", async (extra) => {
+    expect((await POST(request({ ...validBody, ...extra }))).status).toBe(400);
+  });
+});
