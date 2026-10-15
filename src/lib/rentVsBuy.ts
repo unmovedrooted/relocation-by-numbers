@@ -3,7 +3,7 @@
 //
 // Both scenarios start with the same cash (down payment + buyer closing costs).
 // The buyer spends it on the home; the renter invests it. Each month, whoever
-// has the lower housing cost invests the difference at the investment return,
+// has the lower housing cost invests the difference (at the end of each month) at the investment return,
 // so the comparison is apples-to-apples. Net worth = what you'd walk away with
 // if you liquidated that month: the buyer's home equity net of selling costs
 // plus any side investments, vs. the renter's portfolio. The break-even is the
@@ -52,7 +52,7 @@ export type RentVsBuyResult = {
 
 export function simulateRentVsBuy(i: RentVsBuyInput): RentVsBuyResult {
   const months = Math.max(1, Math.round(i.years * 12));
-  const downPayment = i.homePrice * (i.downPct / 100);
+  const downPayment = i.homePrice * (Math.min(100, Math.max(0, i.downPct)) / 100);
   const closingCosts = i.homePrice * (i.buyClosingPct / 100);
   const loan0 = Math.max(0, i.homePrice - downPayment);
   const mRate = i.mortgageRatePct / 100 / 12;
@@ -92,10 +92,8 @@ export function simulateRentVsBuy(i: RentVsBuyInput): RentVsBuyResult {
     totalBuyOutOfPocket += buyCost;
     totalRentPaid += rentCost;
 
-    // Whoever pays less banks the difference.
+    // Whoever pays less banks the difference at the end of the month (the same deposit timing as the other calculators).
     const diff = buyCost - rentCost;
-    if (diff > 0) renterPortfolio += diff;
-    else buyerSide += -diff;
 
     // Amortize the loan for the month.
     const interest = loanBal * mRate;
@@ -103,8 +101,8 @@ export function simulateRentVsBuy(i: RentVsBuyInput): RentVsBuyResult {
     loanBal = Math.max(0, loanBal - principal);
 
     // Grow investments and home value.
-    renterPortfolio *= 1 + invMonthly;
-    buyerSide *= 1 + invMonthly;
+    renterPortfolio = renterPortfolio * (1 + invMonthly) + Math.max(0, diff);
+    buyerSide = buyerSide * (1 + invMonthly) + Math.max(0, -diff);
     homeValue *= 1 + apprMonthly;
 
     // Rent steps up annually.

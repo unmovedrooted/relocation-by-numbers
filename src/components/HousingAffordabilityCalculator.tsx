@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   solveMaxHomePrice,
-  monthlyHousingCost,
+  housingCostAtPrice,
   US_STATE_DEFAULTS,
 } from "../lib/housing";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
@@ -187,12 +187,12 @@ export default function HousingAffordabilityCalculator() {
     const debts = Math.max(0, nz(otherMonthlyDebts));
     const solverInputs = {
       grossMonthly,
-      downPct: nz(downPct),
-      annualRate: nz(ratePct),
+      downPct: Math.min(100, Math.max(0, nz(downPct))),
+      annualRate: Math.max(0, nz(ratePct)),
       termYears: nz(termYears),
-      propertyTaxRate: nz(propertyTaxPct),
-      insuranceMonthly: nz(insuranceMonthly),
-      hoaMonthly: nz(hoaMonthly),
+      propertyTaxRate: Math.max(0, nz(propertyTaxPct)),
+      insuranceMonthly: Math.max(0, nz(insuranceMonthly)),
+      hoaMonthly: Math.max(0, nz(hoaMonthly)),
     };
 
     const frontEndPrice = solveMaxHomePrice({ ...solverInputs, targetDTI: 28 });
@@ -206,14 +206,14 @@ export default function HousingAffordabilityCalculator() {
     const backEndPrice = solveMaxHomePrice({ ...solverInputs, targetDTI: effectiveTargetDTI });
 
     const breakdown = backEndPrice > 0
-      ? monthlyHousingCost({
+      ? housingCostAtPrice({
           homePrice: backEndPrice,
-          downPct: nz(downPct),
-          ratePct: nz(ratePct),
-          termYears: nz(termYears),
-          propertyTaxPct: nz(propertyTaxPct),
-          homeInsMonthly: nz(insuranceMonthly),
-          hoaMonthly: nz(hoaMonthly),
+          downPct: solverInputs.downPct,
+          ratePct: solverInputs.annualRate,
+          termYears: solverInputs.termYears,
+          propertyTaxPct: solverInputs.propertyTaxRate,
+          insuranceMonthly: solverInputs.insuranceMonthly,
+          hoaMonthly: solverInputs.hoaMonthly,
         })
       : null;
 
@@ -464,7 +464,10 @@ export default function HousingAffordabilityCalculator() {
                   <div className="space-y-1.5 text-sm text-slate-700 dark:text-slate-300">
                     <div className="flex justify-between"><span>Principal &amp; interest</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(buyResults.breakdown.principalInterest)}</span></div>
                     <div className="flex justify-between"><span>Property tax</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(buyResults.breakdown.propertyTax)}</span></div>
-                    <div className="flex justify-between"><span>Home insurance</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(buyResults.breakdown.homeInsurance)}</span></div>
+                    <div className="flex justify-between"><span>Home insurance (scaled to this price)</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(buyResults.breakdown.homeInsurance)}</span></div>
+                    {buyResults.breakdown.pmi > 0 && (
+                      <div className="flex justify-between"><span>Mortgage insurance (PMI)</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(buyResults.breakdown.pmi)}</span></div>
+                    )}
                     {buyResults.breakdown.hoa > 0 && (
                       <div className="flex justify-between"><span>HOA</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(buyResults.breakdown.hoa)}</span></div>
                     )}

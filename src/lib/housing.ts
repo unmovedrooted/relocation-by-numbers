@@ -158,6 +158,50 @@ export const US_STATE_DEFAULTS: Record<string, StateDefaults> = {
   dc: { name: "Washington DC",  propertyTax: 0.58, insuranceMonthly: 115, closingCostPct: 3.5 },
 };
 
+// ─── Full cost at a given price (what the affordability solver uses) ─────────
+
+/** Monthly private mortgage insurance when the down payment is below 20%: a rate of 0.7% to 1.5% a year on the loan, by loan-to-value. */
+export function estimatePmiMonthly(loan: number, price: number, downPct: number): number {
+  if (!(loan > 0) || !(price > 0) || downPct / 100 >= 0.2) return 0;
+  const ltv = loan / price;
+  const rate = ltv > 0.95 ? 0.015 : ltv > 0.9 ? 0.012 : ltv > 0.85 ? 0.009 : 0.007;
+  return (loan * rate) / 12;
+}
+
+export type HousingCostAtPriceInputs = {
+  homePrice: number;
+  downPct: number;
+  ratePct: number;
+  termYears: number;
+  propertyTaxPct: number;
+  /** Home insurance in $/month for a home priced at baseHomePrice; it scales in proportion to the price. */
+  insuranceMonthly: number;
+  hoaMonthly: number;
+  baseHomePrice?: number;
+};
+
+export type HousingCostAtPriceResult = HousingCostResult & { pmi: number };
+
+/**
+ * Every monthly cost of owning a home at one price: principal and interest, property tax, insurance (scaled from the reference
+ * price), HOA and PMI. The affordability solver finds the price where this total reaches the debt-to-income limit, and the
+ * calculator shows this same breakdown, so what is displayed always adds up to what was solved.
+ */
+export function housingCostAtPrice(i: HousingCostAtPriceInputs): HousingCostAtPriceResult {
+  const base = i.baseHomePrice ?? 400_000;
+  const core = monthlyHousingCost({
+    homePrice: i.homePrice,
+    downPct: i.downPct,
+    ratePct: i.ratePct,
+    termYears: i.termYears,
+    propertyTaxPct: i.propertyTaxPct,
+    homeInsMonthly: base > 0 ? i.insuranceMonthly * (i.homePrice / base) : i.insuranceMonthly,
+    hoaMonthly: i.hoaMonthly,
+  });
+  const pmi = estimatePmiMonthly(core.loanAmount, i.homePrice, i.downPct);
+  return { ...core, pmi, totalMonthly: core.totalMonthly + pmi };
+}
+
 // ─── Iterative affordability solver ──────────────────────────────────────────
 
 type SolveMaxHomePriceOpts = {
@@ -191,40 +235,23 @@ export function solveMaxHomePrice({
 }: SolveMaxHomePriceOpts): number {
   if (grossMonthly <= 0 || annualRate < 0 || termYears <= 0) return 0;
 
-  const dpFrac = downPct / 100;
-  const r      = annualRate / 100 / 12;
-  const n      = termYears * 12;
   let lo = 0;
   let hi = grossMonthly * 12 * 15; // ceiling = 15× annual gross income
 
   for (let i = 0; i < 60; i++) {
-    const mid  = (lo + hi) / 2;
-    const down = mid * dpFrac;
-    const loan = mid - down;
-
-    const pi  =
-      loan > 0 && r > 0
-        ? (loan * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
-        : loan > 0 ? loan / n : 0; // zero-rate loan: straight-line principal
-    const tax = (mid * (propertyTaxRate / 100)) / 12;
-    const ins = baseHomePrice > 0 ? insuranceMonthly * (mid / baseHomePrice) : insuranceMonthly;
-
-    // Auto PMI, same tiers as the main calculator
-    let pmi = 0;
-    if (dpFrac < 0.20 && loan > 0) {
-      const ltv  = loan / mid;
-      const pmiR = ltv > 0.95 ? 0.015 : ltv > 0.90 ? 0.012 : ltv > 0.85 ? 0.009 : 0.007;
-      pmi = (loan * pmiR) / 12;
-    }
-
-    const total = pi + tax + ins + hoaMonthly + pmi;
-    const dti   = (total / grossMonthly) * 100;
+    const mid = (lo + hi) / 2;
+    const total = housingCostAtPrice({
+      homePrice: mid, downPct, ratePct: annualRate, termYears,
+      propertyTaxPct: propertyTaxRate, insuranceMonthly, hoaMonthly, baseHomePrice,
+    }).totalMonthly;
+    const dti = (total / grossMonthly) * 100;
 
     if (dti <= targetDTI) lo = mid;
     else hi = mid;
   }
 
-  return Math.round(lo / 1_000) * 1_000; // round to nearest $1k
+  // Round DOWN to a whole $1,000 so the shown price never exceeds the limit it was solved for.
+  return Math.floor(lo / 1_000) * 1_000;
 }
 
 // ─── PMI cancellation with optional appreciation ──────────────────────────────
@@ -242,7 +269,7 @@ export function calcPMIDropOffWithAppreciation(
   monthlyPayment: number,
   appreciationRatePct: number = 0
 ): number | null {
-  if (!loan || !homePrice || !annualRate || !monthlyPayment) return null;
+  if (!loan || !homePrice || !(annualRate >= 0) || !monthlyPayment) return null;
   const r    = annualRate / 100 / 12;
   const appR = appreciationRatePct / 100 / 12;
   let bal  = loan;
