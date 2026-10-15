@@ -31,7 +31,7 @@ Inputs: rent 1,000; groceries 300; utilities 100; transport 50; healthcare 150; 
 | Total monthly costs | 1,600 | Matches |
 | Upfront cash including buffer | 5,550 | Matches |
 | Coverage, Europe/Asia/South America | (20,000 − 5,550) / 1,600 = 9.03125 months | Matches for USD-equivalent scenario |
-| Coverage, Caribbean | (20,000 − 4,550) / 1,600 = 9.65625 months | Matches its different buffer treatment |
+| Coverage, Caribbean | (20,000 − 4,550) / 1,600 = 9.65625 months | Matched its different buffer treatment when audited; since unified with the other regions (see Corrections applied) |
 | Two-adult/two-child groceries | 300 × 2.25 = 675 | Matches |
 | Two-adult/two-child transport | 50 × 1.65 = 82.50 | Matches |
 | Two-adult/two-child healthcare | 150 × 2.7 = 405 | Matches |
@@ -105,7 +105,7 @@ Not verified here: browser interactions, raw decimal URL round-trip for all regi
 4. Add preset/URL/browser round-trip matrices and compare regional pages with Compare Cities using identical costs and answers.
 5. Independently verify country taxes by data year against official calculators/rules. Keep that result separate from arithmetic pass counts.
 
-Files added: `src/lib/regionalOutputs.audit.test.ts` and this report. No production files edited; no commit or push.
+Files added by the audit: `src/lib/regionalOutputs.audit.test.ts` and this report. The audit itself changed no production code; the corrections below were applied afterwards.
 
 ## Corrections applied (2026-10-15)
 

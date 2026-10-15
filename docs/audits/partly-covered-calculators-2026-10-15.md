@@ -20,7 +20,7 @@ where a defect was found.
 - **Unvalidated inputs (fixed):** down payment limited to 0% to 100%; negative rates, taxes, insurance and HOA are treated as zero.
 - **Zero-rate PMI paydown with appreciation (fixed):** returned null at 0%.
 - Verified against an independent cost function in seven scenarios (maximal at $1,000, never over the limit) and against the closed-form price; the 28% front-end and 36% back-end rules; rent tiers (25%, 30%, 35%, and the 36% total-debt cap).
-- Note: three PMI estimators exist (affordability and the new relocation calculator now share one; the mortgage calculator and Compare Cities use their own). Not unified.
+- Note: this audit found several PMI estimators; they were later consolidated into one helper (see "PMI consolidated" at the end).
 
 ## Roth conversion (`RothConversionCalculator.tsx`)
 
@@ -50,7 +50,7 @@ Two long-running tests (`wageTax.test.ts` wage-cliff scan and `timeline.test.ts`
 
 ## Still not covered
 
-Compare Cities (international modes) and the Europe, Asia, Caribbean and South America output matrices; the Complete Retirement Plan against an outside review; no state or international official calculator was compared.
+Compare Cities (international modes); the Complete Retirement Plan against an outside review; no state, married-household or international official calculator was compared. (The Europe, Asia, Caribbean and South America output matrices were audited afterwards; see regional-output-matrices-2026-10-15.md. The IRS Tax Withholding Estimator was run for single filers; see release-checks-2026-10-14.md.)
 
 ## PMI consolidated (2026-10-15)
 
