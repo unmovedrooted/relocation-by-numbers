@@ -10,7 +10,7 @@ import {
   type TaxBreakdown,
 } from "../lib/wageTax";
 import type { FilingStatus } from "../lib/tax";
-import { monthlyHousingCost } from "../lib/housing";
+import { monthlyHousingCost, estimatePmiMonthly } from "../lib/housing";
 import TaxAssumptionsNote from "./TaxAssumptionsNote";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
@@ -118,17 +118,6 @@ function money(n: number, digits: number = 0) {
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
-}
-
-function estimatePMIMonthly(
-  loanAmount: number,
-  downPct: number,
-  pmiAnnualPct: number
-) {
-  if (!Number.isFinite(loanAmount) || loanAmount <= 0) return 0;
-  if (!Number.isFinite(downPct) || downPct >= 20) return 0;
-  const rate = clamp(Number.isFinite(pmiAnnualPct) ? pmiAnnualPct : 0, 0, 2.0) / 100;
-  return (loanAmount * rate) / 12;
 }
 
 function findNeededSalary(
@@ -654,7 +643,8 @@ export default function Calculator({
         termYears: n(termYears), propertyTaxPct: n(propertyTaxPct),
         homeInsMonthly: nz(homeInsMonthly), hoaMonthly: nz(hoaMonthly),
       });
-      pmiMonthly = estimatePMIMonthly(buy.loanAmount, clamp(n(downPct), 0, 100), nz(pmiAnnualPct));
+      // Manual mode: this page asks for the PMI rate, so an entered rate (including 0) is used as given.
+      pmiMonthly = estimatePmiMonthly(buy.loanAmount, n(homePrice), clamp(n(downPct), 0, 100), nz(pmiAnnualPct));
       buyTotal = buy.totalMonthly + pmiMonthly;
     }
 

@@ -3,7 +3,7 @@ import { runInNewContext } from "node:vm";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import { estimateNetAnnual, estimateNetBreakdown } from "./wageTax";
-import { monthlyHousingCost } from "./housing";
+import { monthlyHousingCost, estimatePmiMonthly } from "./housing";
 
 // Executes the main relocation calculator's real result callback and its salary solver, and checks them against independent
 // references (IRS Publication 505 2026 rate schedule for a single filer, and a closed-form payment).
@@ -25,7 +25,7 @@ function load(names: string[], memoName?: string) {
 }
 const run = (code: string, scope: Record<string, unknown>) =>
   runInNewContext(ts.transpileModule(code, { compilerOptions: { target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.React } }).outputText,
-    { process: { env: {} }, estimateNetAnnual, estimateNetBreakdown, monthlyHousingCost, STATES: [], citiesForState: () => [], findCity: () => undefined,
+    { process: { env: {} }, estimateNetAnnual, estimateNetBreakdown, monthlyHousingCost, estimatePmiMonthly, STATES: [], citiesForState: () => [], findCity: () => undefined,
       isAllowedCompareRoute: () => false, compareMove: () => null, ...scope });
 
 const nzFn = (v: string) => { const x = Number(v); return Number.isFinite(x) ? x : 0; };

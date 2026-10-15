@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
-import { solveMaxHomePrice, US_STATE_DEFAULTS } from "./housing";
+import { solveMaxHomePrice, US_STATE_DEFAULTS, estimatePmiMonthly } from "./housing";
 import { CONTRIBUTION_LIMITS_2026 } from "./taxYear2026";
 import { EMPLOYEE_401K_LIMIT, estimateNetAnnual, estimateNetBreakdown } from "./wageTax";
 import { compareMove } from "./relocationMove";
@@ -34,7 +34,7 @@ function componentFunctions(file: string, names: string[], globals: Record<strin
 }
 
 describe("additional live calculator known-answer audit", () => {
-  const mortgage = () => componentFunctions("MortgageCalculator", ["calcMonthlyPI", "calcTotalInterest", "buildSchedule", "calcRefi", "calcAutoPMI", "calcPMIDropOff", "calcBreakEven"], { US_STATE_DEFAULTS });
+  const mortgage = () => componentFunctions("MortgageCalculator", ["calcMonthlyPI", "calcTotalInterest", "buildSchedule", "calcRefi", "calcAutoPMI", "calcPMIDropOff", "calcBreakEven"], { US_STATE_DEFAULTS, estimatePmiMonthly });
   it("zero-rate rent-versus-buy comparison is valid, and the mortgage payment stops once the loan is paid off", () => {
     const result = mortgage().calcBreakEven({ downPayment: 0, closingCosts: 0, annualRate: 0,
       monthlyPI: 1000, rent: 1000, tax: 0, ins: 0, hoa: 0, homePrice: 120000,

@@ -8,6 +8,7 @@ import {
 import {
   solveMaxHomePrice,
   calcPMIDropOffWithAppreciation,
+  estimatePmiMonthly,
   US_STATE_DEFAULTS,
 } from "../lib/housing";
 
@@ -296,11 +297,9 @@ function calcTotalInterest(principal: number, annualRate: number, termYears: num
   return calcMonthlyPI(principal, annualRate, termYears) * termYears * 12 - principal;
 }
 
+// Automatic mode: this page estimates PMI from the loan-to-value tiers (see estimatePmiMonthly in lib/housing).
 function calcAutoPMI(loan: number, homePrice: number, downPct: number) {
-  if (downPct >= 20 || !loan || !homePrice) return 0;
-  const ltv  = loan / homePrice;
-  const rate = ltv > 0.95 ? 0.015 : ltv > 0.90 ? 0.012 : ltv > 0.85 ? 0.009 : 0.007;
-  return (loan * rate) / 12;
+  return estimatePmiMonthly(loan, homePrice, downPct);
 }
 
 // ─── FIX 2: Algebraic PMI drop-off, O(1) instead of O(360) loop ─────────

@@ -51,3 +51,12 @@ Two long-running tests (`wageTax.test.ts` wage-cliff scan and `timeline.test.ts`
 ## Still not covered
 
 Compare Cities (international modes) and the Europe, Asia, Caribbean and South America output matrices; the Complete Retirement Plan against an outside review; no state or international official calculator was compared.
+
+## PMI consolidated (2026-10-15)
+
+There were four PMI implementations in two modes. They are now one helper, `estimatePmiMonthly` in `lib/housing.ts`, with the mode chosen explicitly by the caller:
+
+- **Automatic** (loan-to-value tiers: 0.7% up to 85%, 0.9% to 90%, 1.2% to 95%, 1.5% above, none at 20% down): the affordability solver and its breakdown, the mortgage calculator and the one-income relocation calculator.
+- **Manual** (the annual rate the user entered, limited to 0% to 2%): the main relocation calculator and Compare Cities. An entered rate, including 0, is used as given and is never replaced by the automatic estimate.
+
+Example, $400,000 home with 5% down: automatic $380.00 a month, manual 0.5% $158.33, manual 0% $0. Tests in `src/lib/pmi.test.ts` cover every tier boundary, the manual limits and both callers; the earlier page-level tests still pass.

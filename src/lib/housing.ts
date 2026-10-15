@@ -160,9 +160,25 @@ export const US_STATE_DEFAULTS: Record<string, StateDefaults> = {
 
 // ─── Full cost at a given price (what the affordability solver uses) ─────────
 
-/** Monthly private mortgage insurance when the down payment is below 20%: a rate of 0.7% to 1.5% a year on the loan, by loan-to-value. */
-export function estimatePmiMonthly(loan: number, price: number, downPct: number): number {
-  if (!(loan > 0) || !(price > 0) || downPct / 100 >= 0.2) return 0;
+/** The most a manually entered PMI rate may be (percent of the loan per year). */
+export const MAX_MANUAL_PMI_ANNUAL_PCT = 2;
+
+/**
+ * Monthly private mortgage insurance. It applies only when the down payment is below 20%.
+ *
+ * Two modes, and the caller chooses explicitly:
+ *  - automatic (no `manualAnnualRatePct`): a rate of 0.7% to 1.5% a year on the loan, by loan-to-value
+ *    (up to 85%: 0.7%, over 85% to 90%: 0.9%, over 90% to 95%: 1.2%, over 95%: 1.5%);
+ *  - manual (`manualAnnualRatePct` given, including 0): that annual percentage of the loan, limited to 0% to 2%.
+ *    A manual 0 means no PMI; it is never replaced by the automatic estimate.
+ */
+export function estimatePmiMonthly(loan: number, price: number, downPct: number, manualAnnualRatePct?: number): number {
+  if (!Number.isFinite(loan) || loan <= 0 || !Number.isFinite(downPct) || downPct >= 20) return 0;
+  if (manualAnnualRatePct !== undefined) {
+    const manual = Number.isFinite(manualAnnualRatePct) ? manualAnnualRatePct : 0;
+    return (loan * (Math.min(MAX_MANUAL_PMI_ANNUAL_PCT, Math.max(0, manual)) / 100)) / 12;
+  }
+  if (!(price > 0)) return 0;
   const ltv = loan / price;
   const rate = ltv > 0.95 ? 0.015 : ltv > 0.9 ? 0.012 : ltv > 0.85 ? 0.009 : 0.007;
   return (loan * rate) / 12;

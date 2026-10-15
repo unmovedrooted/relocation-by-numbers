@@ -14,7 +14,7 @@
  */
 import { estimateNetBreakdown } from "../wageTax";
 import type { FilingStatus } from "../tax";
-import { monthlyHousingCost } from "../housing";
+import { monthlyHousingCost, estimatePmiMonthly } from "../housing";
 import type { City } from "../cities";
 import type { StateCode } from "../states";
 
@@ -57,13 +57,6 @@ export type UsCompareResult = {
   pctOfIncome: number;
 };
 
-function estimatePMIMonthly(loanAmount: number, downPct: number, pmiAnnualPct: number): number {
-  if (!Number.isFinite(loanAmount) || loanAmount <= 0) return 0;
-  if (!Number.isFinite(downPct) || downPct >= 20) return 0;
-  const rate = Math.max(0, Math.min(2.0, Number.isFinite(pmiAnnualPct) ? pmiAnnualPct : 0)) / 100;
-  return (loanAmount * rate) / 12;
-}
-
 export function computeUsCityResult(input: UsCompareInput): UsCompareResult {
   const { city, grossAnnual, filing, k401Pct, mode } = input;
   const salaryReady = Number.isFinite(grossAnnual) && grossAnnual > 0;
@@ -92,7 +85,8 @@ export function computeUsCityResult(input: UsCompareInput): UsCompareResult {
       homeInsMonthly: input.buy.homeInsMonthly,
       hoaMonthly: input.buy.hoaMonthly,
     });
-    const pmi = estimatePMIMonthly(buy.loanAmount, input.buy.downPct, input.buy.pmiAnnualPct);
+    // Manual mode: Compare Cities takes the PMI rate as an input, so an entered rate (including 0) is used as given.
+    const pmi = estimatePmiMonthly(buy.loanAmount, homePrice, input.buy.downPct, input.buy.pmiAnnualPct);
     housingMonthly = buy.totalMonthly + pmi;
     housingLabel = `Est. home price ${homePrice.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}`;
   } else {
