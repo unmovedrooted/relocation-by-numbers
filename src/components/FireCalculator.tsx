@@ -2118,7 +2118,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 <div className="text-xs text-slate-400">{projection.length > 0 ? `Age ${projection[0].age} → ${projection[projection.length - 1].age}` : ""}</div>
               </div>
               <div className="mt-3 h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                <ResponsiveContainer initialDimension={{ width: 480, height: 280 }} width="100%" height="100%" minWidth={0}>
                   <LineChart data={comparisonChartData} margin={{ top: 18, right: 8, bottom: 6, left: 0 }}>
                     <CartesianGrid stroke="rgba(255,255,255,0.07)" vertical={false} />
                     <XAxis dataKey="age" tick={{ fontSize: 12, fill: "rgba(148,163,184,0.95)" }} axisLine={false} tickLine={false} minTickGap={24} />

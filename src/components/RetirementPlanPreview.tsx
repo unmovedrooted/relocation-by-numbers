@@ -406,7 +406,7 @@ export default function RetirementPlanPreview() {
         <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Balance over time</div>
         <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">Nominal ending assets, {result.years[0].year}–{last.year}</div>
         <div className="h-[280px] w-full">
-          <ResponsiveContainer width="100%" height={280} minWidth={0}>
+          <ResponsiveContainer initialDimension={{ width: 480, height: 280 }} width="100%" height={280} minWidth={0}>
             <AreaChart data={result.years} margin={{ top: 10, right: 8, left: 8, bottom: 0 }}>
               <XAxis dataKey="year" tick={{ fontSize: 11 }} stroke="currentColor" />
               <YAxis tickFormatter={(v) => `$${Math.round(Number(v) / 1000)}k`} tick={{ fontSize: 11 }} width={48} stroke="currentColor" />

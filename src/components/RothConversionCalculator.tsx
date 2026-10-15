@@ -369,7 +369,7 @@ export default function RothConversionCalculator() {
               <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
                 <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">After-tax value at withdrawal</div>
                 <div className="h-[200px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer initialDimension={{ width: 480, height: 280 }} width="100%" height="100%">
                     <BarChart data={results.chartData} margin={{ top: 10, right: 8, left: 8, bottom: 0 }}>
                       <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="currentColor" />
                       <YAxis tickFormatter={(v: number) => `$${Math.round(v / 1000)}k`} tick={{ fontSize: 11 }} width={48} stroke="currentColor" />

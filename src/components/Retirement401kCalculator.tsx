@@ -291,7 +291,7 @@ export default function Retirement401kCalculator() {
               <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
                 <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">What makes up your balance{dollarsNote}</div>
                 <div className="h-[200px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer initialDimension={{ width: 480, height: 280 }} width="100%" height="100%">
                     <PieChart>
                       <Pie data={results.donut} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={52} outerRadius={85} paddingAngle={2} stroke="none" isAnimationActive>
                         {results.donut.map((s) => (<Cell key={s.key} fill={s.fill} />))}
@@ -321,7 +321,7 @@ export default function Retirement401kCalculator() {
                 <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Range of outcomes over time{dollarsNote}</div>
                 <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">Shaded band = 10th–90th percentile · line = median</div>
                 <div className="h-[220px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer initialDimension={{ width: 480, height: 280 }} width="100%" height="100%">
                     <ComposedChart data={results.mc.fanData} margin={{ top: 10, right: 8, left: 8, bottom: 0 }}>
                       <XAxis dataKey="year" tickFormatter={(v) => `${v}y`} tick={{ fontSize: 11 }} stroke="currentColor" />
                       <YAxis tickFormatter={(v) => `$${Math.round(Number(v) / 1000)}k`} tick={{ fontSize: 11 }} width={48} stroke="currentColor" />

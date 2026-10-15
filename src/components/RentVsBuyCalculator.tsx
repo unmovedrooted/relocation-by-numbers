@@ -245,7 +245,7 @@ export default function RentVsBuyCalculator() {
                 <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Net worth over time</div>
                 <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">Where the lines cross is your break-even point.</div>
                 <div className="h-[220px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer initialDimension={{ width: 480, height: 280 }} width="100%" height="100%">
                     <LineChart data={results.chart} margin={{ top: 10, right: 8, left: 8, bottom: 0 }}>
                       <XAxis dataKey="year" tickFormatter={(v) => `${v}y`} tick={{ fontSize: 11 }} stroke="currentColor" />
                       <YAxis tickFormatter={(v) => `$${Math.round(Number(v) / 1000)}k`} tick={{ fontSize: 11 }} width={48} stroke="currentColor" />
