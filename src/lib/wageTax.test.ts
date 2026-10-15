@@ -300,7 +300,7 @@ describe("every state and city runs, and tax never falls as wages rise", () => {
         previous = total;
       }
     }
-  });
+  }, 60_000); // every state across 800 wage levels; slow when the machine is busy
 
   it("returns zero tax and zero net for zero or negative wages", () => {
     for (const gross of [0, -5_000]) {

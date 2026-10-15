@@ -141,6 +141,7 @@ function findNeededSalary(
   if (!Number.isFinite(targetAnnualNet) || targetAnnualNet <= 0) return 0;
   let lo = targetAnnualNet * 0.8;
   let hi = targetAnnualNet * 3.5;
+  for (let i = 0; i < 6 && estimateNetAnnual({ grossAnnual: hi, state, filing, k401Pct, cityId }) < targetAnnualNet; i++) hi *= 2;
   for (let i = 0; i < 40; i++) {
     const mid = (lo + hi) / 2;
     const net = estimateNetAnnual({ grossAnnual: mid, state, filing, k401Pct, cityId });
@@ -625,19 +626,21 @@ export default function Calculator({
     const k401N = nz(k401Pct);
     const salaryReady = Number.isFinite(salaryN) && salaryN > 0;
 
-    const netFromMonthly = salaryReady
-      ? estimateNetAnnual({ grossAnnual: salaryN, state: fromState, filing, k401Pct: k401N, cityId: fromCityId }) / 12
-      : 0;
-
-    const netToMonthly = salaryReady
-      ? estimateNetAnnual({ grossAnnual: salaryN, state: toState, filing, k401Pct: k401N, cityId: toCityId }) / 12
-      : 0;
+    const fromBreakdown = salaryReady
+      ? estimateNetBreakdown({ grossAnnual: salaryN, state: fromState, filing, k401Pct: k401N, cityId: fromCityId })
+      : null;
+    const toBreakdown = salaryReady
+      ? estimateNetBreakdown({ grossAnnual: salaryN, state: toState, filing, k401Pct: k401N, cityId: toCityId })
+      : null;
+    const netFromMonthly = fromBreakdown ? fromBreakdown.net / 12 : 0;
+    const netToMonthly = toBreakdown ? toBreakdown.net / 12 : 0;
 
     const monthlyIncomeDiff = salaryReady ? netToMonthly - netFromMonthly : 0;
     const grossMonthly = salaryReady ? salaryN / 12 : 0;
 
-    const effTaxFromPct = salaryReady ? clamp((1 - (netFromMonthly * 12) / salaryN) * 100, 0, 99.9) : 0;
-    const effTaxToPct   = salaryReady ? clamp((1 - (netToMonthly * 12) / salaryN) * 100, 0, 99.9) : 0;
+    // Taxes only: money saved to a 401(k) reduces take-home pay but is not a tax.
+    const effTaxFromPct = fromBreakdown ? clamp((fromBreakdown.totalTax / salaryN) * 100, 0, 99.9) : 0;
+    const effTaxToPct   = toBreakdown ? clamp((toBreakdown.totalTax / salaryN) * 100, 0, 99.9) : 0;
 
     let buy = { principalInterest: 0, propertyTax: 0, homeInsurance: 0, hoa: 0, totalMonthly: 0, loanAmount: 0 };
     let pmiMonthly = 0;
@@ -647,11 +650,11 @@ export default function Calculator({
 
     if (mode === "buy" && buyReady) {
       buy = monthlyHousingCost({
-        homePrice: n(homePrice), downPct: n(downPct), ratePct: n(ratePct),
+        homePrice: n(homePrice), downPct: clamp(n(downPct), 0, 100), ratePct: n(ratePct),
         termYears: n(termYears), propertyTaxPct: n(propertyTaxPct),
         homeInsMonthly: nz(homeInsMonthly), hoaMonthly: nz(hoaMonthly),
       });
-      pmiMonthly = estimatePMIMonthly(buy.loanAmount, n(downPct), nz(pmiAnnualPct));
+      pmiMonthly = estimatePMIMonthly(buy.loanAmount, clamp(n(downPct), 0, 100), nz(pmiAnnualPct));
       buyTotal = buy.totalMonthly + pmiMonthly;
     }
 
@@ -772,7 +775,7 @@ export default function Calculator({
         fees: entered(moveFeesCost, buying ? homePriceN * 0.03 : 0),
         overlapMonths: nz(overlapMonths),
         refundableDeposit: entered(depositCost, rentDeposit),
-        downPayment: buying ? { amount: homePriceN * (nz(downPct) / 100), estimated: false } : undefined,
+        downPayment: buying ? { amount: homePriceN * (clamp(nz(downPct), 0, 100) / 100), estimated: false } : undefined,
       },
     });
   }, [

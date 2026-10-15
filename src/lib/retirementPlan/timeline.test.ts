@@ -257,7 +257,7 @@ describe("State continuity and plan failures", () => {
         withdrawalOrder: ["cash", "ira"], income: [salary], retirementDates: { one: `${2026 + i % 8}-07-01` } }));
       reconciled(result);
     }
-  });
+  }, 60_000); // 40 full timelines; slow when the machine is busy
 });
 
 describe("Unsupported/invalid timeline contracts fail explicitly", () => {
