@@ -351,9 +351,10 @@ function setQS(params: URLSearchParams) {
   window.history.replaceState(null, "", url);
 }
 
+// Costs, income, savings and counts are never negative: a negative entry is treated as zero, not as money back.
 function numericValue(value: string) {
   const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
 }
 
 function nonNegative(value: string) {
@@ -361,6 +362,9 @@ function nonNegative(value: string) {
 }
 
 // Thresholds are for total essential outflow (housing + living costs) as a share of net income.
+// With no income there is no cost-to-income ratio to rate: show that, not the comfortable band a zero ratio would give.
+const NO_INCOME_BAND = { band: "—", label: "Enter your income", note: "Add your income to see how comfortable these costs are." };
+
 function getReadinessBand(ratio: number) {
   if (ratio <= 0.60) return { band: "A", label: "Comfortable", note: "Total essential costs look healthy relative to your estimated net income." };
   if (ratio <= 0.75) return { band: "B", label: "Manageable", note: "Doable, but keep an eye on recurring costs and setup cash." };
@@ -780,14 +784,14 @@ const rentTo =
 const estimatedHomePrice = estimateHomePriceFromRent(rentTo);
 const buyMonthlyPI = housingMode === "buy"
   ? estimateMortgageMonthly(estimatedHomePrice, {
-      downPct: numericValue(buyDownPct) / 100,
+      downPct: Math.min(100, numericValue(buyDownPct)) / 100,
       rate: numericValue(buyRatePct) / 100,
       years: numericValue(buyTermYears),
       taxAndInsurancePct: DEFAULT_TAX_INSURANCE_PCT,
     }) ?? 0
   : 0;
 const housingLine = housingMode === "buy" ? buyMonthlyPI : rentTo;
-const downPaymentUsd = housingMode === "buy" ? estimatedHomePrice * (numericValue(buyDownPct) / 100) : 0;
+const downPaymentUsd = housingMode === "buy" ? estimatedHomePrice * (Math.min(100, numericValue(buyDownPct)) / 100) : 0;
 
 const carCost =
   needCar === "yes" ? destToUsd(nonNegative(carCostMonthly)) : 0;
@@ -921,7 +925,7 @@ const readinessRecommendation =
           };
     const totalPctOfNet      = netMonthlyTo > 0 ? (housingTotal + livingCosts) / netMonthlyTo : 0;
     const housingPctOfNet    = netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
-    const comfort            = getReadinessBand(totalPctOfNet);
+    const comfort            = salaryReady ? getReadinessBand(totalPctOfNet) : NO_INCOME_BAND;
 
     const furnitureAdj = furnished === "furnished" ? 0 : destToUsd(numericValue(furnitureSetup));
     const rentUpfront =
@@ -1553,7 +1557,8 @@ readinessRecommendation,
 
             <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 dark:bg-slate-900 ring-1 ring-indigo-100 dark:ring-indigo-800">
               <div className={`h-full rounded-full ${
-                results.comfort.band === "A" ? "w-[92%] bg-emerald-500 dark:bg-emerald-600"
+                results.comfort.band === "—" ? "w-0"
+                : results.comfort.band === "A" ? "w-[92%] bg-emerald-500 dark:bg-emerald-600"
                 : results.comfort.band === "B" ? "w-[78%] bg-emerald-400 dark:bg-emerald-700"
                 : results.comfort.band === "C" ? "w-[60%] bg-amber-400 dark:bg-amber-700"
                 : "w-[42%] bg-orange-400 dark:bg-orange-700"

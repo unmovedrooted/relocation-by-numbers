@@ -175,6 +175,9 @@ function setQS(params: URLSearchParams) {
 }
 
 // FIX 3: Updated thresholds for housing + living costs combined
+// With no income there is no cost-to-income ratio to rate: show that, not the comfortable band a zero ratio would give.
+const NO_INCOME_BAND = { band: "—", label: "Enter your income", note: "Add your income to see how comfortable these costs are." };
+
 function getReadinessBand(ratio: number) {
   if (ratio <= 0.60) return { band: "A", label: "Comfortable", note: "Total essential costs look healthy relative to your estimated net income." };
   if (ratio <= 0.75) return { band: "B", label: "Manageable", note: "Doable, but keep an eye on recurring costs and setup cash." };
@@ -324,7 +327,8 @@ function SouthAmericaRelocationCalculatorContent({ initialSearch, urlReady }: { 
   const [buyRatePct, setBuyRatePct] = useState<string>(() => new URLSearchParams(initialSearch).get("buyRate") ?? "7");
   const [buyTermYears, setBuyTermYears] = useState<string>(() => new URLSearchParams(initialSearch).get("buyTerm") ?? "30");
 
-  const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
+  // Costs, income, savings and counts are never negative: a negative entry is treated as zero, not as money back.
+  const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? Math.max(0, x) : 0; };
 
   const allCountriesSorted = useMemo(() =>
     [...INTERNATIONAL_COUNTRIES].sort((a, b) => a.name.localeCompare(b.name)), []
@@ -506,14 +510,14 @@ const rentTo = destinationInputToUsd(nz(destinationRent), "rent");
 const estimatedHomePrice = estimateHomePriceFromRent(rentTo);
 const buyMonthlyPI = housingMode === "buy"
   ? estimateMortgageMonthly(estimatedHomePrice, {
-      downPct: nz(buyDownPct) / 100,
+      downPct: Math.min(100, nz(buyDownPct)) / 100,
       rate: nz(buyRatePct) / 100,
       years: nz(buyTermYears),
       taxAndInsurancePct: DEFAULT_TAX_INSURANCE_PCT,
     }) ?? 0
   : 0;
 const housingLine = housingMode === "buy" ? buyMonthlyPI : rentTo;
-const downPaymentUsd = housingMode === "buy" ? estimatedHomePrice * (nz(buyDownPct) / 100) : 0;
+const downPaymentUsd = housingMode === "buy" ? estimatedHomePrice * (Math.min(100, nz(buyDownPct)) / 100) : 0;
 
 const cityRatio = (fromValue: number, toValue: number) => (toValue > 0 ? fromValue / toValue : 1);
 const groceriesFrom = familyGroceries * cityRatio(fromCityMultipliers.groceries, toCityMultipliers.groceries);
@@ -536,7 +540,7 @@ const utilitiesFrom = familyUtilities * cityRatio(fromCityMultipliers.utilities,
       ? (housingTotal + livingCosts) / netMonthlyTo
       : 0;
     // FIX 3: getReadinessBand now uses the updated combined-cost thresholds
-    const comfort = getReadinessBand(totalPctOfNet);
+    const comfort = salaryReady ? getReadinessBand(totalPctOfNet) : NO_INCOME_BAND;
 
     const furnitureAdj = furnished === "furnished" ? 0 : nz(furnitureSetup);
     const rentUpfront =
@@ -984,7 +988,8 @@ recommendation,
             </div>
             <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 dark:bg-slate-900 ring-1 ring-amber-100 dark:ring-amber-800">
               <div className={`h-full rounded-full ${
-                results.comfort.band === "A" ? "w-[92%] bg-emerald-500 dark:bg-emerald-600"
+                results.comfort.band === "—" ? "w-0"
+                : results.comfort.band === "A" ? "w-[92%] bg-emerald-500 dark:bg-emerald-600"
                 : results.comfort.band === "B" ? "w-[78%] bg-emerald-400 dark:bg-emerald-700"
                 : results.comfort.band === "C" ? "w-[60%] bg-amber-400 dark:bg-amber-700"
                 : "w-[42%] bg-orange-400 dark:bg-orange-700"

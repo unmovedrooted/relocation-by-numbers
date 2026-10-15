@@ -212,6 +212,9 @@ function setQS(params: URLSearchParams) {
   window.history.replaceState(null, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
 }
 
+// With no income there is no cost-to-income ratio to rate: show that, not the comfortable band a zero ratio would give.
+const NO_INCOME_BAND = { band: "—", label: "Enter your income", note: "Add your income to see how comfortable these costs are." };
+
 function getReadinessBand(ratio: number) {
   if (ratio <= 0.60) return { band: "A", label: "Comfortable", note: "Total essential costs look healthy relative to your estimated net income." };
   if (ratio <= 0.75) return { band: "B", label: "Manageable", note: "Doable, but keep an eye on recurring costs and setup cash." };
@@ -334,7 +337,8 @@ export default function AsiaRelocationCalculator() {
   const [currentSavings, setCurrentSavings] = useState<string>("25000");
   const [needCar, setNeedCar] = useState<YesNo>("no");
 
-  const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
+  // Costs, income, savings and counts are never negative: a negative entry is treated as zero, not as money back.
+  const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? Math.max(0, x) : 0; };
 
   // FIX 2: strip non-numeric characters from all number inputs
   const sanitizeNumeric = (val: string) => val.replace(/[^0-9.]/g, "");
@@ -372,6 +376,7 @@ export default function AsiaRelocationCalculator() {
   const currentCityDefaults  = useMemo(() => getCityDefaultsUsd(fromCityCode), [fromCityCode]);
   const targetCityDefaults   = useMemo(() => getCityDefaultsUsd(toCityCode), [toCityCode]);
   const fromCityMultipliers  = useMemo(() => getCityCostMultipliers(fromCityCode), [fromCityCode]);
+  const toCityMultipliers    = useMemo(() => getCityCostMultipliers(toCityCode), [toCityCode]);
 
   useEffect(() => {
     const valid = fromCities.some(c => c.code === fromCityCode);
@@ -562,18 +567,21 @@ export default function AsiaRelocationCalculator() {
     const estimatedHomePrice = estimateHomePriceFromRent(rentTo);
     const buyMonthlyPI = housingMode === "buy"
       ? estimateMortgageMonthly(estimatedHomePrice, {
-          downPct: nz(buyDownPct) / 100,
+          downPct: Math.min(100, nz(buyDownPct)) / 100,
           rate: nz(buyRatePct) / 100,
           years: nz(buyTermYears),
           taxAndInsurancePct: DEFAULT_TAX_INSURANCE_PCT,
         }) ?? 0
       : 0;
     const housingLine = housingMode === "buy" ? buyMonthlyPI : rentTo;
-    const downPaymentUsd = housingMode === "buy" ? estimatedHomePrice * (nz(buyDownPct) / 100) : 0;
+    const downPaymentUsd = housingMode === "buy" ? estimatedHomePrice * (Math.min(100, nz(buyDownPct)) / 100) : 0;
 
-    const groceriesFrom      = familyGroceries      * fromCityMultipliers.groceries;
-    const transportationFrom = familyTransportation * fromCityMultipliers.transit;
-    const utilitiesFrom      = familyUtilities       * fromCityMultipliers.utilities;
+    // The inputs are already the destination city's figures, so the origin city's cost is the destination figure scaled by the
+    // origin-to-destination ratio of the city multipliers (the same city on both sides gives the same figure).
+    const cityRatio = (fromValue: number, toValue: number) => (toValue > 0 ? fromValue / toValue : 1);
+    const groceriesFrom      = familyGroceries      * cityRatio(fromCityMultipliers.groceries, toCityMultipliers.groceries);
+    const transportationFrom = familyTransportation * cityRatio(fromCityMultipliers.transit, toCityMultipliers.transit);
+    const utilitiesFrom      = familyUtilities       * cityRatio(fromCityMultipliers.utilities, toCityMultipliers.utilities);
 
     const carCost          = needCar === "yes" ? 350 : 0;
     const housingUtilities = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
@@ -583,7 +591,7 @@ export default function AsiaRelocationCalculator() {
 
     const totalPctOfNet   = netMonthlyTo > 0 ? (housingTotal + livingCosts) / netMonthlyTo : 0;
     const housingPctOfNet = netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
-    const comfort         = getReadinessBand(totalPctOfNet);
+    const comfort         = salaryReady ? getReadinessBand(totalPctOfNet) : NO_INCOME_BAND;
 
     const furnitureAdj = furnished === "furnished" ? 0 : nz(furnitureSetup);
     const rentUpfront = nz(depositRequired) + nz(firstMonthRent) + nz(lastMonthRent);
@@ -621,7 +629,7 @@ export default function AsiaRelocationCalculator() {
   }, [
     mode, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
     incomeScenario, conditionalAnswers,
-    fromCityMultipliers, currentCityDefaults, targetCityDefaults,
+    fromCityMultipliers, toCityMultipliers, currentCityDefaults, targetCityDefaults,
     adults, children, needCar, furnished, utilitiesIncluded, utilities, destinationRent,
     groceries, transportation, healthcare, depositRequired, firstMonthRent, lastMonthRent,
     visaCost, flightCost, shippingCost, temporaryStay, adminFees, furnitureSetup,
@@ -1141,7 +1149,8 @@ export default function AsiaRelocationCalculator() {
             </div>
             <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 dark:bg-slate-900 ring-1 ring-rose-100 dark:ring-rose-800">
               <div className={`h-full rounded-full ${
-                results.comfort.band === "A" ? "w-[92%] bg-emerald-500 dark:bg-emerald-600"
+                results.comfort.band === "—" ? "w-0"
+                : results.comfort.band === "A" ? "w-[92%] bg-emerald-500 dark:bg-emerald-600"
                 : results.comfort.band === "B" ? "w-[78%] bg-emerald-400 dark:bg-emerald-700"
                 : results.comfort.band === "C" ? "w-[60%] bg-amber-400 dark:bg-amber-700"
                 : "w-[42%] bg-orange-400 dark:bg-orange-700"

@@ -121,6 +121,9 @@ function setQS(params: URLSearchParams) {
   window.history.replaceState(null, "", url);
 }
 
+// With no income there is no cost-to-income ratio to rate: show that, not the comfortable band a zero ratio would give.
+const NO_INCOME_BAND = { band: "—", label: "Enter your income", note: "Add your income to see how comfortable these costs are." };
+
 function getReadinessBand(ratio: number) {
   if (ratio <= 0.25) return { band: "A", label: "Comfortable", note: "This looks healthy relative to your estimated target net income." };
   if (ratio <= 0.35) return { band: "B", label: "Manageable",  note: "Doable, but keep an eye on recurring costs and setup cash." };
@@ -330,7 +333,8 @@ export default function CaribbeanRelocationCalculator() {
   const [emergencyCashBuffer, setEmergencyCashBuffer] = useState<string>("4000");
   const [currentSavings,      setCurrentSavings]      = useState<string>("25000");
 
-  const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
+  // Costs, income, savings and counts are never negative: a negative entry is treated as zero, not as money back.
+  const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? Math.max(0, x) : 0; };
 
   const incomeScenario: IncomeScenario =
     mode === "retired" ? "retired" : salaryType === "remote" ? "remote" : "local";
@@ -621,8 +625,8 @@ export default function CaribbeanRelocationCalculator() {
     const monthlyIncomeDiff    = netMonthlyTo - netMonthlyFrom;
 
     // Family scaling
-    const adultCount  = Math.max(1, nz(adults));
-    const childCount  = Math.max(0, nz(children));
+    const adultCount  = Math.max(1, Math.floor(nz(adults)));
+    const childCount  = Math.max(0, Math.floor(nz(children)));
     const extraAdults = adultCount - 1;
 
     function scaleFamily(baseUsd: number, category: keyof typeof COST_SCALING): number {
@@ -680,14 +684,14 @@ const rentTo = applyMult(
 const estimatedHomePrice = estimateHomePriceFromRent(rentTo);
 const buyMonthlyPI = housingMode === "buy"
   ? estimateMortgageMonthly(estimatedHomePrice, {
-      downPct: nz(buyDownPct) / 100,
+      downPct: Math.min(100, nz(buyDownPct)) / 100,
       rate: nz(buyRatePct) / 100,
       years: nz(buyTermYears),
       taxAndInsurancePct: DEFAULT_TAX_INSURANCE_PCT,
     }) ?? 0
   : 0;
 const housingLine = housingMode === "buy" ? buyMonthlyPI : rentTo;
-const downPaymentUsd = housingMode === "buy" ? estimatedHomePrice * (nz(buyDownPct) / 100) : 0;
+const downPaymentUsd = housingMode === "buy" ? estimatedHomePrice * (Math.min(100, nz(buyDownPct)) / 100) : 0;
 
 // Origin comparators
 // Best case: use current-city defaults.
@@ -743,7 +747,7 @@ const utilitiesFrom = applyMult(
     // falls back to city default, then global fallback constant.
     const monthlyCarCost =
   needCar === "yes"
-    ? nz(carCost) || targetCityDefaults?.monthlyDefaults.car || CAR_COST_FALLBACK_USD
+    ? (carCost.trim() !== "" ? nz(carCost) : targetCityDefaults?.monthlyDefaults.car ?? CAR_COST_FALLBACK_USD)
     : 0;
 
 const housingUtilities = utilitiesIncluded === "yes" ? 0 : utilitiesAdj;
@@ -767,16 +771,17 @@ const housingPctOfNet =
   netMonthlyTo > 0 ? housingTotal / netMonthlyTo : 0;
 
 const comfort =
-  getReadinessBand(totalPctOfNet);
+  salaryReady ? getReadinessBand(totalPctOfNet) : NO_INCOME_BAND;
 
 // Origin monthly comparison
 const rentFrom =
   currentCityDefaults?.monthlyDefaults.rent ??
   reverseScaleToOrigin(nz(destinationRent));
 
-const healthcareFrom =
-  currentCityDefaults?.monthlyDefaults.healthcare ??
-  reverseScaleToOrigin(effectiveHealthcare);
+const healthcareFrom = scaleFamily(
+  currentCityDefaults?.monthlyDefaults.healthcare ?? reverseScaleToOrigin(effectiveHealthcare),
+  "healthcare"
+);
 
 const totalMonthlyExpensesFrom =
   rentFrom +
@@ -819,7 +824,7 @@ const savingsUsd =
   convertLocalToUsd(nz(currentSavings), fromCountry);
 
 const remainingSavingsAfterMove =
-  savingsUsd - startupCosts;
+  savingsUsd - upfrontCashNeeded;
 
 const monthsCovered =
   totalMonthlyExpensesTo > 0 && remainingSavingsAfterMove > 0
@@ -1477,7 +1482,8 @@ const relativeDifference =
             </div>
             <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/80 ring-1 ring-teal-100 dark:bg-slate-800/80 dark:ring-teal-900/40">
               <div className={`h-full rounded-full ${
-                results.comfort.band === "A" ? "w-[92%] bg-emerald-500"
+                results.comfort.band === "—" ? "w-0"
+                : results.comfort.band === "A" ? "w-[92%] bg-emerald-500"
                 : results.comfort.band === "B" ? "w-[78%] bg-emerald-400"
                 : results.comfort.band === "C" ? "w-[60%] bg-amber-400"
                 :                               "w-[42%] bg-orange-400"
