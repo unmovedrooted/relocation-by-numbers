@@ -528,7 +528,7 @@ export default function RetirementCalculator() {
                 ? ` (after ${stateName}'s ~${(results.stateReturnDrag * 100).toFixed(1)}% annual tax drag on a taxable account)`
                 : ""}. This is a smooth average-return projection, it does not model market volatility. No target or &ldquo;on track&rdquo; judgment: it simply shows where your current path lands.
               {results.isTaxable
-                ? " Taxable mode assumes gains are taxed each year at your state's marginal rate, a conservative estimate; buy-and-hold investors who defer gains would see less drag."
+                ? " Taxable mode applies your state's marginal income-tax rate to each year's return and does not include federal tax on investment returns, so it is best used to compare states rather than as an absolute figure; buy-and-hold investors who defer gains would see less state drag."
                 : ""}
             </div>
           </div>

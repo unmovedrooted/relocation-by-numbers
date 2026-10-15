@@ -8,12 +8,13 @@ import {
   estimateNetBreakdown,
   EMPLOYEE_401K_LIMIT,
 } from '@/lib/wageTax'
-import { compareMove, householdNetAnnual, type Item, type MoveResult } from '@/lib/relocationMove'
+import { compareMove, householdNetAnnual, type Item, type MoveResult, type OneTimeCosts } from '@/lib/relocationMove'
 import type { FilingStatus } from '@/lib/tax'
 import { TAX_YEAR } from '@/lib/taxYear2026'
 import TaxAssumptionsNote from './TaxAssumptionsNote'
 import MoveSummary, { MOVE_INPUT_IDS } from './MoveSummary'
 import { buildFireLink } from '@/lib/fireLink'
+import { estimatePmiMonthly, US_STATE_DEFAULTS } from '@/lib/housing'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -41,8 +42,9 @@ interface Results {
   housingBurdenTwo:     number
   verdictOne:           Verdict
   verdictTwo:           Verdict
-  minIncomeForCashflow: number
-  minIncomeFor30Pct:    number
+  /** null when even a very high second income would not reach it. */
+  minIncomeForCashflow: number | null
+  minIncomeFor30Pct:    number | null
   taxesOne:             number
   taxesTwo:             number
   grossMonthlyOne:      number
@@ -107,6 +109,44 @@ const fmt = (n: number) =>
 const fmtK = (n: number) =>
   n >= 1000 ? `$${Math.round(n / 1000)}k` : fmt(n)
 
+function numOr(value: string, fallback: number): number {
+  const n = parseFloat(value)
+  return Number.isFinite(n) && value.trim() !== '' ? n : fallback
+}
+
+/** Monthly cost of owning the new home: principal and interest, property tax, insurance, PMI below 20% down, and HOA. */
+function buyHousingMonthly(args: { homePrice: number; downPct: number; ratePct: number; termYears: number; propertyTaxPct: number; hoa: number }): number {
+  const { homePrice, downPct, ratePct, termYears, propertyTaxPct, hoa } = args
+  const dp = Math.min(100, Math.max(0, downPct))
+  const loan = homePrice * (1 - dp / 100)
+  const tax = (propertyTaxPct / 100) * homePrice / 12
+  const insurance = (homePrice * 0.006) / 12
+  const pmi = estimatePmiMonthly(loan, homePrice, dp)
+  return calcMortgagePI(homePrice, dp, ratePct, termYears) + tax + insurance + pmi + hoa
+}
+
+/** One-time costs of the move. Buying: the down payment must be on hand (it becomes equity, so it is not a cost), closing costs are spent, and a rental deposit does not apply. */
+function buildOneTimeCosts(a: {
+  buying: boolean; homePrice: number; downPct: number; targetState: string; touched: Record<string, boolean>
+  movingTruck: string; miscMoving: string; furnitureBudget: string; leaseBreak: string; moveFees: string; securityDeposit: string; overlapMonths: string
+}): OneTimeCosts {
+  const item = (key: string, amount: number): Item => ({ amount, estimated: !a.touched[key] && amount > 0 })
+  const downPaymentCash = a.buying ? a.homePrice * (Math.min(100, Math.max(0, a.downPct)) / 100) : 0
+  const closingCosts = a.buying ? a.homePrice * ((US_STATE_DEFAULTS[a.targetState]?.closingCostPct ?? 3) / 100) : 0
+  return {
+    movers:            item('movers',  parseFloat(a.movingTruck)     || 0),
+    travel:            item('travel',  parseFloat(a.miscMoving)      || 0),
+    setup:             item('setup',   parseFloat(a.furnitureBudget) || 0),
+    leaseBreak:        item('leaseBreak', parseFloat(a.leaseBreak)   || 0),
+    fees:              a.buying
+      ? { amount: (parseFloat(a.moveFees) || 0) + closingCosts, estimated: true }
+      : item('fees',    parseFloat(a.moveFees)        || 0),
+    overlapMonths:     parseFloat(a.overlapMonths) || 0,
+    refundableDeposit: a.buying ? { amount: 0, estimated: false } : item('deposit', parseFloat(a.securityDeposit) || 0),
+    ...(a.buying ? { downPayment: { amount: downPaymentCash, estimated: false } } : {}),
+  }
+}
+
 function parseMoney(val: string): number {
   return Number(val.replace(/[^\d.]/g, '')) || 0
 }
@@ -159,11 +199,13 @@ function findMinIncome2(
   k401Pct2:         number,
   cityId:           string,
   targetNetMonthly: number,
-): number {
+): number | null {
   const alreadyMet = estimateCombinedNet(income1, 0, state, filing, k401Pct1, k401Pct2, cityId) / 12
   if (alreadyMet >= targetNetMonthly) return 0
   let lo = 0
   let hi = 500_000
+  // Even a second income of 500,000 may not reach the target (for example, very high housing costs): report that, not 500,000.
+  if (estimateCombinedNet(income1, hi, state, filing, k401Pct1, k401Pct2, cityId) / 12 < targetNetMonthly) return null
   for (let i = 0; i < 50; i++) {
     const mid = (lo + hi) / 2
     const net = estimateCombinedNet(income1, mid, state, filing, k401Pct1, k401Pct2, cityId) / 12
@@ -570,14 +612,14 @@ export default function RelocationIncomeCalculator() {
       housingCost = (parseFloat(monthlyRent) || 0) + (parseFloat(rentersInsurance) || 0)
     } else {
       const hp   = parseFloat(homePrice)    || 0
-      const dp   = parseFloat(downPct)      || 10
-      const rate = parseFloat(mortgageRate) || 6.75
-      const term = parseInt(termYears)      || 30
-      const ptax  = ((targetCity?.propertyTaxPct ?? 1) / 100) * hp / 12
-      const ins   = (hp * 0.006) / 12
-      const loanAmt = hp * (1 - dp / 100)
-      const pmi   = hp > 0 && (loanAmt / hp) > 0.8 ? (loanAmt * 0.008) / 12 : 0
-      housingCost = calcMortgagePI(hp, dp, rate, term) + ptax + ins + pmi + (parseFloat(hoa) || 0)
+      housingCost = buyHousingMonthly({
+        homePrice: hp,
+        downPct: numOr(downPct, 10),
+        ratePct: numOr(mortgageRate, 6.75),
+        termYears: parseInt(termYears) || 30,
+        propertyTaxPct: targetCity?.propertyTaxPct ?? 1,
+        hoa: parseFloat(hoa) || 0,
+      })
     }
 
     const totalLiving = Object.values(costs).reduce((a, b) => a + b, 0)
@@ -634,6 +676,7 @@ export default function RelocationIncomeCalculator() {
     const c1 = parseMoney(curIncome1) || i1
     const c2 = curIncome2.trim() === '' ? i2 : parseMoney(curIncome2)
     const item = (key: string, amount: number): Item => ({ amount, estimated: !touched[key] && amount > 0 })
+    const buying = housingMode === 'buy'
     const move = compareMove({
       filing, k401Pct1: k1, k401Pct2: k2,
       currentIncome1: c1, currentIncome2: c2, offerIncome1: i1, offerIncome2: i2,
@@ -642,15 +685,10 @@ export default function RelocationIncomeCalculator() {
       targetHousing:  housingMode === 'rent' ? item('rent', housingCost) : { amount: housingCost, estimated: true },
       currentLiving:  item('curLiving', parseFloat(curLiving) || 0),
       targetLiving:   { amount: totalLiving, estimated: !costsManuallyEdited },
-      oneTime: {
-        movers:            item('movers',  parseFloat(movingTruck)     || 0),
-        travel:            item('travel',  parseFloat(miscMoving)      || 0),
-        setup:             item('setup',   parseFloat(furnitureBudget) || 0),
-        leaseBreak:        item('leaseBreak', parseFloat(leaseBreak)   || 0),
-        fees:              item('fees',    parseFloat(moveFees)        || 0),
-        overlapMonths:     parseFloat(overlapMonths) || 0,
-        refundableDeposit: item('deposit', parseFloat(securityDeposit) || 0),
-      },
+      oneTime: buildOneTimeCosts({
+        buying, homePrice: parseFloat(homePrice) || 0, downPct: numOr(downPct, 10), targetState, touched,
+        movingTruck, miscMoving, furnitureBudget, leaseBreak, moveFees, securityDeposit, overlapMonths,
+      }),
     })
 
     // ── FIX 3: sales tax note ─────────────────────────────────────────────
@@ -1383,13 +1421,13 @@ export default function RelocationIncomeCalculator() {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <StatCard
                   label="To cover all monthly expenses"
-                  value={results.minIncomeForCashflow === 0 ? 'Already covered' : `${fmtK(results.minIncomeForCashflow)} / yr`}
-                  sub={results.minIncomeForCashflow === 0 ? 'One income is enough' : 'breaks even on monthly cash flow'}
+                  value={results.minIncomeForCashflow === null ? 'Out of reach' : results.minIncomeForCashflow === 0 ? 'Already covered' : `${fmtK(results.minIncomeForCashflow)} / yr`}
+                  sub={results.minIncomeForCashflow === null ? 'even a $500k second income would not cover this budget' : results.minIncomeForCashflow === 0 ? 'One income is enough' : 'breaks even on monthly cash flow'}
                 />
                 <StatCard
                   label="To stay under 30% housing burden"
-                  value={results.minIncomeFor30Pct === 0 ? 'Already met' : `${fmtK(results.minIncomeFor30Pct)} / yr`}
-                  sub={results.minIncomeFor30Pct === 0 ? 'Housing is already under 30%' : 'comfortable affordability threshold'}
+                  value={results.minIncomeFor30Pct === null ? 'Out of reach' : results.minIncomeFor30Pct === 0 ? 'Already met' : `${fmtK(results.minIncomeFor30Pct)} / yr`}
+                  sub={results.minIncomeFor30Pct === null ? 'even a $500k second income would not get housing under 30%' : results.minIncomeFor30Pct === 0 ? 'Housing is already under 30%' : 'comfortable affordability threshold'}
                 />
               </div>
             </div>

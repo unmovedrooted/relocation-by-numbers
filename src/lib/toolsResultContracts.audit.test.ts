@@ -98,6 +98,51 @@ describe("Tools displayed-result contracts", () => {
     expect(r.tradFinal).toBe(payTaxFrom === "outside" ? 9200 : 8000);
     expect(r.difference).toBe(800);
   });
+  // IRS Publication 505, 2026 Schedule X for a single filer (standard deduction 16,100), as an independent reference.
+  const fedSingle = (gross: number) => {
+    const t = Math.max(0, gross - 16100);
+    if (t <= 12400) return t * 0.1;
+    if (t <= 50400) return 1240 + (t - 12400) * 0.12;
+    if (t <= 105700) return 5800 + (t - 50400) * 0.22;
+    if (t <= 201775) return 17966 + (t - 105700) * 0.24;
+    return 41024 + (t - 201775) * 0.32;
+  };
+  const roth = (over: Record<string, string> = {}) => result("RothConversionCalculator", { amountToConvert: "100000", currentIncome: "50000",
+    retirementTaxRatePct: "22", yearsToGrow: "20", expectedReturnPct: "7", inflationPct: "0", state: "fl", filing: "single", payTaxFrom: "converted", ...over });
+  it("Roth conversion tax is the extra federal tax when the conversion is stacked on current income, across brackets", () => {
+    const r = roth();
+    expect(r.conversionTax).toBeCloseTo(fedSingle(150000) - fedSingle(50000), 6); // 24,734 - 3,820 = 20,914
+    expect(r.convState).toBe(0);
+    expect(r.effectiveCurrentRate).toBeCloseTo(0.20914, 6);
+  });
+  it("Roth paid from the converted funds: the break-even retirement rate is the effective conversion rate", () => {
+    const r = roth({ expectedReturnPct: "5" });
+    expect(r.breakEvenRate).toBeCloseTo(r.effectiveCurrentRate, 10);
+    const growth = 1.05 ** 20;
+    expect(r.rothFinal).toBeCloseTo((100000 - r.conversionTax) * growth, 4);
+    expect(r.tradFinal).toBeCloseTo(100000 * growth * 0.78, 4);
+    // At a retirement rate equal to the break-even rate the two paths are equal.
+    const even = roth({ expectedReturnPct: "5", retirementTaxRatePct: String(r.effectiveCurrentRate * 100) });
+    expect(even.difference).toBeCloseTo(0, 4);
+  });
+  it("Roth paid from outside savings: the preserved cash is taxed each year at 15% federal plus the state rate", () => {
+    const r = roth({ amountToConvert: "10000", expectedReturnPct: "7", yearsToGrow: "10" });
+    const T = r.conversionTax;
+    const rr = roth({ amountToConvert: "10000", expectedReturnPct: "7", yearsToGrow: "10", payTaxFrom: "outside" });
+    expect(rr.drag).toBeCloseTo(0.15, 10); // Florida has no income tax
+    expect(rr.rothFinal).toBeCloseTo(10000 * 1.07 ** 10, 4);
+    expect(rr.sideAccountFinal).toBeCloseTo(T * (1 + 0.07 * 0.85) ** 10, 4);
+    expect(rr.tradFinal).toBeCloseTo(10000 * 1.07 ** 10 * 0.78 + T * (1 + 0.07 * 0.85) ** 10, 4);
+    // The break-even rate in this mode compares the Roth growth to the taxable side account.
+    expect(rr.breakEvenRate).toBeCloseTo(rr.effectiveCurrentRate * ((1 + 0.07 * 0.85) ** 10 / 1.07 ** 10), 10);
+  });
+  it("Roth conversion state tax: taxed in California, not taxed where retirement income is exempt, and state drag is added to the federal drag", () => {
+    expect(roth({ state: "ca" }).convState).toBeGreaterThan(0);
+    expect(roth({ state: "pa" }).convState).toBe(0);
+    const ca = roth({ state: "ca", payTaxFrom: "outside" });
+    expect(ca.drag).toBeGreaterThan(0.15);
+    expect(ca.drag).toBeLessThan(0.3);
+  });
   it.each(["fl", "ca", "nj"])("HSA result consistency in %s", state => {
     const r = result("HsaCalculator", { age: "40", coverageType: "self", yourContribution: "1000", employerContribution: "500",
       currentBalance: "10000", grossAnnualIncome: "100000", state, filing: "single", expectedReturnPct: "0", yearsToGrow: "10" });

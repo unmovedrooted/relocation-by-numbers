@@ -70,6 +70,11 @@ function InfoTip({ text }: { text: string }) {
   );
 }
 
+// Federal tax on the return of a taxable account (qualified dividends and long-term gains), at the 15% rate that applies across
+// the middle of the income range. It is added to the state's marginal rate for the "outside savings" account, which is taxed as
+// it earns. Buy-and-hold investors who defer gains would pay less, and higher earners (20%, plus the 3.8% investment tax) more.
+const FEDERAL_INVESTMENT_TAX_RATE = 0.15;
+
 function realReturnRate(nominalPct: number, inflationPct: number): number {
   return (1 + nominalPct / 100) / (1 + inflationPct / 100) - 1;
 }
@@ -154,7 +159,7 @@ export default function RothConversionCalculator() {
 
     // Growth factors (real / today's dollars).
     const g = Math.pow(1 + realReturnRate(nz(expectedReturnPct), nz(inflationPct)), years);
-    const drag = representativeStateMarginalRate(state, filing);
+    const drag = Math.min(0.9, FEDERAL_INVESTMENT_TAX_RATE + representativeStateMarginalRate(state, filing));
     const gTaxable = Math.pow(1 + realReturnRate(nz(expectedReturnPct) * (1 - drag), nz(inflationPct)), years);
 
     let rothFinal: number;
@@ -409,6 +414,11 @@ export default function RothConversionCalculator() {
                     <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
                       <span>&nbsp;&nbsp;↳ incl. preserved outside savings, invested</span>
                       <span>{money(results.sideAccountFinal)}</span>
+                    </div>
+                  )}
+                  {payTaxFrom === "outside" && (
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                      The outside savings are assumed to lose about {(results.drag * 100).toFixed(1)}% of their return each year to tax (15% federal plus {stateName}&apos;s state rate).
                     </div>
                   )}
                 </div>
