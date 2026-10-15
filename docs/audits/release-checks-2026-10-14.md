@@ -21,3 +21,16 @@ All 30 calculator pages in the Explore grid carry a planning-estimate or not-adv
 - Add `ANTHROPIC_API_KEY` to `.env.local` and generate a Coast report and a Barista report to see them against the live model (the route names `claude-sonnet-4-6`).
 - Watch the feedback box after release.
 - Keep the Beta label on the retirement planner until its outside review is done.
+
+## IRS Tax Withholding Estimator comparison (2026-10-15, run by the owner's other reviewer)
+
+Single filer under 65, wages only, standard deduction, no credits or retirement contributions:
+
+| Salary | Site federal income tax | IRS estimated liability | Difference |
+|---|---:|---:|---:|
+| $50,000 | $3,820 | $3,823 | $3 |
+| $100,000 | $13,170 | $13,176 | $6 |
+| $150,000 | $24,734 | $24,734 | $0 |
+| $250,000 | $51,304 | $51,754 | $450 |
+
+The $3 and $6 are consistent with the IRS tax table's midpoint rounding against the site's continuous bracket calculation (IRS Publication 1304). The $450 is the Additional Medicare Tax, 0.9% of wages over $200,000, which the site counts under payroll taxes rather than federal income tax. No unexplained difference. This does not cover married households, credits, retirement income, state taxes or the international calculators.
