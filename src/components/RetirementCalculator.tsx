@@ -6,6 +6,7 @@ import { STATES, type StateCode } from "../lib/states";
 import { type FilingStatus } from "../lib/tax";
 import { RETIREMENT_STATE_EXEMPT, withdrawalIncomeTax, representativeStateMarginalRate } from "../lib/retirementTax";
 import { accumulationPaths, RISK_PRESETS, type RiskLevel } from "../lib/monteCarlo";
+import { monthlyDepositFactor } from "../lib/depositTiming";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -78,8 +79,8 @@ function InfoTip({ text }: { text: string }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// MATH, accumulation in real (today's-dollar) terms. Contribute at the
-// start of each year, then grow the balance for that year.
+// MATH, accumulation in real (today's-dollar) terms. Each year the balance grows by
+// the annual return and the year's contribution arrives as twelve monthly end-of-month deposits.
 // ─────────────────────────────────────────────────────────────────────────
 function realReturnRate(nominalPct: number, inflationPct: number): number {
   const n = nominalPct / 100;
@@ -111,9 +112,8 @@ function computeProjection(params: {
   let balance = startingBalance;
   let totalContributed = 0;
   for (let y = 0; y < years; y++) {
-    balance += annualContribution;
+    balance = balance * (1 + r) + annualContribution * monthlyDepositFactor(r);
     totalContributed += annualContribution;
-    balance += balance * r;
   }
   const projectedBalance = balance;
   const growth = projectedBalance - startingBalance - totalContributed;

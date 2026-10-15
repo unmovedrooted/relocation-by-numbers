@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { monthlyDepositFactor } from "../lib/depositTiming";
 import { STATES, type StateCode } from "../lib/states";
 import { estimateNetBreakdown } from "../lib/wageTax";
 import type { FilingStatus } from "../lib/tax";
@@ -107,8 +108,8 @@ function StatCard({
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// GROWTH PROJECTION, contribute at the start of each year, then apply one
-// year of growth. effectiveReturn already has any CA/NJ annual state tax
+// GROWTH PROJECTION, each year the balance grows by the annual return and the year's
+// contribution arrives as twelve monthly end-of-month deposits (payroll-style). effectiveReturn already has any CA/NJ annual state tax
 // drag baked in by the caller.
 // ─────────────────────────────────────────────────────────────────────────
 function projectBalance(startBalance: number, annualContribution: number, effectiveReturn: number, years: number) {
@@ -116,9 +117,8 @@ function projectBalance(startBalance: number, annualContribution: number, effect
   let totalContributed = 0;
   const safeYears = Math.max(0, Math.round(years));
   for (let y = 0; y < safeYears; y++) {
-    balance += annualContribution;
+    balance = balance * (1 + effectiveReturn) + annualContribution * monthlyDepositFactor(effectiveReturn);
     totalContributed += annualContribution;
-    balance += balance * effectiveReturn;
   }
   return { finalBalance: balance, totalContributed };
 }
@@ -408,8 +408,8 @@ export default function HsaCalculator() {
               </label>
             </div>
             <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              Assumes contributions are invested (not spent on current medical expenses) and made at the start of each
-              year. This calculator does not model ongoing withdrawals for medical spending.
+              Assumes contributions are invested (not spent on current medical expenses) and made monthly (at the end
+              of each month). This calculator does not model ongoing withdrawals for medical spending.
             </div>
           </div>
         </div>

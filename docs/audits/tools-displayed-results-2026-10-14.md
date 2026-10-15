@@ -70,3 +70,7 @@ No live browser or newly researched official-calculator comparison was performed
 - The observation tests that recorded the old behaviour now assert the corrected behaviour.
 
 Left for a decision: Investment and Retirement deposit timing (the label says monthly; the engine deposits the year's total on day one, which gives $13,440 instead of $12,646 in the audit case), the HSA excess-contribution handling, the break-even model not investing the rent-versus-buy cash-flow difference, and the housing/living-cost split in international Compare Cities.
+
+## Deposit timing decided and applied (2026-10-14)
+
+Owner approved monthly end-of-month deposits inside an annual-return model. `src/lib/depositTiming.ts` (`monthlyDepositFactor`) turns each year's contribution into twelve monthly deposits growing at the monthly rate equivalent to the annual return, so a year is `balance * (1 + r) + annualContribution * g(r)`. Applied to the Investment, 401(k), Retirement and HSA calculators and to the Monte Carlo accumulation engine (`monteCarlo.ts`). The audit case ($1,000 a month, 12%, one year) now gives $12,646.50, not $13,440. Page text was updated (Investment, HSA). Tests compare each engine with an independent month-by-month loop. Not changed: the FIRE calculator (start-of-year contributions, disclosed in its methodology note) and withdrawal modelling (withdrawals at the start of each year, which is the cautious direction). HSA excess contributions: owner decided not to cap the projection.

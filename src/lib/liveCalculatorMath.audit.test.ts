@@ -6,6 +6,7 @@ import { solveMaxHomePrice, US_STATE_DEFAULTS } from "./housing";
 import { CONTRIBUTION_LIMITS_2026 } from "./taxYear2026";
 import { EMPLOYEE_401K_LIMIT, estimateNetAnnual, estimateNetBreakdown } from "./wageTax";
 import { compareMove } from "./relocationMove";
+import { monthlyDepositFactor } from "./depositTiming";
 
 // Audit harness: execute the actual component-local functions without moving or
 // editing production code. Imports and the React component are not executed.
@@ -28,7 +29,7 @@ function componentFunctions(file: string, names: string[], globals: Record<strin
   }
   const code = declarations.map(node => node.getText(ast)).join("\n") + memo + `\n({${names.join(",")}})`;
   return runInNewContext(ts.transpileModule(code, { compilerOptions: { target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.React } }).outputText,
-    { process: { env: {} }, CONTRIBUTION_LIMITS_2026, EMPLOYEE_401K_LIMIT, estimateNetAnnual, estimateNetBreakdown, ...globals });
+    { process: { env: {} }, CONTRIBUTION_LIMITS_2026, EMPLOYEE_401K_LIMIT, estimateNetAnnual, estimateNetBreakdown, monthlyDepositFactor, ...globals });
 }
 
 describe("additional live calculator known-answer audit", () => {
@@ -78,10 +79,13 @@ describe("additional live calculator known-answer audit", () => {
     expect(result.totalSavings).toBe(-3000);
     expect(result.breakEvenMonths).toBeNull();
   });
-  it.each([0, 1, 10, 30])("retirement accumulation matches annuity-due math over %i years", years => {
+  it.each([0, 1, 10, 30])("retirement accumulation matches month-by-month end-of-month deposits over %i years", years => {
     const r = componentFunctions("RetirementCalculator", ["computeProjection", "realReturnRate"]);
     const result = r.computeProjection({ startingBalance: 50000, annualContribution: 6000, realReturn: 0.05, years });
-    const expected = 50000 * 1.05 ** years + 6000 * 1.05 * ((1.05 ** years - 1) / 0.05);
+    // Independent reference: twelve monthly end-of-month deposits at the monthly rate equivalent to 5% a year.
+    const monthlyRate = 1.05 ** (1 / 12) - 1;
+    let expected = 50000;
+    for (let month = 0; month < years * 12; month++) expected = expected * (1 + monthlyRate) + 500;
     expect(result.projectedBalance).toBeCloseTo(expected, 6);
     expect(result.totalContributed).toBe(years * 6000);
     expect(result.annualIncome).toBeCloseTo(expected * 0.04, 6);
@@ -192,5 +196,32 @@ describe("live calculator mathematical observations (not a full-page certificati
     console.log("401k capped match", { employee: result.yourContrib, referenceMatch: result.yourContrib, actualMatch: result.employerContrib });
     expect(result.yourContrib).toBe(24500);
     expect(Number.isFinite(result.employerContrib)).toBe(true);
+  });
+});
+
+describe("monthly end-of-month deposit timing across accumulation engines", () => {
+  const monthlyReference = (start: number, monthlyDeposit: number, annualReturn: number, years: number) => {
+    const m = (1 + annualReturn) ** (1 / 12) - 1;
+    let balance = start;
+    for (let month = 0; month < years * 12; month++) balance = balance * (1 + m) + monthlyDeposit;
+    return balance;
+  };
+  it("401(k) projection matches a month-by-month reference", () => {
+    const k = componentFunctions("Retirement401kCalculator", ["projectBalance"]);
+    const out = k.projectBalance(20000, 12000, 0.06, 25);
+    expect(out.finalBalance).toBeCloseTo(monthlyReference(20000, 1000, 0.06, 25), 4);
+    expect(out.contributed).toBe(25 * 12000);
+  });
+  it("HSA projection matches a month-by-month reference", () => {
+    const h = componentFunctions("HsaCalculator", ["projectBalance"]);
+    const out = h.projectBalance(8000, 6000, 0.05, 20);
+    expect(out.finalBalance).toBeCloseTo(monthlyReference(8000, 500, 0.05, 20), 4);
+    expect(out.totalContributed).toBe(20 * 6000);
+  });
+  it("Monte Carlo with no volatility matches the deterministic month-by-month reference", async () => {
+    const { accumulationPaths } = await import("./monteCarlo");
+    const sim = accumulationPaths({ startBalance: 10000, annualContribution: 9000, realReturn: 0.04, volatility: 0, years: 15, nPaths: 3 });
+    expect(sim.mean).toBeCloseTo(monthlyReference(10000, 750, 0.04, 15), 4);
+    expect(sim.endingBalance.p50).toBeCloseTo(sim.mean, 6);
   });
 });

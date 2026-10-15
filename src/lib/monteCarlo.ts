@@ -11,6 +11,8 @@
 // jitter between renders.
 // ─────────────────────────────────────────────────────────────────────────
 
+import { monthlyDepositFactor } from "./depositTiming";
+
 export const DEFAULT_SEED = 0x9e3779b1;
 export const DEFAULT_PATHS = 5000;
 
@@ -71,7 +73,7 @@ export const RISK_PRESETS: Record<Exclude<RiskLevel, "custom">, { label: string;
 };
 
 // ─────────────────────────────────────────────────────────────────────────
-// ACCUMULATION: contribute at start of each year, then a random year of growth.
+// ACCUMULATION: a random year of growth, with the year’s contribution made as twelve monthly end-of-month deposits.
 // ─────────────────────────────────────────────────────────────────────────
 export function accumulationPaths(opts: {
   startBalance: number;
@@ -97,9 +99,8 @@ export function accumulationPaths(opts: {
     let balance = start;
     yearCols[0][p] = balance;
     for (let y = 1; y <= years; y++) {
-      balance += contribution;
       const growth = Math.exp(mu + sigma * nextNormal(rng)); // (1 + real return)
-      balance *= growth;
+      balance = balance * growth + contribution * monthlyDepositFactor(growth - 1);
       if (balance < 0) balance = 0;
       yearCols[y][p] = balance;
     }

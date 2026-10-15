@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip } from "recharts";
 import { accumulationPaths, RISK_PRESETS, type RiskLevel } from "../lib/monteCarlo";
+import { monthlyDepositFactor } from "../lib/depositTiming";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -116,14 +117,14 @@ export default function InvestmentCalculator() {
     const yrs = Math.max(0, Math.min(60, Math.round(nz(years))));
     const effReturn = adjustForInflation ? realReturnRate(nz(annualReturnPct), nz(inflationPct)) : nz(annualReturnPct) / 100;
 
-    // Deterministic year-by-year (contribute start of year, then grow).
+    // Deterministic year-by-year: the balance grows by the annual return and the year’s contribution arrives as twelve
+    // monthly end-of-month deposits (see monthlyDepositFactor).
     let balance = start;
     let contributed = 0;
     const growthSeries: BalPt[] = [{ year: 0, balance: start, base: start, growth: 0 }];
     for (let y = 1; y <= yrs; y++) {
-      balance += annualContribution;
+      balance = balance * (1 + effReturn) + annualContribution * monthlyDepositFactor(effReturn);
       contributed += annualContribution;
-      balance += balance * effReturn;
       growthSeries.push({ year: y, balance, base: start + contributed, growth: balance - start - contributed }); // negative when the investment has lost money
     }
     const finalBalance = balance;
@@ -234,7 +235,7 @@ export default function InvestmentCalculator() {
               )}
             </div>
             <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              Contributions are made monthly and compounded annually{adjustForInflation ? `, with growth adjusted for ${inflationPct}% inflation (real return ${(results.effReturn * 100).toFixed(2)}%)` : ""}.
+              Contributions are made monthly (at the end of each month) and the return is an annual return{adjustForInflation ? `, with growth adjusted for ${inflationPct}% inflation (real return ${(results.effReturn * 100).toFixed(2)}%)` : ""}.
             </div>
           </div>
         </div>

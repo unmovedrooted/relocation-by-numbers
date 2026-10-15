@@ -7,6 +7,7 @@ import { estimateNetBreakdown, EMPLOYEE_401K_LIMIT } from "../lib/wageTax";
 import type { FilingStatus } from "../lib/tax";
 import { CONTRIBUTION_LIMITS_2026, TAX_YEAR } from "../lib/taxYear2026";
 import { accumulationPaths, RISK_PRESETS, type RiskLevel } from "../lib/monteCarlo";
+import { monthlyDepositFactor } from "../lib/depositTiming";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -31,7 +32,7 @@ function realReturnRate(nominalPct: number, inflationPct: number) { return (1 + 
 function projectBalance(start: number, annual: number, r: number, years: number) {
   let b = Math.max(0, start); let contributed = 0;
   const byYear: { year: number; balance: number }[] = [{ year: 0, balance: b }];
-  for (let y = 1; y <= years; y++) { b += annual; contributed += annual; b += b * r; byYear.push({ year: y, balance: b }); }
+  for (let y = 1; y <= years; y++) { b = b * (1 + r) + annual * monthlyDepositFactor(r); contributed += annual; byYear.push({ year: y, balance: b }); }
   return { finalBalance: b, contributed, byYear };
 }
 

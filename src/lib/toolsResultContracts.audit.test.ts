@@ -7,6 +7,7 @@ import { estimateNetBreakdown } from "./wageTax";
 import { RETIREMENT_STATE_EXEMPT, representativeStateMarginalRate } from "./retirementTax";
 import { computeUsCityResult } from "./compareEngines/us";
 import { computeIntlCityResult } from "./compareEngines/international";
+import { monthlyDepositFactor } from "./depositTiming";
 
 // Execute the production result callback, not a duplicate of its formulas.
 function result(file: string, globals: Record<string, unknown>) {
@@ -25,7 +26,7 @@ function result(file: string, globals: Record<string, unknown>) {
   if (!callback) throw new Error(`Missing result callback: ${file}`);
   const code = declarations.map(n => n.getText(ast)).join("\n") + `\n(${callback})()`;
   return runInNewContext(ts.transpileModule(code, { compilerOptions: { target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.React } }).outputText,
-    { process: { env: {} }, CONTRIBUTION_LIMITS_2026, estimateNetBreakdown, RETIREMENT_STATE_EXEMPT,
+    { process: { env: {} }, CONTRIBUTION_LIMITS_2026, estimateNetBreakdown, monthlyDepositFactor, RETIREMENT_STATE_EXEMPT,
       representativeStateMarginalRate, nz: (v: string) => Number(v) || 0, ...globals });
 }
 
@@ -59,14 +60,16 @@ describe("Tools displayed-result contracts", () => {
   });
   const investment = (overrides = {}) => result("InvestmentCalculator", { initialAmount: "0", monthlyContribution: "1000",
     years: "1", annualReturnPct: "12", inflationPct: "0", adjustForInflation: false, viewMode: "average", volatility: 0, ...overrides });
-  it("records the contribution timing discrepancy without certifying the displayed label", () => {
+  it("deposits the monthly contribution at the end of each month, as the label says", () => {
     const actual = investment().finalBalance;
     const monthlyRate = 1.12 ** (1 / 12) - 1;
     const monthlyEnd = 1000 * ((1 + monthlyRate) ** 12 - 1) / monthlyRate;
-    console.log("Investment contribution timing", { actual, monthlyEnd, difference: actual - monthlyEnd });
-    expect(actual).toBeCloseTo(13440, 8);
-    expect(actual).toBeGreaterThan(monthlyEnd);
-    expect(actual).toBeGreaterThan(monthlyEnd * (1 + monthlyRate));
+    expect(actual).toBeCloseTo(12646.497908, 5);
+    expect(actual).toBeCloseTo(monthlyEnd, 6);
+    // Ten years with a starting balance, against a month-by-month reference.
+    let reference = 5000;
+    for (let month = 0; month < 120; month++) reference = reference * (1 + monthlyRate) + 1000;
+    expect(investment({ initialAmount: "5000", years: "10" }).finalBalance).toBeCloseTo(reference, 5);
   });
   it("charts negative growth as a loss instead of clamping it to zero", () => {
     const r = investment({ initialAmount: "10000", monthlyContribution: "0", annualReturnPct: "-10" });
