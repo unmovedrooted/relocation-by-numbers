@@ -21,6 +21,25 @@ const base = () => ({ ...fire.defaultsForMode("standard", 100000), state: "", k4
   yearlyInvestment: 12000, expensesMonthly: 4000, inflationPct: 0, salaryGrowthPct: 0, brokerageTaxMode: "drag",
   brokerageTaxDragPct: 0, phase2StartsYear: 200, maxYears: 30, moveCompareOn: false });
 
+describe("post-fix remaining discrepancy observations", () => {
+  it("advanced displayed savings rate still uses surplus rather than configured saving", () => {
+    const i = { ...base(), advanced: true, expensesMonthly: 3000, contrib401k: 5000, contribIra: 2000, contribBrokerage: 1000 };
+    const actual = fire.savingsRateOf(i, 80000, "standard").rate;
+    expect(actual).toBe(.55);
+    const configuredRate = (5000 + 2000 + 1000) / 80000;
+    expect(configuredRate).toBe(.10);
+    console.log("Advanced savings rate", { actual, configuredRate });
+  });
+  it("a savings-table rate below fixed advanced contributions cannot be imposed", () => {
+    const i = { ...base(), advanced: true, contrib401k: 20000, contribIra: 5000, contribBrokerage: 1000 };
+    const row = fire.inputsForSavingsRate(i, 8000, 0);
+    const actualSaving = row.contrib401k + row.contribIra + row.contribBrokerage;
+    expect(actualSaving).toBe(25000);
+    expect(actualSaving).toBeGreaterThan(8000);
+    console.log("10% savings row on $80k base", { requestedSaving: 8000, actualSaving });
+  });
+});
+
 describe("FIRE independent reference audit", () => {
   it.each([
     ["fire-calculator", "standard", 4000], ["fire-number-calculator", "standard", 4000],

@@ -71,6 +71,16 @@ describe("Tools displayed-result contracts", () => {
     for (let month = 0; month < 120; month++) reference = reference * (1 + monthlyRate) + 1000;
     expect(investment({ initialAmount: "5000", years: "10" }).finalBalance).toBeCloseTo(reference, 5);
   });
+  it("matches the SEC Investor.gov compound interest calculator (7% compounded monthly, 10,000 start, 1,000 a month)", () => {
+    // Investor.gov (checked 2026-10-14) treats the rate as a nominal annual rate compounded monthly with end-of-month deposits:
+    // year 1 is 23,115.49 and year 10 is 193,181.42. This calculator takes an annual return, so the equivalent is (1 + 0.07/12)^12 - 1.
+    const effective = String(((1 + 0.07 / 12) ** 12 - 1) * 100);
+    const one = investment({ initialAmount: "10000", years: "1", annualReturnPct: effective });
+    expect(one.finalBalance).toBeCloseTo(23115.49, 1);
+    const ten = investment({ initialAmount: "10000", years: "10", annualReturnPct: effective });
+    expect(ten.finalBalance).toBeCloseTo(193181.42, 1);
+    expect(ten.contributed).toBe(120000);
+  });
   it("charts negative growth as a loss instead of clamping it to zero", () => {
     const r = investment({ initialAmount: "10000", monthlyContribution: "0", annualReturnPct: "-10" });
     expect(r.finalBalance).toBe(9000);

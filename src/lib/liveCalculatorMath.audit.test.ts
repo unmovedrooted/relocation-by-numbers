@@ -7,6 +7,7 @@ import { CONTRIBUTION_LIMITS_2026 } from "./taxYear2026";
 import { EMPLOYEE_401K_LIMIT, estimateNetAnnual, estimateNetBreakdown } from "./wageTax";
 import { compareMove } from "./relocationMove";
 import { monthlyDepositFactor } from "./depositTiming";
+import { requiredDistribution } from "./retirementPlan/rules";
 
 // Audit harness: execute the actual component-local functions without moving or
 // editing production code. Imports and the React component are not executed.
@@ -66,6 +67,27 @@ describe("additional live calculator known-answer audit", () => {
   });
   it("zero-rate total interest is zero", () => {
     expect(mortgage().calcTotalInterest(120000, 0, 10)).toBe(0);
+  });
+  it("matches Freddie Mac's published worked examples (myhome.freddiemac.com, amortization and rates pages)", () => {
+    const m = mortgage();
+    // $135,000 at 4.5% for 30 years: $684.03 a month; first month $506.25 interest, $177.78 principal, balance $134,822.22.
+    expect(m.calcMonthlyPI(135000, 4.5, 30)).toBeCloseTo(684.03, 2);
+    const first = m.buildSchedule(135000, 4.5, 30)[0];
+    expect(first.interest).toBeCloseTo(506.25, 2);
+    expect(first.principal).toBeCloseTo(177.78, 1);
+    expect(first.balance).toBeCloseTo(134822.22, 1);
+    // The same loan at 7%: $323,337 of principal and interest over the life of the loan.
+    expect(m.calcMonthlyPI(135000, 7, 30) * 360).toBeCloseTo(323337, 0);
+    // $300,000 at 6.5% for 30 years: about $1,896 a month.
+    expect(Math.round(m.calcMonthlyPI(300000, 6.5, 30))).toBe(1896);
+  });
+  it("RMD at age 80 matches the SEC Investor.gov RMD calculator (factor 20.2, $24,752.48 on $500,000)", () => {
+    // Investor.gov (checked 2026-10-14): previous year-end balance 500,000, age 80 at year end -> factor 20.2, RMD 24,752.48.
+    const rmd = componentFunctions("RmdCalculator", ["divisorForAge"]);
+    expect(rmd.divisorForAge(80)).toBe(20.2);
+    expect(500000 / rmd.divisorForAge(80)).toBeCloseTo(24752.48, 2);
+    // The Complete Plan engine uses its own table; it must agree. Born 1946 -> age 80 in 2026.
+    expect(requiredDistribution({ birthDate: "1946-01-01", year: 2026, priorDecemberBalance: 500000, accountType: "traditional-ira" })).toBeCloseTo(24752.48, 2);
   });
   it("zero-rate amortization has 120 payments", () => {
     expect(mortgage().buildSchedule(120000, 0, 10)).toHaveLength(120);
