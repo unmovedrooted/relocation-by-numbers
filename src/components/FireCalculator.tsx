@@ -20,7 +20,7 @@ import {
 
 import { STATES, type StateCode } from "@/lib/states";
 import { findCity, citiesForState } from "@/lib/cities";
-import { estimateNetAnnual, effectiveTaxRatePct, EMPLOYEE_401K_LIMIT } from "@/lib/wageTax";
+import { estimateNetAnnual, estimateNetBreakdown, EMPLOYEE_401K_LIMIT } from "@/lib/wageTax";
 import type { FilingStatus } from "@/lib/tax";
 import { parseFireAbroadLink, parseFireLink } from "@/lib/fireLink";
 import { monthlyDepositFactor } from "@/lib/depositTiming";
@@ -99,6 +99,8 @@ type Inputs = {
   baristaPartTimeIncome: number;
   // ── Withdrawal tax rate (Traditional account haircut) ──
   withdrawalTaxRatePct: number;
+  // What-if scenarios only: extra dollars invested each year (in addition to the configured saving), never set by the form.
+  scenarioExtraSaving?: number;
 };
 
 type ComparisonChartRow = {
@@ -341,10 +343,33 @@ function expenseAdjustedForCity(base: number, targetId: string, baselineId: stri
   return Math.max(0, base * ((0.4 + 0.6 * t.col.housing) / (0.4 + 0.6 * b.col.housing)));
 }
 
+// Balances and contributions are used exactly as entered, so an explicit zero stays zero.
 function applyBrokerageAutofill(i: Inputs) {
-  const balBrokerage     = i.advanced && i.balBrokerage === 0     && i.currentPortfolio > 0  ? i.currentPortfolio  : i.balBrokerage;
-  const contribBrokerage = i.advanced && i.contribBrokerage === 0 && i.yearlyInvestment > 0  ? i.yearlyInvestment  : i.contribBrokerage;
-  return { balBrokerage, contribBrokerage };
+  return { balBrokerage: i.balBrokerage, contribBrokerage: i.contribBrokerage };
+}
+
+// When Advanced is switched on, copy the simple-mode portfolio and yearly investment into the empty brokerage fields once.
+function seedAdvancedFromSimple(i: Inputs): Inputs {
+  return {
+    ...i,
+    balBrokerage: i.balBrokerage === 0 && i.currentPortfolio > 0 ? i.currentPortfolio : i.balBrokerage,
+    contribBrokerage: i.contribBrokerage === 0 && i.yearlyInvestment > 0 ? i.yearlyInvestment : i.contribBrokerage,
+  };
+}
+
+// Pays a one-time cost from the taxable account first, then the IRA, then the 401(k). Taxes or penalties on retirement-account
+// money are not modelled. Anything beyond total savings cannot be paid (see moveCostShortfall).
+function applyMoveCost(i: Inputs, cost: number): Inputs {
+  const amount = Math.max(0, Number(cost) || 0);
+  if (!i.advanced) return { ...i, currentPortfolio: Math.max(0, i.currentPortfolio - amount) };
+  let rest = amount;
+  const take = (balance: number) => { const t = Math.min(Math.max(0, balance), rest); rest -= t; return balance - t; };
+  return { ...i, balBrokerage: take(i.balBrokerage), balIra: take(i.balIra), bal401k: take(i.bal401k) };
+}
+
+function moveCostShortfall(i: Inputs): number {
+  const funds = i.advanced ? Math.max(0, i.balBrokerage) + Math.max(0, i.balIra) + Math.max(0, i.bal401k) : Math.max(0, i.currentPortfolio);
+  return Math.max(0, (Number(i.movedCost) || 0) - funds);
 }
 
 function calcEmployerMatch(i: Inputs): number {
@@ -423,6 +448,24 @@ function makeNetPath(a: {
   };
 }
 
+// The simple-mode 401(k) deferral for a given year: the percentage of that year's gross pay, capped at the 401(k) limit, with
+// both pay and the limit following the same assumptions as makeNetPath (pay grows at the salary-growth rate; the limit and the
+// tax rules are indexed to inflation). Take-home pay and the credited saving therefore always use the same dollars.
+function simpleDeferralForYear(i: Inputs, yearsFromNow: number): number {
+  if (!i.state) return 0;
+  const y = Math.max(0, Math.round(yearsFromNow));
+  const salG = (Number(i.salaryGrowthPct) || 0) / 100;
+  const infl = (Number(i.inflationPct) || 0) / 100;
+  const pct = clamp(Number(i.k401Pct) || 0, 0, 60) / 100;
+  const grossY = Math.max(0, Number(i.income) || 0) * Math.pow(1 + salG, y);
+  return Math.min(grossY * pct, EMPLOYEE_401K_LIMIT * Math.pow(1 + infl, y));
+}
+
+// Projection length in whole years (the field accepts decimals; the simulation and the chart both use this).
+function horizonYears(i: Inputs): number {
+  return Math.max(0, Math.round(Number(i.maxYears) || 0));
+}
+
 // Starting balances and per-bucket annual contributions.
 // Simple mode: everything goes into the brokerage bucket (no account distinction).
 // Advanced mode: each account is seeded from user inputs.
@@ -437,8 +480,8 @@ function initBuckets(i: Inputs, netBasis: NetBasis): {
   if (!i.advanced) {
     const autoInvest = Math.max(0, netAt(netBasis, 0, i) - annualExpenses(i));
     const contrib    = i.yearlyInvestment > 0 ? i.yearlyInvestment : autoInvest;
-    // Take-home pay already excludes the 401(k) deferral, so the deferral is saved too (it grows with salary; see growBuckets).
-    const deferral = i.state ? Math.min((Number(i.income) || 0) * ((Number(i.k401Pct) || 0) / 100), EMPLOYEE_401K_LIMIT) : 0;
+    // Take-home pay already excludes the 401(k) deferral, so the deferral is saved too (year by year; see growBuckets).
+    const deferral = simpleDeferralForYear(i, 0);
     return {
       start:         { b401k: 0, bIra: 0, bBrokerage: i.currentPortfolio },
       annualContrib: { b401k: deferral, bIra: 0, bBrokerage: contrib },
@@ -470,14 +513,14 @@ function growBuckets(
   const r    = returnForYear(i, yearIndex);
   const drag = getBrokerageTaxDrag(i);
 
-  const salaryGrowth = i.advanced ? 1 : Math.pow(1 + (Number(i.salaryGrowthPct) || 0) / 100, Math.max(0, yearIndex));
-  // Simple mode: the deferral grows with salary but stays within the (inflation-indexed) 401(k) limit.
-  const deferral  = i.advanced ? annualContrib.b401k : Math.min(annualContrib.b401k * salaryGrowth, Math.max(annualContrib.b401k, EMPLOYEE_401K_LIMIT * Math.pow(1 + (Number(i.inflationPct) || 0) / 100, Math.max(0, yearIndex))));
+  // Simple mode: the same year-specific deferral the tax path removed from take-home pay.
+  const deferral  = i.advanced ? annualContrib.b401k : simpleDeferralForYear(i, yearIndex);
   const c401k      = pastCoast ? 0 : deferral + employerMatch;
   const cIra       = pastCoast ? 0 : annualContrib.bIra;
   // Simple mode with an explicit yearly investment uses that amount; with it blank, the automatic amount is used.
   const useConfigured = i.advanced || (Number(i.yearlyInvestment) || 0) > 0;
-  const cBrokerage = pastCoast ? 0 : (useConfigured ? annualContrib.bBrokerage : autoContrib);
+  const extraSaving = Math.max(0, Number(i.scenarioExtraSaving) || 0);
+  const cBrokerage = pastCoast ? 0 : (useConfigured ? annualContrib.bBrokerage : autoContrib) + extraSaving;
 
  const brokerageReturn = Math.max(-0.99, r - drag);
 
@@ -498,28 +541,32 @@ function returnForYear(i: Inputs, yearIndex: number): number {
   return (y >= switchAt ? p.phase2 : p.phase1) / 100;
 }
 
-// ── Coast FIRE number ─────────────────────────────────────────────────────────
-// Nominal throughout: spending is inflated to the retirement date, the FIRE number is that spending / withdrawal rate,
-// and it is discounted at the nominal return. (Discounting at the real return as well would count inflation twice.)
-function calcCoastFireNumber(i: Inputs): number {
+// ── Coast FIRE target ─────────────────────────────────────────────────────────
+// Everything is nominal and dated. Spending is entered in today's dollars, so it is inflated from the current age to the
+// retirement age; the FIRE number at retirement is that spending / withdrawal rate. The amount you need at a given future
+// moment is that number discounted by the growth between that moment and retirement (Phase 1, then Phase 2 returns, less
+// brokerage tax drag on the taxable share), and grossed up for the withdrawal tax on traditional accounts.
+function coastTargetAtYear(i: Inputs, yearsFromNow: number): number {
   const swr  = (Number(i.withdrawalRatePct) || 0) / 100;
   const infl = (Number(i.inflationPct) || 0) / 100;
-  const yrs  = Math.max(0, i.targetRetirementAge - i.coastAge);
-  const retirementAnnualExpenses = annualExpenses(i) * Math.pow(1 + infl, yrs);
+  const retireIn = Math.max(0, Math.round(i.targetRetirementAge - i.age));
+  const t = clamp(Math.round(yearsFromNow), 0, retireIn);
+  const retirementAnnualExpenses = annualExpenses(i) * Math.pow(1 + infl, retireIn);
   const futureFireNumber = swr > 0 ? retirementAnnualExpenses / swr : Infinity;
 
-  // Growth from the coast age to retirement uses the return for each of those calendar years (Phase 1, then Phase 2),
-  // less the brokerage tax drag on the share of the portfolio held in a taxable account.
   const { brokerage: brokerageShare, traditional: traditionalShare } = portfolioShares(i);
   const drag = getBrokerageTaxDrag(i) * brokerageShare;
-  const startYear = Math.max(0, i.coastAge - i.age);
   let growth = 1;
-  for (let k = 0; k < yrs; k++) growth *= 1 + Math.max(-0.99, returnForYear(i, startYear + k) - drag);
+  for (let k = t; k < retireIn; k++) growth *= 1 + Math.max(-0.99, returnForYear(i, k) - drag);
 
-  // The FIRE number is spendable money, so traditional accounts need a larger balance to leave it after the withdrawal tax.
   const wTax = (Number(i.withdrawalTaxRatePct) || 0) / 100;
   const spendableFraction = Math.max(0.01, 1 - wTax * traditionalShare);
   return futureFireNumber / spendableFraction / growth;
+}
+
+// The balance needed at the coast age (the headline Coast FIRE number).
+function calcCoastFireNumber(i: Inputs): number {
+  return coastTargetAtYear(i, Math.max(0, i.coastAge - i.age));
 }
 
 // Rough split of the portfolio between taxable and traditional accounts, from balances and yearly contributions.
@@ -567,7 +614,8 @@ function simulateYearsToFI(
   };
 }
 
-while (years < i.maxYears) {
+const horizon = horizonYears(i);
+while (years < horizon) {
   const netY = netAt(netAnnualBase, years, i);
   const ageY = i.age + years;
   const pastCoast = mode === "coast" && ageY >= i.coastAge;
@@ -600,29 +648,32 @@ return {
 };
 }
 // ── Years until coast-ready ───────────────────────────────────────────────────
-// Coast uses raw total portfolio (not spendable) because the coast number
-// is an accumulation threshold, not a retirement spending threshold.
+// Coast-ready in year t means the balance at that moment is at least what you would need then to stop contributing and
+// still reach the retirement target (coastTargetAtYear). Contributions stop at the coast age, as in the projection. If the
+// target is not met before the retirement age, there is no coast-ready date for that retirement objective: null.
+// Coast uses the raw total portfolio (not spendable) because the target already grosses up for withdrawal tax.
 function simulateYearsToCoast(i: Inputs, netAnnualBase: NetBasis): number | null {
-  const target = calcCoastFireNumber(i);
-  if (!Number.isFinite(target)) return null;
+  const retireIn = Math.max(0, Math.round(i.targetRetirementAge - i.age));
+  const horizon = Math.min(retireIn, horizonYears(i));
 
   const { start, annualContrib, employerMatch } = initBuckets(i, netAnnualBase);
   let buckets = { ...start };
 
-  if (totalFromBuckets(buckets) >= target) return 0;
+  const target0 = coastTargetAtYear(i, 0);
+  if (!Number.isFinite(target0)) return null;
+  if (totalFromBuckets(buckets) >= target0) return 0;
 
   let years = 0;
-  while (years < i.maxYears) {
+  while (years < horizon) {
     const netY = netAt(netAnnualBase, years, i);
     let autoContrib = 0;
     if (!i.advanced && (Number(i.yearlyInvestment) || 0) <= 0) {
       autoContrib = Math.max(0, netY - annualExpenses(i) * Math.pow(1 + (Number(i.inflationPct) || 0) / 100, years));
     }
-    // Contributions stop at the coast age, as in the main projection.
     const pastCoastAge = i.age + years >= i.coastAge;
     buckets = growBuckets(buckets, i, years, annualContrib, employerMatch, pastCoastAge, autoContrib);
     years++;
-    if (totalFromBuckets(buckets) >= target) return years;
+    if (totalFromBuckets(buckets) >= coastTargetAtYear(i, years)) return years;
   }
   return null;
 }
@@ -637,8 +688,7 @@ function buildProjectionWithExpenses(
 
   const { start, annualContrib, employerMatch } = initBuckets(i, netAnnualBase);
   const effBase  = mode === "barista" ? Math.max(0, baseExpenses - (Number(i.baristaPartTimeIncome) || 0)) : baseExpenses;
-  const stopAt   = yearsToFI === null ? i.maxYears : clamp(yearsToFI + 2, 0, i.maxYears);
-  const coastNum = mode === "coast" ? calcCoastFireNumber(i) : undefined;
+  const stopAt   = yearsToFI === null ? horizonYears(i) : clamp(yearsToFI + 2, 0, horizonYears(i));
 
   const pts: ChartPoint[] = [];
   let buckets = { ...start };
@@ -657,7 +707,7 @@ function buildProjectionWithExpenses(
     spendablePortfolio,
     ...(mode === "standard" ? { fireTarget: fullTgt } : {}),
     ...(mode === "lean" ? { leanFireTarget: effTgt, fullFireTarget: fullTgt } : {}),
-    ...(mode === "coast" ? { fireTarget: fullTgt, coastNumber: coastNum } : {}),
+    ...(mode === "coast" ? { fireTarget: fullTgt, coastNumber: coastTargetAtYear(i, y) } : {}),
     ...(mode === "barista" ? { baristaTarget: effTgt, fullFireTarget: fullTgt } : {}),
   };
 }
@@ -760,12 +810,48 @@ function getDecisionScenarioCopy(
 }
 
 
+// The fully specified "move" scenario: moved income and state (taxed in the new state and city, year by year), the moved spending,
+// and the one-time moving cost paid from savings before the clock starts. The move card and the recommendations both use it.
+function buildMovedScenario(i: Inputs): { inputs: Inputs; net: NetBasis } {
+  const stateChoice = ((i.movedAbroad ? "tx" : i.movedState || i.state) || "") as StateChoice;
+  const gross = i.movedIncome > 0 ? i.movedIncome : i.income;
+  const net = makeNetPath({
+    gross, state: stateChoice, filing: i.filingStatus, k401Pct: i.k401Pct,
+    cityId: stateChoice ? (i.movedState && i.movedCityId ? i.movedCityId : getBaselineCityIdForState(stateChoice)) : undefined,
+    salaryGrowthPct: i.salaryGrowthPct, inflationPct: i.inflationPct,
+  });
+  const funded = applyMoveCost(i, Math.max(0, i.movedCost));
+  return { inputs: { ...funded, income: gross, state: stateChoice, expensesMonthly: i.movedExpensesMonthly }, net };
+}
+
+// Share of take-home-plus-retirement-saving that is saved, using the saving that actually happens in the chosen mode.
+function savingsRateOf(i: Inputs, netAnnual: number, mode: FireMode): { rate: number; base: number; deferral: number } {
+  const side = mode === "barista" ? Math.max(0, Number(i.baristaPartTimeIncome) || 0) : 0;
+  if (i.advanced) {
+    const rate = netAnnual > 0 ? clamp((netAnnual - annualExpenses(i)) / netAnnual, -1, 1) : 0;
+    return { rate, base: netAnnual, deferral: 0 };
+  }
+  const deferral = simpleDeferralForYear(i, 0);
+  const base = netAnnual + deferral + side;
+  const explicit = Number(i.yearlyInvestment) || 0;
+  const saved = explicit > 0 ? explicit + deferral : base - annualExpenses(i);
+  return { rate: base > 0 ? clamp(saved / base, -1, 1) : 0, base, deferral };
+}
+
+// The inputs that make a savings table row save exactly rate x base, whatever way the user has configured saving.
+function inputsForSavingsRate(i: Inputs, saved: number, deferral: number): Inputs {
+  if (i.advanced) return { ...i, contribBrokerage: Math.max(0, saved - Math.max(0, i.contrib401k) - Math.max(0, i.contribIra)) };
+  if ((Number(i.yearlyInvestment) || 0) > 0) return { ...i, yearlyInvestment: Math.max(0, saved - deferral) };
+  return i;
+}
+
 function makeDecisionRunner(
   mode: FireMode,
-  netAnnual: NetBasis
-): (overrideInputs: Inputs) => DecisionProjectionOutput {
-  return (overrideInputs: Inputs): DecisionProjectionOutput => {
-    
+  netBasisForMode: NetBasis
+): (overrideInputs: Inputs, netOverride?: NetBasis) => DecisionProjectionOutput {
+  return (overrideInputs: Inputs, netOverride?: NetBasis): DecisionProjectionOutput => {
+    const netAnnual = netOverride ?? netBasisForMode;
+
     if (mode === "coast") {
       const yearsToGoal = simulateYearsToCoast(overrideInputs, netAnnual);
       const goalAge =
@@ -809,9 +895,15 @@ function buildDecisionEngine(
     key: DecisionScenarioKey;
     label: string;
     nextInputs: Inputs;
+    net?: NetBasis;
   }> = [];
 
+  const autoSaving = !inputs.advanced && !(Number(inputs.yearlyInvestment) > 0);
+  const annualExp = annualExpenses(inputs);
+
   // ── Scenario 1: Lower spending -10% ──────────────────────────────────────
+  // With automatic saving the freed cash is invested by itself; with configured saving it is added to what is invested.
+  const spendingCut = annualExp * 0.1;
   scenarios.push({
     key: "lower_spending",
     label: "Lower spending by 10%",
@@ -819,48 +911,42 @@ function buildDecisionEngine(
       ...inputs,
       expensesMonthly: Math.max(0, inputs.expensesMonthly * 0.9),
       movedExpensesMonthly: Math.max(0, inputs.movedExpensesMonthly * 0.9),
+      scenarioExtraSaving: autoSaving ? 0 : spendingCut,
     },
   });
 
   // ── Scenario 2: Higher savings, honest 10-point rate increase ────────────
-  const currentSavingsRate =
-    netAnnual > 0
-      ? clamp((netAnnual - annualExpensesFromMonthly(inputs.expensesMonthly)) / netAnnual, 0, 1)
-      : 0;
+  const currentSavings = savingsRateOf(inputs, netAnnual, mode);
+  const currentSavingsRate = clamp(currentSavings.rate, 0, 1);
   const targetSavingsRate = clamp(currentSavingsRate + 0.1, 0, 0.8);
-  const impliedMonthly = Math.max(0, (netAnnual * (1 - targetSavingsRate)) / 12);
+  const cutAmount = Math.min(annualExp, Math.max(0, (targetSavingsRate - currentSavingsRate) * currentSavings.base));
   scenarios.push({
     key: "higher_savings",
     label: `Raise savings rate to ${Math.round(targetSavingsRate * 100)}%`,
     nextInputs: {
       ...inputs,
-      expensesMonthly: impliedMonthly,
-      yearlyInvestment: 0,
+      expensesMonthly: Math.max(0, (annualExp - cutAmount) / 12),
+      scenarioExtraSaving: autoSaving ? 0 : cutAmount,
     },
   });
 
-  // ── Scenario 3: Move to lower-cost scenario (only if it's genuinely lower) ─
+  // ── Scenario 3: the full move (income, taxes, moving cost, spending), only if spending is genuinely lower ─
+  let moveScenario: { inputs: Inputs; net: NetBasis } | null = null;
   if (
     inputs.moveCompareOn &&
     inputs.movedExpensesMonthly > 0 &&
     inputs.movedExpensesMonthly < inputs.expensesMonthly
   ) {
+    moveScenario = buildMovedScenario(inputs);
     scenarios.push({
       key: "move",
       label: "Move to the lower-cost location",
-      nextInputs: {
-        ...inputs,
-        expensesMonthly: inputs.movedExpensesMonthly,
-      },
+      nextInputs: moveScenario.inputs,
+      net: moveScenario.net,
     });
   }
 
   // ── Scenario 4: Mode-specific ─────────────────────────────────────────────
-  const currentAutoContrib =
-    inputs.yearlyInvestment > 0
-      ? inputs.yearlyInvestment
-      : Math.max(0, netAnnual - annualExpenses(inputs));
-
   if (mode === "coast") {
     scenarios.push({
       key: "later_coast_age",
@@ -874,17 +960,14 @@ function buildDecisionEngine(
     scenarios.push({
       key: "boost_contributions",
       label: "Add $5,000/year to investments",
-      nextInputs: {
-        ...inputs,
-        yearlyInvestment: Math.max(inputs.yearlyInvestment, currentAutoContrib) + 5000,
-      },
+      nextInputs: { ...inputs, scenarioExtraSaving: 5000 },
     });
   }
 
   // ── Run & rank ────────────────────────────────────────────────────────────
   const ranked = scenarios
-    .map(({ key, label, nextInputs }) => {
-      const output = runProjection(nextInputs);
+    .map(({ key, label, nextInputs, net }) => {
+      const output = runProjection(nextInputs, net);
       const baseYears = baselineOutput.yearsToGoal;
       const nextYears = output.yearsToGoal;
 
@@ -1267,12 +1350,19 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
     salaryGrowthPct: inputs.salaryGrowthPct, inflationPct: inputs.inflationPct,
   }), [inputs.income, inputs.state, inputs.filingStatus, inputs.k401Pct, inputs.salaryGrowthPct, inputs.inflationPct]);
 
+  // Taxes only: money you save to a 401(k) is not a tax.
   const estTaxRate = useMemo(() => {
-    if (!inputs.state) return 0;
-    return effectiveTaxRatePct(netAnnual, inputs.income);
-  }, [inputs.state, netAnnual, inputs.income]);
+    if (!inputs.state || !(inputs.income > 0)) return 0;
+    const taxes = estimateNetBreakdown({
+      grossAnnual: inputs.income, state: inputs.state as StateCode, filing: inputs.filingStatus, k401Pct: inputs.k401Pct,
+      cityId: getBaselineCityIdForState(inputs.state),
+    }).totalTax;
+    return (taxes / inputs.income) * 100;
+  }, [inputs.state, inputs.income, inputs.filingStatus, inputs.k401Pct]);
 
-  const savingsRate = useMemo(() => clamp((netAnnual - annualExp) / Math.max(1, netAnnual), -1, 1), [netAnnual, annualExp]);
+  // Share of take-home pay plus 401(k) saving (plus Barista side income) that is saved, using the saving that really happens.
+  const savingsInfo = useMemo(() => savingsRateOf(inputs, netAnnual, mode), [inputs, netAnnual, mode]);
+  const savingsRate = savingsInfo.rate;
 
   // ── Standard simulation ───────────────────────────────────────────────────
   const result = useMemo(() => simulateYearsToFI(inputs, netPath, mode), [inputs, netPath, mode]);
@@ -1307,11 +1397,13 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   // ── Coast-specific ────────────────────────────────────────────────────────
   const coastFireNumber = useMemo(() => mode === "coast" ? calcCoastFireNumber(inputs) : null, [mode, inputs]);
   const yearsToCoast    = useMemo(() => mode === "coast" ? simulateYearsToCoast(inputs, netPath) : null, [mode, inputs, netPath]);
-  const isCoastReady    = useMemo(() => coastFireNumber !== null && result.startPortfolio >= coastFireNumber, [coastFireNumber, result.startPortfolio]);
+  // What you would need today to stop contributing now and still reach the retirement target.
+  const coastNeededToday = useMemo(() => mode === "coast" ? coastTargetAtYear(inputs, 0) : null, [mode, inputs]);
+  const isCoastReady    = useMemo(() => coastNeededToday !== null && result.startPortfolio >= coastNeededToday, [coastNeededToday, result.startPortfolio]);
   const coastProgress   = useMemo(() => {
-    if (!coastFireNumber || !Number.isFinite(coastFireNumber)) return 0;
-    return clamp(result.startPortfolio / coastFireNumber, 0, 1);
-  }, [coastFireNumber, result.startPortfolio]);
+    if (!coastNeededToday || !Number.isFinite(coastNeededToday)) return 0;
+    return clamp(result.startPortfolio / coastNeededToday, 0, 1);
+  }, [coastNeededToday, result.startPortfolio]);
 
   // ── Lean-specific: full FIRE comparison at 1.5× spending ─────────────────
   const fullFireForLean = useMemo(() => {
@@ -1343,26 +1435,15 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   }, [mode, inputs, netPath]);
 
   // ── Move impact ───────────────────────────────────────────────────────────
-  // Take-home pay after the move: new income and, if it changes, the new state and city's taxes.
-  // Abroad: a U.S. taxpayer who leaves the state pays federal tax only, modeled with a state that has no income tax.
-  // The moved scenario’s take-home pay, taxed year by year in the new state and city.
-  const movedState = ((inputs.movedAbroad ? "tx" : inputs.movedState || inputs.state) || "") as StateChoice;
-  const movedNetPath = useMemo(() => makeNetPath({
-    gross: inputs.movedIncome > 0 ? inputs.movedIncome : inputs.income,
-    state: movedState, filing: inputs.filingStatus, k401Pct: inputs.k401Pct,
-    cityId: movedState ? (inputs.movedState && inputs.movedCityId ? inputs.movedCityId : getBaselineCityIdForState(movedState)) : undefined,
-    salaryGrowthPct: inputs.salaryGrowthPct, inflationPct: inputs.inflationPct,
-  }), [inputs.movedIncome, inputs.income, movedState, inputs.movedState, inputs.movedCityId, inputs.filingStatus, inputs.k401Pct, inputs.salaryGrowthPct, inputs.inflationPct]);
+  // The full move scenario (new income and state taxed year by year, moving cost paid from savings, new spending). The
+  // recommendations use the same builder, so they always agree with this card.
+  const movedScenario = useMemo(() => buildMovedScenario(inputs), [inputs]);
+  const movedShortfall = useMemo(() => moveCostShortfall(inputs), [inputs]);
 
   const movedResult = useMemo(() => {
     if (!inputs.moveCompareOn) return null;
-    // One-time costs come out of savings before the clock starts.
-    const cost = Math.max(0, inputs.movedCost);
-    const movedInputs: Inputs = inputs.advanced
-      ? { ...inputs, balBrokerage: Math.max(0, applyBrokerageAutofill(inputs).balBrokerage - cost), contribBrokerage: applyBrokerageAutofill(inputs).contribBrokerage }
-      : { ...inputs, currentPortfolio: Math.max(0, inputs.currentPortfolio - cost) };
-    return simulateYearsToFI(movedInputs, movedNetPath, mode, { expensesAnnualBase: annualMovedExpenses(inputs) });
-  }, [inputs, movedNetPath, mode]);
+    return simulateYearsToFI(movedScenario.inputs, movedScenario.net, mode);
+  }, [inputs.moveCompareOn, movedScenario, mode]);
   const movedFiAge    = useMemo(() => !movedResult || movedResult.yearsToFI === null ? null : inputs.age + movedResult.yearsToFI, [inputs.age, movedResult]);
   const moveDeltaYears = useMemo(() => fiAge === null || movedFiAge === null ? null : fiAge - movedFiAge, [fiAge, movedFiAge]);
 
@@ -1442,12 +1523,14 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   const savingsTable = useMemo(() => {
     return [10, 20, 30, 40, 50, 60, 70].map(rPct => {
       const r            = rPct / 100;
-      const impliedExp   = Math.max(0, netAnnual * (1 - r));
-      const sim          = netAnnual > 0 ? simulateYearsToFI(inputs, netPath, mode, { expensesAnnualBase: impliedExp }) : null;
+      const saved        = savingsInfo.base * r;
+      const impliedExp   = Math.max(0, savingsInfo.base - saved);
+      const scenario     = inputsForSavingsRate(inputs, saved, savingsInfo.deferral);
+      const sim          = netAnnual > 0 ? simulateYearsToFI(scenario, netPath, mode, { expensesAnnualBase: impliedExp }) : null;
       const ageAtFI      = sim?.yearsToFI == null ? null : inputs.age + sim.yearsToFI;
       return { savingsRatePct: rPct, impliedExpenses: impliedExp, yearsToFI: sim?.yearsToFI ?? null, ageAtFI };
     });
-  }, [inputs, netAnnual, netPath, mode]);
+  }, [inputs, netAnnual, netPath, mode, savingsInfo]);
 
   const currentSavingsRatePct  = useMemo(() => Math.round(savingsRate * 100), [savingsRate]);
   const nearestSavingsRateRow  = useMemo(() => [10,20,30,40,50,60,70].reduce((c, r) => Math.abs(r - currentSavingsRatePct) < Math.abs(c - currentSavingsRatePct) ? r : c, 10), [currentSavingsRatePct]);
@@ -1497,9 +1580,10 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
   async function handleShare() {
     try {
       const base    = window.location.origin;
-      const path    = mode === "standard" ? "/fire-calculator/share" : `/${mode}-fire-calculator/share`;
-      const url     = new URL(path, base);
+      // Only the common share page exists; every mode shares through it with its own details in the query.
+      const url     = new URL("/fire-calculator/share", base);
       url.searchParams.set("mode", mode);
+      if (fiAge) url.searchParams.set("fireAge", String(fiAge));
 
       if (mode === "coast" && coastFireNumber !== null) {
         url.searchParams.set("coastNumber", String(Math.round(coastFireNumber)));
@@ -1571,11 +1655,11 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="text-xs leading-5 text-slate-300">Enter your income, spending, and investing assumptions.</div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button onClick={() => setInputs(s => ({ ...s, advanced: !s.advanced }))}
+              <button onClick={() => setInputs(s => s.advanced ? { ...s, advanced: false } : seedAdvancedFromSimple({ ...s, advanced: true }))}
                 className={["rounded-xl border px-3 py-2 text-xs font-medium", inputs.advanced ? "border-violet-300/40 bg-violet-300/10 text-violet-100" : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"].join(" ")}>
                 {inputs.advanced ? "Advanced: ON" : "Advanced: OFF"}
               </button>
-              <button onClick={() => setInputs(defaultsForMode(mode, initialIncome, spendingPreset))}
+              <button onClick={() => { setInputs(defaultsForMode(mode, initialIncome, spendingPreset)); setLinkedMove(false); setAbroadLabel(""); setPinnedCompareCityId(null); setShareStatus("idle"); }}
                 className="rounded-xl border border-red-300/40 bg-red-300/10 px-3 py-2 text-xs font-medium text-red-200 hover:bg-red-300/20">
                 ↺ Reset
               </button>
@@ -1591,10 +1675,10 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="Stop contributing at age" info="After this age, contributions go to zero and your portfolio coasts on compound growth alone."
                     value={inputs.coastAge}
-                    onChange={v => setInputs(s => ({ ...s, coastAge: clamp(v, s.age, 80) }))} />
+                    onChange={v => setInputs(s => { const coastAge = Math.round(clamp(v, s.age, 80)); return { ...s, coastAge, targetRetirementAge: Math.max(s.targetRetirementAge, coastAge) }; })} />
                   <Field label="Target retirement age" info="The age you plan to fully retire. Used to calculate how long compounding has to work."
                     value={inputs.targetRetirementAge}
-                    onChange={v => setInputs(s => ({ ...s, targetRetirementAge: clamp(v, s.coastAge, 100) }))} />
+                    onChange={v => setInputs(s => ({ ...s, targetRetirementAge: Math.round(clamp(v, s.coastAge, 100)) }))} />
                 </div>
               </div>
             )}
@@ -1607,6 +1691,9 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     value={inputs.baristaPartTimeIncome}
                     onChange={v => setInputs(s => ({ ...s, baristaPartTimeIncome: clamp(v, 0, 500000) }))}
                     prefix="$" />
+                  <div className="text-xs leading-5 text-slate-400 sm:col-span-2">
+                    This counts as extra after-tax income you earn from today: it adds to your saving now, and it reduces the yearly gap your portfolio must cover. It is assumed to grow with inflation like your spending. If it is more than your spending, the gap is zero.
+                  </div>
                   <div className="self-end text-xs text-slate-400">
                     Gap your portfolio covers:<br />
                     <span className="font-semibold text-slate-200">
@@ -1618,7 +1705,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             )}
 
             {/* ── Shared core inputs ─────────────────────────────────────── */}
-            <Field label="Current age" value={inputs.age} onChange={v => setInputs(s => ({ ...s, age: clamp(v, 0, 100) }))} />
+            <Field label="Current age" value={inputs.age} onChange={v => setInputs(s => { const age = Math.round(clamp(v, 0, 100)); const coastAge = Math.max(s.coastAge, age); return { ...s, age, coastAge, targetRetirementAge: Math.max(s.targetRetirementAge, coastAge) }; })} />
             <Field label="Annual gross income" value={inputs.income} onChange={v => setInputs(s => ({ ...s, income: clamp(v, 0, 2_000_000) }))} prefix="$" />
 
             <div className="block">
@@ -1647,17 +1734,9 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">That&apos;s <span className="font-semibold text-slate-200">{money(annualExp, 0)}</span>/yr</div>
 
             <Field label="Current invested portfolio" value={inputs.currentPortfolio}
-              onChange={v => setInputs(s => {
-                const next = { ...s, currentPortfolio: clamp(v, 0, 20_000_000) };
-                if (next.advanced && next.balBrokerage === 0 && next.currentPortfolio > 0) next.balBrokerage = next.currentPortfolio;
-                return next;
-              })} prefix="$" />
+              onChange={v => setInputs(s => ({ ...s, currentPortfolio: clamp(v, 0, 20_000_000) }))} prefix="$" />
             <Field label="Annual contributions (optional)" info="Leave blank to auto-estimate from income minus expenses." value={inputs.yearlyInvestment}
-              onChange={v => setInputs(s => {
-                const next = { ...s, yearlyInvestment: clamp(v, 0, 5_000_000) };
-                if (next.advanced && next.contribBrokerage === 0 && next.yearlyInvestment > 0) next.contribBrokerage = next.yearlyInvestment;
-                return next;
-              })} prefix="$" />
+              onChange={v => setInputs(s => ({ ...s, yearlyInvestment: clamp(v, 0, 5_000_000) }))} prefix="$" />
             <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">Leave blank to estimate from after-tax income.</div>
 
             {/* ── Volatility preset (always visible) ────────────────────── */}
@@ -1787,8 +1866,8 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             <Field label="Withdrawal rate (%)" info="Percentage of portfolio withdrawn yearly in retirement. 4% is common." value={inputs.withdrawalRatePct} onChange={v => setInputs(s => ({ ...s, withdrawalRatePct: clamp(v, 2, 6) }))} suffix="%" />
             <Field label="Inflation (%)" value={inputs.inflationPct} onChange={v => setInputs(s => ({ ...s, inflationPct: clamp(v, 0, 10) }))} suffix="%" />
             <Field label="Salary growth (%)" value={inputs.salaryGrowthPct} onChange={v => setInputs(s => ({ ...s, salaryGrowthPct: clamp(v, 0, 15) }))} suffix="%" />
-            <Field label="Phase 2 starts after (years)" info="Year the calculator switches from Phase 1 to Phase 2 return assumptions." value={inputs.phase2StartsYear} onChange={v => setInputs(s => ({ ...s, phase2StartsYear: clamp(v, 0, 80) }))} />
-            <Field label="Projection length (years)" value={inputs.maxYears} onChange={v => setInputs(s => ({ ...s, maxYears: clamp(v, 1, 80) }))} />
+            <Field label="Phase 2 starts after (years)" info="Year the calculator switches from Phase 1 to Phase 2 return assumptions." value={inputs.phase2StartsYear} onChange={v => setInputs(s => ({ ...s, phase2StartsYear: Math.round(clamp(v, 0, 80)) }))} />
+            <Field label="Projection length (years)" value={inputs.maxYears} onChange={v => setInputs(s => ({ ...s, maxYears: Math.round(clamp(v, 1, 80)) }))} />
 
             {/* ── Move compare ───────────────────────────────────────────── */}
             <div className="mt-2 rounded-xl border border-white/10 bg-black/20 p-4 sm:col-span-2">
@@ -1821,6 +1900,11 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     <Field label="Monthly expenses after moving" value={inputs.movedExpensesMonthly} onChange={v => setInputs(s => ({ ...s, movedExpensesMonthly: clamp(v, 0, 200_000) }))} prefix="$" />
                     <div className="self-end text-xs text-slate-400">Annual: <span className="font-semibold text-slate-200">{money(annualMovedExpenses(inputs), 0)}</span></div>
                     <Field label="Income after moving (0 = same)" value={inputs.movedIncome} onChange={v => setInputs(s => ({ ...s, movedIncome: clamp(v, 0, 10_000_000) }))} prefix="$" />
+                    {movedShortfall > 0 && (
+                      <div className="rounded-xl border border-amber-300/30 bg-amber-300/10 p-3 text-xs leading-5 text-amber-100 sm:col-span-2">
+                        The moving cost is {money(movedShortfall, 0)} more than your savings, so the move result assumes you can cover it. Retirement-account money used for moving costs is taken without tax or penalty.
+                      </div>
+                    )}
                     <Field label="One-time moving costs (spent)" info="Taken out of savings before your timeline starts. Refundable deposits and a down payment are not costs." value={inputs.movedCost} onChange={v => setInputs(s => ({ ...s, movedCost: clamp(v, 0, 10_000_000) }))} prefix="$" />
                     <label className="flex items-start gap-2 text-sm sm:col-span-2">
                       <input type="checkbox" checked={inputs.movedAbroad} onChange={e => setInputs(s => ({ ...s, movedAbroad: e.target.checked }))} />
@@ -1888,7 +1972,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     : <>At your current pace you could reach financial independence at <strong>age {fiAge}</strong>, in about <strong>{result.yearsToFI} years</strong>, around <strong>{fiYear}</strong>.</>}
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Stat label="FIRE Number" value={hasCoreInputs && Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"} helper={`Based on ${inputs.withdrawalRatePct}% withdrawal rate`} />
+                  <Stat label="FIRE Number" value={hasCoreInputs && Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"} helper={`Based on ${inputs.withdrawalRatePct}% withdrawal rate, in the dollars of the year you reach it (spending grows with inflation)`} />
                   <Stat label="Years Until FIRE" value={hasCoreInputs ? result.yearsToFI === null ? "Not reached" : `${result.yearsToFI} yrs` : "—"} helper={fiYear ? `Est. FIRE year: ${fiYear}` : undefined} />
                   <Stat label="Estimated FIRE Age" value={hasCoreInputs ? (fiAge ?? "—") : "—"} />
                   {inputs.advanced
@@ -1982,20 +2066,20 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     ? "Enter your inputs to calculate your Coast FIRE number."
                     : isCoastReady
                     ? <>Your portfolio has already reached your Coast FIRE number. Compound growth alone can carry you to full retirement at <strong>age {inputs.targetRetirementAge}</strong>, even with no new contributions.</>
-                    : <>You need <strong>{money(coastFireNumber ?? 0, 0)}</strong> invested by age <strong>{inputs.coastAge}</strong> for your portfolio to coast to retirement without new contributions.
-                      {yearsToCoast !== null ? <> At your current pace, you could reach it in <strong>{yearsToCoast} years</strong>.</> : null}</>}
+                    : <>You need <strong>{money(coastFireNumber ?? 0, 0)}</strong> invested by age <strong>{inputs.coastAge}</strong> for your portfolio to coast to retirement without new contributions (about <strong>{money(coastNeededToday ?? 0, 0)}</strong> if you stopped today).
+                      {yearsToCoast !== null ? <> At your current pace, you could reach that in <strong>{yearsToCoast} years</strong>.</> : <> At your current pace you do not reach it before age {inputs.targetRetirementAge}; try saving more, a later retirement age or lower spending.</>}</>}
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Stat label="Coast FIRE Number" value={coastFireNumber !== null && Number.isFinite(coastFireNumber) ? money(coastFireNumber, 0) : "—"}
                     helper={`Needed by age ${inputs.coastAge} to coast to retirement at ${inputs.targetRetirementAge}`} highlight={isCoastReady} />
                   <Stat label="Current Portfolio" value={money(result.startPortfolio, 0)}
-                    helper={isCoastReady ? "✓ You've reached Coast FIRE" : coastFireNumber ? `${money(Math.max(0, coastFireNumber - result.startPortfolio), 0)} to go` : undefined} />
+                    helper={isCoastReady ? "✓ You've reached Coast FIRE" : coastNeededToday ? `${money(Math.max(0, coastNeededToday - result.startPortfolio), 0)} to go to coast from today` : undefined} />
                   <Stat label="Coast Status" value={isCoastReady ? "✓ Coast-ready" : yearsToCoast !== null ? `${yearsToCoast} yrs to coast` : "Not reached"}
                     helper={isCoastReady ? `Full FIRE projected at age ${fiAge ?? "—"}` : `Coasting at age ${inputs.coastAge} → retire at ${inputs.targetRetirementAge}`} highlight={isCoastReady} />
                   <Stat label="Full FIRE Projected Age" value={fiAge ?? "—"} helper="If you keep contributing past coast age" />
                 </div>
                 <ProgressBar pct={coastProgress} label="Progress to Coast FIRE number"
-                  sublabel={<>{money(result.startPortfolio, 0)} of {coastFireNumber ? money(coastFireNumber, 0) : "—"} · {isCoastReady ? <span className="text-emerald-300 font-semibold">Coast-ready!</span> : `${Math.round(coastProgress * 100)}% there`}</>} />
+                  sublabel={<>{money(result.startPortfolio, 0)} of {coastNeededToday ? money(coastNeededToday, 0) : "—"} needed today · {isCoastReady ? <span className="text-emerald-300 font-semibold">Coast-ready!</span> : `${Math.round(coastProgress * 100)}% there`}</>} />
               </>)}
 
               {/* ── BARISTA ───────────────────────────────────────────────── */}
