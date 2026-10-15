@@ -32,7 +32,21 @@ function componentFunctions(file: string, names: string[], globals: Record<strin
 }
 
 describe("additional live calculator known-answer audit", () => {
-  const mortgage = () => componentFunctions("MortgageCalculator", ["calcMonthlyPI", "calcTotalInterest", "buildSchedule", "calcRefi", "calcAutoPMI", "calcPMIDropOff"], { US_STATE_DEFAULTS });
+  const mortgage = () => componentFunctions("MortgageCalculator", ["calcMonthlyPI", "calcTotalInterest", "buildSchedule", "calcRefi", "calcAutoPMI", "calcPMIDropOff", "calcBreakEven"], { US_STATE_DEFAULTS });
+  it("zero-rate rent-versus-buy comparison is valid, and the mortgage payment stops once the loan is paid off", () => {
+    const result = mortgage().calcBreakEven({ downPayment: 0, closingCosts: 0, annualRate: 0,
+      monthlyPI: 1000, rent: 1000, tax: 0, ins: 0, hoa: 0, homePrice: 120000,
+      appreciation: 0, rentGrowth: 0, investReturn: 0, maintenanceRate: 0, taxDeductRate: 0 });
+    // Each payment builds equity one for one, so buying is never behind renting at the same payment.
+    expect(result).toEqual({ type: "ok", months: 1 });
+    // A $10,000 loan paid at $1,000 a month is repaid after ten months; later months cost nothing for the loan.
+    // Buying starts $5,000 behind (closing costs) and renting earns nothing, so the cost of renting
+    // ($100 a month, less the $5,000 the renter keeps) catches up with $5,000 at month 100.
+    const payoff = mortgage().calcBreakEven({ downPayment: 0, closingCosts: 5000, annualRate: 0,
+      monthlyPI: 1000, rent: 100, tax: 0, ins: 0, hoa: 0, homePrice: 10000,
+      appreciation: 0, rentGrowth: 0, investReturn: 0, maintenanceRate: 0, taxDeductRate: 0 });
+    expect(payoff).toEqual({ type: "ok", months: 100 });
+  });
   it("matches independently calculated positive-rate mortgage payments and amortization", () => {
     const m = mortgage();
     const principal = 300000, rate = 0.065 / 12, months = 360;

@@ -404,7 +404,7 @@ function calcBreakEven({
     rent <= 0 ||
     monthlyPI <= 0 ||
     downPayment < 0 ||
-    annualRate <= 0
+    annualRate < 0
   ) {
     return { type: "invalid" };
   }
@@ -423,11 +423,13 @@ function calcBreakEven({
 
   for (let m = 1; m <= 360; m++) {
     const interest = loanBalance * monthlyRate;
-    const principal = Math.max(0, monthlyPI - interest);
+    // The mortgage payment stops once the loan is paid off; the last payment is only what is still owed.
+    const payment = loanBalance > 0 ? Math.min(monthlyPI, loanBalance + interest) : 0;
+    const principal = Math.max(0, payment - interest);
     const taxSavings = interest * (taxDeductRate / 100);
     const maintenance = (homeValue * (maintenanceRate / 100)) / 12;
 
-    buyCashFlowCost += monthlyPI + tax + ins + hoa + maintenance - taxSavings;
+    buyCashFlowCost += payment + tax + ins + hoa + maintenance - taxSavings;
     rentCashFlowCost += monthlyRent;
 
     renterInvestedCash *= 1 + investReturn / 100 / 12;

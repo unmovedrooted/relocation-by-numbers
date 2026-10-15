@@ -12,7 +12,7 @@
  * tool auto-fills from each city's defaultRent / medianHomePrice so 2-3
  * targets can be compared without re-typing housing assumptions each time.
  */
-import { estimateNetAnnual } from "../wageTax";
+import { estimateNetBreakdown } from "../wageTax";
 import type { FilingStatus } from "../tax";
 import { monthlyHousingCost } from "../housing";
 import type { City } from "../cities";
@@ -68,12 +68,14 @@ export function computeUsCityResult(input: UsCompareInput): UsCompareResult {
   const { city, grossAnnual, filing, k401Pct, mode } = input;
   const salaryReady = Number.isFinite(grossAnnual) && grossAnnual > 0;
 
-  const netAnnual = salaryReady
-    ? estimateNetAnnual({ grossAnnual, state: city.state, filing, k401Pct, cityId: city.id })
-    : 0;
+  const breakdown = salaryReady
+    ? estimateNetBreakdown({ grossAnnual, state: city.state, filing, k401Pct, cityId: city.id })
+    : null;
+  const netAnnual = breakdown?.net ?? 0;
   const netMonthly = netAnnual / 12;
-  const effTaxPct = salaryReady
-    ? Math.max(0, Math.min(99.9, (1 - netAnnual / grossAnnual) * 100))
+  // Taxes only: money saved to a 401(k) is not a tax, so it is not counted here.
+  const effTaxPct = breakdown
+    ? Math.max(0, Math.min(99.9, (breakdown.totalTax / grossAnnual) * 100))
     : 0;
 
   let housingMonthly = 0;

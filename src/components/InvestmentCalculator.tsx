@@ -58,6 +58,7 @@ function GrowthTooltip({ active, payload }: { active?: boolean; payload?: Array<
     <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-lg dark:border-slate-700 dark:bg-slate-900">
       <div className="font-semibold text-slate-900 dark:text-white">Year {d.year}</div>
       <div className="text-slate-700 dark:text-slate-300">Balance: {money(d.balance)}</div>
+      <div className="text-slate-700 dark:text-slate-300">{d.growth < 0 ? "Loss" : "Growth"}: {money(d.growth)}</div>
     </div>
   );
 }
@@ -123,7 +124,7 @@ export default function InvestmentCalculator() {
       balance += annualContribution;
       contributed += annualContribution;
       balance += balance * effReturn;
-      growthSeries.push({ year: y, balance, base: start + contributed, growth: Math.max(0, balance - start - contributed) });
+      growthSeries.push({ year: y, balance, base: start + contributed, growth: balance - start - contributed }); // negative when the investment has lost money
     }
     const finalBalance = balance;
     const totalGrowth = finalBalance - start - contributed;
@@ -253,7 +254,7 @@ export default function InvestmentCalculator() {
               </div>
               <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
                 <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Growth over time{dollarsNote}</div>
-                <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">Shaded = your contributions · full height = balance incl. growth</div>
+                <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">Shaded = your contributions · the green layer is growth (below the contributions when you are down) · the line is your balance</div>
                 <div className="h-[220px] w-full">
                   <ResponsiveContainer initialDimension={{ width: 480, height: 280 }} width="100%" height="100%">
                     <ComposedChart data={results.growthSeries} margin={{ top: 10, right: 8, left: 8, bottom: 0 }}>
