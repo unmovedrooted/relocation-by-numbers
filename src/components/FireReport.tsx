@@ -95,12 +95,42 @@ function InlineMarkdown({ text }: { text: string }) {
   );
 }
 
+// ── Wording for each plan ─────────────────────────────────────────────────────
+function reportCopy(inputs: FireReportInputs, alreadyFI: boolean): { offer: string; blurb: string; button: string; title: string } {
+  if (inputs.mode === "coast") {
+    return {
+      offer: inputs.coastReady ? "Get your Coast FIRE plan" : "Get your plan to reach Coast FIRE",
+      blurb: "How far you are from your Coast number, what to contribute until your coast age, what to do after you stop, and the healthcare and tax steps before retirement, built from your exact numbers.",
+      button: "Generate my Coast plan",
+      title: "Your Coast FIRE plan",
+    };
+  }
+  if (inputs.mode === "barista") {
+    return {
+      offer: "Get your Barista FIRE plan",
+      blurb: "How your part-time income and portfolio split your spending, the healthcare and benefits gap, how to draw on the portfolio for the gap, and when to make the switch, built from your exact numbers.",
+      button: "Generate my Barista plan",
+      title: "Your Barista FIRE plan",
+    };
+  }
+  return {
+    offer: alreadyFI ? "Get your withdrawal strategy" : `Get your roadmap to FIRE at ${inputs.fireAge ?? "—"}`,
+    blurb: alreadyFI
+      ? "Account withdrawal order, Roth conversions, tax bracket management, and ACA strategy, built from your exact numbers."
+      : "Withdrawal order, Roth conversion windows, healthcare bridge, and sequence-of-returns protection for your specific situation.",
+    button: "Generate my strategy",
+    title: alreadyFI ? "Your withdrawal strategy" : `Your roadmap to FIRE at ${inputs.fireAge ?? "—"}`,
+  };
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 export default function FireReport({ inputs }: { inputs: FireReportInputs }) {
   const [status, setStatus] = useState<Status>("idle");
   const [report, setReport] = useState("");
 
   const alreadyFI = (inputs.yearsToFI ?? 1) <= 0;
+  // Coast and Barista are standalone plans with their own report; standard and Lean share the withdrawal strategy.
+  const copy = reportCopy(inputs, alreadyFI);
 
   async function generate() {
     setStatus("loading");
@@ -143,16 +173,8 @@ export default function FireReport({ inputs }: { inputs: FireReportInputs }) {
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-violet-300">
               Personalized report
             </div>
-            <p className="text-base font-semibold text-white">
-              {alreadyFI
-                ? "Get your withdrawal strategy"
-                : `Get your roadmap to FIRE at ${inputs.fireAge ?? "—"}`}
-            </p>
-            <p className="text-sm leading-6 text-slate-400">
-              {alreadyFI
-                ? "Account withdrawal order, Roth conversions, tax bracket management, and ACA strategy, built from your exact numbers."
-                : "Withdrawal order, Roth conversion windows, healthcare bridge, and sequence-of-returns protection for your specific situation."}
-            </p>
+            <p className="text-base font-semibold text-white">{copy.offer}</p>
+            <p className="text-sm leading-6 text-slate-400">{copy.blurb}</p>
             <p className="text-xs leading-5 text-slate-500">
               When you continue, your age, location, income, spending, tax assumptions,
               account balances, the calculator mode and its settings (such as Coast age or
@@ -167,7 +189,7 @@ export default function FireReport({ inputs }: { inputs: FireReportInputs }) {
             onClick={generate}
             className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-violet-300/30 bg-violet-300/10 px-4 py-2.5 text-sm font-medium text-violet-100 transition hover:bg-violet-300/20 active:scale-[0.98]"
           >
-            Generate my strategy →
+            {copy.button} →
           </button>
         </div>
       </div>
@@ -183,7 +205,7 @@ export default function FireReport({ inputs }: { inputs: FireReportInputs }) {
             Personalized report
           </div>
           <p className="mt-0.5 text-sm font-semibold text-white">
-            {alreadyFI ? "Your withdrawal strategy" : `Your roadmap to FIRE at ${inputs.fireAge ?? "—"}`}
+            {copy.title}
           </p>
         </div>
 

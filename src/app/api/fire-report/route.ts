@@ -1,15 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { buildPrompt, type ReportInputs } from "../../../lib/fireReportPrompt";
+import { buildPrompt, systemPromptFor, type ReportInputs } from "../../../lib/fireReportPrompt";
 
 const MAX_BODY_BYTES = 16_384;
 const PROVIDER_TIMEOUT_MS = 25_000;
 const RATE_LIMIT_REQUESTS = 5;
 const RATE_LIMIT_WINDOW_SECONDS = 60 * 60;
-
-const SYSTEM_PROMPT = `You are a FIRE planning specialist who writes personalized withdrawal strategy reports.
-Write in plain, direct language. Make each section specific to the supplied numbers.
-Format the response in markdown with ## section headers, **bold** key figures, and bullet points.
-Keep the report under 600 words and end with a one-line planning disclaimer.`;
 
 const REQUIRED_KEYS = [
   "age", "state", "filingStatus", "fireAge", "yearsToFI", "expensesMonthly",
@@ -249,7 +244,7 @@ export async function POST(request: Request) {
       {
         model: "claude-sonnet-4-6",
         max_tokens: 1500,
-        system: SYSTEM_PROMPT,
+        system: systemPromptFor(inputs.mode),
         messages: [{ role: "user", content: buildPrompt(inputs) }],
       },
       { signal: controller.signal },
