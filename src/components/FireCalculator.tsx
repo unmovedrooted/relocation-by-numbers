@@ -23,6 +23,7 @@ import { findCity, citiesForState } from "@/lib/cities";
 import { estimateNetAnnual, effectiveTaxRatePct, EMPLOYEE_401K_LIMIT } from "@/lib/wageTax";
 import type { FilingStatus } from "@/lib/tax";
 import { parseFireAbroadLink, parseFireLink } from "@/lib/fireLink";
+import { monthlyDepositFactor } from "@/lib/depositTiming";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIRE MODE
@@ -480,10 +481,12 @@ function growBuckets(
 
  const brokerageReturn = Math.max(-0.99, r - drag);
 
+// Each year's contribution arrives as twelve monthly end-of-month deposits (see depositTiming.ts), so it earns part of the
+// year's return; the taxable bucket uses its own return after tax drag.
 return {
-  b401k: b.b401k * (1 + r) + Math.max(0, c401k),
-  bIra: b.bIra * (1 + r) + Math.max(0, cIra),
-  bBrokerage: b.bBrokerage * (1 + brokerageReturn) + Math.max(0, cBrokerage),
+  b401k: b.b401k * (1 + r) + Math.max(0, c401k) * monthlyDepositFactor(r),
+  bIra: b.bIra * (1 + r) + Math.max(0, cIra) * monthlyDepositFactor(r),
+  bBrokerage: b.bBrokerage * (1 + brokerageReturn) + Math.max(0, cBrokerage) * monthlyDepositFactor(brokerageReturn),
 };
 }
 
@@ -2062,7 +2065,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
                 <div className="font-semibold text-white mb-2">How this estimate works</div>
                 <div className="text-xs leading-5 text-slate-400">
-                  {MODE_NOTES[mode]} Returns use your selected volatility preset. Inflation and salary growth compound annually, and take-home pay is recalculated each year through the tax engine, with pay growing at the salary-growth rate and the tax brackets, deductions and 401(k) limit indexed to inflation. Contributions are added at the start of each year, so monthly saving would grow slightly less. This is a planning estimate, not financial or tax advice.
+                  {MODE_NOTES[mode]} Returns use your selected volatility preset. Inflation and salary growth compound annually, and take-home pay is recalculated each year through the tax engine, with pay growing at the salary-growth rate and the tax brackets, deductions and 401(k) limit indexed to inflation. Each year&apos;s saving is added as twelve monthly end-of-month deposits. This is a planning estimate, not financial or tax advice.
                 </div>
               </div>
             </div>

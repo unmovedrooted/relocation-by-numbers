@@ -131,13 +131,16 @@ describe("live calculator mathematical observations (not a full-page certificati
     const base = { ...fire.defaultsForMode("standard", 100000), currentPortfolio: 0, expensesMonthly: 4000, k401Pct: 0,
       yearlyInvestment: 12000, inflationPct: 0, salaryGrowthPct: 0, maxYears: 1, brokerageTaxMode: "drag", brokerageTaxDragPct: 0 };
     const rows: Array<{ check: string; reference: number | string; actual: number | string }> = [];
+    // The moderate preset's Phase 1 return is 7%; a year's saving arrives as twelve monthly end-of-month deposits,
+    // so it is worth the saved amount times this factor at the end of the first year.
+    const g = monthlyDepositFactor(0.07);
     const add = (check: string, reference: number | string, actual: number | string) => rows.push({ check, reference, actual });
     for (const mode of ["standard", "lean", "barista", "coast"]) {
-      add(`${mode}: explicit $12k contribution, zero starting balance, one year`, 12000, fire.simulateYearsToFI(base, 80000, mode).endPortfolio);
+      add(`${mode}: explicit $12k contribution, zero starting balance, one year`, 12000 * g, fire.simulateYearsToFI(base, 80000, mode).endPortfolio);
     }
     const auto = { ...base, yearlyInvestment: 0, baristaPartTimeIncome: 24000 };
-    add("Standard: automatic contribution $80k net less $48k spending", 32000, fire.simulateYearsToFI(auto, 80000, "standard").endPortfolio);
-    add("Barista: $32k saving plus $24k extra after-tax part-time income earned from today (owner decision)", 56000, fire.simulateYearsToFI(auto, 80000, "barista").endPortfolio);
+    add("Standard: automatic contribution $80k net less $48k spending", 32000 * g, fire.simulateYearsToFI(auto, 80000, "standard").endPortfolio);
+    add("Barista: $32k saving plus $24k extra after-tax part-time income earned from today (owner decision)", 56000 * g, fire.simulateYearsToFI(auto, 80000, "barista").endPortfolio);
     const coast = { ...base, age: 40, coastAge: 40, targetRetirementAge: 65, inflationPct: 2.5, volatility: "moderate", phase2StartsYear: 200 };
     add("Coast target: $48k spending, 4% SWR, 25y, 7% nominal, 2.5% inflation", 1200000 * (1.025 / 1.07) ** 25, fire.calcCoastFireNumber(coast));
     add("Coast target: same scenario, zero inflation", 1200000 / 1.07 ** 25, fire.calcCoastFireNumber({ ...coast, inflationPct: 0 }));
@@ -153,7 +156,7 @@ describe("live calculator mathematical observations (not a full-page certificati
         const net = estimateNetBreakdown({ grossAnnual: salary, state, filing: "single", k401Pct: 0 }).net;
         for (const mode of ["standard", "lean", "coast", "barista"]) {
           const scenario = { ...auto, income: salary, state, expensesMonthly: 4000 };
-          add(`${state} ${salary} ${mode}: first-year cash-flow contribution`, Math.max(0, net - 48000), fire.simulateYearsToFI(scenario, net, mode).endPortfolio);
+          add(`${state} ${salary} ${mode}: first-year cash-flow contribution`, Math.max(0, net - 48000) * g, fire.simulateYearsToFI(scenario, net, mode).endPortfolio);
         }
       }
     }
