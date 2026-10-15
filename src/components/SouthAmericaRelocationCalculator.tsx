@@ -474,7 +474,9 @@ const grossMonthly = annualIncome / 12;
     const annualIncomeForToTax = convertUsdToLocal(annualIncome, toCountry);
 
     const currentTaxEstimate = estimateInternationalTax({ countryCode: fromCountry, annualIncome: annualIncomeForFromTax, filing, isRetired: mode === "retired" });
-    const targetTaxEstimate = estimateInternationalTax({ countryCode: toCountry, annualIncome: annualIncomeForToTax, filing, isRetired: mode === "retired", answers: { [US_TAX_STATUS_KEY]: usTaxStatus, [US_SELF_EMPLOYED_KEY]: usSelfEmployed } });
+    // Remote workers and employees of a local employer are taxed differently; the other regional calculators pass this too.
+    const incomeScenario = mode === "retired" ? "retired" : salaryType === "remote" ? "remote" : "local";
+    const targetTaxEstimate = estimateInternationalTax({ countryCode: toCountry, annualIncome: annualIncomeForToTax, filing, isRetired: mode === "retired", incomeScenario, answers: { [US_TAX_STATUS_KEY]: usTaxStatus, [US_SELF_EMPLOYED_KEY]: usSelfEmployed } });
 
     const currentTaxRate = currentTaxEstimate.effectiveRate;
     const targetTaxRate = targetTaxEstimate.effectiveRate;

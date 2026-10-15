@@ -104,7 +104,8 @@ export function computeCaribCityResult(input: CaribCompareInput): CaribCompareRe
         grossIncomeLocalCurrency: localGross,
         filingStatus: caribFiling,
       });
-      const foreignRate = result.isDisclaimer ? 0 : result.effectiveRate;
+      // The exact rate (tax over income), not the engine's effectiveRate, which is rounded to a whole percent.
+      const foreignRate = result.isDisclaimer || !(localGross > 0) ? 0 : result.tax / localGross;
       const usAdded = input.usTaxHolder && !NO_US_OVERLAY.has(countryCode) && !result.isDisclaimer
         ? usTaxAbroadAddition({ countryCode, annualIncome: localGross, filing, incomeScenario: scenario, foreignTaxUsd: foreignRate * grossAnnualUsd, selfEmployed: input.selfEmployed }).addedUsd
         : 0;

@@ -498,6 +498,7 @@ export default function CompareCitiesCalculator() {
     if (region === "us" || region === "caribbean") return [];
     return intlTargets.map((t) =>
       computeIntlCityResult({
+        region,
         countryCode: t.countryCode,
         cityCode: t.cityCode || undefined,
         grossAnnualUsd: grossN,
@@ -923,7 +924,7 @@ export default function CompareCitiesCalculator() {
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
                 {isUs
                   ? "Rent and home price use each city's typical values as a starting point, for an exact scenario with your own numbers, use the full relocation calculator for a single destination."
-                  : "Housing and living costs use each destination's typical values, and tax uses a simplified estimate, for an exact scenario with a country-specific tax breakdown, use the matching full regional calculator."}{" "}
+                  : "Housing and living costs use each destination's typical values, and tax uses a simplified estimate (working income is treated as a remote worker’s, paid from abroad), for an exact scenario with a country-specific tax breakdown, use the matching full regional calculator."}{" "}
                 Planning estimates only, not financial or tax advice.
               </div>
             </>

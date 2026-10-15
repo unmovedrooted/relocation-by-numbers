@@ -23,6 +23,7 @@
  * to the matching full regional calculator.
  */
 import { estimateInternationalTax, US_SELF_EMPLOYED_KEY, US_TAX_STATUS_KEY, type FilingStatus } from "../internationalTaxes";
+import { estimateAsiaTax } from "../asiaTaxes";
 import { getCityDefaultsUsd } from "../internationalCityDefaults";
 import { getCityCostMultipliers } from "../internationalCityCosts";
 import { getCountryByCode } from "../internationalCountries";
@@ -41,6 +42,8 @@ export type IntlBuyAssumptions = {
 };
 
 export type IntlCompareInput = {
+  /** The compare tool's region. Asia uses the Asia calculator's tax models; every other region uses the shared international ones. */
+  region?: string;
   countryCode: string;
   cityCode?: string;
   /** Gross annual income, already in USD. */
@@ -88,12 +91,16 @@ export function computeIntlCityResult(input: IntlCompareInput): IntlCompareResul
   const cityName = city?.name ?? country?.name ?? countryCode;
   const countryName = country?.name ?? countryCode;
 
+  // The same tax function and default income scenario as the full regional calculator for that region, so a comparison and the
+  // full calculator agree on identical inputs: "working" is a remote worker paid from abroad (the calculators' default salary type).
+  const estimateTax = input.region === "asia" ? estimateAsiaTax : estimateInternationalTax;
   const taxEstimate = salaryReady
-    ? estimateInternationalTax({
+    ? estimateTax({
         countryCode,
         annualIncome: convertUsdToLocal(grossAnnualUsd, countryCode),
         filing,
         isRetired: mode === "retired",
+        incomeScenario: mode === "retired" ? "retired" : "remote",
         answers: input.usTaxHolder ? { [US_TAX_STATUS_KEY]: "yes", [US_SELF_EMPLOYED_KEY]: input.selfEmployed ? "yes" : "no" } : {},
       })
     : null;
