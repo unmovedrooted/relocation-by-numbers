@@ -4,6 +4,7 @@ import { newZealandTax } from "./countryTaxRules/newZealand";
 import { irelandTax } from "./countryTaxRules/ireland";
 import { southAfricaTax } from "./countryTaxRules/southAfrica";
 import { canadaTax } from "./countryTaxRules/canada";
+import { estimateNetBreakdown, getFederalStandardDeduction } from "./wageTax";
 import { estimateAsiaTax } from "./asiaTaxes";
 
 // Figures published or computed by the tax authorities themselves, compared with the site's country modules. Each block names the
@@ -84,5 +85,18 @@ describe("Canada: CRA Payroll Deductions Online Calculator (apps.cra-arc.gc.ca P
   });
   it("CPP and CPP2 annual maximums are the CRA figures ($4,230.45 and $416.00) plus EI at the 2026 maximum ($1,123.07)", () => {
     expect(r.payroll).toBeCloseTo(4_230.45 + 416 + 1_123.07, 2);
+  });
+});
+
+describe("United States, married filing jointly: IRS Tax Withholding Estimator (apps.irs.gov, run 2026-10-15)", () => {
+  // One earner, wages 150,000, no dependents, no adjustments, standard deduction, no other income. The estimator reports
+  // a standard deduction of 32,200 and estimated federal tax of 15,340 (before payroll taxes, which it does not include).
+  it("standard deduction is the IRS figure", () => {
+    expect(getFederalStandardDeduction("married")).toBe(32_200);
+  });
+  it("federal income tax equals the IRS estimate exactly", () => {
+    const r = estimateNetBreakdown({ grossAnnual: 150_000, state: "tx", filing: "married", k401Pct: 0 });
+    expect(r.taxableFederal).toBe(117_800);
+    expect(Math.round(r.federal)).toBe(15_340);
   });
 });
