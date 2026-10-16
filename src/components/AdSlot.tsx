@@ -13,8 +13,12 @@ declare global {
   }
 }
 
+// Ad slots are hidden everywhere for now. Set NEXT_PUBLIC_ADS_ENABLED=1 to show them again.
+const ADS_ENABLED = process.env.NEXT_PUBLIC_ADS_ENABLED === "1";
+
 export default function AdSlot({ slot, className = "" }: AdSlotProps) {
   useEffect(() => {
+    if (!ADS_ENABLED) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch {
@@ -22,7 +26,7 @@ export default function AdSlot({ slot, className = "" }: AdSlotProps) {
     }
   }, []);
 
-  if (!slot) return null;
+  if (!ADS_ENABLED || !slot) return null;
 
   return (
     <div className={className}>

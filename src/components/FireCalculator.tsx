@@ -1010,7 +1010,8 @@ function buildDecisionEngine(
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AdSenseBlock({ slot, className = "" }: { slot: string; className?: string }) {
-  const enabled = Boolean(ADSENSE_CLIENT && slot);
+  // Ad slots are hidden everywhere for now; set NEXT_PUBLIC_ADS_ENABLED=1 to show them again.
+  const enabled = process.env.NEXT_PUBLIC_ADS_ENABLED === "1" && Boolean(ADSENSE_CLIENT && slot);
   useEffect(() => {
     if (!enabled) return;
     try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch { /* ignore */ }
