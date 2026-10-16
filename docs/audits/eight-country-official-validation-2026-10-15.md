@@ -15,7 +15,7 @@ All seven discrepancies were confirmed and corrected in the production modules; 
 
 Not fully validated for production accuracy. Seven targeted checks reproduce discrepancies across Australia, Switzerland, France, Japan, Portugal and Spain. UK ordinary employee scenarios and Mexico's annual ISR tariff match the selected official rules. That does not certify all inputs, regimes, payroll deductions or final tax returns.
 
-This is an **official-rule/source comparison**, not eight completed government calculator browser sessions. No such sessions were run in this batch. Tests execute production functions with independent reference figures. No production code, rates, labels, defaults or formulas were changed.
+This is an **official-rule/source comparison**, not eight completed government calculator browser sessions. No such sessions were run in this batch. Tests execute production functions with independent reference figures. The audit itself changed no production code; the corrections listed under Resolution were made afterwards (commit aabbc8b).
 
 Initial tracked tree was clean. Existing untracked .claude/, INDEXING-QUEUE.md, STATE-WAGE-RULES-DRAFT.md and STEP2-INVENTORY.md were left alone.
 
@@ -91,8 +91,9 @@ Switzerland's normal tests allow 10 cents explicitly: reconstructed continuous b
 
 ## Test interpretation
 
-New file: `src/lib/eightCountryOfficial.audit.test.ts`: 28 matching component cases and seven explicitly marked `it.fails` discrepancy cases. These expected failures MUST become normal assertions when corrections land. Do not interpret green test status as seven fixes. Combined focused run with existing international country tests: 225 normal passes, seven expected failures, 232 total. Full-suite and TypeScript results are reported in the handoff.
+`src/lib/eightCountryOfficial.audit.test.ts`: 28 matching component cases plus the seven discrepancy cases, which were written as expected failures (`it.fails`) and became ordinary assertions when the corrections landed. All 35 now pass.
 
-Final validation: full suite 135 files, 2,436 normal passes plus seven expected failures (2,443 total); TypeScript passed; ESLint on the new test file passed; git diff --check passed (new files were still untracked). No production build or browser matrix was run because this batch only adds an audit test and report.
+Final validation after the corrections: full suite 135 files, 2,443 tests passing; TypeScript and ESLint clean. The existing Madrid test in `internationalTaxCountries.test.ts` was updated to the published Madrid minimum (5,956.65). No production build or browser matrix was run.
 
-Production changes require a separate correction batch. Suggested order: Japan pension inversion; France CSG base; Portugal joint surcharge; France CET; Australia low-income levy contract; Spain regional minimum; Switzerland rounding, then the remaining model limitations. No commit or push.
+## Still open
+The remaining limits listed above, in particular: the Australian Medicare levy threshold needs confirming on the ATO page; other Spanish communities need their published personal minimums; the Swiss cantonal tax is a flat 13% estimate; and Japan, Mexico, Portugal and Spain have unvalidated payroll, deduction and regime details.
