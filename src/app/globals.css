@@ -7,6 +7,12 @@
   --foreground: #171717;
 }
 
+/* Matches the body classes in layout.tsx (bg-slate-950, text-slate-100); without this the unlayered body rule below keeps the page white in dark mode. */
+.dark {
+  --background: #020617;
+  --foreground: #f1f5f9;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
