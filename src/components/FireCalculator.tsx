@@ -25,6 +25,9 @@ import type { FilingStatus } from "@/lib/tax";
 import { parseFireAbroadLink, parseFireLink } from "@/lib/fireLink";
 import { monthlyDepositFactor } from "@/lib/depositTiming";
 
+// The AI-written FIRE report is hidden until the API key is live-tested. Set NEXT_PUBLIC_AI_REPORTS=1 to show it again.
+const AI_REPORTS_ENABLED = process.env.NEXT_PUBLIC_AI_REPORTS === "1";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // FIRE MODE
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2336,7 +2339,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
           )}
 
           {/* ── UPSELL PLACEHOLDER ───────────────────────────────────────── */}
-         <FireReport inputs={reportInputs} />
+         {AI_REPORTS_ENABLED && <FireReport inputs={reportInputs} />}
 
 <FireUpsellCard fireAge={fiAge} yearsToFI={result.yearsToFI} />
 
