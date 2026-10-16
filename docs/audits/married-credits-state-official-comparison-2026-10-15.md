@@ -11,6 +11,9 @@ The wage engine has no dependents, child tax credit or other credits. The discla
 ## State taxes: not compared against an official calculator
 Most states publish rate schedules and forms, not an online calculator. The state functions were read against each state's own 2026 publications during the state-module work, and `wageTax.test.ts` checks them against hand calculations for single filers and for married filing jointly at $200,000. No state's official online calculator was run in this audit, so state results remain labelled as estimates.
 
+## State comparison attempt (2026-10-15)
+A search found no state revenue department online calculator for tax year 2026; the results were third-party sites, which are not official sources. New York's tax tables page offers 2025 as its latest year (the 2026 return forms are not published until the filing season). So an official-calculator comparison for 2026 is not possible for most states until their 2026 forms appear. The state results stay labelled as estimates, and the agency-schedule checks in `wageTax.test.ts` (about 40 states, plus married at $200,000 for 11) remain the verification basis.
+
 ## What stays open
-- State comparisons against official state calculators or published worked examples (for example a few high-population states, married and single).
+- State comparisons against each state's 2026 forms and tables once published (early 2027), starting with California, New York, Pennsylvania, Illinois, Massachusetts and Oregon.
 - Child tax credit and dependents, if the site chooses to model them.
