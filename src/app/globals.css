@@ -26,6 +26,12 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* AdSense leaves an empty white frame where no ad was returned; hide the slot and its wrapper (Google sets data-ad-status="unfilled"). */
+ins.adsbygoogle[data-ad-status="unfilled"],
+div:has(> ins.adsbygoogle[data-ad-status="unfilled"]) {
+  display: none !important;
+}
+
 html {
   max-width: 100%;
 }
