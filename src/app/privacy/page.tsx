@@ -59,6 +59,10 @@ export default function PrivacyPage() {
 
         <div className="mt-4 space-y-4 text-base leading-7 text-slate-700 dark:text-slate-300">
           <p>
+            <strong>The AI-generated FIRE report is not currently offered, so no calculator values are sent to an AI provider.</strong>{" "}
+            The rest of this section describes what would happen if the feature is turned on again.
+          </p>
+          <p>
             The optional personalized FIRE report is different from the calculators
             that run only in your browser. The report is generated only after you
             select the generate button.

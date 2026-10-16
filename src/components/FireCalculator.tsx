@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import CalculatorNumberField from "./calculator-form/CalculatorNumberField";
 import FireReport, { type FireReportInputs } from "@/components/FireReport";
-import FireUpsellCard from "@/components/FireUpsellCard";
 import Link from "next/link";
 import {
   ResponsiveContainer,
@@ -2341,7 +2340,6 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
           {/* ── UPSELL PLACEHOLDER ───────────────────────────────────────── */}
          {AI_REPORTS_ENABLED && <FireReport inputs={reportInputs} />}
 
-<FireUpsellCard fireAge={fiAge} yearsToFI={result.yearsToFI} />
 
           {/* ── Share button ──────────────────────────────────────────────── */}
           <button onClick={handleShare}
