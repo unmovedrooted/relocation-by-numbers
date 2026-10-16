@@ -39,7 +39,9 @@ export function franceEmployeeContributions(gross: number): number {
   const tranche1 = Math.min(gross, FRANCE_SOCIAL_SECURITY_CEILING);
   const tranche2 = Math.min(Math.max(0, gross - FRANCE_SOCIAL_SECURITY_CEILING), 7 * FRANCE_SOCIAL_SECURITY_CEILING);
   const capped = Math.min(gross, 8 * FRANCE_SOCIAL_SECURITY_CEILING);
-  return 0.069 * tranche1 + 0.004 * gross + 0.0315 * tranche1 + 0.0864 * tranche2 + 0.0086 * tranche1 + 0.0108 * tranche2 + 0.0014 * capped;
+  // The CET (0.14% employee share) is due only when pay exceeds the tranche 1 ceiling, then on tranches 1 and 2 (Agirc-Arrco 2026).
+  const cet = gross > FRANCE_SOCIAL_SECURITY_CEILING ? 0.0014 * capped : 0;
+  return 0.069 * tranche1 + 0.004 * gross + 0.0315 * tranche1 + 0.0864 * tranche2 + 0.0086 * tranche1 + 0.0108 * tranche2 + cet;
 }
 
 export type FranceScenario = "local" | "remote" | "retired";
@@ -51,7 +53,8 @@ export function franceTax(income: number, opts: { scenario: FranceScenario; marr
   const employee = opts.scenario === "local";
 
   const contributions = employee ? franceEmployeeContributions(gross) : 0;
-  const csgBase = 0.9825 * Math.min(gross, 192_240);
+  // The 1.75% allowance applies to pay up to four ceilings; pay above that enters the CSG and CRDS base in full (URSSAF).
+  const csgBase = 0.9825 * Math.min(gross, 192_240) + Math.max(0, gross - 192_240);
   // Pensions: standard CSG 8.3%, CRDS 0.5% and the 0.3% solidarity levy; the reduced rates for low pensions are not applied.
   const csgCrds = employee ? 0.097 * csgBase : retired ? 0.091 * gross : 0;
   const deductibleCsg = employee ? 0.068 * csgBase : retired ? 0.059 * gross : 0;

@@ -32,8 +32,13 @@ const MARRIED = [
   [130_500, 0.08], [138_400, 0.09], [144_300, 0.10], [148_300, 0.11], [150_400, 0.12], [152_400, 0.13],
 ] as const;
 
+/** Federal tax as the official table gives it: taxable income truncated to whole CHF 100, tax truncated to CHF 0.05 (ESTV Form 58c). */
 export function switzerlandFederalTax(taxable: number, filing: "single" | "married"): number {
-  const t = Math.max(0, taxable);
+  const t = Math.floor(Math.max(0, taxable) / 100) * 100;
+  return Math.floor(switzerlandFederalTaxExact(t, filing) * 20 + 1e-9) / 20;
+}
+
+function switzerlandFederalTaxExact(t: number, filing: "single" | "married"): number {
   if (filing === "single" ? t >= 793_300 : t > 941_200) return 0.115 * t;
   const table = filing === "single" ? SINGLE : MARRIED;
   let tax = 0;

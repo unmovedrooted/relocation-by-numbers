@@ -39,6 +39,7 @@ export function portugalTax(income: number, filing: "single" | "married", scenar
   const taxable = Math.max(0, gross - Math.max(PORTUGAL_SPECIFIC_DEDUCTION, contributions));
   const unit = filing === "married" ? taxable / 2 : taxable;
   const multiplier = filing === "married" ? 2 : 1;
-  const surcharge = 0.025 * Math.max(0, Math.min(taxable, 250_000) - 80_000) + 0.05 * Math.max(0, taxable - 250_000);
+  // Article 68-A(3): a joint return applies the surcharge to half of the taxable income and doubles the result.
+  const surcharge = multiplier * (0.025 * Math.max(0, Math.min(unit, 250_000) - 80_000) + 0.05 * Math.max(0, unit - 250_000));
   return { incomeTax: portugalScaleTax(unit) * multiplier + surcharge, contributions };
 }

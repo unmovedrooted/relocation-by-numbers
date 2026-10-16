@@ -358,6 +358,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const jointDeduction = filing === "married" ? 3400 : 0;
     const taxable = Math.max(0, netWork - workReduction - jointDeduction);
     const personalMinimum = retiredEs ? 6700 : 5550;
+    // The community's own personal minimum, where published: Madrid EUR 5,956.65 (Comunidad de Madrid, beneficios fiscales), plus the same EUR 1,150 at 65 or over.
+    const REGIONAL_PERSONAL_MINIMUM: Record<string, number> = { MD: 5956.65 };
 
     const NATIONAL_BRACKETS = [
       { upTo: 12450, rate: 0.095 },
@@ -543,9 +545,10 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       ? progressiveTax(taxable, communityBrackets)
       : nationalRate * 0.95; // fallback weighted average
 
+    const regionalMinimum = (REGIONAL_PERSONAL_MINIMUM[region] ?? 5550) + (retiredEs ? 1150 : 0);
     const minimumRelief = (communityBrackets
-      ? progressiveTax(personalMinimum, NATIONAL_BRACKETS) + progressiveTax(personalMinimum, communityBrackets)
-      : progressiveTax(personalMinimum, NATIONAL_BRACKETS) * 1.95) * personalMinimum;
+      ? progressiveTax(personalMinimum, NATIONAL_BRACKETS) * personalMinimum + progressiveTax(regionalMinimum, communityBrackets) * regionalMinimum
+      : progressiveTax(personalMinimum, NATIONAL_BRACKETS) * 1.95 * personalMinimum);
     const totalTaxOnTaxable = Math.max(0, (nationalRate + communityRate) * taxable - minimumRelief);
     const effectiveRate = annualIncome > 0 ? (totalTaxOnTaxable + ssContrib) / annualIncome : 0;
 

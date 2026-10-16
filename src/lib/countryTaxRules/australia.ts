@@ -8,11 +8,15 @@
  * Medicare levy: 2% of taxable income (ATO resident rate tables).
  *
  * The 2025-26 rate for the first bracket was 16%; it is 15% from 2026-27 (14% is legislated for 2027-28, not modeled here).
- * Not modeled: the Medicare levy's low-income reduction, the Medicare levy surcharge, HELP repayments, and employer
+ * Medicare levy low-income reduction for a single person who is not a senior or pensioner: no levy up to $28,011, then 10% of the
+ * excess until the full 2% applies (from $35,013). Figures are from the 2026 Taxation Administration (Withholding Schedules)
+ * Instrument 2026 (legislation.gov.au F2026L00716); the ATO's own annual threshold page was not reachable, so confirm it there.
+ * Not modeled: the senior and family thresholds, the Medicare levy surcharge, HELP repayments, and employer
  * superannuation (paid by the employer on top of salary, so not deducted here).
  */
 export const AUSTRALIA_TAX_YEAR_LABEL = "2026-27";
 export const AUSTRALIA_MEDICARE_LEVY = 0.02;
+export const AUSTRALIA_MEDICARE_LOW_INCOME_THRESHOLD = 28_011;
 
 const BRACKETS = [
   { upTo: 18_200, rate: 0 },
@@ -46,5 +50,5 @@ export function australiaLito(income: number): number {
 export function australiaTax(income: number): { incomeTax: number; medicareLevy: number } {
   const income0 = Math.max(0, income);
   const incomeTax = Math.max(0, australiaBracketTax(income0) - australiaLito(income0));
-  return { incomeTax, medicareLevy: income0 * AUSTRALIA_MEDICARE_LEVY };
+  return { incomeTax, medicareLevy: Math.min(income0 * AUSTRALIA_MEDICARE_LEVY, Math.max(0, income0 - AUSTRALIA_MEDICARE_LOW_INCOME_THRESHOLD) * 0.10) };
 }

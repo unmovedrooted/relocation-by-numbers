@@ -38,12 +38,18 @@ export function japanEmploymentIncome(a: number): number {
   return a - 1_950_000;
 }
 
-export function japanPensionDeduction(p: number): number {
-  if (p <= 3_300_000) return Math.min(p, 1_100_000);
+/** Public pension income after the pension deduction (age 65 or over, other income 10 million yen or less), from the NTA table (No. 1600). */
+export function japanPensionIncome(p: number): number {
+  if (p <= 3_300_000) return Math.max(0, p - 1_100_000);
   if (p <= 4_100_000) return p * 0.75 - 275_000;
   if (p <= 7_700_000) return p * 0.85 - 685_000;
   if (p <= 10_000_000) return p * 0.95 - 1_455_000;
-  return 1_955_000;
+  return p - 1_955_000;
+}
+
+/** The pension deduction itself: the pension less the pension income above. */
+export function japanPensionDeduction(p: number): number {
+  return Math.max(0, p) - japanPensionIncome(p);
 }
 
 export function japanBasicDeduction(totalIncome: number): number {
@@ -78,7 +84,7 @@ export function japanTax(income: number, scenario: "local" | "remote" | "retired
   const socialInsurance = scenario === "local"
     ? (0.0495 + 0.00115 + 0.005) * gross + 0.0915 * Math.min(gross, 650_000 * 12)
     : 0;
-  const net = scenario === "retired" ? Math.max(0, gross - japanPensionDeduction(gross)) : japanEmploymentIncome(gross);
+  const net = scenario === "retired" ? japanPensionIncome(gross) : japanEmploymentIncome(gross);
   const nationalTaxable = Math.max(0, net - socialInsurance - japanBasicDeduction(net));
   const residentTaxable = Math.max(0, net - socialInsurance - 430_000);
   const nationalTax = japanNationalTax(nationalTaxable);
