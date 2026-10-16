@@ -358,8 +358,11 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
     const jointDeduction = filing === "married" ? 3400 : 0;
     const taxable = Math.max(0, netWork - workReduction - jointDeduction);
     const personalMinimum = retiredEs ? 6700 : 5550;
-    // The community's own personal minimum, where published: Madrid EUR 5,956.65 (Comunidad de Madrid, beneficios fiscales), plus the same EUR 1,150 at 65 or over.
-    const REGIONAL_PERSONAL_MINIMUM: Record<string, number> = { MD: 5956.65 };
+    // The community's own personal minimum and its increase at 65 or over, where it sets one (Ministry of Finance, Tributacion Autonomica, Medidas 2025,
+    // chapter IV; Madrid also on comunidad.madrid). Catalonia and Castilla y Leon use the state amounts.
+    const REGIONAL_PERSONAL_MINIMUM: Record<string, { base: number; senior: number }> = {
+      MD: { base: 5956.65, senior: 1234.26 }, GA: { base: 5789, senior: 1199 }, AN: { base: 5790, senior: 1200 }, VC: { base: 6105, senior: 1265 },
+    };
 
     const NATIONAL_BRACKETS = [
       { upTo: 12450, rate: 0.095 },
@@ -545,7 +548,8 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       ? progressiveTax(taxable, communityBrackets)
       : nationalRate * 0.95; // fallback weighted average
 
-    const regionalMinimum = (REGIONAL_PERSONAL_MINIMUM[region] ?? 5550) + (retiredEs ? 1150 : 0);
+    const regionalRule = REGIONAL_PERSONAL_MINIMUM[region] ?? { base: 5550, senior: 1150 };
+    const regionalMinimum = regionalRule.base + (retiredEs ? regionalRule.senior : 0);
     const minimumRelief = (communityBrackets
       ? progressiveTax(personalMinimum, NATIONAL_BRACKETS) * personalMinimum + progressiveTax(regionalMinimum, communityBrackets) * regionalMinimum
       : progressiveTax(personalMinimum, NATIONAL_BRACKETS) * 1.95 * personalMinimum);

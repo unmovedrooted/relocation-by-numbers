@@ -999,10 +999,26 @@ describe("Spain (national scale, Madrid scale, social security, personal minimum
   const es = (income: number, scenario: "local" | "remote" | "retired" = "local") =>
     estimateInternationalTax({ countryCode: "ES", annualIncome: income, filing: "single", isRetired: scenario === "retired", incomeScenario: scenario, answers: { es_region: "MD" } }).effectiveRate;
 
+  const es50 = (region: string) => estimateInternationalTax({ countryCode: "ES", annualIncome: 50_000, filing: "single", isRetired: false, incomeScenario: "local", answers: { es_region: region } }).effectiveRate;
+
   it("EUR 50,000 employee in Madrid", () => {
     // SS 3,250; base 44,750; national 6,129.50; Madrid 2026 scale; national minimum 5,550 and Madrid minimum 5,956.65 (Comunidad de Madrid) relieved at the first national and Madrid rates
     const madrid = 13_362.22 * 0.085 + (19_004.63 - 13_362.22) * 0.107 + (35_425.68 - 19_004.63) * 0.128 + (44_750 - 35_425.68) * 0.174;
     expect(es(50_000)).toBeCloseTo((6_129.5 + madrid - (527.25 + 5_956.65 * 0.085) + 3_250) / 50_000, 8);
+  });
+  it.each([
+    ["MD", 5_956.65, 0.085, [[13_362.22, 0.085], [19_004.63, 0.107], [35_425.68, 0.128], [Infinity, 0.174]]],
+    ["GA", 5_789, 0.09, [[12_985.35, 0.09], [21_068.6, 0.1165], [35_200, 0.149], [Infinity, 0.184]]],
+    ["AN", 5_790, 0.095, [[13_000, 0.095], [21_100, 0.12], [35_200, 0.15], [Infinity, 0.185]]],
+    ["VC", 6_105, 0.088, [[12_000, 0.088], [22_000, 0.118], [32_000, 0.148], [42_000, 0.173], [Infinity, 0.198]]],
+    ["CT", 5_550, 0.095, [[12_500, 0.095], [22_000, 0.125], [33_000, 0.16], [Infinity, 0.19]]],
+    ["CL", 5_550, 0.09, [[12_450, 0.09], [20_200, 0.12], [35_200, 0.14], [Infinity, 0.185]]],
+  ] as const)("%s relieves its own published personal minimum (Ministry of Finance, Medidas 2025)", (region, minimum, firstRate, bands) => {
+    const base = 44_750; // EUR 50,000 less social security 3,250 and the 2,000 expense
+    let regional = 0, prev = 0;
+    for (const [upTo, rate] of bands) { regional += (Math.min(base, upTo) - prev) * rate; prev = upTo; if (base <= upTo) break; }
+    const expected = 6_129.5 + regional - (527.25 + minimum * firstRate) + 3_250;
+    expect(es50(region)).toBeCloseTo(expected / 50_000, 8);
   });
 
   it("a pension of EUR 6,000 pays nothing after the EUR 2,000 expense and the personal minimum", () => {

@@ -7,7 +7,7 @@ All seven discrepancies were confirmed and corrected in the production modules; 
 - Japan: new `japanPensionIncome` (NTA No. 1600 table); the deduction is the pension less that income; the retired scenario uses the income.
 - France: CSG and CRDS base includes pay above four ceilings in full; CET applies only when pay exceeds the first ceiling.
 - Portugal: the joint solidarity surcharge is calculated on half the taxable income and doubled.
-- Spain: Madrid regional personal minimum is 5,956.65 (national minimum stays 5,550). Other communities still use 5,550 until their published minimums are added.
+- Spain: Madrid regional personal minimum is 5,956.65 (national minimum stays 5,550). Later the same day, Galicia (5,789), Andalucia (5,790) and Valencia (6,105) were added from the Ministry of Finance's Tributacion Autonomica 2025 chapter IV, with each community's own increase at 65 or over (Madrid's increase is 1,234.26, not the state 1,150 first assumed). Catalonia and Castilla y Leon use the state amounts (5,550, 1,150). These are the latest published amounts (2025 measures); the other communities still use 5,550.
 - Switzerland: taxable income truncated to CHF 100 and tax to CHF 0.05, as Form 58c. The flat 13% cantonal estimate is unchanged and unvalidated.
 - Australia: Medicare levy low-income reduction for a single non-senior: none up to 28,011, then 10% of the excess. The ATO page on Medicare levy reduction for low-income earners (updated 30 June 2026) confirms 28,011 and 35,013 for 2025-26, with a $29,000 example giving $98.90; the 2026 withholding schedules use the same figures. No separate 2026-27 annual threshold is published yet, so the model uses the 2025-26 figure for 2026-27. Senior and family thresholds are not modelled.
 
@@ -96,4 +96,4 @@ Switzerland's normal tests allow 10 cents explicitly: reconstructed continuous b
 Final validation after the corrections: full suite 135 files, 2,443 tests passing; TypeScript and ESLint clean. The existing Madrid test in `internationalTaxCountries.test.ts` was updated to the published Madrid minimum (5,956.65). No production build or browser matrix was run.
 
 ## Still open
-The remaining limits listed above, in particular: the Australian Medicare levy threshold is ATO-confirmed for 2025-26 only, so recheck it when 2026-27 is published; other Spanish communities need their published personal minimums; the Swiss cantonal tax is a flat 13% estimate; and Japan, Mexico, Portugal and Spain have unvalidated payroll, deduction and regime details.
+The remaining limits listed above, in particular: the Australian Medicare levy threshold is ATO-confirmed for 2025-26 only, so recheck it when 2026-27 is published; the remaining Spanish communities need their own published minimums and the 2026 amounts when published; the Swiss cantonal tax is a flat 13% estimate; and Japan, Mexico, Portugal and Spain have unvalidated payroll, deduction and regime details.
