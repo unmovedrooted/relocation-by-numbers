@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ALLOWED_FIRE_CITY_PAGES } from "@/lib/seo-allowlists";
 import Link from "next/link";
 import AdSlot from "@/components/AdSlot";
 import { notFound } from "next/navigation";
@@ -8,18 +9,7 @@ type Props = {
   params: Promise<{ cityId: string }>;
 };
 
-const ALLOWED_FIRE_CITY_IDS = [
-  "charlotte-nc",
-  "austin-tx",
-  "miami-fl",
-  "atlanta-ga",
-  "denver-co",
-  "seattle-wa",
-  "nyc-ny",
-  "dallas-tx",
-  "raleigh-nc",
-  "boston-ma",
-] as const;
+const ALLOWED_FIRE_CITY_IDS = ALLOWED_FIRE_CITY_PAGES;
 
 const CITY_CONTENT: Record<
   string,

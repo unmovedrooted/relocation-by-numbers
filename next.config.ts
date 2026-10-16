@@ -61,7 +61,8 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: "/cost-of-living-in/:cityId",
+        // Only the published cities; every other /cost-of-living-in/ URL is answered 410 by src/proxy.ts.
+        source: "/cost-of-living-in/:cityId(nyc-ny|charlotte-nc|austin-tx|la-ca|seattle-wa|boston-ma|miami-fl)",
         destination: "/cost-of-living/:cityId",
         permanent: true,
       },

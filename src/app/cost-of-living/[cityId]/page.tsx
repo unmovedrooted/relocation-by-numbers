@@ -4,21 +4,13 @@ import { findCity } from "@/lib/cities";
 import Link from "next/link";
 import { estimateMortgageMonthly } from "@/lib/mortgage";
 import type { Metadata } from "next";
-import { ALLOWED_FIRE_CITY_PAGES } from "@/lib/seo-allowlists";
+import { ALLOWED_FIRE_CITY_PAGES, ALLOWED_CITY_DETAIL_PAGES } from "@/lib/seo-allowlists";
 
 type PageProps = {
   params: Promise<{ cityId: string }>;
 };
 
-const ALLOWED_CITY_IDS = [
-  "nyc-ny",
-  "charlotte-nc",
-  "austin-tx",
-  "la-ca",
-  "seattle-wa",
-  "boston-ma",
-  "miami-fl",
-] as const;
+const ALLOWED_CITY_IDS = ALLOWED_CITY_DETAIL_PAGES;
 
 const CITY_CONTENT: Record<
   string,

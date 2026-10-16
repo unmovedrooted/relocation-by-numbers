@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ALLOWED_CITY_DETAIL_PAGES } from "@/lib/seo-allowlists";
 import { notFound } from "next/navigation";
 import AdSlot from "@/components/AdSlot";
 import Link from "next/link";
@@ -8,15 +9,7 @@ type Props = {
   params: Promise<{ cityId: string }>;
 };
 
-const ALLOWED_CITY_IDS = [
-  "charlotte-nc",
-  "austin-tx",
-  "miami-fl",
-  "la-ca",
-  "seattle-wa",
-  "boston-ma",
-  "nyc-ny",
-] as const;
+const ALLOWED_CITY_IDS = ALLOWED_CITY_DETAIL_PAGES;
 
 const CITY_CONTENT: Record<
   string,
