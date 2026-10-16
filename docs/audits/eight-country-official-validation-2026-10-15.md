@@ -9,7 +9,7 @@ All seven discrepancies were confirmed and corrected in the production modules; 
 - Portugal: the joint solidarity surcharge is calculated on half the taxable income and doubled.
 - Spain: Madrid regional personal minimum is 5,956.65 (national minimum stays 5,550). Other communities still use 5,550 until their published minimums are added.
 - Switzerland: taxable income truncated to CHF 100 and tax to CHF 0.05, as Form 58c. The flat 13% cantonal estimate is unchanged and unvalidated.
-- Australia: Medicare levy low-income reduction for a single non-senior: none up to 28,011, then 10% of the excess. That figure comes from the 2026 withholding schedules instrument, not the ATO annual page (403 to our tools), so it must be confirmed there. Senior and family thresholds are not modelled.
+- Australia: Medicare levy low-income reduction for a single non-senior: none up to 28,011, then 10% of the excess. The ATO page on Medicare levy reduction for low-income earners (updated 30 June 2026) confirms 28,011 and 35,013 for 2025-26, with a $29,000 example giving $98.90; the 2026 withholding schedules use the same figures. No separate 2026-27 annual threshold is published yet, so the model uses the 2025-26 figure for 2026-27. Senior and family thresholds are not modelled.
 
 ## Verdict and scope (as found, before the fixes)
 

@@ -9,8 +9,9 @@
  *
  * The 2025-26 rate for the first bracket was 16%; it is 15% from 2026-27 (14% is legislated for 2027-28, not modeled here).
  * Medicare levy low-income reduction for a single person who is not a senior or pensioner: no levy up to $28,011, then 10% of the
- * excess until the full 2% applies (from $35,013). Figures are from the 2026 Taxation Administration (Withholding Schedules)
- * Instrument 2026 (legislation.gov.au F2026L00716); the ATO's own annual threshold page was not reachable, so confirm it there.
+ * excess until the full 2% applies (from $35,013). The ATO confirms $28,011 and $35,013 for 2025-26 (Medicare levy reduction for
+ * low-income earners, updated 30 June 2026; $29,000 gives $98.90) and the 2026 withholding schedules use the same figures. No separate
+ * 2026-27 annual threshold is published yet, so 2025-26 is used for 2026-27.
  * Not modeled: the senior and family thresholds, the Medicare levy surcharge, HELP repayments, and employer
  * superannuation (paid by the employer on top of salary, so not deducted here).
  */
