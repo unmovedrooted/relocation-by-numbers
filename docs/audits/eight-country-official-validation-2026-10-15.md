@@ -96,4 +96,4 @@ Switzerland's normal tests allow 10 cents explicitly: reconstructed continuous b
 Final validation after the corrections: full suite 135 files, 2,443 tests passing; TypeScript and ESLint clean. The existing Madrid test in `internationalTaxCountries.test.ts` was updated to the published Madrid minimum (5,956.65). No production build or browser matrix was run.
 
 ## Still open
-The remaining limits listed above, in particular: the Australian Medicare levy threshold needs confirming on the ATO page; other Spanish communities need their published personal minimums; the Swiss cantonal tax is a flat 13% estimate; and Japan, Mexico, Portugal and Spain have unvalidated payroll, deduction and regime details.
+The remaining limits listed above, in particular: the Australian Medicare levy threshold is ATO-confirmed for 2025-26 only, so recheck it when 2026-27 is published; other Spanish communities need their published personal minimums; the Swiss cantonal tax is a flat 13% estimate; and Japan, Mexico, Portugal and Spain have unvalidated payroll, deduction and regime details.
