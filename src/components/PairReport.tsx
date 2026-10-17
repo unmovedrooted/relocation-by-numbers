@@ -1,7 +1,10 @@
 import Link from "next/link";
 import FeedbackBox from "@/components/FeedbackBox";
 import { GOVERNMENT_DATA_META } from "@/lib/governmentData";
-import { BUY_ASSUMPTIONS, buildPairReport, type PairReport as Report } from "@/lib/pairReport";
+import { BUY_ASSUMPTIONS, buildPairReport, ELECTRICITY_META, type PairReport as Report } from "@/lib/pairReport";
+import { MIGRATION_META, migrationPair, topDestinations } from "@/lib/migration";
+import { findCity } from "@/lib/cities";
+import { STATE_NAMES } from "@/lib/stateNames";
 
 const usd = (n: number) => `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 const signed = (n: number) => `${n >= 0 ? "+" : "-"}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
@@ -116,6 +119,7 @@ export default function PairReport({ fromId, toId, path }: { fromId: string; toI
     ["Typical home value", orNA(c.homeValue[0]), orNA(c.homeValue[1]), diff(c.homeValue[0], c.homeValue[1])],
     ["Median property tax paid (yearly)", orNA(c.propertyTaxPaid[0]), orNA(c.propertyTaxPaid[1]), diff(c.propertyTaxPaid[0], c.propertyTaxPaid[1])],
     ["Effective property tax rate", orNA(c.propertyTaxRatePct[0], (v) => `${v.toFixed(2)}%`), orNA(c.propertyTaxRatePct[1], (v) => `${v.toFixed(2)}%`), ""],
+    ["Residential electricity (cents per kWh)", orNA(c.electricityCents[0], (v) => v.toFixed(2)), orNA(c.electricityCents[1], (v) => v.toFixed(2)), diff(c.electricityCents[0], c.electricityCents[1], (v) => `${v >= 0 ? "+" : ""}${v.toFixed(2)}`)],
   ];
 
   const b = r.buy;
@@ -133,6 +137,17 @@ export default function PairReport({ fromId, toId, path }: { fromId: string; toI
     ["If you buy: mortgage, property tax and insurance", orNA(bd.ownYear[0]), orNA(bd.ownYear[1]), diff(bd.ownYear[0], bd.ownYear[1])],
     ["Taxes plus owning the home", orNA(bd.ownTotal[0]), orNA(bd.ownTotal[1]), diff(bd.ownTotal[0], bd.ownTotal[1])],
   ];
+
+  const meta = GOVERNMENT_DATA_META;
+
+  const fromCityRec = findCity(fromId);
+  const toCityRec = findCity(toId);
+  const mig = fromCityRec && toCityRec ? migrationPair(fromCityRec.state, toCityRec.state) : null;
+  const fromStateName = fromCityRec ? STATE_NAMES[fromCityRec.state] ?? fromCityRec.state.toUpperCase() : r.fromState;
+  const toStateName = toCityRec ? STATE_NAMES[toCityRec.state] ?? toCityRec.state.toUpperCase() : r.toState;
+  const whereElse = fromCityRec ? topDestinations(fromCityRec.state, 8) : [];
+  const latestYear = MIGRATION_META.years[MIGRATION_META.years.length - 1];
+  const num = (n: number) => n.toLocaleString("en-US");
 
   const faqs: Array<{ q: string; a: string }> = [
     {
@@ -159,16 +174,74 @@ export default function PairReport({ fromId, toId, path }: { fromId: string; toI
     },
   ];
 
+  if (mig) {
+    faqs.push({
+      q: `How many people move from ${fromStateName} to ${toStateName}?`,
+      a: `IRS migration data for ${latestYear} show ${num(mig.households)} households${mig.people ? ` (${num(mig.people)} people)` : ""} that filed in ${fromStateName} the year before filing in ${toStateName}. ${mig.destinationRank === 1 ? `That makes ${toStateName} the most common destination for people leaving ${fromStateName}.` : mig.destinationRank ? `${toStateName} ranks number ${mig.destinationRank} among destinations for people leaving ${fromStateName}.` : ""} ${num(mig.reverseHouseholds)} households moved the other way. These are state totals, not city totals.`.replace(/\s+/g, " ").trim(),
+    });
+  }
+
   const faqJson = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: faqs.map((x) => ({ "@type": "Question", name: x.q, acceptedAnswer: { "@type": "Answer", text: x.a } })),
   };
 
-  const meta = GOVERNMENT_DATA_META;
 
   return (
     <>
+      {mig && (
+        <section className={card} aria-labelledby="pr-migration">
+          <h2 id="pr-migration" className={h2}>Who moves from {fromStateName} to {toStateName}</h2>
+          <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-400">
+            In the latest IRS migration data ({latestYear}), <strong className={strong}>{num(mig.households)} households</strong>
+            {mig.people ? ` (${num(mig.people)} people)` : ""} filed their taxes in {toStateName} after filing in {fromStateName} the year before.
+            {mig.destinationRank === 1
+              ? ` That makes ${toStateName} the most common destination for people leaving ${fromStateName}.`
+              : mig.destinationRank
+                ? ` ${toStateName} ranks number ${mig.destinationRank} among the states people leave ${fromStateName} for.`
+                : ""}
+            {mig.averageAgi ? ` These households reported an average adjusted gross income of ${usd(mig.averageAgi)}.` : ""}
+            {" "}Going the other way, {num(mig.reverseHouseholds)} households moved from {toStateName} to {fromStateName}, a net{" "}
+            {mig.netToDestination >= 0 ? `gain of ${num(mig.netToDestination)} households for ${toStateName}` : `gain of ${num(-mig.netToDestination)} households for ${fromStateName}`}.
+          </p>
+          <h3 className={`mt-5 text-sm font-semibold ${strong}`}>Five-year trend</h3>
+          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
+            {mig.changeFromPeakPct !== null
+              ? `Moves from ${fromStateName} to ${toStateName} peaked in ${mig.peakYear} at ${num(mig.peakHouseholds)} households, then ${mig.changeFromPeakPct < 0 ? "fell" : "rose"} ${Math.abs(Math.round(mig.changeFromPeakPct))}% by ${latestYear}.`
+              : `Moves from ${fromStateName} to ${toStateName} were highest in the latest year, ${latestYear}.`}
+            {mig.changeSinceFirstPct !== null ? ` That is ${mig.changeSinceFirstPct >= 0 ? "up" : "down"} ${Math.abs(Math.round(mig.changeSinceFirstPct))}% from ${mig.years[0]}.` : ""}
+          </p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[28rem] text-sm">
+              <thead>
+                <tr className="text-left">
+                  {mig.years.map((y) => <th key={y} className={`${th} text-right`}>{y}</th>)}
+                </tr>
+              </thead>
+              <tbody className="text-slate-700 dark:text-slate-300">
+                <tr className="border-t border-slate-200 dark:border-slate-800">
+                  {mig.trend.map((v, i) => <td key={mig.years[i]} className="py-2 pr-3 text-right tabular-nums">{num(v)}</td>)}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          {whereElse.length > 0 && (
+            <>
+              <h3 className={`mt-5 text-sm font-semibold ${strong}`}>Where people from {fromStateName} actually move</h3>
+              <ul className="mt-2 grid gap-1 text-sm text-slate-600 dark:text-slate-400 sm:grid-cols-2">
+                {whereElse.map((d) => (
+                  <li key={d.state}>{STATE_NAMES[d.state as keyof typeof STATE_NAMES] ?? d.state.toUpperCase()}: {num(d.households)} households</li>
+                ))}
+              </ul>
+            </>
+          )}
+          <p className={note}>
+            Source: IRS Statistics of Income state-to-state migration files, tax years {MIGRATION_META.years[0]} to {latestYear}. The IRS publishes state totals, not city-to-city moves, and counts only people who filed a return in both years.
+          </p>
+        </section>
+      )}
+
       <section className={card} aria-labelledby="pr-taxes">
         <h2 id="pr-taxes" className={h2}>2026 taxes on {usd(h.salary)}: {r.fromName} and {r.toName}</h2>
         <CompareTable report={r} rows={taxRows} />
@@ -267,6 +340,8 @@ export default function PairReport({ fromId, toId, path }: { fromId: string; toI
           <li><a className="underline underline-offset-2 hover:opacity-80" href="https://www.irs.gov/publications/p15" target="_blank" rel="noopener noreferrer">IRS Publication 15 (2026): Social Security wage base and payroll tax rates</a></li>
           <li><a className="underline underline-offset-2 hover:opacity-80" href={meta.census.source} target="_blank" rel="noopener noreferrer">U.S. Census Bureau, American Community Survey ({meta.census.vintage}): rent, home value and property tax</a></li>
           <li><a className="underline underline-offset-2 hover:opacity-80" href={meta.bea.source} target="_blank" rel="noopener noreferrer">Bureau of Economic Analysis, Regional Price Parities ({meta.bea.vintage})</a></li>
+          <li><a className="underline underline-offset-2 hover:opacity-80" href={MIGRATION_META.url} target="_blank" rel="noopener noreferrer">IRS Statistics of Income, state-to-state migration data ({MIGRATION_META.years[0]} to {latestYear})</a></li>
+          <li><a className="underline underline-offset-2 hover:opacity-80" href={ELECTRICITY_META.url} target="_blank" rel="noopener noreferrer">U.S. Energy Information Administration, Electric Power Monthly, Table 5.6.B ({ELECTRICITY_META.period}, released {ELECTRICITY_META.released})</a></li>
           <li><Link className="underline underline-offset-2 hover:opacity-80" href="/methodology#state-sources">State and city income tax rules, by state</Link></li>
         </ul>
         <h3 className={`mt-4 text-sm font-semibold ${strong}`}>Not included</h3>

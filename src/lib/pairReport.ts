@@ -3,6 +3,7 @@ import { governmentCity } from "./governmentData";
 import { estimateNetBreakdown, type TaxBreakdown } from "./wageTax";
 import { grossForNet } from "./grossForNet";
 import { estimateMortgageMonthly } from "./mortgage";
+import electricity from "../data/eiaElectricity.json";
 
 /**
  * Data behind the city-pair report: the same single filer in two cities, using the site's 2026 tax engine, Census rent, home value and
@@ -10,6 +11,7 @@ import { estimateMortgageMonthly } from "./mortgage";
  */
 
 export const REPORT_SALARY = 100_000;
+export const ELECTRICITY_META = electricity.meta;
 export const REPORT_SALARIES = [50_000, 75_000, 100_000, 150_000, 250_000] as const;
 
 /** Assumptions for the rent-or-buy section, the same defaults the main calculator starts from. */
@@ -68,6 +70,8 @@ export type PairReport = {
     homeValue: [number | null, number | null];
     propertyTaxPaid: [number | null, number | null];
     propertyTaxRatePct: [number | null, number | null];
+    /** Residential electricity price in cents per kWh (EIA, year to date), by state. */
+    electricityCents: [number | null, number | null];
   };
   buy: {
     incomeToRent: [number | null, number | null];
@@ -144,6 +148,7 @@ export function buildPairReport(fromId: string, toId: string): PairReport | null
       homeValue: pair((id) => findCity(id)?.medianHomePrice ?? null, fromId, toId),
       propertyTaxPaid: pair((id) => governmentCity(id)?.census?.medianRealEstateTaxesPaid ?? null, fromId, toId),
       propertyTaxRatePct: pair((id) => findCity(id)?.propertyTaxPct ?? null, fromId, toId),
+      electricityCents: pair((id) => { const st = findCity(id)?.state; return st ? ((electricity.residentialCentsPerKwh as Record<string, number>)[st] ?? null) : null; }, fromId, toId),
     },
     buy: { incomeToRent, monthlyOwnCost: own, incomeToBuy },
     budget: {
