@@ -29,6 +29,7 @@ const CALCULATORS: Calc[] = [
   { href: "/paycheck-calculator", title: "Paycheck Calculator", desc: "Take-home pay after federal, Social Security, Medicare, and state (and city) taxes.", cat: "Taxes" },
   { href: "/income-tax-calculator", title: "Income Tax Calculator", desc: "Federal tax, effective and marginal rates, and a bracket-by-bracket breakdown.", cat: "Taxes" },
   // FIRE
+  { href: "/best-cities-for-fire", title: "Best Cities for FIRE", desc: "Ten cities ranked by what is left after rent, with take-home pay, price levels and state taxes side by side.", cat: "FIRE" },
   { href: "/fire-calculator", title: "FIRE Calculator", desc: "Estimate your FIRE age and financial-independence number.", cat: "FIRE" },
   { href: "/fire-number-calculator", title: "FIRE Number Calculator", desc: "The portfolio you need to retire early, from your spending and withdrawal rate.", cat: "FIRE" },
   { href: "/lean-fire-calculator", title: "Lean FIRE Calculator", desc: "Retire early on a smaller budget and a lower target portfolio.", cat: "FIRE" },
