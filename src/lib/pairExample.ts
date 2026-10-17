@@ -6,7 +6,8 @@ import { estimateNetBreakdown, type TaxBreakdown } from "./wageTax";
  * calculators and the Census Bureau rent and home-value figures stored on each city. Everything here is computed, not typed.
  */
 
-export const PAIR_EXAMPLE_SALARY = 120_000;
+/** One salary for every city-pair and origin page, so the worked example, tables and report all agree. */
+export const PAIR_EXAMPLE_SALARY = 100_000;
 
 export type PairCityExample = {
   id: string;

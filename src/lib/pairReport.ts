@@ -3,6 +3,7 @@ import { governmentCity } from "./governmentData";
 import { estimateNetBreakdown, type TaxBreakdown } from "./wageTax";
 import { grossForNet } from "./grossForNet";
 import { estimateMortgageMonthly } from "./mortgage";
+import { PAIR_EXAMPLE_SALARY } from "./pairExample";
 import electricity from "../data/eiaElectricity.json";
 
 /**
@@ -10,7 +11,7 @@ import electricity from "../data/eiaElectricity.json";
  * property tax, and BEA regional price parities. Everything here is computed; nothing is typed in per page.
  */
 
-export const REPORT_SALARY = 100_000;
+export const REPORT_SALARY = PAIR_EXAMPLE_SALARY;
 export const ELECTRICITY_META = electricity.meta;
 export const REPORT_SALARIES = [50_000, 75_000, 100_000, 150_000, 250_000] as const;
 
