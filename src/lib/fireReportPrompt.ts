@@ -30,6 +30,7 @@ export type ReportInputs = {
   coastReady?: boolean;
   yearsToCoast?: number | null;
   baristaPartTimeIncome?: number;
+  baristaIncomeNow?: number;
   volatility?: "conservative" | "moderate" | "aggressive";
   inflationPct?: number;
   advanced?: boolean;
@@ -131,7 +132,7 @@ function baristaPrompt(inputs: ReportInputs): string {
   return `Generate a personalized Barista FIRE plan for this person:
 
 **Barista plan:**
-- Spending ${money(annualSpend)}/yr; expected part-time income ${money(partTime)}/yr after tax (counted as extra income from today and assumed to grow with inflation)
+- Spending ${money(annualSpend)}/yr; expected part-time income ${money(partTime)}/yr after tax once full-time work ends (it lowers the yearly gap, is assumed to grow with inflation, and is not counted as saving before then)${(inputs.baristaIncomeNow ?? 0) > 0 ? `; part-time income already earned now ${money(inputs.baristaIncomeNow ?? 0)}/yr after tax (it adds to saving until FIRE)` : ""}
 - The portfolio only has to fund the gap of ${money(gap)}/yr, a Barista FIRE number of $${Math.round(number).toLocaleString()} at ${inputs.withdrawalRatePct}%
 - ${alreadyThere ? `Already at Barista FIRE; age ${inputs.fireAge}` : `Projected Barista FIRE age ${inputs.fireAge}; ${inputs.yearsToFI} years away`}
 ${commonFacts(inputs)}

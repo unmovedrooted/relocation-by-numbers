@@ -160,9 +160,10 @@ describe("live calculator mathematical observations (not a full-page certificati
     for (const mode of ["standard", "lean", "barista", "coast"]) {
       add(`${mode}: explicit $12k contribution, zero starting balance, one year`, 12000 * g, fire.simulateYearsToFI(base, 80000, mode).endPortfolio);
     }
-    const auto = { ...base, yearlyInvestment: 0, baristaPartTimeIncome: 24000 };
+    const auto = { ...base, yearlyInvestment: 0, baristaPartTimeIncome: 24000, baristaIncomeNow: 0 };
     add("Standard: automatic contribution $80k net less $48k spending", 32000 * g, fire.simulateYearsToFI(auto, 80000, "standard").endPortfolio);
-    add("Barista: $32k saving plus $24k extra after-tax part-time income earned from today (owner decision)", 56000 * g, fire.simulateYearsToFI(auto, 80000, "barista").endPortfolio);
+    add("Barista: part-time income that starts after leaving full-time work does not add to saving before FIRE ($32k saving)", 32000 * g, fire.simulateYearsToFI(auto, 80000, "barista").endPortfolio);
+    add("Barista: $32k saving plus $24k extra after-tax part-time income already earned now", 56000 * g, fire.simulateYearsToFI({ ...auto, baristaIncomeNow: 24000 }, 80000, "barista").endPortfolio);
     const coast = { ...base, age: 40, coastAge: 40, targetRetirementAge: 65, inflationPct: 2.5, volatility: "moderate", phase2StartsYear: 200 };
     add("Coast target: $48k spending, 4% SWR, 25y, 7% nominal, 2.5% inflation", 1200000 * (1.025 / 1.07) ** 25, fire.calcCoastFireNumber(coast));
     add("Coast target: same scenario, zero inflation", 1200000 / 1.07 ** 25, fire.calcCoastFireNumber({ ...coast, inflationPct: 0 }));
@@ -183,11 +184,11 @@ describe("live calculator mathematical observations (not a full-page certificati
       }
     }
     console.log(JSON.stringify(rows, null, 2));
-    expect(rows).toHaveLength(82);
+    expect(rows).toHaveLength(83);
     for (const row of rows) if (typeof row.actual === "number") expect(Number.isFinite(row.actual)).toBe(true);
     // Regression guards for defects fixed after the first review: these must keep matching their references.
     for (const row of rows) {
-      if (/explicit $12k|^Coast target|^Standard: automatic|^Employer match|^Already FI/.test(row.check) && typeof row.actual === "number") {
+      if (/explicit $12k|^Coast target|^Standard: automatic|^Employer match|^Already FI|^Barista: /.test(row.check) && typeof row.actual === "number") {
         expect(row.actual).toBeCloseTo(row.reference as number, 4);
       }
     }

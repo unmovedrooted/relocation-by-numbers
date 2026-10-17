@@ -32,6 +32,7 @@ export type FireReportInputs = {
   coastReady?: boolean;
   yearsToCoast?: number | null;
   baristaPartTimeIncome?: number;
+  baristaIncomeNow?: number;
   /** Return and inflation assumptions, and how saving is configured. */
   volatility?: "conservative" | "moderate" | "aggressive";
   inflationPct?: number;

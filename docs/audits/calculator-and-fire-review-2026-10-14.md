@@ -148,3 +148,12 @@ Validation: type check, lint (0 errors) and 1,984 tests pass; FIRE, Europe, Sout
 ## Issue 4 fixed (2026-10-14)
 
 FIRE take-home pay is no longer grown at the salary-growth rate. `makeNetPath` in `FireCalculator.tsx` recomputes it for every future year through the same tax engine: gross pay grows at the salary-growth rate, and the tax rules (brackets, standard deduction, payroll wage base, 401(k) limit) are assumed to be indexed to inflation, so each year's gross is deflated, taxed at today's scale, and scaled back up. Pay that outgrows inflation moves into higher brackets; pay that grows exactly with inflation keeps the same tax rate. The same path drives the main projection, Coast readiness, the decision scenarios, the city comparisons and the moved scenario (taxed in the new state and city). The "How this estimate works" note was updated. Known-answer tests are in `liveCalculatorMath.audit.test.ts`. The index assumption is the one remaining simplification: actual future brackets and state rules may differ.
+
+## Update 2026-10-18: Barista income now has two inputs
+
+The 2026-10-14 decision (part-time income counted as extra earnings from today) was split into two inputs after an outside review:
+
+- **Part-time income after you leave full-time work:** lowers the yearly gap the portfolio must cover (the Barista FIRE number). It does not add to saving before FIRE.
+- **Part-time income you already earn now:** adds to saving each year until FIRE. It starts at $0.
+
+The default Barista result is therefore less optimistic than before. To restore the earlier behaviour, set the second input equal to the first.

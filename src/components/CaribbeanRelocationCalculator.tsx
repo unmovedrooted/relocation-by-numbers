@@ -223,6 +223,8 @@ interface VerdictResults {
   targetIsDisclaimer: boolean;
   targetTaxRate:      number;
   currentTaxRate:     number;
+  /** Questions that change the tax result and have not been answered yet. */
+  pendingAssumptions?: string[];
 }
 
 function RelocationVerdict({ results, toCityLabel, displayAmount }: {
@@ -231,15 +233,19 @@ function RelocationVerdict({ results, toCityLabel, displayAmount }: {
   displayAmount: (n: number, d?: number) => string;
 }) {
   const { comfort, monthlyFlexibility, upfrontCashNeeded, monthsCovered,
-          pct, salaryReady, targetIsDisclaimer, targetTaxRate, currentTaxRate } = results;
+          pct, salaryReady, targetIsDisclaimer, targetTaxRate, currentTaxRate, pendingAssumptions = [] } = results;
 
   if (!salaryReady) return null;
 
   const savingsReadiness =
     monthsCovered >= 6 ? "strong" : monthsCovered >= 3 ? "adequate" : "thin";
 
+  const pending = pendingAssumptions.length > 0;
+  const pendingText = pendingAssumptions.join(" and ");
   const taxSentence = targetIsDisclaimer
     ? "Tax impact for this scenario is not yet modeled, consult a local advisor."
+    : pending
+      ? `Provisional: if the assumption below holds, your estimated tax rate would go from ${(currentTaxRate * 100).toFixed(0)}% to ${(targetTaxRate * 100).toFixed(0)}%, but that depends on ${pendingText}, which you have not answered yet.`
     : targetTaxRate < currentTaxRate
       ? `Your estimated tax rate drops from ${(currentTaxRate * 100).toFixed(0)}% to ${(targetTaxRate * 100).toFixed(0)}%, improving monthly take-home.`
       : targetTaxRate > currentTaxRate
@@ -247,7 +253,8 @@ function RelocationVerdict({ results, toCityLabel, displayAmount }: {
         : "Your estimated tax rate is similar in both locations.";
 
   const verdictColor =
-    comfort.band === "A" && savingsReadiness !== "thin" ? "emerald"
+    pending ? "amber"
+    : comfort.band === "A" && savingsReadiness !== "thin" ? "emerald"
     : comfort.band === "D" || savingsReadiness === "thin" ? "rose"
     : "amber";
 
@@ -259,7 +266,7 @@ function RelocationVerdict({ results, toCityLabel, displayAmount }: {
 
   return (
     <div className={`rounded-2xl border p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ${colorMap[verdictColor]}`}>
-      <div className="text-xs font-semibold uppercase tracking-[0.14em] mb-2">Decision Summary</div>
+      <div className="text-xs font-semibold uppercase tracking-[0.14em] mb-2">{pending ? "Decision Summary (provisional)" : "Decision Summary"}</div>
       <p className="text-sm leading-6">
         Moving to <strong>{toCityLabel}</strong>, housing takes up{" "}
         <strong>{pct.toFixed(0)}%</strong> of estimated net income, rated{" "}
@@ -600,6 +607,11 @@ export default function CaribbeanRelocationCalculator() {
     }
 
     const targetIsDisclaimer = targetTaxEstimate?.isDisclaimer ?? true;
+    // Questions whose answer changes the tax result; the decision summary stays provisional until they are answered.
+    const pendingAssumptions: string[] = [];
+    if (toCountry === "DO" && incomeScenario === "remote" && !conditionalAnswers["do_residency_years"]) {
+      pendingAssumptions.push("how long you have been a tax resident in the Dominican Republic");
+    }
     const targetConfidence   = targetTaxEstimate?.confidence   ?? ("pending" as Confidence);
     const targetForeignTaxUsd =
       targetTaxEstimate && !targetIsDisclaimer
@@ -859,6 +871,7 @@ const relativeDifference =
   targetAnnualTaxUsd,
   targetTaxNotes,
   targetIsDisclaimer,
+  pendingAssumptions,
   targetConfidence,
 
   netMonthlyFrom,
@@ -902,7 +915,7 @@ const relativeDifference =
   comparableSalary,
   relativeDifference,
 };
-  }, [fromCityCode,
+  }, [conditionalAnswers,fromCityCode,
     mode, salary, retirementIncome, filing, incomeScenario,
     fromCountry, toCountry, answersEffective,
     toCityMultipliers, fromCityMultipliers, currentCityDefaults, targetCityDefaults, selectedCityDefaults?.monthlyDefaults,

@@ -65,7 +65,7 @@ describe("Barista FIRE is a standalone plan", () => {
     expect(systemPromptFor("barista")).not.toContain("withdrawal strategy reports");
     const prompt = buildPrompt(barista);
     expect(prompt).toContain("personalized Barista FIRE plan");
-    expect(prompt).toContain("expected part-time income $24,000/yr after tax");
+    expect(prompt).toContain("expected part-time income $24,000/yr after tax once full-time work ends");
     // (4000 * 12 - 24000) = 24,000 gap; / 4% = 600,000
     expect(prompt).toContain("The portfolio only has to fund the gap of $24,000/yr, a Barista FIRE number of $600,000 at 4%");
     expect(prompt).toContain("Projected Barista FIRE age 55; 15 years away");

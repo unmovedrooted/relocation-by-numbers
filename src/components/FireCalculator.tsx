@@ -99,6 +99,8 @@ type Inputs = {
   targetRetirementAge: number;
   // ── Barista-specific ────────────────────────────────
   baristaPartTimeIncome: number;
+  /** After-tax part-time income already earned today; it adds to saving before FIRE (unlike baristaPartTimeIncome, which only lowers the yearly gap). */
+  baristaIncomeNow: number;
   // ── Withdrawal tax rate (Traditional account haircut) ──
   withdrawalTaxRatePct: number;
   // What-if scenarios only: extra dollars invested each year (in addition to the configured saving), never set by the form.
@@ -262,6 +264,7 @@ const BASE_DEFAULTS: Inputs = {
   volatility: "moderate",
   coastAge: 40, targetRetirementAge: 65,
   baristaPartTimeIncome: 24000,
+  baristaIncomeNow: 0,
   withdrawalTaxRatePct: 15,
 };
 
@@ -593,6 +596,9 @@ function simulateYearsToFI(
     ? Math.max(0, rawExpenses - (Number(i.baristaPartTimeIncome) || 0))
     : rawExpenses;
 
+  // Part-time income you already earn today adds to saving before FIRE; the income that starts after you leave full-time work only lowers the gap.
+  const savingBase = mode === "barista" ? Math.max(0, rawExpenses - (Number(i.baristaIncomeNow) || 0)) : baseExpenses;
+
   const { start, annualContrib, employerMatch } = initBuckets(i, netAnnualBase);
   let buckets = { ...start };
   let years   = 0;
@@ -617,7 +623,7 @@ while (years < horizon) {
 
   let autoContrib = 0;
   if (!i.advanced && (Number(i.yearlyInvestment) || 0) <= 0) {
-    const expThisYear = baseExpenses * Math.pow(1 + infl, years);
+    const expThisYear = savingBase * Math.pow(1 + infl, years);
     autoContrib = Math.max(0, netY - expThisYear);
   }
 
@@ -717,7 +723,8 @@ function buildProjectionWithExpenses(
 
     let autoContrib = 0;
     if (!i.advanced && (Number(i.yearlyInvestment) || 0) <= 0) {
-      autoContrib = Math.max(0, netY - effExpY);
+      const savingExpY = (mode === "barista" ? Math.max(0, baseExpenses - (Number(i.baristaIncomeNow) || 0)) : effBase) * Math.pow(1 + infl, y - 1);
+      autoContrib = Math.max(0, netY - savingExpY);
     }
 
     buckets = growBuckets(buckets, i, y - 1, annualContrib, employerMatch, pastCoast, autoContrib);
@@ -821,7 +828,7 @@ function buildMovedScenario(i: Inputs): { inputs: Inputs; net: NetBasis } {
 
 // Share of take-home-plus-retirement-saving that is saved, using the saving that actually happens in the chosen mode.
 function savingsRateOf(i: Inputs, netAnnual: number, mode: FireMode): { rate: number; base: number; deferral: number } {
-  const side = mode === "barista" ? Math.max(0, Number(i.baristaPartTimeIncome) || 0) : 0;
+  const side = mode === "barista" ? Math.max(0, Number(i.baristaIncomeNow) || 0) : 0;
   if (i.advanced) {
     const rate = netAnnual > 0 ? clamp((netAnnual - annualExpenses(i)) / netAnnual, -1, 1) : 0;
     return { rate, base: netAnnual, deferral: 0 };
@@ -1157,11 +1164,16 @@ function DecisionEngineCard({ result }: { result: DecisionEngineResult }) {
           </>
         ) : (
           <>
-            You&apos;re currently projected to reach your goal in{" "}
-            <strong className="text-white">
-              {formatDecisionYears(result.baseline.yearsToGoal)}
-            </strong>
-            . {modeLabels.intro}
+            {result.baseline.yearsToGoal === null ? (
+              <>You&apos;re not projected to reach your goal under these assumptions. </>
+            ) : (
+              <>
+                You&apos;re currently projected to reach your goal in{" "}
+                <strong className="text-white">{formatDecisionYears(result.baseline.yearsToGoal)}</strong>
+                .{" "}
+              </>
+            )}
+            {modeLabels.intro}
           </>
         )}
       </p>
@@ -1589,7 +1601,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
     coastReady: isCoastReady,
     yearsToCoast,
   } : {}),
-  ...(mode === "barista" ? { baristaPartTimeIncome: inputs.baristaPartTimeIncome } : {}),
+  ...(mode === "barista" ? { baristaPartTimeIncome: inputs.baristaPartTimeIncome, baristaIncomeNow: inputs.baristaIncomeNow } : {}),
   volatility:           inputs.volatility,
   inflationPct:         inputs.inflationPct,
   advanced:             inputs.advanced,
@@ -1706,12 +1718,16 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="rounded-xl border border-amber-300/20 bg-amber-300/10 p-4 sm:col-span-2">
                 <div className="mb-3 text-xs font-semibold tracking-widest text-amber-200">BARISTA FIRE SETTINGS</div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Expected annual part-time income (after tax)" info="Your take-home (after-tax) income from part-time or flexible work. It is counted as extra income you earn from today, which speeds up saving, and it reduces the yearly gap your portfolio must cover."
+                  <Field label="Part-time income after you leave full-time work (after tax, per year)" info="Your take-home (after-tax) income from part-time or flexible work once you stop full-time work. It lowers the yearly gap your portfolio must cover, so the FIRE number is smaller. It does not add to your saving before then."
                     value={inputs.baristaPartTimeIncome}
                     onChange={v => setInputs(s => ({ ...s, baristaPartTimeIncome: clamp(v, 0, 500000) }))}
                     prefix="$" />
+                  <Field label="Part-time income you already earn now (after tax, per year)" info="Extra after-tax income you earn today on top of your job. It adds to your saving each year until you reach your Barista FIRE number. Leave it at zero if the part-time work only starts after you leave full-time work."
+                    value={inputs.baristaIncomeNow}
+                    onChange={v => setInputs(s => ({ ...s, baristaIncomeNow: clamp(v, 0, 500000) }))}
+                    prefix="$" />
                   <div className="text-xs leading-5 text-slate-400 sm:col-span-2">
-                    This counts as extra after-tax income you earn from today: it adds to your saving now, and it reduces the yearly gap your portfolio must cover. It is assumed to grow with inflation like your spending. If it is more than your spending, the gap is zero.
+                    The first amount only lowers the yearly gap your portfolio must cover; it is assumed to grow with inflation. The second amount is extra income you earn today, so it adds to your saving until you reach FIRE.
                   </div>
                   <div className="self-end text-xs text-slate-400">
                     Gap your portfolio covers:<br />
@@ -1941,11 +1957,14 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   <div className="mt-4 rounded-xl border border-emerald-300/25 bg-emerald-300/10 p-4">
                     <div className="text-xs font-semibold tracking-widest text-emerald-100">MOVE IMPACT</div>
                     <div className="mt-3 grid gap-2 text-sm text-emerald-50">
-                      <div className="flex justify-between gap-3"><span className="text-emerald-100/80">Current FIRE age</span><span className="font-semibold">{fiAge ?? "—"}</span></div>
+                      <div className="flex justify-between gap-3"><span className="text-emerald-100/80">{mode === "coast" ? "Current FIRE age (if you stop contributing at the coast age)" : "Current FIRE age"}</span><span className="font-semibold">{fiAge ?? "—"}</span></div>
+                      {mode === "coast" && (
+                        <div className="flex justify-between gap-3"><span className="text-emerald-100/80">Current FIRE age (if you keep contributing)</span><span className="font-semibold">{fullFiAgeForCoast ?? "—"}</span></div>
+                      )}
                       {movedResult && Number.isFinite(movedResult.fireNumber) && (
                         <div className="flex justify-between gap-3"><span className="text-emerald-100/80">FIRE number after move (at that age, future dollars)</span><span className="font-semibold">{money(movedResult.fireNumber, 0)}</span></div>
                       )}
-                      <div className="flex justify-between gap-3"><span className="text-emerald-100/80">FIRE age after move</span><span className="font-semibold">{movedFiAge ?? "—"}</span></div>
+                      <div className="flex justify-between gap-3"><span className="text-emerald-100/80">{mode === "coast" ? "FIRE age after move (same stop-contributing assumption)" : "FIRE age after move"}</span><span className="font-semibold">{movedFiAge ?? "—"}</span></div>
                       {moveDeltaYears !== null && (
                         <div className="flex justify-between gap-3">
                           <span className="text-emerald-100/80">{moveDeltaYears > 0 ? "Could bring FIRE forward by" : moveDeltaYears < 0 ? "Could delay FIRE by" : "Same timeline"}</span>

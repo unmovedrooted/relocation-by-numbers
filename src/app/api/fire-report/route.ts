@@ -14,7 +14,7 @@ const REQUIRED_KEYS = [
 ] as const;
 const OPTIONAL_KEYS = [
   "targetRetirementAge", "mode", "preset", "coastAge", "coastNumber", "coastReady", "yearsToCoast",
-  "baristaPartTimeIncome", "volatility", "inflationPct", "advanced", "yearlyInvestment",
+  "baristaPartTimeIncome", "baristaIncomeNow", "volatility", "inflationPct", "advanced", "yearlyInvestment",
   "contrib401k", "contribIra", "contribBrokerage",
 ] as const;
 const ALLOWED_KEYS = new Set<string>([...REQUIRED_KEYS, ...OPTIONAL_KEYS]);
@@ -99,6 +99,7 @@ function parseInputs(value: unknown): ReportInputs {
     ...optional("coastReady", () => body.coastReady as boolean),
     ...optional("advanced", () => body.advanced as boolean),
     ...optional("baristaPartTimeIncome", () => boundedNumber(body.baristaPartTimeIncome, "baristaPartTimeIncome", 0, 10_000_000) as number),
+    ...optional("baristaIncomeNow", () => boundedNumber(body.baristaIncomeNow, "baristaIncomeNow", 0, 10_000_000) as number),
     ...optional("inflationPct", () => boundedNumber(body.inflationPct, "inflationPct", -10, 50) as number),
     ...optional("yearlyInvestment", () => boundedNumber(body.yearlyInvestment, "yearlyInvestment", 0, 100_000_000) as number),
     ...optional("contrib401k", () => boundedNumber(body.contrib401k, "contrib401k", 0, 100_000_000) as number),
