@@ -459,7 +459,10 @@ export default function Calculator({
     setIf("fees", setMoveFeesCost); setIf("deposit", setDepositCost);
 
     const t = (qs.get("typed") ?? "").split(",");
-    const restored = { rent: t.includes("rent"), home: t.includes("home"), tax: t.includes("tax") };
+    // A link without the typed flag was written by hand: treat the rent, home price and property tax it supplies as entered.
+    const restored = qs.has("typed")
+      ? { rent: t.includes("rent"), home: t.includes("home"), tax: t.includes("tax") }
+      : { rent: qs.has("rentMonthly"), home: qs.has("homePrice"), tax: qs.has("propertyTaxPct") };
     typedRef.current = restored;
     setTyped(restored);
   }, []);
@@ -522,7 +525,8 @@ export default function Calculator({
     if (moveFeesCost !== "")   qs.set("fees", moveFeesCost);
     if (depositCost !== "")    qs.set("deposit", depositCost);
     const typedKeys = (["rent", "home", "tax"] as const).filter((k) => typed[k]);
-    if (typedKeys.length) qs.set("typed", typedKeys.join(","));
+    // Always written (even empty) so a link without it is known to be hand-built.
+    qs.set("typed", typedKeys.join(","));
 
     setQS(qs);
   }, [
@@ -1007,7 +1011,7 @@ export default function Calculator({
             <div className="grid gap-3 sm:grid-cols-2">
 
               <label className="text-sm">
-                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Salary</div>
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Destination salary</div>
                 <input
                   className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
                   type="number" value={salary} onChange={(e) => setSalary(e.target.value)} placeholder=" "

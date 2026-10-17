@@ -73,15 +73,6 @@ export default function Page() {
             and everyday expenses, before you move.
           </p>
 
-          <div className="mx-auto mt-3 max-w-2xl space-y-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-            <p>{PAYROLL_PROGRAMS_NOTE}</p>
-            {getStateRuleNote("ny") && (
-              <p>
-                <span className="font-medium text-slate-600 dark:text-slate-300">New York:</span> {getStateRuleNote("ny")!.note}
-              </p>
-            )}
-          </div>
-
           <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm">
             <Link
               href="/methodology"
@@ -104,6 +95,15 @@ export default function Page() {
 
         <div className="text-center text-xs text-slate-500 dark:text-slate-400">
           Assumptions updated: October 2026
+        </div>
+
+        <div className="mx-auto max-w-3xl space-y-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+          <p>{PAYROLL_PROGRAMS_NOTE}</p>
+          {getStateRuleNote("ny") && (
+            <p>
+              <span className="font-medium text-slate-600 dark:text-slate-300">New York:</span> {getStateRuleNote("ny")!.note}
+            </p>
+          )}
         </div>
 
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (
@@ -260,7 +260,7 @@ export default function Page() {
                 <li>Neighborhood-specific rent differences</li>
                 <li>Childcare and school decisions</li>
                 <li>Private health insurance variation</li>
-                <li>One-time moving costs and closing costs</li>
+                <li>Your actual mover quotes and closing costs (the move card uses default estimates unless you enter your own)</li>
                 <li>Detailed local tax edge cases or employer-specific deductions</li>
               </ul>
             </div>

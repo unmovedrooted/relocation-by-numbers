@@ -100,6 +100,8 @@ export default async function FireCalculatorPage({ searchParams }: PageProps) {
           </section>
         ) : null}
 
+        <FireCalculator initialIncome={initialIncome} />
+
         <section className="max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6">
           <h2 className="text-xl font-semibold text-white">
             How the FIRE calculator works
@@ -116,8 +118,6 @@ export default async function FireCalculatorPage({ searchParams }: PageProps) {
             assumptions may affect your timeline to financial independence.
           </p>
         </section>
-
-        <FireCalculator initialIncome={initialIncome} />
 
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID ? (
           <section className="rounded-2xl border border-white/10 bg-white/5 p-4">

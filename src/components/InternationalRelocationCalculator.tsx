@@ -1180,6 +1180,12 @@ const readinessRecommendation =
               <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
                 {results.readinessRecommendation.note}
               </p>
+              {results.targetConfidence !== "verified" && (
+                <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-400">
+                  This verdict depends on the tax estimate below, which is {results.targetConfidence === "placeholder" ? "a placeholder" : results.targetConfidence}
+                  {results.targetMissingFactor ? ` (${results.targetMissingFactor.replace(/.$/, "")})` : ""}. Treat it as conditional on those tax assumptions.
+                </p>
+              )}
               <div className="mt-4 grid gap-2 text-xs sm:grid-cols-2">
                 <div className="rounded-xl bg-white/75 p-3 ring-1 ring-black/5 dark:bg-slate-800/60 dark:ring-white/10">
                   <div className="font-semibold text-slate-700 dark:text-slate-300">Income target gap</div>

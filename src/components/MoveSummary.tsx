@@ -53,7 +53,7 @@ export default function MoveSummary({
   const goodText = 'text-emerald-600 dark:text-emerald-400'
   const badText = 'text-red-600 dark:text-red-400'
   const tone = (n: number) => (n >= 0 ? goodText : badText)
-  const recover = (m: number | null) => (m === null ? 'never' : m === 0 ? 'none needed' : `${m} mo`)
+  const recover = (m: number | null) => (m === null ? 'never' : m === 0 ? 'none needed' : m > 36 ? 'over 3 years' : `${m} mo`)
   const estimated = move.estimatedItems.filter(k => ESTIMATE_LABELS[k] && inputIds[k])
 
   return (
