@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import FireAbroadLink from "./FireAbroadLink";
 import { grossForNet } from "@/lib/grossForNet";
+import { usWageEffectiveRate } from "@/lib/usCityTax";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
 import {
   INTERNATIONAL_COUNTRIES,
@@ -21,6 +22,7 @@ import {
   getConditionalQuestionsForCountry,
   type TaxConfidence,
   type ConditionalQuestion,
+  US_TAX_STATUS_KEY,
 } from "@/lib/internationalTaxes";
 import { getCityCostMultipliers } from "@/lib/internationalCityCosts";
 import { USD_TO_LOCAL, COUNTRY_CURRENCY } from "@/lib/internationalFx";
@@ -179,6 +181,11 @@ export default function InternationalRelocationCalculator() {
   const [children, setChildren] = useState<string>("0");
 
   const [conditionalAnswers, setConditionalAnswers] = useState<Record<string, string>>({});
+  // Someone leaving the U.S. is most likely still a U.S. taxpayer abroad, so that question starts on Yes (they can change it).
+  const answersEffective = useMemo<Record<string, string>>(
+    () => (fromCountry === "US" && !conditionalAnswers[US_TAX_STATUS_KEY] ? { ...conditionalAnswers, [US_TAX_STATUS_KEY]: "yes" } : conditionalAnswers),
+    [fromCountry, conditionalAnswers],
+  );
 
   const [destinationRent, setDestinationRent] = useState<string>("2200");
   const [depositRequired, setDepositRequired] = useState<string>("2200");
@@ -393,20 +400,23 @@ export default function InternationalRelocationCalculator() {
       filing,
       isRetired: mode === "retired",
       incomeScenario,
-      answers: conditionalAnswers,
+      answers: answersEffective,
     });
 
-    const currentTaxRate = currentTaxEstimate.effectiveRate;
-    const targetTaxRate  = targetTaxEstimate.effectiveRate;
+    // Wages earned in a listed U.S. city use the main calculator's engine (federal, state, local and payroll tax), not federal only.
+    const usCurrentRate = fromCountry === "US" && mode !== "retired" ? usWageEffectiveRate(fromCityCode, annualIncomeForFromTax, filing) : null;
+    const usTargetRate = toCountry === "US" && mode !== "retired" ? usWageEffectiveRate(toCityCode, annualIncomeForToTax, filing) : null;
+    const currentTaxRate = usCurrentRate ?? currentTaxEstimate.effectiveRate;
+    const targetTaxRate  = usTargetRate ?? targetTaxEstimate.effectiveRate;
 
     const targetConfidence: TaxConfidence = targetTaxEstimate.confidence;
-    const targetMissingFactor: string = targetTaxEstimate.missingFactor ?? "";
-    const targetTaxLabel: string = targetTaxEstimate.label;
+    const targetMissingFactor: string = usTargetRate !== null ? "Credits and deductions beyond the standard deduction are not modeled." : targetTaxEstimate.missingFactor ?? "";
+    const targetTaxLabel: string = usTargetRate !== null ? "US federal, state, local and payroll estimate (2026)" : targetTaxEstimate.label;
     const targetTaxNotes: string[] = [];
-    if (targetTaxEstimate.note) targetTaxNotes.push(targetTaxEstimate.note);
+    if (usTargetRate === null && targetTaxEstimate.note) targetTaxNotes.push(targetTaxEstimate.note);
 
     const unansweredQuestions = getConditionalQuestionsForCountry(toCountry, incomeScenario)
-      .filter(q => !conditionalAnswers[q.key]);
+      .filter(q => !answersEffective[q.key]);
     if (unansweredQuestions.length > 0) {
       targetTaxNotes.push(
         `Answer the tax question${unansweredQuestions.length > 1 ? "s" : ""} above to refine this estimate.`
@@ -500,13 +510,13 @@ export default function InternationalRelocationCalculator() {
       : 0;
     // Solved against the destination’s own tax scale at the income needed, not the rate at your current income.
     const requiredGrossMonthly = targetTaxRate < 1
-      ? grossForNet(requiredNetMonthly * 12, (grossUsd) => estimateInternationalTax({
+      ? grossForNet(requiredNetMonthly * 12, (grossUsd) => (usTargetRate !== null ? usWageEffectiveRate(toCityCode, grossUsd, filing) : null) ?? estimateInternationalTax({
         countryCode: toCountry,
         annualIncome: convertUsdToLocal(grossUsd, toCountry),
         filing,
         isRetired: mode === "retired",
         incomeScenario,
-        answers: conditionalAnswers,
+        answers: answersEffective,
       }).effectiveRate) / 12
       : 0;
     const requiredAnnualIncome = requiredGrossMonthly * 12;
@@ -589,7 +599,7 @@ const readinessRecommendation =
     };
   }, [
     mode, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
-    incomeScenario, conditionalAnswers,
+    incomeScenario, answersEffective, fromCityCode, toCityCode,
     fromCityMultipliers, toCityMultipliers, currentCityDefaults, targetCityDefaults,
     adultCount, childCount, needCar, carCostMonthly, furnished, utilitiesIncluded,
     utilities, destinationRent, groceries, transportation, healthcare,
@@ -831,7 +841,7 @@ const readinessRecommendation =
                 </div>
                 <select
                   className={selectCls}
-                  value={conditionalAnswers[q.key] ?? ""}
+                  value={answersEffective[q.key] ?? ""}
                   onChange={(e) => setConditionalAnswers((prev) => ({ ...prev, [q.key]: e.target.value }))}
                 >
                   <option value="">Select…</option>

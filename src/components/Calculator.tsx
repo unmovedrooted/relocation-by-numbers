@@ -1596,7 +1596,10 @@ export default function Calculator({
                 <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
                   Current housing is{" "}
                   <span className="font-semibold text-amber-700 dark:text-amber-400">estimated</span>{" "}
-                  from your selected target housing cost and the city housing index, not your actual number. Enter your real amount above for a precise comparison.
+                  {mode === "rent" && fromCity && typeof fromCity.defaultRent === "number"
+                    ? <>from the typical rent in {fromCity.name} plus your renter&apos;s insurance and parking, not your actual number.</>
+                    : <>from your selected target housing cost and the city housing index, not your actual number.</>}{" "}
+                  Enter your real amount above for a precise comparison.
                 </div>
               )}
               <div className="overflow-x-auto overscroll-x-contain" role="region" aria-label="Current and target cost comparison" tabIndex={0}>
