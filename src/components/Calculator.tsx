@@ -1357,6 +1357,30 @@ export default function Calculator({
         {/* ══════════════════════════ RESULTS ══════════════════════════ */}
         <div className="space-y-3">
 
+          {/* ── 0. THE ANSWER IN ONE SENTENCE ── */}
+          {move && (
+            <div className="rounded-2xl border border-violet-200 bg-violet-50/70 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-violet-900/60 dark:bg-violet-950/20">
+              <p className="text-lg font-semibold leading-snug text-slate-900 dark:text-white">
+                This move leaves you about {money(Math.abs(move.expected.monthlyChange))} {move.expected.monthlyChange >= 0 ? "more" : "less"} each month.
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">
+                You will need about {money(move.expected.cashUpfront)} upfront, including refundable deposits.{" "}
+                {move.expected.monthsToRecover === null
+                  ? "At this monthly change the move does not earn back its one-time costs."
+                  : move.expected.monthsToRecover === 0
+                    ? "There are no one-time costs to earn back."
+                    : move.expected.monthsToRecover > 36
+                      ? "Earning back the one-time costs would take over 3 years."
+                      : `The one-time costs are earned back in about ${move.expected.monthsToRecover} month${move.expected.monthsToRecover === 1 ? "" : "s"}.`}
+              </p>
+              {move.estimatedItems.length > 0 && (
+                <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                  {move.estimatedItems.length} of these figures are estimates. Replace them with your own in the fields on the left to firm up the answer.
+                </p>
+              )}
+            </div>
+          )}
+
           {/* ── 1. BOTTOM LINE VERDICT ── */}
           <div className={`rounded-2xl border p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ${vs.border} ${vs.bg}`}>
             <div className="flex items-start justify-between gap-3">
