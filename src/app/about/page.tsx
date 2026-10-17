@@ -88,6 +88,25 @@ export default function AboutPage() {
 
       <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
         <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+          Who is behind this site
+        </h2>
+
+        <div className="mt-4 space-y-4 text-slate-700 dark:text-slate-300 text-base leading-7">
+          <p>
+            Relocation By Numbers is an independent project, written and maintained under the site name rather
+            than a personal byline. Every calculator page names its sources, the date they were reviewed and what
+            it leaves out, so you can check the work yourself instead of having to trust a name.
+          </p>
+          <p>
+            If you find a number that looks wrong, use the feedback box at the bottom of any calculator page. Reports
+            that say what you entered, what you saw and what you expected are the easiest to check against the
+            published rules.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           How the numbers are kept honest
         </h2>
 

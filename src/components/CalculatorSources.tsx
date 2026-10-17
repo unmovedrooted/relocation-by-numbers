@@ -33,7 +33,7 @@ export default function CalculatorSources({ path, tone = "light" }: { path: stri
         {info.taxDriven
           ? <>Tax figures come from IRS and state government publications ({TAX_YEAR} rules, checked {taxRulesVerifiedLabel()}). </>
           : null}
-        Sources and limits reviewed {reviewedLabel()}.{" "}
+        Written and maintained by Relocation By Numbers. Sources and limits reviewed {reviewedLabel()}. Found a mistake? Tell us in the feedback box below.{" "}
         <Link href="/methodology" className={linkClass}>Full methodology</Link>
       </p>
 
