@@ -5,6 +5,7 @@ import { findCity } from "@/lib/cities";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ALLOWED_COMPARE_ROUTES } from "@/lib/seo-allowlists";
+import PairReport, { PairReportSummary } from "@/components/PairReport";
 
 export const dynamicParams = true;
 
@@ -291,6 +292,8 @@ export default async function ComparePage({ params }: PageProps) {
           Assumptions updated: October 2026
         </div>
 
+        <PairReportSummary fromId={fromCity.id} toId={toCity.id} />
+
         <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             What to pay attention to when comparing {fromCity.name} and {toCity.name}
@@ -312,6 +315,8 @@ export default async function ComparePage({ params }: PageProps) {
           initialFromCityId={fromCity.id}
           initialToCityId={toCity.id}
         />
+
+        <PairReport fromId={fromCity.id} toId={toCity.id} path={`/compare/${fromCity.id}/${toCity.id}`} />
 
         <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
