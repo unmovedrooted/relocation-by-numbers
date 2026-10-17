@@ -2326,13 +2326,14 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
           )}
 
           {/* ── Affiliate cards ───────────────────────────────────────────── */}
-          {MODE_AFFILIATES[mode].length > 0 && (
+          {/* Placeholder links (href "#") are hidden until real affiliate links are added. */}
+          {MODE_AFFILIATES[mode].some(a => a.href !== "#") && (
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
               <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
                 {nudge ? "Recommended accounts for your situation" : "Accounts worth considering"}
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                {MODE_AFFILIATES[mode].map(a => <AffiliateCard key={a.name} a={a} />)}
+                {MODE_AFFILIATES[mode].filter(a => a.href !== "#").map(a => <AffiliateCard key={a.name} a={a} />)}
               </div>
               <p className="mt-3 text-[11px] text-slate-500">Affiliate links, we may earn a commission at no cost to you. Recommendations are based on your FIRE mode, not paid placement.</p>
             </div>

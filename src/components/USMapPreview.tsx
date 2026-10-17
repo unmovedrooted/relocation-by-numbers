@@ -192,7 +192,7 @@ export default function USMapPreview() {
           </div>
 
           <p className="px-1 text-xs leading-5 text-slate-500">
-            Estimates use 2025 state income tax and the standard deduction, single or married filing jointly. They don&apos;t include local city taxes, credits, or deductions. Not tax advice.
+            Estimates use 2026 state income tax and the standard deduction, single or married filing jointly. They don&apos;t include local city taxes, credits, or deductions. Not tax advice.
           </p>
         </div>
       </div>
