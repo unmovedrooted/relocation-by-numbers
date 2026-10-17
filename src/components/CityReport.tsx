@@ -208,7 +208,7 @@ export default function CityReport({ cityId, tone = "themed", focus, path }: { c
         </ul>
       </section>
 
-      <FeedbackBox path={path ?? (focus === "cost" ? `/cost-of-living/${r.id}` : focus === "salary" ? `/salary-needed-in/${r.id}` : `/fire-in/${r.id}`)} name={`${r.name} page`} tone={tone === "dark" ? "dark" : "light"} />
+      <FeedbackBox path={path ?? (focus === "cost" ? `/cost-of-living/${r.id}` : focus === "salary" ? `/salary-needed-in/${r.id}` : `/best-cities-for-fire/${r.id}`)} name={`${r.name} page`} tone={tone === "dark" ? "dark" : "light"} />
     </>
   );
 }

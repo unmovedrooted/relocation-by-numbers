@@ -133,13 +133,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     .map((cityId) => findCity(cityId))
     .filter((city): city is NonNullable<typeof city> => Boolean(city));
 
-  const fireInPages = fireCities.map((city) => ({
-    url: `${baseUrl}/fire-in/${city.id}`,
-    lastModified: now,
-    priority: 0.6,
-    changeFrequency: "monthly" as const,
-  }));
-
   const detailCities = ALLOWED_CITY_DETAIL_PAGES
     .map((cityId) => findCity(cityId))
     .filter((city): city is NonNullable<typeof city> => Boolean(city));
@@ -192,7 +185,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...rankingHubPages,
     ...compareHubs,
     ...compareRoutes,
-    ...fireInPages,
     ...costOfLivingPages,
     ...bestCitiesFirePages,
     ...bestStatesFirePages,

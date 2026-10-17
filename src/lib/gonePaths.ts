@@ -19,6 +19,8 @@ export function isGonePath(pathname: string): boolean {
 
   switch (family) {
     case "fire-in":
+      // The ten city pages are redirected to /best-cities-for-fire/<city> by next.config before the proxy runs; the rest are gone.
+      return true;
     case "best-cities-for-fire":
       return b === undefined && !has(ALLOWED_FIRE_CITY_PAGES, a);
     case "cost-of-living":

@@ -67,6 +67,12 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        // The FIRE-in pages were merged into the "Is a city good for FIRE" pages; any other /fire-in/ URL is answered 410 by src/proxy.ts.
+        source: "/fire-in/:cityId(charlotte-nc|austin-tx|miami-fl|atlanta-ga|denver-co|seattle-wa|nyc-ny|dallas-tx|raleigh-nc|boston-ma)",
+        destination: "/best-cities-for-fire/:cityId",
+        permanent: true,
+      },
+      {
         source: "/international-relocation-calculator",
         destination: "/international-relocation",
         permanent: true,

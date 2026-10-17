@@ -383,7 +383,7 @@ export default async function FireWithSalaryPage({
               LA vs Austin
             </Link>
             <Link
-              href="/fire-in/charlotte-nc"
+              href="/best-cities-for-fire/charlotte-nc"
               className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-black/30"
             >
               FIRE in Charlotte

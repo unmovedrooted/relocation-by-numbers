@@ -426,7 +426,7 @@ export default async function CostOfLivingPage({ params }: PageProps) {
             <Link
               href={
                 ALLOWED_FIRE_CITY_PAGES.includes(city.id as (typeof ALLOWED_FIRE_CITY_PAGES)[number])
-                  ? `/fire-in/${city.id}`
+                  ? `/best-cities-for-fire/${city.id}`
                   : "/fire-calculator"
               }
               className="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 hover:dark:bg-slate-900/40"
