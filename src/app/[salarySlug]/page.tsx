@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import FireHeaderLinks from "@/components/FireHeaderLinks";
 import { notFound } from "next/navigation";
 import AdSlot from "@/components/AdSlot";
 import FireCalculator from "@/components/FireCalculator";
@@ -193,32 +194,7 @@ export default async function FireWithSalaryPage({
 
           <p className="text-xs text-slate-400">Assumptions updated: October 2026</p>
 
-          <div className="flex flex-wrap gap-2 pt-1">
-            <Link
-              href="/lean-fire-calculator"
-              className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-medium text-white transition hover:bg-white/10"
-            >
-              Lean FIRE
-            </Link>
-            <Link
-              href="/barista-fire-calculator"
-              className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-medium text-white transition hover:bg-white/10"
-            >
-              Barista FIRE
-            </Link>
-            <Link
-              href="/coast-fire-calculator"
-              className="rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-medium text-white transition hover:bg-white/10"
-            >
-              Coast FIRE
-            </Link>
-            <Link
-              href="/compare"
-              className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-3.5 py-1.5 text-sm font-medium text-emerald-200 transition hover:bg-emerald-400/15"
-            >
-              Compare Cities →
-            </Link>
-          </div>
+          <FireHeaderLinks mode="standard" />
         </header>
 
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (

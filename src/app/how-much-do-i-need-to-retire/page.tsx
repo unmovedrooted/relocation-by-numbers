@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import FireHeaderLinks from "@/components/FireHeaderLinks";
 import FeedbackBox from "@/components/FeedbackBox";
 import Link from "next/link";
 import AdSlot from "@/components/AdSlot";
@@ -62,22 +63,8 @@ export default async function Page({ searchParams }: PageProps) {
 
           <div className="text-xs text-slate-400">Assumptions updated: October 2026</div>
 
-          <div className="pt-1">
-            <Link
-              href="/methodology"
-              className="text-sm font-medium text-emerald-200 underline decoration-emerald-300/40 underline-offset-4 transition hover:text-emerald-100"
-            >
-              See methodology and data sources
-            </Link>
-          </div>
 
-          <div className="flex flex-wrap gap-2 pt-2">
-            <Link href="/fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">FIRE calculator</Link>
-            <Link href="/fire-number-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">FIRE number calculator</Link>
-            <Link href="/lean-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Lean FIRE</Link>
-            <Link href="/barista-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Barista FIRE</Link>
-            <Link href="/" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Compare cities</Link>
-          </div>
+          <FireHeaderLinks mode="standard" />
         </header>
 
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (

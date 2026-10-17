@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import FireHeaderLinks from "@/components/FireHeaderLinks";
 import Link from "next/link";
 import FireCalculator from "@/components/FireCalculator";
 import { SEOFAQItem } from "@/components/SeoFAQ";
@@ -60,11 +61,9 @@ export default async function Page({ searchParams }: PageProps) {
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-400">
             <span>Assumptions updated: October 2026</span>
-            <span className="hidden sm:inline">•</span>
-            <Link href="/methodology" className="underline underline-offset-4 hover:no-underline">
-              See methodology
-            </Link>
           </div>
+
+          <FireHeaderLinks current="coast" mode="coast" />
         </header>
 
         <section aria-label="Coast FIRE calculator">

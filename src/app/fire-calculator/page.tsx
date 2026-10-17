@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import FireHeaderLinks from "@/components/FireHeaderLinks";
 import Link from "next/link";
 import AdSlot from "@/components/AdSlot";
 import FireCalculator from "@/components/FireCalculator";
@@ -75,23 +76,8 @@ export default async function FireCalculatorPage({ searchParams }: PageProps) {
             Assumptions updated: October 2026
           </p>
 
-          <div className="pt-1">
-            <Link
-              href="/methodology"
-              className="text-sm font-medium text-emerald-200 underline decoration-emerald-300/40 underline-offset-4 transition hover:text-emerald-100"
-            >
-              See methodology and data sources
-            </Link>
-          </div>
 
-          <div className="flex flex-wrap gap-2 pt-2">
-            <Link href="/lean-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Lean FIRE</Link>
-            <Link href="/barista-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Barista FIRE</Link>
-            <Link href="/coast-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Coast FIRE</Link>
-            <Link href="/chubby-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Chubby FIRE</Link>
-            <Link href="/fat-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Fat FIRE</Link>
-            <Link href="/compare" className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-3 py-2 text-sm font-semibold text-emerald-200 hover:bg-emerald-400/20">Compare Cities →</Link>
-          </div>
+          <FireHeaderLinks current="fire" mode="standard" />
         </header>
 
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ? (

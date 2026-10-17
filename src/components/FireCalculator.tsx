@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import CalculatorNumberField from "./calculator-form/CalculatorNumberField";
 import FireReport, { type FireReportInputs } from "@/components/FireReport";
-import Link from "next/link";
+import { MODE_NOTES } from "@/lib/fireModes";
 import {
   ResponsiveContainer,
   LineChart,
@@ -189,14 +189,6 @@ const MODE_NAV: { mode: FireMode; label: string; href: string }[] = [
   { mode: "coast",    label: "Coast FIRE",   href: "/coast-fire-calculator"   },
   { mode: "barista",  label: "Barista FIRE", href: "/barista-fire-calculator" },
 ];
-
-// ── Mode contextual notes (inside calculator) ─────────────────────────────────
-const MODE_NOTES: Record<FireMode, string> = {
-  standard: "Estimates the portfolio you need to cover your full lifestyle indefinitely at your chosen withdrawal rate.",
-  lean:     "Shows how a lower spending target shrinks the portfolio you need, and how much faster Lean FIRE arrives vs a higher-spending plan.",
-  coast:    "Answers a different question: do you already have enough that compound growth alone can carry you to retirement without another dollar contributed?",
-  barista:  "Part-time income reduces the gap your portfolio must cover. The lower the gap, the smaller the number, and the sooner you can walk away from full-time work.",
-};
 
 // ── Mode-specific affiliates (swap hrefs for real affiliate links later) ──────
 const MODE_AFFILIATES: Record<FireMode, Affiliate[]> = {
@@ -1086,23 +1078,6 @@ function Field({ label, value, onChange, prefix, suffix, info }: {
   );
 }
 
-function ModeNav({ currentMode }: { currentMode: FireMode }) {
-  return (
-    <div className="inline-flex flex-wrap gap-2 rounded-2xl border border-white/10 bg-black/20 p-2">
-      {MODE_NAV.map(({ mode, label, href }) => (
-        <Link key={mode} href={href} className={[
-          "rounded-xl border px-3 py-2 text-xs font-medium transition",
-          currentMode === mode
-            ? "border-emerald-300/30 bg-emerald-300/15 text-emerald-200"
-            : "border-transparent text-slate-300 hover:bg-white/5 hover:text-white",
-        ].join(" ")}>
-          {label}
-        </Link>
-      ))}
-    </div>
-  );
-}
-
 function ProgressBar({ pct: p, label, sublabel }: { pct: number; label: string; sublabel?: ReactNode }) {
   return (
     <div className="rounded-xl border border-white/10 bg-black/20 p-3">
@@ -1655,12 +1630,6 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
 
   return (
     <section className="space-y-6">
-
-      {/* ── Mode nav strip ─────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <ModeNav currentMode={mode} />
-        <p className="max-w-xl text-xs leading-5 text-slate-400">{MODE_NOTES[mode]}</p>
-      </div>
 
       {/* ── Main grid ──────────────────────────────────────────────────────── */}
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_0.9fr]">

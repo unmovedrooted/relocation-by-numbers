@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import FireHeaderLinks from "@/components/FireHeaderLinks";
 import Link from "next/link";
 import FireCalculator from "@/components/FireCalculator";
 import { SEOFAQItem } from "@/components/SeoFAQ";
@@ -70,15 +71,7 @@ export default async function Page({ searchParams }: PageProps) {
             Explore All Tools
           </Link>
 
-          <div className="flex flex-wrap gap-2 pt-2">
-            <Link href="/fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">FIRE calculator →</Link>
-            <Link href="/barista-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Barista FIRE →</Link>
-            <Link href="/coast-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Coast FIRE →</Link>
-            <Link href="/lean-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Lean FIRE →</Link>
-            <Link href="/chubby-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Chubby FIRE →</Link>
-            <Link href="/fat-fire-calculator" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Fat FIRE →</Link>
-            <Link href="/" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10">Compare cities →</Link>
-          </div>
+          <FireHeaderLinks mode="standard" />
         </header>
 
         <section aria-label="FIRE number calculator">
