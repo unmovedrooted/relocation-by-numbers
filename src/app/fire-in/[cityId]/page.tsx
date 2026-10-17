@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import CityReport from "@/components/CityReport";
 import { ALLOWED_FIRE_CITY_PAGES } from "@/lib/seo-allowlists";
 import Link from "next/link";
 import AdSlot from "@/components/AdSlot";
@@ -414,6 +415,8 @@ export default async function Page({ params }: Props) {
             </div>
           </div>
         </section>
+
+        <CityReport cityId={cityId} tone="dark" focus="fire" />
 
         <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
           <Link href="/about" className="transition hover:text-white">

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import CityReport from "@/components/CityReport";
 import { ALLOWED_CITY_DETAIL_PAGES } from "@/lib/seo-allowlists";
 import { notFound } from "next/navigation";
 import AdSlot from "@/components/AdSlot";
@@ -351,6 +352,8 @@ export default async function Page({ params }: Props) {
             </div>
           </section>
         ) : null}
+
+        <CityReport cityId={cityId} tone="dark" focus="salary" />
 
         <footer className="pt-2">
           <div className="mb-3 text-xs text-slate-500">

@@ -30,6 +30,9 @@ for (const [code, name] of Object.entries(NAMES)) {
   price[code] = Number(m[1]);
 }
 
+const us = /U\.S\. Total\s+([0-9]+\.[0-9]+)/.exec(text);
+if (!us) throw new Error("no U.S. total row");
+
 writeFileSync(new URL("../src/data/eiaElectricity.json", import.meta.url), JSON.stringify({
   meta: {
     source: "U.S. Energy Information Administration, Electric Power Monthly, Table 5.6.B: average price of electricity by end-use sector, by state, year to date",
@@ -40,5 +43,6 @@ writeFileSync(new URL("../src/data/eiaElectricity.json", import.meta.url), JSON.
     unit: "cents per kilowatt-hour, residential sector",
   },
   residentialCentsPerKwh: price,
+  usResidentialCentsPerKwh: Number(us[1]),
 }));
 console.log(`wrote ${Object.keys(price).length} states, ${period}, released ${released}`);

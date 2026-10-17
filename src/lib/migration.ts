@@ -74,3 +74,27 @@ function destinationRank(from: string, to: string): number | null {
   const i = all.findIndex((x) => x.state === to);
   return i === -1 ? null : i + 1;
 }
+
+/** Households that moved into `toState` from other states in the latest year, by origin state. */
+export function topOrigins(toState: string, count: number): { state: string; households: number }[] {
+  const to = stateOf(toState);
+  return Object.entries(data.flows)
+    .filter(([key]) => key.endsWith(`>${to}`))
+    .map(([key, f]) => ({ state: key.split(">")[0], households: f.h[f.h.length - 1] }))
+    .sort((a, b) => b.households - a.households)
+    .slice(0, count);
+}
+
+/** Total households that moved into and out of a state in the latest year, and the net. */
+export function stateTotals(state: string): { inflow: number; outflow: number; net: number } {
+  const s = stateOf(state);
+  let inflow = 0;
+  let outflow = 0;
+  for (const [key, f] of Object.entries(data.flows)) {
+    const [a, b] = key.split(">");
+    const h = f.h[f.h.length - 1];
+    if (b === s) inflow += h;
+    if (a === s) outflow += h;
+  }
+  return { inflow, outflow, net: inflow - outflow };
+}

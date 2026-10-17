@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import CityReport from "@/components/CityReport";
 import Calculator from "@/components/Calculator";
 import { findCity } from "@/lib/cities";
 import Link from "next/link";
@@ -438,6 +439,8 @@ export default async function CostOfLivingPage({ params }: PageProps) {
             </Link>
           </div>
         </section>
+
+        <CityReport cityId={cityId} focus="cost" />
 
         <div className="mt-8 text-center">
           <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">

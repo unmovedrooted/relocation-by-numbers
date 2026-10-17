@@ -94,7 +94,7 @@ function rpp(cityId: string, key: "housing" | "utilities" | "goods"): number | n
   return typeof v === "number" ? v : null;
 }
 
-function monthlyOwnCost(cityId: string): number | null {
+export function monthlyOwnCost(cityId: string): number | null {
   const city = findCity(cityId);
   const price = city?.medianHomePrice;
   if (!city || !price) return null;

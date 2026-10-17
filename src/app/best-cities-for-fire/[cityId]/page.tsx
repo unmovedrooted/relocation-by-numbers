@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import CityReport from "@/components/CityReport";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findCity } from "@/lib/cities";
@@ -435,6 +436,8 @@ export default async function CityFirePage({ params }: PageProps) {
             )}
           </div>
         </section>
+
+        <CityReport cityId={cityId} tone="dark" focus="fire" path={`/best-cities-for-fire/${cityId}`} />
 
         <footer className="pt-2">
           <div className="mb-3 text-xs text-slate-400">Assumptions updated: October 2026</div>
