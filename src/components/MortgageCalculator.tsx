@@ -450,6 +450,36 @@ function calcBreakEven({
   return { type: "never" };
 }
 
+/**
+ * Net cost of buying and of renting after `months`, in the same model as calcBreakEven: buying is cash paid out (including the down
+ * payment and closing costs) minus home equity; renting is rent paid minus what the same upfront cash would be worth if invested.
+ */
+function calcNetCostsAt(months: number, args: Parameters<typeof calcBreakEven>[0]): { buyNetCost: number; rentNetCost: number } | null {
+  const { downPayment, closingCosts = 0, annualRate, monthlyPI, rent, tax, ins, hoa, homePrice, appreciation, rentGrowth, investReturn, maintenanceRate, taxDeductRate } = args;
+  if (homePrice <= 0 || rent <= 0 || monthlyPI <= 0 || downPayment < 0 || annualRate < 0) return null;
+  const monthlyRate = annualRate / 100 / 12;
+  let buyCashFlowCost = downPayment + closingCosts;
+  let rentCashFlowCost = 0;
+  let homeValue = homePrice;
+  let loanBalance = homePrice - downPayment;
+  let monthlyRent = rent;
+  let renterInvestedCash = downPayment + closingCosts;
+  for (let m = 1; m <= months; m++) {
+    const interest = loanBalance * monthlyRate;
+    const payment = loanBalance > 0 ? Math.min(monthlyPI, loanBalance + interest) : 0;
+    const principal = Math.max(0, payment - interest);
+    const taxSavings = interest * (taxDeductRate / 100);
+    const maintenance = (homeValue * (maintenanceRate / 100)) / 12;
+    buyCashFlowCost += payment + tax + ins + hoa + maintenance - taxSavings;
+    rentCashFlowCost += monthlyRent;
+    renterInvestedCash *= 1 + investReturn / 100 / 12;
+    homeValue *= 1 + appreciation / 100 / 12;
+    monthlyRent *= 1 + rentGrowth / 100 / 12;
+    loanBalance = Math.max(0, loanBalance - principal);
+  }
+  return { buyNetCost: buyCashFlowCost - (homeValue - loanBalance), rentNetCost: rentCashFlowCost - renterInvestedCash };
+}
+
 function calcRefi(
   curBalance: number, curRate: number, curMonthsLeft: number,
   newRate: number, newTermYears: number, closingCosts: number
@@ -1074,6 +1104,15 @@ function USTab() {
   const fiveYearEquity   = fiveYearHomeVal - fiveYearBalance;
   // Equity includes the down payment, so the down payment and closing costs paid at the start are counted as cost too.
   const fiveYearNetOwn   = fiveYearOwnCost + dp + estimatedClosing - fiveYearEquity;
+  // The comparison uses the same model as the break-even, so a break-even beyond five years means renting is ahead at five years.
+  const fiveYearNet = calcNetCostsAt(60, {
+    downPayment: dp, closingCosts: estimatedClosing, annualRate: r, monthlyPI,
+    rent: nz(monthlyRent), tax: monthlyTax, ins: monthlyIns, hoa: monthlyHOA, homePrice: hp,
+    appreciation: nz(appreciation), rentGrowth: nz(rentGrowth), investReturn: nz(investReturn),
+    maintenanceRate: nz(maintenanceRate), taxDeductRate: nz(taxDeductRate),
+  });
+  const buyAhead5 = fiveYearNet ? fiveYearNet.buyNetCost < fiveYearNet.rentNetCost : fiveYearNetOwn < fiveYearRentCost;
+  const buyRentGap5 = fiveYearNet ? Math.abs(fiveYearNet.rentNetCost - fiveYearNet.buyNetCost) : Math.abs(fiveYearRentCost - fiveYearNetOwn);
 
   const stressCfg        = STRESS_CONFIG[stressLevel];
   const stressedRate     = r + stressCfg.rateDelta;
@@ -1452,20 +1491,20 @@ function USTab() {
             </div>
             <div>
               <div className="text-xs text-slate-500 dark:text-slate-400">5-yr net buy cost</div>
-              <div className={`text-lg font-bold ${fiveYearNetOwn < fiveYearRentCost ? "text-emerald-700 dark:text-emerald-300" : "text-rose-600 dark:text-rose-400"}`}>
-                {money(fiveYearNetOwn)}
+              <div className={`text-lg font-bold ${buyAhead5 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-600 dark:text-rose-400"}`}>
+                {money(fiveYearNet ? fiveYearNet.buyNetCost : fiveYearNetOwn)}
               </div>
-              <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">after equity deducted</div>
+              <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">cash out including down payment, minus equity</div>
             </div>
           </div>
           <div className={`mt-3 rounded-xl px-3 py-2 text-xs font-semibold ${
-            fiveYearNetOwn < fiveYearRentCost ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200" : "bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-200"
+            buyAhead5 ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200" : "bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-200"
           }`}>
-            {fiveYearNetOwn < fiveYearRentCost
-              ? `Over 5 years, buying is ~${money(fiveYearRentCost - fiveYearNetOwn)} cheaper than renting (net of equity).`
-              : `Over 5 years, renting is ~${money(fiveYearNetOwn - fiveYearRentCost)} cheaper than buying (net of equity).`}
+            {buyAhead5
+              ? `Over 5 years, buying is ~${money(buyRentGap5)} cheaper than renting (net of equity, and counting what your upfront cash could earn if you rented).`
+              : `Over 5 years, renting is ~${money(buyRentGap5)} cheaper than buying (net of equity, and counting what your upfront cash could earn if you rented).`}
           </div>
-          <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">Net cost counts the down payment and closing costs you pay up front. It leaves out selling costs and what the down payment could earn if invested instead. Break-even is sensitive to appreciation and rent growth assumptions.</div>
+          <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">Uses the same model as the break-even: buying counts the down payment and closing costs you pay up front, minus home equity; renting is credited with investing that same cash at your investment return. Selling costs are left out. Both are sensitive to appreciation and rent growth assumptions.</div>
         </Card>
 
         <Card>
