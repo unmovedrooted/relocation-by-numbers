@@ -1,31 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ComparePicker from "@/components/ComparePicker";
+import { CITIES, findCity } from "@/lib/cities";
+import { buildPairExample, PAIR_EXAMPLE_SALARY } from "@/lib/pairExample";
+import { ALLOWED_COMPARE_ROUTES, COMPARE_ORIGIN_HUBS } from "@/lib/seo-allowlists";
 
-const COMPARISONS = [
-  { href: "/compare/nyc-ny/charlotte-nc", label: "NYC vs Charlotte", group: "From NYC" },
-  { href: "/compare/nyc-ny/austin-tx", label: "NYC vs Austin", group: "From NYC" },
-  { href: "/compare/nyc-ny/miami-fl", label: "NYC vs Miami", group: "From NYC" },
+const usd = (n: number) => `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
+const signed = (n: number) => `${n >= 0 ? "+" : "-"}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 
-  { href: "/compare/la-ca/austin-tx", label: "Los Angeles vs Austin", group: "From California" },
-  { href: "/compare/la-ca/charlotte-nc", label: "Los Angeles vs Charlotte", group: "From California" },
-
-  { href: "/compare/seattle-wa/dallas-tx", label: "Seattle vs Dallas", group: "From Seattle" },
-  { href: "/compare/seattle-wa/miami-fl", label: "Seattle vs Miami", group: "From Seattle" },
-  { href: "/compare/seattle-wa/charlotte-nc", label: "Seattle vs Charlotte", group: "From Seattle" },
-
-  { href: "/compare/boston-ma/miami-fl", label: "Boston vs Miami", group: "From Boston" },
-  { href: "/compare/boston-ma/charlotte-nc", label: "Boston vs Charlotte", group: "From Boston" },
-];
-
-const groupedComparisons = [
-  "From NYC",
-  "From California",
-  "From Seattle",
-  "From Boston",
-].map((group) => ({
-  group,
-  items: COMPARISONS.filter((item) => item.group === group),
-}));
+/** Every published move, with the worked example computed by the site's tax engine at one salary. Sorted by what is left after rent. */
+function publishedMoves() {
+  return ALLOWED_COMPARE_ROUTES.map((route) => {
+    const ex = buildPairExample(route.from, route.to);
+    return ex ? { ...route, ex } : null;
+  })
+    .filter((m): m is NonNullable<typeof m> => m !== null)
+    .sort((a, b) => (b.ex.afterRentChange ?? -Infinity) - (a.ex.afterRentChange ?? -Infinity));
+}
 
 const PATTERNS = [
   {
@@ -90,6 +81,9 @@ export const metadata: Metadata = {
 };
 
 export default function CompareHubPage() {
+  const moves = publishedMoves();
+  const pickerCities = CITIES.map((c) => ({ id: c.id, name: c.name, state: c.state })).sort((a, b) => a.name.localeCompare(b.name));
+  const origins = COMPARE_ORIGIN_HUBS.map((id) => findCity(id)).filter((c): c is NonNullable<typeof c> => !!c);
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10">
       <div className="mx-auto max-w-6xl space-y-10 px-4">
@@ -141,6 +135,77 @@ export default function CompareHubPage() {
             </Link>
           </div>
         </header>
+
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Compare any two cities</h2>
+          <p className="mb-4 mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
+            Pick where you live now and where you are thinking of moving. The {moves.length} moves below have their own pages; any other pair opens the calculator with both cities filled in.
+          </p>
+          <ComparePicker
+            cities={pickerCities}
+            livePairs={ALLOWED_COMPARE_ROUTES.map((r) => ({ from: r.from, to: r.to }))}
+            salary={PAIR_EXAMPLE_SALARY}
+            defaultFrom="nyc-ny"
+            defaultTo="charlotte-nc"
+          />
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            The {moves.length} flagship moves at {usd(PAIR_EXAMPLE_SALARY)} a year
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-400">
+            One single filer on the same salary in both cities, after federal, state and local income tax and typical rent. Sorted by how much more or less is left after rent each month.
+          </p>
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[40rem] text-sm">
+              <thead>
+                <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  <th className="pb-2 pr-3">Move</th>
+                  <th className="pb-2 pr-3 text-right">Take-home change</th>
+                  <th className="pb-2 pr-3 text-right">Typical rent change</th>
+                  <th className="pb-2 text-right">Left after rent</th>
+                </tr>
+              </thead>
+              <tbody className="text-slate-700 dark:text-slate-300">
+                {moves.map((m) => (
+                  <tr key={`${m.from}-${m.to}`} className="border-t border-slate-200 dark:border-slate-800">
+                    <td className="py-2 pr-3 font-medium">
+                      <Link href={`/compare/${m.from}/${m.to}`} className="underline underline-offset-4 hover:no-underline">
+                        {m.ex.from.name} to {m.ex.to.name}
+                      </Link>
+                    </td>
+                    <td className="py-2 pr-3 text-right tabular-nums">{signed(m.ex.monthlyNetChange)} a month</td>
+                    <td className="py-2 pr-3 text-right tabular-nums">{m.ex.rentChange !== null ? `${signed(m.ex.rentChange)} a month` : "n/a"}</td>
+                    <td className="py-2 text-right font-semibold tabular-nums">{m.ex.afterRentChange !== null ? `${signed(m.ex.afterRentChange)} a month` : "n/a"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-xs leading-6 text-slate-500 dark:text-slate-400">
+            Computed with the site&apos;s 2026 tax engine (standard deduction, no 401(k) contribution). Rents are the U.S. Census Bureau&apos;s medians for each city
+            (American Community Survey). Planning estimates, not tax advice. Your own salary and housing change these numbers, so open a move and enter yours.
+          </p>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Start from where you live</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
+            Each origin page shows the same salary in popular destinations side by side.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {origins.map((o) => (
+              <Link
+                key={o.id}
+                href={`/compare/${o.id}`}
+                className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-4 text-sm font-semibold text-slate-900 dark:text-slate-100 transition hover:bg-slate-100 dark:hover:bg-slate-900"
+              >
+                Moving from {o.name} →
+              </Link>
+            ))}
+          </div>
+        </section>
 
         <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <div className="max-w-3xl">
@@ -207,30 +272,6 @@ export default function CompareHubPage() {
               </div>
             ))}
           </div>
-        </section>
-
-        <section className="space-y-6">
-          {groupedComparisons.map(({ group, items }) => (
-            <div
-              key={group}
-              className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm"
-            >
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-                {group}
-              </h2>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {items.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-4 text-sm font-semibold text-slate-900 dark:text-slate-100 transition hover:bg-white hover:dark:bg-slate-900 hover:shadow-sm"
-                  >
-                    {item.label} →
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))}
         </section>
 
         <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
