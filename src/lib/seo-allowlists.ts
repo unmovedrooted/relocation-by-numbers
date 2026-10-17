@@ -34,6 +34,12 @@ export const ALLOWED_COMPARE_ROUTES = [
   { from: "boston-ma", to: "miami-fl" },
   { from: "boston-ma", to: "charlotte-nc" },
   { from: "seattle-wa", to: "charlotte-nc" },
+  { from: "nyc-ny", to: "dallas-tx" },
+  { from: "la-ca", to: "miami-fl" },
+  { from: "la-ca", to: "dallas-tx" },
+  { from: "seattle-wa", to: "austin-tx" },
+  { from: "boston-ma", to: "austin-tx" },
+  { from: "boston-ma", to: "dallas-tx" },
 ] as const;
 
 /** Origin cities that have a /compare/[from] hub (each has at least one indexed pair). Chicago has no pairs, so no hub. */

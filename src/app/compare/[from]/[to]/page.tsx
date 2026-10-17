@@ -132,6 +132,72 @@ const ROUTE_CONTENT: Record<
     audienceBody:
       "This comparison is often most useful for households trying to trade a higher-cost market for lower monthly pressure while keeping income relatively strong.",
   },
+  "nyc-ny__dallas-tx": {
+    primary:
+      "New York City residents pay state and city income tax on wages, while Texas has no state income tax, so this move changes take-home pay and rent at the same time.",
+    secondary:
+      "Dallas rents are well below New York City's, which is where most of the monthly gain comes from. Buyers should look past the lower home prices: Texas property tax rates are higher than New York City's, and that narrows the savings from owning.",
+    caution:
+      "The comparison assumes the same salary in both places. A local pay adjustment or a change of employer can change the result more than the tax and rent differences do.",
+    audienceTitle: "Best for people leaving New York for a lower-tax, lower-rent market",
+    audienceBody:
+      "This comparison is most useful for renters and remote workers who can keep a New York-level salary, and for buyers who want to see the property tax side of a Texas move before they commit.",
+  },
+  "la-ca__miami-fl": {
+    primary:
+      "This route is mostly a tax-and-home-price story. Florida has no state income tax on wages, but typical rents in Miami are close to Los Angeles rents, so renters should not expect a large housing saving.",
+    secondary:
+      "Where Miami pulls ahead is take-home pay, since California takes state income tax and a state disability insurance contribution from wages, and in the price of buying, where home values are lower than in Los Angeles.",
+    caution:
+      "The effective property tax rate is higher in Miami than in Los Angeles, and home insurance varies widely and is only a flat default here, so check both before treating a lower home price as a lower monthly cost.",
+    audienceTitle: "Best for Californians weighing taxes against a similar rent",
+    audienceBody:
+      "This comparison is useful for people who expect the tax change to do most of the work, and for buyers who want to see how lower prices and higher carrying costs balance out.",
+  },
+  "la-ca__dallas-tx": {
+    primary:
+      "Los Angeles to Dallas combines two changes at once: no state income tax in Texas and a much lower cost of housing, for both renters and buyers.",
+    secondary:
+      "Dallas rents and home values sit well below Los Angeles levels, and IRS migration data show Texas as the most common destination for people leaving California. The page below shows how many households make the move and how the numbers compare.",
+    caution:
+      "Texas property tax rates are higher than California's, so owning costs fall by less than home prices do. Insurance and utility costs vary by home and are only defaults in the calculator.",
+    audienceTitle: "Best for people choosing between the two largest state economies",
+    audienceBody:
+      "This comparison is most useful for California renters and buyers who want to see both the tax saving and the housing saving, and who plan to keep a similar salary after the move.",
+  },
+  "seattle-wa__austin-tx": {
+    primary:
+      "Washington and Texas both skip a state income tax on wages, so the tax change here is small. This move is mostly about housing and everyday costs.",
+    secondary:
+      "Seattle workers do pay Washington's employee-paid programs for paid family leave and long-term care, which Texas does not have, and Austin rents are lower than Seattle's, though by a smaller margin than in many other moves.",
+    caution:
+      "Austin's property tax rate is well above Seattle's, so a buyer can find that the lower price of a home does not translate into a much lower monthly cost.",
+    audienceTitle: "Best for people who want to compare housing, not taxes",
+    audienceBody:
+      "This comparison is most useful for Seattle renters and buyers who already pay no state income tax and want to see whether Austin's housing market changes their monthly budget.",
+  },
+  "boston-ma__austin-tx": {
+    primary:
+      "Massachusetts taxes wages at a flat state rate, while Texas has no state income tax, and Austin rents are far below Boston's. For renters both changes point the same way.",
+    secondary:
+      "For buyers the picture is closer. Austin home values are not far below Boston's, and Texas property tax rates are more than double Massachusetts rates, so owning costs fall by much less than rent does.",
+    caution:
+      "Renters and owners can reach opposite conclusions on this route. Check the renting and buying tables below before relying on one number.",
+    audienceTitle: "Best for Boston renters, and for buyers who want to test the property tax effect",
+    audienceBody:
+      "This comparison is useful for people leaving a Boston rental, and for owners who want to see how much a higher Texas property tax rate takes back from a lower home price.",
+  },
+  "boston-ma__dallas-tx": {
+    primary:
+      "Boston to Dallas removes Massachusetts state income tax and lowers housing costs substantially, because Dallas rents and home values are well below Boston's.",
+    secondary:
+      "The savings come from three places: state income tax, rent, and the price of a home. Dallas property tax rates are higher than Massachusetts rates, which gives back part of the home price saving for buyers.",
+    caution:
+      "Transportation and cooling costs differ between the two places and can offset some of the housing saving. Those costs are not in the figures below.",
+    audienceTitle: "Best for people trading Boston housing costs for a lower-tax market",
+    audienceBody:
+      "This comparison is most useful for Boston renters and buyers who want to see the tax, rent and home price effects separately before deciding whether the move is worth it.",
+  },
 };
 
 export async function generateStaticParams(): Promise<
