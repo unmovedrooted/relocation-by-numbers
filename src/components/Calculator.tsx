@@ -19,7 +19,10 @@ import MoveSummary from "./MoveSummary";
 import { compareMove, type Item } from "../lib/relocationMove";
 
 /** Inputs the "enter yours" buttons in the move card can jump to on this page. */
-const MOVE_IDS: Record<string, string> = { currentHousing: "in-curHousing", targetHousing: "in-rent" };
+const MOVE_IDS: Record<string, string> = {
+  currentHousing: "in-curHousing", targetHousing: "in-rent", movers: "in-movers", travel: "in-travel", setup: "in-setup",
+  leaseBreak: "in-leaseBreak", fees: "in-fees", refundableDeposit: "in-deposit",
+};
 
 type Mode = "rent" | "buy";
 
@@ -1269,6 +1272,67 @@ export default function Calculator({
               />
             </div>
           )}
+
+          {/* One-time moving costs: a blank field uses the estimate shown in it. */}
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">Moving costs (optional)</div>
+            <p className="mb-3 mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Leave a field blank to use the estimate shown in it. These feed cash needed upfront and the time to earn back the cost.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="text-sm">
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Movers or truck</div>
+                <input
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
+                  id="in-movers" type="number" min={0} value={moversCost} onChange={(e) => setMoversCost(e.target.value)} placeholder={"1500"}
+                />
+              </label>
+              <label className="text-sm">
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Travel and storage</div>
+                <input
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
+                  id="in-travel" type="number" min={0} value={travelCost} onChange={(e) => setTravelCost(e.target.value)} placeholder={"500"}
+                />
+              </label>
+              <label className="text-sm">
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Furniture and setup</div>
+                <input
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
+                  id="in-setup" type="number" min={0} value={setupCost} onChange={(e) => setSetupCost(e.target.value)} placeholder={"2000"}
+                />
+              </label>
+              <label className="text-sm">
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Lease break fee</div>
+                <input
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
+                  id="in-leaseBreak" type="number" min={0} value={leaseBreakCost} onChange={(e) => setLeaseBreakCost(e.target.value)} placeholder={"0"}
+                />
+              </label>
+              <label className="text-sm">
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Fees not returned (application, broker, closing)</div>
+                <input
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
+                  id="in-fees" type="number" min={0} value={moveFeesCost} onChange={(e) => setMoveFeesCost(e.target.value)} placeholder={mode === "buy" ? String(Math.round(nz(homePrice) * 0.03)) : "0"}
+                />
+              </label>
+              <label className="text-sm">
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Months paying both homes</div>
+                <input
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
+                  id="in-overlap" type="number" min={0} step={0.5} value={overlapMonths} onChange={(e) => setOverlapMonths(e.target.value)} placeholder={"0"}
+                />
+              </label>
+              {mode === "rent" && (
+                <label className="text-sm">
+                  <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Security deposit (refundable)</div>
+                  <input
+                    className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
+                    id="in-deposit" type="number" min={0} value={depositCost} onChange={(e) => setDepositCost(e.target.value)} placeholder={String(Math.round(nz(rentMonthly) * 2))}
+                  />
+                </label>
+              )}
+            </div>
+          </div>
 
           {move && (
             <MoveSummary
