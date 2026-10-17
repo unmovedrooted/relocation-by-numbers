@@ -3,6 +3,7 @@
 //
 // Coast and Barista FIRE are standalone plans, not variations of a standard retirement: each gets its own system prompt, its own
 // facts and its own set of sections. Standard and Lean share the withdrawal-strategy report.
+import { estimatedBirthYear, rmdStartAge } from "./rmdRules";
 
 export type ReportInputs = {
   age: number;
@@ -157,7 +158,9 @@ function withdrawalPrompt(inputs: ReportInputs): string {
   const fireNumber = annualSpend / (inputs.withdrawalRatePct / 100);
   const alreadyFI = (inputs.yearsToFI ?? 1) <= 0;
   const yearsToMedicare = Math.max(0, 65 - (inputs.fireAge ?? inputs.age));
-  const yearsToRMD = Math.max(0, 73 - (inputs.fireAge ?? inputs.age));
+  // RMDs start at 73 for birth years 1951 to 1959 and 75 for 1960 or later; the birth year is estimated from the current age.
+  const rmdAge = rmdStartAge(estimatedBirthYear(inputs.age, new Date().getFullYear()));
+  const yearsToRMD = Math.max(0, rmdAge - (inputs.fireAge ?? inputs.age));
   const label = mode === "lean" ? "Lean FIRE (a reduced spending budget)" : "Standard FIRE (spending covered entirely by the portfolio)";
   return `Generate a personalized withdrawal strategy report for this person:
 
@@ -170,7 +173,7 @@ ${assumptionsLine(inputs)}
 
 ${portfolioBlock(inputs)}
 
-**Timeline:** ${yearsToMedicare} years to Medicare and ${yearsToRMD} years to RMDs.
+**Timeline:** ${yearsToMedicare} years to Medicare and ${yearsToRMD} years to RMDs (which start at age ${rmdAge}).
 ${inputs.targetRetirementAge ? `Target retirement age: ${inputs.targetRetirementAge}.` : ""}
 
 Cover withdrawal order, Roth conversion opportunities, tax-bracket management,
