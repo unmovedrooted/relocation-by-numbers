@@ -1,5 +1,4 @@
-import { ALLOWED_FIRE_CITY_PAGES } from "@/lib/seo-allowlists";
-import { findCity } from "@/lib/cities";
+import FireCitiesReport from "@/components/FireCitiesReport";
 import type { Metadata } from "next";
 import { GUIDE_INFO } from "@/lib/calculatorSources";
 import CalculatorSources from "@/components/CalculatorSources";
@@ -37,12 +36,6 @@ const CITY_STARTERS = [
   { name: "Boston, MA", href: "/compare/boston-ma/charlotte-nc", dest: "Charlotte, NC" },
 ];
 
-// Every city that has a page, from the same list the pages and the sitemap use.
-const CITY_PAGES = ALLOWED_FIRE_CITY_PAGES.flatMap((id) => {
-  const city = findCity(id);
-  return city ? [{ href: `/best-cities-for-fire/${id}`, label: `FIRE in ${city.name}, ${city.state.toUpperCase()}` }] : [];
-});
-
 export default function Page() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -77,6 +70,8 @@ export default function Page() {
             </Link>
           </div>
         </header>
+
+        <FireCitiesReport />
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
           <h2 className="text-xl font-semibold">
@@ -159,27 +154,6 @@ export default function Page() {
                 <div className="mt-1 text-xs text-slate-400">
                   Compare take-home pay, rent &amp; taxes →
                 </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        <section className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-5">
-          <h2 className="text-xl font-semibold">
-            Can you FIRE in these cities?
-          </h2>
-          <p className="text-sm text-slate-400">
-            Explore city-specific FIRE pages covering housing costs, salary targets,
-            and financial independence timelines.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {CITY_PAGES.map((c) => (
-              <Link
-                key={c.href}
-                href={c.href}
-                className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                {c.label} →
               </Link>
             ))}
           </div>

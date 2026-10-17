@@ -60,6 +60,7 @@ export const viewport = {
 const EXPLORE_LINK = { href: "/explore", label: "Explore" };
 
 const FIRE_NAV_LINKS = [
+  { href: "/best-cities-for-fire", label: "Best Cities for FIRE" },
   { href: "/barista-fire-calculator", label: "Barista FIRE" },
   { href: "/chubby-fire-calculator", label: "Chubby FIRE" },
   { href: "/coast-fire-calculator",  label: "Coast FIRE" },

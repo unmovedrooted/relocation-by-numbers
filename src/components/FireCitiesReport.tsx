@@ -1,0 +1,116 @@
+import Link from "next/link";
+import { buildCityReport, type CityReport } from "@/lib/cityReport";
+import { ALLOWED_FIRE_CITY_PAGES } from "@/lib/seo-allowlists";
+import { MIGRATION_META } from "@/lib/migration";
+import { PAIR_EXAMPLE_SALARY } from "@/lib/pairExample";
+import { GridTable, level, num, orNA, Tile, toneStyles, usd } from "@/components/reportParts";
+
+type Row = { id: string; r: CityReport; afterRent: number | null; monthlyNet: number; stateTax: number };
+
+function rows(): Row[] {
+  return ALLOWED_FIRE_CITY_PAGES.flatMap((id) => {
+    const r = buildCityReport(id);
+    if (!r) return [];
+    const at = r.salaryRows.find((x) => x.salary === PAIR_EXAMPLE_SALARY) ?? r.salaryRows[0];
+    return [{ id, r, afterRent: at.afterRent, monthlyNet: at.monthlyNet, stateTax: at.tax.state + at.tax.local }];
+  }).sort((a, b) => (b.afterRent ?? -Infinity) - (a.afterRent ?? -Infinity));
+}
+
+/**
+ * The ranking at the top of the Best Cities for FIRE hub: the ten FIRE cities at one salary, ordered by what is left after rent,
+ * with the figures behind the order. Dark tone to match the page. Everything is computed from the same data as the city pages.
+ */
+export default function FireCitiesReport() {
+  const t = toneStyles("dark");
+  const list = rows();
+  if (list.length === 0) return null;
+  const ranked = list.filter((x) => x.afterRent !== null);
+  const top = ranked[0];
+  const lowestRent = [...list].filter((x) => x.r.cost.rent !== null).sort((a, b) => a.r.cost.rent! - b.r.cost.rent!)[0];
+  const cheapest = [...list].filter((x) => x.r.cost.priceLevel !== null).sort((a, b) => a.r.cost.priceLevel! - b.r.cost.priceLevel!)[0];
+  const noTax = list.filter((x) => x.stateTax === 0);
+  const year = MIGRATION_META.years[MIGRATION_META.years.length - 1];
+
+  const tableRows: string[][] = list.map((x, i) => [
+    `${i + 1}. ${x.r.name}, ${x.r.stateCode.toUpperCase()}`,
+    usd(x.monthlyNet),
+    orNA(x.r.cost.rent),
+    x.afterRent === null ? "n/a" : usd(x.afterRent),
+    level(x.r.cost.priceLevel),
+    x.stateTax === 0 ? "None" : usd(x.stateTax),
+    `${x.r.migration.net >= 0 ? "+" : ""}${num(x.r.migration.net)}`,
+  ]);
+
+  const faqs: Array<{ q: string; a: string }> = [
+    {
+      q: "Which of these cities leaves the most after rent?",
+      a: top ? `On ${usd(PAIR_EXAMPLE_SALARY)} a year, a single filer in ${top.r.name} has about ${usd(top.afterRent!)} a month left after 2026 taxes and the typical rent, the most of the ${list.length} cities listed. This is before food, transportation, insurance and everything else, so it is a starting point for how much you could save, not the saving itself.` : "Rent data is not available for these cities.",
+    },
+    {
+      q: "Is the cheapest city always the best for FIRE?",
+      a: "No. A lower cost of living only helps if your income holds up and the place suits you. The table shows what the numbers say for one salary; the city pages show take-home pay at five salaries so you can see how the ranking changes with your income.",
+    },
+    {
+      q: "Do no-income-tax states help with FIRE?",
+      a: `${noTax.length > 0 ? `${noTax.map((x) => x.r.name).join(", ")} ${noTax.length === 1 ? "has" : "have"} no state or city income tax on wages, which raises take-home pay. ` : ""}Housing, property tax and insurance still matter, and some of these cities have higher property tax rates, so check the renting and buying figures on each city page.`,
+    },
+  ];
+  const faqJson = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((x) => ({ "@type": "Question", name: x.q, acceptedAnswer: { "@type": "Answer", text: x.a } })),
+  };
+
+  return (
+    <>
+      <section aria-label="Best cities for FIRE at a glance" className={t.card}>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">At a glance, single filer on {usd(PAIR_EXAMPLE_SALARY)}</p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {top && <Tile tone="dark" label="Most left after rent" value={usd(top.afterRent!)} sub={`a month in ${top.r.name}`} />}
+          {lowestRent && <Tile tone="dark" label="Lowest typical rent" value={`${usd(lowestRent.r.cost.rent!)}/mo`} sub={lowestRent.r.name} />}
+          {cheapest && <Tile tone="dark" label="Lowest price level" value={level(cheapest.r.cost.priceLevel)} sub={`${cheapest.r.name} (U.S. = 100)`} />}
+          <Tile tone="dark" label="No state income tax" value={`${noTax.length} of ${list.length}`} sub={noTax.length > 0 ? noTax.map((x) => x.r.name).join(", ") : "none of these cities"} />
+        </div>
+      </section>
+
+      <section className={t.card} aria-labelledby="bc-table">
+        <h2 id="bc-table" className={t.h2}>The {list.length} FIRE cities, ranked by what is left after rent</h2>
+        <p className={`mt-2 text-sm leading-6 ${t.body}`}>
+          One single filer on {usd(PAIR_EXAMPLE_SALARY)} a year in each city, after 2026 federal, state, local and payroll tax and the typical Census rent. Open a city for the full numbers.
+        </p>
+        <GridTable
+          tone="dark"
+          columns={["City", "Take-home a month", "Typical rent", "Left after rent", "Price level", `State and city tax on ${usd(PAIR_EXAMPLE_SALARY)}`, `Net move-ins (${year})`]}
+          rows={tableRows}
+          minWidth="52rem"
+        />
+        <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {list.map((x) => (
+            <li key={x.id}>
+              <Link href={`/best-cities-for-fire/${x.id}`} className="block rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+                Is {x.r.name} good for FIRE? →
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <p className={t.note}>
+          Price level is the BEA regional price parity for the metro area (U.S. = 100). Net move-ins is IRS state-to-state migration for the whole state: households that moved in minus households that moved out ({year}), a plus sign is a net gain.
+          Planning estimates, not tax advice. The ranking depends on the salary used; your own income and spending can reorder it.
+        </p>
+      </section>
+
+      <section className={t.card} aria-labelledby="bc-faq">
+        <h2 id="bc-faq" className={t.h2}>Best cities for FIRE: common questions</h2>
+        <dl className={`mt-4 space-y-5 text-sm ${t.body}`}>
+          {faqs.map((x) => (
+            <div key={x.q}>
+              <dt className={`font-semibold ${t.strong}`}>{x.q}</dt>
+              <dd className="mt-1 leading-7">{x.a}</dd>
+            </div>
+          ))}
+        </dl>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJson) }} />
+      </section>
+    </>
+  );
+}
