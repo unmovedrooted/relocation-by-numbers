@@ -553,6 +553,22 @@ export default function CompareCitiesCalculator() {
   }, [activeResults]);
 
   const isUs = region === "us";
+
+  const summary = useMemo(() => {
+    if (activeResults.length === 0) return null;
+    const best = activeResults.find((r) => r.key === bestFlexibilityKey) ?? activeResults[0];
+    const flex = (n: number) => `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
+    let text = `On ${flex(grossN)} a year, ${best.name} leaves the most each month after housing${isUs ? "" : " and living costs"}: ${flex(best.monthlyFlexibility)}.`;
+    if (isUs && originResult) {
+      const d = best.monthlyFlexibility - originResult.monthlyFlexibility;
+      text += ` That is ${flex(Math.abs(d))} a month ${d >= 0 ? "more" : "less"} than staying in ${originResult.cityName}.`;
+    }
+    if (activeResults.length > 1) {
+      const worst = activeResults.reduce((w, r) => (r.monthlyFlexibility < w.monthlyFlexibility ? r : w), activeResults[0]);
+      if (worst.key !== best.key) text += ` ${worst.name} leaves the least, ${flex(worst.monthlyFlexibility)}, a gap of ${flex(best.monthlyFlexibility - worst.monthlyFlexibility)} a month.`;
+    }
+    return text;
+  }, [activeResults, bestFlexibilityKey, grossN, isUs, originResult]);
   const housingRowLabel = isUs
     ? (mode === "buy" ? "Est. monthly payment + extras" : "Est. rent + extras")
     : (intlHousingMode === "buy" ? "Est. monthly costs (buying)" : "Est. monthly living costs (renting)");
@@ -877,6 +893,13 @@ export default function CompareCitiesCalculator() {
                 </div>
               )}
 
+              {summary && (
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-sm leading-6 text-slate-700 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:text-slate-300">
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400">What this comparison says</div>
+                  <p className="mt-1">{summary}</p>
+                </div>
+              )}
+
               <div className="overflow-x-auto rounded-2xl bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
                 <table className="w-full text-sm">
                   <thead>
@@ -917,6 +940,19 @@ export default function CompareCitiesCalculator() {
                         </td>
                       ))}
                     </tr>
+                    {isUs && originResult && (
+                      <tr>
+                        <td className="p-3 text-slate-500 dark:text-slate-400">Flexibility vs {originResult.cityName}</td>
+                        {activeResults.map((r) => {
+                          const d = r.monthlyFlexibility - originResult.monthlyFlexibility;
+                          return (
+                            <td key={r.key} className={`p-3 text-right font-semibold ${d >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                              {d >= 0 ? "+" : "-"}{money(Math.abs(d))}/mo
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -927,6 +963,13 @@ export default function CompareCitiesCalculator() {
                   : "Housing and living costs use each destination's typical values, and tax uses a simplified estimate (working income is treated as a remote worker’s, paid from abroad), for an exact scenario with a country-specific tax breakdown, use the matching full regional calculator."}{" "}
                 Planning estimates only, not financial or tax advice.
               </div>
+
+              <a
+                href={`/fire-calculator?income=${Math.round(grossN)}`}
+                className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+              >
+                See how this income changes your FIRE timeline →
+              </a>
             </>
           )}
         </div>
