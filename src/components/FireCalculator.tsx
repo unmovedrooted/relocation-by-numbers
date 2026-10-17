@@ -269,15 +269,16 @@ const MODE_OVERRIDES: Record<FireMode, Partial<Inputs>> = {
   standard: {},
   lean:     { expensesMonthly: 2500, withdrawalRatePct: 3.5, movedExpensesMonthly: 2000 },
   coast:    { coastAge: 40, targetRetirementAge: 65 },
-  barista:  { expensesMonthly: 5000, baristaPartTimeIncome: 24000 },
+  barista:  { expensesMonthly: 5000, baristaPartTimeIncome: 24000, movedExpensesMonthly: 3500 },
 };
 
 // Chubby and Fat FIRE share the standard engine; their pages start from a spending level that matches the page text
-// (Chubby about $100,000 to $150,000 a year, Fat $200,000 or more) with an income and portfolio that make it reachable.
+// (Chubby about $100,000 to $150,000 a year, Fat $200,000 or more) with an income and portfolio that make it reachable. Spending after a
+// move starts at about 70% of the page's own spending (as on the standard page), so a move compares like with like.
 type SpendingPreset = "chubby" | "fat";
 const SPENDING_PRESETS: Record<SpendingPreset, Partial<Inputs>> = {
-  chubby: { income: 250000, expensesMonthly: 10000, currentPortfolio: 250000 },
-  fat:    { income: 500000, expensesMonthly: 20000, currentPortfolio: 750000 },
+  chubby: { income: 250000, expensesMonthly: 10000, currentPortfolio: 250000, movedExpensesMonthly: 7000 },
+  fat:    { income: 500000, expensesMonthly: 20000, currentPortfolio: 750000, movedExpensesMonthly: 14000 },
 };
 
 function presetFromPathname(p: string): SpendingPreset | undefined {
@@ -850,7 +851,8 @@ function makeDecisionRunner(
       const yearsToGoal = simulateYearsToCoast(overrideInputs, netAnnual);
       const goalAge =
         yearsToGoal !== null ? overrideInputs.age + yearsToGoal : null;
-      const fiResult = simulateYearsToFI(overrideInputs, netAnnual, mode);
+      // Full FIRE if you keep contributing (the standard projection), not the Coast path that stops contributing at the coast age.
+      const fiResult = simulateYearsToFI(overrideInputs, netAnnual, "standard");
       const fullFireAge =
         fiResult.yearsToFI !== null
           ? overrideInputs.age + fiResult.yearsToFI
@@ -1186,14 +1188,28 @@ function DecisionEngineCard({ result }: { result: DecisionEngineResult }) {
           </div>
         ) : (
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <div className="text-base font-semibold text-white">
-              Your current path is already close to optimal
-            </div>
-            <p className="mt-2 text-sm leading-6 text-slate-300">
-              None of the tested changes materially improved your timeline. That
-              usually means your plan is efficient, or the limiting factor is
-              long-term market growth rather than a simple input change.
-            </p>
+            {result.baseline.yearsToGoal === null ? (
+              <>
+                <div className="text-base font-semibold text-white">
+                  Your goal is not reached under these assumptions
+                </div>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  None of the tested changes got you there either. Try saving more each year, spending less, a later target age, or a higher
+                  income, and check how the projection responds.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-base font-semibold text-white">
+                  Your current path is already close to optimal
+                </div>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  None of the tested changes materially improved your timeline. That
+                  usually means your plan is efficient, or the limiting factor is
+                  long-term market growth rather than a simple input change.
+                </p>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -1382,6 +1398,13 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
     if (!coastNeededToday || !Number.isFinite(coastNeededToday)) return 0;
     return clamp(result.startPortfolio / coastNeededToday, 0, 1);
   }, [coastNeededToday, result.startPortfolio]);
+
+  // ── Coast-specific: full FIRE if you keep contributing (the Coast projection stops contributing at the coast age) ───
+  const fullFireForCoast = useMemo(() => {
+    if (mode !== "coast") return null;
+    return simulateYearsToFI(inputs, netPath, "standard");
+  }, [mode, inputs, netPath]);
+  const fullFiAgeForCoast = useMemo(() => fullFireForCoast?.yearsToFI == null ? null : inputs.age + fullFireForCoast.yearsToFI, [fullFireForCoast, inputs.age]);
 
   // ── Lean-specific: full FIRE comparison at 1.5× spending ─────────────────
   const fullFireForLean = useMemo(() => {
@@ -2062,8 +2085,8 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   <Stat label="Current Portfolio" value={money(result.startPortfolio, 0)}
                     helper={isCoastReady ? "✓ You've reached Coast FIRE" : coastNeededToday ? `${money(Math.max(0, coastNeededToday - result.startPortfolio), 0)} to go to coast from today` : undefined} />
                   <Stat label="Coast Status" value={isCoastReady ? "✓ Coast-ready" : yearsToCoast !== null ? `${yearsToCoast} yrs to coast` : "Not reached"}
-                    helper={isCoastReady ? `Full FIRE projected at age ${fiAge ?? "—"}` : `Coasting at age ${inputs.coastAge} → retire at ${inputs.targetRetirementAge}`} highlight={isCoastReady} />
-                  <Stat label="Full FIRE Projected Age" value={fiAge ?? "—"} helper="If you keep contributing past coast age" />
+                    helper={isCoastReady ? `Full FIRE projected at age ${fullFiAgeForCoast ?? "—"} if you keep contributing` : `Coasting at age ${inputs.coastAge} → retire at ${inputs.targetRetirementAge}`} highlight={isCoastReady} />
+                  <Stat label="Full FIRE Projected Age" value={fullFiAgeForCoast ?? "—"} helper="If you keep contributing past coast age" />
                 </div>
                 <ProgressBar pct={coastProgress} label="Progress to Coast FIRE number"
                   sublabel={<>{money(result.startPortfolio, 0)} of {coastNeededToday ? money(coastNeededToday, 0) : "—"} needed today · {isCoastReady ? <span className="text-emerald-300 font-semibold">Coast-ready!</span> : `${Math.round(coastProgress * 100)}% there`}</>} />

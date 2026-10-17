@@ -102,9 +102,9 @@ export default function PairReport({ fromId, toId, path }: { fromId: string; toI
 
   const b = r.buy;
   const buyRows: Array<[string, string, string, string]> = [
-    [`Income to rent the typical home (${BUY_ASSUMPTIONS.rentShareOfIncome * 100}% rule)`, orNA(b.incomeToRent[0]), orNA(b.incomeToRent[1]), diff(b.incomeToRent[0], b.incomeToRent[1])],
-    [`Monthly cost to own the typical home (${BUY_ASSUMPTIONS.downPct * 100}% down)`, orNA(b.monthlyOwnCost[0]), orNA(b.monthlyOwnCost[1]), diff(b.monthlyOwnCost[0], b.monthlyOwnCost[1])],
-    [`Income to buy the typical home (${BUY_ASSUMPTIONS.buyShareOfIncome * 100}% rule)`, orNA(b.incomeToBuy[0]), orNA(b.incomeToBuy[1]), diff(b.incomeToBuy[0], b.incomeToBuy[1])],
+    [`Income to rent the typical home (${Math.round(BUY_ASSUMPTIONS.rentShareOfIncome * 100)}% rule)`, orNA(b.incomeToRent[0]), orNA(b.incomeToRent[1]), diff(b.incomeToRent[0], b.incomeToRent[1])],
+    [`Monthly cost to own the typical home (${Math.round(BUY_ASSUMPTIONS.downPct * 100)}% down)`, orNA(b.monthlyOwnCost[0]), orNA(b.monthlyOwnCost[1]), diff(b.monthlyOwnCost[0], b.monthlyOwnCost[1])],
+    [`Income to buy the typical home (${Math.round(BUY_ASSUMPTIONS.buyShareOfIncome * 100)}% rule)`, orNA(b.incomeToBuy[0]), orNA(b.incomeToBuy[1]), diff(b.incomeToBuy[0], b.incomeToBuy[1])],
   ];
 
   const bd = r.budget;
@@ -147,7 +147,7 @@ export default function PairReport({ fromId, toId, path }: { fromId: string; toI
       q: `How much income do I need to rent or buy in ${r.toName}?`,
       a: b.incomeToRent[1] === null || b.incomeToBuy[1] === null
         ? `Housing data is not available for ${r.toName}.`
-        : `To keep rent at ${BUY_ASSUMPTIONS.rentShareOfIncome * 100}% of income, about ${usd(b.incomeToRent[1])} a year covers the typical rent of ${usd(c.rent[1] ?? 0)}. Owning the typical home with ${BUY_ASSUMPTIONS.downPct * 100}% down costs about ${usd(b.monthlyOwnCost[1] ?? 0)} a month, which takes about ${usd(b.incomeToBuy[1])} a year at ${BUY_ASSUMPTIONS.buyShareOfIncome * 100}% of income.`,
+        : `To keep rent at ${Math.round(BUY_ASSUMPTIONS.rentShareOfIncome * 100)}% of income, about ${usd(b.incomeToRent[1])} a year covers the typical rent of ${usd(c.rent[1] ?? 0)}. Owning the typical home with ${Math.round(BUY_ASSUMPTIONS.downPct * 100)}% down costs about ${usd(b.monthlyOwnCost[1] ?? 0)} a month, which takes about ${usd(b.incomeToBuy[1])} a year at ${Math.round(BUY_ASSUMPTIONS.buyShareOfIncome * 100)}% of income.`,
     },
   ];
 
@@ -273,7 +273,7 @@ export default function PairReport({ fromId, toId, path }: { fromId: string; toI
         <h2 id="pr-buy" className={h2}>Renting and buying: {r.fromName} vs {r.toName}</h2>
         <CompareTable report={r} rows={buyRows} />
         <p className={note}>
-          Owning cost is the mortgage payment on the typical home with {BUY_ASSUMPTIONS.downPct * 100}% down, a {BUY_ASSUMPTIONS.years}-year loan at {BUY_ASSUMPTIONS.ratePct}% (the calculator&apos;s starting rate, not a quote),
+          Owning cost is the mortgage payment on the typical home with {Math.round(BUY_ASSUMPTIONS.downPct * 100)}% down, a {BUY_ASSUMPTIONS.years}-year loan at {BUY_ASSUMPTIONS.ratePct}% (the calculator&apos;s starting rate, not a quote),
           plus the city&apos;s typical property tax rate and ${BUY_ASSUMPTIONS.homeInsuranceMonthly} a month for insurance. HOA fees and maintenance are not included. The calculator below lets you change the rate, down payment and prices.
         </p>
       </section>

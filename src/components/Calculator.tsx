@@ -289,6 +289,14 @@ function EstimatedLivingCosts({
 }
 
 // ─── Main component ──────────────────────────────────────────────────────────
+/** The city a calculator starts on for a state: the one given, the usual default when the state is the default state, or the state's first listed city. */
+function startCityFor(state: StateCode | undefined, defaultState: StateCode, defaultCity: string, given?: string): string {
+  if (given) return given;
+  if (!state || state === defaultState) return defaultCity;
+  const cities = citiesForState(state);
+  return (cities.find((c) => !String(c.id).startsWith("other-")) ?? cities[0])?.id ?? "";
+}
+
 export default function Calculator({
   initialFromState,
   initialToState,
@@ -307,8 +315,9 @@ export default function Calculator({
   const [fromState, setFromState] = useState<StateCode>(initialFromState ?? "ny");
   const [toState, setToState] = useState<StateCode>(initialToState ?? "nc");
 
-  const [fromCityId, setFromCityId] = useState<string>(initialFromCityId ?? "nyc-ny");
-  const [toCityId, setToCityId] = useState<string>(initialToCityId ?? "raleigh-nc");
+  // Start in a city of the chosen state (a state page such as /move-to/tx must not start on a North Carolina city).
+  const [fromCityId, setFromCityId] = useState<string>(startCityFor(initialFromState, "ny", "nyc-ny", initialFromCityId));
+  const [toCityId, setToCityId] = useState<string>(startCityFor(initialToState, "nc", "raleigh-nc", initialToCityId));
 
   const [fromCityOther, setFromCityOther] = useState("");
   const [toCityOther, setToCityOther] = useState("");

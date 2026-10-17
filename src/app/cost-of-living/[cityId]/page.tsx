@@ -336,6 +336,8 @@ export default async function CostOfLivingPage({ params }: PageProps) {
             monetization="state"
             initialToState={city.state}
             initialToCityId={city.id}
+            // The calculator starts from New York City, so the New York page starts from Los Angeles instead of comparing the city with itself.
+            {...(city.id === "nyc-ny" ? { initialFromState: "ca" as const, initialFromCityId: "la-ca" } : {})}
           />
         </section>
 

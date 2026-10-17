@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { usWageEffectiveRate } from "@/lib/usCityTax";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import FireAbroadLink from "./FireAbroadLink";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
@@ -524,7 +525,9 @@ export default function AsiaRelocationCalculator() {
       answers: conditionalAnswers,
     });
 
-    const currentTaxRate = currentTaxEstimate.effectiveRate;
+    // Wages earned in a listed U.S. city use the main calculator's engine (federal, state, local and payroll tax), not federal only.
+    const usCurrentRate = fromCountry === "US" && mode !== "retired" ? usWageEffectiveRate(fromCityCode, annualIncomeForFromTax, filing) : null;
+    const currentTaxRate = usCurrentRate ?? currentTaxEstimate.effectiveRate;
     const targetTaxRate  = targetTaxEstimate.effectiveRate;
 
     const targetConfidence: TaxConfidence = targetTaxEstimate.confidence;
@@ -626,7 +629,7 @@ export default function AsiaRelocationCalculator() {
       upfrontCashNeeded, monthsCovered, comparableSalary, relativeDifference,
       housingMode, estimatedHomePrice, buyMonthlyPI, downPaymentUsd,
     };
-  }, [
+  }, [fromCityCode,
     mode, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
     incomeScenario, conditionalAnswers,
     fromCityMultipliers, toCityMultipliers, currentCityDefaults, targetCityDefaults,

@@ -97,9 +97,9 @@ export default function OriginReport({ originId, destIds }: { originId: string; 
   ];
 
   const buyRows: string[][] = [
-    costLine(`Income to rent the typical home (${BUY_ASSUMPTIONS.rentShareOfIncome * 100}% rule)`, (r) => r.buy.incomeToRent, (n) => orNA(n)),
-    costLine(`Monthly cost to own the typical home (${BUY_ASSUMPTIONS.downPct * 100}% down)`, (r) => r.buy.monthlyOwnCost, (n) => orNA(n)),
-    costLine(`Income to buy the typical home (${BUY_ASSUMPTIONS.buyShareOfIncome * 100}% rule)`, (r) => r.buy.incomeToBuy, (n) => orNA(n)),
+    costLine(`Income to rent the typical home (${Math.round(BUY_ASSUMPTIONS.rentShareOfIncome * 100)}% rule)`, (r) => r.buy.incomeToRent, (n) => orNA(n)),
+    costLine(`Monthly cost to own the typical home (${Math.round(BUY_ASSUMPTIONS.downPct * 100)}% down)`, (r) => r.buy.monthlyOwnCost, (n) => orNA(n)),
+    costLine(`Income to buy the typical home (${Math.round(BUY_ASSUMPTIONS.buyShareOfIncome * 100)}% rule)`, (r) => r.buy.incomeToBuy, (n) => orNA(n)),
   ];
 
   const budgetRows: string[][] = [
@@ -180,7 +180,7 @@ export default function OriginReport({ originId, destIds }: { originId: string; 
         <h2 id="or-buy" className={h2}>Renting and buying compared</h2>
         <GridTable columns={costCols} rows={buyRows} minWidth="38rem" />
         <p className={note}>
-          Owning cost is the mortgage payment on the typical home with {BUY_ASSUMPTIONS.downPct * 100}% down, a {BUY_ASSUMPTIONS.years}-year loan at {BUY_ASSUMPTIONS.ratePct}% (the calculator&apos;s starting rate, not a quote),
+          Owning cost is the mortgage payment on the typical home with {Math.round(BUY_ASSUMPTIONS.downPct * 100)}% down, a {BUY_ASSUMPTIONS.years}-year loan at {BUY_ASSUMPTIONS.ratePct}% (the calculator&apos;s starting rate, not a quote),
           the city&apos;s typical property tax rate and ${BUY_ASSUMPTIONS.homeInsuranceMonthly} a month for insurance. HOA fees and maintenance are not included.
         </p>
       </section>

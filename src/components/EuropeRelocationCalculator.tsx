@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useSyncExternalStore, useCallback } from "react";
+import { usWageEffectiveRate } from "@/lib/usCityTax";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import FireAbroadLink from "./FireAbroadLink";
 import { grossForNet } from "@/lib/grossForNet";
@@ -726,7 +727,9 @@ const [carCostMonthly, setCarCostMonthly] = useState<string>(initial.carCostMont
       answers: conditionalAnswers,
     });
 
-    const currentTaxRate = currentTaxEstimate.effectiveRate;
+    // Wages earned in a listed U.S. city use the main calculator's engine (federal, state, local and payroll tax), not federal only.
+    const usCurrentRate = fromCountry === "US" && mode !== "retired" ? usWageEffectiveRate(fromCityCode, annualIncomeForFromTax, filing) : null;
+    const currentTaxRate = usCurrentRate ?? currentTaxEstimate.effectiveRate;
     const targetTaxRate  = targetTaxEstimate.effectiveRate;
 
     // Pull confidence, note, missingFactor, and label directly from the tax engine.
@@ -1006,7 +1009,7 @@ marginChangePct,
 flexibilityRatio,
 readinessRecommendation,
     };
-  }, [
+  }, [fromCityCode,
     mode, salary, retirementIncome, filing, fromCountry, toCountry,
     incomeScenario, conditionalAnswers,
     fromCityMultipliers, toCityMultipliers, currentCityDefaults, targetCityDefaults,

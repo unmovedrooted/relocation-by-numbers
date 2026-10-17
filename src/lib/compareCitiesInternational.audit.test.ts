@@ -50,7 +50,8 @@ describe("Caribbean Compare Cities takes the same take-home pay as the full Cari
     it(`${countryCode} ${mode}, $100,000`, async () => {
       const calc = await loadCalculator("Caribbean");
       const regional = calc({ toCountry: countryCode, mode, incomeScenario: mode === "retired" ? "retired" : "remote", salaryType: "remote",
-        salary: "100000", retirementIncome: "100000" });
+        salary: "100000", retirementIncome: "100000", conditionalAnswers: { us_tax_status: "no" } });
+      // The regional calculator starts the U.S. tax question on Yes for someone leaving the U.S.; Compare has no U.S. taxpayer here, so the question is answered No.
       const compare = computeCaribCityResult({ countryCode, grossAnnualUsd: 100000, filing: "single", mode });
       // The full calculator uses the exact tax; Compare used a rate rounded to a whole percent.
       expect(compare.netMonthly).toBeCloseTo(regional.netMonthlyTo, 6);
@@ -126,5 +127,15 @@ describe("Caribbean Compare Cities cost arithmetic", () => {
     const r = computeCaribCityResult({ countryCode: "JM", grossAnnualUsd: 100000, filing: "single", mode: "working", housingMode: "buy", buy: { downPct: 100, ratePct: 7, termYears: 30 } });
     const rent = country.defaultRentSingle;
     expect(r.housingMonthly).toBeCloseTo(Math.round(rent * 12 * 16 * 0.015 / 12) + rent * 0.33 + country.healthcareMonthlySingle, 6);
+  });
+});
+
+describe("the Caribbean calculator assumes a U.S. taxpayer when leaving the U.S.", () => {
+  it("retired income abroad owes more with the U.S. tax question on its default (Yes) than answered No", async () => {
+    const calc = await loadCalculator("Caribbean");
+    const base = { toCountry: "KY", mode: "retired", incomeScenario: "retired", retirementIncome: "100000" };
+    const byDefault = calc({ ...base, conditionalAnswers: {} }).netMonthlyTo as number;
+    const answeredNo = calc({ ...base, conditionalAnswers: { us_tax_status: "no" } }).netMonthlyTo as number;
+    expect(byDefault).toBeLessThan(answeredNo);
   });
 });

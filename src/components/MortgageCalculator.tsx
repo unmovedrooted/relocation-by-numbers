@@ -1072,7 +1072,8 @@ function USTab() {
   const fiveYearBalance  = amortRows[59]?.balance ?? loan;
   const fiveYearHomeVal  = hp * Math.pow(1 + nz(appreciation) / 100, 5);
   const fiveYearEquity   = fiveYearHomeVal - fiveYearBalance;
-  const fiveYearNetOwn   = fiveYearOwnCost - fiveYearEquity;
+  // Equity includes the down payment, so the down payment and closing costs paid at the start are counted as cost too.
+  const fiveYearNetOwn   = fiveYearOwnCost + dp + estimatedClosing - fiveYearEquity;
 
   const stressCfg        = STRESS_CONFIG[stressLevel];
   const stressedRate     = r + stressCfg.rateDelta;
@@ -1131,9 +1132,9 @@ function USTab() {
   const scenarioData = useMemo(() => {
     const transforms = [
       { hp: hp,        dpPc: dpPc,                               r },
-      { hp: hp,        dpPc: Math.min(40, dpPc + 10),            r },
+      { hp: hp,        dpPc: Math.min(50, dpPc + 10),            r },
       { hp: hp * 0.8,  dpPc: dpPc,                               r },
-      { hp: hp,        dpPc: Math.min(40, Math.max(dpPc + 10, 30)), r },
+      { hp: hp,        dpPc: Math.min(50, dpPc + 20),            r },
     ];
 
     return transforms.map((t, i) => {
@@ -1464,7 +1465,7 @@ function USTab() {
               ? `Over 5 years, buying is ~${money(fiveYearRentCost - fiveYearNetOwn)} cheaper than renting (net of equity).`
               : `Over 5 years, renting is ~${money(fiveYearNetOwn - fiveYearRentCost)} cheaper than buying (net of equity).`}
           </div>
-          <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">Break-even is sensitive to appreciation and rent growth assumptions.</div>
+          <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">Net cost counts the down payment and closing costs you pay up front. It leaves out selling costs and what the down payment could earn if invested instead. Break-even is sensitive to appreciation and rent growth assumptions.</div>
         </Card>
 
         <Card>
@@ -1474,6 +1475,7 @@ function USTab() {
               { label: `Down payment (${dpPc}%)`,                     value: dp },
               { label: `Est. closing costs (${nz(closingCostPct)}%)`, value: estimatedClosing },
               { label: "3-month planning buffer",                      value: recommendedReserve },
+              ...(nz(movingBudget) > 0 ? [{ label: "Moving / furnishing", value: nz(movingBudget) }] : []),
             ].map(row => (
               <div key={row.label} className="flex justify-between">
                 <span className="text-slate-600 dark:text-slate-400">{row.label}</span>
@@ -1512,7 +1514,7 @@ function USTab() {
           </div>
           <div className="mt-3 grid gap-1.5 text-xs text-slate-600 dark:text-slate-400">
             <div className="flex justify-between"><span>Total savings</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(nz(currentSavings))}</span></div>
-            <div className="flex justify-between text-slate-500 dark:text-slate-400"><span>Cash to close</span><span>− {money(totalCashNeeded)}</span></div>
+            <div className="flex justify-between text-slate-500 dark:text-slate-400"><span>Down payment and closing costs</span><span>− {money(lenderCashToClose)}</span></div>
             <div className="flex justify-between text-slate-500 dark:text-slate-400"><span>Moving / furnishing</span><span>− {money(nz(movingBudget))}</span></div>
             <div className="mt-1 flex justify-between border-t border-slate-200/60 dark:border-slate-800/60 pt-1.5 font-semibold text-slate-900 dark:text-slate-100">
               <span>Cash remaining</span>

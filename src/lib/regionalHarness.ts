@@ -28,17 +28,18 @@ export async function loadCalculator(region: string) {
   visit(ast);
   if (!callback) throw new Error(`No results callback in ${region}`);
   // The component's own `nz` helper (defined inside the component body) is extracted too, so its real behaviour is tested.
+  // Component-body helpers the callback relies on are extracted too (useMemo runs its function once in the test context).
   let nzSource = "";
   const findNz = (n: ts.Node) => {
-    if (ts.isVariableStatement(n) && n.declarationList.declarations.some(d => d.name.getText(ast) === "nz")) nzSource = n.getText(ast);
+    if (ts.isVariableStatement(n) && n.declarationList.declarations.some(d => ["nz", "answersEffective"].includes(d.name.getText(ast)))) nzSource += (nzSource ? "\n" : "") + n.getText(ast);
     ts.forEachChild(n, findNz);
   };
   findNz(ast);
   const code = ts.transpileModule(declarations.map(n => n.getText(ast)).join("\n") + (nzSource ? `\n${nzSource}` : "") + `\n(${callback})()`,
     { compilerOptions: { target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.React } }).outputText;
-  return (overrides: Record<string, unknown> = {}) => runInNewContext(code, { process: { env: {} }, URLSearchParams, ...bindings,
+  return (overrides: Record<string, unknown> = {}) => runInNewContext(code, { process: { env: {} }, URLSearchParams, useMemo: (f: () => unknown) => f(), ...bindings,
     mode: "working", salary: "100000", retirementIncome: "50000", salaryType: "remote", filing: "single", incomeScenario: "remote",
-    fromCountry: "US", toCountry: "PT", conditionalAnswers: {}, usTaxStatus: "no", usSelfEmployed: "no",
+    fromCountry: "US", fromCityCode: "", toCountry: "PT", conditionalAnswers: {}, usTaxStatus: "no", usSelfEmployed: "no",
     adults: "1", children: "0", destinationRent: "1000", groceries: "300", utilities: "100", transportation: "50", healthcare: "150",
     needCar: "no", carCostMonthly: "350", carCost: "350", utilitiesIncluded: "no", furnished: "unfurnished",
     depositRequired: "2000", firstMonthRent: "1000", lastMonthRent: "0", visaCost: "100", flightCost: "200", shippingCost: "300",

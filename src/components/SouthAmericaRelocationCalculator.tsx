@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useSyncExternalStore, useCallback } from "react";
+import { usWageEffectiveRate } from "@/lib/usCityTax";
 import CalculatorImmediateNumberField from "./calculator-form/CalculatorImmediateNumberField";
 import CalculatorSelect from "./calculator-form/CalculatorSelect";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -478,7 +479,9 @@ const grossMonthly = annualIncome / 12;
     const incomeScenario = mode === "retired" ? "retired" : salaryType === "remote" ? "remote" : "local";
     const targetTaxEstimate = estimateInternationalTax({ countryCode: toCountry, annualIncome: annualIncomeForToTax, filing, isRetired: mode === "retired", incomeScenario, answers: { [US_TAX_STATUS_KEY]: usTaxStatus, [US_SELF_EMPLOYED_KEY]: usSelfEmployed } });
 
-    const currentTaxRate = currentTaxEstimate.effectiveRate;
+    // Wages earned in a listed U.S. city use the main calculator's engine (federal, state, local and payroll tax), not federal only.
+    const usCurrentRate = fromCountry === "US" && mode !== "retired" ? usWageEffectiveRate(fromCityCode, annualIncomeForFromTax, filing) : null;
+    const currentTaxRate = usCurrentRate ?? currentTaxEstimate.effectiveRate;
     const targetTaxRate = targetTaxEstimate.effectiveRate;
     const netMonthlyFrom = grossMonthly * (1 - currentTaxRate);
     const netMonthlyTo = grossMonthly * (1 - targetTaxRate);
@@ -601,7 +604,7 @@ comparableSalary,
 relativeDifference,
 recommendation,
     };
-  }, [
+  }, [fromCityCode,
     mode, usTaxStatus, usSelfEmployed, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
     fromCityMultipliers, toCityMultipliers, currentCityDefaults, targetCityDefaults,
     adults, children, needCar, carCostMonthly, furnished, utilitiesIncluded, utilities, destinationRent,

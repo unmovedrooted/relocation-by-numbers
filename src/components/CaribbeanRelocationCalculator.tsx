@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { usWageEffectiveRate } from "@/lib/usCityTax";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import FireAbroadLink from "./FireAbroadLink";
 import { downloadPdfReport, type PdfRow } from "@/lib/pdfExport";
@@ -303,6 +304,11 @@ export default function CaribbeanRelocationCalculator() {
   const [children,        setChildren]        = useState<string>("0");
 
   const [conditionalAnswers, setConditionalAnswers] = useState<Record<string, string>>({});
+  // Someone leaving the U.S. is most likely still a U.S. taxpayer abroad, so that question starts on Yes (they can change it).
+  const answersEffective = useMemo<Record<string, string>>(
+    () => (fromCountry === "US" && !conditionalAnswers[US_TAX_STATUS_KEY] ? { ...conditionalAnswers, [US_TAX_STATUS_KEY]: "yes" } : conditionalAnswers),
+    [fromCountry, conditionalAnswers],
+  );
 
   const [destinationRent,   setDestinationRent]   = useState<string>("1300");
   const [depositRequired,   setDepositRequired]   = useState<string>("1300");
@@ -367,7 +373,7 @@ export default function CaribbeanRelocationCalculator() {
   }, [currencyDisplay, fromCountry, toCountry]);
 
   const fromCityLabel = getInternationalCityByCode(fromCityCode)?.name ?? "Current city";
-  const toCityLabel   = getInternationalCityByCode(toCityCode)?.name  ?? "Target city";
+  const toCityLabel   = getInternationalCityByCode(toCityCode)?.name ?? getCaribbeanCountryByCode(toCountry)?.name ?? "Target city";
 
   const selectedCityDefaults = useMemo(() => getCityDefaultsByCode(toCityCode), [toCityCode]);
   const currentCityDefaults  = useMemo(() => getCityDefaultsByCode(fromCityCode), [fromCityCode]);
@@ -574,7 +580,9 @@ export default function CaribbeanRelocationCalculator() {
       filing,
       isRetired: mode === "retired",
     });
-    const currentTaxRate = currentTaxEstimate.effectiveRate;
+    // Wages earned in a listed U.S. city use the main calculator's engine (federal, state, local and payroll tax), not federal only.
+    const usCurrentRate = fromCountry === "US" && mode !== "retired" ? usWageEffectiveRate(fromCityCode, annualIncomeForFromTax, filing) : null;
+    const currentTaxRate = usCurrentRate ?? currentTaxEstimate.effectiveRate;
 
     // Tax: destination
     let targetTaxEstimate: ReturnType<typeof estimateScenarioTax> | null = null;
@@ -586,7 +594,7 @@ export default function CaribbeanRelocationCalculator() {
           scenario: incomeScenario,
           grossIncomeLocalCurrency: convertUsdToLocal(annualIncome, toCountry),
           filingStatus: filing === "married" ? "married_joint" : "single",
-          answers: conditionalAnswers,
+          answers: answersEffective,
         });
       }
     }
@@ -600,14 +608,14 @@ export default function CaribbeanRelocationCalculator() {
 
     // U.S. citizens and green-card holders still owe U.S. tax on worldwide income.
     const usAbroad =
-      conditionalAnswers[US_TAX_STATUS_KEY] === "yes" && !NO_US_OVERLAY.has(toCountry) && !targetIsDisclaimer
+      answersEffective[US_TAX_STATUS_KEY] === "yes" && !NO_US_OVERLAY.has(toCountry) && !targetIsDisclaimer
         ? usTaxAbroadAddition({
             countryCode: toCountry,
             annualIncome: convertUsdToLocal(annualIncome, toCountry),
             filing,
             incomeScenario,
             foreignTaxUsd: targetForeignTaxUsd,
-            selfEmployed: conditionalAnswers[US_SELF_EMPLOYED_KEY] === "yes",
+            selfEmployed: answersEffective[US_SELF_EMPLOYED_KEY] === "yes",
           })
         : null;
     const targetAnnualTaxUsd = targetForeignTaxUsd + (usAbroad?.addedUsd ?? 0);
@@ -894,9 +902,9 @@ const relativeDifference =
   comparableSalary,
   relativeDifference,
 };
-  }, [
+  }, [fromCityCode,
     mode, salary, retirementIncome, filing, incomeScenario,
-    fromCountry, toCountry, conditionalAnswers,
+    fromCountry, toCountry, answersEffective,
     toCityMultipliers, fromCityMultipliers, currentCityDefaults, targetCityDefaults, selectedCityDefaults?.monthlyDefaults,
     adults, children, needCar, furnished, utilitiesIncluded,
     utilities, destinationRent, groceries, transportation, carCost, healthcare,
@@ -970,7 +978,7 @@ const relativeDifference =
   const pdfRows = useMemo<PdfRow[]>(() => {
     const rows: PdfRow[] = [
       { Metric: "From", Value: `${fromCityLabel}, ${getCountryByCode(fromCountry)?.name ?? fromCountry}` },
-      { Metric: "To", Value: `${toCityLabel}, ${getCaribbeanCountryByCode(toCountry)?.name ?? toCountry}` },
+      { Metric: "To", Value: toCityLabel === (getCaribbeanCountryByCode(toCountry)?.name ?? toCountry) ? toCityLabel : `${toCityLabel}, ${getCaribbeanCountryByCode(toCountry)?.name ?? toCountry}` },
       { Metric: "Mode", Value: mode === "retired" ? "Retired" : "Working" },
       { Metric: mode === "retired" ? "Gross annual retirement income" : "Gross annual salary", Value: displayAmount(results.annualIncome) },
       { Metric: "Net monthly income (current)", Value: displayAmount(results.netMonthlyFrom) },
@@ -1342,7 +1350,7 @@ const relativeDifference =
           <UsTaxQuestion
             countryCode={toCountry}
             countryName={getCaribbeanCountryByCode(toCountry)?.name ?? toCountry}
-            value={conditionalAnswers[US_TAX_STATUS_KEY] ?? ""}
+            value={answersEffective[US_TAX_STATUS_KEY] ?? ""}
             onChange={(v) => setConditionalAnswers((prev) => ({ ...prev, [US_TAX_STATUS_KEY]: v }))}
             selfEmployed={conditionalAnswers[US_SELF_EMPLOYED_KEY] ?? ""}
             onSelfEmployedChange={(v) => setConditionalAnswers((prev) => ({ ...prev, [US_SELF_EMPLOYED_KEY]: v }))}

@@ -67,9 +67,9 @@ export default function CityReport({ cityId, tone = "themed", focus, path }: { c
   ];
 
   const buyRows: string[][] = [
-    [`Income to rent the typical home (${BUY_ASSUMPTIONS.rentShareOfIncome * 100}% rule)`, orNA(r.housing.incomeToRent)],
-    [`Monthly cost to own the typical home (${BUY_ASSUMPTIONS.downPct * 100}% down)`, orNA(r.housing.monthlyOwnCost)],
-    [`Income to buy the typical home (${BUY_ASSUMPTIONS.buyShareOfIncome * 100}% rule)`, orNA(r.housing.incomeToBuy)],
+    [`Income to rent the typical home (${Math.round(BUY_ASSUMPTIONS.rentShareOfIncome * 100)}% rule)`, orNA(r.housing.incomeToRent)],
+    [`Monthly cost to own the typical home (${Math.round(BUY_ASSUMPTIONS.downPct * 100)}% down)`, orNA(r.housing.monthlyOwnCost)],
+    [`Income to buy the typical home (${Math.round(BUY_ASSUMPTIONS.buyShareOfIncome * 100)}% rule)`, orNA(r.housing.incomeToBuy)],
   ];
 
   const m = r.migration;
@@ -88,7 +88,7 @@ export default function CityReport({ cityId, tone = "themed", focus, path }: { c
       q: `How much income do I need to rent or buy in ${r.name}?`,
       a: r.housing.incomeToRent === null || r.housing.incomeToBuy === null
         ? `Housing data is not available for ${r.name}.`
-        : `To keep rent at ${BUY_ASSUMPTIONS.rentShareOfIncome * 100}% of income, about ${usd(r.housing.incomeToRent)} a year covers the typical rent of ${usd(c.rent ?? 0)}. Owning the typical home with ${BUY_ASSUMPTIONS.downPct * 100}% down costs about ${usd(r.housing.monthlyOwnCost ?? 0)} a month, which takes about ${usd(r.housing.incomeToBuy)} a year at ${BUY_ASSUMPTIONS.buyShareOfIncome * 100}% of income.`,
+        : `To keep rent at ${Math.round(BUY_ASSUMPTIONS.rentShareOfIncome * 100)}% of income, about ${usd(r.housing.incomeToRent)} a year covers the typical rent of ${usd(c.rent ?? 0)}. Owning the typical home with ${Math.round(BUY_ASSUMPTIONS.downPct * 100)}% down costs about ${usd(r.housing.monthlyOwnCost ?? 0)} a month, which takes about ${usd(r.housing.incomeToBuy)} a year at ${Math.round(BUY_ASSUMPTIONS.buyShareOfIncome * 100)}% of income.`,
     },
     {
       q: `Are people moving to ${state}?`,
@@ -115,7 +115,7 @@ export default function CityReport({ cityId, tone = "themed", focus, path }: { c
           <Tile tone={tone} label="Take-home pay" value={usd(tax.net)} sub={`a year, after ${pctOf(tax.totalTax, r.salary)} total tax`} />
           <Tile tone={tone} label="Typical rent" value={c.rent === null ? "n/a" : `${usd(c.rent)}/mo`} sub={rentVsUs === null ? "Census Bureau, recent movers" : `${Math.abs(rentVsUs).toFixed(0)}% ${word(rentVsUs)} than the U.S. median`} />
           <Tile tone={tone} label="Price level (U.S. = 100)" value={level(c.priceLevel)} sub={`${r.name} metro area (BEA)`} />
-          <Tile tone={tone} label="Income to rent comfortably" value={orNA(r.housing.incomeToRent)} sub={`keeps rent at ${BUY_ASSUMPTIONS.rentShareOfIncome * 100}% of income`} />
+          <Tile tone={tone} label="Income to rent comfortably" value={orNA(r.housing.incomeToRent)} sub={`keeps rent at ${Math.round(BUY_ASSUMPTIONS.rentShareOfIncome * 100)}% of income`} />
         </div>
       </section>
 
@@ -144,7 +144,7 @@ export default function CityReport({ cityId, tone = "themed", focus, path }: { c
         <h2 id="cr-buy" className={t.h2}>Renting and buying in {r.name}</h2>
         <GridTable tone={tone} columns={["Measure", r.name]} rows={buyRows} minWidth="22rem" />
         <p className={t.note}>
-          Owning cost is the mortgage payment on the typical home with {BUY_ASSUMPTIONS.downPct * 100}% down, a {BUY_ASSUMPTIONS.years}-year loan at {BUY_ASSUMPTIONS.ratePct}% (the calculator&apos;s starting rate, not a quote), the city&apos;s typical property tax rate
+          Owning cost is the mortgage payment on the typical home with {Math.round(BUY_ASSUMPTIONS.downPct * 100)}% down, a {BUY_ASSUMPTIONS.years}-year loan at {BUY_ASSUMPTIONS.ratePct}% (the calculator&apos;s starting rate, not a quote), the city&apos;s typical property tax rate
           and ${BUY_ASSUMPTIONS.homeInsuranceMonthly} a month for insurance. HOA fees and maintenance are not included.
         </p>
       </section>
