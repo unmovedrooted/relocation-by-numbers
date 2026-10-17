@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { findCity } from "@/lib/cities";
 import { ALLOWED_COMPARE_ROUTES, COMPARE_ORIGIN_HUBS, COMPARE_HUB_DESTINATIONS } from "@/lib/seo-allowlists";
 import { buildPairExample, PAIR_EXAMPLE_SALARY } from "@/lib/pairExample";
+import OriginReport, { OriginReportSummary } from "@/components/OriginReport";
+import FeedbackBox from "@/components/FeedbackBox";
 
 export const dynamicParams = false;
 
@@ -72,6 +74,8 @@ export default async function CompareOriginHub({ params }: PageProps) {
           </p>
         </header>
 
+        <OriginReportSummary originId={from} destIds={destinations} />
+
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Same salary, {rows.length} destinations</h2>
           <div className="mt-4 overflow-x-auto">
@@ -110,6 +114,8 @@ export default async function CompareOriginHub({ params }: PageProps) {
           </p>
         </section>
 
+        <OriginReport originId={from} destIds={destinations} />
+
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">What the numbers do not show</h2>
           <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-slate-600 dark:text-slate-400">
@@ -123,6 +129,8 @@ export default async function CompareOriginHub({ params }: PageProps) {
             <Link href="/compare-cities" className="rounded-xl border border-slate-200 px-4 py-2 text-slate-900 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-100 dark:hover:bg-slate-800">Compare up to three cities</Link>
           </div>
         </section>
+
+        <FeedbackBox path={`/compare/${from}`} name={`Moving from ${origin.name}`} />
       </div>
     </main>
   );

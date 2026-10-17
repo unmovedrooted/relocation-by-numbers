@@ -5,29 +5,7 @@ import { BUY_ASSUMPTIONS, buildPairReport, ELECTRICITY_META, type PairReport as 
 import { MIGRATION_META, migrationPair, topDestinations } from "@/lib/migration";
 import { findCity } from "@/lib/cities";
 import { STATE_NAMES } from "@/lib/stateNames";
-
-const usd = (n: number) => `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
-const signed = (n: number) => `${n >= 0 ? "+" : "-"}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
-const orNA = (n: number | null, f: (v: number) => string = usd) => (n === null ? "n/a" : f(n));
-const level = (n: number | null) => (n === null ? "n/a" : n.toFixed(1));
-const diff = (a: number | null, b: number | null, f: (v: number) => string = signed) => (a === null || b === null ? "n/a" : f(b - a));
-const pctOf = (part: number, whole: number) => (whole > 0 ? `${((part / whole) * 100).toFixed(1)}%` : "0.0%");
-
-const card = "rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]";
-const h2 = "text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100";
-const th = "pb-2 pr-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400";
-const note = "mt-3 text-xs leading-6 text-slate-500 dark:text-slate-400";
-const strong = "text-slate-900 dark:text-slate-100";
-
-function Tile({ label, value, sub }: { label: string; value: string; sub: string }) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
-      <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div>
-      <div className="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{value}</div>
-      <div className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{sub}</div>
-    </div>
-  );
-}
+import { card, diff, h2, level, note, num, orNA, pctOf, signed, strong, th, Tile, usd } from "@/components/reportParts";
 
 function CompareTable({ report, rows }: { report: Report; rows: Array<[string, string, string, string]> }) {
   return (
@@ -147,7 +125,6 @@ export default function PairReport({ fromId, toId, path }: { fromId: string; toI
   const toStateName = toCityRec ? STATE_NAMES[toCityRec.state] ?? toCityRec.state.toUpperCase() : r.toState;
   const whereElse = fromCityRec ? topDestinations(fromCityRec.state, 8) : [];
   const latestYear = MIGRATION_META.years[MIGRATION_META.years.length - 1];
-  const num = (n: number) => n.toLocaleString("en-US");
 
   const faqs: Array<{ q: string; a: string }> = [
     {
