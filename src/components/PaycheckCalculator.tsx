@@ -233,7 +233,7 @@ export default function PaycheckCalculator() {
               <label className="text-sm">
                 <div className={labelHeadCls}>
                   401(k) contribution (%)
-                  <InfoTip text="Pre-tax 401(k) reduces federal and (in most states) state income tax, but not Social Security or Medicare. CA and PA still tax it at the state level." />
+                  <InfoTip text="Pre-tax 401(k) reduces federal and (in most states) state income tax, but not Social Security or Medicare. PA still taxes it at the state level." />
                 </div>
                 <input className={inputCls} type="number" min="0" max="100" step="1" value={k401Pct} onChange={(e) => setK401Pct(e.target.value)} placeholder=" " />
               </label>

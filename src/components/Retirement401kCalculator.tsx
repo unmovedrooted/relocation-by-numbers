@@ -339,7 +339,7 @@ export default function Retirement401kCalculator() {
 
           {inputsReady && (
             <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-              Pre-tax 401(k) contributions lower your federal (and, in most states, state) income tax now, but not Social Security/Medicare; withdrawals in retirement are taxed as ordinary income. CA and PA tax contributions at the state level. Estimates only, not tax or investment advice.
+              Pre-tax 401(k) contributions lower your federal (and, in most states, state) income tax now, but not Social Security/Medicare; withdrawals in retirement are taxed as ordinary income. PA taxes contributions at the state level. Estimates only, not tax or investment advice.
             </div>
           )}
         </div>

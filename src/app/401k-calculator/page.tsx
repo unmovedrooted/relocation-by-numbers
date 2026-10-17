@@ -60,7 +60,7 @@ const faqSchema = {
     { "@type": "Question", name: "How does employer 401(k) matching work?", acceptedAnswer: { "@type": "Answer", text: "Many employers match a percentage of what you contribute, up to a limit. A common formula is '50% up to 6% of salary,' meaning the employer adds 50 cents per dollar you contribute on the first 6% of your pay. Contributing at least up to the cap captures the full match, it's effectively free money." } },
     { "@type": "Question", name: "What is the 401(k) contribution limit for 2026?", acceptedAnswer: { "@type": "Answer", text: "For 2026, employees can defer up to $24,500. Those age 50-59 or 64+ can add a $8,000 catch-up (up to $32,500), and ages 60-63 can add an enhanced $11,250 catch-up (up to $35,750). The combined employee-plus-employer limit is $72,000." } },
     { "@type": "Question", name: "How much does a 401(k) reduce my taxes?", acceptedAnswer: { "@type": "Answer", text: "Pre-tax (traditional) 401(k) contributions lower your taxable income, cutting federal and, in most states, state income tax now, though not Social Security or Medicare. This calculator estimates your exact savings and the net effect on your paycheck. Withdrawals are taxed later as ordinary income." } },
-    { "@type": "Question", name: "Do all states give 401(k) contributions a tax break?", acceptedAnswer: { "@type": "Answer", text: "Most do, matching the federal treatment, but California and Pennsylvania tax 401(k) contributions at the state level, so you don't get a state tax break there." } },
+    { "@type": "Question", name: "Do all states give 401(k) contributions a tax break?", acceptedAnswer: { "@type": "Answer", text: "Most do, matching the federal treatment, but Pennsylvania taxes 401(k) contributions at the state level, so you do not get a state tax break there." } },
   ],
 };
 
@@ -78,7 +78,7 @@ const FAQ_ITEMS = [
   { q: "How does employer matching work?", a: "Employers often match a percent of your contribution up to a cap, e.g. '50% up to 6%' means 50¢ per $1 on the first 6% of salary. Contributing at least to the cap captures the full match (free money)." },
   { q: "What's the 2026 contribution limit?", a: "$24,500 for employees; +$8,000 catch-up at 50-59/64+, +$11,250 at 60-63. The combined employee + employer limit is $72,000." },
   { q: "How much does a 401(k) cut my taxes?", a: "Pre-tax contributions lower federal and (in most states) state income tax now, not FICA. The calculator shows your savings and the net paycheck effect; withdrawals are taxed later." },
-  { q: "Do all states give the tax break?", a: "Most match the federal treatment, but California and Pennsylvania tax 401(k) contributions at the state level." },
+  { q: "Do all states give the tax break?", a: "Most match the federal treatment, but Pennsylvania taxes 401(k) contributions at the state level." },
 ];
 
 export default function Page() {
