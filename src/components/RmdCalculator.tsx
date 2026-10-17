@@ -264,7 +264,7 @@ export default function RmdCalculator() {
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                RMDs from traditional IRAs and 401(k)s must begin by April 1 of the year after you turn {results.startRmdAge} (then by December 31 each year after). Missing one triggers a 25% penalty (10% if corrected promptly). This uses the Uniform Lifetime Table; a spouse more than 10 years younger as sole beneficiary uses a different table. Roth IRAs have no lifetime RMDs. The tax shown uses the standard deduction for a filer under 65; the extra deduction at 65+ and the temporary senior deduction are not applied, so it may be overstated. Estimates only, not tax advice.
+                RMDs from traditional IRAs and 401(k)s must begin by April 1 of the year after the year you reach age {results.startRmdAge} (then by December 31 each year after). The starting age is 73 if you were born 1951 to 1959 and 75 if you were born in 1960 or later; the age shown here uses your birth year, or an estimate from your age if you leave it blank. Missing one triggers a 25% penalty (10% if corrected promptly). This uses the Uniform Lifetime Table; a spouse more than 10 years younger as sole beneficiary uses a different table. Roth IRAs have no lifetime RMDs. The tax shown uses the standard deduction for a filer under 65; the extra deduction at 65+ and the temporary senior deduction are not applied, so it may be overstated. Estimates only, not tax advice.
               </div>
             </>
           )}
