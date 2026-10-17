@@ -1015,6 +1015,14 @@ export default function Calculator({
               </label>
 
               <label className="text-sm">
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Current salary (optional)</div>
+                <input
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
+                  id="in-curSalary" type="number" value={currentSalary} onChange={(e) => setCurrentSalary(e.target.value)} placeholder="Same as salary"
+                />
+              </label>
+
+              <label className="text-sm">
                 <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Filing status</div>
                 <select
                   className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 shadow-inner ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
@@ -1263,7 +1271,7 @@ export default function Calculator({
               move={move}
               fromName={currentCityLabel}
               toName={findCity(toCityId)?.name || stateName}
-              hasCurrentIncome={false}
+              hasCurrentIncome={currentSalary.trim() !== ""}
               inputIds={MOVE_IDS}
             />
           )}
@@ -1314,13 +1322,13 @@ export default function Calculator({
                 )}
                 {neededSalary != null && neededSalary > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600 dark:text-slate-400">Salary to match current lifestyle</span>
+                    <span className="text-slate-600 dark:text-slate-400">Salary to match current lifestyle<span className="block text-[11px] text-slate-400 dark:text-slate-500">After tax and new-city costs, leaves what you have left over now.</span></span>
                     <span className="font-semibold text-slate-900 dark:text-slate-100">{money(neededSalary)}</span>
                   </div>
                 )}
                 {comparable && (
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600 dark:text-slate-400">COL-equivalent salary</span>
+                    <span className="text-slate-600 dark:text-slate-400">COL-equivalent salary<span className="block text-[11px] text-slate-400 dark:text-slate-500">Your salary scaled by how much more or less the new city costs. Ignores taxes.</span></span>
                     <span className="font-semibold text-slate-900 dark:text-slate-100">{money(comparable.comparableSalary)}</span>
                   </div>
                 )}

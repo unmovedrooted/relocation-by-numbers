@@ -113,7 +113,7 @@ export default function MoveSummary({
         </div>
         {!hasCurrentIncome && (
           <p className="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
-            No separate current income entered, so pay is assumed unchanged. Enter your income now above to include a raise or pay cut.
+            No separate current income entered, so pay is assumed unchanged. Enter your current salary in the field above to include a raise or pay cut.
           </p>
         )}
 
