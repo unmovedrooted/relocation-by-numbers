@@ -1727,7 +1727,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     onChange={v => setInputs(s => ({ ...s, baristaIncomeNow: clamp(v, 0, 500000) }))}
                     prefix="$" />
                   <div className="text-xs leading-5 text-slate-400 sm:col-span-2">
-                    The first amount only lowers the yearly gap your portfolio must cover; it is assumed to grow with inflation. The second amount is extra income you earn today, so it adds to your saving until you reach FIRE.
+                    The first amount only lowers the yearly gap your portfolio must cover; it is assumed to grow with inflation. The second amount is extra income you earn today, so it adds to your saving until you reach FIRE. Not earning part-time income yet? Leave the second amount at $0.
                   </div>
                   <div className="self-end text-xs text-slate-400">
                     Gap your portfolio covers:<br />
