@@ -270,18 +270,17 @@ const BASE_DEFAULTS: Inputs = {
 
 const MODE_OVERRIDES: Record<FireMode, Partial<Inputs>> = {
   standard: {},
-  lean:     { expensesMonthly: 2500, withdrawalRatePct: 3.5, movedExpensesMonthly: 2000 },
+  lean:     { expensesMonthly: 2500, withdrawalRatePct: 3.5 },
   coast:    { coastAge: 40, targetRetirementAge: 65 },
-  barista:  { expensesMonthly: 5000, baristaPartTimeIncome: 24000, movedExpensesMonthly: 3500 },
+  barista:  { expensesMonthly: 5000, baristaPartTimeIncome: 24000 },
 };
 
 // Chubby and Fat FIRE share the standard engine; their pages start from a spending level that matches the page text
-// (Chubby about $100,000 to $150,000 a year, Fat $200,000 or more) with an income and portfolio that make it reachable. Spending after a
-// move starts at about 70% of the page's own spending (as on the standard page), so a move compares like with like.
+// (Chubby about $100,000 to $150,000 a year, Fat $200,000 or more) with an income and portfolio that make it reachable.
 type SpendingPreset = "chubby" | "fat";
 const SPENDING_PRESETS: Record<SpendingPreset, Partial<Inputs>> = {
-  chubby: { income: 250000, expensesMonthly: 10000, currentPortfolio: 250000, movedExpensesMonthly: 7000 },
-  fat:    { income: 500000, expensesMonthly: 20000, currentPortfolio: 750000, movedExpensesMonthly: 14000 },
+  chubby: { income: 250000, expensesMonthly: 10000, currentPortfolio: 250000 },
+  fat:    { income: 500000, expensesMonthly: 20000, currentPortfolio: 750000 },
 };
 
 function presetFromPathname(p: string): SpendingPreset | undefined {
@@ -291,12 +290,15 @@ function presetFromPathname(p: string): SpendingPreset | undefined {
 }
 
 function defaultsForMode(mode: FireMode, initialIncome: number, spending?: SpendingPreset): Inputs {
-  return {
+  const merged: Inputs = {
     ...BASE_DEFAULTS,
     ...MODE_OVERRIDES[mode],
     ...(spending ? SPENDING_PRESETS[spending] : {}),
     income: initialIncome > 0 ? initialIncome : (spending ? SPENDING_PRESETS[spending].income ?? BASE_DEFAULTS.income : BASE_DEFAULTS.income),
   };
+  // Spending after a move starts equal to spending now, so a move shows no gain until you enter what you expect to spend there: an assumed
+  // cut in spending would be credited to geography.
+  return { ...merged, movedExpensesMonthly: merged.expensesMonthly };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1934,6 +1936,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   <div className="mt-4 grid gap-4 sm:grid-cols-2">
                     <Field label="Monthly expenses after moving" value={inputs.movedExpensesMonthly} onChange={v => setInputs(s => ({ ...s, movedExpensesMonthly: clamp(v, 0, 200_000) }))} prefix="$" />
                     <div className="self-end text-xs text-slate-400">Annual: <span className="font-semibold text-slate-200">{money(annualMovedExpenses(inputs), 0)}</span></div>
+                    <div className="text-xs leading-5 text-slate-400 sm:col-span-2">Starts equal to your spending now, so a move shows no gain until you enter what you expect to spend in the new place. Pick a state or enter your own figure.</div>
                     <Field label="Income after moving (0 = same)" value={inputs.movedIncome} onChange={v => setInputs(s => ({ ...s, movedIncome: clamp(v, 0, 10_000_000) }))} prefix="$" />
                     {movedShortfall > 0 && (
                       <div className="rounded-xl border border-amber-300/30 bg-amber-300/10 p-3 text-xs leading-5 text-amber-100 sm:col-span-2">
@@ -2140,7 +2143,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Full FIRE (no part-time income)</div>
-                    <div className="mt-2 text-xs text-slate-400">Portfolio covers all expenses</div>
+                    <div className="mt-2 text-xs text-slate-400">Portfolio covers all expenses, in the dollars of the year you reach it</div>
                     <div className="mt-3 text-2xl font-bold text-white">{fullFireForBarista && Number.isFinite(fullFireForBarista.fireNumber) ? money(fullFireForBarista.fireNumber, 0) : "—"}</div>
                     <div className="mt-1 text-sm text-slate-300">FIRE at age {fullFiAgeForBarista ?? "—"}</div>
                   </div>
@@ -2159,7 +2162,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 {/* Part-time income sensitivity table */}
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
                   <div className="text-sm font-semibold text-white">Part-time income sensitivity</div>
-                  <div className="mt-1 text-xs text-slate-400">How different income levels change your number and timeline</div>
+                  <div className="mt-1 text-xs text-slate-400">How different income levels change your number (in today&apos;s dollars) and timeline</div>
                 <div className="mt-3 overflow-x-auto overscroll-x-contain rounded-xl border border-white/10" role="region" aria-label="Part-time income sensitivity" tabIndex={0}>
                   <div className="min-w-[26rem]">
                     <div className="grid grid-cols-4 bg-white/5 px-3 py-2 text-[11px] font-semibold tracking-widest text-slate-300/80">
