@@ -1,4 +1,7 @@
+import { averageStateRent } from "@/lib/stateRent";
 import type { Metadata } from "next";
+import { GUIDE_INFO } from "@/lib/calculatorSources";
+import CalculatorSources from "@/components/CalculatorSources";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { STATES, type StateCode } from "@/lib/states";
@@ -239,12 +242,8 @@ export default async function BestStateForFirePage({ params }: PageProps) {
     .filter((city) => ALLOWED_FIRE_CITY_PAGES.includes(city.id as (typeof ALLOWED_FIRE_CITY_PAGES)[number]))
     .slice(0, 3);
 
-  const avgRent =
-    stateCities.length > 0
-      ? Math.round(
-          stateCities.reduce((sum, c) => sum + (c.defaultRent ?? 0), 0) / stateCities.length
-        )
-      : null;
+  const avgRentRaw = averageStateRent(found.code);
+  const avgRent = avgRentRaw === null ? null : Math.round(avgRentRaw);
 
   const stateContent = STATE_CONTENT[found.code];
   if (!stateContent) return notFound();
@@ -336,7 +335,7 @@ export default async function BestStateForFirePage({ params }: PageProps) {
               </div>
             </div>
             <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-              <div className="text-xs uppercase tracking-widest text-slate-400">Cities tracked</div>
+              <div className="text-xs uppercase tracking-widest text-slate-400">Cities in our data</div>
               <div className="mt-2 font-semibold text-white">
                 {stateCities.length > 0 ? stateCities.length : "—"}
               </div>
@@ -508,6 +507,7 @@ export default async function BestStateForFirePage({ params }: PageProps) {
           </div>
         </footer>
       </div>
+      <CalculatorSources path="/best-states-for-fire" tone="dark" info={GUIDE_INFO.fireRanking} feedbackPath={`/best-states-for-fire/${state}`} />
     </main>
   );
 }

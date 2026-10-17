@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { GUIDE_INFO } from "@/lib/calculatorSources";
+import CalculatorSources from "@/components/CalculatorSources";
 import Calculator from "@/components/Calculator";
 import { notFound } from "next/navigation";
 import AdSlot from "@/components/AdSlot";
@@ -344,6 +346,7 @@ export default async function MoveToStatePage({ params }: Props) {
           </div>
         </footer>
       </div>
+      <CalculatorSources path="/move-to" info={GUIDE_INFO.move} feedbackPath={`/move-to/${state}`} />
     </main>
   );
 }

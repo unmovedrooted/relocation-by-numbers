@@ -1,6 +1,8 @@
+import { averageStateRent } from "@/lib/stateRent";
 import type { Metadata } from "next";
+import { GUIDE_INFO } from "@/lib/calculatorSources";
+import CalculatorSources from "@/components/CalculatorSources";
 import { STATES, type StateCode } from "@/lib/states";
-import { citiesForState } from "@/lib/cities";
 import Link from "next/link";
 import { ALLOWED_STATE_CODES } from "@/lib/seo-allowlists";
 
@@ -32,9 +34,7 @@ const NO_INCOME_TAX_STATES: StateCode[] = [
 ];
 
 function scoreState(code: StateCode) {
-  const cities = citiesForState(code);
-  if (!cities.length) return 0;
-  return cities.reduce((sum, c) => sum + (c.defaultRent ?? 0), 0) / cities.length;
+  return averageStateRent(code) ?? 0;
 }
 
 export default function Page() {
@@ -331,6 +331,7 @@ export default function Page() {
           </div>
         </footer>
       </div>
+      <CalculatorSources path="/best-states-for-fire" tone="dark" info={GUIDE_INFO.fireRanking} />
     </main>
   );
 }

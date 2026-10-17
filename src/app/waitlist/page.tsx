@@ -48,7 +48,7 @@ export default function WaitlistPage() {
             },
             {
               title: "Roth conversion strategy",
-              body: "How much to convert each year, which tax brackets to target, and the optimal window before RMDs begin at 73.",
+              body: "How much to convert each year, which tax brackets to target, and the optimal window before RMDs begin (age 73 or 75, by birth year).",
             },
             {
               title: "Tax bracket management",

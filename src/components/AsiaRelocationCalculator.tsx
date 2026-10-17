@@ -47,7 +47,7 @@ const ASIA_VISA_CONTEXT: Record<string, {
     icon: "🇹🇭",
     program: "LTR Visa / Thailand Elite / METV",
     highlight: "Long-Term Resident Visa",
-    notes: "Thailand's Long-Term Resident (LTR) Visa offers 10-year stays for retirees ($80k+ assets), remote workers ($80k/yr income), and high-net-worth individuals. Thailand Elite is a paid membership visa (฿600k–฿2M). METV available for shorter flexible stays. No path to permanent residency for most.",
+    notes: "Thailand's Long-Term Resident (LTR) Visa offers 10-year stays. Wealthy pensioners (age 50 or older) need $80k a year of pension or passive income, or $40k to $80k a year plus $250k invested; work-from-Thailand professionals need $80k a year of income, or $40k to $80k plus a master's degree (Thailand BOI, ltr.boi.go.th). Thailand Elite is a paid membership visa (฿600k–฿2M). METV available for shorter flexible stays. No path to permanent residency for most.",
     estimatedFee: 250,
   },
   JP: {

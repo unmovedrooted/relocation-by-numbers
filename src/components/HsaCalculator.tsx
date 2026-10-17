@@ -451,8 +451,8 @@ export default function HsaCalculator() {
                 An HSA has three tax advantages: contributions are pre-tax (or deductible), growth is tax-free, and
                 withdrawals for qualified medical expenses are tax-free. After age 65, non-medical withdrawals are
                 taxed as ordinary income (like a traditional IRA) with no penalty, before 65, non-medical withdrawals
-                carry a 20% penalty plus ordinary income tax. This tool does not model neighborhood-level HDHP plan
-                selection, HSA custodian fees, or investment sequencing. Planning estimates only, not tax or
+                carry a 20% penalty plus ordinary income tax. This tool does not model your plan's premiums, deductibles or
+                network, HSA custodian fees, or investment sequencing. Planning estimates only, not tax or
                 investment advice.
               </div>
             </>

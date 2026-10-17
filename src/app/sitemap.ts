@@ -9,9 +9,15 @@ import {
   ALLOWED_STATE_CODES,
 } from "@/lib/seo-allowlists";
 
+const CONTENT_UPDATED_ON = "2026-10-17";
+const LEGAL_UPDATED_ON = "2026-10-16";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://www.relocationbynumbers.com";
-  const now = new Date();
+  // The date the page content last changed, not the build time: a lastmod that changes on every deploy teaches search engines to ignore it.
+  // Update CONTENT_UPDATED_ON when calculator, city or comparison content changes, and LEGAL_UPDATED_ON when the policy pages change.
+  const now = new Date(CONTENT_UPDATED_ON);
+  const legalUpdated = new Date(LEGAL_UPDATED_ON);
 
   const corePages = [
     { url: baseUrl, priority: 1.0, changeFrequency: "weekly" as const },
@@ -24,7 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/methodology`, priority: 0.5, changeFrequency: "monthly" as const },
   ].map((page) => ({
     ...page,
-    lastModified: now,
+    lastModified: /\/(disclaimer|privacy|terms)$/.test(page.url) ? legalUpdated : now,
   }));
 
   const calculatorPages = [

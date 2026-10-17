@@ -70,6 +70,23 @@ const FIRE_INFO = (name: string): CalculatorInfo => ({
 const PAYROLL_PROGRAMS_LINK: SourceRef = { label: "Employee-paid state payroll programs included, with rates and sources", url: "/methodology#state-payroll" };
 const TAXES = [RP_2025_32, PUB_15, FORM_8959, STATE_SOURCES_LINK, LOCAL_SOURCES_LINK, PAYROLL_PROGRAMS_LINK];
 
+/** Sources and limits for template pages (state guides, rankings, salary pages, comparison hubs). */
+export const GUIDE_INFO: Readonly<Record<"move" | "fireSalary" | "fireRanking" | "compare", CalculatorInfo>> = Object.freeze({
+  move: {
+    name: "Moving-to-state guide", taxDriven: true, sources: TAXES, notes: [HOUSING_NOTE],
+    exclusions: [...US_TAX_EXCLUSIONS, "State-level averages hide large differences between cities and neighborhoods."],
+  },
+  fireSalary: FIRE_INFO("FIRE on this salary"),
+  fireRanking: {
+    name: "FIRE rankings", taxDriven: true, sources: TAXES, notes: [HOUSING_NOTE, "Rankings use the same tax engine and Census and BEA figures as the state and city pages."],
+    exclusions: [...US_TAX_EXCLUSIONS.slice(0, 3), "A ranking depends on the salary, spending and filing status it assumes; your own numbers can reorder it."],
+  },
+  compare: {
+    name: "City comparisons", taxDriven: true, sources: TAXES, notes: [HOUSING_NOTE],
+    exclusions: [...US_TAX_EXCLUSIONS, "Neighborhood-level rent and home prices can differ widely from a city median."],
+  },
+});
+
 export const CALCULATOR_INFO: Readonly<Record<string, CalculatorInfo>> = Object.freeze({
   "/": { name: "US Relocation & Take-Home Calculator", taxDriven: true, sources: TAXES, notes: [HOUSING_NOTE, MOVE_NOTE],
     exclusions: [...US_TAX_EXCLUSIONS, "Moving costs not entered default to planning averages, and the date the lease or home sale closes is not modeled."] },

@@ -1,4 +1,8 @@
+import { ALLOWED_FIRE_CITY_PAGES } from "@/lib/seo-allowlists";
+import { findCity } from "@/lib/cities";
 import type { Metadata } from "next";
+import { GUIDE_INFO } from "@/lib/calculatorSources";
+import CalculatorSources from "@/components/CalculatorSources";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -33,15 +37,11 @@ const CITY_STARTERS = [
   { name: "Boston, MA", href: "/compare/boston-ma/charlotte-nc", dest: "Charlotte, NC" },
 ];
 
-const CITY_PAGES = [
-  { href: "/best-cities-for-fire/charlotte-nc", label: "FIRE in Charlotte, NC" },
-  { href: "/best-cities-for-fire/austin-tx", label: "FIRE in Austin, TX" },
-  { href: "/best-cities-for-fire/miami-fl", label: "FIRE in Miami, FL" },
-  { href: "/best-cities-for-fire/atlanta-ga", label: "FIRE in Atlanta, GA" },
-  { href: "/best-cities-for-fire/denver-co", label: "FIRE in Denver, CO" },
-  { href: "/best-cities-for-fire/seattle-wa", label: "FIRE in Seattle, WA" },
-  { href: "/best-cities-for-fire/nyc-ny", label: "FIRE in New York City" },
-];
+// Every city that has a page, from the same list the pages and the sitemap use.
+const CITY_PAGES = ALLOWED_FIRE_CITY_PAGES.flatMap((id) => {
+  const city = findCity(id);
+  return city ? [{ href: `/best-cities-for-fire/${id}`, label: `FIRE in ${city.name}, ${city.state.toUpperCase()}` }] : [];
+});
 
 export default function Page() {
   return (
@@ -273,6 +273,7 @@ export default function Page() {
           </div>
         </footer>
       </div>
+      <CalculatorSources path="/best-cities-for-fire" tone="dark" info={GUIDE_INFO.fireRanking} />
     </main>
   );
 }

@@ -111,7 +111,7 @@ const faqSchema = {
       name: "When do Required Minimum Distributions (RMDs) start?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Under SECURE 2.0, RMDs from traditional retirement accounts begin at age 73 (rising to 75 in 2033). Roth IRAs have no RMDs during the owner's lifetime. This calculator focuses on your chosen withdrawal amount and does not force RMDs.",
+        text: "Under SECURE 2.0, RMDs from traditional retirement accounts begin at age 73 if you were born 1951 to 1959 and at age 75 if you were born in 1960 or later. Roth IRAs have no RMDs during the owner's lifetime. This calculator focuses on your chosen withdrawal amount and does not force RMDs.",
       },
     },
     {
@@ -150,7 +150,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "When do RMDs start?",
-    a: "Under SECURE 2.0, Required Minimum Distributions from traditional accounts begin at age 73 (rising to 75 in 2033). Roth IRAs have no lifetime RMDs.",
+    a: "Under SECURE 2.0, Required Minimum Distributions from traditional accounts begin at age 73 if you were born 1951 to 1959 and at age 75 if you were born in 1960 or later. Roth IRAs have no lifetime RMDs.",
   },
   {
     q: "Is inflation included?",
@@ -278,7 +278,7 @@ export default function Page() {
                     taxable brokerage accounts.
                   </p>
                   <p>
-                    Required Minimum Distributions (age 73+) may force larger withdrawals than you choose here. This
+                    Required Minimum Distributions (age 73 or 75, by birth year) may force larger withdrawals than you choose here. This
                     calculator does not model RMDs.
                   </p>
                   <p>This calculator is not tax or investment advice.</p>

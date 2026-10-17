@@ -1,6 +1,6 @@
 import Link from "next/link";
 import FeedbackBox from "./FeedbackBox";
-import { CALCULATOR_INFO, SOURCES_REVIEWED_ON, type SourceRef } from "../lib/calculatorSources";
+import { CALCULATOR_INFO, SOURCES_REVIEWED_ON, type CalculatorInfo, type SourceRef } from "../lib/calculatorSources";
 import { taxRulesVerifiedLabel, TAX_YEAR } from "../lib/taxRuleNotes";
 
 function reviewedLabel(): string {
@@ -17,8 +17,8 @@ function SourceLink({ source, linkClass }: { source: SourceRef; linkClass: strin
  * Tax year, review date, sources and known exclusions for one calculator, from src/lib/calculatorSources.ts.
  * Render it near the end of a calculator page. `tone="dark"` is for pages with a fixed dark background.
  */
-export default function CalculatorSources({ path, tone = "light" }: { path: string; tone?: "light" | "dark" }) {
-  const info = CALCULATOR_INFO[path];
+export default function CalculatorSources({ path, tone = "light", info: given, feedbackPath }: { path: string; tone?: "light" | "dark"; info?: CalculatorInfo; feedbackPath?: string }) {
+  const info = given ?? CALCULATOR_INFO[path];
   if (!info) return null;
   const box = tone === "dark"
     ? "border-white/10 bg-white/5 text-slate-300"
@@ -59,7 +59,7 @@ export default function CalculatorSources({ path, tone = "light" }: { path: stri
         {info.exclusions.map((item) => <li key={item}>{item}</li>)}
       </ul>
     </section>
-    <FeedbackBox path={path} name={info.name} tone={tone} />
+    <FeedbackBox path={feedbackPath ?? path} name={info.name} tone={tone} />
     </>
   );
 }

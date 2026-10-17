@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { GUIDE_INFO } from "@/lib/calculatorSources";
+import CalculatorSources from "@/components/CalculatorSources";
 import Link from "next/link";
 import ComparePicker from "@/components/ComparePicker";
 import { CITIES, findCity } from "@/lib/cities";
@@ -428,6 +430,7 @@ export default function CompareHubPage() {
           </div>
         </section>
       </div>
+      <CalculatorSources path="/compare" info={GUIDE_INFO.compare} />
     </main>
   );
 }

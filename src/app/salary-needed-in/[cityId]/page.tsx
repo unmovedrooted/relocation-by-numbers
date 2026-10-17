@@ -1,3 +1,5 @@
+import { estimateNetBreakdown } from "@/lib/wageTax";
+import { STATE_NAMES } from "@/lib/stateNames";
 import type { Metadata } from "next";
 import CityReport from "@/components/CityReport";
 import { ALLOWED_CITY_DETAIL_PAGES } from "@/lib/seo-allowlists";
@@ -132,6 +134,9 @@ export default async function Page({ params }: Props) {
   }
 
   const city = findCity(cityId);
+  const wageTax = city ? estimateNetBreakdown({ grossAnnual: 100_000, state: city.state, filing: "single", k401Pct: 0, cityId: city.id }) : null;
+  const hasWageTax = wageTax ? wageTax.state + wageTax.local > 0 : true;
+  const stateLabel = city ? STATE_NAMES[city.state] : "";
   if (!city) return notFound();
 
   const rent = city.defaultRent ?? 0;
@@ -254,8 +259,9 @@ export default async function Page({ params }: Props) {
           <p>{cityContent.secondary}</p>
           <p>{cityContent.caution}</p>
           <p>
-            State tax also matters. Gross salary is not the same as take-home pay, which is why
-            city comparison and tax-aware planning tools are useful alongside this page.
+            {hasWageTax
+              ? "State tax also matters. Gross salary is not the same as take-home pay, which is why city comparison and tax-aware planning tools are useful alongside this page."
+              : `${stateLabel} has no state or city income tax on wages, but gross salary is still not take-home pay: federal income tax and payroll taxes apply, which is why city comparison and tax-aware planning tools are useful alongside this page.`}
           </p>
         </section>
 
@@ -327,8 +333,9 @@ export default async function Page({ params }: Props) {
                 Does state income tax affect the salary I need in {city.name}?
               </div>
               <p className="mt-1">
-                Yes. State income tax affects take-home pay, which means your gross salary may need to be higher
-                than the housing-only estimate suggests.
+                {hasWageTax
+                  ? "Yes. State income tax affects take-home pay, which means your gross salary may need to be higher than the housing-only estimate suggests."
+                  : `Not directly. ${stateLabel} has no state or city income tax on wages, so the difference comes from federal and payroll taxes, which are the same everywhere, and from housing costs.`}
               </p>
             </div>
           </div>

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { GUIDE_INFO } from "@/lib/calculatorSources";
+import CalculatorSources from "@/components/CalculatorSources";
 import FireHeaderLinks from "@/components/FireHeaderLinks";
 import { notFound } from "next/navigation";
 import AdSlot from "@/components/AdSlot";
@@ -457,6 +459,7 @@ export default async function FireWithSalaryPage({
           </Link>
         </div>
       </div>
+      <CalculatorSources path="/fire-with-salary" tone="dark" info={GUIDE_INFO.fireSalary} feedbackPath={`/${salarySlug}`} />
     </main>
   );
 }

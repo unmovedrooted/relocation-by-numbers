@@ -664,7 +664,7 @@ export default function RetirementWithdrawalCalculator() {
                 using {`${accountType === "roth" ? "Roth (tax-free)" : "traditional/taxable"}`} treatment and {TAX_YEAR}
                 federal &amp; state rules with the standard deduction; they don&apos;t include Social Security, the
                 extra standard deduction at 65+, capital-gains treatment, or Required Minimum Distributions (which
-                begin at age 73).{" "}
+                begin at age 73 or 75, depending on your birth year).{" "}
                 {viewMode === "montecarlo"
                   ? "The Monte Carlo view runs 5,000 seeded simulations drawing each year's return from a lognormal distribution around your expected return at the chosen volatility, a model of market risk, not a prediction."
                   : "This is a smooth average-return projection; switch to “Market ups & downs” to model volatility and sequence-of-returns risk."}{" "}

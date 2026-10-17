@@ -1237,7 +1237,7 @@ function DecisionEngineCard({ result }: { result: DecisionEngineResult }) {
                 <p className="mt-2 text-xs leading-5 text-slate-400">
                   {item.shortCopy}
                 </p>
-                <div className="mt-3 grid grid-cols-3 gap-2">
+                <div className={`mt-3 grid gap-2 ${item.fullFireAge === item.goalAge ? "grid-cols-2" : "grid-cols-3"}`}>
                   <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
                     <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                       {modeLabels.goalAge}
@@ -1246,14 +1246,17 @@ function DecisionEngineCard({ result }: { result: DecisionEngineResult }) {
                       {item.goalAge ?? "—"}
                     </div>
                   </div>
-                  <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                      Full FIRE age
+                  {/* Shown only when it differs from the goal age (Coast FIRE); on the other pages the two are the same number. */}
+                  {item.fullFireAge !== item.goalAge && (
+                    <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                        Full FIRE age
+                      </div>
+                      <div className="mt-1 text-sm font-semibold text-white">
+                        {item.fullFireAge ?? "—"}
+                      </div>
                     </div>
-                    <div className="mt-1 text-sm font-semibold text-white">
-                      {item.fullFireAge ?? "—"}
-                    </div>
-                  </div>
+                  )}
                   <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
                     <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                       {modeLabels.goal}
@@ -1362,6 +1365,12 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   const result = useMemo(() => simulateYearsToFI(inputs, netPath, mode), [inputs, netPath, mode]);
 
   const fiAge  = useMemo(() => result.yearsToFI === null ? null : inputs.age + result.yearsToFI, [inputs.age, result.yearsToFI]);
+  // The FIRE number is in the dollars of the year you reach it; this adds what that is worth in today's dollars.
+  const fireNumberTodayNote = useMemo(() => {
+    if (result.yearsToFI === null || !Number.isFinite(result.fireNumber)) return "";
+    const today = result.fireNumber / Math.pow(1 + (Number(inputs.inflationPct) || 0) / 100, result.yearsToFI);
+    return ` That is about ${money(today, 0)} in today's dollars.`;
+  }, [result.fireNumber, result.yearsToFI, inputs.inflationPct]);
   const fiYear = useMemo(() => result.yearsToFI === null ? null : new Date().getFullYear() + result.yearsToFI, [result.yearsToFI]);
 
   const projection = useMemo(() => buildProjection(inputs, netPath, result.yearsToFI, mode), [inputs, netPath, result.yearsToFI, mode]);
@@ -1982,7 +1991,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     : <>At your current pace you could reach financial independence at <strong>age {fiAge}</strong>, in about <strong>{result.yearsToFI} years</strong>, around <strong>{fiYear}</strong>.</>}
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Stat label="FIRE Number" value={hasCoreInputs && Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"} helper={`Based on ${inputs.withdrawalRatePct}% withdrawal rate, in the dollars of the year you reach it (spending grows with inflation)`} />
+                  <Stat label="FIRE Number" value={hasCoreInputs && Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"} helper={`Based on ${inputs.withdrawalRatePct}% withdrawal rate, in the dollars of the year you reach it (spending grows with inflation).${fireNumberTodayNote}`} />
                   <Stat label="Years Until FIRE" value={hasCoreInputs ? result.yearsToFI === null ? "Not reached" : `${result.yearsToFI} yrs` : "—"} helper={fiYear ? `Est. FIRE year: ${fiYear}` : undefined} />
                   <Stat label="Estimated FIRE Age" value={hasCoreInputs ? (fiAge ?? "—") : "—"} />
                   {inputs.advanced
@@ -2061,7 +2070,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   </div>
                 )}
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Stat label="Lean FIRE Number" value={hasCoreInputs && Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"} helper={`At ${inputs.withdrawalRatePct}% withdrawal`} highlight />
+                  <Stat label="Lean FIRE Number" value={hasCoreInputs && Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"} helper={`At ${inputs.withdrawalRatePct}% withdrawal, in the dollars of the year you reach it.${fireNumberTodayNote}`} highlight />
                   <Stat label="Savings Rate" value={hasCoreInputs ? pct(savingsRate) : "—"} helper={`${money(netAnnual, 0)} est. net income`} />
                 </div>
                 <ProgressBar pct={progress.pct} label="Progress to Lean FIRE"
@@ -2123,7 +2132,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   </div>
                 )}
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Stat label="Barista FIRE Number" value={hasCoreInputs && Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"} helper={`At ${inputs.withdrawalRatePct}% withdrawal on the gap`} highlight />
+                  <Stat label="Barista FIRE Number" value={hasCoreInputs && Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"} helper={`At ${inputs.withdrawalRatePct}% withdrawal on the gap, in the dollars of the year you reach it.${fireNumberTodayNote}`} highlight />
                   <Stat label="Portfolio Gap Covered" value={hasCoreInputs ? money(Math.max(0, annualExp - (Number(inputs.baristaPartTimeIncome) || 0)), 0) : "—"} helper="Amount your portfolio must fund per year" />
                 </div>
                 <ProgressBar pct={progress.pct} label="Progress to Barista FIRE"
