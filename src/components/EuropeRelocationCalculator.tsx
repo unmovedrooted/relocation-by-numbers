@@ -993,6 +993,16 @@ const readinessRecommendation =
       pct: housingPctOfNet * 100,
       comfort,
       upfrontCashNeeded,
+      upfrontItems: [
+        { label: housingMode === "buy" ? "Down payment" : "Deposit, first and last month's rent", amount: housingUpfront },
+        { label: "Visa / permit", amount: destToUsd(nonNegative(visaCost)) },
+        { label: "Flight", amount: destToUsd(nonNegative(flightCost)) },
+        { label: "Shipping / baggage", amount: destToUsd(nonNegative(shippingCost)) },
+        { label: "Temporary housing", amount: destToUsd(nonNegative(temporaryStay)) },
+        { label: "Setup / admin", amount: destToUsd(nonNegative(adminFees)) },
+        { label: "Furniture", amount: furnitureAdj },
+        { label: "Emergency cash buffer (reserve, not spent)", amount: destToUsd(nonNegative(emergencyCashBuffer)) },
+      ].filter((item) => item.amount > 0),
       monthsCovered,
       comparableSalary,
       relativeDifference,
@@ -1486,6 +1496,11 @@ readinessRecommendation,
               <div>Total: <span className="font-bold">{displayAmount(results.livingCosts, 2)}</span></div>
 
               <div className="mt-2">Upfront cash needed: <span className="font-semibold">{displayAmount(results.upfrontCashNeeded)}</span></div>
+              <ul className="mt-1 space-y-0.5 text-xs text-slate-500 dark:text-slate-400">
+                {results.upfrontItems.map((item) => (
+                  <li key={item.label}>{item.label}: {displayAmount(item.amount)}</li>
+                ))}
+              </ul>
               <div>Months covered by savings after upfront costs: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
               <div className="mt-2">Housing % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
             </div>

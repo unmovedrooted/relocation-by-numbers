@@ -292,7 +292,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
   // -------------------------------------------------------------------------
   // PORTUGAL, EUR
-  // 2024 IRS brackets (Continente). Conditional: IFICI / NHR special regime.
+  // 2026 IRS brackets (Continente, countryTaxRules/portugal.ts). Conditional: IFICI special regime (NHR closed to new entrants).
   // Key: answers.pt_ifici (note: calculator may also pass pt_nhr, both checked)
   // -------------------------------------------------------------------------
   PT: ({ annualIncome, filing, isRetired, incomeScenario = isRetired ? "retired" : "local", answers }) => {
@@ -303,9 +303,9 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
         effectiveRate: clampRate(isRetired ? 0.18 : 0.20),
         model: "flat",
         confidence: "partial",
-        label: "Portugal IFICI / NHR planning estimate",
+        label: "Portugal IFICI what-if (eligibility not confirmed)",
         missingFactor: "Income classification (employment vs passive vs pension) changes the treatment.",
-        note: "The IFICI flat rate (20% on qualifying Portuguese-source income) is well-defined in legislation. Main uncertainty: whether your specific income streams qualify, foreign employment, pension, and passive income each have different treatment. Confirm with a Portugal-licensed tax advisor before relying on this number.",
+        note: "The IFICI flat rate (20% on qualifying Portuguese-source income) is well-defined in legislation. Main uncertainty: whether your specific income streams qualify, foreign employment, pension, and passive income each have different treatment. Confirm with a Portugal-licensed tax advisor before relying on this number. This is a Portugal estimate only; US tax on US citizens and residents is not reconciled.",
       };
     }
 
@@ -318,7 +318,7 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
       confidence: "simplified",
       label: `Portugal IRS + social security (${PORTUGAL_TAX_YEAR_LABEL}, Continente)`,
       missingFactor: "Personal deductions (health, education, housing), dependants and IRS Jovem not modelled; the specific deduction and social security rate were not re-read on an official page.",
-      note: "Uses the 2026 mainland scale from the Portal das Finanças (12.5% to 48%), after the specific deduction (EUR 4,587.09, or the 11% employee social security if larger), the 2.5% and 5% solidarity surcharge above EUR 80,000 and EUR 250,000, and the joint-filing split for married couples (one earner). Retirees and remote workers paid abroad pay no social security here. Not modelled: deductions, dependants, IRS Jovem, the Azores and Madeira reductions, and the NHR/IFICI regimes beyond the planning rate. Income must be passed in euros.",
+      note: "Uses the 2026 mainland scale from the Portal das Finanças (12.5% to 48%), after the specific deduction (EUR 4,587.09, or the 11% employee social security if larger), the 2.5% and 5% solidarity surcharge above EUR 80,000 and EUR 250,000, and the joint-filing split for married couples (one earner). Retirees and remote workers paid abroad pay no social security here. Not modelled: deductions, dependants, IRS Jovem, the Azores and Madeira reductions, and the NHR/IFICI regimes beyond the what-if rate. Social security is shown only for local employment; a US employer's remote worker may stay under US coverage (US-Portugal totalization agreement) or owe Portuguese contributions as a contractor, so check which applies. This is a Portugal estimate only: US citizens and residents still file a US return, and the foreign tax credit or exclusion is not included. Income must be passed in euros.",
     };
   },
 
@@ -1772,14 +1772,14 @@ const COUNTRY_TAX_QUESTIONS: Record<string, ConditionalQuestion[]> = {
   PT: [
     {
       key: "pt_ifici",
-      label: "Are you applying for the IFICI (formerly NHR) special tax regime?",
+      label: "Do you expect to qualify for Portugal's IFICI regime?",
       helpText:
-        "Portugal's IFICI regime offers a 20% flat rate on qualifying Portuguese-source income and broad exemptions on foreign-source income for eligible new residents.",
+        "IFICI replaced the NHR regime, which is closed to new entrants. It offers a 20% flat rate on qualifying Portuguese-source income, but only for specific qualifying activities and employers, and applying does not by itself qualify you. Work you do while living in Portugal is generally Portuguese-source even when your employer is abroad. Answer Yes only to see the regime as a what-if.",
       when: { incomeScenario: ["remote"] },
       options: [
-        { value: "yes", label: "Yes, applying for IFICI / NHR" },
+        { value: "yes", label: "Yes, show the IFICI what-if (eligibility not confirmed)" },
         { value: "no", label: "No, standard progressive rates apply" },
-        { value: "unsure", label: "Not sure yet" },
+        { value: "unsure", label: "Not sure yet (standard rates shown)" },
       ],
     },
   ],
