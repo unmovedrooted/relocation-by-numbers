@@ -1957,7 +1957,6 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 </div>
               )}
             </div>}
-            <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">That&apos;s <span className="font-semibold text-slate-200">{money(annualExp, 0)}</span>/yr</div>
 
             {spendingPreset && (
               <div className="sm:col-span-2">
