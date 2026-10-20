@@ -294,6 +294,12 @@ const SPENDING_PRESETS: Record<SpendingPreset, Partial<Inputs>> = {
   fat:    { income: 500000, expensesMonthly: 20000, currentPortfolio: 750000 },
 };
 
+// Optional monthly spending categories for the Chubby and Fat pages; each set adds up to the page's default spending.
+const SPENDING_CATEGORY_DEFAULTS: Record<SpendingPreset, Record<string, number>> = {
+  chubby: { "Housing": 3500, "Food and dining": 1500, "Travel": 1500, "Healthcare": 800, "Transportation": 700, "Everything else": 2000 },
+  fat:    { "Housing": 7000, "Food and dining": 2500, "Travel": 4000, "Healthcare": 1500, "Transportation": 1500, "Everything else": 3500 },
+};
+
 function presetFromPathname(p: string): SpendingPreset | undefined {
   if (p.includes("chubby-fire")) return "chubby";
   if (p.includes("fat-fire")) return "fat";
@@ -1399,6 +1405,8 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
 
   // Details that do not depend on the FIRE style (age, income, location, portfolio) carry over between the FIRE pages for the tab's session.
   // Spending and withdrawal assumptions belong to each style, so they start from the page's own defaults.
+  const [budgetByCategory, setBudgetByCategory] = useState(false);
+  const [spendingCats, setSpendingCats] = useState<Record<string, number>>(() => spendingPreset ? SPENDING_CATEGORY_DEFAULTS[spendingPreset] : {});
   const [hydrated, setHydrated] = useState(false);
   const [carriedOver, setCarriedOver] = useState(false);
   useEffect(() => {
@@ -1918,7 +1926,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             </div>
 
             <Field label="401(k) contribution %" info="Percentage of salary contributed to a 401(k). Lowers taxable income." value={inputs.k401Pct} onChange={v => setInputs(s => ({ ...s, k401Pct: clamp(v, 0, 60) }))} suffix="%" />
-            <Field label="Monthly spending" info="Used to calculate your FIRE target. Higher spending = larger number." value={inputs.expensesMonthly} onChange={v => setInputs(s => ({ ...s, expensesMonthly: clamp(v, 0, 200_000) }))} prefix="$" />
+            <Field label="Monthly spending" info="Used to calculate your FIRE target. Higher spending = larger number." value={inputs.expensesMonthly} onChange={v => { setBudgetByCategory(false); setInputs(s => ({ ...s, expensesMonthly: clamp(v, 0, 200_000) })); }} prefix="$" />
             <div className="sm:col-span-2">
               <label className="flex items-center gap-2 text-xs text-slate-200">
                 <input
@@ -1942,6 +1950,37 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               )}
             </div>
             <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">That&apos;s <span className="font-semibold text-slate-200">{money(annualExp, 0)}</span>/yr</div>
+
+            {spendingPreset && (
+              <div className="sm:col-span-2">
+                <label className="flex items-center gap-2 text-xs text-slate-200">
+                  <input
+                    type="checkbox"
+                    checked={budgetByCategory}
+                    onChange={e => {
+                      setBudgetByCategory(e.target.checked);
+                      if (e.target.checked) setInputs(s => ({ ...s, expensesMonthly: Object.values(spendingCats).reduce((a, b) => a + b, 0) }));
+                    }}
+                  />
+                  Build my monthly spending from categories
+                </label>
+                {budgetByCategory && (
+                  <div className="mt-2 grid gap-x-4 gap-y-3 sm:grid-cols-2">
+                    {Object.entries(spendingCats).map(([name, amount]) => (
+                      <Field key={name} label={name} value={amount} prefix="$"
+                        onChange={v => {
+                          const next = { ...spendingCats, [name]: clamp(v, 0, 200_000) };
+                          setSpendingCats(next);
+                          setInputs(s => ({ ...s, expensesMonthly: Object.values(next).reduce((a, b) => a + b, 0) }));
+                        }} />
+                    ))}
+                    <p className="text-xs leading-5 text-slate-400 sm:col-span-2">
+                      These add up to your monthly spending of {money(Object.values(spendingCats).reduce((a, b) => a + b, 0), 0)}, which sets your FIRE number. Adjust a category to see what a lifestyle choice costs in years.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             <Field label="Current invested portfolio" value={inputs.currentPortfolio}
               onChange={v => setInputs(s => ({ ...s, currentPortfolio: clamp(v, 0, 20_000_000) }))} prefix="$" />
