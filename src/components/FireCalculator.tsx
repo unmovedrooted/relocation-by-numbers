@@ -1405,6 +1405,9 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
 
   // Details that do not depend on the FIRE style (age, income, location, portfolio) carry over between the FIRE pages for the tab's session.
   // Spending and withdrawal assumptions belong to each style, so they start from the page's own defaults.
+  // First-time visitors see the core inputs (age, income, state, spending, portfolio); the rest sit behind "Show all inputs".
+  // Everything shows when the page was opened with carried-over details, a move, or Advanced mode.
+  const [showAllInputs, setShowAllInputs] = useState(false);
   const [budgetByCategory, setBudgetByCategory] = useState(false);
   const [spendingCats, setSpendingCats] = useState<Record<string, number>>(() => spendingPreset ? SPENDING_CATEGORY_DEFAULTS[spendingPreset] : {});
   const [hydrated, setHydrated] = useState(false);
@@ -1443,6 +1446,8 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
       window.sessionStorage.setItem(SHARED_FIRE_KEY, JSON.stringify(shared));
     } catch { /* storage unavailable */ }
   }, [hydrated, inputs]);
+
+  const showMore = showAllInputs || inputs.advanced || carriedOver || linkedMove || !!abroadLabel;
 
   // ── Core derived values ───────────────────────────────────────────────────
   const annualExp =useMemo(() => annualExpenses(inputs), [inputs]);
@@ -1816,10 +1821,12 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="text-xs leading-5 text-slate-300">Enter your income, spending, and investing assumptions.</div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button onClick={() => setInputs(s => s.advanced ? { ...s, advanced: false } : seedAdvancedFromSimple({ ...s, advanced: true }))}
-                className={["rounded-xl border px-3 py-2 text-xs font-medium", inputs.advanced ? "border-violet-300/40 bg-violet-300/10 text-violet-100" : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"].join(" ")}>
-                {inputs.advanced ? "Advanced: ON" : "Advanced: OFF"}
-              </button>
+              {showMore && (
+                <button onClick={() => setInputs(s => s.advanced ? { ...s, advanced: false } : seedAdvancedFromSimple({ ...s, advanced: true }))}
+                  className={["rounded-xl border px-3 py-2 text-xs font-medium", inputs.advanced ? "border-violet-300/40 bg-violet-300/10 text-violet-100" : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"].join(" ")}>
+                  {inputs.advanced ? "Advanced: ON" : "Advanced: OFF"}
+                </button>
+              )}
               <button onClick={() => { setInputs(defaultsForMode(mode, initialIncome, spendingPreset)); setLinkedMove(false); setAbroadLabel(""); setPinnedCompareCityId(null); setShareStatus("idle"); }}
                 className="rounded-xl border border-red-300/40 bg-red-300/10 px-3 py-2 text-xs font-medium text-red-200 hover:bg-red-300/20">
                 ↺ Reset
@@ -1901,6 +1908,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             )}
 
             {/* ── Shared core inputs ─────────────────────────────────────── */}
+            <div className="text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">ABOUT YOU</div>
             <Field label="Current age" value={inputs.age} onChange={v => setInputs(s => { const age = Math.round(clamp(v, 0, 100)); const coastAge = Math.max(s.coastAge, age); return { ...s, age, coastAge, targetRetirementAge: Math.max(s.targetRetirementAge, coastAge) }; })} />
             <Field label="Annual gross income" value={inputs.income} onChange={v => setInputs(s => ({ ...s, income: clamp(v, 0, 2_000_000) }))} prefix="$" />
 
@@ -1916,18 +1924,19 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               </select>
             </div>
 
-            <div className="block">
+            {showMore && (<div className="block">
               <label htmlFor="fire-filing-status" className="mb-0.5 block text-[11px] font-medium leading-tight text-slate-300">Filing status</label>
               <select id="fire-filing-status" value={inputs.filingStatus} onChange={e => setInputs(s => ({ ...s, filingStatus: e.target.value as FilingStatus }))}
                 className="h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10">
                 <option value="single" className="bg-slate-900">Single</option>
                 <option value="married" className="bg-slate-900">Married</option>
               </select>
-            </div>
+            </div>)}
 
-            <Field label="401(k) contribution %" info="Percentage of salary contributed to a 401(k). Lowers taxable income." value={inputs.k401Pct} onChange={v => setInputs(s => ({ ...s, k401Pct: clamp(v, 0, 60) }))} suffix="%" />
+            {showMore && <Field label="401(k) contribution %" info="Percentage of salary contributed to a 401(k). Lowers taxable income." value={inputs.k401Pct} onChange={v => setInputs(s => ({ ...s, k401Pct: clamp(v, 0, 60) }))} suffix="%" />}
+            <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">SPENDING</div>
             <Field label="Monthly spending" info="Used to calculate your FIRE target. Higher spending = larger number." value={inputs.expensesMonthly} onChange={v => { setBudgetByCategory(false); setInputs(s => ({ ...s, expensesMonthly: clamp(v, 0, 200_000) })); }} prefix="$" />
-            <div className="sm:col-span-2">
+            {(showMore || inputs.retirementDifferent) && <div className="sm:col-span-2">
               <label className="flex items-center gap-2 text-xs text-slate-200">
                 <input
                   type="checkbox"
@@ -1948,7 +1957,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   </p>
                 </div>
               )}
-            </div>
+            </div>}
             <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">That&apos;s <span className="font-semibold text-slate-200">{money(annualExp, 0)}</span>/yr</div>
 
             {spendingPreset && (
@@ -1982,14 +1991,24 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               </div>
             )}
 
+            <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">SAVINGS AND INVESTING</div>
             <Field label="Current invested portfolio" value={inputs.currentPortfolio}
               onChange={v => setInputs(s => ({ ...s, currentPortfolio: clamp(v, 0, 20_000_000) }))} prefix="$" />
-            <Field label="Annual contributions (optional)" info="Leave blank to auto-estimate from income minus expenses." value={inputs.yearlyInvestment}
-              onChange={v => setInputs(s => ({ ...s, yearlyInvestment: clamp(v, 0, 5_000_000) }))} prefix="$" />
-            <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">Leave blank to estimate from after-tax income.</div>
+            {showMore && <Field label="Annual contributions (optional)" info="Leave blank to auto-estimate from income minus expenses." value={inputs.yearlyInvestment}
+              onChange={v => setInputs(s => ({ ...s, yearlyInvestment: clamp(v, 0, 5_000_000) }))} prefix="$" />}
+            {showMore && <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">Leave blank to estimate from after-tax income.</div>}
 
-            {/* ── Volatility preset (always visible) ────────────────────── */}
-            <div className="sm:col-span-2">
+            {!showMore && (
+              <div className="rounded-xl border border-white/10 bg-black/10 p-3 text-xs leading-5 text-slate-400 sm:col-span-2">
+                Using defaults: filing {inputs.filingStatus}, 401(k) {inputs.k401Pct}%, {inputs.volatility} returns, {inputs.withdrawalRatePct}% withdrawal, {inputs.inflationPct}% inflation. Saving is estimated from your after-tax income less spending.{" "}
+                <button type="button" onClick={() => setShowAllInputs(true)} className="font-semibold text-emerald-200 underline underline-offset-4 hover:text-emerald-100">
+                  Show all inputs
+                </button>
+              </div>
+            )}
+
+            {/* ── Volatility preset ─────────────────────────────────────── */}
+            {showMore && <div className="sm:col-span-2">
               <div className="mb-1 text-[11px] font-medium text-slate-300">Investment return assumptions</div>
               <div className="flex flex-wrap gap-2">
                 {(["conservative", "moderate", "aggressive"] as const).map(v => (
@@ -2007,7 +2026,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 Moderate {VOLATILITY_PRESETS.moderate.phase1}% / {VOLATILITY_PRESETS.moderate.phase2}% ·
                 Aggressive {VOLATILITY_PRESETS.aggressive.phase1}% / {VOLATILITY_PRESETS.aggressive.phase2}%
               </div>
-            </div>
+            </div>}
 
             {(spendingPreset === "chubby" || spendingPreset === "fat") && (
               <div className="rounded-xl border border-amber-300/20 bg-amber-300/10 p-3 text-xs leading-5 text-amber-100 sm:col-span-2">
@@ -2131,7 +2150,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             </>)}
 
             {/* ── Return / withdrawal / inflation settings ───────────────── */}
-            <details className="group rounded-xl border border-white/10 bg-black/10 p-3 sm:col-span-2">
+            {showMore && <details className="group rounded-xl border border-white/10 bg-black/10 p-3 sm:col-span-2">
               <summary className="cursor-pointer list-none text-xs font-medium text-slate-200">
                 <span className="mr-1 inline-block transition group-open:rotate-90">▸</span>
                 Withdrawal, inflation and projection settings
@@ -2144,7 +2163,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 <Field label="Phase 2 starts after (years)" info="Year the calculator switches from Phase 1 to Phase 2 return assumptions." value={inputs.phase2StartsYear} onChange={v => setInputs(s => ({ ...s, phase2StartsYear: Math.round(clamp(v, 0, 80)) }))} />
                 <Field label="Projection length (years)" value={inputs.maxYears} onChange={v => setInputs(s => ({ ...s, maxYears: Math.round(clamp(v, 1, 80)) }))} />
               </div>
-            </details>
+            </details>}
 
             {/* ── Move compare ───────────────────────────────────────────── */}
             <div className="mt-2 rounded-xl border border-white/10 bg-black/20 p-4 sm:col-span-2">
