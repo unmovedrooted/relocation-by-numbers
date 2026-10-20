@@ -1,5 +1,6 @@
 "use client";
 
+import MobileResultBar from "./MobileResultBar";
 import { Children, cloneElement, isValidElement, useState, useMemo, useEffect, useCallback, useId, type ReactNode } from "react";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
@@ -1210,6 +1211,7 @@ function USTab() {
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <MobileResultBar targetId="mortgage-results" summary={hp > 0 && grossMonthly > 0 ? `${money(totalMonthly)}/mo · ${verdict.title}` : null} />
       <div className="space-y-3">
         <Card>
           <H2 action={<ResetButton onReset={handleReset} />}>Home &amp; Loan Details</H2>
@@ -1344,8 +1346,7 @@ function USTab() {
         </div>
       </div>
 
-      <div className="space-y-3">
-        <MobileSummaryBar monthly={totalMonthly} />
+      <div id="mortgage-results" className="scroll-mt-4 space-y-3">
 
         <div className={`rounded-2xl border p-5 shadow-[0_6px_20px_rgba(15,23,42,0.07)] ${verdict.border} ${verdict.bg}`}>
           <div className="flex items-start justify-between gap-3">

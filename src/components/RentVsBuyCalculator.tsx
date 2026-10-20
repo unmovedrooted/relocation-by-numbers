@@ -1,5 +1,6 @@
 "use client";
 
+import MobileResultBar from "./MobileResultBar";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
 import { RENT_VS_BUY_DEFAULTS as D, simulateRentVsBuy, type RentVsBuyInput } from "../lib/rentVsBuy";
@@ -191,6 +192,7 @@ export default function RentVsBuyCalculator() {
 
   return (
     <div className="text-slate-900 dark:text-slate-100">
+      <MobileResultBar targetId="rvb-results" summary={inputsReady ? `${results.buyWins ? "Buying" : "Renting"} ahead by ${money(results.diff)} after ${yearsN} years` : null} />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* INPUTS */}
         <div className="space-y-3">
@@ -234,7 +236,7 @@ export default function RentVsBuyCalculator() {
         </div>
 
         {/* RESULTS */}
-        <div className="space-y-3">
+        <div id="rvb-results" className="scroll-mt-4 space-y-3">
           {!inputsReady ? (
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">
               Enter a home price and monthly rent to compare.

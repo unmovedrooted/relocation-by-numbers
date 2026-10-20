@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import ExampleResultsNotice from "./ExampleResultsNotice";
+import MobileResultBar from "./MobileResultBar";
 import { STATES, type StateCode } from "../lib/states";
 import { citiesForState, findCity } from "../lib/cities";
 import { isAllowedCompareRoute } from "../lib/compare";
@@ -985,6 +986,10 @@ export default function Calculator({
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <div className="text-slate-900 dark:text-slate-100">
+      <MobileResultBar
+        targetId="move-results"
+        summary={move ? `${money(Math.abs(move.expected.monthlyChange))} a month ${move.expected.monthlyChange >= 0 ? "more" : "less"} · ${money(move.expected.cashUpfront)} upfront` : null}
+      />
       {/* Mode toggle + Reset */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="text-sm font-semibold" />
@@ -1357,7 +1362,7 @@ export default function Calculator({
         </div>
 
         {/* ══════════════════════════ RESULTS ══════════════════════════ */}
-        <div className="space-y-3">
+        <div id="move-results" className="scroll-mt-4 space-y-3">
 
           <ExampleResultsNotice />
 

@@ -1,5 +1,6 @@
 "use client";
 
+import MobileResultBar from "./MobileResultBar";
 import ExampleResultsNotice from "./ExampleResultsNotice";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { usWageEffectiveRate } from "@/lib/usCityTax";
@@ -1030,6 +1031,7 @@ const relativeDifference =
   // ---------------------------------------------------------------------------
   return (
     <div className="text-slate-900 dark:text-slate-100">
+      <MobileResultBar targetId="intl-results" summary={results.salaryReady ? `${displayAmount(results.monthlyFlexibility, 0)} left each month · ${displayAmount(results.upfrontCashNeeded, 0)} upfront` : null} />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="text-sm font-semibold" />
         <div className="flex items-center gap-2">
@@ -1375,7 +1377,7 @@ const relativeDifference =
 
           {/* Main results */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
-            <div className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Results</div>
+            <div id="intl-results" className="mb-2 scroll-mt-4 text-sm font-semibold text-slate-900 dark:text-slate-100">Results</div>
             <ExampleResultsNotice className="mb-3" />
             <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
               {CARIBBEAN_TAX_ASSUMPTIONS_LABEL} · Planning estimates only

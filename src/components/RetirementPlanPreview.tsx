@@ -1,5 +1,6 @@
 "use client";
 
+import MobileResultBar from "./MobileResultBar";
 import { useEffect, useState, type FormEvent } from "react";
 import styles from "./RetirementPlanPreview.module.css";
 import { STATES } from "@/lib/states";
@@ -208,6 +209,7 @@ export default function RetirementPlanPreview() {
 
   return <div className={`${styles.planner} min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100`}>
   <div className="mx-auto w-full min-w-0 max-w-7xl space-y-6 px-4 py-8 sm:py-12">
+    <MobileResultBar targetId="plan-results" label="See projection" summary={result && last && !dirty ? `Ending assets ${money(last.endingPortfolio)} · ${result.allYearsFunded ? "funded" : "shortfall"}` : null} />
     <header className="mx-auto max-w-3xl space-y-3 text-center">
       <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Beta</p>
       <p className="text-xs text-slate-500 dark:text-slate-400">Assumptions updated: October 2026</p>
@@ -402,7 +404,7 @@ export default function RetirementPlanPreview() {
 
       {/* ══════════════════════════ RESULTS ══════════════════════════ */}
       {result && last && (
-        <div className="min-w-0 lg:sticky lg:top-6">
+        <div id="plan-results" className="min-w-0 scroll-mt-4 lg:sticky lg:top-6">
           {stayResult && moving && values.moveState && <div className="mb-4"><RetirementMoveResults withMove={result} stay={stayResult} from={values.state} to={values.moveState} moveYear={Number(values.moveYear)} /></div>}
           {/* ── HERO VERDICT ── */}
           <div key={runVersion} className={`animate-result-update rounded-2xl border p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition-opacity ${vs.border} ${vs.bg} ${dirty ? "opacity-70" : ""}`}>

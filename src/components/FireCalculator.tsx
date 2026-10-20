@@ -1,5 +1,6 @@
 "use client";
 
+import MobileResultBar from "./MobileResultBar";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import CalculatorNumberField from "./calculator-form/CalculatorNumberField";
@@ -1809,6 +1810,10 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
 
   return (
     <section className="space-y-6">
+      <MobileResultBar
+        targetId="fire-results"
+        summary={hasCoreInputs ? (fiAge !== null ? `FIRE at age ${fiAge} · ${result.yearsToFI} years away` : `FIRE not reached in ${inputs.maxYears} years`) : null}
+      />
 
       {/* ── Main grid ──────────────────────────────────────────────────────── */}
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -2240,7 +2245,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
         </div>
 
         {/* ── RIGHT: Results panel ────────────────────────────────────────── */}
-        <div className="space-y-4">
+        <div id="fire-results" className="scroll-mt-4 space-y-4">
           <div className="mt-6">
             <div role="tablist" className="inline-flex flex-wrap gap-2 rounded-2xl border border-white/10 bg-black/20 p-2">
               {(["milestone", "move", "savings"] as const).map(tab => (
