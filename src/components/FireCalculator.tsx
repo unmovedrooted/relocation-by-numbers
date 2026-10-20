@@ -21,6 +21,7 @@ import { STATES, type StateCode } from "@/lib/states";
 import { findCity, citiesForState } from "@/lib/cities";
 import { estimateNetAnnual, estimateNetBreakdown, EMPLOYEE_401K_LIMIT } from "@/lib/wageTax";
 import type { FilingStatus } from "@/lib/tax";
+import Link from "next/link";
 import { parseFireAbroadLink, parseFireLink } from "@/lib/fireLink";
 import { monthlyDepositFactor } from "@/lib/depositTiming";
 
@@ -1380,11 +1381,18 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
 
   const fiAge  = useMemo(() => result.yearsToFI === null ? null : inputs.age + result.yearsToFI, [inputs.age, result.yearsToFI]);
   // The FIRE number is in the dollars of the year you reach it; this adds what that is worth in today's dollars.
+  const [dollarView, setDollarView] = useState<"future" | "today">("future");
+  const inView = (amount: number, years: number | null | undefined) =>
+    dollarView === "today" && years != null ? amount / Math.pow(1 + (Number(inputs.inflationPct) || 0) / 100, years) : amount;
+  const dollarBasis = dollarView === "today" ? "in today's dollars" : "in the dollars of the year you reach it";
+  const fireNumberShown = Number.isFinite(result.fireNumber) ? money(inView(result.fireNumber, result.yearsToFI), 0) : "—";
+  const fullFireNumberShown = (r: { fireNumber: number; yearsToFI: number | null } | null | undefined) =>
+    r && Number.isFinite(r.fireNumber) ? money(inView(r.fireNumber, r.yearsToFI), 0) : "—";
   const fireNumberTodayNote = useMemo(() => {
-    if (result.yearsToFI === null || !Number.isFinite(result.fireNumber)) return "";
+    if (dollarView === "today" || result.yearsToFI === null || !Number.isFinite(result.fireNumber)) return "";
     const today = result.fireNumber / Math.pow(1 + (Number(inputs.inflationPct) || 0) / 100, result.yearsToFI);
     return ` That is about ${money(today, 0)} in today's dollars.`;
-  }, [result.fireNumber, result.yearsToFI, inputs.inflationPct]);
+  }, [dollarView, result.fireNumber, result.yearsToFI, inputs.inflationPct]);
   const fiYear = useMemo(() => result.yearsToFI === null ? null : new Date().getFullYear() + result.yearsToFI, [result.yearsToFI]);
 
   const projection = useMemo(() => buildProjection(inputs, netPath, result.yearsToFI, mode), [inputs, netPath, result.yearsToFI, mode]);
@@ -2002,6 +2010,22 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               MILESTONE TAB
           ═══════════════════════════════════════════════════════════════ */}
           <section className={activeResultTab === "milestone" ? "block" : "hidden"}>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+              <span>Show dollar amounts in:</span>
+              <div className="inline-flex rounded-lg border border-white/10 bg-white/5 p-0.5" role="group" aria-label="Dollar basis">
+                {([["future", "Year reached"], ["today", "Today's dollars"]] as const).map(([v, label]) => (
+                  <button
+                    key={v}
+                    type="button"
+                    aria-pressed={dollarView === v}
+                    onClick={() => setDollarView(v)}
+                    className={`rounded-md px-3 py-1.5 font-medium transition ${dollarView === v ? "bg-emerald-400/20 text-emerald-100" : "text-slate-300 hover:bg-white/10"}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 to-slate-950/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm space-y-4">
 
               {/* ── STANDARD ──────────────────────────────────────────────── */}
@@ -2013,7 +2037,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     : <>At your current pace you could reach financial independence at <strong>age {fiAge}</strong>, in about <strong>{result.yearsToFI} years</strong>, around <strong>{fiYear}</strong>.</>}
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Stat label="FIRE Number" value={hasCoreInputs && Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"} helper={`Based on ${inputs.withdrawalRatePct}% withdrawal rate, in the dollars of the year you reach it (spending grows with inflation).${fireNumberTodayNote}`} />
+                  <Stat label="FIRE Number" value={hasCoreInputs && fireNumberShown} helper={`Based on ${inputs.withdrawalRatePct}% withdrawal rate, ${dollarBasis} (spending grows with inflation).${fireNumberTodayNote}`} />
                   <Stat label="Years Until FIRE" value={hasCoreInputs ? result.yearsToFI === null ? "Not reached" : `${result.yearsToFI} yrs` : "—"} helper={fiYear ? `Est. FIRE year: ${fiYear}` : undefined} />
                   <Stat label="Estimated FIRE Age" value={hasCoreInputs ? (fiAge ?? "—") : "—"} />
                   {inputs.advanced
@@ -2074,14 +2098,14 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   <div className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-widest text-emerald-300">Lean FIRE</div>
                     <div className="mt-2 text-xs text-slate-400">{money(inputs.expensesMonthly, 0)}/mo spending</div>
-                    <div className="mt-3 text-2xl font-bold text-white">{Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"}</div>
+                    <div className="mt-3 text-2xl font-bold text-white">{fireNumberShown}</div>
                     <div className="mt-1 text-sm text-emerald-200">FIRE at age {fiAge ?? "—"}</div>
                     <div className="mt-1 text-xs text-slate-400">{result.yearsToFI !== null ? `${result.yearsToFI} years away` : "Not reached"}</div>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Full FIRE (+50% spending)</div>
                     <div className="mt-2 text-xs text-slate-400">{money(inputs.expensesMonthly * 1.5, 0)}/mo spending</div>
-                    <div className="mt-3 text-2xl font-bold text-white">{fullFireForLean && Number.isFinite(fullFireForLean.fireNumber) ? money(fullFireForLean.fireNumber, 0) : "—"}</div>
+                    <div className="mt-3 text-2xl font-bold text-white">{fullFireNumberShown(fullFireForLean)}</div>
                     <div className="mt-1 text-sm text-slate-300">FIRE at age {fullFiAgeForLean ?? "—"}</div>
                     <div className="mt-1 text-xs text-slate-400">{fullFireForLean?.yearsToFI !== null && fullFireForLean?.yearsToFI !== undefined ? `${fullFireForLean.yearsToFI} years away` : "Not reached"}</div>
                   </div>
@@ -2092,7 +2116,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   </div>
                 )}
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Stat label="Lean FIRE Number" value={hasCoreInputs && Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"} helper={`At ${inputs.withdrawalRatePct}% withdrawal, in the dollars of the year you reach it.${fireNumberTodayNote}`} highlight />
+                  <Stat label="Lean FIRE Number" value={hasCoreInputs && fireNumberShown} helper={`At ${inputs.withdrawalRatePct}% withdrawal, ${dollarBasis}.${fireNumberTodayNote}`} highlight />
                   <Stat label="Savings Rate" value={hasCoreInputs ? pct(savingsRate) : "—"} helper={`${money(netAnnual, 0)} est. net income`} />
                 </div>
                 <ProgressBar pct={progress.pct} label="Progress to Lean FIRE"
@@ -2138,13 +2162,13 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   <div className="rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-widest text-amber-300">Barista FIRE</div>
                     <div className="mt-2 text-xs text-slate-400">{money(inputs.baristaPartTimeIncome, 0)}/yr part-time income</div>
-                    <div className="mt-3 text-2xl font-bold text-white">{Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"}</div>
+                    <div className="mt-3 text-2xl font-bold text-white">{fireNumberShown}</div>
                     <div className="mt-1 text-sm text-amber-200">FIRE at age {fiAge ?? "—"}</div>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Full FIRE (no part-time income)</div>
-                    <div className="mt-2 text-xs text-slate-400">Portfolio covers all expenses, in the dollars of the year you reach it</div>
-                    <div className="mt-3 text-2xl font-bold text-white">{fullFireForBarista && Number.isFinite(fullFireForBarista.fireNumber) ? money(fullFireForBarista.fireNumber, 0) : "—"}</div>
+                    <div className="mt-2 text-xs text-slate-400">Portfolio covers all expenses, {dollarBasis}</div>
+                    <div className="mt-3 text-2xl font-bold text-white">{fullFireNumberShown(fullFireForBarista)}</div>
                     <div className="mt-1 text-sm text-slate-300">FIRE at age {fullFiAgeForBarista ?? "—"}</div>
                   </div>
                 </div>
@@ -2154,7 +2178,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   </div>
                 )}
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Stat label="Barista FIRE Number" value={hasCoreInputs && Number.isFinite(result.fireNumber) ? money(result.fireNumber, 0) : "—"} helper={`At ${inputs.withdrawalRatePct}% withdrawal on the gap, in the dollars of the year you reach it.${fireNumberTodayNote}`} highlight />
+                  <Stat label="Barista FIRE Number" value={hasCoreInputs && fireNumberShown} helper={`At ${inputs.withdrawalRatePct}% withdrawal on the gap, ${dollarBasis}.${fireNumberTodayNote}`} highlight />
                   <Stat label="Portfolio Gap Covered" value={hasCoreInputs ? money(Math.max(0, annualExp - (Number(inputs.baristaPartTimeIncome) || 0)), 0) : "—"} helper="Amount your portfolio must fund per year" />
                 </div>
                 <ProgressBar pct={progress.pct} label="Progress to Barista FIRE"
@@ -2192,6 +2216,25 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 <div className="text-xs leading-5 text-slate-400">
                   {MODE_NOTES[mode]} Returns use your selected volatility preset. Inflation and salary growth compound annually, and take-home pay is recalculated each year through the tax engine, with pay growing at the salary-growth rate and the tax brackets, deductions and 401(k) limit indexed to inflation. Each year&apos;s saving is added as twelve monthly end-of-month deposits. This is a planning estimate, not financial or tax advice.
                 </div>
+              </div>
+
+              {/* ── Next steps: compare a move, see the FIRE impact, then plan in detail ── */}
+              <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/5 p-4">
+                <div className="text-sm font-semibold text-white">Where to go next</div>
+                <ol className="mt-3 grid gap-2 sm:grid-cols-3">
+                  {[
+                    { n: 1, title: "Compare a move", body: "See what a city or state change does to rent, taxes and take-home pay.", href: "/compare", cta: "Compare cities" },
+                    { n: 2, title: "See the FIRE impact", body: "Rank cities by how much sooner they could get you to FIRE.", href: "/best-cities-for-fire", cta: "Best cities for FIRE" },
+                    { n: 3, title: "Plan it in detail", body: "Model withdrawals, taxes and Social Security year by year (Beta).", href: "/complete-retirement-plan", cta: "Complete Retirement Plan" },
+                  ].map((s) => (
+                    <li key={s.n} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                      <div className="text-[11px] font-semibold uppercase tracking-widest text-emerald-300">Step {s.n}</div>
+                      <div className="mt-1 text-sm font-semibold text-white">{s.title}</div>
+                      <p className="mt-1 text-xs leading-5 text-slate-400">{s.body}</p>
+                      <Link href={s.href} className="mt-2 inline-block text-xs font-semibold text-emerald-200 underline decoration-emerald-300/40 underline-offset-4 hover:text-emerald-100">{s.cta} →</Link>
+                    </li>
+                  ))}
+                </ol>
               </div>
             </div>
           </section>

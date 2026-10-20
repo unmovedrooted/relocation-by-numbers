@@ -214,6 +214,10 @@ export default function RetirementPlanPreview() {
       </p>
       <p role="note" className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200">{PLANNER_NOTICE}</p>
       <p className="text-sm text-slate-500 dark:text-slate-400">Example scenario shown. Replace it with your own numbers.</p>
+      <p className="text-sm text-slate-500 dark:text-slate-400">
+        Still deciding where to retire? <a className="font-semibold underline underline-offset-4 hover:no-underline" href="/compare">Compare cities</a> or{" "}
+        <a className="font-semibold underline underline-offset-4 hover:no-underline" href="/fire-calculator">check your FIRE timeline</a> first.
+      </p>
     </header>
 
     <form onSubmit={submit} className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_440px] lg:items-start">

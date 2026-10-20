@@ -293,6 +293,15 @@ export default function PairReport({ fromId, toId, path }: { fromId: string; toI
         </p>
       </section>
 
+      <section className={card} aria-labelledby="pr-next">
+        <h2 id="pr-next" className={h2}>Where to go next</h2>
+        <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
+          <li><Link className="font-semibold underline underline-offset-4 hover:no-underline" href="/fire-calculator">See the FIRE impact</Link>: enter your own numbers and use the Move tab to see how a different cost of living changes your timeline.</li>
+          <li><Link className="font-semibold underline underline-offset-4 hover:no-underline" href="/best-cities-for-fire">Rank cities for FIRE</Link>: see which cities get you there soonest.</li>
+          <li><Link className="font-semibold underline underline-offset-4 hover:no-underline" href="/complete-retirement-plan">Plan it in detail</Link>: model withdrawals, taxes and Social Security year by year (Beta).</li>
+        </ul>
+      </section>
+
       <section className={card} aria-labelledby="pr-faq">
         <h2 id="pr-faq" className={h2}>Frequently asked questions</h2>
         <dl className="mt-4 space-y-5 text-sm text-slate-600 dark:text-slate-400">
