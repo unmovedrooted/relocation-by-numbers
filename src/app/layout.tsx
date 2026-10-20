@@ -77,14 +77,14 @@ const INTERNATIONAL_NAV_LINKS = [
   { href: "/south-america-relocation-calculator", label: "South America" },
 ];
 
-const TOOLS_NAV_LINKS = [
-  { href: "/housing-affordability-calculator", label: "Affordability" },
-  { href: "/compare-cities", label: "Compare Cities" },
-  { href: "/one-income-relocation-calculator",  label: "Income Calculator" },
+const PAY_TAX_NAV_LINKS = [
   { href: "/income-tax-calculator", label: "Income Tax" },
-  { href: "/investment-calculator", label: "Investment" },
-  { href: "/mortgage-calculator",   label: "Mortgage" },
   { href: "/paycheck-calculator", label: "Paycheck" },
+];
+
+const HOUSING_NAV_LINKS = [
+  { href: "/housing-affordability-calculator", label: "Affordability" },
+  { href: "/mortgage-calculator",   label: "Mortgage" },
   { href: "/rent-vs-buy-calculator", label: "Rent vs. Buy" },
 ];
 
@@ -92,6 +92,7 @@ const RETIREMENT_NAV_LINKS = [
   { href: "/complete-retirement-plan", label: "Complete Retirement Plan" },
   { href: "/401k-calculator", label: "401(k) Calculator" },
   { href: "/hsa-calculator", label: "HSA Calculator" },
+  { href: "/investment-calculator", label: "Investment Growth" },
   { href: "/retirement-calculator", label: "Retirement Calculator" },
   { href: "/rmd-calculator", label: "RMD Calculator" },
   { href: "/roth-conversion-calculator", label: "Roth Conversion" },
@@ -99,8 +100,10 @@ const RETIREMENT_NAV_LINKS = [
 ];
 
 const CALCULATOR_NAV_LINKS = [
-  { href: "/", label: "Calculator" },
+  { href: "/", label: "U.S. Relocation Calculator" },
   { href: "/compare", label: "City Pair Comparisons" },
+  { href: "/compare-cities", label: "Compare Cities" },
+  { href: "/one-income-relocation-calculator", label: "One-Income Move" },
 ];
 
 // Flat list for mobile, dropdowns are a desktop-only affordance.
@@ -109,7 +112,8 @@ const NAV_LINKS = [
   ...CALCULATOR_NAV_LINKS,
   ...FIRE_NAV_LINKS,
   ...INTERNATIONAL_NAV_LINKS,
-  ...TOOLS_NAV_LINKS,
+  ...PAY_TAX_NAV_LINKS,
+  ...HOUSING_NAV_LINKS,
   ...RETIREMENT_NAV_LINKS,
 ];
 
@@ -169,10 +173,11 @@ export default function RootLayout({
                     <Link href="/explore" className="transition hover:text-slate-900 dark:hover:text-white">
                       Explore
                     </Link>
-                    <NavToolsDropdown label="Calculator" links={CALCULATOR_NAV_LINKS} />
+                    <NavToolsDropdown label="U.S. Relocation" links={CALCULATOR_NAV_LINKS} />
                     <NavToolsDropdown label="FIRE" links={FIRE_NAV_LINKS} />
                     <NavToolsDropdown label="International" links={INTERNATIONAL_NAV_LINKS} />
-                    <NavToolsDropdown label="Tools" links={TOOLS_NAV_LINKS} />
+                    <NavToolsDropdown label="Pay & Taxes" links={PAY_TAX_NAV_LINKS} />
+                    <NavToolsDropdown label="Housing" links={HOUSING_NAV_LINKS} />
                     <NavToolsDropdown label="Retirement" links={RETIREMENT_NAV_LINKS} />
                   </nav>
                   <ThemeToggle />

@@ -31,9 +31,15 @@ export const metadata: Metadata = {
 const START_HERE = [
   {
     href: "/",
-    title: "Relocation calculator",
-    description: "See what a move does to your take-home pay, taxes, housing and monthly budget, between U.S. cities or abroad.",
-    cta: "Compare a move",
+    title: "U.S. move",
+    description: "See what a move between U.S. cities does to your take-home pay, taxes, housing and monthly budget.",
+    cta: "Compare a U.S. move",
+  },
+  {
+    href: "/international-relocation",
+    title: "International move",
+    description: "Compare a U.S. city with a city abroad: income tax, rent, living costs and what it takes to move.",
+    cta: "Compare an international move",
   },
   {
     href: "/paycheck-calculator",
@@ -358,9 +364,9 @@ export default function ExplorePage() {
               Start here
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-300">
-              New to the site? These three tools answer the questions people ask most. The full list of calculators is below.
+              New to the site? These tools answer the questions people ask most. The full list of calculators is below.
             </p>
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
+            <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {START_HERE.map((tool) => (
                 <Link
                   key={tool.href}
