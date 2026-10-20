@@ -1,5 +1,6 @@
 "use client";
 
+import AssumptionsCard, { sourceFor } from "./AssumptionsCard";
 import ChangeNote from "./ChangeNote";
 import { useChangeNote } from "@/lib/useChangeNote";
 import MobileResultBar from "./MobileResultBar";
@@ -1528,6 +1529,27 @@ function USTab() {
         {thresholds && thresholdInput && (
           <RentVsBuyThresholdsCard thresholds={thresholds} homePrice={thresholdInput.homePrice} monthlyRent={thresholdInput.monthlyRent} appreciationPct={thresholdInput.appreciationPct} years={10} horizonChosen={false} />
         )}
+
+        <AssumptionsCard
+          replaceHint="Replace a planning assumption with a real quote, such as your lender's rate, your insurance estimate or your agent's selling cost, to firm up the answer."
+          items={[
+            { label: "Home price", value: money(hp), source: sourceFor(homePrice, "500000", "sample") },
+            { label: "Down payment", value: `${dpPc}%`, source: sourceFor(downPct, "20", "sample") },
+            { label: "Mortgage rate", value: `${rate}%`, source: sourceFor(rate, "6.75", "planning") },
+            { label: "Closing costs", value: `${closingCostPct}% of price`, source: sourceFor(closingCostPct, "2.5", "planning") },
+            { label: "Property tax rate", value: `${propertyTaxRate}% a year`, source: sourceFor(propertyTaxRate, "1.1", "planning") },
+            { label: "Home insurance", value: `${money(nz(insurance))} a month`, source: sourceFor(insurance, "150", "planning") },
+            { label: "Maintenance", value: `${maintenanceRate}% a year`, source: sourceFor(maintenanceRate, "1.0", "planning") },
+            { label: "Gross income", value: money(nz(grossIncome)), source: sourceFor(grossIncome, "120000", "sample") },
+            { label: "Savings", value: money(nz(currentSavings)), source: sourceFor(currentSavings, "80000", "sample") },
+            { label: "Monthly rent", value: money(nz(monthlyRent)), source: sourceFor(monthlyRent, "2500", "sample") },
+            { label: "Home appreciation", value: `${appreciation}% a year`, source: sourceFor(appreciation, "3.5", "planning") },
+            { label: "Rent growth", value: `${rentGrowth}% a year`, source: sourceFor(rentGrowth, "3.0", "planning") },
+            { label: "Investment return", value: `${investReturn}% a year`, source: sourceFor(investReturn, "7.0", "planning") },
+            { label: "Selling costs", value: `${sellingCostPct}% of price`, source: sourceFor(sellingCostPct, String(RVB.sellingCostPct), "planning") },
+            { label: "Marginal tax rate for the interest deduction", value: `${taxDeductRate}%`, source: sourceFor(taxDeductRate, String(RVB.taxBenefitPct), "planning") },
+          ]}
+        />
 
         <Card>
           <H2>Cash Needed to Close</H2>

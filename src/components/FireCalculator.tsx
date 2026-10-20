@@ -1,5 +1,6 @@
 "use client";
 
+import AssumptionsCard, { type AssumptionItem } from "./AssumptionsCard";
 import ChangeNote from "./ChangeNote";
 import { useChangeNote } from "@/lib/useChangeNote";
 import MobileResultBar from "./MobileResultBar";
@@ -2552,6 +2553,27 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   {MODE_NOTES[mode]} Returns use your selected volatility preset. Inflation and salary growth compound annually, and take-home pay is recalculated each year through the tax engine, with pay growing at the salary-growth rate and the tax brackets, deductions and 401(k) limit indexed to inflation. Each year&apos;s saving is added as twelve monthly end-of-month deposits. This is a planning estimate, not financial or tax advice.
                 </div>
               </div>
+
+              <AssumptionsCard
+                dark
+                replaceHint="Replace sample values with your own numbers. Planning assumptions are the site's starting estimates; change them in the settings if you have a view."
+                items={(() => {
+                  const start = defaultsForMode(mode, initialIncome, spendingPreset);
+                  const same = (a: unknown, b: unknown) => String(a) === String(b);
+                  return [
+                    { label: "Age", value: String(inputs.age), source: same(inputs.age, start.age) ? "sample" : "yours" },
+                    { label: "Annual gross income", value: money(inputs.income, 0), source: same(inputs.income, start.income) ? "sample" : "yours" },
+                    { label: "State", value: String(inputs.state).toUpperCase(), source: same(inputs.state, start.state) ? "sample" : "yours" },
+                    { label: "Monthly spending", value: money(inputs.expensesMonthly, 0), source: same(inputs.expensesMonthly, start.expensesMonthly) ? "sample" : "yours" },
+                    ...(inputs.retirementDifferent ? [{ label: "Monthly spending in retirement", value: money(inputs.retirementExpensesMonthly, 0), source: same(inputs.retirementExpensesMonthly, start.retirementExpensesMonthly) ? "planning" : "yours" } as const] : []),
+                    { label: "Invested portfolio", value: money(inputs.currentPortfolio, 0), source: same(inputs.currentPortfolio, start.currentPortfolio) ? "sample" : "yours" },
+                    { label: "Withdrawal rate", value: `${inputs.withdrawalRatePct}%`, source: same(inputs.withdrawalRatePct, start.withdrawalRatePct) ? "planning" : "yours" },
+                    { label: "Inflation", value: `${inputs.inflationPct}%`, source: same(inputs.inflationPct, start.inflationPct) ? "planning" : "yours" },
+                    { label: "Salary growth", value: `${inputs.salaryGrowthPct}%`, source: same(inputs.salaryGrowthPct, start.salaryGrowthPct) ? "planning" : "yours" },
+                    { label: "Investment returns", value: `${inputs.volatility} (${VOLATILITY_PRESETS[inputs.volatility].phase1}% then ${VOLATILITY_PRESETS[inputs.volatility].phase2}%)`, source: same(inputs.volatility, start.volatility) ? "planning" : "yours" },
+                  ] as AssumptionItem[];
+                })()}
+              />
 
               {/* ── Next steps: compare a move, see the FIRE impact, then plan in detail ── */}
               <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/5 p-4">

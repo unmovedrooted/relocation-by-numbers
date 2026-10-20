@@ -1,5 +1,6 @@
 "use client";
 
+import AssumptionsCard from "./AssumptionsCard";
 import ChangeNote from "./ChangeNote";
 import { useChangeNote } from "@/lib/useChangeNote";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -1556,6 +1557,29 @@ export default function Calculator({
               </div>
               <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Only figures marked as estimates move between cases; anything you entered stays fixed.</div>
             </div>
+          )}
+
+          {/* ── 1.6 ASSUMPTIONS ── */}
+          {move && (
+            <AssumptionsCard
+              replaceHint="City data and planning assumptions are starting estimates. Replace them with a real rent quote, your own bills and moving quotes in the fields on the left to firm up the answer."
+              items={[
+                { label: "Offer salary", value: money(n(salary)), source: "yours" },
+                { label: "Current salary", value: currentSalary.trim() === "" ? "Same as offer" : money(nz(currentSalary)), source: currentSalary.trim() === "" ? "planning" : "yours", note: currentSalary.trim() === "" ? "Enter your current salary if it differs" : undefined },
+                mode === "buy"
+                  ? { label: "Home price", value: money(nz(homePrice)), source: typed.home ? "yours" : "city" }
+                  : { label: "Monthly rent in the new city", value: money(nz(rentMonthly)), source: typed.rent ? "yours" : "city" },
+                { label: "Groceries", value: `${money(effectiveGroceries)}/mo`, source: colGroceries.trim() === "" ? "city" : "yours" },
+                { label: "Utilities", value: `${money(effectiveUtilities)}/mo`, source: colUtilities.trim() === "" ? "city" : "yours" },
+                { label: "Transportation", value: `${money(effectiveTransport)}/mo`, source: colTransport.trim() === "" ? "city" : "yours" },
+                { label: "Dining out", value: `${money(effectiveDining)}/mo`, source: colDining.trim() === "" ? "planning" : "yours" },
+                { label: "Subscriptions and misc", value: `${money(effectiveMisc)}/mo`, source: colMisc.trim() === "" ? "planning" : "yours" },
+                { label: "Movers or truck", value: money(move.oneTime.movers.amount), source: move.oneTime.movers.estimated ? "planning" : "yours" },
+                { label: "Travel and storage", value: money(move.oneTime.travel.amount), source: move.oneTime.travel.estimated ? "planning" : "yours" },
+                { label: "Furniture and setup", value: money(move.oneTime.setup.amount), source: move.oneTime.setup.estimated ? "planning" : "yours" },
+                { label: "Refundable deposit", value: money(move.oneTime.refundableDeposit.amount), source: move.oneTime.refundableDeposit.estimated ? "planning" : "yours" },
+              ]}
+            />
           )}
 
           {/* ── 2. RESULTS DETAIL ── */}
