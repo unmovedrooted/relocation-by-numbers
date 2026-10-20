@@ -32,14 +32,14 @@ export default function AssumptionsCard({ items, replaceHint, dark = false }: { 
       <p className={`mb-3 mt-1 text-xs leading-5 ${muted}`}>
         {replaceHint ?? "Replace a default with a real quote or your own figure to firm up the answer."}
       </p>
-      <ul className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
+      <ul className="space-y-2">
         {items.map((item) => (
-          <li key={item.label} className={`flex items-start justify-between gap-3 text-sm ${text}`}>
-            <span>
+          <li key={item.label} className={`flex flex-col gap-1 border-b border-black/5 pb-2 text-sm last:border-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-4 dark:border-white/10 ${text}`}>
+            <span className="min-w-0 sm:basis-2/5">
               {item.label}
               {item.note && <span className={`block text-[11px] ${muted}`}>{item.note}</span>}
             </span>
-            <span className="shrink-0 text-right">
+            <span className="min-w-0 sm:basis-3/5 sm:text-right">
               <span className="block font-semibold">{item.value}</span>
               <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${SOURCE_STYLE[item.source].cls}`}>{SOURCE_STYLE[item.source].label}</span>
             </span>
