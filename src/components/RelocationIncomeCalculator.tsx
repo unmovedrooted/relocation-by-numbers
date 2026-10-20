@@ -315,10 +315,12 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
 // ─── NEW: Money flow stacked bar (FIX 2) ──────────────────────────────────────
 
 function MoneyFlowBar({
-  grossMonthly, taxes, housing, living, flexibility,
+  grossMonthly, taxes, retirement = 0, housing, living, flexibility,
 }: {
   grossMonthly: number
   taxes:        number
+  /** Monthly 401(k) contribution taken before take-home pay. */
+  retirement?:  number
   housing:      number
   living:       number
   flexibility:  number
@@ -329,6 +331,7 @@ function MoneyFlowBar({
 
   const segments = [
     { label: 'Taxes',         value: taxes,                   width: clamp(taxes),                   color: 'bg-slate-400 dark:bg-slate-500' },
+    ...(retirement > 0.5 ? [{ label: 'Retirement savings (401(k))', value: retirement, width: clamp(retirement), color: 'bg-sky-400 dark:bg-sky-500' }] : []),
     { label: 'Housing',       value: housing,                  width: clamp(housing),                  color: housing / grossMonthly > 0.40 ? 'bg-rose-500' : housing / grossMonthly > 0.30 ? 'bg-amber-500' : 'bg-sky-400' },
     { label: 'Living costs',  value: living,                   width: clamp(living),                   color: 'bg-violet-400 dark:bg-violet-500' },
     { label: 'Flexibility',   value: Math.max(0, flexibility), width: clamp(Math.max(0, flexibility)), color: flexibility < 0 ? 'bg-red-500' : flexibility < 400 ? 'bg-amber-400' : 'bg-emerald-400' },
@@ -703,7 +706,9 @@ export default function RelocationIncomeCalculator() {
     } else if (verdictTwo === 'Safe' && verdictOne === 'Stretch') {
       insightMessage = `This move depends on two incomes. Losing one income would put serious strain on this budget, plan accordingly.`
     } else if (verdictTwo === 'Tight') {
-      insightMessage = `This is a stretch even on two incomes. Review your housing or cost assumptions, or consider a higher second income threshold.`
+      insightMessage = verdictOne === 'Stretch'
+        ? `This move is a stretch on one income and still tight on two. Review your housing or cost assumptions, or consider a higher second income.`
+        : `This move is tight on both one income and two. Review your housing or cost assumptions, or consider a higher second income.`
     } else {
       insightMessage = `This city is a financial stretch. Consider a lower-cost area or a larger combined income before committing to this move.`
     }
@@ -1191,7 +1196,9 @@ export default function RelocationIncomeCalculator() {
           </div>
         </div>
         <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
-          The refundable deposit counts toward the cash you need but not toward what the move costs. Everything else is spent.
+          {housingMode === 'buy'
+            ? 'The down payment counts toward the cash you need but not toward what the move costs, because it becomes home equity. Closing costs and moving expenses are spent.'
+            : 'The refundable deposit counts toward the cash you need but not toward what the move costs. Everything else is spent.'}
         </p>
 
         <Divider />
@@ -1263,6 +1270,7 @@ export default function RelocationIncomeCalculator() {
               fireHref={results.fireHref}
               retirementHref={`/retirement-state-tax?from=${currentState}&to=${targetState}`}
               inputIds={MOVE_INPUT_IDS}
+              buying={housingMode === 'buy'}
             />
 
             {/* Card 1: Verdict */}
@@ -1398,6 +1406,7 @@ export default function RelocationIncomeCalculator() {
               <MoneyFlowBar
                 grossMonthly={results.grossMonthlyOne}
                 taxes={results.taxesOne / 12}
+                retirement={Math.max(0, results.grossMonthlyOne - results.taxesOne / 12 - results.netMonthlyOne)}
                 housing={results.housingCost}
                 living={results.totalLiving}
                 flexibility={results.flexibilityOne}

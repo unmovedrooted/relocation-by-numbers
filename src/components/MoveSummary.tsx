@@ -29,7 +29,7 @@ export const MOVE_INPUT_IDS: Record<string, string> = {
 const signed = (n: number) => (n >= 0 ? '+' : '−') + fmt(Math.abs(n))
 
 export default function MoveSummary({
-  move, fromName, toName, hasCurrentIncome, inputIds, fireHref, retirementHref,
+  move, fromName, toName, hasCurrentIncome, inputIds, fireHref, retirementHref, buying = false,
 }: {
   move: MoveResult
   fromName: string
@@ -41,6 +41,8 @@ export default function MoveSummary({
   fireHref?: string
   /** Link to the retirement-state tax view for the two states. */
   retirementHref?: string
+  /** True when the move is a home purchase: the cash then is a down payment, closing costs and moving expenses, not a rental deposit. */
+  buying?: boolean
 }) {
   const e = move.expected
   const rows = [
@@ -80,7 +82,7 @@ export default function MoveSummary({
           <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4">
             <p className="text-xs text-slate-500 dark:text-slate-400">Cash needed upfront</p>
             <p className="mt-1 whitespace-nowrap text-xl font-semibold tabular-nums sm:text-2xl text-slate-900 dark:text-white">{fmt(e.cashUpfront)}</p>
-            <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">Includes a refundable deposit. Range {fmt(move.high.cashUpfront)} to {fmt(move.low.cashUpfront)}</p>
+            <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">{buying ? 'Down payment (it becomes home equity), closing costs and moving expenses. Range' : 'Includes a refundable deposit. Range'} {fmt(move.high.cashUpfront)} to {fmt(move.low.cashUpfront)}</p>
           </div>
           <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4">
             <p className="text-xs text-slate-500 dark:text-slate-400">Time to earn back the cost</p>

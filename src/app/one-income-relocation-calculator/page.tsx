@@ -178,7 +178,7 @@ export default function Page() {
       <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:from-slate-950 dark:to-slate-900 dark:text-slate-100">
 
         {/* ── HERO ───────────────────────────────────────────────────────────── */}
-        <header className="relative overflow-hidden py-14 text-center sm:py-20">
+        <header className="relative overflow-hidden py-8 text-center sm:py-10">
           {/* Subtle radial glow, gives depth without being loud */}
           <div
             aria-hidden
@@ -209,11 +209,15 @@ export default function Page() {
 
             {/* Trust line */}
             <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
-              Real tax estimates · City-level housing data · 100+ US cities · Free, no signup
+              Real tax estimates · City-level housing data · 100+ US cities · Free, no signup · Takes about a minute
             </p>
-            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-              Takes less than 60 seconds
-            </p>
+
+            <a
+              href="#calculator"
+              className="mt-5 inline-flex items-center rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700"
+            >
+              Start the calculator ↓
+            </a>
 
             {/* Feature pills */}
             <div className="mt-5 flex flex-wrap justify-center gap-2">
@@ -271,65 +275,6 @@ export default function Page() {
 
         <div className="mx-auto max-w-5xl space-y-10 px-4 pb-16 pt-8 sm:px-6">
 
-          {/* ── WHO THIS IS FOR ─────────────────────────────────────────────── */}
-          <section aria-label="Who this calculator is for">
-            <h2 className="mb-4 text-center text-[11px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-              This calculator is for you if…
-            </h2>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {[
-                {
-                  icon: '💼',
-                  title: 'One job secured, one pending',
-                  body: 'You\'re relocating for one offer and not sure when the second income arrives.',
-                },
-                {
-                  icon: '🏡',
-                  title: 'Moving before the plan is set',
-                  body: 'You need to know if the move works at all on one salary, just in case.',
-                },
-                {
-                  icon: '🧍',
-                  title: 'Solo mover pressure-testing',
-                  body: 'You want to see exactly how far your paycheck goes in the new city.',
-                },
-              ].map(({ icon, title, body }) => (
-                <div
-                  key={title}
-                  className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
-                >
-                  <span className="text-2xl">{icon}</span>
-                  <h3 className="mt-3 text-sm font-semibold text-slate-900 dark:text-white">{title}</h3>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{body}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* ── KILLER FEATURE HOOK ─────────────────────────────────────────── */}
-          <div className="rounded-2xl border border-violet-200 bg-violet-50 px-5 py-4 dark:border-violet-800/50 dark:bg-violet-950/30">
-            <div className="flex items-start gap-3 sm:items-center">
-              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-600 text-xs font-bold text-white sm:mt-0">
-                ↓
-              </span>
-              <p className="text-sm text-violet-900 dark:text-violet-200">
-                <strong>See instantly:</strong> the exact second income your household needs to make this move work, down to the dollar, after taxes.
-              </p>
-            </div>
-          </div>
-
-          {/* ── TOP AD SLOT, removed, add back when ready ──────────────────── */}
-
-          {/* ── PREVIEW RESULT ──────────────────────────────────────────────── */}
-          {/* Rotates across 3 real city scenarios, gives a taste before any input */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-            <span className="mr-1.5 font-semibold text-slate-900 dark:text-white">
-              Example:
-            </span>
-            A {example.income} salary in {example.city} becomes {example.net}/month after taxes, but housing alone can take {example.housing},{' '}
-            {example.note}
-          </div>
-
           {/* ── CALCULATOR ──────────────────────────────────────────────────── */}
           <div id="calculator">
             <RelocationIncomeCalculator />
@@ -356,13 +301,72 @@ export default function Page() {
             If this move doesn&apos;t work on one income, you need to know before you commit, not after.
           </p>
 
+          {/* ── WHO THIS IS FOR ─────────────────────────────────────────────── */}
+          <section aria-label="Who this calculator is for">
+            <h2 className="mb-4 text-center text-[11px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+              This calculator is for you if…
+            </h2>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {[
+                {
+                  icon: '💼',
+                  title: 'One job secured, one pending',
+                  body: 'You\'re relocating for one offer and not sure when the second income arrives.',
+                },
+                {
+                  icon: '🏡',
+                  title: 'Moving before the plan is set',
+                  body: 'You need to know if the move works at all on one salary, just in case.',
+                },
+                {
+                  icon: '🧍',
+                  title: 'Solo mover pressure-testing',
+                  body: 'You want to see how far your paycheck goes in the new city.',
+                },
+              ].map(({ icon, title, body }) => (
+                <div
+                  key={title}
+                  className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <span className="text-2xl">{icon}</span>
+                  <h3 className="mt-3 text-sm font-semibold text-slate-900 dark:text-white">{title}</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{body}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ── KILLER FEATURE HOOK ─────────────────────────────────────────── */}
+          <div className="rounded-2xl border border-violet-200 bg-violet-50 px-5 py-4 dark:border-violet-800/50 dark:bg-violet-950/30">
+            <div className="flex items-start gap-3 sm:items-center">
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-600 text-xs font-bold text-white sm:mt-0">
+                ↓
+              </span>
+              <p className="text-sm text-violet-900 dark:text-violet-200">
+                <strong>Estimate</strong> the second income your household would need to make this move work, after taxes.
+              </p>
+            </div>
+          </div>
+
+          {/* ── TOP AD SLOT, removed, add back when ready ──────────────────── */}
+
+          {/* ── PREVIEW RESULT ──────────────────────────────────────────────── */}
+          {/* Rotates across 3 real city scenarios, gives a taste before any input */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+            <span className="mr-1.5 font-semibold text-slate-900 dark:text-white">
+              Example:
+            </span>
+            A {example.income} salary in {example.city} becomes {example.net}/month after taxes, but housing alone can take {example.housing},{' '}
+            {example.note}
+          </div>
+
           {/* ── HOW IT WORKS ─────────────────────────────────────────────────  */}
           <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
             <h2 className="text-base font-semibold tracking-tight text-slate-900 dark:text-white sm:text-lg">
               How to use this calculator
             </h2>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Four inputs. One clear verdict.
+              Four steps. One clear verdict.
             </p>
 
             <ol className="mt-5 space-y-4">
@@ -385,7 +389,7 @@ export default function Page() {
                 {
                   step: '04',
                   title: 'Read your verdict',
-                  body: 'Get Safe, Tight, or Stretch, plus the exact second income needed to make the move work.',
+                  body: 'Get Safe, Tight, or Stretch, plus an estimate of the second income needed to make the move work.',
                 },
               ].map(({ step, title, body }) => (
                 <li key={step} className="flex gap-4">

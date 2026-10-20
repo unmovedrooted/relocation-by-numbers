@@ -1383,6 +1383,7 @@ export default function Calculator({
               toName={findCity(toCityId)?.name || stateName}
               hasCurrentIncome={currentSalary.trim() !== ""}
               inputIds={MOVE_IDS}
+              buying={mode === "buy"}
             />
           )}
         </div>
