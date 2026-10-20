@@ -1474,7 +1474,7 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
 
   const fiAge  = useMemo(() => result.yearsToFI === null ? null : inputs.age + result.yearsToFI, [inputs.age, result.yearsToFI]);
   // The FIRE number is in the dollars of the year you reach it; this adds what that is worth in today's dollars.
-  const [dollarView, setDollarView] = useState<"future" | "today">("future");
+  const [dollarView, setDollarView] = useState<"future" | "today">("today");
   const inView = (amount: number, years: number | null | undefined) =>
     dollarView === "today" && years != null ? amount / Math.pow(1 + (Number(inputs.inflationPct) || 0) / 100, years) : amount;
   const dollarBasis = dollarView === "today" ? "in today's dollars" : "in the dollars of the year you reach it";
@@ -1803,6 +1803,23 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             </div>
           </div>
 
+          {(linkedMove || abroadLabel) && (
+            <div className="mt-3 rounded-lg border border-violet-300/30 bg-violet-300/10 px-3 py-2 text-xs leading-5 text-violet-100" role="note">
+              <div className="font-semibold">Carried over from your move comparison. Check these before you rely on the result:</div>
+              <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                {linkedMove && (
+                  <>
+                    <li>Income {money(inputs.income, 0)} a year in {inputs.state ? inputs.state.toUpperCase() : "your state"}, filing {inputs.filingStatus}, 401(k) {inputs.k401Pct}%</li>
+                    <li>Spending {money(inputs.expensesMonthly, 0)}/mo now, {money(inputs.movedExpensesMonthly, 0)}/mo after the move</li>
+                    {inputs.movedState && <li>After the move: {inputs.movedIncome > 0 ? `income ${money(inputs.movedIncome, 0)} a year in ` : ""}{inputs.movedState.toUpperCase()}</li>}
+                    {inputs.movedCost > 0 && <li>One-time moving cost {money(inputs.movedCost, 0)}, paid from savings</li>}
+                  </>
+                )}
+                {abroadLabel && <li>Spending after moving to {abroadLabel}: {money(inputs.movedExpensesMonthly, 0)}/mo. Your income, location and portfolio are not carried over; enter them below.</li>}
+                <li>Not carried over: your investments and savings. Enter your portfolio below.</li>
+              </ul>
+            </div>
+          )}
           {carriedOver && (
             <p className="mt-3 rounded-lg border border-emerald-400/20 bg-emerald-400/5 px-3 py-2 text-xs leading-5 text-emerald-100">
               Your age, income, location and portfolio carried over from your last FIRE page. This style uses its own spending ({money(inputs.expensesMonthly, 0)}/mo) and a {inputs.withdrawalRatePct}% withdrawal rate; change them below if you want.
@@ -2041,11 +2058,20 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             </>)}
 
             {/* ── Return / withdrawal / inflation settings ───────────────── */}
-            <Field label="Withdrawal rate (%)" info="Percentage of portfolio withdrawn yearly in retirement. 4% is common." value={inputs.withdrawalRatePct} onChange={v => setInputs(s => ({ ...s, withdrawalRatePct: clamp(v, 2, 6) }))} suffix="%" />
-            <Field label="Inflation (%)" value={inputs.inflationPct} onChange={v => setInputs(s => ({ ...s, inflationPct: clamp(v, 0, 10) }))} suffix="%" />
-            <Field label="Salary growth (%)" value={inputs.salaryGrowthPct} onChange={v => setInputs(s => ({ ...s, salaryGrowthPct: clamp(v, 0, 15) }))} suffix="%" />
-            <Field label="Phase 2 starts after (years)" info="Year the calculator switches from Phase 1 to Phase 2 return assumptions." value={inputs.phase2StartsYear} onChange={v => setInputs(s => ({ ...s, phase2StartsYear: Math.round(clamp(v, 0, 80)) }))} />
-            <Field label="Projection length (years)" value={inputs.maxYears} onChange={v => setInputs(s => ({ ...s, maxYears: Math.round(clamp(v, 1, 80)) }))} />
+            <details className="group rounded-xl border border-white/10 bg-black/10 p-3 sm:col-span-2">
+              <summary className="cursor-pointer list-none text-xs font-medium text-slate-200">
+                <span className="mr-1 inline-block transition group-open:rotate-90">▸</span>
+                Withdrawal, inflation and projection settings
+                <span className="ml-2 font-normal text-slate-400">{inputs.withdrawalRatePct}% withdrawal · {inputs.inflationPct}% inflation · {inputs.salaryGrowthPct}% salary growth</span>
+              </summary>
+              <div className="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-2">
+                <Field label="Withdrawal rate (%)" info="Percentage of portfolio withdrawn yearly in retirement. 4% is common." value={inputs.withdrawalRatePct} onChange={v => setInputs(s => ({ ...s, withdrawalRatePct: clamp(v, 2, 6) }))} suffix="%" />
+                <Field label="Inflation (%)" value={inputs.inflationPct} onChange={v => setInputs(s => ({ ...s, inflationPct: clamp(v, 0, 10) }))} suffix="%" />
+                <Field label="Salary growth (%)" value={inputs.salaryGrowthPct} onChange={v => setInputs(s => ({ ...s, salaryGrowthPct: clamp(v, 0, 15) }))} suffix="%" />
+                <Field label="Phase 2 starts after (years)" info="Year the calculator switches from Phase 1 to Phase 2 return assumptions." value={inputs.phase2StartsYear} onChange={v => setInputs(s => ({ ...s, phase2StartsYear: Math.round(clamp(v, 0, 80)) }))} />
+                <Field label="Projection length (years)" value={inputs.maxYears} onChange={v => setInputs(s => ({ ...s, maxYears: Math.round(clamp(v, 1, 80)) }))} />
+              </div>
+            </details>
 
             {/* ── Move compare ───────────────────────────────────────────── */}
             <div className="mt-2 rounded-xl border border-white/10 bg-black/20 p-4 sm:col-span-2">
@@ -2146,7 +2172,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
               <span>Show dollar amounts in:</span>
               <div className="inline-flex rounded-lg border border-white/10 bg-white/5 p-0.5" role="group" aria-label="Dollar basis">
-                {([["future", "Year reached"], ["today", "Today's dollars"]] as const).map(([v, label]) => (
+                {([["today", "Today's dollars"], ["future", "Year reached"]] as const).map(([v, label]) => (
                   <button
                     key={v}
                     type="button"
