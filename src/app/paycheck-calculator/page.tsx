@@ -123,14 +123,14 @@ export default function Page() {
       <Script id="sd-breadcrumb" type="application/ld+json" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:from-slate-950 dark:to-slate-900 dark:text-slate-100">
-        <header className="py-10 text-center">
+        <header className="py-5 text-center">
           <div className="mx-auto max-w-4xl px-4 sm:px-6">
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Paycheck Calculator</h1>
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
               See your take-home pay after federal, Social Security, Medicare, and state taxes, with a full breakdown
               of where every dollar of your paycheck goes.
             </p>
-            <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+            <p className="mx-auto mt-2 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
               Salary or hourly, any state, with 401(k) impact, 2026 tax rules.
             </p>
             <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">
@@ -138,12 +138,6 @@ export default function Page() {
               <span className="mx-2" aria-hidden="true">·</span>
               Planning estimates only. Results depend on your inputs, tax status, and assumptions.
             </div>
-            <div className="mt-5 flex flex-wrap justify-center gap-2">
-              {["Federal + FICA + state", "Salary or hourly", "By state", "401(k) impact"].map((f) => (
-                <span key={f} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">{f}</span>
-              ))}
-            </div>
-            <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-cyan-600/80" />
           </div>
         </header>
 

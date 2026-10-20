@@ -36,8 +36,8 @@ export default async function FireCalculatorPage({ searchParams }: PageProps) {
   const initialIncome = parseIncomeParam(income);
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-6xl px-4 py-10 space-y-10">
-        <header className="space-y-4">
+      <div className="mx-auto max-w-6xl px-4 py-6 space-y-6">
+        <header className="space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
             <span className="h-2 w-2 rounded-full bg-emerald-400" />
             FIRE Calculator

@@ -106,10 +106,10 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      name: "What is included in the cash to close estimate?",
+      name: "What is included in the cash needed before buying?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "The cash to close estimate includes: (1) your down payment, (2) estimated closing costs (typically 2–5% of the loan for US purchases, you can adjust this percentage), and (3) a 3-month planning buffer representing common post-closing reserve targets. The 3-month buffer is a planning guideline, not a universal lender requirement. Your official Loan Estimate will show the exact closing figure.",
+        text: "The calculator shows cash in three parts: (1) down payment and closing costs, which is the cash to close (closing costs are typically 2–5% of the home price for US purchases, and you can adjust the percentage), (2) moving and setup expenses, which are your own estimate, and (3) recommended cash reserves, a 3-month planning buffer of housing costs. The total of the three is the cash needed before buying. The reserve is a planning guideline, not a universal lender requirement. Your official Loan Estimate will show the exact closing figure.",
       },
     },
     {
@@ -180,7 +180,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What's included in cash to close?",
-    a: "Down payment, estimated closing costs, and a 3-month planning buffer. The buffer is a planning guideline, not a universal lender requirement.",
+    a: "Cash to close is the down payment plus estimated closing costs. The calculator adds your moving and setup expenses and a 3-month reserve of housing costs to show the total cash needed before buying. The reserve is a planning guideline, not a universal lender requirement.",
   },
   {
     q: "How does rent vs buy break-even work?",
@@ -231,26 +231,26 @@ export default function Page() {
       />
 
       <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:from-slate-950 dark:to-slate-900 dark:text-slate-100">
-        <header className="py-10 text-center">
+        <header className="py-5 text-center">
           <div className="mx-auto max-w-4xl px-4 sm:px-6">
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
               Mortgage Calculator for US &amp; International Buyers
             </h1>
 
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
               Monthly payments, cash to close, rent vs buy break-even, and affordability, for US
               and international home buyers.
             </p>
 
-            <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+            <p className="mx-auto mt-2 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
               Planning estimates for monthly payment, cash to close, affordability, and rent vs buy.
             </p>
 
-            <div className="mt-4 text-xs text-slate-500 dark:text-slate-400">
+            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
               Assumptions updated: October 2026
             </div>
 
-            <div className="mt-3">
+            <div className="mt-1">
               <Link
                 href="/methodology"
                 className="text-sm font-medium text-slate-700 underline underline-offset-4 hover:no-underline dark:text-slate-300"
@@ -259,18 +259,7 @@ export default function Page() {
               </Link>
             </div>
 
-            <div className="mt-5 flex flex-wrap justify-center gap-2">
-              {["Cash to close", "Rent vs buy", "Refinance", "Buying abroad"].map((f) => (
-                <span
-                  key={f}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
-                >
-                  {f}
-                </span>
-              ))}
-            </div>
 
-            <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-violet-600/80" />
           </div>
         </header>
 
@@ -334,7 +323,7 @@ export default function Page() {
                     },
                     {
                       title: "Cash to close",
-                      body: "Down payment, closing costs, and a planning buffer in one number.",
+                      body: "Down payment and closing costs, plus moving expenses and a cash reserve, shown as three separate lines with a total.",
                     },
                     {
                       title: "Rent vs buy break-even",

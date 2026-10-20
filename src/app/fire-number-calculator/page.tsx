@@ -36,9 +36,9 @@ export default async function Page({ searchParams }: PageProps) {
   const initialIncome = parseIncomeParam(income);
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-5xl px-4 py-10 space-y-10">
+      <div className="mx-auto max-w-5xl px-4 py-6 space-y-6">
 
-        <header className="space-y-3">
+        <header className="space-y-2">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
             FIRE Number Calculator
           </h1>

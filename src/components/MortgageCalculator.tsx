@@ -1431,9 +1431,9 @@ function USTab() {
           </div>
           <div className="grid grid-cols-2 gap-4 border-t border-white/10 dark:border-slate-200 pt-4">
             <div>
-              <div className="text-xs text-slate-400 dark:text-slate-500">Cash to close</div>
+              <div className="text-xs text-slate-400 dark:text-slate-500">Cash needed before buying</div>
               <div className="text-xl font-bold">{money(totalCashNeeded)}</div>
-              <div className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">down + closing + 3-mo buffer</div>
+              <div className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">down payment and closing, moving, reserves</div>
             </div>
             <div>
               <div className="text-xs text-slate-400 dark:text-slate-500">Income for 28% DTI</div>
@@ -1532,7 +1532,7 @@ function USTab() {
 
 
         <Card>
-          <H2>Cash Needed to Close</H2>
+          <H2>Cash Needed Before Buying</H2>
           <div className="space-y-2 text-sm">
             {[
               { label: "Down payment and closing costs", value: lenderCashToClose, sub: `${dpPc}% down (${money(dp)}) plus estimated closing costs of ${nz(closingCostPct)}% (${money(estimatedClosing)})` },

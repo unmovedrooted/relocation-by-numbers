@@ -73,24 +73,23 @@ export default function Page() {
       <Script id="sd-breadcrumb" type="application/ld+json" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:from-slate-950 dark:to-slate-900 dark:text-slate-100">
-        <header className="py-10 text-center">
+        <header className="py-5 text-center">
           <div className="mx-auto max-w-4xl px-4 sm:px-6">
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
               Compare Cities Side by Side
             </h1>
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
               One income, up to three destinations. See net income, taxes, housing costs, and monthly flexibility
               for each city at once.
             </p>
-            <p className="mx-auto mt-3 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+            <p className="mx-auto mt-2 max-w-xl text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
               US, Caribbean, Asia, Europe, South America, or worldwide, pick a region and compare.
             </p>
-            <div className="mt-3">
+            <div className="mt-1">
               <Link href="/methodology" className="text-sm font-medium text-slate-700 underline underline-offset-4 hover:no-underline dark:text-slate-300">
                 See methodology
               </Link>
             </div>
-            <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-fuchsia-600/80" />
           </div>
         </header>
 

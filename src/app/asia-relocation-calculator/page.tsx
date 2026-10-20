@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:from-slate-950 dark:to-slate-900 dark:text-slate-100">
-      <header className="py-10 text-center">
+      <header className="py-5 text-center">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
             Asia &amp; Middle East Relocation Calculator
@@ -39,7 +39,7 @@ export default function Page() {
             Compare Cost of Living, Taxes, Rent &amp; Moving Budget by City
           </p>
 
-          <p className="mx-auto mt-3 max-w-4xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
+          <p className="mx-auto mt-2 max-w-4xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
             Compare taxes, rent, living costs, take-home pay, and one-time moving expenses
             across Southeast Asia, East Asia, South Asia, and the Gulf, including Bangkok,
             Tokyo, Singapore, Manila, Taipei, Hong Kong, Bangalore, Shanghai, Dubai, Doha,
@@ -59,7 +59,6 @@ export default function Page() {
             </Link>
           </div>
 
-          <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-rose-600/80" />
         </div>
       </header>
 

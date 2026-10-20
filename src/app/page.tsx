@@ -58,7 +58,7 @@ const EXAMPLES = [
 export default function Page() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 dark:from-slate-950 dark:to-slate-900 dark:text-slate-100">
-      <header className="py-10 text-center">
+      <header className="py-5 text-center">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
             Relocation Calculator by State
@@ -68,7 +68,7 @@ export default function Page() {
             Compare Salary, Taxes &amp; Cost of Living Across All 50 States
           </p>
 
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
+          <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
             See how far your salary really goes after state income taxes, housing costs,
             and everyday expenses, before you move.
           </p>
@@ -86,7 +86,6 @@ export default function Page() {
             </span>
           </div>
 
-          <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-blue-600/80" />
         </div>
       </header>
 
