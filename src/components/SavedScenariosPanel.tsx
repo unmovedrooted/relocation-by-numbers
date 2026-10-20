@@ -61,7 +61,8 @@ export default function SavedScenariosPanel({
         <div>
           <div className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-400">Save this scenario</div>
           <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">
-            Bookmark your current inputs on this device so you can come back to them or compare with other saved scenarios.
+            Keep your current inputs so you can come back to them or compare with other saved scenarios. Saves stay in this browser only and will not follow you to another device; use Share to send a link.{" "}
+            <a className="font-semibold underline underline-offset-4 hover:no-underline" href="/my-scenarios">My scenarios</a>
           </div>
         </div>
         <button

@@ -206,7 +206,7 @@ export default function RentVsBuyCalculator() {
     });
 
   const getCurrentScenario = () => ({
-    label: "Rent vs. Buy",
+    label: `Rent vs. Buy: ${money(results.input.homePrice)} home vs ${money(results.input.monthlyRent)} rent`,
     url: typeof window !== "undefined" ? window.location.pathname + window.location.search : "/",
     subtitle: `${results.buyWins ? "Buy" : "Rent"} +${money(results.diff, 0)} over ${yearsN}y`,
     source: "RentVsBuy",

@@ -107,6 +107,8 @@ const CALCULATOR_NAV_LINKS = [
 ];
 
 // Flat list for mobile, dropdowns are a desktop-only affordance.
+const MY_SCENARIOS_LINK = { href: "/my-scenarios", label: "My scenarios" };
+
 const NAV_LINKS = [
   EXPLORE_LINK,
   ...CALCULATOR_NAV_LINKS,
@@ -115,6 +117,7 @@ const NAV_LINKS = [
   ...PAY_TAX_NAV_LINKS,
   ...HOUSING_NAV_LINKS,
   ...RETIREMENT_NAV_LINKS,
+  MY_SCENARIOS_LINK,
 ];
 
 export default function RootLayout({
@@ -179,6 +182,9 @@ export default function RootLayout({
                     <NavToolsDropdown label="Pay & Taxes" links={PAY_TAX_NAV_LINKS} />
                     <NavToolsDropdown label="Housing" links={HOUSING_NAV_LINKS} />
                     <NavToolsDropdown label="Retirement" links={RETIREMENT_NAV_LINKS} />
+                    <Link href={MY_SCENARIOS_LINK.href} className="transition hover:text-slate-900 dark:hover:text-white">
+                      {MY_SCENARIOS_LINK.label}
+                    </Link>
                   </nav>
                   <ThemeToggle />
                   <MobileNavigation links={NAV_LINKS} />
