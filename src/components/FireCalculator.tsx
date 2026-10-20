@@ -54,6 +54,9 @@ type Inputs = {
   age:              number;
   income:           number;
   expensesMonthly:  number;
+  /** When true, the FIRE target uses retirementExpensesMonthly (today's dollars) while saving before FIRE still uses expensesMonthly. */
+  retirementDifferent: boolean;
+  retirementExpensesMonthly: number;
   state:            StateChoice;
   filingStatus:     FilingStatus;
   k401Pct:          number;
@@ -249,6 +252,7 @@ const INTERNAL_FAQS: Record<FireMode, { q: string; a: string }[]> = {
 const BASE_DEFAULTS: Inputs = {
   preset: "custom",
   age: 30, income: 90000, expensesMonthly: 4000,
+  retirementDifferent: false, retirementExpensesMonthly: 0,
   state: "ny", filingStatus: "single", k401Pct: 8,
   currentPortfolio: 75000, yearlyInvestment: 0,
   advanced: false, targetFireAge: 45,
@@ -321,6 +325,17 @@ function pct(n: number, digits = 1) {
 function annualExpensesFromMonthly(m: number)  { return Math.max(0, (Number(m) || 0) * 12); }
 function annualExpenses(i: Inputs)             { return annualExpensesFromMonthly(i.expensesMonthly); }
 function annualMovedExpenses(i: Inputs)        { return annualExpensesFromMonthly(i.movedExpensesMonthly); }
+/**
+ * Yearly spending the portfolio must support in retirement, in today's dollars, when the spending used before FIRE is `currentUsed`
+ * (the entered amount, or a scenario's: a move, a spending cut). Without a separate retirement budget it is `currentUsed`. With one,
+ * the retirement budget moves in proportion to the scenario's change in current spending, so a cheaper city also lowers it.
+ */
+function retirementAnnualFor(i: Inputs, currentUsed: number): number {
+  if (!i.retirementDifferent) return currentUsed;
+  const entered = annualExpenses(i);
+  const retirement = annualExpensesFromMonthly(i.retirementExpensesMonthly);
+  return entered > 0 ? (retirement * currentUsed) / entered : retirement;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BUSINESS LOGIC
@@ -552,7 +567,7 @@ function coastTargetAtYear(i: Inputs, yearsFromNow: number): number {
   const infl = (Number(i.inflationPct) || 0) / 100;
   const retireIn = Math.max(0, Math.round(i.targetRetirementAge - i.age));
   const t = clamp(Math.round(yearsFromNow), 0, retireIn);
-  const retirementAnnualExpenses = annualExpenses(i) * Math.pow(1 + infl, retireIn);
+  const retirementAnnualExpenses = retirementAnnualFor(i, annualExpenses(i)) * Math.pow(1 + infl, retireIn);
   const futureFireNumber = swr > 0 ? retirementAnnualExpenses / swr : Infinity;
 
   const { brokerage: brokerageShare, traditional: traditionalShare } = portfolioShares(i);
@@ -595,12 +610,14 @@ function simulateYearsToFI(
   const infl = (Number(i.inflationPct) || 0) / 100;
 
   const rawExpenses  = override?.expensesAnnualBase ?? annualExpenses(i);
+  // The FIRE target is built from retirement spending (the same as current spending unless a separate budget is entered).
+  const rawTarget = retirementAnnualFor(i, rawExpenses);
   const baseExpenses = mode === "barista"
-    ? Math.max(0, rawExpenses - (Number(i.baristaPartTimeIncome) || 0))
-    : rawExpenses;
+    ? Math.max(0, rawTarget - (Number(i.baristaPartTimeIncome) || 0))
+    : rawTarget;
 
   // Part-time income you already earn today adds to saving before FIRE; the income that starts after you leave full-time work only lowers the gap.
-  const savingBase = mode === "barista" ? Math.max(0, rawExpenses - (Number(i.baristaIncomeNow) || 0)) : baseExpenses;
+  const savingBase = mode === "barista" ? Math.max(0, rawExpenses - (Number(i.baristaIncomeNow) || 0)) : rawExpenses;
 
   const { start, annualContrib, employerMatch } = initBuckets(i, netAnnualBase);
   let buckets = { ...start };
@@ -691,8 +708,9 @@ function buildProjectionWithExpenses(
   const swr  = (Number(i.withdrawalRatePct) || 0) / 100;
 
   const { start, annualContrib, employerMatch } = initBuckets(i, netAnnualBase);
-  const effBase  = mode === "barista" ? Math.max(0, baseExpenses - (Number(i.baristaPartTimeIncome) || 0)) : baseExpenses;
-  const stopAt   = yearsToFI === null ? horizonYears(i) : clamp(yearsToFI + 2, 0, horizonYears(i));
+  const targetBase = retirementAnnualFor(i, baseExpenses);
+  const effBase  = mode === "barista" ? Math.max(0, targetBase - (Number(i.baristaPartTimeIncome) || 0)) : targetBase;
+  const stopAt  = yearsToFI === null ? horizonYears(i) : clamp(yearsToFI + 2, 0, horizonYears(i));
 
   const pts: ChartPoint[] = [];
   let buckets = { ...start };
@@ -700,7 +718,7 @@ function buildProjectionWithExpenses(
  function makePoint(age: number, b: Buckets, y: number): ChartPoint {
   const portfolio = totalFromBuckets(b);
   const spendablePortfolio = calcSpendableFromBuckets(i, b);
-  const expY = baseExpenses * Math.pow(1 + infl, y);
+  const expY = targetBase * Math.pow(1 + infl, y);
   const effExpY = effBase * Math.pow(1 + infl, y);
   const fullTgt = swr > 0 ? expY / swr : Infinity;
   const effTgt = swr > 0 ? effExpY / swr : Infinity;
@@ -726,7 +744,7 @@ function buildProjectionWithExpenses(
 
     let autoContrib = 0;
     if (!i.advanced && (Number(i.yearlyInvestment) || 0) <= 0) {
-      const savingExpY = (mode === "barista" ? Math.max(0, baseExpenses - (Number(i.baristaIncomeNow) || 0)) : effBase) * Math.pow(1 + infl, y - 1);
+      const savingExpY = (mode === "barista" ? Math.max(0, baseExpenses - (Number(i.baristaIncomeNow) || 0)) : baseExpenses) * Math.pow(1 + infl, y - 1);
       autoContrib = Math.max(0, netY - savingExpY);
     }
 
@@ -826,7 +844,11 @@ function buildMovedScenario(i: Inputs): { inputs: Inputs; net: NetBasis } {
     salaryGrowthPct: i.salaryGrowthPct, inflationPct: i.inflationPct,
   });
   const funded = applyMoveCost(i, Math.max(0, i.movedCost));
-  return { inputs: { ...funded, income: gross, state: stateChoice, expensesMonthly: i.movedExpensesMonthly }, net };
+  // A separate retirement budget moves in proportion to the change in current spending.
+  const movedRetirement = i.retirementDifferent && i.expensesMonthly > 0
+    ? (i.retirementExpensesMonthly * i.movedExpensesMonthly) / i.expensesMonthly
+    : i.retirementExpensesMonthly;
+  return { inputs: { ...funded, income: gross, state: stateChoice, expensesMonthly: i.movedExpensesMonthly, retirementExpensesMonthly: movedRetirement }, net };
 }
 
 // Share of take-home-plus-retirement-saving that is saved, using the saving that actually happens in the chosen mode.
@@ -1635,6 +1657,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
   fireAge:              fiAge,
   yearsToFI:            result.yearsToFI,
   expensesMonthly:      inputs.expensesMonthly,
+  ...(inputs.retirementDifferent ? { retirementExpensesMonthly: inputs.retirementExpensesMonthly } : {}),
   withdrawalRatePct:    inputs.withdrawalRatePct,
   withdrawalTaxRatePct: inputs.withdrawalTaxRatePct,
   bal401k:              inputs.advanced ? inputs.bal401k       : 0,
@@ -1826,6 +1849,28 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
 
             <Field label="401(k) contribution %" info="Percentage of salary contributed to a 401(k). Lowers taxable income." value={inputs.k401Pct} onChange={v => setInputs(s => ({ ...s, k401Pct: clamp(v, 0, 60) }))} suffix="%" />
             <Field label="Monthly spending" info="Used to calculate your FIRE target. Higher spending = larger number." value={inputs.expensesMonthly} onChange={v => setInputs(s => ({ ...s, expensesMonthly: clamp(v, 0, 200_000) }))} prefix="$" />
+            <div className="sm:col-span-2">
+              <label className="flex items-center gap-2 text-xs text-slate-200">
+                <input
+                  type="checkbox"
+                  checked={inputs.retirementDifferent}
+                  onChange={e => setInputs(s => ({
+                    ...s,
+                    retirementDifferent: e.target.checked,
+                    retirementExpensesMonthly: e.target.checked && s.retirementExpensesMonthly <= 0 ? s.expensesMonthly : s.retirementExpensesMonthly,
+                  }))}
+                />
+                My retirement spending will be different
+              </label>
+              {inputs.retirementDifferent && (
+                <div className="mt-2">
+                  <Field label="Monthly spending in retirement" info="In today's dollars. Your FIRE target is built from this amount, while the spending above still sets how much you can invest now. Useful when costs such as childcare or a mortgage will end before you retire." value={inputs.retirementExpensesMonthly} onChange={v => setInputs(s => ({ ...s, retirementExpensesMonthly: clamp(v, 0, 200_000) }))} prefix="$" />
+                  <p className="mt-1 text-[11px] leading-4 text-slate-400">
+                    Investing now is based on {money(inputs.expensesMonthly, 0)}/mo of spending. The FIRE number is based on {money(inputs.retirementExpensesMonthly, 0)}/mo. In a move comparison, this budget changes in proportion to the change in your current spending.
+                  </p>
+                </div>
+              )}
+            </div>
             <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">That&apos;s <span className="font-semibold text-slate-200">{money(annualExp, 0)}</span>/yr</div>
 
             <Field label="Current invested portfolio" value={inputs.currentPortfolio}
@@ -1836,7 +1881,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
 
             {/* ── Volatility preset (always visible) ────────────────────── */}
             <div className="sm:col-span-2">
-              <div className="mb-1 text-[11px] font-medium text-slate-300">Market volatility assumption</div>
+              <div className="mb-1 text-[11px] font-medium text-slate-300">Investment return assumptions</div>
               <div className="flex flex-wrap gap-2">
                 {(["conservative", "moderate", "aggressive"] as const).map(v => (
                   <button key={v} type="button" onClick={() => setInputs(s => ({ ...s, volatility: v }))}
@@ -1848,6 +1893,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 ))}
               </div>
               <div className="mt-1 text-[11px] text-slate-400">
+                Yearly return, first {inputs.phase2StartsYear} years / after that:{" "}
                 Conservative {VOLATILITY_PRESETS.conservative.phase1}% / {VOLATILITY_PRESETS.conservative.phase2}% ·
                 Moderate {VOLATILITY_PRESETS.moderate.phase1}% / {VOLATILITY_PRESETS.moderate.phase2}% ·
                 Aggressive {VOLATILITY_PRESETS.aggressive.phase1}% / {VOLATILITY_PRESETS.aggressive.phase2}%
@@ -2095,7 +2141,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     : <Stat label="Savings Rate" value={hasCoreInputs ? pct(savingsRate) : "—"} helper={`${money(netAnnual, 0)} est. net · ${estTaxRate.toFixed(1)}% tax rate`} />}
                 </div>
                 <ProgressBar pct={progress.pct} label="Progress to FIRE"
-                  sublabel={<>{money(progress.current, 0)} {inputs.advanced ? "spendable toward FIRE" : "invested"} · {fiAge ? <>On track for FIRE at <span className="font-semibold text-slate-200">{fiAge}</span></> : "Keep building your foundation"}</>} />
+                  sublabel={<>{money(progress.current, 0)} {inputs.advanced ? "spendable toward FIRE" : "invested"} · {fiAge ? <>Projected under these assumptions: FIRE at <span className="font-semibold text-slate-200">{fiAge}</span></> : "Keep building your foundation"}</>} />
                 {hasCoreInputs && result.yearsToFI !== null && (
   <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
     <p className="text-xs text-slate-400">
@@ -2170,7 +2216,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   <Stat label="Savings Rate" value={hasCoreInputs ? pct(savingsRate) : "—"} helper={`${money(netAnnual, 0)} est. net income`} />
                 </div>
                 <ProgressBar pct={progress.pct} label="Progress to Lean FIRE"
-                  sublabel={<>{money(progress.current, 0)} {inputs.advanced ? "spendable toward FIRE" : "invested"} · {fiAge ? <>On track for Lean FIRE at <span className="font-semibold text-slate-200">{fiAge}</span></> : "Keep building"}</>} />
+                  sublabel={<>{money(progress.current, 0)} {inputs.advanced ? "spendable toward FIRE" : "invested"} · {fiAge ? <>Projected under these assumptions: Lean FIRE at <span className="font-semibold text-slate-200">{fiAge}</span></> : "Keep building"}</>} />
               </>)}
 
               {/* ── COAST ─────────────────────────────────────────────────── */}
@@ -2184,6 +2230,32 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     : <>You need <strong>{money(coastFireNumber ?? 0, 0)}</strong> invested by age <strong>{inputs.coastAge}</strong> for your portfolio to coast to retirement without new contributions (about <strong>{money(coastNeededToday ?? 0, 0)}</strong> if you stopped today).
                       {yearsToCoast !== null ? <> At your current pace, you could reach that in <strong>{yearsToCoast} years</strong>.</> : <> At your current pace you do not reach it before age {inputs.targetRetirementAge}; try saving more, a later retirement age or lower spending.</>}</>}
                 </p>
+                {hasCoreInputs && (
+                  <div>
+                    <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-400">Three paths to retiring at {inputs.targetRetirementAge}</div>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                        <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Stop contributing today</div>
+                        <div className="mt-2 text-lg font-bold text-white">
+                          {isCoastReady ? "Enough already" : coastNeededToday ? `${money(Math.max(0, coastNeededToday - result.startPortfolio), 0)} short` : "—"}
+                        </div>
+                        <div className="mt-1 text-xs leading-5 text-slate-400">Needs {coastNeededToday ? money(coastNeededToday, 0) : "—"} invested today to coast to {inputs.targetRetirementAge}.</div>
+                      </div>
+                      <div className="rounded-2xl border border-sky-300/30 bg-sky-300/10 p-4">
+                        <div className="text-[11px] font-semibold uppercase tracking-widest text-sky-200">Stop at age {inputs.coastAge}</div>
+                        <div className="mt-2 text-lg font-bold text-white">
+                          {isCoastReady ? "Already coast-ready" : yearsToCoast !== null ? `Coast-ready at ${inputs.age + yearsToCoast}` : "Not reached in time"}
+                        </div>
+                        <div className="mt-1 text-xs leading-5 text-slate-400">Needs {coastFireNumber !== null && Number.isFinite(coastFireNumber) ? money(coastFireNumber, 0) : "—"} by age {inputs.coastAge}, then growth alone carries you to {inputs.targetRetirementAge}.</div>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                        <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Keep contributing</div>
+                        <div className="mt-2 text-lg font-bold text-white">Full FIRE at {fullFiAgeForCoast ?? "—"}</div>
+                        <div className="mt-1 text-xs leading-5 text-slate-400">Contributions continue until your portfolio covers your spending. This is a different goal from the retirement age above.</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Stat label="Coast FIRE Number" value={coastFireNumber !== null && Number.isFinite(coastFireNumber) ? money(coastFireNumber, 0) : "—"}
                     helper={`Needed by age ${inputs.coastAge} to coast to retirement at ${inputs.targetRetirementAge}`} highlight={isCoastReady} />
@@ -2205,7 +2277,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     ? "Enter your inputs to see your Barista FIRE number."
                     : fiAge === null
                     ? <>Barista FIRE not projected within <strong>{inputs.maxYears} years</strong>. Try adjusting your inputs.</>
-                    : <>With <strong>{money(inputs.baristaPartTimeIncome, 0)}/yr</strong> of part-time income, your portfolio only needs to cover <strong>{money(Math.max(0, annualExp - (Number(inputs.baristaPartTimeIncome) || 0)), 0)}/yr</strong>, reaching Barista FIRE at <strong>age {fiAge}</strong>.</>}
+                    : <>With <strong>{money(inputs.baristaPartTimeIncome, 0)}/yr</strong> of part-time income, your portfolio only needs to cover <strong>{money(Math.max(0, retirementAnnualFor(inputs, annualExp) - (Number(inputs.baristaPartTimeIncome) || 0)), 0)}/yr</strong>, reaching Barista FIRE at <strong>age {fiAge}</strong>.</>}
                 </p>
                 {/* Side-by-side */}
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -2232,7 +2304,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   <Stat label="Portfolio Gap Covered" value={hasCoreInputs ? money(Math.max(0, annualExp - (Number(inputs.baristaPartTimeIncome) || 0)), 0) : "—"} helper="Amount your portfolio must fund per year" />
                 </div>
                 <ProgressBar pct={progress.pct} label="Progress to Barista FIRE"
-                  sublabel={<>{money(progress.current, 0)} {inputs.advanced ? "spendable toward FIRE" : "invested"} · {fiAge ? <>On track for Barista FIRE at <span className="font-semibold text-slate-200">{fiAge}</span></> : "Keep building"}</>} />
+                  sublabel={<>{money(progress.current, 0)} {inputs.advanced ? "spendable toward FIRE" : "invested"} · {fiAge ? <>Projected under these assumptions: Barista FIRE at <span className="font-semibold text-slate-200">{fiAge}</span></> : "Keep building"}</>} />
                 {/* Part-time income sensitivity table */}
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
                   <div className="text-sm font-semibold text-white">Part-time income sensitivity</div>

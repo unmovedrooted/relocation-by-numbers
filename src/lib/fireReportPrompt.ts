@@ -12,6 +12,8 @@ export type ReportInputs = {
   fireAge: number | null;
   yearsToFI: number | null;
   expensesMonthly: number;
+  /** Monthly spending in retirement (today's dollars) when it differs from current spending; the FIRE number is built from it. */
+  retirementExpensesMonthly?: number;
   withdrawalRatePct: number;
   withdrawalTaxRatePct: number;
   bal401k: number;
@@ -85,10 +87,14 @@ function portfolioBlock(inputs: ReportInputs): string {
 - Total: $${total.toLocaleString()}; estimated traditional-account withdrawal tax ${inputs.withdrawalTaxRatePct}%`;
 }
 
+function retirementMonthly(inputs: ReportInputs): number {
+  return inputs.retirementExpensesMonthly ?? inputs.expensesMonthly;
+}
+
 function commonFacts(inputs: ReportInputs): string {
   return `- Age ${inputs.age}, filing ${inputs.filingStatus}, state ${inputs.state.toUpperCase()}
 - Gross income $${inputs.income.toLocaleString()}/yr; net $${Math.round(inputs.netAnnual).toLocaleString()}/yr
-- Savings rate ${inputs.savingsRatePct}% of take-home pay plus retirement saving; monthly spending $${inputs.expensesMonthly.toLocaleString()}`;
+- Savings rate ${inputs.savingsRatePct}% of take-home pay plus retirement saving; monthly spending now $${inputs.expensesMonthly.toLocaleString()}${inputs.retirementExpensesMonthly != null ? `; expected monthly spending in retirement $${inputs.retirementExpensesMonthly.toLocaleString()} (today's dollars, used for the FIRE number)` : ""}`;
 }
 
 const CLOSING = "Use only the supplied values and do not infer identifying information.";
@@ -107,7 +113,7 @@ function coastPrompt(inputs: ReportInputs): string {
 
 **Coast plan:**
 - Stop contributing at age ${inputs.coastAge ?? "unknown"} (${yearsToCoastAge} years from now); retire at ${retireAge ?? "unknown"}${yearsToRetire != null ? ` (${yearsToRetire} years from now)` : ""}
-- Coast FIRE number: ${inputs.coastNumber != null ? `${money(inputs.coastNumber)} invested by the coast age` : "not available"}, assuming ${swr}% withdrawals at retirement and ${money(inputs.expensesMonthly * 12)}/yr of spending in today's dollars
+- Coast FIRE number: ${inputs.coastNumber != null ? `${money(inputs.coastNumber)} invested by the coast age` : "not available"}, assuming ${swr}% withdrawals at retirement and ${money(retirementMonthly(inputs) * 12)}/yr of retirement spending in today's dollars
 - ${status}
 - If contributions simply continue, full FIRE would be reached at age ${inputs.fireAge ?? "—"}; that is a comparison, not the plan
 ${commonFacts(inputs)}
@@ -124,7 +130,7 @@ ${CLOSING}`;
 }
 
 function baristaPrompt(inputs: ReportInputs): string {
-  const annualSpend = inputs.expensesMonthly * 12;
+  const annualSpend = retirementMonthly(inputs) * 12;
   const partTime = inputs.baristaPartTimeIncome ?? 0;
   const gap = Math.max(0, annualSpend - partTime);
   const number = gap / (inputs.withdrawalRatePct / 100);
@@ -154,7 +160,7 @@ ${CLOSING}`;
 
 function withdrawalPrompt(inputs: ReportInputs): string {
   const mode = inputs.mode ?? "standard";
-  const annualSpend = inputs.expensesMonthly * 12;
+  const annualSpend = retirementMonthly(inputs) * 12;
   const fireNumber = annualSpend / (inputs.withdrawalRatePct / 100);
   const alreadyFI = (inputs.yearsToFI ?? 1) <= 0;
   const yearsToMedicare = Math.max(0, 65 - (inputs.fireAge ?? inputs.age));

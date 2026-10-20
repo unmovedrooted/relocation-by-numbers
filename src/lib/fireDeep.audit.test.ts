@@ -222,3 +222,24 @@ describe("FIRE deep-audit findings, corrected", () => {
     expect(result.endPortfolio).toBeCloseTo(chart[2].portfolio, 6);
   });
 });
+
+describe("separate retirement spending", () => {
+  it("builds the FIRE number from retirement spending while saving uses current spending", () => {
+    const same = fire.simulateYearsToFI(base(), 80000, "standard");
+    const lower = fire.simulateYearsToFI({ ...base(), retirementDifferent: true, retirementExpensesMonthly: 3000 }, 80000, "standard");
+    expect(same.fireNumber).toBeCloseTo(4000 * 12 / .04, 6);
+    expect(lower.fireNumber).toBeCloseTo(3000 * 12 / .04, 6);
+    // Saving before FIRE is the fixed $12,000 a year in both, so a smaller target is reached no later.
+    expect(lower.yearsToFI).toBeLessThanOrEqual(same.yearsToFI);
+  });
+  it("is identical to current spending when the amounts match", () => {
+    const a = fire.simulateYearsToFI(base(), 80000, "standard");
+    const b = fire.simulateYearsToFI({ ...base(), retirementDifferent: true, retirementExpensesMonthly: 4000 }, 80000, "standard");
+    expect(b.fireNumber).toBeCloseTo(a.fireNumber, 6);
+    expect(b.yearsToFI).toBe(a.yearsToFI);
+  });
+  it("scales the retirement budget with a moved spending level", () => {
+    const i = { ...base(), retirementDifferent: true, retirementExpensesMonthly: 3000, movedExpensesMonthly: 2000, moveCompareOn: true };
+    expect(fire.buildMovedScenario(i).inputs.retirementExpensesMonthly).toBeCloseTo(1500, 8);
+  });
+});
