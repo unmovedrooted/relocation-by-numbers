@@ -109,7 +109,7 @@ const faqSchema = {
       name: "What is included in the cash needed before buying?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "The calculator shows cash in three parts: (1) down payment and closing costs, which is the cash to close (closing costs are typically 2–5% of the home price for US purchases, and you can adjust the percentage), (2) moving and setup expenses, which are your own estimate, and (3) recommended cash reserves, a 3-month planning buffer of housing costs. The total of the three is the cash needed before buying. The reserve is a planning guideline, not a universal lender requirement. Your official Loan Estimate will show the exact closing figure.",
+        text: "The calculator shows cash in three parts: (1) down payment and closing costs, which is the cash to close (closing costs are typically 2–5% of the home price for US purchases, and you can adjust the percentage), (2) moving and setup expenses, which are your own estimate, and (3) recommended cash reserves, which equal your emergency fund target in months of housing costs (6 months by default). The total of the three is the cash needed before buying. The reserve is a planning guideline, not a universal lender requirement. Your official Loan Estimate will show the exact closing figure.",
       },
     },
     {
@@ -180,7 +180,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What's included in cash to close?",
-    a: "Cash to close is the down payment plus estimated closing costs. The calculator adds your moving and setup expenses and a 3-month reserve of housing costs to show the total cash needed before buying. The reserve is a planning guideline, not a universal lender requirement.",
+    a: "Cash to close is the down payment plus estimated closing costs. The calculator adds your moving and setup expenses and a reserve equal to your emergency fund target (6 months of housing costs by default) to show the total cash needed before buying. The reserve is a planning guideline, not a universal lender requirement.",
   },
   {
     q: "How does rent vs buy break-even work?",

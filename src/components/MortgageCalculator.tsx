@@ -23,13 +23,13 @@ import {
 // ═══════════════════════════════════════════════════════════════════════
 
 const COUNTRIES = [
-  { code:"PT", name:"Portugal",       rate:3.5,  downMin:30, notes:"Non-residents typically need 30%+ down. Banks require NIF and proof of income. Golden Visa property route available." },
+  { code:"PT", name:"Portugal",       rate:3.5,  downMin:30, notes:"Non-residents typically need 30%+ down. Banks require NIF and proof of income. Portugal real-estate Golden Visa route closed to new applications in 2023, so a property purchase no longer leads to residency on its own." },
   { code:"ES", name:"Spain",          rate:3.8,  downMin:30, notes:"Non-residents need 30–40% down. NIE number required. Mortgage terms often shorter for foreigners." },
   { code:"DE", name:"Germany",        rate:3.9,  downMin:20, notes:"Germany is relatively open to foreign buyers. 20–30% down typical. Strong rental market makes buying less urgent." },
   { code:"FR", name:"France",         rate:4.0,  downMin:25, notes:"French banks lend to non-residents but require 25–30% down. Notaire fees add ~7–8% to purchase cost." },
   { code:"IT", name:"Italy",          rate:4.2,  downMin:30, notes:"Italian banks are conservative with foreign buyers. 30–40% down common. €1 home deals exist in depopulating towns." },
   { code:"NL", name:"Netherlands",    rate:3.9,  downMin:10, notes:"EU residents can access Dutch mortgages on similar terms. Non-EU buyers face more scrutiny." },
-  { code:"GR", name:"Greece",         rate:4.5,  downMin:30, notes:"Foreign buyers need 30–40% down. Golden Visa via €250k+ investment. Property taxes are relatively low." },
+  { code:"GR", name:"Greece",         rate:4.5,  downMin:30, notes:"Foreign buyers need 30–40% down. A property Golden Visa route exists, but its investment thresholds were raised in 2024 and vary by area, so check the current rules. Property taxes are relatively low." },
   { code:"HR", name:"Croatia",        rate:4.0,  downMin:30, notes:"EU citizens can buy freely. Non-EU buyers need reciprocity agreement. Growing expat market." },
   { code:"MT", name:"Malta",          rate:3.5,  downMin:10, notes:"English-speaking, EU member. Non-residents can buy in designated areas. AIP permit required for some zones." },
   { code:"CY", name:"Cyprus",         rate:4.0,  downMin:30, notes:"Non-EU buyers need permission. Non-dom tax regime popular with expats. Limassol is a major expat hub." },
@@ -1031,7 +1031,8 @@ function USTab() {
 
   const estimatedClosing = hp * (nz(closingCostPct) / 100);
   const lenderCashToClose = dp + estimatedClosing;
-  const recommendedReserve = totalMonthly * 3;
+  // The reserve is the emergency fund target the visitor chose (months of housing costs), so the total matches their own goal.
+  const recommendedReserve = totalMonthly * nz(emergencyFundMonths);
   const totalCashNeeded = lenderCashToClose + recommendedReserve + nz(movingBudget);
 
   const cashAfterClose = nz(currentSavings) - lenderCashToClose - nz(movingBudget);
@@ -1537,7 +1538,7 @@ function USTab() {
             {[
               { label: "Down payment and closing costs", value: lenderCashToClose, sub: `${dpPc}% down (${money(dp)}) plus estimated closing costs of ${nz(closingCostPct)}% (${money(estimatedClosing)})` },
               { label: "Moving and setup expenses",      value: nz(movingBudget),  sub: "Moving, furnishing and first purchases; your own estimate" },
-              { label: "Recommended cash reserves",      value: recommendedReserve, sub: "A 3-month planning buffer of housing costs, not a lender requirement" },
+              { label: "Recommended cash reserves",      value: recommendedReserve, sub: `${nz(emergencyFundMonths)} months of housing costs, your emergency fund target; not a lender requirement` },
             ].map(row => (
               <div key={row.label}>
                 <div className="flex justify-between">

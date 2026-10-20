@@ -203,8 +203,11 @@ export type HousingCostAtPriceResult = HousingCostResult & { pmi: number };
  * price), HOA and PMI. The affordability solver finds the price where this total reaches the debt-to-income limit, and the
  * calculator shows this same breakdown, so what is displayed always adds up to what was solved.
  */
+/** The home price the entered monthly insurance amount refers to; insurance scales in proportion to the price from there. */
+export const INSURANCE_REFERENCE_PRICE = 400_000;
+
 export function housingCostAtPrice(i: HousingCostAtPriceInputs): HousingCostAtPriceResult {
-  const base = i.baseHomePrice ?? 400_000;
+  const base = i.baseHomePrice ?? INSURANCE_REFERENCE_PRICE;
   const core = monthlyHousingCost({
     homePrice: i.homePrice,
     downPct: i.downPct,
@@ -247,7 +250,7 @@ export function solveMaxHomePrice({
   insuranceMonthly,
   hoaMonthly,
   targetDTI = 28,
-  baseHomePrice = 400_000,
+  baseHomePrice = INSURANCE_REFERENCE_PRICE,
 }: SolveMaxHomePriceOpts): number {
   if (grossMonthly <= 0 || annualRate < 0 || termYears <= 0) return 0;
 

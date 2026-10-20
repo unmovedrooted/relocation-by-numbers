@@ -289,6 +289,12 @@ export default function RentVsBuyCalculator() {
                 </p>
               </div>
 
+              {results.input.downPct < 20 && (
+                <p role="note" className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200">
+                  PMI is excluded from this comparison. With less than 20% down, actual ownership costs may be higher.
+                </p>
+              )}
+
               <RentVsBuyThresholdsCard thresholds={results.thresholds} homePrice={results.input.homePrice} monthlyRent={results.input.monthlyRent} appreciationPct={results.input.appreciationPct} years={yearsN} />
 
 

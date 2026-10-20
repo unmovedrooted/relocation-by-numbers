@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   solveMaxHomePrice,
   housingCostAtPrice,
+  INSURANCE_REFERENCE_PRICE,
   US_STATE_DEFAULTS,
 } from "../lib/housing";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
@@ -383,8 +384,11 @@ export default function HousingAffordabilityCalculator() {
                   <input className={inputCls} type="number" step="0.01" value={propertyTaxPct} onChange={(e) => setPropertyTaxPct(e.target.value)} placeholder=" " />
                 </label>
                 <label className="text-sm">
-                  <div className={labelHeadCls}>Home insurance ($/mo)</div>
+                  <div className={labelHeadCls}>Home insurance ($/mo, for a {money(INSURANCE_REFERENCE_PRICE)} home)</div>
                   <input className={inputCls} type="number" value={insuranceMonthly} onChange={(e) => setInsuranceMonthly(e.target.value)} placeholder=" " />
+                  <div className="mt-1 text-xs leading-4 text-slate-500 dark:text-slate-400">
+                    Enter the monthly premium for a {money(INSURANCE_REFERENCE_PRICE)} home. The calculator scales it in proportion to each home price it tests, so a cheaper home uses a smaller amount.
+                  </div>
                 </label>
                 <label className="text-sm">
                   <div className={labelHeadCls}>HOA ($/mo)</div>
