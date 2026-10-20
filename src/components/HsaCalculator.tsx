@@ -430,6 +430,9 @@ export default function HsaCalculator() {
                 tone="emerald"
                 note={`Federal ${money(results.federalSaved)} + FICA ${money(results.ficaSaved)} + state ${results.isNonConforming ? "$0" : money(results.stateSaved)}, from contributing ${money(results.yourContributionAmount)}.`}
               />
+              <p className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs leading-5 text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+                These savings assume you are eligible for an HSA (covered by a qualifying high-deductible health plan, with no disqualifying coverage) and contribute through payroll, which avoids income tax and FICA. A contribution you make directly and deduct on your return saves income tax but not FICA.
+              </p>
               <StatCard
                 label={`Projected balance in ${results.years} years`}
                 amount={results.finalBalance}

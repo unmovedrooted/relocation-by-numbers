@@ -59,7 +59,7 @@ const labelHeadCls = "mb-1 text-xs font-medium leading-4 text-slate-600 dark:tex
 // "advantaged" = 401k/IRA/Roth (growth tax-sheltered; state doesn't drag the
 // balance). "taxable" = a regular brokerage (growth taxed annually, so the
 // state's marginal rate drags the return and thus the ending balance).
-type AccountKind = "advantaged" | "taxable";
+type AccountKind = "traditional" | "roth" | "taxable";
 
 function InfoTip({ text }: { text: string }) {
   return (
@@ -157,7 +157,7 @@ export default function RetirementCalculator() {
   const [inflationPct, setInflationPct] = useState<string>("3");
   const [state, setState] = useState<StateCode>("ca");
   const [filing, setFiling] = useState<FilingStatus>("single");
-  const [accountType, setAccountType] = useState<AccountKind>("advantaged");
+  const [accountType, setAccountType] = useState<AccountKind>("traditional");
 
   const [viewMode, setViewMode] = useState<"average" | "montecarlo">("average");
   const [riskLevel, setRiskLevel] = useState<RiskLevel>("balanced");
@@ -183,7 +183,8 @@ export default function RetirementCalculator() {
     const vFiling = qs.get("filing") as FilingStatus | null;
     if (vFiling === "single" || vFiling === "married") setFiling(vFiling);
     const vAccount = qs.get("account");
-    if (vAccount === "advantaged" || vAccount === "taxable") setAccountType(vAccount);
+    if (vAccount === "advantaged" || vAccount === "traditional") setAccountType("traditional");
+    else if (vAccount === "roth" || vAccount === "taxable") setAccountType(vAccount);
     const vView = qs.get("view");
     if (vView === "average" || vView === "montecarlo") setViewMode(vView);
     const vRisk = qs.get("risk");
@@ -217,6 +218,7 @@ export default function RetirementCalculator() {
     const annualContribution = Math.max(0, nz(monthlyContribution)) * 12;
     const startingBalance = Math.max(0, nz(currentSavings));
     const isTaxable = accountType === "taxable";
+    const isRoth = accountType === "roth";
 
     // In a taxable brokerage account, investment gains are taxed each year, so
     // the state's marginal rate drags the return (and thus the ending balance).
@@ -287,7 +289,7 @@ export default function RetirementCalculator() {
     // drawdown. In a taxable brokerage the tax was already paid annually during
     // growth (that's the balance drag above), so withdrawals aren't taxed again
     // as ordinary income, the supportable income is effectively after-tax.
-    const incomeTax = isTaxable
+    const incomeTax = isTaxable || isRoth
       ? { total: 0, federal: 0, state: 0 }
       : withdrawalIncomeTax(base.annualIncome, state, filing, "traditional");
     const afterTaxAnnualIncome = base.annualIncome - incomeTax.total;
@@ -300,6 +302,7 @@ export default function RetirementCalculator() {
       realReturn,
       annualContribution,
       isTaxable,
+      isRoth,
       stateReturnDrag,
       pie,
       levers,
@@ -339,7 +342,7 @@ export default function RetirementCalculator() {
   // ── EXPORT ROWS (shared by CSV + PDF) ───────────────────────────────────
   const exportRows = useMemo<CsvRow[]>(() => {
     const rows: CsvRow[] = [
-      { Metric: "Account type", Value: results.isTaxable ? "Taxable brokerage" : "Tax-advantaged (401k/IRA/Roth)" },
+      { Metric: "Account type", Value: results.isTaxable ? "Taxable brokerage" : results.isRoth ? "Roth (401k/IRA)" : "Traditional (401k/IRA)" },
       { Metric: "Current age", Value: currentAge },
       { Metric: "Retirement age", Value: retirementAge },
       { Metric: "Years until retirement", Value: results.years },
@@ -364,6 +367,8 @@ export default function RetirementCalculator() {
     );
     if (results.isTaxable) {
       rows.push({ Metric: "After-tax income (already taxed during growth), per month", Value: money(results.afterTaxMonthlyIncome) });
+    } else if (results.isRoth) {
+      rows.push({ Metric: "After-tax income (Roth, qualified withdrawals), per month", Value: money(results.afterTaxMonthlyIncome) });
     } else {
       rows.push(
         { Metric: "Est. income tax on withdrawals", Value: results.incomeIsStateExempt ? `${money(results.incomeTax.total)} (federal only; state exempt)` : money(results.incomeTax.total) },
@@ -435,21 +440,34 @@ export default function RetirementCalculator() {
             <div className="mb-3">
               <div className={labelHeadCls}>
                 Account type
-                <InfoTip text="Tax-advantaged (401k/IRA/Roth) growth is sheltered, so the balance is the same in every state. In a taxable brokerage, gains are taxed each year, so your state's tax drags the return and the ending balance." />
+                <InfoTip text="Traditional and Roth growth is sheltered, so the balance is the same in every state. Traditional withdrawals are taxed as income in retirement; qualified Roth withdrawals are not. In a taxable brokerage, gains are taxed each year, so your state's tax drags the return and the ending balance." />
               </div>
               <div className="inline-flex w-full select-none gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
                 <button
                   type="button"
-                  onClick={() => setAccountType("advantaged")}
-                  aria-pressed={accountType === "advantaged"}
+                  onClick={() => setAccountType("traditional")}
+                  aria-pressed={accountType === "traditional"}
                   className={`flex-1 rounded-lg px-3 py-2 text-center leading-tight transition-all ${
-                    accountType === "advantaged"
+                    accountType === "traditional"
                       ? "bg-white text-cyan-700 shadow-md ring-1 ring-cyan-500/40 dark:bg-slate-950 dark:text-cyan-300 dark:ring-cyan-400/30"
                       : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                   }`}
                 >
-                  <span className="block text-sm font-semibold">Tax-advantaged</span>
-                  <span className="block text-[11px] font-normal opacity-70">401k · IRA · Roth</span>
+                  <span className="block text-sm font-semibold">Traditional</span>
+                  <span className="block text-[11px] font-normal opacity-70">401k · IRA · pre-tax</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAccountType("roth")}
+                  aria-pressed={accountType === "roth"}
+                  className={`flex-1 rounded-lg px-3 py-2 text-center leading-tight transition-all ${
+                    accountType === "roth"
+                      ? "bg-white text-cyan-700 shadow-md ring-1 ring-cyan-500/40 dark:bg-slate-950 dark:text-cyan-300 dark:ring-cyan-400/30"
+                      : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                  }`}
+                >
+                  <span className="block text-sm font-semibold">Roth</span>
+                  <span className="block text-[11px] font-normal opacity-70">401k · IRA · after-tax</span>
                 </button>
                 <button
                   type="button"
@@ -557,13 +575,17 @@ export default function RetirementCalculator() {
                       <>
                         That&apos;s effectively after-tax, a taxable brokerage is taxed as it grows (already reflected in the balance{results.stateReturnDrag > 0 ? ` via ${stateName}'s ~${(results.stateReturnDrag * 100).toFixed(1)}% annual drag` : ""}), so withdrawals aren&apos;t taxed again as income.
                       </>
+                    ) : results.isRoth ? (
+                      <>
+                        Qualified Roth withdrawals (after age 59½ and the 5-year rule) are federal and state income-tax free, so about <span className="font-semibold">{money(results.afterTaxMonthlyIncome)}/mo</span> is yours to spend. Roth contributions are made with after-tax money, so a Roth is not directly comparable to a traditional balance of the same size.
+                      </>
                     ) : results.incomeIsStateExempt ? (
                       <>
                         ≈ <span className="font-semibold">{money(results.afterTaxMonthlyIncome)}/mo</span> after federal tax, {stateName} doesn&apos;t tax qualified retirement withdrawals.
                       </>
                     ) : (
                       <>
-                        ≈ <span className="font-semibold">{money(results.afterTaxMonthlyIncome)}/mo</span> after an estimated {(results.incomeEffectiveTaxRate * 100).toFixed(1)}% income tax in {stateName} (traditional). Roth would be tax-free. Tax uses the standard deduction for a filer under 65; the extra deduction at 65+ and the temporary senior deduction are not applied, so tax may be overstated.
+                        ≈ <span className="font-semibold">{money(results.afterTaxMonthlyIncome)}/mo</span> after an estimated {(results.incomeEffectiveTaxRate * 100).toFixed(1)}% income tax in {stateName} (traditional). A Roth account would be tax-free. Tax uses the standard deduction for a filer under 65; the extra deduction at 65+ and the temporary senior deduction are not applied, so tax may be overstated.
                       </>
                     )}
                   </p>
