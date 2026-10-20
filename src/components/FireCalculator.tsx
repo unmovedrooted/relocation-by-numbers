@@ -105,6 +105,8 @@ type Inputs = {
   baristaPartTimeIncome: number;
   /** After-tax part-time income already earned today; it adds to saving before FIRE (unlike baristaPartTimeIncome, which only lowers the yearly gap). */
   baristaIncomeNow: number;
+  /** Age at which the part-time income stops (0 = it lasts through retirement). After it, the portfolio must cover full spending. */
+  baristaEndAge: number;
   // ── Withdrawal tax rate (Traditional account haircut) ──
   withdrawalTaxRatePct: number;
   // What-if scenarios only: extra dollars invested each year (in addition to the configured saving), never set by the form.
@@ -270,6 +272,7 @@ const BASE_DEFAULTS: Inputs = {
   coastAge: 40, targetRetirementAge: 65,
   baristaPartTimeIncome: 24000,
   baristaIncomeNow: 0,
+  baristaEndAge: 0,
   withdrawalTaxRatePct: 15,
 };
 
@@ -585,6 +588,29 @@ function calcCoastFireNumber(i: Inputs): number {
   return coastTargetAtYear(i, Math.max(0, i.coastAge - i.age));
 }
 
+// ── Barista FIRE target ───────────────────────────────────────────────────────
+// With no end age the part-time income lasts through retirement, so the portfolio funds only the gap (spending less that income).
+// With an end age, the portfolio at year y must fund the gap until then and then be large enough to fund full spending: it is the
+// full FIRE number at the end age, discounted back by the returns in between, plus the gap withdrawals taken at the start of each year.
+// All amounts are nominal; spending and the part-time income grow with inflation.
+function baristaTargetAt(i: Inputs, rawTarget: number, y: number): number {
+  const swr  = (Number(i.withdrawalRatePct) || 0) / 100;
+  const infl = (Number(i.inflationPct) || 0) / 100;
+  if (swr <= 0) return Infinity;
+  const grow = (n: number) => Math.pow(1 + infl, n);
+  const partTime = Number(i.baristaPartTimeIncome) || 0;
+  const endAge = Number(i.baristaEndAge) || 0;
+  const gap = Math.max(0, rawTarget - partTime);
+  if (endAge <= 0) return (gap * grow(y)) / swr;
+  const yearsOfIncome = Math.round(endAge - (i.age + y));
+  if (yearsOfIncome <= 0) return (rawTarget * grow(y)) / swr;
+  let need = (rawTarget * grow(y + yearsOfIncome)) / swr;
+  for (let j = yearsOfIncome - 1; j >= 0; j--) {
+    need = gap * grow(y + j) + need / (1 + returnForYear(i, y + j));
+  }
+  return need;
+}
+
 // Rough split of the portfolio between taxable and traditional accounts, from balances and yearly contributions.
 // Simple mode is entirely taxable.
 function portfolioShares(i: Inputs): { brokerage: number; traditional: number } {
@@ -623,7 +649,11 @@ function simulateYearsToFI(
   let buckets = { ...start };
   let years   = 0;
 
-  const fire0 = swr > 0 ? baseExpenses / swr : Infinity;
+  // The portfolio needed at a given year. Barista uses its own target (which can account for the part-time income ending).
+  const targetAt = (y: number) => mode === "barista"
+    ? baristaTargetAt(i, rawTarget, y)
+    : swr > 0 ? (baseExpenses * Math.pow(1 + infl, y)) / swr : Infinity;
+  const fire0 = targetAt(0);
  if (calcSpendableFromBuckets(i, buckets) >= fire0) {
   return {
     fireNumber: fire0,
@@ -650,14 +680,12 @@ while (years < horizon) {
   buckets = growBuckets(buckets, i, years, annualContrib, employerMatch, pastCoast, autoContrib);
   years++;
 
-  const expAtEndOfYear = baseExpenses * Math.pow(1 + infl, years);
-  const fireTarget = swr > 0 ? expAtEndOfYear / swr : Infinity;
+  const fireTarget = targetAt(years);
 
   if (calcSpendableFromBuckets(i, buckets) >= fireTarget) break;
 }
 
-  const expEnd = baseExpenses * Math.pow(1 + infl, years);
-const fireEnd = swr > 0 ? expEnd / swr : Infinity;
+const fireEnd = targetAt(years);
 
 return {
   fireNumber: fireEnd,
@@ -721,7 +749,7 @@ function buildProjectionWithExpenses(
   const expY = targetBase * Math.pow(1 + infl, y);
   const effExpY = effBase * Math.pow(1 + infl, y);
   const fullTgt = swr > 0 ? expY / swr : Infinity;
-  const effTgt = swr > 0 ? effExpY / swr : Infinity;
+  const effTgt = mode === "barista" ? baristaTargetAt(i, targetBase, y) : swr > 0 ? effExpY / swr : Infinity;
 
   return {
     age,
@@ -1809,6 +1837,14 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     value={inputs.baristaIncomeNow}
                     onChange={v => setInputs(s => ({ ...s, baristaIncomeNow: clamp(v, 0, 500000) }))}
                     prefix="$" />
+                  <Field label="Part-time income ends at age (optional)" info="Leave at 0 if the part-time income lasts through retirement. If it stops at an age you enter, the portfolio must cover the gap until then and your full spending afterward, so the Barista FIRE number rises."
+                    value={inputs.baristaEndAge}
+                    onChange={v => setInputs(s => ({ ...s, baristaEndAge: v <= 0 ? 0 : Math.round(clamp(v, s.age + 1, 100)) }))} />
+                  {inputs.baristaEndAge > 0 && (
+                    <div className="self-end text-xs leading-5 text-slate-400">
+                      After age {inputs.baristaEndAge} the portfolio funds full spending, so the number includes that.
+                    </div>
+                  )}
                   <div className="text-xs leading-5 text-slate-400 sm:col-span-2">
                     The first amount only lowers the yearly gap your portfolio must cover; it is assumed to grow with inflation. The second amount is extra income you earn today, so it adds to your saving until you reach FIRE. Not earning part-time income yet? Leave the second amount at $0.
                   </div>

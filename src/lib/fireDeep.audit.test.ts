@@ -243,3 +243,19 @@ describe("separate retirement spending", () => {
     expect(fire.buildMovedScenario(i).inputs.retirementExpensesMonthly).toBeCloseTo(1500, 8);
   });
 });
+
+describe("Barista part-time income end age", () => {
+  const barista = () => ({ ...base(), baristaPartTimeIncome: 24000, baristaIncomeNow: 0, expensesMonthly: 4000, inflationPct: 0, volatility: "moderate" });
+  it("keeps the gap-only target when no end age is set", () => {
+    const r = fire.simulateYearsToFI({ ...barista(), baristaEndAge: 0 }, 80000, "barista");
+    expect(r.fireNumber).toBeCloseTo((48000 - 24000) / .04, 6);
+  });
+  it("needs more when the income stops, and is bounded by the full FIRE number", () => {
+    const i = { ...barista(), baristaEndAge: 60, currentPortfolio: 0 };
+    const open = fire.simulateYearsToFI({ ...i, baristaEndAge: 0 }, 80000, "barista");
+    const ends = fire.simulateYearsToFI(i, 80000, "barista");
+    expect(ends.fireNumber).toBeGreaterThan(open.fireNumber);
+    const afterEnd = fire.simulateYearsToFI({ ...i, age: 61, baristaEndAge: 60 }, 80000, "barista");
+    expect(afterEnd.fireNumber).toBeCloseTo(48000 / .04, 6);
+  });
+});
