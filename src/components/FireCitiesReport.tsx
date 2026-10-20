@@ -3,7 +3,9 @@ import { buildCityReport, type CityReport } from "@/lib/cityReport";
 import { ALLOWED_FIRE_CITY_PAGES } from "@/lib/seo-allowlists";
 import { MIGRATION_META } from "@/lib/migration";
 import { PAIR_EXAMPLE_SALARY } from "@/lib/pairExample";
-import { GridTable, level, num, orNA, Tile, toneStyles, usd } from "@/components/reportParts";
+import { level, Tile, toneStyles, usd } from "@/components/reportParts";
+import { REPORT_SALARIES } from "@/lib/pairReport";
+import FireCitiesTable, { type FireCityRow } from "@/components/FireCitiesTable";
 
 type Row = { id: string; r: CityReport; afterRent: number | null; monthlyNet: number; stateTax: number };
 
@@ -31,15 +33,20 @@ export default function FireCitiesReport() {
   const noTax = list.filter((x) => x.stateTax === 0);
   const year = MIGRATION_META.years[MIGRATION_META.years.length - 1];
 
-  const tableRows: string[][] = list.map((x, i) => [
-    `${i + 1}. ${x.r.name}, ${x.r.stateCode.toUpperCase()}`,
-    usd(x.monthlyNet),
-    orNA(x.r.cost.rent),
-    x.afterRent === null ? "n/a" : usd(x.afterRent),
-    level(x.r.cost.priceLevel),
-    x.stateTax === 0 ? "None" : usd(x.stateTax),
-    `${x.r.migration.net >= 0 ? "+" : ""}${num(x.r.migration.net)}`,
-  ]);
+  // Every salary and both filing statuses are computed here, so the table can be re-ranked in the browser without recomputing.
+  const tableCities: FireCityRow[] = list.map((x) => {
+    const married = buildCityReport(x.id, "married");
+    const pick = (rep: CityReport) => Object.fromEntries(rep.salaryRows.map((s) => [String(s.salary), { monthlyNet: s.monthlyNet, stateTax: s.tax.state + s.tax.local }]));
+    return {
+      id: x.id,
+      name: x.r.name,
+      stateCode: x.r.stateCode,
+      rent: x.r.cost.rent,
+      priceLevel: x.r.cost.priceLevel,
+      netMigration: x.r.migration.net,
+      byFiling: { single: pick(x.r), married: married ? pick(married) : pick(x.r) },
+    };
+  });
 
   const faqs: Array<{ q: string; a: string }> = [
     {
@@ -75,15 +82,7 @@ export default function FireCitiesReport() {
 
       <section className={t.card} aria-labelledby="bc-table">
         <h2 id="bc-table" className={t.h2}>The {list.length} FIRE cities, ranked by what is left after rent</h2>
-        <p className={`mt-2 text-sm leading-6 ${t.body}`}>
-          One single filer on {usd(PAIR_EXAMPLE_SALARY)} a year in each city, after 2026 federal, state, local and payroll tax and the typical Census rent. Open a city for the full numbers.
-        </p>
-        <GridTable
-          tone="dark"
-          columns={["City", "Take-home a month", "Typical rent", "Left after rent", "Price level", `State and city tax on ${usd(PAIR_EXAMPLE_SALARY)}`, `Net move-ins (${year})`]}
-          rows={tableRows}
-          minWidth="52rem"
-        />
+        <FireCitiesTable cities={tableCities} salaries={[...REPORT_SALARIES]} defaultSalary={PAIR_EXAMPLE_SALARY} migrationYear={String(year)} />
         <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((x) => (
             <li key={x.id}>

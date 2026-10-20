@@ -33,10 +33,10 @@ export type CityReport = {
   migration: { inflow: number; outflow: number; net: number; origins: { state: string; households: number }[]; destinations: { state: string; households: number }[] };
 };
 
-export function buildCityReport(cityId: string): CityReport | null {
+export function buildCityReport(cityId: string, filing: "single" | "married" = "single"): CityReport | null {
   const city = findCity(cityId);
   if (!city) return null;
-  const netFor = (gross: number) => estimateNetBreakdown({ grossAnnual: gross, state: city.state, filing: "single", k401Pct: 0, cityId: city.id });
+  const netFor = (gross: number) => estimateNetBreakdown({ grossAnnual: gross, state: city.state, filing, k401Pct: 0, cityId: city.id });
   const rent = city.defaultRent ?? null;
   const gov = governmentCity(cityId);
   const rpp = gov?.rpp;
