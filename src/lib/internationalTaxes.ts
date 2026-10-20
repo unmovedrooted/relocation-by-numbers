@@ -205,10 +205,10 @@ const TAX_ESTIMATORS: Record<string, TaxEstimator> = {
 
   // -------------------------------------------------------------------------
   // UNITED STATES, USD
-  // 2025 tax year figures (IRS Rev. Proc. 2024-40 + OBBB amendments).
-  // Standard deduction: $15,750 single / $31,500 MFJ (post-OBBB).
-  // Social Security wage base 2025: $176,100.
-  // Employee NI equivalents: SS 6.2% up to $176,100, Medicare 1.45%,
+  // 2026 tax year figures (IRS Rev. Proc. 2025-32 and Publication 15; see taxYear2026.ts).
+  // Standard deduction: $16,100 single / $32,200 MFJ.
+  // Social Security wage base 2026: $184,500.
+  // Employee NI equivalents: SS 6.2% up to the wage base, Medicare 1.45%,
   // Additional Medicare 0.9% above $200k single / $250k MFJ.
   // Federal brackets are applied to TAXABLE income (after std deduction).
   // -------------------------------------------------------------------------
