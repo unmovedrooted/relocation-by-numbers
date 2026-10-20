@@ -232,7 +232,7 @@ export default function HousingAffordabilityCalculator() {
     ];
     if (mode === "rent") {
       rows.push(
-        { Metric: "Comfortable rent (25%)", Value: money(rentResults.comfortable) },
+        { Metric: "Rent at 25% of gross income", Value: money(rentResults.comfortable) },
         { Metric: "Recommended rent (30% rule)", Value: money(rentResults.recommended) },
         { Metric: "Debt-adjusted max rent", Value: money(rentResults.debtAdjusted) },
       );
@@ -406,11 +406,11 @@ export default function HousingAffordabilityCalculator() {
           ) : mode === "rent" ? (
             <>
               <TierCard
-                label="Comfortable"
+                label="25% of gross income"
                 amount={rentResults.comfortable}
                 suffix="/mo"
                 tone="emerald"
-                note="25% of gross income, leaves the most room for savings and surprises."
+                note="The lowest of the three guidelines, so it leaves the most room for savings and surprises."
               />
               <TierCard
                 label="Recommended (30% rule)"
@@ -439,7 +439,7 @@ export default function HousingAffordabilityCalculator() {
           ) : (
             <>
               <TierCard
-                label="Comfortable (front-end only)"
+                label="28% of gross income (front-end only)"
                 amount={buyResults.frontEndPrice}
                 suffix="max home price"
                 tone="emerald"

@@ -76,7 +76,7 @@ export default function Retirement401kCalculator() {
   const [retirementAge, setRetirementAge] = useState("65");
   const [expectedReturnPct, setExpectedReturnPct] = useState("7");
   const [inflationPct, setInflationPct] = useState("3");
-  const [adjustForInflation, setAdjustForInflation] = useState(false);
+  const [adjustForInflation, setAdjustForInflation] = useState(true);
   const [filing, setFiling] = useState<FilingStatus>("single");
   const [state, setState] = useState<StateCode>("ca");
 
@@ -92,7 +92,7 @@ export default function Retirement401kCalculator() {
     const g = (k: string, s: (v: string) => void) => { const v = qs.get(k); if (v !== null) s(v); };
     g("salary", setSalary); g("your", setYourContribPct); g("match", setEmployerMatchPct); g("cap", setEmployerCapPct);
     g("balance", setCurrentBalance); g("age", setAge); g("retire", setRetirementAge); g("return", setExpectedReturnPct); g("inflation", setInflationPct);
-    if (qs.get("real") === "1") setAdjustForInflation(true);
+    if (qs.get("real") === "0") setAdjustForInflation(false);
     const f = qs.get("filing") as FilingStatus | null; if (f === "single" || f === "married") setFiling(f);
     const st = qs.get("state"); if (st) setState(st as StateCode);
     const v = qs.get("view"); if (v === "average" || v === "montecarlo") setViewMode(v);
@@ -106,7 +106,7 @@ export default function Retirement401kCalculator() {
     const set = (k: string, v: string) => { if (v) qs.set(k, v); };
     set("salary", salary); set("your", yourContribPct); set("match", employerMatchPct); set("cap", employerCapPct);
     set("balance", currentBalance); set("age", age); set("retire", retirementAge); set("return", expectedReturnPct);
-    if (adjustForInflation) { qs.set("real", "1"); set("inflation", inflationPct); }
+    if (adjustForInflation) set("inflation", inflationPct); else qs.set("real", "0");
     qs.set("filing", filing); qs.set("state", state); qs.set("view", viewMode);
     if (viewMode === "montecarlo") { qs.set("risk", riskLevel); if (riskLevel === "custom") set("vol", customVolatilityPct); }
     setQS(qs);

@@ -348,7 +348,7 @@ export default function RetirementWithdrawalCalculator() {
   // ── EXPORT ROWS (shared by CSV + PDF) ───────────────────────────────────
   const exportRows = useMemo<CsvRow[]>(() => {
     const rows: CsvRow[] = [
-      { Metric: "Mode", Value: mode === "howLong" ? "How long will it last" : "Safe withdrawal amount" },
+      { Metric: "Mode", Value: mode === "howLong" ? "How long will it last" : "Modeled sustainable withdrawal" },
       { Metric: "Starting balance", Value: money(results.startBalance) },
       { Metric: "Account type", Value: accountType === "roth" ? "Roth (tax-free)" : "Traditional (taxable)" },
       { Metric: "Expected annual return", Value: `${expectedReturnPct}%` },
@@ -415,7 +415,7 @@ export default function RetirementWithdrawalCalculator() {
             onClick={() => setMode("safeAmount")}
             className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${mode === "safeAmount" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}
           >
-            Safe withdrawal amount
+            Modeled sustainable withdrawal
           </button>
         </div>
       </div>
@@ -585,7 +585,7 @@ export default function RetirementWithdrawalCalculator() {
                   />
                 ) : (
                   <StatCard
-                    label={`Safe withdrawal for ${horizonYears} years`}
+                    label={`Modeled sustainable withdrawal for ${horizonYears} years`}
                     value={`${money(results.grossWithdrawal)}/yr`}
                     tone="emerald"
                     note={`That's ${money(results.grossWithdrawal / 12)}/mo gross, or ${(results.withdrawalPctOfBalance * 100).toFixed(1)}% of your balance, vs. the 4%-rule reference of ${money(results.fourPctBenchmark)}/yr.`}

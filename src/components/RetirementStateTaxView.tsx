@@ -143,6 +143,9 @@ export default function RetirementStateTaxView() {
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">All states, lowest state income tax first</h2>
+        <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+          Each "adds" column is the state tax that source adds to the bill. The columns do not add up to the State tax total, because deductions are shared between sources.
+        </p>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -177,8 +180,7 @@ export default function RetirementStateTaxView() {
         </div>
         <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">
           &quot;Adds&quot; is the state tax the household would not owe if that income were removed, so it includes indirect effects: some states
-          shrink a pension deduction by the Social Security received, or phase a deduction out as income rises. The three amounts do not add up
-          to the total, because deductions are shared. Click a state to compare it.
+          shrink a pension deduction by the Social Security received, or phase a deduction out as income rises. Click a state to compare it.
         </p>
       </section>
     </div>

@@ -909,7 +909,7 @@ export default function CompareCitiesCalculator() {
                         <th key={r.key} className="p-3 text-right font-semibold text-slate-900 dark:text-slate-100">
                           {r.name}
                           {r.key === bestFlexibilityKey && (
-                            <span className="ml-1.5 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">BEST</span>
+                            <span className="ml-1.5 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">Most left after housing</span>
                           )}
                         </th>
                       ))}
@@ -933,7 +933,7 @@ export default function CompareCitiesCalculator() {
                       {activeResults.map((r) => <td key={r.key} className="p-3 text-right text-slate-700 dark:text-slate-300">{r.pctOfIncome.toFixed(1)}%</td>)}
                     </tr>
                     <tr>
-                      <td className="p-3 font-semibold text-slate-900 dark:text-slate-100">Monthly flexibility</td>
+                      <td className="p-3 font-semibold text-slate-900 dark:text-slate-100">Left after housing</td>
                       {activeResults.map((r) => (
                         <td key={r.key} className={`p-3 text-right font-bold ${r.monthlyFlexibility >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                           {money(r.monthlyFlexibility)}

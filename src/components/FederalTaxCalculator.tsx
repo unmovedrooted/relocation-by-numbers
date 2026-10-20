@@ -184,7 +184,7 @@ export default function FederalTaxCalculator() {
                   <div className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{(results.effectiveOfGross * 100).toFixed(1)}%</div>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center dark:border-slate-800 dark:bg-slate-900">
-                  <div className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">After tax</div>
+                  <div className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">After modeled income tax</div>
                   <div className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{money(results.afterTax)}</div>
                 </div>
               </div>

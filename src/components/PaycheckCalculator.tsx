@@ -300,6 +300,9 @@ export default function PaycheckCalculator() {
                 <p className="mt-2 text-sm leading-5 opacity-90">
                   {money(results.b.net)}/yr net, you keep {(results.takeHomePct * 100).toFixed(0)}% of gross, at a {(results.effectiveTaxRate * 100).toFixed(1)}% effective tax rate in {stateName}.
                 </p>
+                <p className="mt-2 text-xs leading-5 opacity-80">
+                  This is a full-year tax estimate divided into {eachLabel} periods, not your employer&apos;s exact payroll calculation. Withholding on a real paycheck depends on your W-4, benefits and pay timing.
+                </p>
               </div>
 
               <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
