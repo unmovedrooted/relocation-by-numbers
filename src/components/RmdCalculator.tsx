@@ -75,6 +75,7 @@ export default function RmdCalculator() {
   const [expectedReturnPct, setExpectedReturnPct] = useState("5");
   const [filing, setFiling] = useState<FilingStatus>("single");
   const [state, setState] = useState<StateCode>("fl");
+  const [otherIncome, setOtherIncome] = useState("");
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
 
   const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
@@ -87,6 +88,7 @@ export default function RmdCalculator() {
     const vR = qs.get("return"); if (vR) setExpectedReturnPct(vR);
     const vF = qs.get("filing") as FilingStatus | null; if (vF === "single" || vF === "married") setFiling(vF);
     const vS = qs.get("state"); if (vS) setState(vS as StateCode);
+    const vO = qs.get("other"); if (vO) setOtherIncome(vO);
   }, []);
 
   useEffect(() => {
@@ -98,8 +100,9 @@ export default function RmdCalculator() {
     if (expectedReturnPct) qs.set("return", expectedReturnPct);
     qs.set("filing", filing);
     qs.set("state", state);
+    if (otherIncome) qs.set("other", otherIncome);
     setQS(qs);
-  }, [age, birthYear, balance, expectedReturnPct, filing, state]);
+  }, [age, birthYear, balance, expectedReturnPct, filing, state, otherIncome]);
 
   const results = useMemo(() => {
     const ageN = Math.round(nz(age));
@@ -109,6 +112,11 @@ export default function RmdCalculator() {
     const birthYearUsed = birthYearN >= 1900 && birthYearN <= TAX_YEAR ? birthYearN : estimatedBirthYear(ageN, TAX_YEAR);
     const startRmdAge = rmdStartAge(birthYearUsed);
     const required = ageN >= startRmdAge;
+    // Tax the RMD adds on top of any other taxable income (pension, taxable Social Security, interest), in today's dollars.
+    const other = Math.max(0, nz(otherIncome));
+    const taxOn = (rmd: number) => other > 0
+      ? Math.max(0, withdrawalIncomeTax(other + rmd, state, filing, "traditional").total - withdrawalIncomeTax(other, state, filing, "traditional").total)
+      : withdrawalIncomeTax(rmd, state, filing, "traditional").total;
 
     // This-year RMD (if required now).
     let thisYearRmd = 0;
@@ -118,7 +126,7 @@ export default function RmdCalculator() {
       thisYearDivisor = divisorForAge(ageN);
       if (thisYearDivisor) {
         thisYearRmd = bal0 / thisYearDivisor;
-        thisYearTax = withdrawalIncomeTax(thisYearRmd, state, filing, "traditional").total;
+        thisYearTax = taxOn(thisYearRmd);
       }
     }
 
@@ -133,14 +141,14 @@ export default function RmdCalculator() {
     for (let a = startAge; a <= 95 && bal > 1; a++) {
       const div = divisorForAge(a) ?? 2.0;
       const rmd = bal / div;
-      const tax = withdrawalIncomeTax(rmd, state, filing, "traditional").total;
+      const tax = taxOn(rmd);
       schedule.push({ age: a, startBalance: bal, divisor: div, rmd, tax });
       bal = (bal - rmd) * (1 + r);
     }
 
     const firstRmd = ageN < startRmdAge ? schedule[0] : null;
     return { ageN, bal0, required, thisYearRmd, thisYearDivisor, thisYearTax, schedule, firstRmd, startAge, startRmdAge, birthYearUsed };
-  }, [age, birthYear, balance, expectedReturnPct, filing, state]);
+  }, [age, birthYear, balance, expectedReturnPct, filing, state, otherIncome]);
 
   const inputsReady = results.bal0 > 0 && results.ageN > 0;
   const stateName = STATES.find((s) => s.code === state)?.name ?? state;
@@ -196,9 +204,10 @@ export default function RmdCalculator() {
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm"><div className={labelHeadCls}>Filing status</div><select className={selectCls} value={filing} onChange={(e) => setFiling(e.target.value as FilingStatus)}><option value="single">Single</option><option value="married">Married (joint)</option></select></label>
               <label className="text-sm"><div className={labelHeadCls}>State</div><select className={selectCls} value={state} onChange={(e) => setState(e.target.value as StateCode)}>{STATES.map((s) => (<option key={s.code} value={s.code}>{s.name}</option>))}</select></label>
+              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Other taxable income per year (optional)<InfoTip text="Pension, the taxable part of Social Security, interest and similar income. Adding it taxes the RMD at the higher rate it would actually face. In today's dollars; it is held flat in the schedule." /></div><input className={inputCls} type="number" min="0" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} placeholder="0" /></label>
             </div>
             <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              RMDs are taxed as ordinary income (federal + state, no FICA). This estimate treats the RMD as your only income; if you have other income, your rate may be higher.
+              RMDs are taxed as ordinary income (federal + state, no FICA). {nz(otherIncome) > 0 ? "The tax shown is the extra tax the RMD adds on top of your other income." : "Without other income entered, this treats the RMD as your only income; if you have other income, your rate may be higher."}
             </div>
           </div>
         </div>
