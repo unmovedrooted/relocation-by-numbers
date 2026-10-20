@@ -1934,7 +1934,6 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             </div>)}
 
             {showMore && <Field label="401(k) contribution %" info="Percentage of salary contributed to a 401(k). Lowers taxable income." value={inputs.k401Pct} onChange={v => setInputs(s => ({ ...s, k401Pct: clamp(v, 0, 60) }))} suffix="%" />}
-            <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">SPENDING</div>
             <Field label="Monthly spending" info="Used to calculate your FIRE target. Higher spending = larger number." value={inputs.expensesMonthly} onChange={v => { setBudgetByCategory(false); setInputs(s => ({ ...s, expensesMonthly: clamp(v, 0, 200_000) })); }} prefix="$" />
             {(showMore || inputs.retirementDifferent) && <div className="sm:col-span-2">
               <label className="flex items-center gap-2 text-xs text-slate-200">
