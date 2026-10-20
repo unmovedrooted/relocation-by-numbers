@@ -155,12 +155,12 @@ type VerdictResult = {
 
 function getBuyWaitRentVerdict({
   frontDTI, backDTI, cashAfterClose, emergencyFundTarget,
-  breakEvenYears, totalMonthly, monthlyRent, downPct, salaryReady,
+  breakEvenYears, totalMonthly, monthlyRent, downPct, salaryReady, monthlySaving,
 }: {
   frontDTI: number; backDTI: number; cashAfterClose: number;
   emergencyFundTarget: number; breakEvenYears: number | null;
   totalMonthly: number; monthlyRent: number; downPct: number;
-  salaryReady: boolean;
+  salaryReady: boolean; monthlySaving: number;
 }): VerdictResult {
   if (!salaryReady || !totalMonthly) {
     return {
@@ -202,10 +202,19 @@ function getBuyWaitRentVerdict({
   const dtiStretched = frontDTI > 36;
 
   if (cashDanger || cashTight || dtiStretched) {
+    // The size of the cash gap is known; how long it takes to close depends on what the buyer can save each month.
+    const shortfall = Math.max(0, emergencyFundTarget - cashAfterClose);
+    const cashGap = cashDanger || cashTight;
+    const timing = !cashGap || shortfall <= 0 ? ""
+      : monthlySaving > 0
+        ? ` Saving ${money(monthlySaving)} a month would take about ${Math.ceil(shortfall / monthlySaving)} months to close that gap.`
+        : " Enter how much you can save each month to estimate how long closing the gap would take.";
     return {
       type: "wait",
-      title: "Wait 12–18 months",
-      description: "You're close, but improving your cash position or income first would meaningfully lower your risk.",
+      title: cashGap ? "Build more cash first" : "The payment is a stretch",
+      description: cashGap
+        ? `After closing you would be ${money(shortfall)} below your emergency fund target.${timing}`
+        : "The monthly payment is high compared with your income. A lower price, a larger down payment or a higher income would lower the risk.",
       reasons: [
         cashDanger ? "You'd be cash-negative after closing, can't cover emergencies" : "",
         cashTight  ? `Cash after close (${downPct.toFixed(0)}% down) falls below your emergency fund target` : "",
@@ -995,6 +1004,7 @@ function USTab() {
   const [currentSavings,      setCurrentSavings]      = useState("80000");
   const [emergencyFundMonths, setEmergencyFundMonths]  = useState("6");
   const [movingBudget,        setMovingBudget]         = useState("5000");
+  const [monthlySaving,       setMonthlySaving]        = useState("");
   const [stressLevel,      setStressLevel]      = useState<StressLevel>("none");
   const [appreciationPMI,  setAppreciationPMI]  = useState(false);
   const [scenarioNames, setScenarioNames] = useState([
@@ -1138,7 +1148,8 @@ function USTab() {
     breakEvenYears: beYears, totalMonthly,
     monthlyRent: nz(monthlyRent), downPct: dpPc,
     salaryReady: grossMonthly > 0 && hp > 0,
-  }), [frontDTI, backDTI, cashAfterClose, emergencyFundTarget, beYears, totalMonthly, monthlyRent, dpPc, grossMonthly, hp]);
+    monthlySaving: nz(monthlySaving),
+  }), [frontDTI, backDTI, cashAfterClose, emergencyFundTarget, beYears, totalMonthly, monthlyRent, dpPc, grossMonthly, hp, monthlySaving]);
 
   const maxHomePriceSolved = useMemo(() => solveMaxHomePrice({
     grossMonthly,
@@ -1362,9 +1373,12 @@ function USTab() {
                tip="How many months of housing costs you want to hold as an emergency fund after closing.">
               <input className={inputCls()} type="number" value={emergencyFundMonths} onChange={e => setEmergencyFundMonths(e.target.value)} />
             </F>
-            <F label="Moving / furnishing budget" tipSide="right"
+            <F label="Moving and setup budget" tipSide="right"
                tip="Moving trucks, first-month furnishing, appliances. Deducted from your post-closing cash calculation.">
               <input className={inputCls()} type="number" value={movingBudget} onChange={e => setMovingBudget(e.target.value)} />
+            </F>
+            <F label="Monthly amount you can save (optional)" tip="Used only to estimate how long it would take to close a cash gap. Leave blank if you are not sure.">
+              <input className={inputCls()} type="number" value={monthlySaving} onChange={e => setMonthlySaving(e.target.value)} placeholder="e.g. 1500" />
             </F>
           </div>
         </Card>
@@ -1511,23 +1525,25 @@ function USTab() {
           <H2>Cash Needed to Close</H2>
           <div className="space-y-2 text-sm">
             {[
-              { label: `Down payment (${dpPc}%)`,                     value: dp },
-              { label: `Est. closing costs (${nz(closingCostPct)}%)`, value: estimatedClosing },
-              { label: "3-month planning buffer",                      value: recommendedReserve },
-              ...(nz(movingBudget) > 0 ? [{ label: "Moving / furnishing", value: nz(movingBudget) }] : []),
+              { label: "Down payment and closing costs", value: lenderCashToClose, sub: `${dpPc}% down (${money(dp)}) plus estimated closing costs of ${nz(closingCostPct)}% (${money(estimatedClosing)})` },
+              { label: "Moving and setup expenses",      value: nz(movingBudget),  sub: "Moving, furnishing and first purchases; your own estimate" },
+              { label: "Recommended cash reserves",      value: recommendedReserve, sub: "A 3-month planning buffer of housing costs, not a lender requirement" },
             ].map(row => (
-              <div key={row.label} className="flex justify-between">
-                <span className="text-slate-600 dark:text-slate-400">{row.label}</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-100">{money(row.value)}</span>
+              <div key={row.label}>
+                <div className="flex justify-between">
+                  <span className="text-slate-600 dark:text-slate-400">{row.label}</span>
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">{money(row.value)}</span>
+                </div>
+                <div className="text-xs text-slate-400 dark:text-slate-500">{row.sub}</div>
               </div>
             ))}
             <div className="mt-2 flex justify-between border-t border-slate-200 dark:border-slate-800 pt-2">
-              <span className="font-semibold text-slate-900 dark:text-slate-100">Total cash needed</span>
+              <span className="font-semibold text-slate-900 dark:text-slate-100">Total cash needed before buying</span>
               <span className="text-xl font-bold text-slate-900 dark:text-slate-100">{money(totalCashNeeded)}</span>
             </div>
           </div>
           <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
-            The 3-month buffer is a planning target, not a universal lender requirement.
+            Cash after close below is your savings minus the first two lines; the reserve is what you would like left over.
           </p>
         </Card>
 
@@ -1554,7 +1570,7 @@ function USTab() {
           <div className="mt-3 grid gap-1.5 text-xs text-slate-600 dark:text-slate-400">
             <div className="flex justify-between"><span>Total savings</span><span className="font-semibold text-slate-900 dark:text-slate-100">{money(nz(currentSavings))}</span></div>
             <div className="flex justify-between text-slate-500 dark:text-slate-400"><span>Down payment and closing costs</span><span>− {money(lenderCashToClose)}</span></div>
-            <div className="flex justify-between text-slate-500 dark:text-slate-400"><span>Moving / furnishing</span><span>− {money(nz(movingBudget))}</span></div>
+            <div className="flex justify-between text-slate-500 dark:text-slate-400"><span>Moving and setup expenses</span><span>− {money(nz(movingBudget))}</span></div>
             <div className="mt-1 flex justify-between border-t border-slate-200/60 dark:border-slate-800/60 pt-1.5 font-semibold text-slate-900 dark:text-slate-100">
               <span>Cash remaining</span>
               <span className={cashAfterClose < 0 ? "text-rose-600 dark:text-rose-400" : ""}>{money(cashAfterClose)}</span>
@@ -1732,7 +1748,7 @@ function USTab() {
                 <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold text-slate-500 dark:text-slate-400">
                   <th className="px-3 py-2 text-left">Scenario</th>
                   <th className="px-3 py-2 text-right">Monthly</th>
-                  <th className="px-3 py-2 text-right">Cash to Close</th>
+                  <th className="px-3 py-2 text-right">Down payment and closing costs</th>
                   <th className="px-3 py-2 text-right">5-yr Cost</th>
                   <th className="px-3 py-2 text-right">Break-Even</th>
                 </tr>
