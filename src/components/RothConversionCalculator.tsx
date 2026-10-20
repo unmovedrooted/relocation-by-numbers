@@ -184,6 +184,15 @@ export default function RothConversionCalculator() {
     const difference = rothFinal - tradFinal;
     const rothWins = difference > 0;
 
+    // The same comparison at other combined (federal plus state) retirement tax rates.
+    const sensitivityRates = Array.from(new Set([10, 12, 15, 22, 24, 32, 37, Math.round(tRet * 1000) / 10])).sort((a, b) => a - b);
+    const sensitivity = sensitivityRates.map((ratePct) => {
+      const t = ratePct / 100;
+      const roth = payTaxFrom === "converted" ? (C - conversionTax) * g : C * g;
+      const trad = payTaxFrom === "converted" ? C * g * (1 - t) : C * g * (1 - t) + sideAccountFinal;
+      return { ratePct, difference: roth - trad, mine: Math.abs(ratePct - tRet * 100) < 0.05 };
+    });
+
     const chartData = [
       { name: "Convert to Roth", value: rothFinal, fill: "#10b981" },
       { name: "Keep Traditional", value: tradFinal, fill: "#0e7490" },
@@ -206,6 +215,7 @@ export default function RothConversionCalculator() {
       difference,
       rothWins,
       chartData,
+      sensitivity,
       stateExempt: RETIREMENT_STATE_EXEMPT.has(state),
     };
   }, [amountToConvert, payTaxFrom, currentIncome, filing, state, retirementTaxRatePct, yearsToGrow, expectedReturnPct, inflationPct]);
@@ -330,8 +340,8 @@ export default function RothConversionCalculator() {
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm">
                 <div className={labelHeadCls}>
-                  Expected retirement tax rate (%)
-                  <InfoTip text="The tax rate you expect on withdrawals in retirement. If you'll be in a lower bracket later, converting is less attractive; if higher, it's more attractive." />
+                  Expected retirement tax rate, federal + state (%)
+                  <InfoTip text="The combined federal and state income tax rate you expect to pay on traditional withdrawals in retirement. If you'll be in a lower bracket later, converting is less attractive; if higher, it's more attractive." />
                 </div>
                 <input className={inputCls} type="number" step="0.1" value={retirementTaxRatePct} onChange={(e) => setRetirementTaxRatePct(e.target.value)} placeholder=" " />
               </label>
@@ -422,6 +432,26 @@ export default function RothConversionCalculator() {
                     </div>
                   )}
                 </div>
+              </div>
+
+              <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+                <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">If your retirement tax rate is different</div>
+                <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">Convert minus keep traditional, after tax, in today&apos;s dollars. Positive means converting is ahead. Rates are combined federal and state.</div>
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-left text-slate-500 dark:text-slate-400"><th className="py-1.5 font-medium">Retirement tax rate</th><th className="py-1.5 text-right font-medium">Converting is ahead by</th></tr>
+                  </thead>
+                  <tbody className="text-slate-700 dark:text-slate-300">
+                    {results.sensitivity.map((r) => (
+                      <tr key={r.ratePct} className={`border-t border-slate-100 dark:border-slate-800 ${r.mine ? "font-semibold" : ""}`}>
+                        <td className="py-1.5">{r.ratePct}%{r.mine ? " (yours)" : ""}</td>
+                        <td className={`py-1.5 text-right font-semibold ${r.difference >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-cyan-700 dark:text-cyan-300"}`}>
+                          {r.difference >= 0 ? "+" : "-"}{money(Math.abs(r.difference))}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
