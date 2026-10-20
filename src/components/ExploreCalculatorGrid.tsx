@@ -45,7 +45,7 @@ const CALCULATORS: Calc[] = [
   { href: "/hsa-calculator", title: "HSA Calculator", desc: "2026 limits, real federal + FICA + state tax savings, and tax-free growth.", cat: "Retirement" },
   { href: "/how-much-do-i-need-to-retire", title: "How Much Do I Need to Retire?", desc: "The portfolio that covers your spending in retirement, with a savings plan to reach it.", cat: "Retirement" },
   { href: "/retirement-state-tax", title: "Retirement Tax by State", desc: "How each state taxes Social Security, pensions and 401(k) withdrawals, side by side.", cat: "Retirement" },
-  { href: "/retirement-withdrawal-calculator", title: "Retirement Withdrawal", desc: "How long will your money last, or your safe withdrawal, with sequence-of-returns risk.", cat: "Retirement" },
+  { href: "/retirement-withdrawal-calculator", title: "Retirement Withdrawal", desc: "How long will your money last, or your modeled sustainable withdrawal, with sequence-of-returns risk.", cat: "Retirement" },
   { href: "/rmd-calculator", title: "RMD Calculator", desc: "Your required minimum distribution from the IRS Uniform Lifetime Table.", cat: "Retirement" },
   { href: "/roth-conversion-calculator", title: "Roth Conversion Calculator", desc: "Convert now or pay tax later? Tax due, both paths, and break-even rate.", cat: "Retirement" },
   { href: "/investment-calculator", title: "Investment Calculator", desc: "Compound growth from a lump sum plus contributions, with a Monte Carlo range.", cat: "Retirement" },

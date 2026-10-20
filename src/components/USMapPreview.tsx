@@ -52,7 +52,7 @@ export default function USMapPreview() {
   }
 
   const hoveredStat = hovered ? byCode.get(hovered) : null;
-  const openPaycheck = (code: StateCode) => router.push(`/paycheck-calculator?salary=${salary}&state=${code}`);
+  const openPaycheck = (code: StateCode) => router.push(`/paycheck-calculator?salary=${salary}&state=${code}&filing=${filing}`);
 
   return (
     <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]">
@@ -144,7 +144,7 @@ export default function USMapPreview() {
                         </p>
                       </div>
                       <Link
-                        href={`/paycheck-calculator?salary=${salary}&state=${hoveredStat.code}`}
+                        href={`/paycheck-calculator?salary=${salary}&state=${hoveredStat.code}&filing=${filing}`}
                         className="inline-flex flex-shrink-0 items-center rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:bg-emerald-400/20"
                       >
                         Open in paycheck calculator →

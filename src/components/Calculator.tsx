@@ -347,17 +347,19 @@ export default function Calculator({
   const clearTyped = () => { typedRef.current = {}; setTyped({}); };
 
   // ── Buy inputs ──────────────────────────────────────────────────────────
-  const [homePrice, setHomePrice] = useState<string>("450000");
+  // Start from the starting target city's Census figures right away, so the first answer already uses the defaults it keeps after loading.
+  const startCity = findCity(toCityId);
+  const [homePrice, setHomePrice] = useState<string>(startCity?.medianHomePrice ? String(startCity.medianHomePrice) : "450000");
   const [downPct, setDownPct] = useState<string>("20");
   const [ratePct, setRatePct] = useState<string>("6.5");
   const [termYears, setTermYears] = useState<string>("30");
-  const [propertyTaxPct, setPropertyTaxPct] = useState<string>("1.0");
+  const [propertyTaxPct, setPropertyTaxPct] = useState<string>(startCity?.propertyTaxPct ? String(startCity.propertyTaxPct) : "1.0");
   const [homeInsMonthly, setHomeInsMonthly] = useState<string>("150");
   const [hoaMonthly, setHoaMonthly] = useState<string>("0");
   const [pmiAnnualPct, setPmiAnnualPct] = useState<string>("0");
 
   // ── Rent inputs ─────────────────────────────────────────────────────────
-  const [rentMonthly, setRentMonthly] = useState<string>("2200");
+  const [rentMonthly, setRentMonthly] = useState<string>(startCity?.defaultRent ? String(startCity.defaultRent) : "2200");
   const [rentersInsMonthly, setRentersInsMonthly] = useState<string>("20");
   const [parkingMonthly, setParkingMonthly] = useState<string>("150");
 
@@ -996,8 +998,9 @@ export default function Calculator({
       from: { label: "current city", value: currentCityLabel },
       to: { label: "target city", value: targetCityLabel },
       mode: { label: "rent or buy", value: mode },
-      rent: { label: "monthly rent", value: rentMonthly },
-      homePrice: { label: "home price", value: homePrice },
+      // Rent and home price the visitor has not typed follow the target city; a city change is reported as the city change, not as an edit.
+      rent: { label: "monthly rent", value: typed.rent ? rentMonthly : "the city's default" },
+      homePrice: { label: "home price", value: typed.home ? homePrice : "the city's default" },
       down: { label: "down payment %", value: downPct },
       movers: { label: "movers cost", value: moversCost || "default" },
       travel: { label: "travel cost", value: travelCost || "default" },
@@ -1888,7 +1891,7 @@ export default function Calculator({
             <AssumptionsCard
               replaceHint="City data and planning assumptions are starting estimates. Replace them with a real rent quote, your own bills and moving quotes in the fields on the left to firm up the answer."
               items={[
-                { label: "Offer salary", value: money(n(salary)), source: "yours" },
+                { label: "Offer salary", value: money(n(salary)), source: salary === "150000" ? "sample" : "yours" },
                 { label: "Current salary", value: currentSalary.trim() === "" ? "Same as offer" : money(nz(currentSalary)), source: currentSalary.trim() === "" ? "planning" : "yours", note: currentSalary.trim() === "" ? "Enter your current salary if it differs" : undefined },
                 mode === "buy"
                   ? { label: "Home price", value: money(nz(homePrice)), source: typed.home ? "yours" : "city" }
