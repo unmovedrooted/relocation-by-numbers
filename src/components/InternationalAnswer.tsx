@@ -28,12 +28,31 @@ export default function InternationalAnswer({
     : monthsCovered <= 0
       ? " Your savings do not cover the upfront costs."
       : ` After that, your savings would cover about ${monthsCovered.toFixed(1)} months of costs.`;
+  // Three separate questions: can you live there, can you afford the move, and how long would savings last afterward.
+  const cashOk = Number.isFinite(monthsCovered) && monthsCovered > 0;
+  const runwayMonths = Number.isFinite(monthsCovered) ? monthsCovered : 0;
+  const runwayLabel = runwayMonths >= 6 ? "Solid" : runwayMonths >= 3 ? "Moderate" : "Short";
+  const tone = (good: boolean | "mid") => good === true ? "text-emerald-700 dark:text-emerald-300" : good === "mid" ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300";
+  const rows: Array<{ label: string; value: string; note: string; good: boolean | "mid" }> = [
+    { label: "Monthly budget", value: comfortLabel, note: monthlyFlexibility >= 0 ? `${displayAmount(monthlyFlexibility, 0)} left each month` : "Costs exceed take-home pay", good: monthlyFlexibility < 0 ? false : /comfortable|strong|healthy/i.test(comfortLabel) ? true : "mid" },
+    { label: "Cash for the move", value: cashOk ? "Covered" : "Short", note: cashOk ? "Savings cover the upfront costs" : "Savings do not cover the upfront costs", good: cashOk },
+    { label: "Emergency runway", value: runwayLabel, note: `${runwayMonths.toFixed(1)} months of costs after the move`, good: runwayMonths >= 6 ? true : runwayMonths >= 3 ? "mid" : false },
+  ];
   return (
     <div className="mb-3 rounded-xl border border-violet-200 bg-violet-50/70 p-4 dark:border-violet-900/60 dark:bg-violet-950/20">
       <p className="text-base font-semibold leading-snug text-slate-900 dark:text-white">{left}</p>
       <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">
-        You would need about {displayAmount(upfrontCashNeeded, 0)} upfront, including deposits and any emergency buffer.{runway} Overall: {comfortLabel.toLowerCase()}.
+        You would need about {displayAmount(upfrontCashNeeded, 0)} upfront, including deposits and any emergency buffer.{runway}
       </p>
+      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        {rows.map((r) => (
+          <div key={r.label} className="rounded-lg border border-slate-200 bg-white/70 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/40">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{r.label}</div>
+            <div className={`text-sm font-semibold ${tone(r.good)}`}>{r.value}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">{r.note}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
