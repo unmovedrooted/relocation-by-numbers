@@ -225,8 +225,12 @@ export default function Page() {
                   <p>
                     Pick a mode. In <strong>&ldquo;How long will it last?&rdquo;</strong> you enter a withdrawal and
                     the calculator draws it down year by year until the money runs out. In <strong>&ldquo;Modeled sustainable
-                    withdrawal&rdquo;</strong> you enter a target retirement length and it solves for the
-                    largest level withdrawal your balance can sustain for that many years.
+                    withdrawal&rdquo;</strong> you enter a target retirement length and choose how sure you want to
+                    be. It starts at a 90% chance: it runs 5,000 simulated markets and finds the largest level
+                    withdrawal that lasts that many years in at least 90% of them (you can also pick 80% or 95%).
+                    &ldquo;Average returns&rdquo; instead solves for a level withdrawal under one fixed return, which
+                    ignores market swings and can last in far fewer than half of simulated markets. All of these are
+                    model results that depend on the return, volatility and inflation you choose, not guarantees.
                   </p>
                   <p>
                     Everything runs in today&apos;s dollars: withdrawals rise with inflation to hold your buying power

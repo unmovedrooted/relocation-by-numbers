@@ -185,7 +185,7 @@ export default function RetirementWithdrawalCalculator() {
   const [customVolatilityPct, setCustomVolatilityPct] = useState<string>("13");
 
   // Solve for a withdrawal that lasts in this share of simulated markets (0 = the average-return answer), and an option to enter spending after tax.
-  const [targetSuccess, setTargetSuccess] = useState<0 | 80 | 90 | 95>(0);
+  const [targetSuccess, setTargetSuccess] = useState<0 | 80 | 90 | 95>(90);
   const [spendBasis, setSpendBasis] = useState<"gross" | "aftertax">("gross");
   const [afterTaxSpend, setAfterTaxSpend] = useState<string>("45000");
 
@@ -217,7 +217,11 @@ export default function RetirementWithdrawalCalculator() {
     const vRisk = qs.get("risk");
     if (vRisk === "conservative" || vRisk === "balanced" || vRisk === "aggressive" || vRisk === "custom") setRiskLevel(vRisk);
     const vVol = qs.get("vol"); if (vVol) setCustomVolatilityPct(vVol);
-    const vSuccess = Number(qs.get("success")); if (vSuccess === 80 || vSuccess === 90 || vSuccess === 95) setTargetSuccess(vSuccess);
+    const rawSuccess = qs.get("success");
+    const vSuccess = Number(rawSuccess);
+    if (rawSuccess !== null && (vSuccess === 0 || vSuccess === 80 || vSuccess === 90 || vSuccess === 95)) setTargetSuccess(vSuccess);
+    // Opening the sustainable-withdrawal mode with a success target and no chosen view shows the simulation, which is what a target needs.
+    if (vMode === "safeAmount" && !qs.get("view") && !(rawSuccess !== null && vSuccess === 0)) setViewMode("montecarlo");
     if (qs.get("basis") === "aftertax") setSpendBasis("aftertax");
     const vSpend = qs.get("spend"); if (vSpend) setAfterTaxSpend(vSpend);
   }, []);
@@ -230,7 +234,7 @@ export default function RetirementWithdrawalCalculator() {
     if (currentBalance) qs.set("balance", currentBalance);
     if (mode === "howLong" && spendBasis === "gross" && annualWithdrawal) qs.set("withdrawal", annualWithdrawal);
     if (mode === "howLong" && spendBasis === "aftertax") { qs.set("basis", "aftertax"); if (afterTaxSpend) qs.set("spend", afterTaxSpend); }
-    if (mode === "safeAmount" && targetSuccess > 0) qs.set("success", String(targetSuccess));
+    if (mode === "safeAmount") qs.set("success", String(targetSuccess));
     if (mode === "safeAmount" && horizonYears) qs.set("horizon", horizonYears);
     if (currentAge) qs.set("age", currentAge);
     qs.set("account", accountType);
@@ -457,7 +461,7 @@ export default function RetirementWithdrawalCalculator() {
           </button>
           <button
             type="button"
-            onClick={() => setMode("safeAmount")}
+            onClick={() => { setMode("safeAmount"); if (targetSuccess > 0) setViewMode("montecarlo"); }}
             className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${mode === "safeAmount" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400"}`}
           >
             Modeled sustainable withdrawal
@@ -643,7 +647,12 @@ export default function RetirementWithdrawalCalculator() {
               </label>
             </div>
             <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              Real return used: {(results.realReturn * 100).toFixed(2)}%. This is a smooth, average-return projection, it does not model market volatility or sequence-of-returns risk.
+              Real return used: {(results.realReturn * 100).toFixed(2)}%.{" "}
+              {viewMode === "montecarlo"
+                ? mode === "safeAmount" && targetSuccess > 0
+                  ? `Each year's return is simulated around this expected return at ${(volatility * 100).toFixed(0)}% volatility, and the withdrawal is solved so the money lasts the full retirement in at least ${targetSuccess}% of 5,000 simulated markets.`
+                  : `Each year's return is simulated around this expected return at ${(volatility * 100).toFixed(0)}% volatility, so the results show how outcomes vary rather than one fixed path.`
+                : "This is a smooth, average-return projection, it does not model market volatility or sequence-of-returns risk."}
             </div>
           </div>
         </div>
@@ -683,7 +692,7 @@ export default function RetirementWithdrawalCalculator() {
               ) : mc ? (
                 mode === "safeAmount" ? (
                   <StatCard
-                    label={targetSuccess > 0 ? `Withdrawal for a ${targetSuccess}% chance, ${mc.horizon} years` : `Chance it lasts ${mc.horizon} years`}
+                    label={targetSuccess > 0 ? `Withdrawal for ${targetSuccess === 80 ? "an" : "a"} ${targetSuccess}% chance, ${mc.horizon} years` : `Chance it lasts ${mc.horizon} years`}
                     value={targetSuccess > 0 ? `${money(results.grossWithdrawal)}/yr` : `${(mc.successRate * 100).toFixed(0)}%`}
                     tone={targetSuccess > 0 || mc.successRate >= 0.9 ? "emerald" : mc.successRate >= 0.75 ? "cyan" : "amber"}
                     note={targetSuccess > 0
@@ -778,7 +787,7 @@ export default function RetirementWithdrawalCalculator() {
                 extra standard deduction at 65+, capital-gains treatment, or Required Minimum Distributions (which
                 begin at age 73 or 75, depending on your birth year).{" "}
                 {viewMode === "montecarlo"
-                  ? "The Monte Carlo view runs 5,000 seeded simulations drawing each year's return from a lognormal distribution around your expected return at the chosen volatility, a model of market risk, not a prediction."
+                  ? `The Monte Carlo view runs 5,000 seeded simulations drawing each year's return from a lognormal distribution around your expected return at the chosen volatility, a model of market risk, not a prediction.${mode === "safeAmount" && targetSuccess > 0 ? ` The withdrawal shown is the largest one that lasts the full retirement in at least ${targetSuccess}% of those simulations; a different return, volatility or inflation assumption would change it.` : ""}`
                   : "This is a smooth average-return projection; switch to “Market ups & downs” to model volatility and sequence-of-returns risk."}{" "}
                 Planning estimates only, not tax or investment advice.
               </div>
