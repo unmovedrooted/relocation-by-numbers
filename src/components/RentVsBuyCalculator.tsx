@@ -126,7 +126,17 @@ export default function RentVsBuyCalculator() {
     const buyWins = sim.finalBuyer >= sim.finalRenter;
     const diff = Math.abs(sim.finalBuyer - sim.finalRenter);
     const breakEvenYear = sim.breakEvenMonth > 0 ? sim.breakEvenMonth / 12 : null;
-    return { input, sim, chart, buyWins, diff, breakEvenYear };
+    // How the answer moves with the two assumptions it is most sensitive to: home appreciation and the renter's investment return.
+    const appreciationSteps = [-2, 0, 2];
+    const returnSteps = [-2, 0, 2];
+    const sensitivity = appreciationSteps.map((da) => ({
+      appreciation: Math.max(-10, input.appreciationPct + da),
+      cells: returnSteps.map((dr) => {
+        const r = simulateRentVsBuy({ ...input, appreciationPct: Math.max(-10, input.appreciationPct + da), investmentReturnPct: Math.max(0, input.investmentReturnPct + dr) });
+        return { investment: Math.max(0, input.investmentReturnPct + dr), buyAhead: r.finalBuyer - r.finalRenter };
+      }),
+    }));
+    return { input, sim, chart, buyWins, diff, breakEvenYear, sensitivity };
   }, [homePrice, downPct, mortgageRatePct, loanYears, propertyTaxPct, homeInsuranceAnnual, hoaMonthly, maintenancePct, buyClosingPct, appreciationPct, sellingCostPct, monthlyRent, rentGrowthPct, rentersInsuranceMonthly, investmentReturnPct, years]);
 
   const inputsReady = results.input.homePrice > 0 && results.input.monthlyRent > 0;
@@ -272,8 +282,38 @@ export default function RentVsBuyCalculator() {
                 </div>
               </div>
 
+              <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+                <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">How sensitive is the answer?</div>
+                <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">Net worth after {yearsN} years, buying minus renting. Positive means buying is ahead. Rows change home appreciation; columns change the renter&apos;s investment return.</div>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[22rem] text-xs">
+                    <thead>
+                      <tr className="text-left text-slate-500 dark:text-slate-400">
+                        <th className="py-1.5 pr-2 font-medium">Appreciation</th>
+                        {results.sensitivity[0].cells.map((c) => <th key={c.investment} className="py-1.5 text-right font-medium">{c.investment.toFixed(1)}% return</th>)}
+                      </tr>
+                    </thead>
+                    <tbody className="text-slate-700 dark:text-slate-300">
+                      {results.sensitivity.map((row) => (
+                        <tr key={row.appreciation} className="border-t border-slate-100 dark:border-slate-800">
+                          <td className="py-1.5 pr-2">{row.appreciation.toFixed(1)}% a year</td>
+                          {row.cells.map((c) => (
+                            <td key={c.investment} className={`py-1.5 text-right font-semibold ${c.buyAhead >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-cyan-700 dark:text-cyan-300"}`}>
+                              {c.buyAhead >= 0 ? "+" : "-"}{money(Math.abs(c.buyAhead))}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
                 This is a net-worth comparison in future dollars: it assumes the renter invests the money a buyer ties up, and that whoever pays less each month invests the difference. It doesn&apos;t model income-tax effects (mortgage-interest or SALT deductions, investment taxes), PMI, or moving costs, and results are highly sensitive to the appreciation and investment-return assumptions. Not financial advice.
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+                The <a className="underline underline-offset-2" href="/mortgage-calculator">mortgage calculator</a> also compares renting and buying, but its answer can differ: it counts cash paid out minus equity and leaves out selling costs, while this tool deducts selling costs from the home&apos;s value, and the two start from different default rates and growth assumptions. Neither is wrong; they answer slightly different questions.
               </div>
             </>
           )}
