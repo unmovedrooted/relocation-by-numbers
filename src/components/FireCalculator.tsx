@@ -1954,6 +1954,24 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               </div>
             </div>
 
+            {(spendingPreset === "chubby" || spendingPreset === "fat") && (
+              <div className="rounded-xl border border-amber-300/20 bg-amber-300/10 p-3 text-xs leading-5 text-amber-100 sm:col-span-2">
+                <div className="font-semibold">Larger budgets make account mix and withdrawal tax matter more</div>
+                {inputs.advanced ? (
+                  <p className="mt-1">
+                    Withdrawals from traditional 401(k) and IRA balances are taxed at {inputs.withdrawalTaxRatePct}%; Roth and brokerage balances are not reduced by that rate. Set your balances and account types below, because they change the spendable portfolio.
+                  </p>
+                ) : (
+                  <p className="mt-1">
+                    In simple mode the whole portfolio is treated as one taxable account, so no tax on withdrawals from traditional accounts is applied.{" "}
+                    <button type="button" className="font-semibold underline underline-offset-4" onClick={() => setInputs(s => seedAdvancedFromSimple({ ...s, advanced: true }))}>
+                      Turn on Advanced to set your account mix and withdrawal tax
+                    </button>.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* ── Advanced inputs ────────────────────────────────────────── */}
             {inputs.advanced && (<>
               <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">ACCOUNT BALANCES</div>

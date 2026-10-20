@@ -61,21 +61,13 @@ export default async function FireCalculatorPage({ searchParams }: PageProps) {
             Calculate Your FIRE Number, Years to FI, and How Moving Changes Your Timeline
           </p>
 
-          <p className="max-w-4xl text-base leading-7 text-slate-300 sm:text-lg">
-            Enter your income, spending, and investing assumptions to estimate your FIRE number,
-            your years to financial independence, and your projected FIRE age. Then compare how
-            moving to a lower-cost or lower-tax city could bring that date forward.
-          </p>
-
-          <p className="max-w-4xl text-xs leading-6 text-slate-400 sm:text-sm">
-            Uses federal tax brackets, FICA, filing status, optional 401(k) contributions,
-            and state-specific tax estimates to model after-tax income for planning comparisons.
+          <p className="max-w-4xl text-base leading-7 text-slate-300">
+            Enter your income, spending and savings to see your FIRE number and age, then compare how a move could change them.
           </p>
 
           <p className="max-w-4xl text-xs leading-6 text-slate-500">
-            Assumptions updated: October 2026
+            Assumptions updated: October 2026. How taxes are modeled is explained below the calculator.
           </p>
-
 
           <FireHeaderLinks current="fire" mode="standard" />
         </header>
