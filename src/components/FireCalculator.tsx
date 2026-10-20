@@ -1,5 +1,7 @@
 "use client";
 
+import ChangeNote from "./ChangeNote";
+import { useChangeNote } from "@/lib/useChangeNote";
 import MobileResultBar from "./MobileResultBar";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
@@ -1808,6 +1810,34 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
   // RENDER
   // ─────────────────────────────────────────────────────────────────────────
 
+  const dollars = (n: number) => money(n, 0);
+  const { note: changeNote, dismiss: dismissChangeNote } = useChangeNote(
+    {
+      age: { label: "age", value: String(inputs.age) },
+      income: { label: "income", value: dollars(inputs.income) },
+      state: { label: "state", value: String(inputs.state).toUpperCase() },
+      filing: { label: "filing status", value: inputs.filingStatus },
+      k401: { label: "401(k) contribution", value: `${inputs.k401Pct}%` },
+      spending: { label: "monthly spending", value: dollars(inputs.expensesMonthly) },
+      retirementSpending: { label: "monthly spending in retirement", value: inputs.retirementDifferent ? dollars(inputs.retirementExpensesMonthly) : "the same as now" },
+      portfolio: { label: "invested portfolio", value: dollars(inputs.currentPortfolio) },
+      contributions: { label: "annual contributions", value: dollars(inputs.yearlyInvestment) },
+      withdrawal: { label: "withdrawal rate", value: `${inputs.withdrawalRatePct}%` },
+      inflation: { label: "inflation", value: `${inputs.inflationPct}%` },
+      salaryGrowth: { label: "salary growth", value: `${inputs.salaryGrowthPct}%` },
+      returns: { label: "return assumption", value: inputs.volatility },
+      coastAge: { label: "coast age", value: String(inputs.coastAge) },
+      retireAge: { label: "target retirement age", value: String(inputs.targetRetirementAge) },
+      partTime: { label: "part-time income after leaving full-time work", value: dollars(inputs.baristaPartTimeIncome) },
+      partTimeNow: { label: "part-time income now", value: dollars(inputs.baristaIncomeNow) },
+      partTimeEnd: { label: "part-time income end age", value: inputs.baristaEndAge ? String(inputs.baristaEndAge) : "none" },
+    },
+    [
+      { label: "FIRE age", value: hasCoreInputs ? fiAge : null, format: (n) => String(n) },
+      { label: "the FIRE number", value: hasCoreInputs && Number.isFinite(result.fireNumber) ? inView(result.fireNumber, result.yearsToFI) : null, format: dollars },
+    ],
+  );
+
   return (
     <section className="space-y-6">
       <MobileResultBar
@@ -2246,6 +2276,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
 
         {/* ── RIGHT: Results panel ────────────────────────────────────────── */}
         <div id="fire-results" className="scroll-mt-4 space-y-4">
+          <ChangeNote note={changeNote} onDismiss={dismissChangeNote} dark />
           <div className="mt-6">
             <div role="tablist" className="inline-flex flex-wrap gap-2 rounded-2xl border border-white/10 bg-black/20 p-2">
               {(["milestone", "move", "savings"] as const).map(tab => (

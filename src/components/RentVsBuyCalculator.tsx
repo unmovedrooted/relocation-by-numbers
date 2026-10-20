@@ -1,5 +1,7 @@
 "use client";
 
+import ChangeNote from "./ChangeNote";
+import { useChangeNote } from "@/lib/useChangeNote";
 import MobileResultBar from "./MobileResultBar";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
@@ -147,6 +149,30 @@ export default function RentVsBuyCalculator() {
   const inputsReady = results.input.homePrice > 0 && results.input.monthlyRent > 0;
   const yearsN = results.input.years;
 
+  const lead = results.sim.finalBuyer - results.sim.finalRenter;
+  const { note: changeNote, dismiss: dismissChangeNote } = useChangeNote(
+    {
+      price: { label: "home price", value: homePrice },
+      down: { label: "down payment %", value: downPct },
+      rate: { label: "mortgage rate", value: mortgageRatePct },
+      term: { label: "loan term", value: loanYears },
+      ptax: { label: "property tax", value: propertyTaxPct },
+      hins: { label: "home insurance", value: homeInsuranceAnnual },
+      hoa: { label: "HOA", value: hoaMonthly },
+      maint: { label: "maintenance", value: maintenancePct },
+      closing: { label: "closing costs", value: buyClosingPct },
+      appr: { label: "home appreciation", value: appreciationPct },
+      sell: { label: "selling costs", value: sellingCostPct },
+      taxben: { label: "interest tax benefit", value: taxBenefitPct },
+      rent: { label: "monthly rent", value: monthlyRent },
+      rentgrow: { label: "rent growth", value: rentGrowthPct },
+      rins: { label: "renter's insurance", value: rentersInsuranceMonthly },
+      inv: { label: "investment return", value: investmentReturnPct },
+      years: { label: "years you'll stay", value: years },
+    },
+    [{ label: "the comparison", value: inputsReady ? lead : null, format: (n) => `${n >= 0 ? "buying" : "renting"} ahead by ${money(Math.abs(n))}` }],
+  );
+
   const exportRows = useMemo<CsvRow[]>(() => {
     const { sim } = results;
     return [
@@ -239,6 +265,7 @@ export default function RentVsBuyCalculator() {
 
         {/* RESULTS */}
         <div id="rvb-results" className="scroll-mt-4 space-y-3">
+          <ChangeNote note={changeNote} onDismiss={dismissChangeNote} />
           {!inputsReady ? (
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">
               Enter a home price and monthly rent to compare.

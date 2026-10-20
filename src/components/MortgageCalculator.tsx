@@ -1,5 +1,7 @@
 "use client";
 
+import ChangeNote from "./ChangeNote";
+import { useChangeNote } from "@/lib/useChangeNote";
 import MobileResultBar from "./MobileResultBar";
 import { Children, cloneElement, isValidElement, useState, useMemo, useEffect, useCallback, useId, type ReactNode } from "react";
 import {
@@ -1223,6 +1225,36 @@ function USTab() {
     setScenarioNames(["Buy Now", "Rent 2 Yrs, Buy", "Cheaper Home", "Higher Down"]);
   }
 
+  const { note: changeNote, dismiss: dismissChangeNote } = useChangeNote(
+    {
+      price: { label: "home price", value: homePrice },
+      down: { label: "down payment %", value: downPct },
+      rate: { label: "mortgage rate", value: rate },
+      term: { label: "loan term", value: String(term) },
+      closing: { label: "closing costs", value: closingCostPct },
+      ptax: { label: "property tax rate", value: propertyTaxRate },
+      ins: { label: "home insurance", value: insurance },
+      hoa: { label: "HOA", value: hoa },
+      maint: { label: "maintenance", value: maintenanceRate },
+      income: { label: "gross income", value: grossIncome },
+      debts: { label: "other debts", value: otherDebts },
+      rent: { label: "monthly rent", value: monthlyRent },
+      appr: { label: "appreciation", value: appreciation },
+      rentgrow: { label: "rent growth", value: rentGrowth },
+      inv: { label: "investment return", value: investReturn },
+      taxrate: { label: "marginal tax rate", value: taxDeductRate },
+      sell: { label: "selling costs", value: sellingCostPct },
+      savings: { label: "savings", value: currentSavings },
+      efund: { label: "emergency fund months", value: emergencyFundMonths },
+      moving: { label: "moving budget", value: movingBudget },
+    },
+    [
+      { label: "the monthly payment", value: hp > 0 ? totalMonthly : null, format: (n) => money(n) },
+      { label: "cash after closing", value: hp > 0 ? cashAfterClose : null, format: (n) => money(n) },
+      { label: "the rent-versus-buy break-even", value: beYears, format: (n) => `${n} years` },
+    ],
+  );
+
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <MobileResultBar targetId="mortgage-results" summary={hp > 0 && grossMonthly > 0 ? `${money(totalMonthly)}/mo · ${verdict.title}` : null} />
@@ -1361,6 +1393,7 @@ function USTab() {
       </div>
 
       <div id="mortgage-results" className="scroll-mt-4 space-y-3">
+        <ChangeNote note={changeNote} onDismiss={dismissChangeNote} />
 
         <div className={`rounded-2xl border p-5 shadow-[0_6px_20px_rgba(15,23,42,0.07)] ${verdict.border} ${verdict.bg}`}>
           <div className="flex items-start justify-between gap-3">

@@ -1,5 +1,7 @@
 "use client";
 
+import ChangeNote from "./ChangeNote";
+import { useChangeNote } from "@/lib/useChangeNote";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ExampleResultsNotice from "./ExampleResultsNotice";
 import MobileResultBar from "./MobileResultBar";
@@ -984,6 +986,29 @@ export default function Calculator({
   // ─────────────────────────────────────────────────────────────────────────
   // RENDER
   // ─────────────────────────────────────────────────────────────────────────
+  const { note: changeNote, dismiss: dismissChangeNote } = useChangeNote(
+    {
+      salary: { label: "offer salary", value: salary },
+      currentSalary: { label: "current salary", value: currentSalary || "the same" },
+      k401: { label: "401(k) contribution", value: k401Pct },
+      filing: { label: "filing status", value: filing },
+      from: { label: "current city", value: currentCityLabel },
+      to: { label: "target city", value: targetCityLabel },
+      mode: { label: "rent or buy", value: mode },
+      rent: { label: "monthly rent", value: rentMonthly },
+      homePrice: { label: "home price", value: homePrice },
+      down: { label: "down payment %", value: downPct },
+      movers: { label: "movers cost", value: moversCost || "default" },
+      travel: { label: "travel cost", value: travelCost || "default" },
+      setup: { label: "setup cost", value: setupCost || "default" },
+      overlap: { label: "overlap months", value: overlapMonths },
+    },
+    [
+      { label: "the monthly change", value: move ? move.expected.monthlyChange : null, format: (n) => `${n >= 0 ? "+" : "-"}${money(Math.abs(n))}` },
+      { label: "cash needed upfront", value: move ? move.expected.cashUpfront : null, format: (n) => money(n) },
+    ],
+  );
+
   return (
     <div className="text-slate-900 dark:text-slate-100">
       <MobileResultBar
@@ -1364,6 +1389,7 @@ export default function Calculator({
         {/* ══════════════════════════ RESULTS ══════════════════════════ */}
         <div id="move-results" className="scroll-mt-4 space-y-3">
 
+          <ChangeNote note={changeNote} onDismiss={dismissChangeNote} />
           <ExampleResultsNotice />
 
           {/* ── 0. THE ANSWER IN ONE SENTENCE ── */}
