@@ -64,6 +64,8 @@ const VERDICT_STYLES = {
   },
 } as const;
 
+const STEPS = ["Household & dates", "Accounts & balances", "Contributions & planned changes", "Tax strategies (optional)", "Run & results"] as const;
+
 export default function RetirementPlanPreview() {
   const [values, setValues] = useState({ ...PREVIEW_DEFAULTS });
   const [accounts, setAccounts] = useState(initialAccountEditor);
@@ -76,6 +78,8 @@ export default function RetirementPlanPreview() {
   const [stayResult, setStayResult] = useState<ReturnType<typeof calculatePreview> | null>(null);
   const [error, setError] = useState("");
   const [dirty, setDirty] = useState(false);
+  // 0 shows every section; 1 to 5 show one step of the guided setup. Hidden sections stay mounted, so nothing entered is lost.
+  const [step, setStep] = useState(1);
   const [runVersion, setRunVersion] = useState(0);
   const [strategyReset, setStrategyReset] = useState(0);
   const change = (key: string, value: string) => { setValues(previous => ({ ...previous, [key]: value })); setDirty(true); };
@@ -165,6 +169,7 @@ export default function RetirementPlanPreview() {
     setError("");
     setRunVersion(v => v + 1);
   };
+  const show = (n: number) => (step === 0 || step === n ? "" : "hidden");
   const moving = values.moveOn === "yes";
   const hawaiiRelevant = values.state === "hi" || (moving && values.moveState === "hi");
   const last = result?.years.at(-1);
@@ -220,9 +225,33 @@ export default function RetirementPlanPreview() {
       </p>
     </header>
 
-    <form onSubmit={submit} className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_440px] lg:items-start">
+    <form onSubmit={submit} onInvalidCapture={event => {
+      const form = event.currentTarget;
+      const target = event.target as HTMLElement;
+      const owner = target.closest("[data-step]") as HTMLElement | null;
+      const n = owner ? Number(owner.dataset.step) : 0;
+      if (step !== 0 && n && n !== step) { setStep(n); setTimeout(() => form.reportValidity(), 50); }
+    }} className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_440px] lg:items-start">
       {/* ══════════════════════════ INPUTS ══════════════════════════ */}
       <div className="min-w-0 space-y-6">
+        <nav aria-label="Setup steps" className="rounded-2xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+          <ol className="flex flex-wrap gap-2">
+            {STEPS.map((label, i) => (
+              <li key={label}>
+                <button type="button" onClick={() => setStep(i + 1)} aria-current={step === i + 1 ? "step" : undefined}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${step === i + 1 ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"}`}>
+                  {i + 1}. {label}
+                </button>
+              </li>
+            ))}
+            <li className="ml-auto">
+              <button type="button" onClick={() => setStep(step === 0 ? 1 : 0)} className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 underline underline-offset-4 hover:no-underline dark:text-slate-400">
+                {step === 0 ? "Guided steps" : "Show all sections"}
+              </button>
+            </li>
+          </ol>
+        </nav>
+        <div data-step="1" className={`${show(1)} min-w-0 space-y-6`}>
         <section className={panel} aria-labelledby="plan-household-heading">
           <h2 id="plan-household-heading" className="mb-4 text-lg font-semibold">Household &amp; assumptions</h2>
           <div className="mb-4 grid min-w-0 gap-4 sm:grid-cols-2">
@@ -259,33 +288,6 @@ export default function RetirementPlanPreview() {
             {values.thresholdGrowthMode === "separate" && numeric("taxGrowth", "Tax & contribution threshold growth (%)", { max: 20,
               helpText: "Scenario rate for indexed federal thresholds, payroll wage cap and workplace limits. Not future published rules." })}
           </div>
-        </section>
-        <section className={panel} aria-labelledby="plan-move-heading">
-          <h2 id="plan-move-heading" className="mb-2 text-lg font-semibold">Planned move (optional)</h2>
-          <label htmlFor="plan-move-on" className="mb-4 flex items-start gap-2 text-sm">
-            <input id="plan-move-on" type="checkbox" checked={moving} onChange={event => change("moveOn", event.target.checked ? "yes" : "")} />
-            <span>Plan a move to another state during the projection. From January 1 of the move year the household is a full-year resident of the new state, and that state&apos;s income tax applies from then on.</span>
-          </label>
-          {moving && <>
-            <div className="mb-4 grid min-w-0 gap-4 sm:grid-cols-2">
-              {numeric("moveYear", "Move year (first full year as a resident)", { min: Number(values.startYear) || 2026, max: Number(values.endYear) || 2126, step: "1" })}
-              <div className="min-w-0"><label htmlFor="plan-move-state" className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Destination state</label>
-                <select id="plan-move-state" className={control} value={values.moveState} onChange={event => { setValues(previous => ({ ...previous, moveState: event.target.value, moveCityId: "" })); setDirty(true); }}>
-                  <option value="">Choose a state</option>
-                  {STATES.filter(state => state.code !== values.state && VERIFIED_RETIREMENT_STATES.includes(state.code)).map(state => <option key={state.code} value={state.code}>{state.name}</option>)}
-                </select></div>
-              {CITY_FIELD_STATES.includes(values.moveState) && <div className="min-w-0"><label htmlFor="plan-move-city" className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">{values.moveState === "ny" || values.moveState === "pa" || OPTIONAL_CITY_STATES.includes(values.moveState) ? "Destination city" : "Destination county"}{OPTIONAL_CITY_STATES.includes(values.moveState) ? " (optional)" : ""}</label>
-                <select id="plan-move-city" className={control} value={values.moveCityId} onChange={event => change("moveCityId", event.target.value)}>
-                  <option value="">{OPTIONAL_CITY_STATES.includes(values.moveState) ? "No listed city (no city income tax modeled)" : "Choose a location"}</option>
-                  {values.moveState === "ny" && <option value="ny-outside-nyc-yonkers">Outside NYC and Yonkers</option>}
-                  {retirementCityChoices(values.moveState).map(city => <option key={city.id} value={city.id}>{city.name}</option>)}
-                </select></div>}
-            </div>
-            {values.moveState === "or" && values.state !== "or" && <OregonLocalFields values={values} change={change} />}
-            <LocalTaxNote state={values.moveState} />
-            {values.moveState in STATE_CONTRACT_FIELD && <RetirementStateConsents state={values.moveState} values={values} change={change} />}
-            <p className="text-xs text-slate-500 dark:text-slate-400">Moving costs, housing costs and spending changes are not part of the planner; the comparison covers income tax only. The account list, pensions and Social Security stay as entered.</p>
-          </>}
         </section>
         <div className="grid min-w-0 gap-6 lg:grid-cols-2">
           {(values.household === "married" ? ["one", "two"] : ["one"]).map((id, index) => <fieldset key={id} className={panel}>
@@ -327,18 +329,69 @@ export default function RetirementPlanPreview() {
             <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">Income amounts are full-year amounts in the first modeled year’s dollars, even when starting later. Enter expected payable Social Security; this preview does not calculate claiming benefits or the earnings test.</p>
           </fieldset>)}
         </div>
+        </div>
+        <div data-step="2" className={`${show(2)} min-w-0 space-y-6`}>
         <RetirementAccountEditor value={accounts} onChange={changeAccounts} married={values.household === "married"} startYear={Number(values.startYear) || 2026} hawaii={hawaiiRelevant} />
+        </div>
+        <div data-step="3" className={`${show(3)} min-w-0 space-y-6`}>
         <RetirementContributionEditor accounts={accounts} value={saving} married={values.household === "married"} onChange={changeSaving} />
         <RetirementIraContributionEditor accounts={accounts} value={saving.ira ?? initialIraContributionEditor()} married={values.household === "married"}
           onChange={ira => changeSaving({ ...saving, ira })} />
         <RetirementMedicareEditor value={medicare} onChange={next => { setMedicare(next); setDirty(true); }} married={values.household === "married"}
           startYear={Number(values.startYear)} endYear={Number(values.endYear)} />
+        <section className={panel} aria-labelledby="plan-move-heading">
+          <h2 id="plan-move-heading" className="mb-2 text-lg font-semibold">Planned move (optional)</h2>
+          <label htmlFor="plan-move-on" className="mb-4 flex items-start gap-2 text-sm">
+            <input id="plan-move-on" type="checkbox" checked={moving} onChange={event => change("moveOn", event.target.checked ? "yes" : "")} />
+            <span>Plan a move to another state during the projection. From January 1 of the move year the household is a full-year resident of the new state, and that state&apos;s income tax applies from then on.</span>
+          </label>
+          {moving && <>
+            <div className="mb-4 grid min-w-0 gap-4 sm:grid-cols-2">
+              {numeric("moveYear", "Move year (first full year as a resident)", { min: Number(values.startYear) || 2026, max: Number(values.endYear) || 2126, step: "1" })}
+              <div className="min-w-0"><label htmlFor="plan-move-state" className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Destination state</label>
+                <select id="plan-move-state" className={control} value={values.moveState} onChange={event => { setValues(previous => ({ ...previous, moveState: event.target.value, moveCityId: "" })); setDirty(true); }}>
+                  <option value="">Choose a state</option>
+                  {STATES.filter(state => state.code !== values.state && VERIFIED_RETIREMENT_STATES.includes(state.code)).map(state => <option key={state.code} value={state.code}>{state.name}</option>)}
+                </select></div>
+              {CITY_FIELD_STATES.includes(values.moveState) && <div className="min-w-0"><label htmlFor="plan-move-city" className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">{values.moveState === "ny" || values.moveState === "pa" || OPTIONAL_CITY_STATES.includes(values.moveState) ? "Destination city" : "Destination county"}{OPTIONAL_CITY_STATES.includes(values.moveState) ? " (optional)" : ""}</label>
+                <select id="plan-move-city" className={control} value={values.moveCityId} onChange={event => change("moveCityId", event.target.value)}>
+                  <option value="">{OPTIONAL_CITY_STATES.includes(values.moveState) ? "No listed city (no city income tax modeled)" : "Choose a location"}</option>
+                  {values.moveState === "ny" && <option value="ny-outside-nyc-yonkers">Outside NYC and Yonkers</option>}
+                  {retirementCityChoices(values.moveState).map(city => <option key={city.id} value={city.id}>{city.name}</option>)}
+                </select></div>}
+            </div>
+            {values.moveState === "or" && values.state !== "or" && <OregonLocalFields values={values} change={change} />}
+            <LocalTaxNote state={values.moveState} />
+            {values.moveState in STATE_CONTRACT_FIELD && <RetirementStateConsents state={values.moveState} values={values} change={change} />}
+            <p className="text-xs text-slate-500 dark:text-slate-400">Moving costs, housing costs and spending changes are not part of the planner; the comparison covers income tax only. The account list, pensions and Social Security stay as entered.</p>
+          </>}
+        </section>
+        </div>
+        <div data-step="4" className={`${show(4)} min-w-0 space-y-6`}>
         <RetirementConversionEditor value={conversions} onChange={next => { setConversions(next); setDirty(true); }} accounts={accounts} married={values.household === "married"} />
         <RetirementStrategyComparison key={strategyReset} accounts={accounts} married={values.household === "married"} scenarioKey={JSON.stringify([values,accounts,saving,medicare])} buildInput={()=>buildPreviewInput(values,accounts,saving,medicare)} />
         <RetirementSpendingSearch
           investedAccounts={accounts.accounts.filter(a => (a.ownerId === "one" || values.household === "married") && a.kind !== "cash" && a.kind !== "annuity").map(a => ({ id: a.id, name: a.name }))}
           scenarioKey={JSON.stringify([values, accounts, saving, medicare, conversions])}
           buildInput={() => addPreviewConversions(buildPreviewInput(values, accounts, saving, medicare), conversions)} />
+        </div>
+        <div data-step="5" className={`${show(5)} min-w-0`}>
+          <div className={panel}>
+            <h2 className="mb-2 text-lg font-semibold">Run the projection</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Review what you entered, then run the projection. The result appears beside the form, and the balance chart, year-by-year table and methodology are below it. You can go back to any step and run it again.</p>
+            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-600 dark:text-slate-400">
+              <li>{values.household === "married" ? "Two people, married filing jointly" : "One person"}, living in {STATES.find(st => st.code === values.state)?.name ?? values.state}{moving && values.moveState ? `, moving to ${STATES.find(st => st.code === values.moveState)?.name ?? values.moveState} in ${values.moveYear}` : ""}</li>
+              <li>Projection {values.startYear} to {values.endYear}, household spending {money(Number(values.spending) || 0)} a year</li>
+              <li>{accounts.accounts.length} account{accounts.accounts.length === 1 ? "" : "s"} entered</li>
+            </ul>
+          </div>
+        </div>
+        {step > 0 && (
+          <div className="flex flex-wrap items-center gap-3">
+            {step > 1 && <button type="button" onClick={() => setStep(step - 1)} className="rounded-xl border border-slate-300 px-4 py-2 text-sm dark:border-slate-700">Back</button>}
+            {step < 5 && <button type="button" onClick={() => setStep(step + 1)} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900">Next: {STEPS[step]}</button>}
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-3">
           <button type="submit" className="rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500">Run projection</button>
           <button type="button" onClick={resetExample} className="rounded-xl border border-slate-300 px-5 py-3 text-sm dark:border-slate-700">Reset example</button>
@@ -367,7 +420,7 @@ export default function RetirementPlanPreview() {
             <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/70 ring-1 ring-slate-200/50 dark:bg-slate-800/70 dark:ring-slate-700/50">
               <div className={`h-full rounded-full transition-all ${vs.bar}`} style={{ width: `${Math.round(fundedYearsPct * 100)}%` }} />
             </div>
-            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{Math.round(fundedYearsPct * 100)}% of modeled years fully funded · planning estimate, not financial advice.</p>
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Funded in {Math.round(fundedYearsPct * 100)}% of modeled years under one fixed-return projection. This is not a probability of success; the simulation below shows how outcomes vary. Planning estimate, not financial advice.</p>
             <p role="note" className="mt-1 text-xs font-medium text-slate-600 dark:text-slate-300">{PLANNER_NOTICE}</p>
             {dirty && <p role="status" className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-400">Inputs changed — run the projection to refresh these results.</p>}
 
