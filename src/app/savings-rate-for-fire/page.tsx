@@ -53,10 +53,6 @@ export default async function Page({ searchParams }: PageProps) {
             you spend, which lowers the portfolio you need to retire.
           </p>
 
-          <p className="max-w-4xl text-sm leading-6 text-slate-400">
-            That is why savings rate matters so much: it pushes both sides of the math at once.
-            Higher savings grow the portfolio faster while lower spending shrinks the target.
-          </p>
 
           <div className="text-xs text-slate-400">Assumptions updated: October 2026</div>
 
@@ -90,6 +86,13 @@ export default async function Page({ searchParams }: PageProps) {
         </section>
 
         <FireCalculator hideFAQ initialIncome={initialIncome} />
+
+        <section className="max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6">
+          <p className="text-sm leading-7 text-slate-300 sm:text-base">
+            That is why savings rate matters so much: it pushes both sides of the math at once.
+            Higher savings grow the portfolio faster while lower spending shrinks the target.
+          </p>
+        </section>
 
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID ? (
           <section className="rounded-2xl border border-white/10 bg-white/5 p-4">

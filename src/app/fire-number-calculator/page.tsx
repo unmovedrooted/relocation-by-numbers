@@ -57,10 +57,6 @@ export default async function Page({ searchParams }: PageProps) {
             expenses, your FIRE number is $1.2 million.
           </p>
 
-          <p className="leading-relaxed text-slate-300">
-            Enter your income, spending, state, and investing assumptions below to calculate
-            your personal FIRE number and estimated years to financial independence.
-          </p>
 
           <div className="text-xs text-slate-400">Assumptions updated: October 2026</div>
 

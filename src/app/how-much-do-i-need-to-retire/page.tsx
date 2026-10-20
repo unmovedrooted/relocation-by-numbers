@@ -55,11 +55,6 @@ export default async function Page({ searchParams }: PageProps) {
             <span className="font-semibold text-white">25× your annual expenses</span>.
           </p>
 
-          <p className="max-w-3xl text-sm leading-6 text-slate-400">
-            But your retirement number also depends on where you live. Lower taxes and
-            a lower cost of living can reduce annual spending, shrink the portfolio you
-            need, and shorten your timeline by years.
-          </p>
 
           <div className="text-xs text-slate-400">Assumptions updated: October 2026</div>
 
@@ -97,6 +92,14 @@ export default async function Page({ searchParams }: PageProps) {
         </section>
 
         <FireCalculator hideFAQ initialIncome={initialIncome} />
+
+        <section className="max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6">
+          <p className="text-sm leading-7 text-slate-300 sm:text-base">
+            But your retirement number also depends on where you live. Lower taxes and
+            a lower cost of living can reduce annual spending, shrink the portfolio you
+            need, and shorten your timeline by years.
+          </p>
+        </section>
 
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID ? (
           <section className="rounded-2xl border border-white/10 bg-white/5 p-4">

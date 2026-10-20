@@ -53,11 +53,6 @@ export default async function Page({ searchParams }: PageProps) {
             stop making new contributions.
           </p>
 
-          <p className="leading-relaxed text-slate-300">
-            In plain terms, Coast FIRE means your portfolio has reached escape velocity.
-            You still need enough income to cover your current lifestyle, but you no longer
-            need to keep aggressively investing for traditional retirement if your assumptions hold.
-          </p>
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-400">
             <span>Assumptions updated: October 2026</span>
@@ -68,6 +63,14 @@ export default async function Page({ searchParams }: PageProps) {
 
         <section aria-label="Coast FIRE calculator">
           <FireCalculator hideFAQ initialIncome={initialIncome} />
+
+          <section className="max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6">
+            <p className="text-sm leading-7 text-slate-300 sm:text-base">
+              In plain terms, Coast FIRE means your portfolio has reached escape velocity.
+            You still need enough income to cover your current lifestyle, but you no longer
+            need to keep aggressively investing for traditional retirement if your assumptions hold.
+            </p>
+          </section>
         </section>
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">

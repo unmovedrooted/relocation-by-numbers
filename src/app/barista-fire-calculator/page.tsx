@@ -53,11 +53,6 @@ export default async function Page({ searchParams }: PageProps) {
             cover part of your lifestyle and let your investments cover the rest.
           </p>
 
-          <p className="leading-relaxed text-slate-300">
-            That changes the math. If your annual expenses are $60,000 and you expect $24,000
-            of part-time income, your portfolio only needs to support $36,000 per year. At a
-            4% withdrawal rate, that means a $900,000 target instead of $1,500,000.
-          </p>
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-400">
             <span>Assumptions updated: October 2026</span>
@@ -68,6 +63,14 @@ export default async function Page({ searchParams }: PageProps) {
 
         <section aria-label="Barista FIRE calculator">
           <FireCalculator hideFAQ initialIncome={initialIncome} />
+
+          <section className="max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6">
+            <p className="text-sm leading-7 text-slate-300 sm:text-base">
+              That changes the math. If your annual expenses are $60,000 and you expect $24,000
+            of part-time income, your portfolio only needs to support $36,000 per year. At a
+            4% withdrawal rate, that means a $900,000 target instead of $1,500,000.
+            </p>
+          </section>
         </section>
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">

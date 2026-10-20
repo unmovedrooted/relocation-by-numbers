@@ -43,7 +43,7 @@ describe("post-fix remaining discrepancy observations", () => {
 describe("FIRE independent reference audit", () => {
   it.each([
     ["fire-calculator", "standard", 4000], ["fire-number-calculator", "standard", 4000],
-    ["lean-fire-calculator", "lean", 2500], ["barista-fire-calculator", "barista", 5000],
+    ["lean-fire-calculator", "lean", 4000], ["barista-fire-calculator", "barista", 5000],
     ["coast-fire-calculator", "coast", 4000], ["chubby-fire-calculator", "standard", 10000],
     ["fat-fire-calculator", "standard", 20000], ["savings-rate-for-fire", "standard", 4000],
   ])("route %s uses mode %s and spending %s", (route, mode, spending) => {
@@ -241,6 +241,16 @@ describe("separate retirement spending", () => {
   it("scales the retirement budget with a moved spending level", () => {
     const i = { ...base(), retirementDifferent: true, retirementExpensesMonthly: 3000, movedExpensesMonthly: 2000, moveCompareOn: true };
     expect(fire.buildMovedScenario(i).inputs.retirementExpensesMonthly).toBeCloseTo(1500, 8);
+  });
+});
+
+describe("Lean page defaults", () => {
+  it("keeps current spending at the standard default and makes the lean amount the retirement budget", () => {
+    const d = fire.defaultsForMode("lean", 0);
+    expect(d.expensesMonthly).toBe(4000);
+    expect(d.retirementDifferent).toBe(true);
+    expect(d.retirementExpensesMonthly).toBe(2500);
+    expect(d.withdrawalRatePct).toBe(3.5);
   });
 });
 

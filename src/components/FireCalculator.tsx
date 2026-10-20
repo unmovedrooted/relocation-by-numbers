@@ -279,7 +279,9 @@ const BASE_DEFAULTS: Inputs = {
 
 const MODE_OVERRIDES: Record<FireMode, Partial<Inputs>> = {
   standard: {},
-  lean:     { expensesMonthly: 2500, withdrawalRatePct: 3.5 },
+  // Lean keeps current spending at the standard default and makes the lean amount the retirement budget, so a lean budget can be compared
+  // with the same income and saving.
+  lean:     { retirementDifferent: true, retirementExpensesMonthly: 2500, withdrawalRatePct: 3.5 },
   coast:    { coastAge: 40, targetRetirementAge: 65 },
   barista:  { expensesMonthly: 5000, baristaPartTimeIncome: 24000 },
 };
@@ -1533,10 +1535,24 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   const fullFiAgeForCoast = useMemo(() => fullFireForCoast?.yearsToFI == null ? null : inputs.age + fullFireForCoast.yearsToFI, [fullFireForCoast, inputs.age]);
 
   // ── Lean-specific: full FIRE comparison at 1.5× spending ─────────────────
+  // With a separate retirement budget (the Lean page's default) the comparison is your current spending as the retirement budget;
+  // otherwise it is 50% higher spending.
+  const leanComparesToCurrent = inputs.retirementDifferent;
   const fullFireForLean = useMemo(() => {
     if (mode !== "lean") return null;
+    if (inputs.retirementDifferent) return simulateYearsToFI({ ...inputs, retirementDifferent: false }, netPath, "standard");
     const fullExp = annualExpensesFromMonthly(inputs.expensesMonthly * 1.5);
     return simulateYearsToFI(inputs, netPath, "standard", { expensesAnnualBase: fullExp });
+  }, [mode, inputs, netPath]);
+  // The same income, saving and current spending with different retirement budgets.
+  const leanBudgetRows = useMemo(() => {
+    if (mode !== "lean") return [];
+    const mine = inputs.retirementDifferent ? inputs.retirementExpensesMonthly : inputs.expensesMonthly;
+    const budgets = Array.from(new Set([1500, 2000, 2500, 3000, 3500, 4000, 5000, Math.round(mine)])).filter(b => b > 0).sort((a, b) => a - b);
+    return budgets.map(b => {
+      const r = simulateYearsToFI({ ...inputs, retirementDifferent: true, retirementExpensesMonthly: b }, netPath, "lean");
+      return { budget: b, mine: b === Math.round(mine), number: r.fireNumber, years: r.yearsToFI, age: r.yearsToFI === null ? null : inputs.age + r.yearsToFI };
+    });
   }, [mode, inputs, netPath]);
   const fullFiAgeForLean = useMemo(() => fullFireForLean?.yearsToFI == null ? null : inputs.age + fullFireForLean.yearsToFI, [fullFireForLean, inputs.age]);
   const leanYearsSaved   = useMemo(() => fiAge !== null && fullFiAgeForLean !== null ? fullFiAgeForLean - fiAge : null, [fiAge, fullFiAgeForLean]);
@@ -1822,7 +1838,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
           )}
           {carriedOver && (
             <p className="mt-3 rounded-lg border border-emerald-400/20 bg-emerald-400/5 px-3 py-2 text-xs leading-5 text-emerald-100">
-              Your age, income, location and portfolio carried over from your last FIRE page. This style uses its own spending ({money(inputs.expensesMonthly, 0)}/mo) and a {inputs.withdrawalRatePct}% withdrawal rate; change them below if you want.
+              Your age, income, location and portfolio carried over from your last FIRE page. This style uses its own spending ({money(inputs.expensesMonthly, 0)}/mo{inputs.retirementDifferent ? `, ${money(inputs.retirementExpensesMonthly, 0)}/mo in retirement` : ""}) and a {inputs.withdrawalRatePct}% withdrawal rate; change them below if you want.
             </p>
           )}
 
@@ -2216,7 +2232,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     : <>At your current pace you could reach financial independence at <strong>age {fiAge}</strong>, in about <strong>{result.yearsToFI} years</strong>, around <strong>{fiYear}</strong>.</>}
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Stat label="FIRE Number" value={hasCoreInputs && fireNumberShown} helper={`Based on ${inputs.withdrawalRatePct}% withdrawal rate, ${dollarBasis} (spending grows with inflation).${fireNumberTodayNote}`} />
+                  <Stat label="FIRE Number" value={hasCoreInputs ? fireNumberShown : "—"} helper={`Based on ${inputs.withdrawalRatePct}% withdrawal rate, ${dollarBasis} (spending grows with inflation).${fireNumberTodayNote}`} />
                   <Stat label="Years Until FIRE" value={hasCoreInputs ? result.yearsToFI === null ? "Not reached" : `${result.yearsToFI} yrs` : "—"} helper={fiYear ? `Est. FIRE year: ${fiYear}` : undefined} />
                   <Stat label="Estimated FIRE Age" value={hasCoreInputs ? (fiAge ?? "—") : "—"} />
                   {inputs.advanced
@@ -2269,21 +2285,21 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 <p className="text-sm leading-6 text-slate-300">
                   {fiAge === null
                     ? <>Lean FIRE not projected within <strong>{inputs.maxYears} years</strong> at current inputs.</>
-                    : <>With lean spending of <strong>{money(inputs.expensesMonthly, 0)}/mo</strong>, you could reach Lean FIRE at <strong>age {fiAge}</strong>
-                      {leanYearsSaved !== null && leanYearsSaved > 0 ? <>, <strong>{leanYearsSaved} years sooner</strong> than a higher-spending plan.</> : <>.</>}</>}
+                    : <>With a lean retirement budget of <strong>{money(inputs.retirementDifferent ? inputs.retirementExpensesMonthly : inputs.expensesMonthly, 0)}/mo</strong>, you could reach Lean FIRE at <strong>age {fiAge}</strong>
+                      {leanYearsSaved !== null && leanYearsSaved > 0 ? <>, <strong>{leanYearsSaved} years sooner</strong> than {leanComparesToCurrent ? "retiring on your current spending" : "a higher-spending plan"}.</> : <>.</>}</>}
                 </p>
                 {/* Side-by-side comparison */}
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-widest text-emerald-300">Lean FIRE</div>
-                    <div className="mt-2 text-xs text-slate-400">{money(inputs.expensesMonthly, 0)}/mo spending</div>
+                    <div className="mt-2 text-xs text-slate-400">{money(inputs.retirementDifferent ? inputs.retirementExpensesMonthly : inputs.expensesMonthly, 0)}/mo in retirement</div>
                     <div className="mt-3 text-2xl font-bold text-white">{fireNumberShown}</div>
                     <div className="mt-1 text-sm text-emerald-200">FIRE at age {fiAge ?? "—"}</div>
                     <div className="mt-1 text-xs text-slate-400">{result.yearsToFI !== null ? `${result.yearsToFI} years away` : "Not reached"}</div>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Full FIRE (+50% spending)</div>
-                    <div className="mt-2 text-xs text-slate-400">{money(inputs.expensesMonthly * 1.5, 0)}/mo spending</div>
+                    <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">{leanComparesToCurrent ? "Retiring on your current spending" : "Full FIRE (+50% spending)"}</div>
+                    <div className="mt-2 text-xs text-slate-400">{money(leanComparesToCurrent ? inputs.expensesMonthly : inputs.expensesMonthly * 1.5, 0)}/mo in retirement</div>
                     <div className="mt-3 text-2xl font-bold text-white">{fullFireNumberShown(fullFireForLean)}</div>
                     <div className="mt-1 text-sm text-slate-300">FIRE at age {fullFiAgeForLean ?? "—"}</div>
                     <div className="mt-1 text-xs text-slate-400">{fullFireForLean?.yearsToFI !== null && fullFireForLean?.yearsToFI !== undefined ? `${fullFireForLean.yearsToFI} years away` : "Not reached"}</div>
@@ -2291,11 +2307,33 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 </div>
                 {leanYearsSaved !== null && leanYearsSaved > 0 && (
                   <div className="rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100">
-                    Lean spending saves you <strong>{leanYearsSaved} years</strong> vs a 50% higher spending plan. That&apos;s the power of the lean approach.
+                    A lean retirement budget gets you there <strong>{leanYearsSaved} years</strong> sooner than {leanComparesToCurrent ? "retiring on your current spending" : "a plan with 50% higher spending"}.
+                  </div>
+                )}
+                {hasCoreInputs && leanBudgetRows.length > 0 && (
+                  <div>
+                    <div className="mb-2 text-sm font-semibold text-white">Compare retirement budgets</div>
+                    <p className="mb-2 text-xs leading-5 text-slate-400">Your income, saving and current spending stay the same; only the monthly budget your portfolio must support in retirement changes.</p>
+                    <div className="overflow-x-auto rounded-xl border border-white/10" role="region" aria-label="Retirement budget comparison" tabIndex={0}>
+                      <table className="w-full min-w-[26rem] text-left text-xs">
+                        <thead className="bg-white/5 text-slate-300">
+                          <tr><th className="px-3 py-2">Monthly retirement budget</th><th className="px-3 py-2">FIRE number</th><th className="px-3 py-2">FIRE age</th></tr>
+                        </thead>
+                        <tbody className="text-slate-200">
+                          {leanBudgetRows.map(r => (
+                            <tr key={r.budget} className={["border-t border-white/10", r.mine ? "bg-emerald-300/10 font-semibold" : ""].join(" ")}>
+                              <td className="px-3 py-2">{money(r.budget, 0)}{r.mine ? " (yours)" : ""}</td>
+                              <td className="px-3 py-2">{money(inView(r.number, r.years), 0)}</td>
+                              <td className="px-3 py-2">{r.age ?? "Not reached"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 )}
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Stat label="Lean FIRE Number" value={hasCoreInputs && fireNumberShown} helper={`At ${inputs.withdrawalRatePct}% withdrawal, ${dollarBasis}.${fireNumberTodayNote}`} highlight />
+                  <Stat label="Lean FIRE Number" value={hasCoreInputs ? fireNumberShown : "—"} helper={`At ${inputs.withdrawalRatePct}% withdrawal, ${dollarBasis}.${fireNumberTodayNote}`} highlight />
                   <Stat label="Savings Rate" value={hasCoreInputs ? pct(savingsRate) : "—"} helper={`${money(netAnnual, 0)} est. net income`} />
                 </div>
                 <ProgressBar pct={progress.pct} label="Progress to Lean FIRE"
@@ -2383,7 +2421,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   </div>
                 )}
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Stat label="Barista FIRE Number" value={hasCoreInputs && fireNumberShown} helper={`At ${inputs.withdrawalRatePct}% withdrawal on the gap, ${dollarBasis}.${fireNumberTodayNote}`} highlight />
+                  <Stat label="Barista FIRE Number" value={hasCoreInputs ? fireNumberShown : "—"} helper={`At ${inputs.withdrawalRatePct}% withdrawal on the gap, ${dollarBasis}.${fireNumberTodayNote}`} highlight />
                   <Stat label="Portfolio Gap Covered" value={hasCoreInputs ? money(Math.max(0, annualExp - (Number(inputs.baristaPartTimeIncome) || 0)), 0) : "—"} helper="Amount your portfolio must fund per year" />
                 </div>
                 <ProgressBar pct={progress.pct} label="Progress to Barista FIRE"
