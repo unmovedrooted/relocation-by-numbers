@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import UsageEvents from "@/components/UsageEvents";
 import Link from "next/link";
 import Script from "next/script";
 import Image from "next/image";
@@ -132,6 +133,7 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <PwaRegistration />
+          <UsageEvents />
           {process.env.NODE_ENV === "production" && GA_MEASUREMENT_ID ? (
             <>
               <Script

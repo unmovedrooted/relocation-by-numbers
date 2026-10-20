@@ -118,6 +118,13 @@ export default function PrivacyPage() {
             site is performing and which tools or pages are most useful. It is not
             intended to build detailed personal financial profiles from calculator use.
           </p>
+
+          <p>
+            To see where visitors get stuck, the site counts a few anonymous events on calculator pages: that a visitor started, made a first edit,
+            saw a result after editing, or followed a &ldquo;where to go next&rdquo; link. Each event records only the page it happened on. It never
+            includes what you typed, the numbers or cities you chose, or the address with its query string, and nothing is sent if your browser
+            is set to Do Not Track.
+          </p>
         </div>
       </section>
 

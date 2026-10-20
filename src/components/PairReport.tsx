@@ -293,7 +293,7 @@ export default function PairReport({ fromId, toId, path }: { fromId: string; toI
         </p>
       </section>
 
-      <section className={card} aria-labelledby="pr-next">
+      <section className={card} aria-labelledby="pr-next" data-next-step>
         <h2 id="pr-next" className={h2}>Where to go next</h2>
         <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
           <li><Link className="font-semibold underline underline-offset-4 hover:no-underline" href="/fire-calculator">See the FIRE impact</Link>: enter your own numbers and use the Move tab to see how a different cost of living changes your timeline.</li>

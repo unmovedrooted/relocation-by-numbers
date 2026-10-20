@@ -98,7 +98,7 @@ export default function FireCitiesReport() {
         </p>
       </section>
 
-      <section className={t.card} aria-labelledby="bc-next">
+      <section className={t.card} aria-labelledby="bc-next" data-next-step>
         <h2 id="bc-next" className={t.h2}>Where to go next</h2>
         <ul className={`mt-3 space-y-2 text-sm leading-6 ${t.body}`}>
           <li><Link className="font-semibold underline underline-offset-4 hover:no-underline" href="/compare">Compare a move</Link>: see what a change of city does to rent, taxes and take-home pay.</li>

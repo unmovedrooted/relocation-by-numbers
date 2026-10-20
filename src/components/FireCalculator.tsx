@@ -2576,7 +2576,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               />
 
               {/* ── Next steps: compare a move, see the FIRE impact, then plan in detail ── */}
-              <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/5 p-4">
+              <div data-next-step className="rounded-2xl border border-emerald-400/20 bg-emerald-400/5 p-4">
                 <div className="text-sm font-semibold text-white">Where to go next</div>
                 <ol className="mt-3 grid gap-2 sm:grid-cols-3">
                   {[
