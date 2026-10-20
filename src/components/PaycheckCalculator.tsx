@@ -301,7 +301,7 @@ export default function PaycheckCalculator() {
                   {money(results.b.net)}/yr net, you keep {(results.takeHomePct * 100).toFixed(0)}% of gross, at a {(results.effectiveTaxRate * 100).toFixed(1)}% effective tax rate in {stateName}.
                 </p>
                 <p className="mt-2 text-xs leading-5 opacity-80">
-                  This is a full-year tax estimate divided into {eachLabel} periods, not your employer&apos;s exact payroll calculation. Withholding on a real paycheck depends on your W-4, benefits and pay timing.
+                  Estimates use annual tax rules and divide the result by your selected pay frequency ({FREQUENCIES[frequency].periods} pay periods a year). Actual employer withholding may differ with your W-4, benefits and pay timing.
                 </p>
               </div>
 

@@ -111,7 +111,7 @@ const breadcrumbSchema = {
 const FAQ_ITEMS = [
   { q: "How is take-home pay calculated?", a: "Gross pay minus federal income tax, Social Security and Medicare (FICA), state/local income tax, and pre-tax deductions like a 401(k). This tool uses 2026 federal brackets, the standard deduction, and state income tax." },
   { q: "Does a 401(k) increase my take-home pay?", a: "No, it lowers your taxable income (reducing federal and usually state tax), but the contribution still leaves your paycheck and goes to your retirement account. It doesn't reduce Social Security or Medicare." },
-  { q: "Which states have no income tax?", a: "Alaska, Florida, Nevada, New Hampshire, South Dakota, Tennessee, Texas, Washington, and Wyoming. Paychecks there are reduced only by federal tax and FICA." },
+  { q: "Which states have no income tax?", a: "Alaska, Florida, Nevada, New Hampshire, South Dakota, Tennessee, Texas, Washington, and Wyoming. Paychecks there have no state income tax, but they are still reduced by federal tax and FICA, by any employee-paid state payroll programs (for example, Washington's paid family and medical leave and WA Cares), and by retirement contributions you select." },
   { q: "What is FICA?", a: "Social Security (6.2% up to a wage base) plus Medicare (1.45%, plus 0.9% above higher-income thresholds). It's separate from federal income tax." },
 ];
 
@@ -177,7 +177,7 @@ export default function Page() {
               <div className="rounded-2xl border border-cyan-200/70 bg-cyan-50 p-5 dark:border-cyan-900/60 dark:bg-cyan-950/30">
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Good to know</h3>
                 <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                  <p>These are estimates for planning and comparison, using the standard deduction and typical withholding rules.</p>
+                  <p>Estimates use annual tax rules and divide the result by your selected pay frequency. Actual employer withholding may differ.</p>
                   <p>They don&apos;t include pre-tax health or HSA deductions, extra withholding, tax credits, or non-standard local taxes, which can shift your actual paycheck.</p>
                   <p>Comparing a job offer in another city? Pair this with the relocation and compare-cities tools to see the full picture.</p>
                   <p>This calculator is not tax advice.</p>
