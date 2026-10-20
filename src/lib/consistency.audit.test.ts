@@ -154,3 +154,21 @@ describe("what would change the rent-versus-buy answer", () => {
     expect(t.monthlyRent === null || t.monthlyRent > 800).toBe(true);
   });
 });
+
+describe("living-cost estimate behind the Compare Cities handoff", () => {
+  it("is the relocation calculator's starting figure for the same city, and scales with regional prices", async () => {
+    const { estimateLivingCosts } = await import("./livingCostEstimate");
+    const nyc = findCity("nyc-ny");
+    const raleigh = findCity("raleigh-nc");
+    expect(estimateLivingCosts(nyc, nyc)).toEqual({ current: 1650, target: 1650 });
+    const move = estimateLivingCosts(nyc, raleigh);
+    expect(move.current).toBe(1650);
+    // Raleigh's groceries, utilities and transport prices are below New York's, so everyday costs fall.
+    expect(move.target).toBeLessThan(1650);
+    expect(move.target).toBeGreaterThan(900);
+  });
+  it("falls back to the base figure when a city has no price data", async () => {
+    const { estimateLivingCosts } = await import("./livingCostEstimate");
+    expect(estimateLivingCosts(undefined, undefined)).toEqual({ current: 1650, target: 1650 });
+  });
+});

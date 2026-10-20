@@ -1892,9 +1892,9 @@ export default function Calculator({
                 mode === "buy"
                   ? { label: "Home price", value: money(nz(homePrice)), source: typed.home ? "yours" : "city" }
                   : { label: "Monthly rent in the new city", value: money(nz(rentMonthly)), source: typed.rent ? "yours" : "city" },
-                { label: "Groceries", value: `${money(effectiveGroceries)}/mo`, source: colGroceries.trim() === "" ? "city" : "yours" },
-                { label: "Utilities", value: `${money(effectiveUtilities)}/mo`, source: colUtilities.trim() === "" ? "city" : "yours" },
-                { label: "Transportation", value: `${money(effectiveTransport)}/mo`, source: colTransport.trim() === "" ? "city" : "yours" },
+                { label: "Groceries", value: `${money(effectiveGroceries)}/mo`, source: colGroceries.trim() === "" ? "city" : "yours", note: colGroceries.trim() === "" ? "National budget scaled by the city's BEA price level" : undefined },
+                { label: "Utilities", value: `${money(effectiveUtilities)}/mo`, source: colUtilities.trim() === "" ? "city" : "yours", note: colUtilities.trim() === "" ? "National budget scaled by the city's BEA price level" : undefined },
+                { label: "Transportation", value: `${money(effectiveTransport)}/mo`, source: colTransport.trim() === "" ? "city" : "yours", note: colTransport.trim() === "" ? "National budget scaled by the city's BEA price level" : undefined },
                 { label: "Dining out", value: `${money(effectiveDining)}/mo`, source: colDining.trim() === "" ? "planning" : "yours" },
                 { label: "Subscriptions and misc", value: `${money(effectiveMisc)}/mo`, source: colMisc.trim() === "" ? "planning" : "yours" },
                 { label: "Movers or truck", value: money(move.oneTime.movers.amount), source: move.oneTime.movers.estimated ? "planning" : "yours" },

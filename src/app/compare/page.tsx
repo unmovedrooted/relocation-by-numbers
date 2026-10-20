@@ -100,8 +100,8 @@ export default function CompareHubPage() {
 
           <p className="mx-auto max-w-3xl text-slate-600 dark:text-slate-400 leading-7">
             See how cost of living, take-home pay, housing costs, and monthly affordability
-            change when you relocate from one city to another. This hub focuses on a smaller
-            set of high-value comparisons instead of spreading across dozens of weak routes.
+            change when you relocate from one city to another. Start with the moves people ask
+            about most; each comparison shows take-home pay, rent, taxes and where households are actually moving.
           </p>
 
           <p className="mx-auto max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">

@@ -127,9 +127,11 @@ export default function AboutPage() {
               the fall.
             </li>
             <li>
-              City rent, home-price and cost-of-living defaults are planning estimates, not figures from a single
-              published government dataset, so treat them as a starting point and enter your own numbers where you
-              can.
+              City rent, home-price and property-tax defaults come from U.S. Census Bureau survey data, and city price
+              levels come from Bureau of Economic Analysis regional price parities. The national dollar budgets those
+              price levels scale (groceries, utilities, transportation, dining, subscriptions), along with insurance,
+              closing costs and moving costs, are the site&apos;s own planning assumptions. Treat every default as a
+              starting point and enter your own numbers where you can; the methodology page lists which is which.
             </li>
           </ul>
           <p>

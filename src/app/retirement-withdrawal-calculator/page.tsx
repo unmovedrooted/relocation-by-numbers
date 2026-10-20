@@ -15,7 +15,7 @@ const CANONICAL = `${SITE_URL}${PAGE_PATH}`;
 export const metadata: Metadata = {
   title: "Retirement Withdrawal Calculator, How Long Will My Money Last?",
   description:
-    "Free retirement withdrawal calculator. See how long your savings will last at a given withdrawal, or the safe amount you can withdraw for a target retirement length, with taxes, inflation, and the 4% rule built in.",
+    "Free retirement withdrawal calculator. See how long your savings will last at a given withdrawal, or the modeled sustainable withdrawal you can take for a target retirement length, with taxes, inflation, and the 4% rule built in.",
   keywords: [
     "retirement withdrawal calculator",
     "how long will my money last calculator",
@@ -34,13 +34,13 @@ export const metadata: Metadata = {
     siteName: "Relocation by Numbers",
     title: "Retirement Withdrawal Calculator, How Long Will My Money Last?",
     description:
-      "See how long your savings last, or your safe annual withdrawal for a target retirement length, with taxes, inflation, and the 4% rule.",
+      "See how long your savings last, or your modeled sustainable annual withdrawal for a target retirement length, with taxes, inflation, and the 4% rule.",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
     title: "Retirement Withdrawal Calculator, How Long Will My Money Last?",
-    description: "How long your savings last, or your safe withdrawal amount, taxes, inflation, and the 4% rule included.",
+    description: "How long your savings last, or your modeled sustainable withdrawal, taxes, inflation, and the 4% rule included.",
     site: "@relocationbynumbers",
   },
   robots: {
@@ -60,12 +60,12 @@ const webAppSchema = {
   name: "Retirement Withdrawal Calculator",
   url: CANONICAL,
   description:
-    "Free retirement withdrawal calculator that shows how long your savings will last at a given withdrawal, or the safe withdrawal amount for a target retirement length, accounting for taxes, inflation, and the 4% rule.",
+    "Free retirement withdrawal calculator that shows how long your savings will last at a given withdrawal, or the modeled sustainable withdrawal for a target retirement length, accounting for taxes, inflation, and the 4% rule.",
   applicationCategory: "FinanceApplication",
   operatingSystem: "Any",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   featureList: [
-    "How-long-will-it-last and safe-withdrawal modes",
+    "How-long-will-it-last and sustainable-withdrawal modes",
     "Federal and state income tax on withdrawals (traditional vs Roth)",
     "Inflation-adjusted, today's-dollar projections",
     "4% rule reference and horizon comparison",
@@ -188,7 +188,7 @@ export default function Page() {
             </h1>
 
             <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              See how long your savings will last at a given withdrawal, or the safe amount you can withdraw for a
+              See how long your savings will last at a given withdrawal, or the modeled sustainable withdrawal you can take for a
               target retirement length. Taxes, inflation, and the 4% rule are all built in.
             </p>
 
@@ -224,8 +224,8 @@ export default function Page() {
                 <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
                   <p>
                     Pick a mode. In <strong>&ldquo;How long will it last?&rdquo;</strong> you enter a withdrawal and
-                    the calculator draws it down year by year until the money runs out. In <strong>&ldquo;Safe
-                    withdrawal amount&rdquo;</strong> you enter a target retirement length and it solves for the
+                    the calculator draws it down year by year until the money runs out. In <strong>&ldquo;Modeled sustainable
+                    withdrawal&rdquo;</strong> you enter a target retirement length and it solves for the
                     largest level withdrawal your balance can sustain for that many years.
                   </p>
                   <p>

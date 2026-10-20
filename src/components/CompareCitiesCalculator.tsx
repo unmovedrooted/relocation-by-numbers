@@ -1,5 +1,7 @@
 "use client";
 
+import { buildFireLink } from "@/lib/fireLink";
+import { estimateLivingCosts } from "@/lib/livingCostEstimate";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { STATES, type StateCode } from "../lib/states";
 import { citiesForState, findCity } from "../lib/cities";
@@ -554,6 +556,28 @@ export default function CompareCitiesCalculator() {
 
   const isUs = region === "us";
 
+  // A move handed to the FIRE calculator: the current city, the city with the most left after housing, their housing costs and the same
+  // everyday-cost assumptions the relocation calculator uses. Outside the U.S. only the income is handed over (no living-cost figures here).
+  const fire = useMemo(() => {
+    const fallback = { href: `/fire-calculator?income=${Math.round(grossN)}`, label: "See how this income changes your FIRE timeline →" };
+    if (region !== "us" || !originResult || !bestFlexibilityKey || !salaryReady) return fallback;
+    const to = targetResults.find((r) => r.cityId === bestFlexibilityKey);
+    const fromCity = findCity(originCityId);
+    const toCity = findCity(bestFlexibilityKey);
+    if (!to || !fromCity || !toCity) return fallback;
+    const living = estimateLivingCosts(fromCity, toCity);
+    return {
+      href: buildFireLink({
+        income: grossN, state: originResult.state, filing, k401Pct: Math.min(60, Math.max(0, nz(k401Pct))),
+        expenses: originResult.housingMonthly + living.current,
+        movedIncome: grossN, movedState: to.state, movedCityId: toCity.id,
+        movedExpenses: to.housingMonthly + living.target,
+        movedCost: 0,
+      }),
+      label: `See how moving to ${to.cityName} changes your FIRE timeline →`,
+    };
+  }, [region, originResult, bestFlexibilityKey, targetResults, originCityId, grossN, filing, k401Pct, salaryReady]);
+
   const summary = useMemo(() => {
     if (activeResults.length === 0) return null;
     const best = activeResults.find((r) => r.key === bestFlexibilityKey) ?? activeResults[0];
@@ -965,10 +989,10 @@ export default function CompareCitiesCalculator() {
               </div>
 
               <a
-                href={`/fire-calculator?income=${Math.round(grossN)}`}
+                href={fire.href}
                 className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
               >
-                See how this income changes your FIRE timeline →
+                {fire.label}
               </a>
             </>
           )}

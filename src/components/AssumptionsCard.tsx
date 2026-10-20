@@ -48,7 +48,7 @@ export default function AssumptionsCard({ items, replaceHint, dark = false }: { 
       </ul>
       <p className={`mt-3 text-[11px] leading-4 ${muted}`}>
         {used.map((s) => SOURCE_STYLE[s].label).join(" · ")}.{" "}
-        {used.includes("city") && "City data comes from Census, BEA and other public sources for the city you chose. "}
+        {used.includes("city") && "City data is published Census or BEA data for the city you chose; where BEA price levels scale the site's national budgets, the budget itself is a planning assumption. "}
         {used.includes("planning") && "Planning assumptions are the site's starting estimates, not quotes or forecasts. "}
         {used.includes("sample") && "Sample values are placeholders until you enter your own."}
       </p>

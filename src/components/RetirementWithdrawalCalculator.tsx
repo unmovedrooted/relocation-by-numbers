@@ -274,8 +274,8 @@ export default function RetirementWithdrawalCalculator() {
     const ageNow = nz(currentAge);
     const depletionAge = ageNow > 0 && depletes ? ageNow + yearsLasts : null;
 
-    // Milestone remaining balances (today's dollars) for howLong; safe
-    // withdrawal at alternate horizons for safeAmount.
+    // Milestone remaining balances (today's dollars) for howLong; modeled
+    // sustainable withdrawal at alternate horizons for safeAmount.
     const milestones =
       mode === "howLong"
         ? [5, 10, 15, 20, 25, 30].map((y) => ({
@@ -597,7 +597,7 @@ export default function RetirementWithdrawalCalculator() {
                     label={`Chance it lasts ${mc.horizon} years`}
                     value={`${(mc.successRate * 100).toFixed(0)}%`}
                     tone={mc.successRate >= 0.9 ? "emerald" : mc.successRate >= 0.75 ? "cyan" : "amber"}
-                    note={`Across 5,000 simulated markets at ${(volatility * 100).toFixed(0)}% volatility, ${money(results.grossWithdrawal)}/yr lasted the full ${mc.horizon} years in ${(mc.successRate * 100).toFixed(0)}% of them. The average view's "safe" amount isn't guaranteed once markets swing.`}
+                    note={`Across 5,000 simulated markets at ${(volatility * 100).toFixed(0)}% volatility, ${money(results.grossWithdrawal)}/yr lasted the full ${mc.horizon} years in ${(mc.successRate * 100).toFixed(0)}% of them. The average view's sustainable amount isn't guaranteed once markets swing.`}
                   />
                 ) : (
                   <StatCard
@@ -623,7 +623,7 @@ export default function RetirementWithdrawalCalculator() {
               {viewMode === "average" ? (
                 <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
                   <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    {mode === "howLong" ? "Balance over time (today's $)" : "Safe withdrawal at other horizons"}
+                    {mode === "howLong" ? "Balance over time (today's $)" : "Modeled sustainable withdrawal at other horizons"}
                   </div>
                   <div className="space-y-1.5 text-sm text-slate-700 dark:text-slate-300">
                     {results.milestones.map((m) => (
