@@ -1,5 +1,6 @@
 "use client";
 
+import ExampleResultsNotice from "./ExampleResultsNotice";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { usWageEffectiveRate } from "@/lib/usCityTax";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -1375,6 +1376,7 @@ const relativeDifference =
           {/* Main results */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
             <div className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Results</div>
+            <ExampleResultsNotice className="mb-3" />
             <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
               {CARIBBEAN_TAX_ASSUMPTIONS_LABEL} · Planning estimates only
             </div>

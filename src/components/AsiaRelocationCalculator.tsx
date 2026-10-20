@@ -1,5 +1,6 @@
 "use client";
 
+import ExampleResultsNotice from "./ExampleResultsNotice";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { usWageEffectiveRate } from "@/lib/usCityTax";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -958,6 +959,7 @@ export default function AsiaRelocationCalculator() {
         <div className="space-y-3">
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-2 text-sm font-semibold">Results</div>
+            <ExampleResultsNotice className="mb-3" />
             <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">{ASIA_TAX_LABEL} · Planning estimates only</div>
             <div className="mb-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
               <div>Current: <span className="font-semibold">{fromCityLabel}</span>

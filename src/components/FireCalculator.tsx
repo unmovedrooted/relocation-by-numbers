@@ -22,6 +22,7 @@ import { findCity, citiesForState } from "@/lib/cities";
 import { estimateNetAnnual, estimateNetBreakdown, EMPLOYEE_401K_LIMIT } from "@/lib/wageTax";
 import type { FilingStatus } from "@/lib/tax";
 import Link from "next/link";
+import ExampleResultsNotice from "./ExampleResultsNotice";
 import { parseFireAbroadLink, parseFireLink } from "@/lib/fireLink";
 import { monthlyDepositFactor } from "@/lib/depositTiming";
 
@@ -2159,6 +2160,8 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               </div>
             </div>
             <div className="rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 to-slate-950/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm space-y-4">
+
+              <ExampleResultsNotice />
 
               {/* ── STANDARD ──────────────────────────────────────────────── */}
               {mode === "standard" && (<>

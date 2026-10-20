@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import ExampleResultsNotice from "./ExampleResultsNotice";
 import { STATES, type StateCode } from "../lib/states";
 import { citiesForState, findCity } from "../lib/cities";
 import { isAllowedCompareRoute } from "../lib/compare";
@@ -1356,6 +1357,8 @@ export default function Calculator({
 
         {/* ══════════════════════════ RESULTS ══════════════════════════ */}
         <div className="space-y-3">
+
+          <ExampleResultsNotice />
 
           {/* ── 0. THE ANSWER IN ONE SENTENCE ── */}
           {move && (

@@ -1,5 +1,6 @@
 "use client";
 
+import ExampleResultsNotice from "./ExampleResultsNotice";
 import { useEffect, useMemo, useState, useSyncExternalStore, useCallback } from "react";
 import { usWageEffectiveRate } from "@/lib/usCityTax";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -1412,6 +1413,7 @@ readinessRecommendation,
           {/* Main results card */}
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-2 text-sm font-semibold">Results</div>
+            <ExampleResultsNotice className="mb-3" />
             <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
               {EUROPE_TAX_ASSUMPTIONS_LABEL} · Planning estimates only
             </div>
