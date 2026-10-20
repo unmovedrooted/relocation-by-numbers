@@ -6,7 +6,8 @@ import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
-import { RENT_VS_BUY_DEFAULTS as RVB, simulateRentVsBuy, type RentVsBuyResult } from "../lib/rentVsBuy";
+import { RENT_VS_BUY_DEFAULTS as RVB, rentVsBuyThresholds, simulateRentVsBuy, type RentVsBuyInput, type RentVsBuyResult } from "../lib/rentVsBuy";
+import RentVsBuyThresholdsCard from "./RentVsBuyThresholdsCard";
 import {
   solveMaxHomePrice,
   calcPMIDropOffWithAppreciation,
@@ -403,10 +404,10 @@ type RentVsBuyArgs = {
  * Runs the shared rent-versus-buy simulation (the same one the Rent vs. Buy calculator uses) from this page's monthly figures.
  * Returns null when the inputs cannot describe a purchase.
  */
-function rentVsBuyAt(args: RentVsBuyArgs, years: number): RentVsBuyResult | null {
+function rentVsBuyInputFrom(args: RentVsBuyArgs, years: number): RentVsBuyInput | null {
   const { downPayment, closingCosts = 0, annualRate, monthlyPI, rent, tax, ins, hoa, homePrice } = args;
   if (homePrice <= 0 || rent <= 0 || monthlyPI <= 0 || downPayment < 0 || annualRate < 0) return null;
-  return simulateRentVsBuy({
+  return {
     homePrice,
     downPct: (downPayment / homePrice) * 100,
     mortgageRatePct: annualRate,
@@ -424,7 +425,12 @@ function rentVsBuyAt(args: RentVsBuyArgs, years: number): RentVsBuyResult | null
     investmentReturnPct: args.investReturn,
     years,
     taxBenefitPct: args.taxDeductRate,
-  });
+  };
+}
+
+function rentVsBuyAt(args: RentVsBuyArgs, years: number): RentVsBuyResult | null {
+  const input = rentVsBuyInputFrom(args, years);
+  return input ? simulateRentVsBuy(input) : null;
 }
 
 /** The first month the buyer's net worth (after selling costs) catches the renter's, within 30 years. */
@@ -1075,6 +1081,14 @@ function USTab() {
     maintenanceRate: nz(maintenanceRate), taxDeductRate: nz(taxDeductRate),
     loanYears: term, sellingCostPct: nz(sellingCostPct),
   });
+  const thresholdInput = rentVsBuyInputFrom({
+    downPayment: dp, closingCosts: estimatedClosing, annualRate: r, monthlyPI,
+    rent: nz(monthlyRent), tax: monthlyTax, ins: monthlyIns, hoa: monthlyHOA, homePrice: hp,
+    appreciation: nz(appreciation), rentGrowth: nz(rentGrowth), investReturn: nz(investReturn),
+    maintenanceRate: nz(maintenanceRate), taxDeductRate: nz(taxDeductRate),
+    loanYears: term, sellingCostPct: nz(sellingCostPct),
+  }, 10);
+  const thresholds = useMemo(() => (thresholdInput ? rentVsBuyThresholds(thresholdInput) : null), [thresholdInput?.homePrice, thresholdInput?.downPct, thresholdInput?.mortgageRatePct, thresholdInput?.loanYears, thresholdInput?.propertyTaxPct, thresholdInput?.homeInsuranceAnnual, thresholdInput?.hoaMonthly, thresholdInput?.maintenancePct, thresholdInput?.buyClosingPct, thresholdInput?.appreciationPct, thresholdInput?.sellingCostPct, thresholdInput?.monthlyRent, thresholdInput?.rentGrowthPct, thresholdInput?.investmentReturnPct, thresholdInput?.taxBenefitPct]); // eslint-disable-line react-hooks/exhaustive-deps
   const buyAhead5 = fiveYearNet ? fiveYearNet.buyNetWorth >= fiveYearNet.rentNetWorth : false;
   const buyRentGap5 = fiveYearNet ? Math.abs(fiveYearNet.buyNetWorth - fiveYearNet.rentNetWorth) : 0;
 
@@ -1477,6 +1491,10 @@ function USTab() {
           </div>
           <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">This is the same comparison as the <a className="underline underline-offset-2" href="/rent-vs-buy-calculator">Rent vs. Buy calculator</a>, with the same starting assumptions. The buyer's net worth is home equity after selling costs; the renter invests the down payment and closing costs, and whoever pays less each month invests the difference. Both are sensitive to appreciation, rent growth and investment return.</div>
         </Card>
+
+        {thresholds && thresholdInput && (
+          <RentVsBuyThresholdsCard thresholds={thresholds} homePrice={thresholdInput.homePrice} monthlyRent={thresholdInput.monthlyRent} appreciationPct={thresholdInput.appreciationPct} years={10} horizonChosen={false} />
+        )}
 
         <Card>
           <H2>Cash Needed to Close</H2>

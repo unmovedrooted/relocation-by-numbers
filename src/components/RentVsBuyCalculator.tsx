@@ -3,7 +3,8 @@
 import MobileResultBar from "./MobileResultBar";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
-import { RENT_VS_BUY_DEFAULTS as D, simulateRentVsBuy, type RentVsBuyInput } from "../lib/rentVsBuy";
+import { RENT_VS_BUY_DEFAULTS as D, rentVsBuyThresholds, simulateRentVsBuy, type RentVsBuyInput } from "../lib/rentVsBuy";
+import RentVsBuyThresholdsCard from "./RentVsBuyThresholdsCard";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -139,7 +140,8 @@ export default function RentVsBuyCalculator() {
         return { investment: Math.max(0, input.investmentReturnPct + dr), buyAhead: r.finalBuyer - r.finalRenter };
       }),
     }));
-    return { input, sim, chart, buyWins, diff, breakEvenYear, sensitivity };
+    const thresholds = rentVsBuyThresholds(input);
+    return { input, sim, chart, buyWins, diff, breakEvenYear, sensitivity, thresholds };
   }, [homePrice, downPct, mortgageRatePct, loanYears, propertyTaxPct, homeInsuranceAnnual, hoaMonthly, maintenancePct, buyClosingPct, appreciationPct, sellingCostPct, taxBenefitPct, monthlyRent, rentGrowthPct, rentersInsuranceMonthly, investmentReturnPct, years]);
 
   const inputsReady = results.input.homePrice > 0 && results.input.monthlyRent > 0;
@@ -255,6 +257,8 @@ export default function RentVsBuyCalculator() {
                     : `Renting stays ahead the whole ${yearsN} years.`}
                 </p>
               </div>
+
+              <RentVsBuyThresholdsCard thresholds={results.thresholds} homePrice={results.input.homePrice} monthlyRent={results.input.monthlyRent} appreciationPct={results.input.appreciationPct} years={yearsN} />
 
               <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
                 <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Net worth over time</div>

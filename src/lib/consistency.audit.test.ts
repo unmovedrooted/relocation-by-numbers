@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { compareMove, type Item, type MoveInputs } from "./relocationMove";
 import { findCity } from "./cities";
 import { estimateMortgageMonthly } from "./mortgage";
-import { RENT_VS_BUY_DEFAULTS, simulateRentVsBuy, type RentVsBuyInput } from "./rentVsBuy";
+import { RENT_VS_BUY_DEFAULTS, rentVsBuyThresholds, simulateRentVsBuy, type RentVsBuyInput } from "./rentVsBuy";
 import { buildFireLink, parseFireLink, type FireMoveLink } from "./fireLink";
 
 const entered = (amount: number): Item => ({ amount, estimated: false });
@@ -110,5 +110,47 @@ describe("shared links reproduce the scenario", () => {
     };
     const url = new URL(buildFireLink(move), "https://example.com");
     expect(parseFireLink(url.searchParams)).toEqual(move);
+  });
+});
+
+describe("what would change the rent-versus-buy answer", () => {
+  const base: RentVsBuyInput = {
+    homePrice: 500000, downPct: 20, mortgageRatePct: 6.75, loanYears: 30, propertyTaxPct: 1.1, homeInsuranceAnnual: 1800, hoaMonthly: 0,
+    maintenancePct: 1, buyClosingPct: 2.5, appreciationPct: 3.5, sellingCostPct: 6, monthlyRent: 2500, rentGrowthPct: 3, rentersInsuranceMonthly: 15,
+    investmentReturnPct: 7, years: 10,
+  };
+
+  it("when renting is ahead, each threshold moves the answer the right way and lands where the two draw level", () => {
+    const t = rentVsBuyThresholds(base);
+    expect(t.winner).toBe("rent");
+    const lead = (i: RentVsBuyInput) => { const r = simulateRentVsBuy(i); return r.finalBuyer - r.finalRenter; };
+    expect(lead(base)).toBeLessThan(0);
+    for (const [key, make] of [
+      ["homePrice", (x: number) => ({ ...base, homePrice: x })],
+      ["monthlyRent", (x: number) => ({ ...base, monthlyRent: x })],
+      ["appreciationPct", (x: number) => ({ ...base, appreciationPct: x })],
+    ] as const) {
+      const value = t[key];
+      if (value === null) continue;
+      // At the threshold the two are level, to within a dollar or so of net worth.
+      expect(Math.abs(lead(make(value)))).toBeLessThan(2000);
+    }
+    expect(t.homePrice!).toBeLessThan(base.homePrice);
+    expect(t.monthlyRent!).toBeGreaterThan(base.monthlyRent);
+    expect(t.appreciationPct!).toBeGreaterThan(base.appreciationPct);
+  });
+
+  it("when buying is ahead the thresholds point the other way", () => {
+    const t = rentVsBuyThresholds({ ...base, years: 30, monthlyRent: 3500 });
+    expect(t.winner).toBe("buy");
+    expect(t.monthlyRent!).toBeLessThan(3500);
+    expect(t.homePrice!).toBeGreaterThan(500000);
+  });
+
+  it("reports no threshold when the answer cannot flip in the searched range", () => {
+    // Zero appreciation and a very long loan keep renting ahead whatever the rent, up to three times the entered rent.
+    const t = rentVsBuyThresholds({ ...base, monthlyRent: 800, appreciationPct: 0, years: 5 });
+    expect(t.winner).toBe("rent");
+    expect(t.monthlyRent === null || t.monthlyRent > 800).toBe(true);
   });
 });

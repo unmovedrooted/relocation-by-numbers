@@ -156,3 +156,54 @@ export function simulateRentVsBuy(i: RentVsBuyInput): RentVsBuyResult {
     finalLoanBalance: loanBal,
   };
 }
+
+export type RentVsBuyThresholds = {
+  /** Who is ahead in net worth at the chosen horizon. */
+  winner: "buy" | "rent";
+  /** Years until buying's net worth first catches the renter's (null if it never does within 40 years). */
+  breakEvenYears: number | null;
+  /** The home price at which the answer flips with everything else unchanged (null if it does not flip in the searched range). */
+  homePrice: number | null;
+  /** The monthly rent at which the answer flips. */
+  monthlyRent: number | null;
+  /** The yearly home appreciation, %, at which the answer flips. */
+  appreciationPct: number | null;
+};
+
+/**
+ * What would change the conclusion, worked out from the visitor's own scenario: the length of stay, home price, rent and appreciation at
+ * which the other choice draws level at the chosen horizon, changing one thing at a time. A value is null when the answer does not flip
+ * anywhere in the range searched (price 30% to 250% of the entered price, rent 30% to 300%, appreciation -3% to 12%).
+ */
+export function rentVsBuyThresholds(input: RentVsBuyInput): RentVsBuyThresholds {
+  const lead = (i: RentVsBuyInput) => { const r = simulateRentVsBuy(i); return r.finalBuyer - r.finalRenter; };
+  const winner: "buy" | "rent" = lead(input) >= 0 ? "buy" : "rent";
+  const flipped = (i: RentVsBuyInput) => (winner === "rent" ? lead(i) >= 0 : lead(i) < 0);
+
+  // Finds the value between `from` (the entered value, where nothing has flipped) and `limit` where the answer first flips.
+  const boundary = (make: (x: number) => RentVsBuyInput, from: number, limit: number): number | null => {
+    if (!flipped(make(limit))) return null;
+    let lo = from;
+    let hi = limit;
+    for (let k = 0; k < 40; k++) {
+      const mid = (lo + hi) / 2;
+      if (flipped(make(mid))) hi = mid; else lo = mid;
+    }
+    return hi;
+  };
+
+  const long = simulateRentVsBuy({ ...input, years: 40 });
+  const breakEvenYears = long.breakEvenMonth > 0 ? Math.round((long.breakEvenMonth / 12) * 10) / 10 : null;
+
+  // When renting is ahead, buying needs a lower price, higher rent or more appreciation; when buying is ahead, the reverse.
+  const priceLimit = winner === "rent" ? input.homePrice * 0.3 : input.homePrice * 2.5;
+  const rentLimit = winner === "rent" ? input.monthlyRent * 3 : input.monthlyRent * 0.3;
+  const apprLimit = winner === "rent" ? 12 : -3;
+  return {
+    winner,
+    breakEvenYears,
+    homePrice: boundary((x) => ({ ...input, homePrice: x }), input.homePrice, priceLimit),
+    monthlyRent: boundary((x) => ({ ...input, monthlyRent: x }), input.monthlyRent, rentLimit),
+    appreciationPct: boundary((x) => ({ ...input, appreciationPct: x }), input.appreciationPct, apprLimit),
+  };
+}
