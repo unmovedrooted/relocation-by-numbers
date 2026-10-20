@@ -40,7 +40,7 @@ export default function FireHeaderLinks({ current, mode = "standard" }: { curren
           </Link>
         </div>
       </div>
-      <p className="max-w-3xl text-xs leading-5 text-slate-400">{MODE_NOTES[mode]}</p>
+      <p className="max-w-3xl text-xs leading-5 text-slate-300">{MODE_NOTES[mode]}</p>
     </div>
   );
 }

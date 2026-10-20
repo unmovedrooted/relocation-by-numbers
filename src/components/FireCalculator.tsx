@@ -1129,9 +1129,9 @@ function Stat({ label, value, helper, highlight }: {
       "rounded-2xl border px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
       highlight ? "border-emerald-300/25 bg-emerald-300/10" : "border-white/10 bg-white/[0.04]",
     ].join(" ")}>
-      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</div>
+      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-300">{label}</div>
       <div className="mt-3 text-xl font-semibold tracking-tight text-white sm:text-2xl">{value}</div>
-      {helper ? <div className="mt-3 text-xs leading-5 text-slate-400">{helper}</div> : null}
+      {helper ? <div className="mt-3 text-xs leading-5 text-slate-300">{helper}</div> : null}
     </div>
   );
 }
@@ -1158,12 +1158,12 @@ function ProgressBar({ pct: p, label, sublabel }: { pct: number; label: string; 
     <div className="rounded-xl border border-white/10 bg-black/20 p-3">
       <div className="flex items-center justify-between">
         <div className="text-[11px] font-medium text-slate-300">{label}</div>
-        <div className="text-[11px] text-slate-400">{Math.round(p * 100)}%</div>
+        <div className="text-[11px] text-slate-300">{Math.round(p * 100)}%</div>
       </div>
       <div className="mt-2 h-2 w-full rounded-full bg-white/10">
         <div className="h-2 rounded-full bg-emerald-300 transition-all" style={{ width: `${Math.round(p * 100)}%` }} />
       </div>
-      {sublabel ? <div className="mt-2 text-[12px] leading-5 text-slate-400">{sublabel}</div> : null}
+      {sublabel ? <div className="mt-2 text-[12px] leading-5 text-slate-300">{sublabel}</div> : null}
     </div>
   );
 }
@@ -1258,7 +1258,7 @@ function DecisionEngineCard({ result }: { result: DecisionEngineResult }) {
               {result.winner.explanation}
             </p>
             <div className="mt-3 inline-flex items-center gap-2 rounded-xl border border-emerald-300/20 bg-black/20 px-3 py-2">
-              <span className="text-xs text-slate-400">Estimated improvement</span>
+              <span className="text-xs text-slate-300">Estimated improvement</span>
               <span className="text-sm font-bold text-emerald-200">
                 {Math.round(result.winner.yearsSavedVsBaseline ?? 0)} years sooner
               </span>
@@ -1312,12 +1312,12 @@ function DecisionEngineCard({ result }: { result: DecisionEngineResult }) {
                     {Math.round(item.yearsSavedVsBaseline ?? 0)} yrs sooner
                   </span>
                 </div>
-                <p className="mt-2 text-xs leading-5 text-slate-400">
+                <p className="mt-2 text-xs leading-5 text-slate-300">
                   {item.shortCopy}
                 </p>
                 <div className={`mt-3 grid gap-2 ${item.fullFireAge === item.goalAge ? "grid-cols-2" : "grid-cols-3"}`}>
                   <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                       {modeLabels.goalAge}
                     </div>
                     <div className="mt-1 text-sm font-semibold text-white">
@@ -1327,7 +1327,7 @@ function DecisionEngineCard({ result }: { result: DecisionEngineResult }) {
                   {/* Shown only when it differs from the goal age (Coast FIRE); on the other pages the two are the same number. */}
                   {item.fullFireAge !== item.goalAge && (
                     <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                         Full FIRE age
                       </div>
                       <div className="mt-1 text-sm font-semibold text-white">
@@ -1336,7 +1336,7 @@ function DecisionEngineCard({ result }: { result: DecisionEngineResult }) {
                     </div>
                   )}
                   <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                       {modeLabels.goal}
                     </div>
                     <div className="mt-1 text-sm font-semibold text-white">
@@ -1351,7 +1351,7 @@ function DecisionEngineCard({ result }: { result: DecisionEngineResult }) {
       )}
 
       {/* ── Disclaimer ─────────────────────────────────────────────────── */}
-      <p className="mt-5 text-xs leading-5 text-slate-500">
+      <p className="mt-5 text-xs leading-5 text-slate-400">
         These are planning estimates, not guarantees. Small changes in return
         assumptions, taxes, and future spending can materially change the result.
       </p>
@@ -1926,14 +1926,14 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     value={inputs.baristaEndAge}
                     onChange={v => setInputs(s => ({ ...s, baristaEndAge: v <= 0 ? 0 : Math.round(clamp(v, s.age + 1, 100)) }))} />
                   {inputs.baristaEndAge > 0 && (
-                    <div className="self-end text-xs leading-5 text-slate-400">
+                    <div className="self-end text-xs leading-5 text-slate-300">
                       After age {inputs.baristaEndAge} the portfolio funds full spending, so the number includes that.
                     </div>
                   )}
-                  <div className="text-xs leading-5 text-slate-400 sm:col-span-2">
+                  <div className="text-xs leading-5 text-slate-300 sm:col-span-2">
                     The first amount only lowers the yearly gap your portfolio must cover; it is assumed to grow with inflation. The second amount is extra income you earn today, so it adds to your saving until you reach FIRE. Not earning part-time income yet? Leave the second amount at $0.
                   </div>
-                  <div className="self-end text-xs text-slate-400">
+                  <div className="self-end text-xs text-slate-300">
                     Gap your portfolio covers:<br />
                     <span className="font-semibold text-slate-200">
                       {money(Math.max(0, annualExp - (Number(inputs.baristaPartTimeIncome) || 0)), 0)}/yr
@@ -1987,7 +1987,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               {inputs.retirementDifferent && (
                 <div className="mt-2">
                   <Field label="Monthly spending in retirement" info="In today's dollars. Your FIRE target is built from this amount, while the spending above still sets how much you can invest now. Useful when costs such as childcare or a mortgage will end before you retire." value={inputs.retirementExpensesMonthly} onChange={v => setInputs(s => ({ ...s, retirementExpensesMonthly: clamp(v, 0, 200_000) }))} prefix="$" />
-                  <p className="mt-1 text-[11px] leading-4 text-slate-400">
+                  <p className="mt-1 text-[11px] leading-4 text-slate-300">
                     Investing now is based on {money(inputs.expensesMonthly, 0)}/mo of spending. The FIRE number is based on {money(inputs.retirementExpensesMonthly, 0)}/mo. In a move comparison, this budget changes in proportion to the change in your current spending.
                   </p>
                 </div>
@@ -2017,7 +2017,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                           setInputs(s => ({ ...s, expensesMonthly: Object.values(next).reduce((a, b) => a + b, 0) }));
                         }} />
                     ))}
-                    <p className="text-xs leading-5 text-slate-400 sm:col-span-2">
+                    <p className="text-xs leading-5 text-slate-300 sm:col-span-2">
                       These add up to your monthly spending of {money(Object.values(spendingCats).reduce((a, b) => a + b, 0), 0)}, which sets your FIRE number. Adjust a category to see what a lifestyle choice costs in years.
                     </p>
                   </div>
@@ -2030,10 +2030,10 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               onChange={v => setInputs(s => ({ ...s, currentPortfolio: clamp(v, 0, 20_000_000) }))} prefix="$" />
             {showMore && <Field label="Annual contributions (optional)" info="Leave blank to auto-estimate from income minus expenses." value={inputs.yearlyInvestment}
               onChange={v => setInputs(s => ({ ...s, yearlyInvestment: clamp(v, 0, 5_000_000) }))} prefix="$" />}
-            {showMore && <div className="-mt-1 text-xs text-slate-400 sm:col-start-2">Leave blank to estimate from after-tax income.</div>}
+            {showMore && <div className="-mt-1 text-xs text-slate-300 sm:col-start-2">Leave blank to estimate from after-tax income.</div>}
 
             {!showMore && (
-              <div className="rounded-xl border border-white/10 bg-black/10 p-3 text-xs leading-5 text-slate-400 sm:col-span-2">
+              <div className="rounded-xl border border-white/10 bg-black/10 p-3 text-xs leading-5 text-slate-300 sm:col-span-2">
                 Using defaults: filing {inputs.filingStatus}, 401(k) {inputs.k401Pct}%, {inputs.volatility} returns, {inputs.withdrawalRatePct}% withdrawal, {inputs.inflationPct}% inflation. Saving is estimated from your after-tax income less spending.{" "}
                 <button type="button" onClick={() => setShowAllInputs(true)} className="font-semibold text-emerald-200 underline underline-offset-4 hover:text-emerald-100">
                   Show all inputs
@@ -2054,7 +2054,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   </button>
                 ))}
               </div>
-              <div className="mt-1 text-[11px] text-slate-400">
+              <div className="mt-1 text-[11px] text-slate-300">
                 Yearly return, first {inputs.phase2StartsYear} years / after that:{" "}
                 Conservative {VOLATILITY_PRESETS.conservative.phase1}% / {VOLATILITY_PRESETS.conservative.phase2}% ·
                 Moderate {VOLATILITY_PRESETS.moderate.phase1}% / {VOLATILITY_PRESETS.moderate.phase2}% ·
@@ -2093,7 +2093,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="space-y-2">
                 <Field label="401(k) annual contribution" value={inputs.contrib401k} onChange={v => setInputs(s => ({ ...s, contrib401k: clamp(v, 0, 500_000) }))} prefix="$" />
                 <div className="flex items-center gap-2 pl-1">
-                  <span className="text-[11px] text-slate-400">Account type:</span>
+                  <span className="text-[11px] text-slate-300">Account type:</span>
                   {(["traditional", "roth"] as const).map(t => (
                     <button key={t} type="button" onClick={() => setInputs(s => ({ ...s, taxTreatment401k: t }))}
                       className={["rounded-lg border px-2 py-1 text-[11px] font-medium capitalize transition", inputs.taxTreatment401k === t
@@ -2108,7 +2108,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="space-y-2">
                 <Field label="IRA yearly contribution" value={inputs.contribIra} onChange={v => setInputs(s => ({ ...s, contribIra: clamp(v, 0, 500_000) }))} prefix="$" />
                 <div className="flex items-center gap-2 pl-1">
-                  <span className="text-[11px] text-slate-400">Account type:</span>
+                  <span className="text-[11px] text-slate-300">Account type:</span>
                   {(["traditional", "roth"] as const).map(t => (
                     <button key={t} type="button" onClick={() => setInputs(s => ({ ...s, taxTreatmentIra: t }))}
                       className={["rounded-lg border px-2 py-1 text-[11px] font-medium capitalize transition", inputs.taxTreatmentIra === t
@@ -2123,7 +2123,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="space-y-2 sm:col-span-2">
                 <Field label="Brokerage yearly contribution" value={inputs.contribBrokerage} onChange={v => setInputs(s => ({ ...s, contribBrokerage: clamp(v, 0, 5_000_000) }))} prefix="$" />
                 <div className="flex flex-wrap items-center gap-2 pl-1">
-                  <span className="text-[11px] text-slate-400">Tax treatment:</span>
+                  <span className="text-[11px] text-slate-300">Tax treatment:</span>
                   {(["simple", "drag"] as const).map(m => (
                     <button key={m} type="button" onClick={() => setInputs(s => ({ ...s, brokerageTaxMode: m }))}
                       className={["rounded-lg border px-2 py-1 text-[11px] font-medium transition", inputs.brokerageTaxMode === m
@@ -2167,7 +2167,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   onChange={v => setInputs(s => ({ ...s, withdrawalTaxRatePct: clamp(v, 0, 40) }))}
                   suffix="%"
                 />
-                <div className="self-end text-xs text-slate-400">
+                <div className="self-end text-xs text-slate-300">
                   {(() => {
                     const { balBrokerage } = applyBrokerageAutofill(inputs);
                     const b: Buckets = { b401k: inputs.bal401k, bIra: inputs.balIra, bBrokerage: balBrokerage };
@@ -2188,7 +2188,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <summary className="cursor-pointer list-none text-xs font-medium text-slate-200">
                 <span className="mr-1 inline-block transition group-open:rotate-90">▸</span>
                 Withdrawal, inflation and projection settings
-                <span className="ml-2 font-normal text-slate-400">{inputs.withdrawalRatePct}% withdrawal · {inputs.inflationPct}% inflation · {inputs.salaryGrowthPct}% salary growth</span>
+                <span className="ml-2 font-normal text-slate-300">{inputs.withdrawalRatePct}% withdrawal · {inputs.inflationPct}% inflation · {inputs.salaryGrowthPct}% salary growth</span>
               </summary>
               <div className="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-2">
                 <Field label="Withdrawal rate (%)" info="Percentage of portfolio withdrawn yearly in retirement. 4% is common." value={inputs.withdrawalRatePct} onChange={v => setInputs(s => ({ ...s, withdrawalRatePct: clamp(v, 2, 6) }))} suffix="%" />
@@ -2204,7 +2204,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <div className="text-sm font-semibold uppercase tracking-wide text-slate-200">How moving could change your timeline</div>
-                  <div className="mt-1 text-xs leading-5 text-slate-400">Geography may be one of the most powerful levers in a FIRE plan. Same income, same returns, different cost of living.</div>
+                  <div className="mt-1 text-xs leading-5 text-slate-300">Geography may be one of the most powerful levers in a FIRE plan. Same income, same returns, different cost of living.</div>
                 </div>
                 <button onClick={() => setInputs(s => ({ ...s, moveCompareOn: !s.moveCompareOn }))}
                   className={["rounded-xl border px-3 py-2 text-xs font-medium", inputs.moveCompareOn
@@ -2228,8 +2228,8 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   )}
                   <div className="mt-4 grid gap-4 sm:grid-cols-2">
                     <Field label="Monthly expenses after moving" value={inputs.movedExpensesMonthly} onChange={v => setInputs(s => ({ ...s, movedExpensesMonthly: clamp(v, 0, 200_000) }))} prefix="$" />
-                    <div className="self-end text-xs text-slate-400">Annual: <span className="font-semibold text-slate-200">{money(annualMovedExpenses(inputs), 0)}</span></div>
-                    <div className="text-xs leading-5 text-slate-400 sm:col-span-2">Starts equal to your spending now, so a move shows no gain until you enter what you expect to spend in the new place. Pick a state or enter your own figure.</div>
+                    <div className="self-end text-xs text-slate-300">Annual: <span className="font-semibold text-slate-200">{money(annualMovedExpenses(inputs), 0)}</span></div>
+                    <div className="text-xs leading-5 text-slate-300 sm:col-span-2">Starts equal to your spending now, so a move shows no gain until you enter what you expect to spend in the new place. Pick a state or enter your own figure.</div>
                     <Field label="Income after moving (0 = same)" value={inputs.movedIncome} onChange={v => setInputs(s => ({ ...s, movedIncome: clamp(v, 0, 10_000_000) }))} prefix="$" />
                     {movedShortfall > 0 && (
                       <div className="rounded-xl border border-amber-300/30 bg-amber-300/10 p-3 text-xs leading-5 text-amber-100 sm:col-span-2">
@@ -2296,7 +2296,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               MILESTONE TAB
           ═══════════════════════════════════════════════════════════════ */}
           <section className={activeResultTab === "milestone" ? "block" : "hidden"}>
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300">
               <span>Show dollar amounts in:</span>
               <div className="inline-flex rounded-lg border border-white/10 bg-white/5 p-0.5" role="group" aria-label="Dollar basis">
                 {([["today", "Today's dollars"], ["future", "Year reached"]] as const).map(([v, label]) => (
@@ -2336,7 +2336,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   sublabel={<>{money(progress.current, 0)} {inputs.advanced ? "spendable toward FIRE" : "invested"} · {fiAge ? <>Projected under these assumptions: FIRE at <span className="font-semibold text-slate-200">{fiAge}</span></> : "Keep building your foundation"}</>} />
                 {hasCoreInputs && result.yearsToFI !== null && (
   <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-    <p className="text-xs text-slate-400">
+    <p className="text-xs text-slate-300">
       {result.yearsToFI === 0
         ? "You've hit your FIRE number, share the milestone."
         : `FIRE at ${fiAge ?? "—"} · ${result.yearsToFI} years away`}
@@ -2360,7 +2360,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
                       {[["401(k)", inputs.bal401k], ["IRA", inputs.balIra], ["Brokerage", applyBrokerageAutofill(inputs).balBrokerage]].map(([label, val]) => (
                         <div key={String(label)} className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
-                          <div className="text-slate-400 text-[11px]">{label}</div>
+                          <div className="text-slate-300 text-[11px]">{label}</div>
                           <div className="mt-1 font-semibold text-white">{money(Number(val), 0)}</div>
                         </div>
                       ))}
@@ -2385,17 +2385,17 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-widest text-emerald-300">Lean FIRE</div>
-                    <div className="mt-2 text-xs text-slate-400">{money(inputs.retirementDifferent ? inputs.retirementExpensesMonthly : inputs.expensesMonthly, 0)}/mo in retirement</div>
+                    <div className="mt-2 text-xs text-slate-300">{money(inputs.retirementDifferent ? inputs.retirementExpensesMonthly : inputs.expensesMonthly, 0)}/mo in retirement</div>
                     <div className="mt-3 text-2xl font-bold text-white">{fireNumberShown}</div>
                     <div className="mt-1 text-sm text-emerald-200">FIRE at age {fiAge ?? "—"}</div>
-                    <div className="mt-1 text-xs text-slate-400">{result.yearsToFI !== null ? `${result.yearsToFI} years away` : "Not reached"}</div>
+                    <div className="mt-1 text-xs text-slate-300">{result.yearsToFI !== null ? `${result.yearsToFI} years away` : "Not reached"}</div>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">{leanComparesToCurrent ? "Retiring on your current spending" : "Full FIRE (+50% spending)"}</div>
-                    <div className="mt-2 text-xs text-slate-400">{money(leanComparesToCurrent ? inputs.expensesMonthly : inputs.expensesMonthly * 1.5, 0)}/mo in retirement</div>
+                    <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-300">{leanComparesToCurrent ? "Retiring on your current spending" : "Full FIRE (+50% spending)"}</div>
+                    <div className="mt-2 text-xs text-slate-300">{money(leanComparesToCurrent ? inputs.expensesMonthly : inputs.expensesMonthly * 1.5, 0)}/mo in retirement</div>
                     <div className="mt-3 text-2xl font-bold text-white">{fullFireNumberShown(fullFireForLean)}</div>
                     <div className="mt-1 text-sm text-slate-300">FIRE at age {fullFiAgeForLean ?? "—"}</div>
-                    <div className="mt-1 text-xs text-slate-400">{fullFireForLean?.yearsToFI !== null && fullFireForLean?.yearsToFI !== undefined ? `${fullFireForLean.yearsToFI} years away` : "Not reached"}</div>
+                    <div className="mt-1 text-xs text-slate-300">{fullFireForLean?.yearsToFI !== null && fullFireForLean?.yearsToFI !== undefined ? `${fullFireForLean.yearsToFI} years away` : "Not reached"}</div>
                   </div>
                 </div>
                 {leanYearsSaved !== null && leanYearsSaved > 0 && (
@@ -2406,7 +2406,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 {hasCoreInputs && leanBudgetRows.length > 0 && (
                   <div>
                     <div className="mb-2 text-sm font-semibold text-white">Compare retirement budgets</div>
-                    <p className="mb-2 text-xs leading-5 text-slate-400">Your income, saving and current spending stay the same; only the monthly budget your portfolio must support in retirement changes.</p>
+                    <p className="mb-2 text-xs leading-5 text-slate-300">Your income, saving and current spending stay the same; only the monthly budget your portfolio must support in retirement changes.</p>
                     <div className="overflow-x-auto rounded-xl border border-white/10" role="region" aria-label="Retirement budget comparison" tabIndex={0}>
                       <table className="w-full min-w-[26rem] text-left text-xs">
                         <thead className="bg-white/5 text-slate-300">
@@ -2446,26 +2446,26 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 </p>
                 {hasCoreInputs && (
                   <div>
-                    <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-400">Three paths to retiring at {inputs.targetRetirementAge}</div>
+                    <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-300">Three paths to retiring at {inputs.targetRetirementAge}</div>
                     <div className="grid gap-3 sm:grid-cols-3">
                       <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                        <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Stop contributing today</div>
+                        <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-300">Stop contributing today</div>
                         <div className="mt-2 text-lg font-bold text-white">
                           {isCoastReady ? "Enough already" : coastNeededToday ? `${money(Math.max(0, coastNeededToday - result.startPortfolio), 0)} short` : "—"}
                         </div>
-                        <div className="mt-1 text-xs leading-5 text-slate-400">Needs {coastNeededToday ? money(coastNeededToday, 0) : "—"} invested today to coast to {inputs.targetRetirementAge}.</div>
+                        <div className="mt-1 text-xs leading-5 text-slate-300">Needs {coastNeededToday ? money(coastNeededToday, 0) : "—"} invested today to coast to {inputs.targetRetirementAge}.</div>
                       </div>
                       <div className="rounded-2xl border border-sky-300/30 bg-sky-300/10 p-4">
                         <div className="text-[11px] font-semibold uppercase tracking-widest text-sky-200">Stop at age {inputs.coastAge}</div>
                         <div className="mt-2 text-lg font-bold text-white">
                           {isCoastReady ? "Already coast-ready" : yearsToCoast !== null ? `Coast-ready at ${inputs.age + yearsToCoast}` : "Not reached in time"}
                         </div>
-                        <div className="mt-1 text-xs leading-5 text-slate-400">Needs {coastFireNumber !== null && Number.isFinite(coastFireNumber) ? money(coastFireNumber, 0) : "—"} by age {inputs.coastAge}, then growth alone carries you to {inputs.targetRetirementAge}.</div>
+                        <div className="mt-1 text-xs leading-5 text-slate-300">Needs {coastFireNumber !== null && Number.isFinite(coastFireNumber) ? money(coastFireNumber, 0) : "—"} by age {inputs.coastAge}, then growth alone carries you to {inputs.targetRetirementAge}.</div>
                       </div>
                       <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                        <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Keep contributing</div>
+                        <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-300">Keep contributing</div>
                         <div className="mt-2 text-lg font-bold text-white">Full FIRE at {fullFiAgeForCoast ?? "—"}</div>
-                        <div className="mt-1 text-xs leading-5 text-slate-400">Contributions continue until your portfolio covers your spending. This is a different goal from the retirement age above.</div>
+                        <div className="mt-1 text-xs leading-5 text-slate-300">Contributions continue until your portfolio covers your spending. This is a different goal from the retirement age above.</div>
                       </div>
                     </div>
                   </div>
@@ -2497,13 +2497,13 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-widest text-amber-300">Barista FIRE</div>
-                    <div className="mt-2 text-xs text-slate-400">{money(inputs.baristaPartTimeIncome, 0)}/yr part-time income</div>
+                    <div className="mt-2 text-xs text-slate-300">{money(inputs.baristaPartTimeIncome, 0)}/yr part-time income</div>
                     <div className="mt-3 text-2xl font-bold text-white">{fireNumberShown}</div>
                     <div className="mt-1 text-sm text-amber-200">FIRE at age {fiAge ?? "—"}</div>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Full FIRE (no part-time income)</div>
-                    <div className="mt-2 text-xs text-slate-400">Portfolio covers all expenses, {dollarBasis}</div>
+                    <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-300">Full FIRE (no part-time income)</div>
+                    <div className="mt-2 text-xs text-slate-300">Portfolio covers all expenses, {dollarBasis}</div>
                     <div className="mt-3 text-2xl font-bold text-white">{fullFireNumberShown(fullFireForBarista)}</div>
                     <div className="mt-1 text-sm text-slate-300">FIRE at age {fullFiAgeForBarista ?? "—"}</div>
                   </div>
@@ -2522,7 +2522,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 {/* Part-time income sensitivity table */}
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
                   <div className="text-sm font-semibold text-white">Part-time income sensitivity</div>
-                  <div className="mt-1 text-xs text-slate-400">How different income levels change your number (in today&apos;s dollars) and timeline</div>
+                  <div className="mt-1 text-xs text-slate-300">How different income levels change your number (in today&apos;s dollars) and timeline</div>
                 <div className="mt-3 overflow-x-auto overscroll-x-contain rounded-xl border border-white/10" role="region" aria-label="Part-time income sensitivity" tabIndex={0}>
                   <div className="min-w-[26rem]">
                     <div className="grid grid-cols-4 bg-white/5 px-3 py-2 text-[11px] font-semibold tracking-widest text-slate-300/80">
@@ -2549,7 +2549,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               {/* ── Shared: methodology note ───────────────────────────────── */}
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
                 <div className="font-semibold text-white mb-2">How this estimate works</div>
-                <div className="text-xs leading-5 text-slate-400">
+                <div className="text-xs leading-5 text-slate-300">
                   {MODE_NOTES[mode]} Returns use your selected volatility preset. Inflation and salary growth compound annually, and take-home pay is recalculated each year through the tax engine, with pay growing at the salary-growth rate and the tax brackets, deductions and 401(k) limit indexed to inflation. Each year&apos;s saving is added as twelve monthly end-of-month deposits. This is a planning estimate, not financial or tax advice.
                 </div>
               </div>
@@ -2587,7 +2587,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     <li key={s.n} className="rounded-xl border border-white/10 bg-white/5 p-3">
                       <div className="text-[11px] font-semibold uppercase tracking-widest text-emerald-300">Step {s.n}</div>
                       <div className="mt-1 text-sm font-semibold text-white">{s.title}</div>
-                      <p className="mt-1 text-xs leading-5 text-slate-400">{s.body}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-300">{s.body}</p>
                       <Link href={s.href} className="mt-2 inline-block text-xs font-semibold text-emerald-200 underline decoration-emerald-300/40 underline-offset-4 hover:text-emerald-100">{s.cta} →</Link>
                     </li>
                   ))}
@@ -2610,7 +2610,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     <div key={row!.cityId} className={["flex items-center justify-between gap-3 rounded-xl border px-3 py-2 text-sm", isBest ? "border-emerald-300/40 bg-emerald-300/10" : "border-white/10 bg-black/20"].join(" ")}>
                       <div className="text-slate-200">
                         {row!.cityName}, {row!.state}
-                        {row!.isBaseline && <span className="ml-2 text-[11px] text-slate-400">(current)</span>}
+                        {row!.isBaseline && <span className="ml-2 text-[11px] text-slate-300">(current)</span>}
                         {isBest && <span className="ml-2 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">Most years saved</span>}
                       </div>
                       <div className="text-right">
@@ -2643,7 +2643,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
               <div className="flex items-center justify-between">
                 <div className="text-xs font-medium text-slate-300">Portfolio projection</div>
-                <div className="text-xs text-slate-400">{projection.length > 0 ? `Age ${projection[0].age} → ${projection[projection.length - 1].age}` : ""}</div>
+                <div className="text-xs text-slate-300">{projection.length > 0 ? `Age ${projection[0].age} → ${projection[projection.length - 1].age}` : ""}</div>
               </div>
               <div className="mt-3 h-64 w-full">
                 <ResponsiveContainer initialDimension={{ width: 480, height: 280 }} width="100%" height="100%" minWidth={0}>
@@ -2687,7 +2687,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-400">
+              <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-300">
                 <div className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-emerald-300" />Current path</div>
                 {proposedComparison && <div className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-sky-400" />Proposed move</div>}
                 <div className="inline-flex items-center gap-2"><span className="h-[2px] w-4 bg-slate-300/60" />FIRE target</div>
@@ -2703,7 +2703,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
           <section className={activeResultTab === "savings" ? "block" : "hidden"}>
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
               <div className="text-sm font-semibold text-white">How savings rate changes your timeline</div>
-              <div className="mt-1 text-xs leading-5 text-slate-400">Same after-tax income, expenses adjusted to match each savings rate.
+              <div className="mt-1 text-xs leading-5 text-slate-300">Same after-tax income, expenses adjusted to match each savings rate.
                 {mode === "barista" ? " Part-time income offset is applied at each row." : ""}
                 {mode === "coast"   ? " Contributions stop at coast age in all scenarios." : ""}
               </div>
@@ -2752,13 +2752,13 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
           {/* Placeholder links (href "#") are hidden until real affiliate links are added. */}
           {MODE_AFFILIATES[mode].some(a => a.href !== "#") && (
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+              <div className="text-xs font-semibold uppercase tracking-widest text-slate-300 mb-3">
                 {nudge ? "Recommended accounts for your situation" : "Accounts worth considering"}
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 {MODE_AFFILIATES[mode].filter(a => a.href !== "#").map(a => <AffiliateCard key={a.name} a={a} />)}
               </div>
-              <p className="mt-3 text-[11px] text-slate-500">Affiliate links, we may earn a commission at no cost to you. Recommendations are based on your FIRE mode, not paid placement.</p>
+              <p className="mt-3 text-[11px] text-slate-400">Affiliate links, we may earn a commission at no cost to you. Recommendations are based on your FIRE mode, not paid placement.</p>
             </div>
           )}
 

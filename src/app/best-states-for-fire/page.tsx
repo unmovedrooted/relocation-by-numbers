@@ -68,14 +68,14 @@ export default function Page() {
             while you are still building toward FIRE.
           </p>
 
-          <p className="max-w-3xl text-sm leading-6 text-slate-400">
+          <p className="max-w-3xl text-sm leading-6 text-slate-300">
             This page is a starting-point ranking based primarily on average rent across
             major cities in each state, with no-income-tax states clearly marked. It is
             designed to help you spot promising FIRE-friendly states, not to replace
             a personalized comparison based on your own salary, taxes, and lifestyle.
           </p>
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-400">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-300">
             <span>Assumptions updated: October 2026</span>
             <span className="hidden sm:inline">•</span>
             <Link href="/methodology" className="underline underline-offset-4 hover:no-underline">
@@ -145,12 +145,12 @@ export default function Page() {
                 className="flex flex-col items-start gap-4 rounded-xl border border-white/10 bg-white/5 p-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <span className="w-6 text-sm font-semibold text-slate-400">
+                  <span className="w-6 text-sm font-semibold text-slate-300">
                     #{i + 1}
                   </span>
                   <div>
                     <div className="font-semibold text-white">{state.name}</div>
-                    <div className="mt-0.5 flex flex-wrap gap-2 text-xs text-slate-400">
+                    <div className="mt-0.5 flex flex-wrap gap-2 text-xs text-slate-300">
                       <span>
                         Avg rent ~${Math.round(state.score).toLocaleString()}/mo
                       </span>
@@ -173,7 +173,7 @@ export default function Page() {
             ))}
           </div>
 
-          <p className="pt-1 text-xs text-slate-500">
+          <p className="pt-1 text-xs text-slate-400">
             Ranked primarily by average rent across major cities in each state. Lower rent
             generally means a lower spending base and a smaller FIRE target. No-income-tax
             status is shown as an additional planning signal.
@@ -211,25 +211,25 @@ export default function Page() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
               <div className="font-semibold text-white">Housing cost relative to your income</div>
-              <p className="mt-1 text-sm leading-6 text-slate-400">
+              <p className="mt-1 text-sm leading-6 text-slate-300">
                 A lower-rent state only helps if the move improves your actual income-to-cost ratio.
               </p>
             </div>
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
               <div className="font-semibold text-white">State income tax</div>
-              <p className="mt-1 text-sm leading-6 text-slate-400">
+              <p className="mt-1 text-sm leading-6 text-slate-300">
                 Lower tax drag can help, especially during accumulation, but it is only one part of the picture.
               </p>
             </div>
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
               <div className="font-semibold text-white">Remote income portability</div>
-              <p className="mt-1 text-sm leading-6 text-slate-400">
+              <p className="mt-1 text-sm leading-6 text-slate-300">
                 The biggest FIRE gains often come when you keep a stronger salary while reducing housing costs.
               </p>
             </div>
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
               <div className="font-semibold text-white">Lifestyle fit</div>
-              <p className="mt-1 text-sm leading-6 text-slate-400">
+              <p className="mt-1 text-sm leading-6 text-slate-300">
                 A lower-cost state is only useful if it supports the kind of life you actually want to live.
               </p>
             </div>
@@ -317,8 +317,8 @@ export default function Page() {
         </section>
 
         <footer className="pt-2">
-          <div className="mb-3 text-xs text-slate-500">Assumptions updated: October 2026</div>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+          <div className="mb-3 text-xs text-slate-400">Assumptions updated: October 2026</div>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
             <Link href="/about" className="transition hover:text-white">About</Link>
             <span>•</span>
             <Link href="/disclaimer" className="transition hover:text-white">Disclaimer</Link>

@@ -56,13 +56,13 @@ export default function Page() {
             to financial independence by years.
           </p>
 
-          <p className="max-w-3xl text-sm leading-6 text-slate-400">
+          <p className="max-w-3xl text-sm leading-6 text-slate-300">
             At a 4% withdrawal rate, every $12,000 reduction in annual spending lowers
             the required portfolio by $300,000. That is why city choice can matter so
             much for early retirement math.
           </p>
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-400">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-300">
             <span>Assumptions updated: October 2026</span>
             <span className="hidden sm:inline">•</span>
             <Link href="/methodology" className="underline underline-offset-4 hover:no-underline">
@@ -102,7 +102,7 @@ export default function Page() {
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
               <div className="font-semibold text-white">Lower housing costs</div>
-              <p className="mt-1 text-sm leading-6 text-slate-400">
+              <p className="mt-1 text-sm leading-6 text-slate-300">
                 Housing is the biggest monthly expense for most households. Lower rent or lower ownership costs
                 directly reduce the spending your portfolio needs to support.
               </p>
@@ -110,7 +110,7 @@ export default function Page() {
 
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
               <div className="font-semibold text-white">Lower tax drag</div>
-              <p className="mt-1 text-sm leading-6 text-slate-400">
+              <p className="mt-1 text-sm leading-6 text-slate-300">
                 Lower or no state income tax can increase take-home pay and improve how much of your income
                 is available for investing.
               </p>
@@ -118,14 +118,14 @@ export default function Page() {
 
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
               <div className="font-semibold text-white">Remote work leverage</div>
-              <p className="mt-1 text-sm leading-6 text-slate-400">
+              <p className="mt-1 text-sm leading-6 text-slate-300">
                 One of the strongest FIRE setups is keeping a higher salary while relocating to a lower-cost city.
               </p>
             </div>
 
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
               <div className="font-semibold text-white">Lifestyle fit</div>
-              <p className="mt-1 text-sm leading-6 text-slate-400">
+              <p className="mt-1 text-sm leading-6 text-slate-300">
                 A city is only FIRE-friendly if you can actually sustain the lifestyle there. Lower costs are useful,
                 but only if the place works for your real life.
               </p>
@@ -137,7 +137,7 @@ export default function Page() {
           <h2 className="text-xl font-semibold">
             Popular high-cost to lower-cost city comparisons
           </h2>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-slate-300">
             Start with a common relocation path. Each page compares take-home pay, housing costs,
             taxes, and monthly affordability side by side.
           </p>
@@ -151,7 +151,7 @@ export default function Page() {
                 <div className="text-sm font-semibold text-white">
                   {c.name} → {c.dest}
                 </div>
-                <div className="mt-1 text-xs text-slate-400">
+                <div className="mt-1 text-xs text-slate-300">
                   Compare take-home pay, rent &amp; taxes →
                 </div>
               </Link>
@@ -233,8 +233,8 @@ export default function Page() {
         </section>
 
         <footer className="pt-2">
-          <div className="mb-3 text-xs text-slate-400">Assumptions updated: October 2026</div>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+          <div className="mb-3 text-xs text-slate-300">Assumptions updated: October 2026</div>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
             <Link href="/about" className="transition hover:text-white">About</Link>
             <span>•</span>
             <Link href="/disclaimer" className="transition hover:text-white">Disclaimer</Link>

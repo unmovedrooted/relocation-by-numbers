@@ -24,7 +24,7 @@ export default function AssumptionsCard({ items, replaceHint, dark = false }: { 
     ? "rounded-2xl border border-white/10 bg-white/5 p-5"
     : "rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800";
   const head = dark ? "text-sm font-semibold text-white" : "text-sm font-semibold text-slate-900 dark:text-slate-100";
-  const muted = dark ? "text-slate-400" : "text-slate-500 dark:text-slate-400";
+  const muted = dark ? "text-slate-300" : "text-slate-500 dark:text-slate-400";
   const text = dark ? "text-slate-200" : "text-slate-700 dark:text-slate-300";
   return (
     <div className={card}>

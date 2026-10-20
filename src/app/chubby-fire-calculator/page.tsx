@@ -55,11 +55,23 @@ export default async function Page({ searchParams }: PageProps) {
           </p>
 
 
-          <div className="text-xs text-slate-400">Assumptions updated: October 2026</div>
+          <div className="text-xs text-slate-300">Assumptions updated: October 2026</div>
 
 
           <FireHeaderLinks current="chubby" mode="standard" />
         </header>
+
+
+        <section aria-label="Chubby FIRE calculator">
+          <FireCalculator hideFAQ initialIncome={initialIncome} />
+
+          <section className="max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6">
+            <p className="text-sm leading-7 text-slate-300 sm:text-base">
+              Chubby FIRE is commonly framed as roughly $100,000 to $150,000 in annual spending,
+            which at a 4% withdrawal rate implies a portfolio of about $2.5 million to $3.75
+            million. Your exact number depends on your spending and withdrawal-rate assumptions.
+            </p>
+          </section>
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
           <h2 className="text-xl font-semibold">How Chubby FIRE actually works</h2>
@@ -76,17 +88,6 @@ export default async function Page({ searchParams }: PageProps) {
             </p>
           </div>
         </section>
-
-        <section aria-label="Chubby FIRE calculator">
-          <FireCalculator hideFAQ initialIncome={initialIncome} />
-
-          <section className="max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6">
-            <p className="text-sm leading-7 text-slate-300 sm:text-base">
-              Chubby FIRE is commonly framed as roughly $100,000 to $150,000 in annual spending,
-            which at a 4% withdrawal rate implies a portfolio of about $2.5 million to $3.75
-            million. Your exact number depends on your spending and withdrawal-rate assumptions.
-            </p>
-          </section>
         </section>
 
         {process.env.NEXT_PUBLIC_ADSENSE_SLOT_MID ? (
@@ -177,8 +178,8 @@ export default async function Page({ searchParams }: PageProps) {
 
         <CalculatorSources path="/chubby-fire-calculator" tone="dark" />
         <footer className="pt-2">
-          <div className="mb-3 text-xs text-slate-400">Assumptions updated: October 2026</div>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+          <div className="mb-3 text-xs text-slate-300">Assumptions updated: October 2026</div>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
             <Link href="/about" className="transition hover:text-white">About</Link>
             <span>•</span>
             <Link href="/disclaimer" className="transition hover:text-white">Disclaimer</Link>

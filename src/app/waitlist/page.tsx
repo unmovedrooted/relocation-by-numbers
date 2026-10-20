@@ -20,7 +20,7 @@ export default function WaitlistPage() {
         {/* ── Back nav ───────────────────────────────────────────────────── */}
         <Link
           href="/fire-calculator"
-          className="inline-flex items-center gap-2 text-sm text-slate-400 transition hover:text-white"
+          className="inline-flex items-center gap-2 text-sm text-slate-300 transition hover:text-white"
         >
           <span className="h-2 w-2 rounded-full bg-emerald-400" />
           Relocation by Numbers
@@ -68,7 +68,7 @@ export default function WaitlistPage() {
               className="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4"
             >
               <p className="text-sm font-semibold text-white">{item.title}</p>
-              <p className="mt-1 text-sm leading-6 text-slate-400">{item.body}</p>
+              <p className="mt-1 text-sm leading-6 text-slate-300">{item.body}</p>
             </div>
           ))}
         </div>
@@ -76,7 +76,7 @@ export default function WaitlistPage() {
         {/* ── Email capture ──────────────────────────────────────────────── */}
         <div className="mt-10 rounded-2xl border border-violet-300/20 bg-violet-300/[0.06] p-6">
           <p className="text-base font-semibold text-white">Get early access</p>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-300">
             We&apos;ll email you when it&apos;s ready. No spam, one email when it launches.
           </p>
           <div className="mt-4">
@@ -85,7 +85,7 @@ export default function WaitlistPage() {
         </div>
 
         {/* ── Footer note ────────────────────────────────────────────────── */}
-        <p className="mt-8 text-center text-xs text-slate-500">
+        <p className="mt-8 text-center text-xs text-slate-400">
           Planning estimates only. Not tax, legal, or financial advice.
         </p>
 

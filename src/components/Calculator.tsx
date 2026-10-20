@@ -1559,29 +1559,6 @@ export default function Calculator({
             </div>
           )}
 
-          {/* ── 1.6 ASSUMPTIONS ── */}
-          {move && (
-            <AssumptionsCard
-              replaceHint="City data and planning assumptions are starting estimates. Replace them with a real rent quote, your own bills and moving quotes in the fields on the left to firm up the answer."
-              items={[
-                { label: "Offer salary", value: money(n(salary)), source: "yours" },
-                { label: "Current salary", value: currentSalary.trim() === "" ? "Same as offer" : money(nz(currentSalary)), source: currentSalary.trim() === "" ? "planning" : "yours", note: currentSalary.trim() === "" ? "Enter your current salary if it differs" : undefined },
-                mode === "buy"
-                  ? { label: "Home price", value: money(nz(homePrice)), source: typed.home ? "yours" : "city" }
-                  : { label: "Monthly rent in the new city", value: money(nz(rentMonthly)), source: typed.rent ? "yours" : "city" },
-                { label: "Groceries", value: `${money(effectiveGroceries)}/mo`, source: colGroceries.trim() === "" ? "city" : "yours" },
-                { label: "Utilities", value: `${money(effectiveUtilities)}/mo`, source: colUtilities.trim() === "" ? "city" : "yours" },
-                { label: "Transportation", value: `${money(effectiveTransport)}/mo`, source: colTransport.trim() === "" ? "city" : "yours" },
-                { label: "Dining out", value: `${money(effectiveDining)}/mo`, source: colDining.trim() === "" ? "planning" : "yours" },
-                { label: "Subscriptions and misc", value: `${money(effectiveMisc)}/mo`, source: colMisc.trim() === "" ? "planning" : "yours" },
-                { label: "Movers or truck", value: money(move.oneTime.movers.amount), source: move.oneTime.movers.estimated ? "planning" : "yours" },
-                { label: "Travel and storage", value: money(move.oneTime.travel.amount), source: move.oneTime.travel.estimated ? "planning" : "yours" },
-                { label: "Furniture and setup", value: money(move.oneTime.setup.amount), source: move.oneTime.setup.estimated ? "planning" : "yours" },
-                { label: "Refundable deposit", value: money(move.oneTime.refundableDeposit.amount), source: move.oneTime.refundableDeposit.estimated ? "planning" : "yours" },
-              ]}
-            />
-          )}
-
           {/* ── 2. RESULTS DETAIL ── */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
             <div className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Results</div>
@@ -1903,6 +1880,29 @@ export default function Calculator({
                 This is a planning estimate, not a guarantee, use it as a starting point for your own research and negotiation.
               </div>
             </div>
+          )}
+
+          {/* ── 1.6 ASSUMPTIONS ── */}
+          {move && (
+            <AssumptionsCard
+              replaceHint="City data and planning assumptions are starting estimates. Replace them with a real rent quote, your own bills and moving quotes in the fields on the left to firm up the answer."
+              items={[
+                { label: "Offer salary", value: money(n(salary)), source: "yours" },
+                { label: "Current salary", value: currentSalary.trim() === "" ? "Same as offer" : money(nz(currentSalary)), source: currentSalary.trim() === "" ? "planning" : "yours", note: currentSalary.trim() === "" ? "Enter your current salary if it differs" : undefined },
+                mode === "buy"
+                  ? { label: "Home price", value: money(nz(homePrice)), source: typed.home ? "yours" : "city" }
+                  : { label: "Monthly rent in the new city", value: money(nz(rentMonthly)), source: typed.rent ? "yours" : "city" },
+                { label: "Groceries", value: `${money(effectiveGroceries)}/mo`, source: colGroceries.trim() === "" ? "city" : "yours" },
+                { label: "Utilities", value: `${money(effectiveUtilities)}/mo`, source: colUtilities.trim() === "" ? "city" : "yours" },
+                { label: "Transportation", value: `${money(effectiveTransport)}/mo`, source: colTransport.trim() === "" ? "city" : "yours" },
+                { label: "Dining out", value: `${money(effectiveDining)}/mo`, source: colDining.trim() === "" ? "planning" : "yours" },
+                { label: "Subscriptions and misc", value: `${money(effectiveMisc)}/mo`, source: colMisc.trim() === "" ? "planning" : "yours" },
+                { label: "Movers or truck", value: money(move.oneTime.movers.amount), source: move.oneTime.movers.estimated ? "planning" : "yours" },
+                { label: "Travel and storage", value: money(move.oneTime.travel.amount), source: move.oneTime.travel.estimated ? "planning" : "yours" },
+                { label: "Furniture and setup", value: money(move.oneTime.setup.amount), source: move.oneTime.setup.estimated ? "planning" : "yours" },
+                { label: "Refundable deposit", value: money(move.oneTime.refundableDeposit.amount), source: move.oneTime.refundableDeposit.estimated ? "planning" : "yours" },
+              ]}
+            />
           )}
 
           {/* ── 7. SHARE ── */}

@@ -43,7 +43,7 @@ export default async function FireCalculatorPage({ searchParams }: PageProps) {
             FIRE Calculator
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
             <Link href="/about" className="transition hover:text-white">About</Link>
             <span>•</span>
             <Link href="/disclaimer" className="transition hover:text-white">Disclaimer</Link>
@@ -65,7 +65,7 @@ export default async function FireCalculatorPage({ searchParams }: PageProps) {
             Enter your income, spending and savings to see your FIRE number and age, then compare how a move could change them.
           </p>
 
-          <p className="max-w-4xl text-xs leading-6 text-slate-500">
+          <p className="max-w-4xl text-xs leading-6 text-slate-400">
             Assumptions updated: October 2026. How taxes are modeled is explained below the calculator.
           </p>
 
@@ -203,7 +203,7 @@ export default async function FireCalculatorPage({ searchParams }: PageProps) {
           </div>
         </section>
 
-        <p className="text-center text-xs text-slate-500">
+        <p className="text-center text-xs text-slate-400">
           Planning estimate only. Not tax, legal, or financial advice.
         </p>
       </div>

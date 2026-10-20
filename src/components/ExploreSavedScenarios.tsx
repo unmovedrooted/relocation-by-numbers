@@ -44,13 +44,13 @@ export default function ExploreSavedScenarios() {
                 )}
                 <span className="truncate text-base font-semibold text-white transition group-hover:text-emerald-200">{s.label}</span>
               </div>
-              {s.subtitle && <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-400">{s.subtitle}</p>}
+              {s.subtitle && <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-300">{s.subtitle}</p>}
             </Link>
             <button
               type="button"
               aria-label={`Remove ${s.label}`}
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); remove(s.id); }}
-              className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 transition hover:bg-white/10 hover:text-white"
+              className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/10 hover:text-white"
             >
               ×
             </button>

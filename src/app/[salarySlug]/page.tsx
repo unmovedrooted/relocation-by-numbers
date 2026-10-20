@@ -194,7 +194,7 @@ export default async function FireWithSalaryPage({
             {pageCopy.intro}
           </p>
 
-          <p className="text-xs text-slate-400">Assumptions updated: October 2026</p>
+          <p className="text-xs text-slate-300">Assumptions updated: October 2026</p>
 
           <FireHeaderLinks mode="standard" />
         </header>
@@ -210,7 +210,7 @@ export default async function FireWithSalaryPage({
           <h2 className="text-xl font-semibold">
             Your estimated FIRE number on a {label} salary
           </h2>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-slate-300">
             These estimates use the 4% rule (25× annual expenses) at different savings rates.
             Lower spending = lower FIRE number = faster timeline.
           </p>
@@ -224,17 +224,17 @@ export default async function FireWithSalaryPage({
                 key={scenario.label}
                 className="rounded-xl border border-white/10 bg-black/20 px-4 py-3"
               >
-                <div className="text-xs text-slate-400">{scenario.label}</div>
+                <div className="text-xs text-slate-300">{scenario.label}</div>
                 <div className="mt-2 text-lg font-semibold text-white">
                   ${scenario.data.fireTarget.toLocaleString()}
                 </div>
-                <div className="mt-1 text-xs text-slate-400">
+                <div className="mt-1 text-xs text-slate-300">
                   ~${scenario.data.annualExpenses.toLocaleString()}/yr expenses
                 </div>
               </div>
             ))}
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-400">
             Gross income of ${income.toLocaleString()}. Does not account for taxes, which
             reduce take-home pay and actual savings capacity. Use the calculator below for
             a tax-adjusted estimate.
@@ -441,7 +441,7 @@ export default async function FireWithSalaryPage({
           </div>
         </section>
 
-        <div className="flex flex-wrap items-center gap-2 pt-2 text-sm text-slate-400">
+        <div className="flex flex-wrap items-center gap-2 pt-2 text-sm text-slate-300">
           <Link href="/about" className="transition hover:text-white">
             About
           </Link>

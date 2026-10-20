@@ -18,17 +18,17 @@ export function toneStyles(tone: Tone) {
     return {
       card: "rounded-2xl border border-white/10 bg-white/5 p-6",
       h2: "text-xl font-semibold text-white",
-      th: "pb-2 pr-3 text-xs font-semibold uppercase tracking-wide text-slate-400",
-      note: "mt-3 text-xs leading-6 text-slate-400",
+      th: "pb-2 pr-3 text-xs font-semibold uppercase tracking-wide text-slate-300",
+      note: "mt-3 text-xs leading-6 text-slate-300",
       strong: "text-white",
       body: "text-slate-300",
       muted: "text-slate-300",
       rowBorder: "border-t border-white/10",
       link: "underline underline-offset-2 hover:opacity-80",
       tile: "rounded-xl border border-white/10 bg-black/20 p-4",
-      tileLabel: "text-[11px] font-semibold uppercase tracking-wide text-slate-400",
+      tileLabel: "text-[11px] font-semibold uppercase tracking-wide text-slate-300",
       tileValue: "mt-1 text-2xl font-bold tabular-nums text-white",
-      tileSub: "mt-1 text-xs leading-5 text-slate-400",
+      tileSub: "mt-1 text-xs leading-5 text-slate-300",
     };
   }
   return {

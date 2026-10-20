@@ -168,7 +168,7 @@ export default async function Page({ params }: Props) {
             tighter estimate uses a 40% housing-share threshold.
           </p>
 
-          <div className="text-xs text-slate-500">Assumptions updated: October 2026</div>
+          <div className="text-xs text-slate-400">Assumptions updated: October 2026</div>
 
           <div className="pt-1">
             <Link
@@ -188,21 +188,21 @@ export default async function Page({ params }: Props) {
 
         <section className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-xl border border-white/10 bg-white/5 p-5">
-            <div className="text-sm text-slate-400">Comfortable salary in {city.name}</div>
+            <div className="text-sm text-slate-300">Comfortable salary in {city.name}</div>
             <div className="mt-2 text-2xl font-semibold">
               {comfortableSalary ? `$${comfortableSalary.toLocaleString()}` : "N/A"}
             </div>
-            <div className="mt-1 text-xs text-slate-400">
+            <div className="mt-1 text-xs text-slate-300">
               Based on housing at 30% of gross income
             </div>
           </div>
 
           <div className="rounded-xl border border-white/10 bg-white/5 p-5">
-            <div className="text-sm text-slate-400">Minimum salary estimate</div>
+            <div className="text-sm text-slate-300">Minimum salary estimate</div>
             <div className="mt-2 text-2xl font-semibold">
               {basicSalary ? `$${basicSalary.toLocaleString()}` : "N/A"}
             </div>
-            <div className="mt-1 text-xs text-slate-400">
+            <div className="mt-1 text-xs text-slate-300">
               Based on housing at 40% of gross income
             </div>
           </div>
@@ -214,25 +214,25 @@ export default async function Page({ params }: Props) {
           </h2>
           <div className="grid gap-2 text-sm text-slate-300 sm:grid-cols-3">
             <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-              <div className="text-xs text-slate-400">Average rent</div>
+              <div className="text-xs text-slate-300">Average rent</div>
               <div className="mt-1 font-semibold text-white">
                 {city.defaultRent ? `$${city.defaultRent.toLocaleString()} / mo` : "N/A"}
               </div>
             </div>
             <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-              <div className="text-xs text-slate-400">Median home price</div>
+              <div className="text-xs text-slate-300">Median home price</div>
               <div className="mt-1 font-semibold text-white">
                 {city.medianHomePrice ? `$${city.medianHomePrice.toLocaleString()}` : "N/A"}
               </div>
             </div>
             <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-              <div className="text-xs text-slate-400">Property tax rate</div>
+              <div className="text-xs text-slate-300">Property tax rate</div>
               <div className="mt-1 font-semibold text-white">
                 {typeof city.propertyTaxPct === "number" ? `${city.propertyTaxPct}%` : "N/A"}
               </div>
             </div>
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-400">
             Rent and home price figures are planning estimates. Real costs vary by neighborhood and market conditions.
           </p>
         </section>
@@ -363,10 +363,10 @@ export default async function Page({ params }: Props) {
         <CityReport cityId={cityId} tone="dark" focus="salary" />
 
         <footer className="pt-2">
-          <div className="mb-3 text-xs text-slate-500">
+          <div className="mb-3 text-xs text-slate-400">
             Planning estimate only. Salary targets are housing-based guidelines, not a full personal budget.
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
             <Link href="/about" className="transition hover:text-white">About</Link>
             <span>•</span>
             <Link href="/disclaimer" className="transition hover:text-white">Disclaimer</Link>

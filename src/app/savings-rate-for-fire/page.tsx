@@ -54,7 +54,7 @@ export default async function Page({ searchParams }: PageProps) {
           </p>
 
 
-          <div className="text-xs text-slate-400">Assumptions updated: October 2026</div>
+          <div className="text-xs text-slate-300">Assumptions updated: October 2026</div>
 
 
           <FireHeaderLinks mode="standard" />
@@ -65,6 +65,9 @@ export default async function Page({ searchParams }: PageProps) {
            
           </section>
         ) : null}
+
+
+        <FireCalculator hideFAQ initialIncome={initialIncome} />
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
           <h2 className="text-xl font-semibold">
@@ -84,8 +87,6 @@ export default async function Page({ searchParams }: PageProps) {
             </p>
           </div>
         </section>
-
-        <FireCalculator hideFAQ initialIncome={initialIncome} />
 
         <section className="max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6">
           <p className="text-sm leading-7 text-slate-300 sm:text-base">
@@ -203,8 +204,8 @@ export default async function Page({ searchParams }: PageProps) {
 
         <CalculatorSources path="/savings-rate-for-fire" tone="dark" />
         <footer className="pt-2">
-          <div className="mb-3 text-xs text-slate-400">Assumptions updated: October 2026</div>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+          <div className="mb-3 text-xs text-slate-300">Assumptions updated: October 2026</div>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
             <Link href="/about" className="transition hover:text-white">About</Link>
             <span>•</span>
             <Link href="/disclaimer" className="transition hover:text-white">Disclaimer</Link>

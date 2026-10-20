@@ -86,7 +86,7 @@ export default function ExploreCalculatorGrid() {
 
       <div className="flex flex-col gap-3">
         <div className="relative">
-          <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300">
             <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.6" />
             <path d="m14 14 3 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
           </svg>
@@ -96,7 +96,7 @@ export default function ExploreCalculatorGrid() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search calculators (e.g. roth, paycheck, mortgage)…"
             aria-label="Search calculators"
-            className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-10 pr-4 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-300/40 focus:bg-white/[0.06] focus:ring-4 focus:ring-emerald-400/10"
+            className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-10 pr-4 text-sm text-white placeholder:text-slate-400 outline-none transition focus:border-emerald-300/40 focus:bg-white/[0.06] focus:ring-4 focus:ring-emerald-400/10"
           />
         </div>
 
@@ -124,7 +124,7 @@ export default function ExploreCalculatorGrid() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center text-sm text-slate-400">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center text-sm text-slate-300">
           No calculators match “{query}”. Try another term or clear the filter.
         </div>
       ) : (
@@ -141,8 +141,8 @@ export default function ExploreCalculatorGrid() {
                   <span className="text-base font-semibold text-white transition group-hover:text-emerald-200">{c.title}</span>
                 </div>
               </div>
-              <p className="mt-2 text-sm leading-6 text-slate-400">{c.desc}</p>
-              <span className="mt-auto pt-3 text-xs font-medium text-slate-500">{c.cat}</span>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{c.desc}</p>
+              <span className="mt-auto pt-3 text-xs font-medium text-slate-400">{c.cat}</span>
             </Link>
           ))}
         </div>

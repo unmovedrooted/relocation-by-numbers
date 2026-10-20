@@ -221,7 +221,7 @@ export default async function CityFirePage({ params }: PageProps) {
             based on housing costs, tax drag, and how much room may be left in the budget after essentials.
           </p>
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-400">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-300">
             <span>Assumptions updated: October 2026</span>
             <span className="hidden sm:inline">•</span>
             <Link href="/methodology" className="underline underline-offset-4 hover:no-underline">
@@ -268,24 +268,24 @@ export default async function CityFirePage({ params }: PageProps) {
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-              <div className="text-xs uppercase tracking-widest text-slate-400">Average rent</div>
+              <div className="text-xs uppercase tracking-widest text-slate-300">Average rent</div>
               <div className="mt-2 font-semibold text-white">
                 {rent ? `$${rent.toLocaleString()} / mo` : "N/A"}
               </div>
             </div>
             <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-              <div className="text-xs uppercase tracking-widest text-slate-400">Median home price</div>
+              <div className="text-xs uppercase tracking-widest text-slate-300">Median home price</div>
               <div className="mt-2 font-semibold text-white">
                 {homePrice ? `$${homePrice.toLocaleString()}` : "N/A"}
               </div>
               {annualTax ? (
-                <div className="mt-1 text-xs text-slate-400">
+                <div className="mt-1 text-xs text-slate-300">
                   ~${annualTax.toLocaleString()}/yr property tax
                 </div>
               ) : null}
             </div>
             <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-              <div className="text-xs uppercase tracking-widest text-slate-400">Property tax rate</div>
+              <div className="text-xs uppercase tracking-widest text-slate-300">Property tax rate</div>
               <div className="mt-2 font-semibold text-white">
                 {taxRate ? `${taxRate}%` : "N/A"}
               </div>
@@ -304,7 +304,7 @@ export default async function CityFirePage({ params }: PageProps) {
               <div className="mt-1 text-lg font-semibold text-white">
                 ~${housingOnlyBaseline.toLocaleString()}
               </div>
-              <div className="mt-1 text-xs text-slate-400">
+              <div className="mt-1 text-xs text-slate-300">
                 This is not a full FIRE number. It is a rough 25× baseline using rent alone as a housing proxy,
                 before groceries, healthcare, taxes, transportation, and all other living costs are added.
               </div>
@@ -382,7 +382,7 @@ export default async function CityFirePage({ params }: PageProps) {
             <h2 className="text-xl font-semibold">
               Compare {city.name} with other FIRE cities
             </h2>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-slate-300">
               Explore a smaller set of FIRE-focused city pages instead of a broad low-value inventory.
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -395,7 +395,7 @@ export default async function CityFirePage({ params }: PageProps) {
                   <div className="text-sm font-semibold text-white">
                     Is {c!.name} good for FIRE?
                   </div>
-                  <div className="mt-1 text-xs text-slate-400">
+                  <div className="mt-1 text-xs text-slate-300">
                     {c!.state.toUpperCase()} · Avg rent{" "}
                     {c!.defaultRent ? `$${c!.defaultRent.toLocaleString()}/mo` : "N/A"}
                   </div>
@@ -440,8 +440,8 @@ export default async function CityFirePage({ params }: PageProps) {
         <CityReport cityId={cityId} tone="dark" focus="fire" path={`/best-cities-for-fire/${cityId}`} />
 
         <footer className="pt-2">
-          <div className="mb-3 text-xs text-slate-400">Assumptions updated: October 2026</div>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+          <div className="mb-3 text-xs text-slate-300">Assumptions updated: October 2026</div>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
             <Link href="/about" className="transition hover:text-white">About</Link>
             <span>•</span>
             <Link href="/disclaimer" className="transition hover:text-white">Disclaimer</Link>

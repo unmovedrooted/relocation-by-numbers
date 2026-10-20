@@ -288,27 +288,6 @@ export default function RentVsBuyCalculator() {
 
               <RentVsBuyThresholdsCard thresholds={results.thresholds} homePrice={results.input.homePrice} monthlyRent={results.input.monthlyRent} appreciationPct={results.input.appreciationPct} years={yearsN} />
 
-              <AssumptionsCard
-                replaceHint="Replace a planning assumption with a real quote, such as your lender's rate or an agent's selling cost, to firm up the answer."
-                items={[
-                  { label: "Home price", value: money(results.input.homePrice), source: sourceFor(homePrice, "500000", "sample") },
-                  { label: "Down payment", value: `${downPct}%`, source: sourceFor(downPct, "20", "sample") },
-                  { label: "Mortgage rate", value: `${mortgageRatePct}%`, source: sourceFor(mortgageRatePct, String(D.mortgageRatePct), "planning") },
-                  { label: "Loan term", value: `${loanYears} years`, source: sourceFor(loanYears, "30", "sample") },
-                  { label: "Property tax", value: `${propertyTaxPct}% a year`, source: sourceFor(propertyTaxPct, String(D.propertyTaxPct), "planning") },
-                  { label: "Home insurance", value: `${money(Number(homeInsuranceAnnual) || 0)} a year`, source: sourceFor(homeInsuranceAnnual, String(D.homeInsuranceAnnual), "planning") },
-                  { label: "Maintenance", value: `${maintenancePct}% a year`, source: sourceFor(maintenancePct, String(D.maintenancePct), "planning") },
-                  { label: "Closing costs", value: `${buyClosingPct}% of price`, source: sourceFor(buyClosingPct, String(D.buyClosingPct), "planning") },
-                  { label: "Home appreciation", value: `${appreciationPct}% a year`, source: sourceFor(appreciationPct, String(D.appreciationPct), "planning") },
-                  { label: "Selling costs", value: `${sellingCostPct}% of price`, source: sourceFor(sellingCostPct, String(D.sellingCostPct), "planning") },
-                  { label: "Mortgage-interest tax benefit", value: `${taxBenefitPct}%`, source: sourceFor(taxBenefitPct, String(D.taxBenefitPct), "planning") },
-                  { label: "Monthly rent", value: money(results.input.monthlyRent), source: sourceFor(monthlyRent, "2500", "sample") },
-                  { label: "Rent growth", value: `${rentGrowthPct}% a year`, source: sourceFor(rentGrowthPct, String(D.rentGrowthPct), "planning") },
-                  { label: "Renter's insurance", value: `${money(Number(rentersInsuranceMonthly) || 0)} a month`, source: sourceFor(rentersInsuranceMonthly, String(D.rentersInsuranceMonthly), "planning") },
-                  { label: "Investment return", value: `${investmentReturnPct}% a year`, source: sourceFor(investmentReturnPct, String(D.investmentReturnPct), "planning") },
-                  { label: "Years you'll stay", value: `${years}`, source: sourceFor(years, "10", "sample") },
-                ]}
-              />
 
               <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
                 <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Net worth over time</div>
@@ -374,6 +353,28 @@ export default function RentVsBuyCalculator() {
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
                 The <a className="underline underline-offset-2" href="/mortgage-calculator">mortgage calculator</a> uses this same comparison and the same starting assumptions, so the two agree when you enter the same numbers.
               </div>
+
+              <AssumptionsCard
+                replaceHint="Replace a planning assumption with a real quote, such as your lender's rate or an agent's selling cost, to firm up the answer."
+                items={[
+                  { label: "Home price", value: money(results.input.homePrice), source: sourceFor(homePrice, "500000", "sample") },
+                  { label: "Down payment", value: `${downPct}%`, source: sourceFor(downPct, "20", "sample") },
+                  { label: "Mortgage rate", value: `${mortgageRatePct}%`, source: sourceFor(mortgageRatePct, String(D.mortgageRatePct), "planning") },
+                  { label: "Loan term", value: `${loanYears} years`, source: sourceFor(loanYears, "30", "sample") },
+                  { label: "Property tax", value: `${propertyTaxPct}% a year`, source: sourceFor(propertyTaxPct, String(D.propertyTaxPct), "planning") },
+                  { label: "Home insurance", value: `${money(Number(homeInsuranceAnnual) || 0)} a year`, source: sourceFor(homeInsuranceAnnual, String(D.homeInsuranceAnnual), "planning") },
+                  { label: "Maintenance", value: `${maintenancePct}% a year`, source: sourceFor(maintenancePct, String(D.maintenancePct), "planning") },
+                  { label: "Closing costs", value: `${buyClosingPct}% of price`, source: sourceFor(buyClosingPct, String(D.buyClosingPct), "planning") },
+                  { label: "Home appreciation", value: `${appreciationPct}% a year`, source: sourceFor(appreciationPct, String(D.appreciationPct), "planning") },
+                  { label: "Selling costs", value: `${sellingCostPct}% of price`, source: sourceFor(sellingCostPct, String(D.sellingCostPct), "planning") },
+                  { label: "Mortgage-interest tax benefit", value: `${taxBenefitPct}%`, source: sourceFor(taxBenefitPct, String(D.taxBenefitPct), "planning") },
+                  { label: "Monthly rent", value: money(results.input.monthlyRent), source: sourceFor(monthlyRent, "2500", "sample") },
+                  { label: "Rent growth", value: `${rentGrowthPct}% a year`, source: sourceFor(rentGrowthPct, String(D.rentGrowthPct), "planning") },
+                  { label: "Renter's insurance", value: `${money(Number(rentersInsuranceMonthly) || 0)} a month`, source: sourceFor(rentersInsuranceMonthly, String(D.rentersInsuranceMonthly), "planning") },
+                  { label: "Investment return", value: `${investmentReturnPct}% a year`, source: sourceFor(investmentReturnPct, String(D.investmentReturnPct), "planning") },
+                  { label: "Years you'll stay", value: `${years}`, source: sourceFor(years, "10", "sample") },
+                ]}
+              />
             </>
           )}
         </div>

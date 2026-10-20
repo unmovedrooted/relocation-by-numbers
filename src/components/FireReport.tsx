@@ -176,8 +176,8 @@ export default function FireReport({ inputs }: { inputs: FireReportInputs }) {
               Personalized report
             </div>
             <p className="text-base font-semibold text-white">{copy.offer}</p>
-            <p className="text-sm leading-6 text-slate-400">{copy.blurb}</p>
-            <p className="text-xs leading-5 text-slate-500">
+            <p className="text-sm leading-6 text-slate-300">{copy.blurb}</p>
+            <p className="text-xs leading-5 text-slate-400">
               When you continue, your age, location, income, spending, tax assumptions,
               account balances, the calculator mode and its settings (such as Coast age or
               Barista part-time income), return and inflation assumptions, and yearly
@@ -215,7 +215,7 @@ export default function FireReport({ inputs }: { inputs: FireReportInputs }) {
           <button
             type="button"
             onClick={generate}
-            className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400 transition hover:bg-white/10 hover:text-white"
+            className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10 hover:text-white"
           >
             Regenerate
           </button>

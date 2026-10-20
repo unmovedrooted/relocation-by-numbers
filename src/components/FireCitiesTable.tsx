@@ -31,7 +31,7 @@ export default function FireCitiesTable({ cities, salaries, defaultSalary, migra
 
   return (
     <>
-      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 text-xs text-slate-400">
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 text-xs text-slate-300">
         <div className="flex items-center gap-2">
           <span>Salary</span>
           <div className="inline-flex flex-wrap rounded-lg border border-white/10 bg-white/5 p-0.5" role="group" aria-label="Salary">

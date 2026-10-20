@@ -275,7 +275,7 @@ export default async function BestStateForFirePage({ params }: PageProps) {
             support a strong income-to-expense ratio.
           </p>
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-400">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-300">
             <span>Assumptions updated: October 2026</span>
             <span className="hidden sm:inline">•</span>
             <Link href="/methodology" className="underline underline-offset-4 hover:no-underline">
@@ -318,7 +318,7 @@ export default async function BestStateForFirePage({ params }: PageProps) {
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-              <div className="text-xs uppercase tracking-widest text-slate-400">State income tax</div>
+              <div className="text-xs uppercase tracking-widest text-slate-300">State income tax</div>
               <div className="mt-2 font-semibold text-white">
                 {noTax ? "None" : "Yes"}
               </div>
@@ -329,13 +329,13 @@ export default async function BestStateForFirePage({ params }: PageProps) {
               ) : null}
             </div>
             <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-              <div className="text-xs uppercase tracking-widest text-slate-400">Avg rent (major cities)</div>
+              <div className="text-xs uppercase tracking-widest text-slate-300">Avg rent (major cities)</div>
               <div className="mt-2 font-semibold text-white">
                 {avgRent ? `~$${avgRent.toLocaleString()}/mo` : "—"}
               </div>
             </div>
             <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-              <div className="text-xs uppercase tracking-widest text-slate-400">Cities in our data</div>
+              <div className="text-xs uppercase tracking-widest text-slate-300">Cities in our data</div>
               <div className="mt-2 font-semibold text-white">
                 {stateCities.length > 0 ? stateCities.length : "—"}
               </div>
@@ -362,7 +362,7 @@ export default async function BestStateForFirePage({ params }: PageProps) {
             <h2 className="text-xl font-semibold">
               Cities to explore in {found.name}
             </h2>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-slate-300">
               Compare major cities in {found.name} to see where housing pressure may be lightest.
             </p>
             <div className="grid gap-3 sm:grid-cols-3">
@@ -373,10 +373,10 @@ export default async function BestStateForFirePage({ params }: PageProps) {
                   className="rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:bg-white/10"
                 >
                   <div className="text-sm font-semibold text-white">{city.name}</div>
-                  <div className="mt-2 text-xs text-slate-400">
+                  <div className="mt-2 text-xs text-slate-300">
                     Avg rent: {city.defaultRent ? `$${city.defaultRent.toLocaleString()}/mo` : "N/A"}
                   </div>
-                  <div className="text-xs text-slate-400">
+                  <div className="text-xs text-slate-300">
                     Median home: {city.medianHomePrice ? `$${city.medianHomePrice.toLocaleString()}` : "N/A"}
                   </div>
                   <div className="mt-2 text-xs text-emerald-400">
@@ -386,7 +386,7 @@ export default async function BestStateForFirePage({ params }: PageProps) {
               ))}
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2 text-sm text-slate-400">
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2 text-sm text-slate-300">
               <div className="font-semibold text-slate-300">Where these numbers come from</div>
               <p>
                 Rent and home price figures use city-level planning data from Relocation by Numbers.
@@ -483,7 +483,7 @@ export default async function BestStateForFirePage({ params }: PageProps) {
                   <div className="text-sm font-semibold text-white">
                     Is {s!.name} good for FIRE?
                   </div>
-                  <div className="mt-1 text-xs text-slate-400">
+                  <div className="mt-1 text-xs text-slate-300">
                     Explore taxes, housing, and FIRE potential in {s!.name}
                   </div>
                 </Link>
@@ -493,8 +493,8 @@ export default async function BestStateForFirePage({ params }: PageProps) {
         ) : null}
 
         <footer className="pt-2">
-          <div className="mb-3 text-xs text-slate-400">Assumptions updated: October 2026</div>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400">
+          <div className="mb-3 text-xs text-slate-300">Assumptions updated: October 2026</div>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
             <Link href="/about" className="transition hover:text-white">About</Link>
             <span>•</span>
             <Link href="/disclaimer" className="transition hover:text-white">Disclaimer</Link>

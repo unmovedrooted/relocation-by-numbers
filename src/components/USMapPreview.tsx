@@ -126,11 +126,11 @@ export default function USMapPreview() {
                 </ComposableMap>
 
                 {/* Legend */}
-                <div className="mt-4 flex items-center gap-3 text-xs text-slate-400">
+                <div className="mt-4 flex items-center gap-3 text-xs text-slate-300">
                   <span>Less tax</span>
                   <span className="h-2.5 flex-1 rounded-full" style={{ background: "linear-gradient(90deg, hsl(212,55%,88%), hsl(212,61%,60%), hsl(212,67%,32%))" }} />
                   <span>More tax</span>
-                  <span className="ml-2 text-slate-500">up to {(maxRate * 100).toFixed(1)}%</span>
+                  <span className="ml-2 text-slate-400">up to {(maxRate * 100).toFixed(1)}%</span>
                 </div>
 
                 {/* Hover detail */}
@@ -153,7 +153,7 @@ export default function USMapPreview() {
                   ) : (
                     <div>
                       <div className="text-base font-semibold text-white">Hover a state</div>
-                      <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+                      <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
                         See its state income tax and take-home on a {money(salary)} salary. The nine palest states have no state income tax.
                       </p>
                     </div>
@@ -167,7 +167,7 @@ export default function USMapPreview() {
         <div className="space-y-6">
           <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-5">
             <h3 className="text-lg font-semibold text-white">Lowest state income tax</h3>
-            <p className="mt-1 text-sm leading-6 text-slate-400">On a {money(salary)} {filing} salary.</p>
+            <p className="mt-1 text-sm leading-6 text-slate-300">On a {money(salary)} {filing} salary.</p>
             <div className="mt-4 space-y-2">
               {lowest.map((s) => (
                 <button key={s.code} type="button" onClick={() => openPaycheck(s.code)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-left transition hover:border-sky-300/40 hover:bg-white/[0.06]">
@@ -180,7 +180,7 @@ export default function USMapPreview() {
 
           <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-5">
             <h3 className="text-lg font-semibold text-white">Highest state income tax</h3>
-            <p className="mt-1 text-sm leading-6 text-slate-400">On a {money(salary)} {filing} salary.</p>
+            <p className="mt-1 text-sm leading-6 text-slate-300">On a {money(salary)} {filing} salary.</p>
             <div className="mt-4 space-y-2">
               {highest.map((s) => (
                 <button key={s.code} type="button" onClick={() => openPaycheck(s.code)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-left transition hover:border-rose-300/40 hover:bg-white/[0.06]">
@@ -191,7 +191,7 @@ export default function USMapPreview() {
             </div>
           </div>
 
-          <p className="px-1 text-xs leading-5 text-slate-500">
+          <p className="px-1 text-xs leading-5 text-slate-400">
             Estimates use 2026 state income tax and the standard deduction, single or married filing jointly. They don&apos;t include local city taxes, credits, or deductions. Not tax advice.
           </p>
         </div>

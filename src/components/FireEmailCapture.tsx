@@ -52,7 +52,7 @@ export default function FireEmailCapture({ fireAge, location }: Props) {
   return (
     <div className="rounded-2xl border border-white/10 bg-black/20 px-5 py-4">
       <p className="text-sm font-semibold text-white">Save your FIRE plan</p>
-      <p className="mt-0.5 text-xs text-slate-400">
+      <p className="mt-0.5 text-xs text-slate-300">
         Get a check-in in 6 months with updated projections.
       </p>
 
@@ -64,7 +64,7 @@ export default function FireEmailCapture({ fireAge, location }: Props) {
           onChange={e => setEmail(e.target.value)}
           onKeyDown={e => e.key === "Enter" && handleSubmit()}
           disabled={status === "loading"}
-          className="h-9 min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10 disabled:opacity-50"
+          className="h-9 min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white placeholder:text-slate-400 outline-none transition focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10 disabled:opacity-50"
         />
         <button
           onClick={handleSubmit}
