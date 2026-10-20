@@ -1169,7 +1169,7 @@ function USTab() {
       const pmi  = calcAutoPMI(l, t.hp, t.dpPc);
       const total = pi + tax + ins + monthlyHOA + pmi;
       const closing   = t.hp * (nz(closingCostPct) / 100);
-      const cashNeeded = d + closing + total * 3;
+      const cashNeeded = d + closing; // down payment and closing costs only; reserves are shown separately above
 
       let fiveYrOwn = 0;
       for (let m = 0; m < 60; m++) {
