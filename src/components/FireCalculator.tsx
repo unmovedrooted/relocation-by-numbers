@@ -1300,6 +1300,9 @@ function DecisionEngineCard({ result }: { result: DecisionEngineResult }) {
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 
+const SHARED_FIRE_KEY = "rbn-fire-shared-v1";
+const SHARED_FIRE_FIELDS = ["age", "income", "state", "filingStatus", "k401Pct", "currentPortfolio", "salaryGrowthPct", "inflationPct"] as const;
+
 export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: FireCalculatorProps) {
   const pathname = usePathname();
   const mode     = modeFromPathname(pathname);
@@ -1341,8 +1344,47 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
     setLinkedMove(true);
   }, []);
 
+  // Details that do not depend on the FIRE style (age, income, location, portfolio) carry over between the FIRE pages for the tab's session.
+  // Spending and withdrawal assumptions belong to each style, so they start from the page's own defaults.
+  const [hydrated, setHydrated] = useState(false);
+  const [carriedOver, setCarriedOver] = useState(false);
+  useEffect(() => {
+    try {
+      const query = new URLSearchParams(window.location.search);
+      if (!parseFireAbroadLink(query) && !parseFireLink(query)) {
+        const raw = window.sessionStorage.getItem(SHARED_FIRE_KEY);
+        if (raw) {
+          const saved = JSON.parse(raw) as Partial<Pick<Inputs, typeof SHARED_FIRE_FIELDS[number]>>;
+          const patch: Partial<Inputs> = {};
+          for (const f of SHARED_FIRE_FIELDS) {
+            if (f === "income" && initialIncome > 0) continue;
+            const v = saved[f];
+            if (v !== undefined && typeof v === typeof defaultsForMode(mode, initialIncome, spendingPreset)[f]) (patch as Record<string, unknown>)[f] = v;
+          }
+          if (Object.keys(patch).length) {
+            setInputs(s => {
+              const n = { ...s, ...patch };
+              return { ...n, coastAge: Math.max(n.coastAge, n.age), targetRetirementAge: Math.max(n.targetRetirementAge, n.age + 1) };
+            });
+            setCarriedOver(true);
+          }
+        }
+      }
+    } catch { /* storage unavailable */ }
+    setHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      const shared: Record<string, unknown> = {};
+      for (const f of SHARED_FIRE_FIELDS) shared[f] = inputs[f];
+      window.sessionStorage.setItem(SHARED_FIRE_KEY, JSON.stringify(shared));
+    } catch { /* storage unavailable */ }
+  }, [hydrated, inputs]);
+
   // ── Core derived values ───────────────────────────────────────────────────
-  const annualExp = useMemo(() => annualExpenses(inputs), [inputs]);
+  const annualExp =useMemo(() => annualExpenses(inputs), [inputs]);
 
   const netAnnual = useMemo(() => {
     if (!inputs.state) return Math.max(0, inputs.income);
@@ -1408,7 +1450,9 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
 
   const progress = useMemo(() => {
   const current = Number(inputs.advanced ? result.startSpendablePortfolio : result.startPortfolio);
-  const target = Number(result.fireNumber);
+  // Today's portfolio is compared with the target in today's dollars (the FIRE number is in the dollars of the year it is reached).
+  const infl = Number(inputs.inflationPct) || 0;
+  const target = Number(result.fireNumber) / (result.yearsToFI != null ? Math.pow(1 + infl / 100, result.yearsToFI) : 1);
   const pctValue =
     target > 0 && Number.isFinite(target) ? clamp(current / target, 0, 1) : 0;
 
@@ -1417,7 +1461,7 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
     target,
     pct: pctValue,
   };
-}, [inputs.advanced, result]);
+}, [inputs.advanced, inputs.inflationPct, result]);
 
   // ── Coast-specific ────────────────────────────────────────────────────────
   const coastFireNumber = useMemo(() => mode === "coast" ? calcCoastFireNumber(inputs) : null, [mode, inputs]);
@@ -1706,6 +1750,12 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               </button>
             </div>
           </div>
+
+          {carriedOver && (
+            <p className="mt-3 rounded-lg border border-emerald-400/20 bg-emerald-400/5 px-3 py-2 text-xs leading-5 text-emerald-100">
+              Your age, income, location and portfolio carried over from your last FIRE page. This style uses its own spending ({money(inputs.expensesMonthly, 0)}/mo) and a {inputs.withdrawalRatePct}% withdrawal rate; change them below if you want.
+            </p>
+          )}
 
           <div className="mt-5 grid gap-x-4 gap-y-3 sm:grid-cols-2">
 
