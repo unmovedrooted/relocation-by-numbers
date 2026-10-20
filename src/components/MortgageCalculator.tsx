@@ -1518,7 +1518,7 @@ function USTab() {
               ? `Over 5 years, buying is ~${money(buyRentGap5)} cheaper than renting (net of equity, and counting what your upfront cash could earn if you rented).`
               : `Over 5 years, renting is ~${money(buyRentGap5)} cheaper than buying (net of equity, and counting what your upfront cash could earn if you rented).`}
           </div>
-          <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">Uses the same model as the break-even: buying counts the down payment and closing costs you pay up front, minus home equity; renting is credited with investing that same cash at your investment return. Selling costs are left out. Both are sensitive to appreciation and rent growth assumptions.</div>
+          <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">Uses the same model as the break-even: buying counts the down payment and closing costs you pay up front, minus home equity; renting is credited with investing that same cash at your investment return. Selling costs are left out. Both are sensitive to appreciation and rent growth assumptions. The <a className="underline underline-offset-2" href="/rent-vs-buy-calculator">Rent vs. Buy calculator</a> compares net worth instead: it deducts selling costs and leaves out the mortgage-interest tax benefit used here, and it starts from different default rates, so the two can reach different answers.</div>
         </Card>
 
         <Card>
