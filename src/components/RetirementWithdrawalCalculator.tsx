@@ -10,6 +10,7 @@ import { withdrawalPaths, RISK_PRESETS, type RiskLevel } from "../lib/monteCarlo
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
+import { grossForAfterTax, solveWithdrawalForSuccess } from "../lib/withdrawalSolvers";
 
 const CAP_YEARS = 60; // horizon cap; beyond this we treat the money as effectively perpetual
 
@@ -183,6 +184,11 @@ export default function RetirementWithdrawalCalculator() {
   const [riskLevel, setRiskLevel] = useState<RiskLevel>("balanced");
   const [customVolatilityPct, setCustomVolatilityPct] = useState<string>("13");
 
+  // Solve for a withdrawal that lasts in this share of simulated markets (0 = the average-return answer), and an option to enter spending after tax.
+  const [targetSuccess, setTargetSuccess] = useState<0 | 80 | 90 | 95>(0);
+  const [spendBasis, setSpendBasis] = useState<"gross" | "aftertax">("gross");
+  const [afterTaxSpend, setAfterTaxSpend] = useState<string>("45000");
+
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
 
   const nz = (v: string) => {
@@ -211,6 +217,9 @@ export default function RetirementWithdrawalCalculator() {
     const vRisk = qs.get("risk");
     if (vRisk === "conservative" || vRisk === "balanced" || vRisk === "aggressive" || vRisk === "custom") setRiskLevel(vRisk);
     const vVol = qs.get("vol"); if (vVol) setCustomVolatilityPct(vVol);
+    const vSuccess = Number(qs.get("success")); if (vSuccess === 80 || vSuccess === 90 || vSuccess === 95) setTargetSuccess(vSuccess);
+    if (qs.get("basis") === "aftertax") setSpendBasis("aftertax");
+    const vSpend = qs.get("spend"); if (vSpend) setAfterTaxSpend(vSpend);
   }, []);
 
   // ── QS SYNC ──────────────────────────────────────────────────────────
@@ -219,7 +228,9 @@ export default function RetirementWithdrawalCalculator() {
     const qs = new URLSearchParams();
     qs.set("mode", mode);
     if (currentBalance) qs.set("balance", currentBalance);
-    if (mode === "howLong" && annualWithdrawal) qs.set("withdrawal", annualWithdrawal);
+    if (mode === "howLong" && spendBasis === "gross" && annualWithdrawal) qs.set("withdrawal", annualWithdrawal);
+    if (mode === "howLong" && spendBasis === "aftertax") { qs.set("basis", "aftertax"); if (afterTaxSpend) qs.set("spend", afterTaxSpend); }
+    if (mode === "safeAmount" && targetSuccess > 0) qs.set("success", String(targetSuccess));
     if (mode === "safeAmount" && horizonYears) qs.set("horizon", horizonYears);
     if (currentAge) qs.set("age", currentAge);
     qs.set("account", accountType);
@@ -233,7 +244,9 @@ export default function RetirementWithdrawalCalculator() {
       if (riskLevel === "custom" && customVolatilityPct) qs.set("vol", customVolatilityPct);
     }
     setQS(qs);
-  }, [mode, currentBalance, annualWithdrawal, horizonYears, currentAge, accountType, filing, state, expectedReturnPct, inflationPct, viewMode, riskLevel, customVolatilityPct]);
+  }, [mode, currentBalance, annualWithdrawal, horizonYears, currentAge, accountType, filing, state, expectedReturnPct, inflationPct, viewMode, riskLevel, customVolatilityPct, targetSuccess, spendBasis, afterTaxSpend]);
+
+  const volatility = riskLevel === "custom" ? Math.max(0, nz(customVolatilityPct)) / 100 : RISK_PRESETS[riskLevel].volatilityPct / 100;
 
   const results = useMemo(() => {
     const balance = Math.max(0, nz(currentBalance));
@@ -246,15 +259,26 @@ export default function RetirementWithdrawalCalculator() {
     let depletes: boolean;
     let trajectory: number[];
 
+    let solvedSuccess: number | null = null;
     if (mode === "howLong") {
-      grossWithdrawal = Math.max(0, nz(annualWithdrawal));
+      // Entered directly, or worked out from the amount you want to spend after income tax.
+      grossWithdrawal = spendBasis === "aftertax"
+        ? grossForAfterTax(Math.max(0, nz(afterTaxSpend)), (g) => withdrawalIncomeTax(g, state, filing, accountType).total)
+        : Math.max(0, nz(annualWithdrawal));
       const sim = simulate(balance, grossWithdrawal, r);
       yearsLasts = sim.years;
       depletes = sim.depletes;
       trajectory = sim.trajectory;
     } else {
       const horizon = Math.max(1, Math.round(nz(horizonYears)));
-      grossWithdrawal = solveSafeWithdrawal(balance, horizon, r);
+      if (targetSuccess > 0) {
+        // The largest withdrawal that lasts the full horizon in at least this share of the simulated markets.
+        const solved = solveWithdrawalForSuccess({ startBalance: balance, horizon, realReturn: r, volatility, target: targetSuccess / 100 });
+        grossWithdrawal = solved.withdrawal;
+        solvedSuccess = solved.successRate;
+      } else {
+        grossWithdrawal = solveSafeWithdrawal(balance, horizon, r);
+      }
       const sim = simulate(balance, grossWithdrawal, r);
       yearsLasts = sim.years;
       depletes = sim.depletes;
@@ -283,11 +307,13 @@ export default function RetirementWithdrawalCalculator() {
             value: y < trajectory.length ? trajectory[y] : depletes ? 0 : trajectory[trajectory.length - 1],
             depleted: depletes && y > yearsLasts,
           }))
-        : [20, 25, 30, 35].map((y) => ({
-            years: y,
-            value: solveSafeWithdrawal(balance, y, r),
-            depleted: false,
-          }));
+        : targetSuccess > 0
+          ? []
+          : [20, 25, 30, 35].map((y) => ({
+              years: y,
+              value: solveSafeWithdrawal(balance, y, r),
+              depleted: false,
+            }));
 
     return {
       realReturn: r,
@@ -304,16 +330,35 @@ export default function RetirementWithdrawalCalculator() {
       milestones,
       stateExemptOrNone,
       startBalance: balance,
+      solvedSuccess,
     };
-  }, [mode, currentBalance, annualWithdrawal, horizonYears, currentAge, accountType, filing, state, expectedReturnPct, inflationPct]);
+  }, [mode, currentBalance, annualWithdrawal, horizonYears, currentAge, accountType, filing, state, expectedReturnPct, inflationPct, targetSuccess, spendBasis, afterTaxSpend, volatility]);
 
   const inputsReady = results.startBalance > 0;
+  const chooseTarget = (t: 0 | 80 | 90 | 95) => {
+    setTargetSuccess(t);
+    if (t > 0) setViewMode("montecarlo"); // a success rate only means something with market ups and downs
+  };
+  const [handoffBusy, setHandoffBusy] = useState(false);
+  const openPlan = async () => {
+    setHandoffBusy(true);
+    try {
+      const { buildPlanHandoff } = await import("../lib/withdrawalHandoff");
+      const { href } = buildPlanHandoff({
+        state, filing, age: nz(currentAge) || 65, balance: results.startBalance, roth: accountType === "roth",
+        returnPct: nz(expectedReturnPct), inflationPct: nz(inflationPct), afterTaxSpending: results.afterTaxAnnual,
+        horizonYears: Math.max(5, Math.round(nz(horizonYears)) || 30),
+      });
+      window.location.assign(href);
+    } finally {
+      setHandoffBusy(false);
+    }
+  };
   const stateName = STATES.find((s) => s.code === state)?.name ?? state;
   const lastsLabel = results.depletes
     ? `${results.yearsLasts} year${results.yearsLasts === 1 ? "" : "s"}`
     : `${CAP_YEARS}+ years`;
 
-  const volatility = riskLevel === "custom" ? Math.max(0, nz(customVolatilityPct)) / 100 : RISK_PRESETS[riskLevel].volatilityPct / 100;
 
   // ── MONTE CARLO ─────────────────────────────────────────────────────────
   // Runs only in Monte Carlo view. Uses the same expected real return as the
@@ -480,7 +525,25 @@ export default function RetirementWithdrawalCalculator() {
                 <div className={labelHeadCls}>Current retirement balance</div>
                 <input className={inputCls} type="number" min="0" value={currentBalance} onChange={(e) => setCurrentBalance(e.target.value)} placeholder=" " />
               </label>
-              {mode === "howLong" ? (
+              {mode === "howLong" && (
+                <label className="text-sm sm:col-span-2">
+                  <div className={labelHeadCls}>I want to enter</div>
+                  <select className={selectCls} value={spendBasis} onChange={(e) => setSpendBasis(e.target.value as "gross" | "aftertax")}>
+                    <option value="gross">A withdrawal before tax</option>
+                    <option value="aftertax">What I need to spend after tax</option>
+                  </select>
+                </label>
+              )}
+              {mode === "howLong" && spendBasis === "aftertax" ? (
+                <label className="text-sm">
+                  <div className={labelHeadCls}>
+                    Spending after tax (today&apos;s $ a year)
+                    <InfoTip text="How much you need to have left to spend each year after income tax. The calculator works out the withdrawal before tax that leaves this much, using your state and filing status." />
+                  </div>
+                  <input className={inputCls} type="number" min="0" value={afterTaxSpend} onChange={(e) => setAfterTaxSpend(e.target.value)} placeholder=" " />
+                  <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Needs a withdrawal of about {money(results.grossWithdrawal)} a year before tax.</div>
+                </label>
+              ) : mode === "howLong" ? (
                 <label className="text-sm">
                   <div className={labelHeadCls}>
                     Annual withdrawal (today&apos;s $)
@@ -496,6 +559,32 @@ export default function RetirementWithdrawalCalculator() {
                   </div>
                   <input className={inputCls} type="number" min="1" value={horizonYears} onChange={(e) => setHorizonYears(e.target.value)} placeholder=" " />
                 </label>
+              )}
+              {mode === "safeAmount" && (
+                <div className="sm:col-span-2">
+                  <div className={labelHeadCls}>
+                    How sure do you want to be?
+                    <InfoTip text="Average returns give one answer, but real markets vary. Choose a share of simulated markets in which the money should last the whole retirement. A higher share means a smaller withdrawal. The result depends on the return, volatility and inflation you chose and on the model itself, so it is an estimate, not a guarantee." />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {([[0, "Average returns"], [80, "80% of markets"], [90, "90% of markets"], [95, "95% of markets"]] as const).map(([t, label]) => (
+                      <button
+                        key={t}
+                        type="button"
+                        aria-pressed={targetSuccess === t}
+                        onClick={() => chooseTarget(t)}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${targetSuccess === t ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                    {targetSuccess === 0
+                      ? "Average returns ignore market swings, so the answer can last in far fewer than half of simulated markets. Pick a share of markets to see a more cautious withdrawal."
+                      : `Solves for the largest withdrawal that lasts the full ${horizonYears || 30} years in at least ${targetSuccess}% of 5,000 simulated markets. Model-dependent.`}
+                  </div>
+                </div>
               )}
               <label className="text-sm">
                 <div className={labelHeadCls}>Your current age</div>
@@ -585,7 +674,7 @@ export default function RetirementWithdrawalCalculator() {
                   />
                 ) : (
                   <StatCard
-                    label={`Modeled sustainable withdrawal for ${horizonYears} years`}
+                    label={targetSuccess > 0 ? `Withdrawal solved for ${targetSuccess}% of markets, ${horizonYears} years` : `Modeled sustainable withdrawal for ${horizonYears} years`}
                     value={`${money(results.grossWithdrawal)}/yr`}
                     tone="emerald"
                     note={`That's ${money(results.grossWithdrawal / 12)}/mo gross, or ${(results.withdrawalPctOfBalance * 100).toFixed(1)}% of your balance, vs. the 4%-rule reference of ${money(results.fourPctBenchmark)}/yr.`}
@@ -594,10 +683,12 @@ export default function RetirementWithdrawalCalculator() {
               ) : mc ? (
                 mode === "safeAmount" ? (
                   <StatCard
-                    label={`Chance it lasts ${mc.horizon} years`}
-                    value={`${(mc.successRate * 100).toFixed(0)}%`}
-                    tone={mc.successRate >= 0.9 ? "emerald" : mc.successRate >= 0.75 ? "cyan" : "amber"}
-                    note={`Across 5,000 simulated markets at ${(volatility * 100).toFixed(0)}% volatility, ${money(results.grossWithdrawal)}/yr lasted the full ${mc.horizon} years in ${(mc.successRate * 100).toFixed(0)}% of them. The average view's sustainable amount isn't guaranteed once markets swing.`}
+                    label={targetSuccess > 0 ? `Withdrawal for a ${targetSuccess}% chance, ${mc.horizon} years` : `Chance it lasts ${mc.horizon} years`}
+                    value={targetSuccess > 0 ? `${money(results.grossWithdrawal)}/yr` : `${(mc.successRate * 100).toFixed(0)}%`}
+                    tone={targetSuccess > 0 || mc.successRate >= 0.9 ? "emerald" : mc.successRate >= 0.75 ? "cyan" : "amber"}
+                    note={targetSuccess > 0
+                      ? `${money(results.grossWithdrawal / 12)}/mo gross. It lasted the full ${mc.horizon} years in ${(mc.successRate * 100).toFixed(0)}% of 5,000 simulated markets at ${(volatility * 100).toFixed(0)}% volatility, against your target of ${targetSuccess}%. This is a model result: it depends on the expected return, volatility and inflation you chose, and it is not a guarantee.`
+                      : `Across 5,000 simulated markets at ${(volatility * 100).toFixed(0)}% volatility, ${money(results.grossWithdrawal)}/yr lasted the full ${mc.horizon} years in ${(mc.successRate * 100).toFixed(0)}% of them. The average view's sustainable amount isn't guaranteed once markets swing. Choose a share of markets under "How sure do you want to be?" for a more cautious withdrawal.`}
                   />
                 ) : (
                   <StatCard
@@ -626,6 +717,9 @@ export default function RetirementWithdrawalCalculator() {
                     {mode === "howLong" ? "Balance over time (today's $)" : "Modeled sustainable withdrawal at other horizons"}
                   </div>
                   <div className="space-y-1.5 text-sm text-slate-700 dark:text-slate-300">
+                    {results.milestones.length === 0 && (
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Other horizons are shown for the average-return answer. Choose &ldquo;Average returns&rdquo; under &ldquo;How sure do you want to be?&rdquo; to see them.</div>
+                    )}
                     {results.milestones.map((m) => (
                       <div key={m.years} className="flex justify-between">
                         <span>{mode === "howLong" ? `After ${m.years} years` : `${m.years}-year retirement`}</span>
@@ -658,6 +752,24 @@ export default function RetirementWithdrawalCalculator() {
                   </div>
                 </div>
               ) : null}
+
+              <div data-next-step className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">Plan this in more detail</div>
+                <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                  This tool uses one account and withdrawals as your only income. The Complete Retirement Plan adds Social Security, pensions, mixed account types, required distributions and a year-by-year household projection (Beta).
+                </p>
+                <button
+                  type="button"
+                  disabled={handoffBusy}
+                  onClick={openPlan}
+                  className="mt-3 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  {handoffBusy ? "Opening…" : "Continue in the Complete Retirement Plan"}
+                </button>
+                <p className="mt-2 text-[11px] leading-4 text-slate-500 dark:text-slate-400">
+                  Your balance, state, filing status, spending after tax and return assumptions go with you where the planner can accept them. A Roth account, or a state that asks you to confirm its rules, opens the planner empty so you can enter and confirm those yourself.
+                </p>
+              </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
                 All figures are in today&apos;s dollars. Tax estimates treat withdrawals as your only ordinary income

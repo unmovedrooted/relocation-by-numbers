@@ -202,3 +202,50 @@ export function withdrawalPaths(opts: {
     successRateAt,
   };
 }
+
+/**
+ * Share of simulated markets in which a fixed real withdrawal lasts `horizon` full years. It follows exactly the same draws as
+ * withdrawalPaths (same seed, one random number per path per year), so for the same inputs it returns the same rate as that function's
+ * successRateAt, without building the percentile bands.
+ */
+export function withdrawalSuccessRate(opts: {
+  startBalance: number;
+  annualWithdrawal: number;
+  realReturn: number;
+  volatility: number;
+  maxYears: number;
+  horizon: number;
+  nPaths?: number;
+  seed?: number;
+}): number {
+  const start = Math.max(0, opts.startBalance);
+  const W = Math.max(0, opts.annualWithdrawal);
+  const maxYears = Math.max(1, Math.round(opts.maxYears));
+  const horizon = Math.max(0, Math.round(opts.horizon));
+  const nPaths = Math.max(1, opts.nPaths ?? DEFAULT_PATHS);
+  const { mu, sigma } = lognormalParams(opts.realReturn, opts.volatility);
+  const rng = mulberry32(opts.seed ?? DEFAULT_SEED);
+  let survived = 0;
+  for (let p = 0; p < nPaths; p++) {
+    let balance = start;
+    let depleted = false;
+    let lasted = maxYears;
+    for (let y = 1; y <= maxYears; y++) {
+      if (!depleted) {
+        if (balance < W) {
+          depleted = true;
+          lasted = y - 1;
+          balance = 0;
+        } else {
+          balance -= W;
+          balance *= Math.exp(mu + sigma * nextNormal(rng));
+          if (balance < 0) balance = 0;
+        }
+      } else {
+        nextNormal(rng);
+      }
+    }
+    if (lasted >= horizon) survived++;
+  }
+  return survived / nPaths;
+}
