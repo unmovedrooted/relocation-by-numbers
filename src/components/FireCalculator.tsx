@@ -1375,7 +1375,7 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   const [openFaq,  setOpenFaq]  = useState<number | null>(0);
   const [pinnedCompareCityId, setPinnedCompareCityId] = useState<string | null>(null);
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
-  const [activeResultTab, setActiveResultTab] = useState<"milestone" | "move" | "savings">("milestone");
+  const [activeResultTab, setActiveResultTab] = useState<"milestone" | "move" | "savings">(() => (pathname.includes("savings-rate-for-fire") ? "savings" : "milestone"));
   const [linkedMove, setLinkedMove] = useState(false);
   const [abroadLabel, setAbroadLabel] = useState("");
 
@@ -1834,7 +1834,9 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
       partTimeEnd: { label: "part-time income end age", value: inputs.baristaEndAge ? String(inputs.baristaEndAge) : "none" },
     },
     [
-      { label: "FIRE age", value: hasCoreInputs ? fiAge : null, format: (n) => String(n) },
+      mode === "coast"
+        ? { label: "the coast-ready age", value: hasCoreInputs && !isCoastReady && yearsToCoast !== null ? inputs.age + yearsToCoast : null, format: (n) => String(n) }
+        : { label: "FIRE age", value: hasCoreInputs ? fiAge : null, format: (n) => String(n) },
       { label: "the FIRE number", value: hasCoreInputs && Number.isFinite(result.fireNumber) ? inView(result.fireNumber, result.yearsToFI) : null, format: dollars },
     ],
   );
@@ -1843,7 +1845,16 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
     <section className="space-y-6">
       <MobileResultBar
         targetId="fire-results"
-        summary={hasCoreInputs ? (fiAge !== null ? `FIRE at age ${fiAge} · ${result.yearsToFI} years away` : `FIRE not reached in ${inputs.maxYears} years`) : null}
+        summary={!hasCoreInputs ? null
+          : mode === "coast"
+            ? (isCoastReady
+                ? `Coast-ready: you can stop contributing and still retire at ${inputs.targetRetirementAge}`
+                : yearsToCoast !== null
+                  ? `Coast-ready at age ${inputs.age + yearsToCoast}, then retire at ${inputs.targetRetirementAge}`
+                  : `Coast target not reached by age ${inputs.targetRetirementAge}`)
+            : fiAge !== null
+              ? `${mode === "lean" ? "Lean FIRE" : mode === "barista" ? "Barista FIRE" : "FIRE"} at age ${fiAge} · ${result.yearsToFI} years away`
+              : `FIRE not reached in ${inputs.maxYears} years`}
       />
 
       {/* ── Main grid ──────────────────────────────────────────────────────── */}

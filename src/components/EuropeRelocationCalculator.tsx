@@ -1098,6 +1098,8 @@ readinessRecommendation,
   // ---------------------------------------------------------------------------
   // RENDER
   // ---------------------------------------------------------------------------
+  // Living costs and moving expenses start as estimates; the form shows them on request so the first screen stays short.
+  const [showDetails, setShowDetails] = useState(false);
   const { note: changeNote, dismiss: dismissChangeNote } = useChangeNote(
     {
       salary: { label: "salary", value: salary },
@@ -1348,6 +1350,20 @@ readinessRecommendation,
 </div>
 
 
+          {!showDetails && (
+            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">Living costs and moving expenses</div>
+              <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                Using estimates for {toCityLabel} unless you changed them: everyday costs of about {displayAmount(results.livingCosts, 0)} a month, and about{" "}
+                {displayAmount(results.upfrontCashNeeded, 0)} of upfront cash (deposits, visa, flights, setup and a cash buffer).
+              </p>
+              <button type="button" onClick={() => setShowDetails(true)} className="mt-2 text-xs font-semibold text-emerald-700 underline underline-offset-4 hover:no-underline dark:text-emerald-300">
+                Show and edit living costs and moving expenses
+              </button>
+            </div>
+          )}
+          {showDetails && (
+            <>
           {/* Estimated Living Costs */}
 <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
   <div className="mb-1 text-sm font-semibold">
@@ -1431,6 +1447,8 @@ readinessRecommendation,
             </div>
             <div className="mt-4 w-full text-xs text-slate-500 dark:text-slate-400">Planning estimates only.</div>
           </div>
+            </>
+          )}
         </div>
 
         {/* ================================================================
