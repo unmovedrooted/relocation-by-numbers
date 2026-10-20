@@ -262,8 +262,8 @@ export default function Page() {
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Good to know before you use it</h3>
                 <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
                   <p>
-                    This is a smooth, average-return projection. Real markets are volatile, and a run of bad early
-                    returns (sequence-of-returns risk) can deplete a portfolio faster than the average suggests.
+                    The Average view uses a fixed return. Market ups &amp; downs simulates variable returns to
+                    illustrate sequence-of-returns risk.
                   </p>
                   <p>
                     Tax estimates treat the withdrawal as your only ordinary income with the standard deduction. They
