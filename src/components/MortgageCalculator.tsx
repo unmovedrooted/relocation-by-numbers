@@ -5,6 +5,7 @@ import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
+import { RENT_VS_BUY_DEFAULTS as RVB, simulateRentVsBuy, type RentVsBuyResult } from "../lib/rentVsBuy";
 import {
   solveMaxHomePrice,
   calcPMIDropOffWithAppreciation,
@@ -376,22 +377,7 @@ function calcBiweeklySavings(principal: number, annualRate: number, termYears: n
   };
 }
 
-function calcBreakEven({
-  downPayment,
-  closingCosts = 0,
-  annualRate,
-  monthlyPI,
-  rent,
-  tax,
-  ins,
-  hoa,
-  homePrice,
-  appreciation,
-  rentGrowth,
-  investReturn,
-  maintenanceRate,
-  taxDeductRate,
-}: {
+type RentVsBuyArgs = {
   downPayment: number;
   closingCosts?: number;
   annualRate: number;
@@ -405,88 +391,52 @@ function calcBreakEven({
   rentGrowth: number;
   investReturn: number;
   maintenanceRate: number;
+  /** Share of mortgage interest recovered as a tax saving, %. */
   taxDeductRate: number;
-}): BreakEvenResult {
-  if (
-    homePrice <= 0 ||
-    rent <= 0 ||
-    monthlyPI <= 0 ||
-    downPayment < 0 ||
-    annualRate < 0
-  ) {
-    return { type: "invalid" };
-  }
-
-  const upfrontCash = downPayment + closingCosts;
-  const monthlyRate = annualRate / 100 / 12;
-
-  let buyCashFlowCost = upfrontCash;
-  let rentCashFlowCost = 0;
-
-  let homeValue = homePrice;
-  let loanBalance = homePrice - downPayment;
-  let monthlyRent = rent;
-
-  let renterInvestedCash = upfrontCash;
-
-  for (let m = 1; m <= 360; m++) {
-    const interest = loanBalance * monthlyRate;
-    // The mortgage payment stops once the loan is paid off; the last payment is only what is still owed.
-    const payment = loanBalance > 0 ? Math.min(monthlyPI, loanBalance + interest) : 0;
-    const principal = Math.max(0, payment - interest);
-    const taxSavings = interest * (taxDeductRate / 100);
-    const maintenance = (homeValue * (maintenanceRate / 100)) / 12;
-
-    buyCashFlowCost += payment + tax + ins + hoa + maintenance - taxSavings;
-    rentCashFlowCost += monthlyRent;
-
-    renterInvestedCash *= 1 + investReturn / 100 / 12;
-    homeValue *= 1 + appreciation / 100 / 12;
-    monthlyRent *= 1 + rentGrowth / 100 / 12;
-    loanBalance = Math.max(0, loanBalance - principal);
-
-    const homeownerNetWorth = homeValue - loanBalance;
-    const renterNetWorth = renterInvestedCash;
-
-    const buyNetCost = buyCashFlowCost - homeownerNetWorth;
-    const rentNetCost = rentCashFlowCost - renterNetWorth;
-
-    if (buyNetCost <= rentNetCost) {
-      return { type: "ok", months: m };
-    }
-  }
-
-  return { type: "never" };
-}
+  loanYears?: number;
+  sellingCostPct?: number;
+  rentersInsuranceMonthly?: number;
+};
 
 /**
- * Net cost of buying and of renting after `months`, in the same model as calcBreakEven: buying is cash paid out (including the down
- * payment and closing costs) minus home equity; renting is rent paid minus what the same upfront cash would be worth if invested.
+ * Runs the shared rent-versus-buy simulation (the same one the Rent vs. Buy calculator uses) from this page's monthly figures.
+ * Returns null when the inputs cannot describe a purchase.
  */
-function calcNetCostsAt(months: number, args: Parameters<typeof calcBreakEven>[0]): { buyNetCost: number; rentNetCost: number } | null {
-  const { downPayment, closingCosts = 0, annualRate, monthlyPI, rent, tax, ins, hoa, homePrice, appreciation, rentGrowth, investReturn, maintenanceRate, taxDeductRate } = args;
+function rentVsBuyAt(args: RentVsBuyArgs, years: number): RentVsBuyResult | null {
+  const { downPayment, closingCosts = 0, annualRate, monthlyPI, rent, tax, ins, hoa, homePrice } = args;
   if (homePrice <= 0 || rent <= 0 || monthlyPI <= 0 || downPayment < 0 || annualRate < 0) return null;
-  const monthlyRate = annualRate / 100 / 12;
-  let buyCashFlowCost = downPayment + closingCosts;
-  let rentCashFlowCost = 0;
-  let homeValue = homePrice;
-  let loanBalance = homePrice - downPayment;
-  let monthlyRent = rent;
-  let renterInvestedCash = downPayment + closingCosts;
-  for (let m = 1; m <= months; m++) {
-    const interest = loanBalance * monthlyRate;
-    const payment = loanBalance > 0 ? Math.min(monthlyPI, loanBalance + interest) : 0;
-    const principal = Math.max(0, payment - interest);
-    const taxSavings = interest * (taxDeductRate / 100);
-    const maintenance = (homeValue * (maintenanceRate / 100)) / 12;
-    buyCashFlowCost += payment + tax + ins + hoa + maintenance - taxSavings;
-    rentCashFlowCost += monthlyRent;
-    renterInvestedCash *= 1 + investReturn / 100 / 12;
-    homeValue *= 1 + appreciation / 100 / 12;
-    monthlyRent *= 1 + rentGrowth / 100 / 12;
-    loanBalance = Math.max(0, loanBalance - principal);
-  }
-  return { buyNetCost: buyCashFlowCost - (homeValue - loanBalance), rentNetCost: rentCashFlowCost - renterInvestedCash };
+  return simulateRentVsBuy({
+    homePrice,
+    downPct: (downPayment / homePrice) * 100,
+    mortgageRatePct: annualRate,
+    loanYears: args.loanYears ?? 30,
+    propertyTaxPct: ((tax * 12) / homePrice) * 100,
+    homeInsuranceAnnual: ins * 12,
+    hoaMonthly: hoa,
+    maintenancePct: args.maintenanceRate,
+    buyClosingPct: (closingCosts / homePrice) * 100,
+    appreciationPct: args.appreciation,
+    sellingCostPct: args.sellingCostPct ?? RVB.sellingCostPct,
+    monthlyRent: rent,
+    rentGrowthPct: args.rentGrowth,
+    rentersInsuranceMonthly: args.rentersInsuranceMonthly ?? RVB.rentersInsuranceMonthly,
+    investmentReturnPct: args.investReturn,
+    years,
+    taxBenefitPct: args.taxDeductRate,
+  });
+}
+
+/** The first month the buyer's net worth (after selling costs) catches the renter's, within 30 years. */
+function calcBreakEven(args: RentVsBuyArgs): BreakEvenResult {
+  const sim = rentVsBuyAt(args, 30);
+  if (!sim) return { type: "invalid" };
+  return sim.breakEvenMonth > 0 ? { type: "ok", months: sim.breakEvenMonth } : { type: "never" };
+}
+
+/** Net worth of buying and of renting after `months`, from the same simulation as the break-even. */
+function calcNetWorthAt(months: number, args: RentVsBuyArgs): { buyNetWorth: number; rentNetWorth: number } | null {
+  const sim = rentVsBuyAt(args, months / 12);
+  return sim ? { buyNetWorth: sim.finalBuyer, rentNetWorth: sim.finalRenter } : null;
 }
 
 function calcRefi(
@@ -1000,7 +950,8 @@ function USTab() {
   const [appreciation,    setAppreciation]     = useState("3.5");
   const [rentGrowth,      setRentGrowth]       = useState("3.0");
   const [investReturn,    setInvestReturn]     = useState("7.0");
-  const [taxDeductRate,   setTaxDeductRate]    = useState("22");
+  const [taxDeductRate,   setTaxDeductRate]    = useState(String(RVB.taxBenefitPct));
+  const [sellingCostPct,  setSellingCostPct]   = useState(String(RVB.sellingCostPct));
   const [currentSavings,      setCurrentSavings]      = useState("80000");
   const [emergencyFundMonths, setEmergencyFundMonths]  = useState("6");
   const [movingBudget,        setMovingBudget]         = useState("5000");
@@ -1068,7 +1019,7 @@ function USTab() {
   const frontDTI = grossMonthly > 0 ? (totalMonthly / grossMonthly) * 100 : 0;
   const backDTI  = grossMonthly > 0 ? ((totalMonthly + nz(otherDebts)) / grossMonthly) * 100 : 0;
 
-  const estimatedClosing = loan * (nz(closingCostPct) / 100);
+  const estimatedClosing = hp * (nz(closingCostPct) / 100);
   const lenderCashToClose = dp + estimatedClosing;
   const recommendedReserve = totalMonthly * 3;
   const totalCashNeeded = lenderCashToClose + recommendedReserve + nz(movingBudget);
@@ -1086,7 +1037,8 @@ function USTab() {
     rent: nz(monthlyRent), tax: monthlyTax, ins: monthlyIns, hoa: monthlyHOA, homePrice: hp,
     appreciation: nz(appreciation), rentGrowth: nz(rentGrowth), investReturn: nz(investReturn),
     maintenanceRate: nz(maintenanceRate), taxDeductRate: nz(taxDeductRate),
-  }), [dp, estimatedClosing, r, monthlyPI, monthlyRent, monthlyTax, monthlyIns, monthlyHOA, hp, appreciation, rentGrowth, investReturn, maintenanceRate, taxDeductRate]);
+    loanYears: term, sellingCostPct: nz(sellingCostPct),
+  }), [dp, estimatedClosing, r, monthlyPI, monthlyRent, monthlyTax, monthlyIns, monthlyHOA, hp, appreciation, rentGrowth, investReturn, maintenanceRate, taxDeductRate, term, sellingCostPct]);
 
   const beYears =
   breakEvenMonth.type === "ok"
@@ -1114,15 +1066,16 @@ function USTab() {
   const fiveYearEquity   = fiveYearHomeVal - fiveYearBalance;
   // Equity includes the down payment, so the down payment and closing costs paid at the start are counted as cost too.
   const fiveYearNetOwn   = fiveYearOwnCost + dp + estimatedClosing - fiveYearEquity;
-  // The comparison uses the same model as the break-even, so a break-even beyond five years means renting is ahead at five years.
-  const fiveYearNet = calcNetCostsAt(60, {
+  // The same simulation as the break-even, so a break-even beyond five years means renting is ahead at five years.
+  const fiveYearNet = calcNetWorthAt(60, {
     downPayment: dp, closingCosts: estimatedClosing, annualRate: r, monthlyPI,
     rent: nz(monthlyRent), tax: monthlyTax, ins: monthlyIns, hoa: monthlyHOA, homePrice: hp,
     appreciation: nz(appreciation), rentGrowth: nz(rentGrowth), investReturn: nz(investReturn),
     maintenanceRate: nz(maintenanceRate), taxDeductRate: nz(taxDeductRate),
+    loanYears: term, sellingCostPct: nz(sellingCostPct),
   });
-  const buyAhead5 = fiveYearNet ? fiveYearNet.buyNetCost < fiveYearNet.rentNetCost : fiveYearNetOwn < fiveYearRentCost;
-  const buyRentGap5 = fiveYearNet ? Math.abs(fiveYearNet.rentNetCost - fiveYearNet.buyNetCost) : Math.abs(fiveYearRentCost - fiveYearNetOwn);
+  const buyAhead5 = fiveYearNet ? fiveYearNet.buyNetWorth >= fiveYearNet.rentNetWorth : false;
+  const buyRentGap5 = fiveYearNet ? Math.abs(fiveYearNet.buyNetWorth - fiveYearNet.rentNetWorth) : 0;
 
   const stressCfg        = STRESS_CONFIG[stressLevel];
   const stressedRate     = r + stressCfg.rateDelta;
@@ -1197,7 +1150,7 @@ function USTab() {
   : monthlyIns;
       const pmi  = calcAutoPMI(l, t.hp, t.dpPc);
       const total = pi + tax + ins + monthlyHOA + pmi;
-      const closing   = l * (nz(closingCostPct) / 100);
+      const closing   = t.hp * (nz(closingCostPct) / 100);
       const cashNeeded = d + closing + total * 3;
 
       let fiveYrOwn = 0;
@@ -1210,7 +1163,7 @@ function USTab() {
         rent: nz(monthlyRent), tax, ins, hoa: nz(hoa), homePrice: t.hp,
         appreciation: nz(appreciation), rentGrowth: nz(rentGrowth),
         investReturn: nz(investReturn), maintenanceRate: nz(maintenanceRate),
-        taxDeductRate: nz(taxDeductRate),
+        taxDeductRate: nz(taxDeductRate), loanYears: term, sellingCostPct: nz(sellingCostPct),
       });
 
       const sDTI = grossMonthly > 0 ? (total / grossMonthly) * 100 : 0;
@@ -1229,7 +1182,7 @@ function USTab() {
     });
   }, [hp, dpPc, r, term, propertyTaxRate, monthlyIns, monthlyHOA, closingCostPct,
       maintenanceRate, monthlyRent, appreciation, rentGrowth, investReturn,
-      taxDeductRate, grossMonthly, hoa, scenarioNames]);
+      taxDeductRate, sellingCostPct, grossMonthly, hoa, scenarioNames]);
 
   const bestMonthly   = Math.min(...scenarioData.map(s => s.totalMonthly));
   const bestFiveYear  = Math.min(...scenarioData.map(s => s.fiveYearOwnCost));
@@ -1249,7 +1202,7 @@ function USTab() {
     setClosingCostPct("2.5"); setPropertyTaxRate("1.1"); setInsurance("150");
     setHoa("0"); setMaintenanceRate("1.0"); setExtraMonthly("0"); setBiweekly(false);
     setGrossIncome("120000"); setOtherDebts("500"); setMonthlyRent("2500");
-    setAppreciation("3.5"); setRentGrowth("3.0"); setInvestReturn("7.0"); setTaxDeductRate("22");
+    setAppreciation("3.5"); setRentGrowth("3.0"); setInvestReturn("7.0"); setTaxDeductRate(String(RVB.taxBenefitPct)); setSellingCostPct(String(RVB.sellingCostPct));
     setCurrentSavings("80000"); setEmergencyFundMonths("6"); setMovingBudget("5000");
     setStressLevel("none"); setAppreciationPMI(false);
     setScenarioNames(["Buy Now", "Rent 2 Yrs, Buy", "Cheaper Home", "Higher Down"]);
@@ -1285,7 +1238,7 @@ function USTab() {
               </select>
             </F>
             <F label="Est. closing costs (%)" tipSide="right"
-               tip="US closing costs typically run 2–5% of the loan. Auto-filled when you select a state.">
+               tip="Closing costs as a percent of the home price, typically 2–5%. Auto-filled when you select a state; the Rent vs. Buy calculator uses the same basis.">
               <input className={inputCls()} type="number" step="0.25" value={closingCostPct} onChange={e => setClosingCostPct(e.target.value)} />
             </F>
             <F label="Closing costs ($)"><RO value={money(estimatedClosing)} /></F>
@@ -1356,8 +1309,11 @@ function USTab() {
                tip="What the down payment could earn if invested instead. Used in opportunity-cost calculation.">
               <input className={inputCls()} type="number" step="0.1" value={investReturn} onChange={e => setInvestReturn(e.target.value)} />
             </F>
+            <F label="Selling costs (%)" tip="Agent commission and closing costs when you sell, as a percent of the sale price. Subtracted from the buyer's equity in the comparison.">
+              <input className={inputCls()} type="number" step="0.1" value={sellingCostPct} onChange={e => setSellingCostPct(e.target.value)} />
+            </F>
             <F label="Marginal tax rate (%)" tipSide="right"
-               tip="Used to estimate mortgage interest deduction value. Set to 0 if you take the standard deduction." span2>
+               tip="Used to estimate the value of the mortgage interest deduction. Leave at 0 if you take the standard deduction, as most households do.">
               <input className={inputCls()} type="number" step="1" value={taxDeductRate} onChange={e => setTaxDeductRate(e.target.value)} />
             </F>
           </div>
@@ -1504,21 +1460,21 @@ function USTab() {
               <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">principal + appreciation</div>
             </div>
             <div>
-              <div className="text-xs text-slate-500 dark:text-slate-400">5-yr net buy cost</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">5-yr net worth: buy vs rent</div>
               <div className={`text-lg font-bold ${buyAhead5 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-600 dark:text-rose-400"}`}>
-                {money(fiveYearNet ? fiveYearNet.buyNetCost : fiveYearNetOwn)}
+                {fiveYearNet ? `${money(fiveYearNet.buyNetWorth)} vs ${money(fiveYearNet.rentNetWorth)}` : "n/a"}
               </div>
-              <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">cash out including down payment, minus equity</div>
+              <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">home equity after selling costs vs renting and investing</div>
             </div>
           </div>
           <div className={`mt-3 rounded-xl px-3 py-2 text-xs font-semibold ${
             buyAhead5 ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200" : "bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-200"
           }`}>
             {buyAhead5
-              ? `Over 5 years, buying is ~${money(buyRentGap5)} cheaper than renting (net of equity, and counting what your upfront cash could earn if you rented).`
-              : `Over 5 years, renting is ~${money(buyRentGap5)} cheaper than buying (net of equity, and counting what your upfront cash could earn if you rented).`}
+              ? `After 5 years, buying leaves you about ${money(buyRentGap5)} ahead of renting in net worth.`
+              : `After 5 years, renting leaves you about ${money(buyRentGap5)} ahead of buying in net worth.`}
           </div>
-          <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">Uses the same model as the break-even: buying counts the down payment and closing costs you pay up front, minus home equity; renting is credited with investing that same cash at your investment return. Selling costs are left out. Both are sensitive to appreciation and rent growth assumptions. The <a className="underline underline-offset-2" href="/rent-vs-buy-calculator">Rent vs. Buy calculator</a> compares net worth instead: it deducts selling costs and leaves out the mortgage-interest tax benefit used here, and it starts from different default rates, so the two can reach different answers.</div>
+          <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">This is the same comparison as the <a className="underline underline-offset-2" href="/rent-vs-buy-calculator">Rent vs. Buy calculator</a>, with the same starting assumptions. The buyer's net worth is home equity after selling costs; the renter invests the down payment and closing costs, and whoever pays less each month invests the difference. Both are sensitive to appreciation, rent growth and investment return.</div>
         </Card>
 
         <Card>
@@ -1728,10 +1684,10 @@ function USTab() {
             <div>Tax deduction: <strong>{fmtPct(nz(taxDeductRate))} bracket</strong></div>
           </div>
           <HowThisWorks items={[
-            `Each month, cumulative ownership cost (P&I + tax + insurance + HOA + ${fmtPct(nz(maintenanceRate))}/yr maintenance) is compared to cumulative rent.`,
+            `Each month the buyer pays P&I, tax, insurance, HOA and ${fmtPct(nz(maintenanceRate))}/yr maintenance; the renter pays rent. Whoever pays less invests the difference.`,
             `Rent grows at ${fmtPct(nz(rentGrowth))}/yr compounding.`,
-            `Your ${money(dp)} down payment is modelled as an investment earning ${fmtPct(nz(investReturn))}/yr, this is the opportunity cost of buying.`,
-            "Equity paydown (principal repaid + appreciation) is credited back to the buyer each month.",
+            `The renter invests your ${money(dp + estimatedClosing)} down payment and closing costs at ${fmtPct(nz(investReturn))}/yr, the opportunity cost of buying.`,
+            `The buyer's net worth is home equity (value less loan) after ${fmtPct(nz(sellingCostPct))} selling costs. Break-even is the first month it catches the renter's.`,
             nz(taxDeductRate) > 0
               ? `A ${fmtPct(nz(taxDeductRate))} marginal tax deduction on mortgage interest is applied.`
               : "No mortgage interest tax deduction is applied (standard deduction assumed).",
@@ -1894,6 +1850,7 @@ function InternationalTab() {
     investReturn: nz(investReturn),
     maintenanceRate: nz(maintenanceRate),
     taxDeductRate: 0,
+    loanYears: term,
   });
 }, [
   dp,

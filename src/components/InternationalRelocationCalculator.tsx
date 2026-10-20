@@ -577,6 +577,8 @@ const readinessRecommendation =
       furnitureAdj + destToUsd(nonNegative(emergencyCashBuffer));
 
     const totalMonthlyOutflow = housingTotal + livingCosts;
+    // Savings left once the upfront costs are paid (negative when they fall short).
+    const cashAfterUpfront = convertLocalToUsd(nonNegative(currentSavings), fromCountry) - upfrontCashNeeded;
     const monthsCovered = totalMonthlyOutflow > 0 ? Math.max(0, convertLocalToUsd(nonNegative(currentSavings), fromCountry) - upfrontCashNeeded) / totalMonthlyOutflow : 0;
 
     const currentProfile = getCountryByCode(fromCountry);
@@ -597,7 +599,7 @@ const readinessRecommendation =
       requiredNetMonthly, requiredGrossMonthly, requiredAnnualIncome,
       incomeGap, marginChangePct, flexibilityRatio, readinessRecommendation,
       pct, comfort,
-      upfrontCashNeeded, monthsCovered, comparableSalary, relativeDifference,
+      upfrontCashNeeded, monthsCovered, cashAfterUpfront, comparableSalary, relativeDifference,
     };
   }, [
     mode, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
@@ -1058,7 +1060,7 @@ const readinessRecommendation =
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
             <div className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Results</div>
             <ExampleResultsNotice className="mb-3" />
-            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} comfortLabel={results.comfort.label} displayAmount={displayAmount} />
+            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} cashAfterUpfront={results.cashAfterUpfront} comfortLabel={results.comfort.label} displayAmount={displayAmount} />
             <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">{INT_TAX_LABEL} · Planning estimates only</div>
 
             <div className="mb-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">

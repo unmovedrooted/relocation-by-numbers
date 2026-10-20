@@ -607,6 +607,8 @@ export default function AsiaRelocationCalculator() {
       nz(temporaryStay) + nz(adminFees) + furnitureAdj + nz(emergencyCashBuffer);
 
     const totalMonthlyOutflow = housingTotal + livingCosts;
+    // Savings left once the upfront costs are paid (negative when they fall short).
+    const cashAfterUpfront = convertLocalToUsd(nz(currentSavings), fromCountry) - upfrontCashNeeded;
     const monthsCovered = totalMonthlyOutflow > 0
       ? Math.max(0, convertLocalToUsd(nz(currentSavings), fromCountry) - upfrontCashNeeded) / totalMonthlyOutflow
       : 0;
@@ -628,7 +630,7 @@ export default function AsiaRelocationCalculator() {
       pct: housingPctOfNet * 100,
       totalPctOfNet: totalPctOfNet * 100,
       comfort,
-      upfrontCashNeeded, monthsCovered, comparableSalary, relativeDifference,
+      upfrontCashNeeded, monthsCovered, cashAfterUpfront, comparableSalary, relativeDifference,
       housingMode, estimatedHomePrice, buyMonthlyPI, downPaymentUsd,
     };
   }, [fromCityCode,
@@ -961,7 +963,7 @@ export default function AsiaRelocationCalculator() {
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-2 text-sm font-semibold">Results</div>
             <ExampleResultsNotice className="mb-3" />
-            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} comfortLabel={results.comfort.label} displayAmount={displayAmount} />
+            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} cashAfterUpfront={results.cashAfterUpfront} comfortLabel={results.comfort.label} displayAmount={displayAmount} />
             <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">{ASIA_TAX_LABEL} · Planning estimates only</div>
             <div className="mb-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
               <div>Current: <span className="font-semibold">{fromCityLabel}</span>

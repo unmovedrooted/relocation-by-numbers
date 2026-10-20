@@ -1,3 +1,4 @@
+import { RENT_VS_BUY_DEFAULTS, simulateRentVsBuy } from "./rentVsBuy";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
@@ -34,20 +35,38 @@ function componentFunctions(file: string, names: string[], globals: Record<strin
 }
 
 describe("additional live calculator known-answer audit", () => {
-  const mortgage = () => componentFunctions("MortgageCalculator", ["calcMonthlyPI", "calcTotalInterest", "buildSchedule", "calcRefi", "calcAutoPMI", "calcPMIDropOff", "calcBreakEven"], { US_STATE_DEFAULTS, estimatePmiMonthly });
+  const mortgage = () => componentFunctions("MortgageCalculator", ["calcMonthlyPI", "calcTotalInterest", "buildSchedule", "calcRefi", "calcAutoPMI", "calcPMIDropOff", "calcBreakEven"], { US_STATE_DEFAULTS, estimatePmiMonthly, simulateRentVsBuy, RVB: RENT_VS_BUY_DEFAULTS });
   it("zero-rate rent-versus-buy comparison is valid, and the mortgage payment stops once the loan is paid off", () => {
     const result = mortgage().calcBreakEven({ downPayment: 0, closingCosts: 0, annualRate: 0,
       monthlyPI: 1000, rent: 1000, tax: 0, ins: 0, hoa: 0, homePrice: 120000,
-      appreciation: 0, rentGrowth: 0, investReturn: 0, maintenanceRate: 0, taxDeductRate: 0 });
-    // Each payment builds equity one for one, so buying is never behind renting at the same payment.
+      appreciation: 0, rentGrowth: 0, investReturn: 0, maintenanceRate: 0, taxDeductRate: 0, loanYears: 10, sellingCostPct: 0, rentersInsuranceMonthly: 0 });
+    // Each payment builds equity one for one and costs the same as rent, so buying is never behind renting.
     expect(result).toEqual({ type: "ok", months: 1 });
-    // A $10,000 loan paid at $1,000 a month is repaid after ten months; later months cost nothing for the loan.
-    // Buying starts $5,000 behind (closing costs) and renting earns nothing, so the cost of renting
-    // ($100 a month, less the $5,000 the renter keeps) catches up with $5,000 at month 100.
+    // A $10,000 loan paid off over ten months. Buying starts $5,000 behind (closing costs); the renter invests the $5,000 and the
+    // $900 a month by which the payment exceeds rent for ten months ($14,000), while the buyer's $10,000 of equity then grows by
+    // the $100 of rent no longer paid each month, so the buyer catches up 40 months after payoff, in month 50.
     const payoff = mortgage().calcBreakEven({ downPayment: 0, closingCosts: 5000, annualRate: 0,
       monthlyPI: 1000, rent: 100, tax: 0, ins: 0, hoa: 0, homePrice: 10000,
-      appreciation: 0, rentGrowth: 0, investReturn: 0, maintenanceRate: 0, taxDeductRate: 0 });
-    expect(payoff).toEqual({ type: "ok", months: 100 });
+      appreciation: 0, rentGrowth: 0, investReturn: 0, maintenanceRate: 0, taxDeductRate: 0, loanYears: 10 / 12, sellingCostPct: 0, rentersInsuranceMonthly: 0 });
+    expect(payoff).toEqual({ type: "ok", months: 50 });
+  });
+  it("the mortgage page's break-even is the shared rent-versus-buy simulation", () => {
+    const args = { downPayment: 100000, closingCosts: 12500, annualRate: 6.75, monthlyPI: 2594, rent: 2500, tax: 458.33, ins: 150, hoa: 0, homePrice: 500000,
+      appreciation: 3.5, rentGrowth: 3, investReturn: 7, maintenanceRate: 1, taxDeductRate: 0, loanYears: 30, sellingCostPct: 6 };
+    const page = mortgage().calcBreakEven(args);
+    const engine = simulateRentVsBuy({ homePrice: 500000, downPct: 20, mortgageRatePct: 6.75, loanYears: 30, propertyTaxPct: 1.1, homeInsuranceAnnual: 1800,
+      hoaMonthly: 0, maintenancePct: 1, buyClosingPct: 2.5, appreciationPct: 3.5, sellingCostPct: 6, monthlyRent: 2500, rentGrowthPct: 3,
+      rentersInsuranceMonthly: 15, investmentReturnPct: 7, years: 30 });
+    expect(page).toEqual(engine.breakEvenMonth > 0 ? { type: "ok", months: engine.breakEvenMonth } : { type: "never" });
+  });
+  it("a mortgage-interest tax benefit lowers the buyer's cost in the shared engine", () => {
+    const base = { homePrice: 500000, downPct: 20, mortgageRatePct: 6.75, loanYears: 30, propertyTaxPct: 1.1, homeInsuranceAnnual: 1800, hoaMonthly: 0,
+      maintenancePct: 1, buyClosingPct: 2.5, appreciationPct: 3.5, sellingCostPct: 6, monthlyRent: 2500, rentGrowthPct: 3, rentersInsuranceMonthly: 0,
+      investmentReturnPct: 7, years: 10 };
+    const without = simulateRentVsBuy(base);
+    const withBenefit = simulateRentVsBuy({ ...base, taxBenefitPct: 22 });
+    expect(withBenefit.firstMonthBuyCost).toBeLessThan(without.firstMonthBuyCost);
+    expect(withBenefit.finalBuyer).toBeGreaterThanOrEqual(without.finalBuyer);
   });
   it("matches independently calculated positive-rate mortgage payments and amortization", () => {
     const m = mortgage();

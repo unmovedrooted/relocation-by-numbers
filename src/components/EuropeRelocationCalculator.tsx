@@ -949,6 +949,8 @@ const readinessRecommendation =
   destToUsd(nonNegative(emergencyCashBuffer));
 
     const totalMonthlyOutflow = housingTotal + livingCosts;
+    // Savings left once the upfront costs are paid (negative when they fall short).
+    const cashAfterUpfront = convertLocalToUsd(nonNegative(currentSavings), fromCountry) - upfrontCashNeeded;
     const monthsCovered =
   totalMonthlyOutflow > 0
     ? Math.max(0, convertLocalToUsd(nonNegative(currentSavings), fromCountry) - upfrontCashNeeded) / totalMonthlyOutflow
@@ -1006,6 +1008,7 @@ const readinessRecommendation =
         { label: "Emergency cash buffer (reserve, not spent)", amount: destToUsd(nonNegative(emergencyCashBuffer)) },
       ].filter((item) => item.amount > 0),
       monthsCovered,
+      cashAfterUpfront,
       comparableSalary,
       relativeDifference,
       rentFrom,
@@ -1415,7 +1418,7 @@ readinessRecommendation,
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-2 text-sm font-semibold">Results</div>
             <ExampleResultsNotice className="mb-3" />
-            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} comfortLabel={results.comfort.label} displayAmount={displayAmount} />
+            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} cashAfterUpfront={results.cashAfterUpfront} comfortLabel={results.comfort.label} displayAmount={displayAmount} />
             <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
               {EUROPE_TAX_ASSUMPTIONS_LABEL} · Planning estimates only
             </div>

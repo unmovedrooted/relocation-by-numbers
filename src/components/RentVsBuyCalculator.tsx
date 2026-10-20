@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
-import { simulateRentVsBuy, type RentVsBuyInput } from "../lib/rentVsBuy";
+import { RENT_VS_BUY_DEFAULTS as D, simulateRentVsBuy, type RentVsBuyInput } from "../lib/rentVsBuy";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -58,21 +58,22 @@ export default function RentVsBuyCalculator() {
   // Buy
   const [homePrice, setHomePrice] = useState("500000");
   const [downPct, setDownPct] = useState("20");
-  const [mortgageRatePct, setMortgageRatePct] = useState("7");
+  const [mortgageRatePct, setMortgageRatePct] = useState(String(D.mortgageRatePct));
   const [loanYears, setLoanYears] = useState("30");
-  const [propertyTaxPct, setPropertyTaxPct] = useState("1.1");
-  const [homeInsuranceAnnual, setHomeInsuranceAnnual] = useState("1800");
+  const [propertyTaxPct, setPropertyTaxPct] = useState(String(D.propertyTaxPct));
+  const [homeInsuranceAnnual, setHomeInsuranceAnnual] = useState(String(D.homeInsuranceAnnual));
   const [hoaMonthly, setHoaMonthly] = useState("0");
-  const [maintenancePct, setMaintenancePct] = useState("1");
-  const [buyClosingPct, setBuyClosingPct] = useState("3");
-  const [appreciationPct, setAppreciationPct] = useState("3");
-  const [sellingCostPct, setSellingCostPct] = useState("6");
+  const [maintenancePct, setMaintenancePct] = useState(String(D.maintenancePct));
+  const [buyClosingPct, setBuyClosingPct] = useState(String(D.buyClosingPct));
+  const [appreciationPct, setAppreciationPct] = useState(String(D.appreciationPct));
+  const [sellingCostPct, setSellingCostPct] = useState(String(D.sellingCostPct));
+  const [taxBenefitPct, setTaxBenefitPct] = useState(String(D.taxBenefitPct));
   // Rent
   const [monthlyRent, setMonthlyRent] = useState("2500");
-  const [rentGrowthPct, setRentGrowthPct] = useState("3");
-  const [rentersInsuranceMonthly, setRentersInsuranceMonthly] = useState("15");
+  const [rentGrowthPct, setRentGrowthPct] = useState(String(D.rentGrowthPct));
+  const [rentersInsuranceMonthly, setRentersInsuranceMonthly] = useState(String(D.rentersInsuranceMonthly));
   // Shared
-  const [investmentReturnPct, setInvestmentReturnPct] = useState("6");
+  const [investmentReturnPct, setInvestmentReturnPct] = useState(String(D.investmentReturnPct));
   const [years, setYears] = useState("10");
 
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
@@ -83,8 +84,8 @@ export default function RentVsBuyCalculator() {
     ["hoa", hoaMonthly, setHoaMonthly], ["maint", maintenancePct, setMaintenancePct], ["closing", buyClosingPct, setBuyClosingPct],
     ["appr", appreciationPct, setAppreciationPct], ["sell", sellingCostPct, setSellingCostPct], ["rent", monthlyRent, setMonthlyRent],
     ["rentgrow", rentGrowthPct, setRentGrowthPct], ["rins", rentersInsuranceMonthly, setRentersInsuranceMonthly],
-    ["inv", investmentReturnPct, setInvestmentReturnPct], ["years", years, setYears],
-  ], [homePrice, downPct, mortgageRatePct, loanYears, propertyTaxPct, homeInsuranceAnnual, hoaMonthly, maintenancePct, buyClosingPct, appreciationPct, sellingCostPct, monthlyRent, rentGrowthPct, rentersInsuranceMonthly, investmentReturnPct, years]);
+    ["inv", investmentReturnPct, setInvestmentReturnPct], ["years", years, setYears], ["taxben", taxBenefitPct, setTaxBenefitPct],
+  ], [taxBenefitPct, homePrice, downPct, mortgageRatePct, loanYears, propertyTaxPct, homeInsuranceAnnual, hoaMonthly, maintenancePct, buyClosingPct, appreciationPct, sellingCostPct, monthlyRent, rentGrowthPct, rentersInsuranceMonthly, investmentReturnPct, years]);
 
   // ── QS HYDRATION ──
   useEffect(() => {
@@ -92,7 +93,7 @@ export default function RentVsBuyCalculator() {
     const map: Record<string, (v: string) => void> = {
       price: setHomePrice, down: setDownPct, rate: setMortgageRatePct, term: setLoanYears, ptax: setPropertyTaxPct,
       hins: setHomeInsuranceAnnual, hoa: setHoaMonthly, maint: setMaintenancePct, closing: setBuyClosingPct, appr: setAppreciationPct,
-      sell: setSellingCostPct, rent: setMonthlyRent, rentgrow: setRentGrowthPct, rins: setRentersInsuranceMonthly, inv: setInvestmentReturnPct, years: setYears,
+      sell: setSellingCostPct, rent: setMonthlyRent, rentgrow: setRentGrowthPct, rins: setRentersInsuranceMonthly, inv: setInvestmentReturnPct, years: setYears, taxben: setTaxBenefitPct,
     };
     for (const [k, setter] of Object.entries(map)) {
       const v = qs.get(k);
@@ -116,6 +117,7 @@ export default function RentVsBuyCalculator() {
       appreciationPct: FIELD(appreciationPct), sellingCostPct: FIELD(sellingCostPct), monthlyRent: Math.max(0, FIELD(monthlyRent)),
       rentGrowthPct: FIELD(rentGrowthPct), rentersInsuranceMonthly: FIELD(rentersInsuranceMonthly),
       investmentReturnPct: FIELD(investmentReturnPct), years: Math.max(1, Math.min(40, FIELD(years))),
+      taxBenefitPct: Math.max(0, Math.min(50, FIELD(taxBenefitPct))),
     };
     const sim = simulateRentVsBuy(input);
     const chart: CrossPoint[] = [];
@@ -137,7 +139,7 @@ export default function RentVsBuyCalculator() {
       }),
     }));
     return { input, sim, chart, buyWins, diff, breakEvenYear, sensitivity };
-  }, [homePrice, downPct, mortgageRatePct, loanYears, propertyTaxPct, homeInsuranceAnnual, hoaMonthly, maintenancePct, buyClosingPct, appreciationPct, sellingCostPct, monthlyRent, rentGrowthPct, rentersInsuranceMonthly, investmentReturnPct, years]);
+  }, [homePrice, downPct, mortgageRatePct, loanYears, propertyTaxPct, homeInsuranceAnnual, hoaMonthly, maintenancePct, buyClosingPct, appreciationPct, sellingCostPct, taxBenefitPct, monthlyRent, rentGrowthPct, rentersInsuranceMonthly, investmentReturnPct, years]);
 
   const inputsReady = results.input.homePrice > 0 && results.input.monthlyRent > 0;
   const yearsN = results.input.years;
@@ -206,6 +208,7 @@ export default function RentVsBuyCalculator() {
               {field("Closing costs (%)", buyClosingPct, setBuyClosingPct, { step: "0.1", tip: "Upfront buying costs (loan fees, title, etc.) as a percent of price. Sunk cost." })}
               {field("Home appreciation (%/yr)", appreciationPct, setAppreciationPct, { step: "0.1" })}
               {field("Selling costs (%)", sellingCostPct, setSellingCostPct, { step: "0.1", tip: "Agent commission and closing costs when you sell, as a percent of sale price (~6%)." })}
+              {field("Mortgage-interest tax benefit (%)", taxBenefitPct, setTaxBenefitPct, { step: "1", tip: "Share of each year's mortgage interest you expect to get back as a tax saving. Leave at 0 unless you itemize deductions; most households take the standard deduction and get no benefit." })}
             </div>
           </div>
 
@@ -313,7 +316,7 @@ export default function RentVsBuyCalculator() {
                 This is a net-worth comparison in future dollars: it assumes the renter invests the money a buyer ties up, and that whoever pays less each month invests the difference. It doesn&apos;t model income-tax effects (mortgage-interest or SALT deductions, investment taxes), PMI, or moving costs, and results are highly sensitive to the appreciation and investment-return assumptions. Not financial advice.
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                The <a className="underline underline-offset-2" href="/mortgage-calculator">mortgage calculator</a> also compares renting and buying, but its answer can differ: it counts cash paid out minus equity and leaves out selling costs, while this tool deducts selling costs from the home&apos;s value, and the two start from different default rates and growth assumptions. Neither is wrong; they answer slightly different questions.
+                The <a className="underline underline-offset-2" href="/mortgage-calculator">mortgage calculator</a> uses this same comparison and the same starting assumptions, so the two agree when you enter the same numbers.
               </div>
             </>
           )}

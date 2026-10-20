@@ -567,6 +567,8 @@ const utilitiesFrom = familyUtilities * cityRatio(fromCityMultipliers.utilities,
 
     const totalMonthlyOutflow = housingTotal + livingCosts;
     // FIX 5: Convert savings from origin currency to USD before dividing
+    // Savings left once the upfront costs are paid (negative when they fall short).
+    const cashAfterUpfront = originToUsd(nz(currentSavings)) - upfrontCashNeeded;
     const monthsCovered = totalMonthlyOutflow > 0
   ? Math.max(0, originToUsd(nz(currentSavings)) - upfrontCashNeeded) / totalMonthlyOutflow
   : 0;
@@ -602,6 +604,7 @@ const utilitiesFrom = familyUtilities * cityRatio(fromCityMultipliers.utilities,
       comfort,
       upfrontCashNeeded,
 monthsCovered,
+cashAfterUpfront,
 comparableSalary,
 relativeDifference,
 recommendation,
@@ -891,7 +894,7 @@ recommendation,
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-2 text-sm font-semibold">Results</div>
             <ExampleResultsNotice className="mb-3" />
-            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} comfortLabel={results.comfort.label} displayAmount={displayAmount} />
+            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} cashAfterUpfront={results.cashAfterUpfront} comfortLabel={results.comfort.label} displayAmount={displayAmount} />
             <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">Assumptions updated: October 2026 · Planning estimates only</div>
             <div className="mb-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
               <div>Current city: <span className="font-semibold">{fromCityLabel}</span></div>

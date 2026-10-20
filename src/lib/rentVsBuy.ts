@@ -30,7 +30,27 @@ export type RentVsBuyInput = {
   // Shared
   investmentReturnPct: number; // annual, opportunity cost
   years: number; // horizon
+  /** Share of mortgage interest recovered as a tax saving, % (0 = none; the default when omitted). */
+  taxBenefitPct?: number;
 };
+
+/**
+ * Starting assumptions shared by the Rent vs. Buy and mortgage calculators, so both begin from the same numbers and a difference
+ * between their answers comes from what the visitor changes, not from different defaults.
+ */
+export const RENT_VS_BUY_DEFAULTS = {
+  mortgageRatePct: 6.75,
+  propertyTaxPct: 1.1,
+  homeInsuranceAnnual: 1800,
+  maintenancePct: 1,
+  buyClosingPct: 2.5,
+  appreciationPct: 3.5,
+  sellingCostPct: 6,
+  rentGrowthPct: 3,
+  rentersInsuranceMonthly: 15,
+  investmentReturnPct: 7,
+  taxBenefitPct: 0,
+} as const;
 
 export type RentVsBuyResult = {
   months: number;
@@ -82,7 +102,9 @@ export function simulateRentVsBuy(i: RentVsBuyInput): RentVsBuyResult {
     const insurance = i.homeInsuranceAnnual / 12;
     const maintenance = (homeValue * (i.maintenancePct / 100)) / 12;
     const pi = m <= nLoan ? monthlyPI : 0;
-    const buyCost = pi + propTax + insurance + i.hoaMonthly + maintenance;
+    const interest = loanBal * mRate;
+    const taxSaving = interest * ((i.taxBenefitPct ?? 0) / 100);
+    const buyCost = pi + propTax + insurance + i.hoaMonthly + maintenance - taxSaving;
     const rentCost = rent + i.rentersInsuranceMonthly;
 
     if (m === 1) {
@@ -96,7 +118,6 @@ export function simulateRentVsBuy(i: RentVsBuyInput): RentVsBuyResult {
     const diff = buyCost - rentCost;
 
     // Amortize the loan for the month.
-    const interest = loanBal * mRate;
     const principal = Math.min(loanBal, Math.max(0, pi - interest));
     loanBal = Math.max(0, loanBal - principal);
 

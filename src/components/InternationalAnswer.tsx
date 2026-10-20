@@ -8,6 +8,7 @@ export default function InternationalAnswer({
   monthlyFlexibility,
   upfrontCashNeeded,
   monthsCovered,
+  cashAfterUpfront,
   comfortLabel,
   displayAmount,
 }: {
@@ -16,6 +17,8 @@ export default function InternationalAnswer({
   monthlyFlexibility: number;
   upfrontCashNeeded: number;
   monthsCovered: number;
+  /** Savings left after the upfront costs, in dollars; negative when they fall short. */
+  cashAfterUpfront: number;
   comfortLabel: string;
   displayAmount: (amountUsd: number, digits?: number) => string;
 }) {
@@ -23,19 +26,17 @@ export default function InternationalAnswer({
   const left = monthlyFlexibility >= 0
     ? `About ${displayAmount(monthlyFlexibility, 0)} a month is left in ${toCityLabel} after taxes, housing and core living costs.`
     : `Housing and core living costs in ${toCityLabel} would exceed take-home pay by about ${displayAmount(Math.abs(monthlyFlexibility), 0)} a month.`;
-  const runway = !Number.isFinite(monthsCovered)
-    ? ""
-    : monthsCovered <= 0
-      ? " Your savings do not cover the upfront costs."
-      : ` After that, your savings would cover about ${monthsCovered.toFixed(1)} months of costs.`;
+  const runway = cashAfterUpfront < 0
+    ? ` Your savings are about ${displayAmount(Math.abs(cashAfterUpfront), 0)} short of that.`
+    : ` That would leave about ${displayAmount(cashAfterUpfront, 0)} in savings${Number.isFinite(monthsCovered) ? `, enough for about ${monthsCovered.toFixed(1)} months of costs` : ""}.`;
   // Three separate questions: can you live there, can you afford the move, and how long would savings last afterward.
-  const cashOk = Number.isFinite(monthsCovered) && monthsCovered > 0;
+  const cashOk = cashAfterUpfront >= 0;
   const runwayMonths = Number.isFinite(monthsCovered) ? monthsCovered : 0;
   const runwayLabel = runwayMonths >= 6 ? "Solid" : runwayMonths >= 3 ? "Moderate" : "Short";
   const tone = (good: boolean | "mid") => good === true ? "text-emerald-700 dark:text-emerald-300" : good === "mid" ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300";
   const rows: Array<{ label: string; value: string; note: string; good: boolean | "mid" }> = [
     { label: "Monthly budget", value: comfortLabel, note: monthlyFlexibility >= 0 ? `${displayAmount(monthlyFlexibility, 0)} left each month` : "Costs exceed take-home pay", good: monthlyFlexibility < 0 ? false : /comfortable|strong|healthy/i.test(comfortLabel) ? true : "mid" },
-    { label: "Cash for the move", value: cashOk ? "Covered" : "Short", note: cashOk ? "Savings cover the upfront costs" : "Savings do not cover the upfront costs", good: cashOk },
+    { label: "Cash after upfront costs", value: `${cashAfterUpfront < 0 ? "-" : ""}${displayAmount(Math.abs(cashAfterUpfront), 0)}`, note: cashOk ? "Savings left once the move is paid for" : "Short of the upfront costs", good: cashOk },
     { label: "Emergency runway", value: runwayLabel, note: `${runwayMonths.toFixed(1)} months of costs after the move`, good: runwayMonths >= 6 ? true : runwayMonths >= 3 ? "mid" : false },
   ];
   return (
