@@ -212,6 +212,15 @@ export default function OriginReport({ originId, destIds }: { originId: string; 
         </section>
       )}
 
+      <section className={card} aria-labelledby="or-next">
+        <h2 id="or-next" className={h2}>Where to go next</h2>
+        <ul className={`mt-3 space-y-2 text-sm leading-6 ${"text-slate-600 dark:text-slate-400"}`}>
+          <li><Link className="font-semibold underline underline-offset-4 hover:no-underline" href="/compare">Compare a move</Link>: see what a change of city does to rent, taxes and take-home pay.</li>
+          <li><Link className="font-semibold underline underline-offset-4 hover:no-underline" href="/fire-calculator">See the FIRE impact</Link>: enter your numbers and use the Move tab to see the change in your timeline.</li>
+          <li><Link className="font-semibold underline underline-offset-4 hover:no-underline" href="/complete-retirement-plan">Plan it in detail</Link>: model withdrawals, taxes and Social Security year by year (Beta).</li>
+        </ul>
+      </section>
+
       <section className={card} aria-labelledby="or-faq">
         <h2 id="or-faq" className={h2}>Frequently asked questions</h2>
         <dl className="mt-4 space-y-5 text-sm text-slate-600 dark:text-slate-400">
