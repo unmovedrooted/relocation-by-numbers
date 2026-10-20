@@ -17,7 +17,7 @@ import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 import MoveSummary from "./MoveSummary";
-import { compareMove, type Item } from "../lib/relocationMove";
+import { compareMove, type Item, type OneTimeCosts } from "../lib/relocationMove";
 
 /** Inputs the "enter yours" buttons in the move card can jump to on this page. */
 const MOVE_IDS: Record<string, string> = {
@@ -762,7 +762,18 @@ export default function Calculator({
     const buying = mode === "buy" && results.buyReady;
     const homePriceN = nz(homePrice);
     const rentDeposit = mode === "rent" ? nz(rentMonthly) * 2 : 0;
-    return compareMove({
+    const oneTime: OneTimeCosts = {
+      movers: entered(moversCost, 1500),
+      travel: entered(travelCost, 500),
+      setup: entered(setupCost, 2000),
+      leaseBreak: entered(leaseBreakCost, 0),
+      // Closing costs of about 3% of the price when buying; application and broker fees are entered by the user
+      fees: entered(moveFeesCost, buying ? homePriceN * 0.03 : 0),
+      overlapMonths: nz(overlapMonths),
+      refundableDeposit: entered(depositCost, rentDeposit),
+      downPayment: buying ? { amount: homePriceN * (clamp(nz(downPct), 0, 100) / 100), estimated: false } : undefined,
+    };
+    return { ...compareMove({
       filing,
       k401Pct1: nz(k401Pct), k401Pct2: 0,
       currentIncome1: currentSalaryN, currentIncome2: 0,
@@ -773,18 +784,8 @@ export default function Calculator({
       targetHousing: { amount: results.activeHousing, estimated: mode === "buy" ? !typed.home : !typed.rent },
       currentLiving: { amount: currentEssentialNonHousing, estimated: true },
       targetLiving: { amount: targetEssentialNonHousing, estimated: colGroceries === "" || colUtilities === "" || colTransport === "" || colDining === "" || colMisc === "" },
-      oneTime: {
-        movers: entered(moversCost, 1500),
-        travel: entered(travelCost, 500),
-        setup: entered(setupCost, 2000),
-        leaseBreak: entered(leaseBreakCost, 0),
-        // Closing costs of about 3% of the price when buying; application and broker fees are entered by the user
-        fees: entered(moveFeesCost, buying ? homePriceN * 0.03 : 0),
-        overlapMonths: nz(overlapMonths),
-        refundableDeposit: entered(depositCost, rentDeposit),
-        downPayment: buying ? { amount: homePriceN * (clamp(nz(downPct), 0, 100) / 100), estimated: false } : undefined,
-      },
-    });
+      oneTime,
+    }), oneTime, activeHousing: results.activeHousing };
   }, [
     results.salaryReady, results.activeHousing, results.buyReady, currentHousingActual, isCurrentHousingEstimated,
     currentEssentialNonHousing, targetEssentialNonHousing, salary, currentSalary, filing, k401Pct, mode,
@@ -1439,6 +1440,92 @@ export default function Calculator({
               </div>
             )}
           </div>
+
+          {/* ── 1.5 DETAILED MOVE RESULTS ── */}
+          {move && (
+            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">Detailed move results</div>
+              <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">How the monthly change adds up, what the move costs up front, and how far the answer could move if estimated costs are off.</div>
+
+              <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Where the monthly change comes from</div>
+              <div className="mt-2 grid gap-1.5 text-sm text-slate-700 dark:text-slate-300">
+                {([
+                  ["Pay after tax, at your current taxes", move.breakdown.salary],
+                  ["Tax change from moving", move.breakdown.taxes],
+                  ["Housing", move.breakdown.housing],
+                  ["Everyday costs", move.breakdown.otherCosts],
+                ] as [string, number][]).map(([label, value]) => (
+                  <div key={label} className="flex justify-between">
+                    <span>{label}</span>
+                    <span className={`font-semibold ${value >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>{value >= 0 ? "+" : "-"}{money(Math.abs(value))}</span>
+                  </div>
+                ))}
+                <div className="mt-1 flex justify-between border-t border-slate-200 pt-1.5 font-semibold text-slate-900 dark:border-slate-800 dark:text-slate-100">
+                  <span>Monthly change</span>
+                  <span>{move.expected.monthlyChange >= 0 ? "+" : "-"}{money(Math.abs(move.expected.monthlyChange))}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">One-time costs</div>
+              <div className="mt-2 grid gap-1.5 text-sm text-slate-700 dark:text-slate-300">
+                {([
+                  ["Movers or truck", move.oneTime.movers.amount, move.oneTime.movers.estimated],
+                  ["Travel and storage", move.oneTime.travel.amount, move.oneTime.travel.estimated],
+                  ["Furniture and setup", move.oneTime.setup.amount, move.oneTime.setup.estimated],
+                  ["Ending your current lease early", move.oneTime.leaseBreak.amount, move.oneTime.leaseBreak.estimated],
+                  [mode === "buy" ? "Closing costs and fees" : "Application and other fees", move.oneTime.fees.amount, move.oneTime.fees.estimated],
+                  ...(move.oneTime.overlapMonths > 0 ? [[`Overlapping housing, ${move.oneTime.overlapMonths} month${move.oneTime.overlapMonths === 1 ? "" : "s"}`, move.oneTime.overlapMonths * move.activeHousing, false] as [string, number, boolean]] : []),
+                ] as [string, number, boolean][]).map(([label, value, est]) => (
+                  <div key={label} className="flex justify-between">
+                    <span>{label}{est && <span className="ml-1 text-[11px] text-slate-400 dark:text-slate-500">(estimate)</span>}</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{money(value)}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between border-t border-slate-200 pt-1.5 font-semibold text-slate-900 dark:border-slate-800 dark:text-slate-100">
+                  <span>Spent on the move</span>
+                  <span>{money(move.expected.spentOneTime)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Refundable deposit{move.oneTime.refundableDeposit.estimated && <span className="ml-1 text-[11px] text-slate-400 dark:text-slate-500">(estimate)</span>}</span>
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">{money(move.oneTime.refundableDeposit.amount)}</span>
+                </div>
+                {move.oneTime.downPayment && (
+                  <div className="flex justify-between">
+                    <span>Down payment<span className="ml-1 text-[11px] text-slate-400 dark:text-slate-500">(becomes home equity)</span></span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{money(move.oneTime.downPayment.amount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between border-t border-slate-200 pt-1.5 font-semibold text-slate-900 dark:border-slate-800 dark:text-slate-100">
+                  <span>Cash needed upfront</span>
+                  <span>{money(move.expected.cashUpfront)}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">If estimated costs are off</div>
+              <div className="mt-2 overflow-x-auto">
+                <table className="w-full min-w-[22rem] text-left text-xs">
+                  <thead className="text-slate-500 dark:text-slate-400">
+                    <tr><th className="py-1.5 font-medium">Case</th><th className="py-1.5 text-right font-medium">Monthly change</th><th className="py-1.5 text-right font-medium">Cash upfront</th><th className="py-1.5 text-right font-medium">Months to earn back</th></tr>
+                  </thead>
+                  <tbody className="text-slate-700 dark:text-slate-300">
+                    {([
+                      ["Costs higher than estimated", move.low],
+                      ["As estimated", move.expected],
+                      ["Costs lower than estimated", move.high],
+                    ] as const).map(([label, sc]) => (
+                      <tr key={label} className="border-t border-slate-100 dark:border-slate-800">
+                        <td className="py-1.5">{label}</td>
+                        <td className="py-1.5 text-right font-semibold">{sc.monthlyChange >= 0 ? "+" : "-"}{money(Math.abs(sc.monthlyChange))}</td>
+                        <td className="py-1.5 text-right">{money(sc.cashUpfront)}</td>
+                        <td className="py-1.5 text-right">{sc.monthsToRecover === null ? "Not earned back" : sc.monthsToRecover === 0 ? "No costs to earn back" : `${sc.monthsToRecover}`}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Only figures marked as estimates move between cases; anything you entered stays fixed.</div>
+            </div>
+          )}
 
           {/* ── 2. RESULTS DETAIL ── */}
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
