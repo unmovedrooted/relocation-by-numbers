@@ -27,7 +27,7 @@ export default function FireCitiesTable({ cities, salaries, defaultSalary, migra
 
   const who = filing === "single" ? "single filer" : "married couple filing jointly (one earner)";
   const button = (active: boolean) =>
-    `rounded-lg px-3 py-1.5 text-xs font-medium transition ${active ? "bg-emerald-400/20 text-emerald-100" : "text-slate-300 hover:bg-white/10"}`;
+    `rounded-lg px-3 py-1.5 text-xs font-medium transition ${active ? "bg-emerald-500 text-white" : "text-slate-300 hover:bg-white/10"}`;
 
   return (
     <>

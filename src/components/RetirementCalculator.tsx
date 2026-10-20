@@ -449,7 +449,7 @@ export default function RetirementCalculator() {
                   aria-pressed={accountType === "traditional"}
                   className={`flex-1 rounded-lg px-3 py-2 text-center leading-tight transition-all ${
                     accountType === "traditional"
-                      ? "bg-white text-cyan-700 shadow-md ring-1 ring-cyan-500/40 dark:bg-slate-950 dark:text-cyan-300 dark:ring-cyan-400/30"
+                      ? "bg-emerald-600 text-white shadow-md"
                       : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                   }`}
                 >
@@ -462,7 +462,7 @@ export default function RetirementCalculator() {
                   aria-pressed={accountType === "roth"}
                   className={`flex-1 rounded-lg px-3 py-2 text-center leading-tight transition-all ${
                     accountType === "roth"
-                      ? "bg-white text-cyan-700 shadow-md ring-1 ring-cyan-500/40 dark:bg-slate-950 dark:text-cyan-300 dark:ring-cyan-400/30"
+                      ? "bg-emerald-600 text-white shadow-md"
                       : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                   }`}
                 >
@@ -475,7 +475,7 @@ export default function RetirementCalculator() {
                   aria-pressed={accountType === "taxable"}
                   className={`flex-1 rounded-lg px-3 py-2 text-center leading-tight transition-all ${
                     accountType === "taxable"
-                      ? "bg-white text-cyan-700 shadow-md ring-1 ring-cyan-500/40 dark:bg-slate-950 dark:text-cyan-300 dark:ring-cyan-400/30"
+                      ? "bg-emerald-600 text-white shadow-md"
                       : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                   }`}
                 >
@@ -676,10 +676,10 @@ export default function RetirementCalculator() {
 
       {inputsReady && (
         <div className="mt-4 space-y-3">
-          <div className="rounded-2xl border border-cyan-200 bg-cyan-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-cyan-900/60 dark:bg-cyan-950/20">
+          <div className="rounded-2xl border border-slate-200 bg-white/60 p-4 dark:border-slate-800 dark:bg-slate-900/40">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-cyan-700 dark:text-cyan-400">Share this scenario</div>
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Share this scenario</div>
                 <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">Copy your current inputs and send them to a partner, advisor, or future self.</div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -706,16 +706,16 @@ export default function RetirementCalculator() {
                       window.setTimeout(() => setShareStatus("idle"), 2500);
                     }
                   }}
-                  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                  className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                 >
                   {shareStatus === "copied" ? "Link copied!" : shareStatus === "shared" ? "Shared!" : shareStatus === "error" ? "Share failed" : "Share scenario"}
                 </button>
                 <button type="button" onClick={handleExportCsv}
-                  className="inline-flex items-center justify-center rounded-xl border border-cyan-300 bg-white px-4 py-2.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50 dark:border-cyan-800 dark:bg-slate-900 dark:text-cyan-300 dark:hover:bg-slate-950">
+                  className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                   Export CSV
                 </button>
                 <button type="button" onClick={handleExportPdf}
-                  className="inline-flex items-center justify-center rounded-xl border border-cyan-300 bg-white px-4 py-2.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50 dark:border-cyan-800 dark:bg-slate-900 dark:text-cyan-300 dark:hover:bg-slate-950">
+                  className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                   Export PDF
                 </button>
               </div>

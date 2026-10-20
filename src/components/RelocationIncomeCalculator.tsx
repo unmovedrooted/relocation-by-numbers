@@ -1475,7 +1475,7 @@ export default function RelocationIncomeCalculator() {
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+                  className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                 >
                   {saveStatus === 'copied' ? 'Link copied!' :
                    saveStatus === 'shared' ? 'Shared!' :

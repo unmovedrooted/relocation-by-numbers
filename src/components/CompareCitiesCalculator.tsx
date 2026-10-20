@@ -640,7 +640,7 @@ export default function CompareCitiesCalculator() {
             onClick={() => setRegion(r.key)}
             className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
               region === r.key
-                ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+                ? "bg-emerald-600 text-white"
                 : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700"
             }`}
           >
@@ -686,8 +686,8 @@ export default function CompareCitiesCalculator() {
               <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">{isUs ? "Housing mode" : "Income & housing"}</div>
               {isUs && (
                 <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
-                  <button type="button" onClick={() => setMode("rent")} className={`rounded-lg px-3 py-1 text-sm ${mode === "rent" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Rent</button>
-                  <button type="button" onClick={() => setMode("buy")} className={`rounded-lg px-3 py-1 text-sm ${mode === "buy" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Buy</button>
+                  <button type="button" onClick={() => setMode("rent")} className={`rounded-lg px-3 py-1 text-sm ${mode === "rent" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400"}`}>Rent</button>
+                  <button type="button" onClick={() => setMode("buy")} className={`rounded-lg px-3 py-1 text-sm ${mode === "buy" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400"}`}>Buy</button>
                 </div>
               )}
             </div>
@@ -710,15 +710,15 @@ export default function CompareCitiesCalculator() {
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Income</span>
                   <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
-                    <button type="button" onClick={() => setIncomeMode("working")} className={`rounded-lg px-3 py-1 text-sm ${incomeMode === "working" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Working</button>
-                    <button type="button" onClick={() => setIncomeMode("retired")} className={`rounded-lg px-3 py-1 text-sm ${incomeMode === "retired" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Retired</button>
+                    <button type="button" onClick={() => setIncomeMode("working")} className={`rounded-lg px-3 py-1 text-sm ${incomeMode === "working" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400"}`}>Working</button>
+                    <button type="button" onClick={() => setIncomeMode("retired")} className={`rounded-lg px-3 py-1 text-sm ${incomeMode === "retired" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400"}`}>Retired</button>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Housing</span>
                   <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
-                    <button type="button" onClick={() => setIntlHousingMode("rent")} className={`rounded-lg px-3 py-1 text-sm ${intlHousingMode === "rent" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Rent</button>
-                    <button type="button" onClick={() => setIntlHousingMode("buy")} className={`rounded-lg px-3 py-1 text-sm ${intlHousingMode === "buy" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Buy</button>
+                    <button type="button" onClick={() => setIntlHousingMode("rent")} className={`rounded-lg px-3 py-1 text-sm ${intlHousingMode === "rent" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400"}`}>Rent</button>
+                    <button type="button" onClick={() => setIntlHousingMode("buy")} className={`rounded-lg px-3 py-1 text-sm ${intlHousingMode === "buy" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400"}`}>Buy</button>
                   </div>
                 </div>
               </div>
@@ -1008,16 +1008,16 @@ export default function CompareCitiesCalculator() {
                       window.setTimeout(() => setShareStatus("idle"), 2500);
                     }
                   }}
-                  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                  className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                 >
                   {shareStatus === "copied" ? "Link copied!" : shareStatus === "shared" ? "Shared!" : shareStatus === "error" ? "Share failed" : "Share scenario"}
                 </button>
                 <button type="button" onClick={handleExportCsv}
-                  className="inline-flex items-center justify-center rounded-xl border border-fuchsia-300 bg-white px-4 py-2.5 text-sm font-semibold text-fuchsia-700 transition hover:bg-fuchsia-50 dark:border-fuchsia-800 dark:bg-slate-900 dark:text-fuchsia-300 dark:hover:bg-slate-950">
+                  className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                   Export CSV
                 </button>
                 <button type="button" onClick={handleExportPdf}
-                  className="inline-flex items-center justify-center rounded-xl border border-fuchsia-300 bg-white px-4 py-2.5 text-sm font-semibold text-fuchsia-700 transition hover:bg-fuchsia-50 dark:border-fuchsia-800 dark:bg-slate-900 dark:text-fuchsia-300 dark:hover:bg-slate-950">
+                  className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                   Export PDF
                 </button>
               </div>

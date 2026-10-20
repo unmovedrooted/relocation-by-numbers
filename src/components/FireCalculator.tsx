@@ -2048,7 +2048,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 {(["conservative", "moderate", "aggressive"] as const).map(v => (
                   <button key={v} type="button" onClick={() => setInputs(s => ({ ...s, volatility: v }))}
                     className={["rounded-xl border px-3 py-2 text-xs font-medium capitalize", inputs.volatility === v
-                      ? "border-emerald-300/40 bg-emerald-300/10 text-emerald-100"
+                      ? "border-emerald-400 bg-emerald-500 text-white"
                       : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"].join(" ")}>
                     {v}
                   </button>
@@ -2208,7 +2208,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 </div>
                 <button onClick={() => setInputs(s => ({ ...s, moveCompareOn: !s.moveCompareOn }))}
                   className={["rounded-xl border px-3 py-2 text-xs font-medium", inputs.moveCompareOn
-                    ? "border-emerald-300/40 bg-emerald-300/10 text-emerald-100"
+                    ? "border-emerald-400 bg-emerald-500 text-white"
                     : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"].join(" ")}>
                   {inputs.moveCompareOn ? "Hide comparison" : "Compare cities"}
                 </button>
@@ -2284,7 +2284,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 <button key={tab} type="button" role="tab" aria-selected={activeResultTab === tab}
                   onClick={() => setActiveResultTab(tab)}
                   className={["rounded-xl border px-4 py-2 text-sm font-medium transition", activeResultTab === tab
-                    ? "border-emerald-300/30 bg-emerald-300/15 text-emerald-200"
+                    ? "border-emerald-400 bg-emerald-500 text-white"
                     : "border-transparent text-slate-300 hover:bg-white/5 hover:text-white"].join(" ")}>
                   {tab === "milestone" ? "Milestone" : tab === "move" ? "Move impact" : "Savings rate"}
                 </button>
@@ -2305,7 +2305,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     type="button"
                     aria-pressed={dollarView === v}
                     onClick={() => setDollarView(v)}
-                    className={`rounded-md px-3 py-1.5 font-medium transition ${dollarView === v ? "bg-emerald-400/20 text-emerald-100" : "text-slate-300 hover:bg-white/10"}`}
+                    className={`rounded-md px-3 py-1.5 font-medium transition ${dollarView === v ? "bg-emerald-500 text-white" : "text-slate-300 hover:bg-white/10"}`}
                   >
                     {label}
                   </button>

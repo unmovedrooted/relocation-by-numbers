@@ -56,10 +56,10 @@ export default function SavedScenariosPanel({
   };
 
   return (
-    <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-sky-900/60 dark:bg-sky-950/20">
+    <div className="rounded-2xl border border-slate-200 bg-white/60 p-4 dark:border-slate-800 dark:bg-slate-900/40">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-400">Save this scenario</div>
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Save this scenario</div>
           <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">
             Keep your current inputs so you can come back to them or compare with other saved scenarios. Saves stay in this browser only and will not follow you to another device; use Share to send a link.{" "}
             <a className="font-semibold underline underline-offset-4 hover:no-underline" href="/my-scenarios">My scenarios</a>
@@ -68,7 +68,7 @@ export default function SavedScenariosPanel({
         <button
           type="button"
           onClick={handleSave}
-          className="inline-flex items-center justify-center rounded-xl border border-sky-300 bg-white px-4 py-2.5 text-sm font-semibold text-sky-700 transition hover:bg-sky-50 dark:border-sky-800 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-slate-950"
+          className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
         >
           {saveStatus === "saved" ? "Saved!" : "Save scenario"}
         </button>

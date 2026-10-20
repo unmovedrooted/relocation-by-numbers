@@ -1024,14 +1024,14 @@ export default function Calculator({
             <button
               type="button"
               onClick={() => setMode("rent")}
-              className={`rounded-lg px-3 py-1 text-sm ${mode === "rent" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300"}`}
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "rent" ? "bg-emerald-600 text-white" : "text-slate-700 dark:text-slate-300"}`}
             >
               Rent
             </button>
             <button
               type="button"
               onClick={() => setMode("buy")}
-              className={`rounded-lg px-3 py-1 text-sm ${mode === "buy" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300"}`}
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "buy" ? "bg-emerald-600 text-white" : "text-slate-700 dark:text-slate-300"}`}
             >
               Buy
             </button>
@@ -1906,10 +1906,10 @@ export default function Calculator({
           )}
 
           {/* ── 7. SHARE ── */}
-          <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-sky-900/60 dark:bg-sky-950/20">
+          <div className="rounded-2xl border border-slate-200 bg-white/60 p-4 dark:border-slate-800 dark:bg-slate-900/40">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-400">Share this scenario</div>
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Share this scenario</div>
                 <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">
                   Copy your current comparison link and send it to a partner, friend, or future self.
                 </div>
@@ -1947,21 +1947,21 @@ export default function Calculator({
                     }
                   }
                 }}
-                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 {shareStatus === "copied" ? "Link copied!" : shareStatus === "shared" ? "Shared!" : shareStatus === "error" ? "Share failed" : "Share scenario"}
               </button>
               <button
                 type="button"
                 onClick={handleExportCsv}
-                className="inline-flex items-center justify-center rounded-xl border border-sky-300 bg-white px-4 py-2.5 text-sm font-semibold text-sky-700 transition hover:bg-sky-50 dark:border-sky-800 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-slate-950"
+                className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Export CSV
               </button>
               <button
                 type="button"
                 onClick={handleExportPdf}
-                className="inline-flex items-center justify-center rounded-xl border border-sky-300 bg-white px-4 py-2.5 text-sm font-semibold text-sky-700 transition hover:bg-sky-50 dark:border-sky-800 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-slate-950"
+                className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Export PDF
               </button>

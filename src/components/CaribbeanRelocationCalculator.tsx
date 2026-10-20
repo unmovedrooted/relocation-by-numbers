@@ -1037,11 +1037,11 @@ const relativeDifference =
         <div className="flex items-center gap-2">
           <div className="inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-700">
             <button type="button" onClick={() => setMode("working")}
-              className={`rounded-lg px-3 py-1 text-sm ${mode === "working" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300"}`}>
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "working" ? "bg-emerald-600 text-white" : "text-slate-700 dark:text-slate-300"}`}>
               Working
             </button>
             <button type="button" onClick={() => setMode("retired")}
-              className={`rounded-lg px-3 py-1 text-sm ${mode === "retired" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300"}`}>
+              className={`rounded-lg px-3 py-1 text-sm ${mode === "retired" ? "bg-emerald-600 text-white" : "text-slate-700 dark:text-slate-300"}`}>
               Retired
             </button>
           </div>
@@ -1191,8 +1191,8 @@ const relativeDifference =
             <div className="mb-3 flex items-center justify-between">
               <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">Housing</div>
               <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
-                <button type="button" onClick={() => setHousingMode("rent")} className={`rounded-lg px-3 py-1 text-sm ${housingMode === "rent" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Rent</button>
-                <button type="button" onClick={() => setHousingMode("buy")} className={`rounded-lg px-3 py-1 text-sm ${housingMode === "buy" ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}>Buy</button>
+                <button type="button" onClick={() => setHousingMode("rent")} className={`rounded-lg px-3 py-1 text-sm ${housingMode === "rent" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400"}`}>Rent</button>
+                <button type="button" onClick={() => setHousingMode("buy")} className={`rounded-lg px-3 py-1 text-sm ${housingMode === "buy" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400"}`}>Buy</button>
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -1548,11 +1548,11 @@ const relativeDifference =
                     window.setTimeout(() => setShareStatus("idle"), 2500);
                   }
                 }}
-                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
+                className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                 {shareStatus === "copied" ? "Link copied!" : shareStatus === "shared" ? "Shared!" : shareStatus === "error" ? "Share failed" : "Share scenario"}
               </button>
               <button type="button" onClick={handleExportPdf}
-                className="inline-flex items-center justify-center rounded-xl border border-teal-300 bg-white px-4 py-2.5 text-sm font-semibold text-teal-700 transition hover:bg-teal-50 dark:border-teal-800 dark:bg-slate-900 dark:text-teal-300 dark:hover:bg-slate-950">
+                className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                 Export PDF
               </button>
               </div>

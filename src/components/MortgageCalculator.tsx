@@ -2300,7 +2300,7 @@ export default function MortgageCalculator() {
           {tabs.map(tab => (
             <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
               className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${
-                activeTab === tab.id ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                activeTab === tab.id ? "bg-emerald-600 text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
               }`}>
               {tab.label}
             </button>

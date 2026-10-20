@@ -66,7 +66,7 @@ export default function RentVsBuyCalculator() {
   const [mortgageRatePct, setMortgageRatePct] = useState(String(D.mortgageRatePct));
   const [loanYears, setLoanYears] = useState("30");
   const [propertyTaxPct, setPropertyTaxPct] = useState(String(D.propertyTaxPct));
-  const [homeInsuranceAnnual, setHomeInsuranceAnnual] = useState(String(D.homeInsuranceAnnual));
+  const [homeInsuranceMonthly, setHomeInsuranceMonthly] = useState(String(D.homeInsuranceAnnual / 12));
   const [hoaMonthly, setHoaMonthly] = useState("0");
   const [maintenancePct, setMaintenancePct] = useState(String(D.maintenancePct));
   const [buyClosingPct, setBuyClosingPct] = useState(String(D.buyClosingPct));
@@ -85,25 +85,28 @@ export default function RentVsBuyCalculator() {
 
   const FIELDS: [string, string, (v: string) => void][] = useMemo(() => [
     ["price", homePrice, setHomePrice], ["down", downPct, setDownPct], ["rate", mortgageRatePct, setMortgageRatePct],
-    ["term", loanYears, setLoanYears], ["ptax", propertyTaxPct, setPropertyTaxPct], ["hins", homeInsuranceAnnual, setHomeInsuranceAnnual],
+    ["term", loanYears, setLoanYears], ["ptax", propertyTaxPct, setPropertyTaxPct], ["hinsm", homeInsuranceMonthly, setHomeInsuranceMonthly],
     ["hoa", hoaMonthly, setHoaMonthly], ["maint", maintenancePct, setMaintenancePct], ["closing", buyClosingPct, setBuyClosingPct],
     ["appr", appreciationPct, setAppreciationPct], ["sell", sellingCostPct, setSellingCostPct], ["rent", monthlyRent, setMonthlyRent],
     ["rentgrow", rentGrowthPct, setRentGrowthPct], ["rins", rentersInsuranceMonthly, setRentersInsuranceMonthly],
     ["inv", investmentReturnPct, setInvestmentReturnPct], ["years", years, setYears], ["taxben", taxBenefitPct, setTaxBenefitPct],
-  ], [taxBenefitPct, homePrice, downPct, mortgageRatePct, loanYears, propertyTaxPct, homeInsuranceAnnual, hoaMonthly, maintenancePct, buyClosingPct, appreciationPct, sellingCostPct, monthlyRent, rentGrowthPct, rentersInsuranceMonthly, investmentReturnPct, years]);
+  ], [taxBenefitPct, homePrice, downPct, mortgageRatePct, loanYears, propertyTaxPct, homeInsuranceMonthly, hoaMonthly, maintenancePct, buyClosingPct, appreciationPct, sellingCostPct, monthlyRent, rentGrowthPct, rentersInsuranceMonthly, investmentReturnPct, years]);
 
   // ── QS HYDRATION ──
   useEffect(() => {
     const qs = getQS();
     const map: Record<string, (v: string) => void> = {
       price: setHomePrice, down: setDownPct, rate: setMortgageRatePct, term: setLoanYears, ptax: setPropertyTaxPct,
-      hins: setHomeInsuranceAnnual, hoa: setHoaMonthly, maint: setMaintenancePct, closing: setBuyClosingPct, appr: setAppreciationPct,
+      hinsm: setHomeInsuranceMonthly, hoa: setHoaMonthly, maint: setMaintenancePct, closing: setBuyClosingPct, appr: setAppreciationPct,
       sell: setSellingCostPct, rent: setMonthlyRent, rentgrow: setRentGrowthPct, rins: setRentersInsuranceMonthly, inv: setInvestmentReturnPct, years: setYears, taxben: setTaxBenefitPct,
     };
     for (const [k, setter] of Object.entries(map)) {
       const v = qs.get(k);
       if (v !== null) setter(v);
     }
+    // Links made before insurance became a monthly field carried the yearly amount as "hins".
+    const legacyYearly = qs.get("hins");
+    if (legacyYearly !== null && qs.get("hinsm") === null) setHomeInsuranceMonthly(String(Math.round((Number(legacyYearly) || 0) / 12)));
   }, []);
 
   // ── QS SYNC ──
@@ -117,7 +120,7 @@ export default function RentVsBuyCalculator() {
   const results = useMemo(() => {
     const input: RentVsBuyInput = {
       homePrice: Math.max(0, FIELD(homePrice)), downPct: FIELD(downPct), mortgageRatePct: FIELD(mortgageRatePct),
-      loanYears: Math.max(1, FIELD(loanYears)), propertyTaxPct: FIELD(propertyTaxPct), homeInsuranceAnnual: FIELD(homeInsuranceAnnual),
+      loanYears: Math.max(1, FIELD(loanYears)), propertyTaxPct: FIELD(propertyTaxPct), homeInsuranceAnnual: FIELD(homeInsuranceMonthly) * 12,
       hoaMonthly: FIELD(hoaMonthly), maintenancePct: FIELD(maintenancePct), buyClosingPct: FIELD(buyClosingPct),
       appreciationPct: FIELD(appreciationPct), sellingCostPct: FIELD(sellingCostPct), monthlyRent: Math.max(0, FIELD(monthlyRent)),
       rentGrowthPct: FIELD(rentGrowthPct), rentersInsuranceMonthly: FIELD(rentersInsuranceMonthly),
@@ -145,7 +148,7 @@ export default function RentVsBuyCalculator() {
     }));
     const thresholds = rentVsBuyThresholds(input);
     return { input, sim, chart, buyWins, diff, breakEvenYear, sensitivity, thresholds };
-  }, [homePrice, downPct, mortgageRatePct, loanYears, propertyTaxPct, homeInsuranceAnnual, hoaMonthly, maintenancePct, buyClosingPct, appreciationPct, sellingCostPct, taxBenefitPct, monthlyRent, rentGrowthPct, rentersInsuranceMonthly, investmentReturnPct, years]);
+  }, [homePrice, downPct, mortgageRatePct, loanYears, propertyTaxPct, homeInsuranceMonthly, hoaMonthly, maintenancePct, buyClosingPct, appreciationPct, sellingCostPct, taxBenefitPct, monthlyRent, rentGrowthPct, rentersInsuranceMonthly, investmentReturnPct, years]);
 
   const inputsReady = results.input.homePrice > 0 && results.input.monthlyRent > 0;
   const yearsN = results.input.years;
@@ -158,7 +161,7 @@ export default function RentVsBuyCalculator() {
       rate: { label: "mortgage rate", value: mortgageRatePct },
       term: { label: "loan term", value: loanYears },
       ptax: { label: "property tax", value: propertyTaxPct },
-      hins: { label: "home insurance", value: homeInsuranceAnnual },
+      hinsm: { label: "home insurance", value: homeInsuranceMonthly },
       hoa: { label: "HOA", value: hoaMonthly },
       maint: { label: "maintenance", value: maintenancePct },
       closing: { label: "closing costs", value: buyClosingPct },
@@ -233,7 +236,7 @@ export default function RentVsBuyCalculator() {
               {field("Mortgage rate (%)", mortgageRatePct, setMortgageRatePct, { step: "0.1" })}
               {field("Loan term (years)", loanYears, setLoanYears)}
               {field("Property tax (%/yr)", propertyTaxPct, setPropertyTaxPct, { step: "0.1", tip: "Annual property tax as a percent of the home's value." })}
-              {field("Home insurance ($/yr)", homeInsuranceAnnual, setHomeInsuranceAnnual)}
+              {field("Home insurance ($/mo)", homeInsuranceMonthly, setHomeInsuranceMonthly)}
               {field("HOA ($/mo)", hoaMonthly, setHoaMonthly)}
               {field("Maintenance (%/yr)", maintenancePct, setMaintenancePct, { step: "0.1", tip: "Annual upkeep as a percent of home value. ~1% is a common rule of thumb." })}
               {field("Closing costs (%)", buyClosingPct, setBuyClosingPct, { step: "0.1", tip: "Upfront buying costs (loan fees, title, etc.) as a percent of price. Sunk cost." })}
@@ -362,7 +365,7 @@ export default function RentVsBuyCalculator() {
                   { label: "Mortgage rate", value: `${mortgageRatePct}%`, source: sourceFor(mortgageRatePct, String(D.mortgageRatePct), "planning") },
                   { label: "Loan term", value: `${loanYears} years`, source: sourceFor(loanYears, "30", "sample") },
                   { label: "Property tax", value: `${propertyTaxPct}% a year`, source: sourceFor(propertyTaxPct, String(D.propertyTaxPct), "planning") },
-                  { label: "Home insurance", value: `${money(Number(homeInsuranceAnnual) || 0)} a year`, source: sourceFor(homeInsuranceAnnual, String(D.homeInsuranceAnnual), "planning") },
+                  { label: "Home insurance", value: `${money(Number(homeInsuranceMonthly) || 0)} a month`, source: sourceFor(homeInsuranceMonthly, String(D.homeInsuranceAnnual / 12), "planning") },
                   { label: "Maintenance", value: `${maintenancePct}% a year`, source: sourceFor(maintenancePct, String(D.maintenancePct), "planning") },
                   { label: "Closing costs", value: `${buyClosingPct}% of price`, source: sourceFor(buyClosingPct, String(D.buyClosingPct), "planning") },
                   { label: "Home appreciation", value: `${appreciationPct}% a year`, source: sourceFor(appreciationPct, String(D.appreciationPct), "planning") },
@@ -382,10 +385,10 @@ export default function RentVsBuyCalculator() {
 
       {inputsReady && (
         <div className="mt-4 space-y-3">
-          <div className="rounded-2xl border border-cyan-200 bg-cyan-50/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-cyan-900/60 dark:bg-cyan-950/20">
+          <div className="rounded-2xl border border-slate-200 bg-white/60 p-4 dark:border-slate-800 dark:bg-slate-900/40">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-cyan-700 dark:text-cyan-400">Share this scenario</div>
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Share this scenario</div>
                 <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">Copy your current inputs and send them to a partner, agent, or future self.</div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -404,12 +407,12 @@ export default function RentVsBuyCalculator() {
                       window.setTimeout(() => setShareStatus("idle"), 2500);
                     }
                   }}
-                  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                  className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                 >
                   {shareStatus === "copied" ? "Link copied!" : shareStatus === "shared" ? "Shared!" : shareStatus === "error" ? "Share failed" : "Share scenario"}
                 </button>
-                <button type="button" onClick={handleExportCsv} className="inline-flex items-center justify-center rounded-xl border border-cyan-300 bg-white px-4 py-2.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50 dark:border-cyan-800 dark:bg-slate-900 dark:text-cyan-300 dark:hover:bg-slate-950">Export CSV</button>
-                <button type="button" onClick={handleExportPdf} className="inline-flex items-center justify-center rounded-xl border border-cyan-300 bg-white px-4 py-2.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50 dark:border-cyan-800 dark:bg-slate-900 dark:text-cyan-300 dark:hover:bg-slate-950">Export PDF</button>
+                <button type="button" onClick={handleExportCsv} className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Export CSV</button>
+                <button type="button" onClick={handleExportPdf} className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Export PDF</button>
               </div>
             </div>
           </div>

@@ -11,7 +11,7 @@ const KEY_LABELS: Record<string, string> = {
   salary: "Salary", k401: "401(k) %", homePrice: "Home price", downPct: "Down payment %", ratePct: "Mortgage rate %", termYears: "Loan term",
   rentMonthly: "Monthly rent", price: "Home price", down: "Down payment %", rate: "Mortgage rate %", term: "Loan term", rent: "Monthly rent",
   years: "Years", appr: "Appreciation %", inv: "Investment return %", rentgrow: "Rent growth %", maint: "Maintenance %", sell: "Selling costs %",
-  ptax: "Property tax %", hins: "Home insurance", hoa: "HOA", closing: "Closing costs %", rins: "Renter's insurance", taxben: "Interest tax benefit %",
+  ptax: "Property tax %", hins: "Home insurance (yearly)", hinsm: "Home insurance (monthly)", hoa: "HOA", closing: "Closing costs %", rins: "Renter's insurance", taxben: "Interest tax benefit %",
   fromCountry: "Current country", toCountry: "Destination country", fromCityCode: "Current city", toCityCode: "Destination city",
   savings: "Savings", groceries: "Groceries", utilities: "Utilities", transport: "Transportation", healthcare: "Healthcare", visa: "Visa", flight: "Flight",
   emergency: "Emergency buffer", currency: "Display currency", adults: "Adults", children: "Children",
