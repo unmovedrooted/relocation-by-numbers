@@ -226,7 +226,7 @@ export default function InvestmentCalculator() {
             </div>
             <div className="mt-3 flex items-center gap-2">
               <input id="adjInf" type="checkbox" checked={adjustForInflation} onChange={(e) => setAdjustForInflation(e.target.checked)} className="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 dark:border-slate-600 dark:bg-slate-800" />
-              <label htmlFor="adjInf" className="text-sm text-slate-700 dark:text-slate-300">Show results in today&apos;s dollars<InfoTip text="Adjusts for inflation so the final number reflects real buying power. The portfolio then grows at your return minus inflation." /></label>
+              <label htmlFor="adjInf" className="text-sm text-slate-700 dark:text-slate-300">Show results in today&apos;s dollars<InfoTip text="Adjusts for inflation so the final number reflects real buying power. The portfolio then grows at your inflation-adjusted return (your return after inflation). Your monthly contribution keeps its buying power too: it is assumed to rise with inflation each year, which makes the projection higher than a fixed-dollar contribution would." /></label>
               {adjustForInflation && (
                 <span className="ml-auto inline-flex items-center gap-1">
                   <input className="h-8 w-16 rounded-lg bg-slate-50 px-2 text-sm text-slate-900 ring-1 ring-slate-200 outline-none focus:ring-4 focus:ring-cyan-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700" type="number" step="0.1" value={inflationPct} onChange={(e) => setInflationPct(e.target.value)} aria-label="Inflation percent" />
@@ -235,7 +235,7 @@ export default function InvestmentCalculator() {
               )}
             </div>
             <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              Contributions are made monthly (at the end of each month) and the return is an annual return{adjustForInflation ? `, with growth adjusted for ${inflationPct}% inflation (real return ${(results.effReturn * 100).toFixed(2)}%)` : ""}.
+              Contributions are made monthly (at the end of each month) and the return is an annual return{adjustForInflation ? `, with growth adjusted for ${inflationPct}% inflation (real return ${(results.effReturn * 100).toFixed(2)}%). Your monthly contribution is assumed to keep its purchasing power, so it rises with inflation each year` : ""}.
             </div>
           </div>
         </div>

@@ -247,8 +247,8 @@ export default function Page() {
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Good to know before you use it</h3>
                 <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
                   <p>
-                    This is a smooth, average-return projection. Real markets are volatile, and the order of returns
-                    matters, a projection is a guide, not a prediction.
+                    The Average view uses a fixed return. Range of outcomes simulates variable returns to illustrate
+                    sequence-of-returns risk. Either way, a projection is a guide, not a prediction.
                   </p>
                   <p>
                     There&apos;s deliberately no &ldquo;target&rdquo; or &ldquo;you&apos;re behind&rdquo; verdict. What

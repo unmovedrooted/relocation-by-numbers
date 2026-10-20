@@ -204,6 +204,10 @@ export default function HsaCalculator() {
     const totalAnnualContribution = yourContributionAmount + employerContributionAmount;
     const overLimitAmount = Math.max(0, totalAnnualContribution - contributionLimit);
     const remainingRoom = Math.max(0, contributionLimit - totalAnnualContribution);
+    // Employer money counts toward the same limit as yours. The projection and the tax savings use only what the limit allows: the combined
+    // amount is capped at the limit, and your own deductible share is what is left after the employer's contribution.
+    const modeledAnnualContribution = Math.min(totalAnnualContribution, contributionLimit);
+    const allowedYourContribution = Math.min(yourContributionAmount, Math.max(0, contributionLimit - employerContributionAmount));
 
     // Tax savings: diff a full tax computation against one with gross income
     // reduced by your contribution. This correctly reflects marginal bracket
@@ -211,7 +215,7 @@ export default function HsaCalculator() {
     // Medicare surtax threshold, the same verified engine used across the
     // rest of the site's calculators.
     const grossFull = Math.max(0, nz(grossAnnualIncome));
-    const grossReduced = Math.max(0, grossFull - yourContributionAmount);
+    const grossReduced = Math.max(0, grossFull - allowedYourContribution);
     const breakdownFull = estimateNetBreakdown({ grossAnnual: grossFull, state, filing, k401Pct: 0 });
     const breakdownReduced = estimateNetBreakdown({ grossAnnual: grossReduced, state, filing, k401Pct: 0 });
 
@@ -238,7 +242,7 @@ export default function HsaCalculator() {
     const years = Math.max(0, Math.round(nz(yearsToGrow)));
     const { finalBalance, totalContributed } = projectBalance(
       nz(currentBalance),
-      totalAnnualContribution,
+      modeledAnnualContribution,
       effectiveReturn,
       years
     );
@@ -246,7 +250,7 @@ export default function HsaCalculator() {
 
     const horizons = [5, 10, 20, 30].map((h) => ({
       years: h,
-      ...projectBalance(nz(currentBalance), totalAnnualContribution, effectiveReturn, h),
+      ...projectBalance(nz(currentBalance), modeledAnnualContribution, effectiveReturn, h),
     }));
 
     return {
@@ -255,6 +259,8 @@ export default function HsaCalculator() {
       yourContributionAmount,
       employerContributionAmount,
       totalAnnualContribution,
+      modeledAnnualContribution,
+      allowedYourContribution,
       overLimitAmount,
       remainingRoom,
       federalSaved,
@@ -285,7 +291,8 @@ export default function HsaCalculator() {
       { Metric: `${TAX_YEAR} contribution limit`, Value: money(results.contributionLimit) },
       { Metric: "Your contribution", Value: money(results.yourContributionAmount) },
       { Metric: "Employer contribution", Value: money(results.employerContributionAmount) },
-      { Metric: "Total annual contribution", Value: money(results.totalAnnualContribution) },
+      { Metric: "Total annual contribution entered", Value: money(results.totalAnnualContribution) },
+      { Metric: "Combined contribution modeled (capped at the limit)", Value: money(results.modeledAnnualContribution) },
       { Metric: results.overLimitAmount > 0 ? "Over the limit by" : "Remaining room under limit", Value: money(results.overLimitAmount > 0 ? results.overLimitAmount : results.remainingRoom) },
       { Metric: "State", Value: STATES.find((s) => s.code === state)?.name ?? state },
       { Metric: "Federal tax saved this year", Value: money(results.federalSaved) },
@@ -306,7 +313,7 @@ export default function HsaCalculator() {
     downloadPdfReport({
       filename: "hsa-scenario",
       title: "HSA Contribution & Growth Plan",
-      subtitle: `${money(results.totalAnnualContribution)}/yr · projected ${money(results.finalBalance)} in ${results.years} years`,
+      subtitle: `${money(results.modeledAnnualContribution)}/yr · projected ${money(results.finalBalance)} in ${results.years} years`,
       rows: exportRows as PdfRow[],
       footerNote: "Planning estimates only, not tax or investment advice. relocationbynumbers.com",
     });
@@ -315,7 +322,7 @@ export default function HsaCalculator() {
   const getCurrentScenario = () => ({
     label: "HSA plan",
     url: typeof window !== "undefined" ? window.location.pathname + window.location.search : "/",
-    subtitle: `${money(results.totalAnnualContribution, 0)}/yr → ${money(results.finalBalance, 0)} in ${results.years}y`,
+    subtitle: `${money(results.modeledAnnualContribution, 0)}/yr → ${money(results.finalBalance, 0)} in ${results.years}y`,
     source: "HSA",
   });
 
@@ -360,7 +367,7 @@ export default function HsaCalculator() {
             </div>
             {results.overLimitAmount > 0 && (
               <div className="mt-3 rounded-xl border border-amber-300 bg-amber-100 px-3 py-2 text-xs leading-5 text-amber-800 dark:border-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
-                ⚠ Your combined contribution is {money(results.overLimitAmount)} over the {money(results.contributionLimit)} limit. Excess HSA contributions are subject to a 6% excise tax each year they remain in the account unless withdrawn before the tax deadline.
+                ⚠ Your combined contribution is {money(results.overLimitAmount)} over the {money(results.contributionLimit)} limit. Excess HSA contributions are subject to a 6% excise tax each year they remain in the account unless withdrawn before the tax deadline. The projection and tax savings below count only the allowed amount: {money(results.modeledAnnualContribution)} a year combined, of which {money(results.allowedYourContribution)} is yours.
               </div>
             )}
           </div>
@@ -428,7 +435,7 @@ export default function HsaCalculator() {
                 label="Total tax savings this year"
                 amount={results.totalTaxSavingsThisYear}
                 tone="emerald"
-                note={`Federal ${money(results.federalSaved)} + FICA ${money(results.ficaSaved)} + state ${results.isNonConforming ? "$0" : money(results.stateSaved)}, from contributing ${money(results.yourContributionAmount)}.`}
+                note={`Federal ${money(results.federalSaved)} + FICA ${money(results.ficaSaved)} + state ${results.isNonConforming ? "$0" : money(results.stateSaved)}, from contributing ${money(results.allowedYourContribution)}.`}
               />
               <p className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs leading-5 text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
                 These savings assume you are eligible for an HSA (covered by a qualifying high-deductible health plan, with no disqualifying coverage) and contribute through payroll, which avoids income tax and FICA. A contribution you make directly and deduct on your return saves income tax but not FICA.
@@ -477,7 +484,7 @@ export default function HsaCalculator() {
                   onClick={async () => {
                     try {
                       const shareUrl = new URL(window.location.href);
-                      const shareText = `My HSA plan: ${money(results.totalAnnualContribution, 0)}/yr, projected ${money(results.finalBalance, 0)} in ${results.years} years.`;
+                      const shareText = `My HSA plan: ${money(results.modeledAnnualContribution, 0)}/yr, projected ${money(results.finalBalance, 0)} in ${results.years} years.`;
                       const canNativeShare = typeof navigator !== "undefined" && "share" in navigator;
                       if (canNativeShare) {
                         await (navigator as Navigator & { share: (data: { title?: string; text?: string; url?: string }) => Promise<void> }).share({

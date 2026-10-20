@@ -140,7 +140,7 @@ export default function Page() {
               <div className="rounded-2xl border border-cyan-200/70 bg-cyan-50 p-5 dark:border-cyan-900/60 dark:bg-cyan-950/30">
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Good to know</h3>
                 <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                  <p>Always contribute at least enough to get the full employer match, it&apos;s an immediate, guaranteed return.</p>
+                  <p>Always contribute at least enough to get the full employer match: it is usually an immediate return on your contribution. Whether you keep the match can depend on your plan&apos;s vesting schedule, which this calculator doesn&apos;t model.</p>
                   <p>Pre-tax contributions cut your taxes now; you pay ordinary income tax when you withdraw in retirement.</p>
                   <p>This doesn&apos;t model vesting schedules, Roth 401(k) contributions, loans, or fees.</p>
                   <p>It&apos;s a planning estimate, not tax or investment advice.</p>

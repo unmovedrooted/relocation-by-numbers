@@ -544,7 +544,11 @@ export default function RetirementCalculator() {
               Real return used: {(results.realReturn * 100).toFixed(2)}%
               {results.isTaxable && results.stateReturnDrag > 0
                 ? ` (after ${stateName}'s ~${(results.stateReturnDrag * 100).toFixed(1)}% annual tax drag on a taxable account)`
-                : ""}. This is a smooth average-return projection, it does not model market volatility. No target or &ldquo;on track&rdquo; judgment: it simply shows where your current path lands.
+                : ""}.{" "}
+              {viewMode === "montecarlo"
+                ? `Range of outcomes simulates each year's return around this expected return at ${(volatility * 100).toFixed(0)}% volatility, to illustrate sequence-of-returns risk.`
+                : "The Average view uses a fixed return, so it does not model market volatility."}{" "}
+              No target or &ldquo;on track&rdquo; judgment: it simply shows where your current path lands.
               {results.isTaxable
                 ? " Taxable mode applies your state's marginal income-tax rate to each year's return and does not include federal tax on investment returns, so it is best used to compare states rather than as an absolute figure; buy-and-hold investors who defer gains would see less state drag."
                 : ""}

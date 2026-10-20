@@ -116,7 +116,7 @@ export const CALCULATOR_INFO: Readonly<Record<string, CalculatorInfo>> = Object.
     exclusions: ["Taxes treat withdrawals as your only ordinary income with the standard deduction; Social Security and other income are not included.", "Payroll tax does not apply to distributions; states that do not tax qualified retirement income are modeled as exempt.", "The average-return view does not model market volatility; the optional Monte Carlo view is illustrative."] },
   "/retirement-calculator": { name: "Retirement Calculator", taxDriven: false, sources: [],
     notes: ["Projects balances from the inputs you enter in today's dollars; no external data source is used."],
-    exclusions: ["A smooth average-return projection that does not model market volatility.", "Taxes on withdrawals follow the simplified treatment described on the Methodology page."] },
+    exclusions: ["The Average view uses a fixed return and does not model market volatility; the Range of outcomes view simulates variable returns to illustrate sequence-of-returns risk.", "Taxes on withdrawals follow the simplified treatment described on the Methodology page."] },
   ...Object.fromEntries(([
     ["/fire-calculator", "FIRE Calculator"],
     ["/fire-number-calculator", "FIRE Number Calculator"],
