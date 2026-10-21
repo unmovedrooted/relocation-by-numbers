@@ -3,7 +3,7 @@ import { buildCityReport, type CityReport } from "@/lib/cityReport";
 import { ALLOWED_FIRE_CITY_PAGES } from "@/lib/seo-allowlists";
 import { MIGRATION_META } from "@/lib/migration";
 import { PAIR_EXAMPLE_SALARY } from "@/lib/pairExample";
-import { level, Tile, toneStyles, usd } from "@/components/reportParts";
+import { toneStyles, usd } from "@/components/reportParts";
 import { REPORT_SALARIES } from "@/lib/pairReport";
 import FireCitiesTable, { type FireCityRow } from "@/components/FireCitiesTable";
 
@@ -28,8 +28,6 @@ export default function FireCitiesReport() {
   if (list.length === 0) return null;
   const ranked = list.filter((x) => x.afterRent !== null);
   const top = ranked[0];
-  const lowestRent = [...list].filter((x) => x.r.cost.rent !== null).sort((a, b) => a.r.cost.rent! - b.r.cost.rent!)[0];
-  const cheapest = [...list].filter((x) => x.r.cost.priceLevel !== null).sort((a, b) => a.r.cost.priceLevel! - b.r.cost.priceLevel!)[0];
   const noTax = list.filter((x) => x.stateTax === 0);
   const year = MIGRATION_META.years[MIGRATION_META.years.length - 1];
 
@@ -70,19 +68,9 @@ export default function FireCitiesReport() {
 
   return (
     <>
-      <section aria-label="Best cities for FIRE at a glance" className={t.card}>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">At a glance, single filer on {usd(PAIR_EXAMPLE_SALARY)}</p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {top && <Tile tone="dark" label="Most left after rent" value={usd(top.afterRent!)} sub={`a month in ${top.r.name}`} />}
-          {lowestRent && <Tile tone="dark" label="Lowest typical rent" value={`${usd(lowestRent.r.cost.rent!)}/mo`} sub={lowestRent.r.name} />}
-          {cheapest && <Tile tone="dark" label="Lowest price level" value={level(cheapest.r.cost.priceLevel)} sub={`${cheapest.r.name} (U.S. = 100)`} />}
-          <Tile tone="dark" label="No state income tax" value={`${noTax.length} of ${list.length}`} sub={noTax.length > 0 ? noTax.map((x) => x.r.name).join(", ") : "none of these cities"} />
-        </div>
-      </section>
-
       <section className={t.card} aria-labelledby="bc-table">
         <h2 id="bc-table" className={t.h2}>The {list.length} FIRE cities, ranked by what is left after rent</h2>
-        <FireCitiesTable cities={tableCities} salaries={[...REPORT_SALARIES]} defaultSalary={PAIR_EXAMPLE_SALARY} migrationYear={String(year)} />
+        <FireCitiesTable cities={tableCities} salaries={[...REPORT_SALARIES]} defaultSalary={PAIR_EXAMPLE_SALARY} />
         <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((x) => (
             <li key={x.id}>
@@ -93,7 +81,7 @@ export default function FireCitiesReport() {
           ))}
         </ul>
         <p className={t.note}>
-          Price level is the BEA regional price parity for the metro area (U.S. = 100). Net move-ins is IRS state-to-state migration for the whole state: households that moved in minus households that moved out ({year}), a plus sign is a net gain.
+          Price level is the BEA regional price parity for the metro area (U.S. = 100). State migration ({year}) is on each city page.
           Planning estimates, not tax advice. The ranking depends on the salary used; your own income and spending can reorder it.
         </p>
       </section>

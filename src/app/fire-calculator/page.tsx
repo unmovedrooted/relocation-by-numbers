@@ -43,15 +43,6 @@ export default async function FireCalculatorPage({ searchParams }: PageProps) {
             FIRE Calculator
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
-            <Link href="/about" className="transition hover:text-white">About</Link>
-            <span>•</span>
-            <Link href="/disclaimer" className="transition hover:text-white">Disclaimer</Link>
-            <span>•</span>
-            <Link href="/privacy" className="transition hover:text-white">Privacy</Link>
-            <span>•</span>
-            <Link href="/terms" className="transition hover:text-white">Terms</Link>
-          </div>
 
           <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
             FIRE Calculator, Financial Independence by Location

@@ -4,7 +4,7 @@ import AssumptionsCard, { type AssumptionItem } from "./AssumptionsCard";
 import ChangeNote from "./ChangeNote";
 import { useChangeNote } from "@/lib/useChangeNote";
 import MobileResultBar from "./MobileResultBar";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode, useRef } from "react";
 import { usePathname } from "next/navigation";
 import CalculatorNumberField from "./calculator-form/CalculatorNumberField";
 import FireReport, { type FireReportInputs } from "@/components/FireReport";
@@ -599,6 +599,13 @@ function coastTargetAtYear(i: Inputs, yearsFromNow: number): number {
 // The balance needed at the coast age (the headline Coast FIRE number).
 function calcCoastFireNumber(i: Inputs): number {
   return coastTargetAtYear(i, Math.max(0, i.coastAge - i.age));
+}
+
+// Past this age a projected date is no longer an early-retirement result, so it is worded as financial independence at that age.
+const EARLY_RETIREMENT_LIMIT_AGE = 65;
+function fiAtAgeText(age: number | null | undefined, name = "FIRE"): string {
+  if (age == null) return `${name} at age —`;
+  return age >= EARLY_RETIREMENT_LIMIT_AGE ? `Projected financial independence at ${age}` : `${name} at age ${age}`;
 }
 
 // ── Barista FIRE target ───────────────────────────────────────────────────────
@@ -1416,6 +1423,18 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   const [spendingCats, setSpendingCats] = useState<Record<string, number>>(() => spendingPreset ? SPENDING_CATEGORY_DEFAULTS[spendingPreset] : {});
   const [hydrated, setHydrated] = useState(false);
   const [carriedOver, setCarriedOver] = useState(false);
+  // What carried over from the last FIRE page, and this calculator's own example for the same fields, so the visitor can pick either.
+  const carriedValues = useRef<{ mine: Partial<Inputs>; example: Partial<Inputs> } | null>(null);
+  const [carriedChoice, setCarriedChoice] = useState<"mine" | "example">("mine");
+  const chooseCarried = (choice: "mine" | "example") => {
+    const v = carriedValues.current;
+    if (!v) return;
+    setInputs(s => {
+      const n = { ...s, ...(choice === "mine" ? v.mine : v.example) };
+      return { ...n, coastAge: Math.max(n.coastAge, n.age), targetRetirementAge: Math.max(n.targetRetirementAge, n.age + 1) };
+    });
+    setCarriedChoice(choice);
+  };
   useEffect(() => {
     try {
       const query = new URLSearchParams(window.location.search);
@@ -1430,6 +1449,8 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
             if (v !== undefined && typeof v === typeof defaultsForMode(mode, initialIncome, spendingPreset)[f]) (patch as Record<string, unknown>)[f] = v;
           }
           if (Object.keys(patch).length) {
+            const own = defaultsForMode(mode, initialIncome, spendingPreset);
+            carriedValues.current = { mine: patch, example: Object.fromEntries(Object.keys(patch).map(k => [k, own[k as keyof Inputs]])) as Partial<Inputs> };
             setInputs(s => {
               const n = { ...s, ...patch };
               return { ...n, coastAge: Math.max(n.coastAge, n.age), targetRetirementAge: Math.max(n.targetRetirementAge, n.age + 1) };
@@ -1582,14 +1603,24 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   const fullFiAgeForBarista = useMemo(() => fullFireForBarista?.yearsToFI == null ? null : inputs.age + fullFireForBarista.yearsToFI, [fullFireForBarista, inputs.age]);
   const baristaYearsSaved   = useMemo(() => fullFiAgeForBarista !== null && fiAge !== null ? fullFiAgeForBarista - fiAge : null, [fiAge, fullFiAgeForBarista]);
 
+  // Part-time income that ends before the projected milestone gives no reduction: the portfolio must then cover full spending.
+  const baristaRetSpend = retirementAnnualFor(inputs, annualExp);
+  const baristaPartTime = Number(inputs.baristaPartTimeIncome) || 0;
+  const baristaEndAge = Number(inputs.baristaEndAge) || 0;
+  const baristaIncomeEnded = mode === "barista" && baristaEndAge > 0 && fiAge !== null && fiAge >= baristaEndAge;
+  const baristaGapCovered = baristaIncomeEnded ? baristaRetSpend : Math.max(0, baristaRetSpend - baristaPartTime);
+
   const baristaTable = useMemo(() => {
     if (mode !== "barista") return [];
     const swr = (Number(inputs.withdrawalRatePct) || 0) / 100;
+    const spend = retirementAnnualFor(inputs, annualExpenses(inputs));
+    const endAge = Number(inputs.baristaEndAge) || 0;
     return [0, 12000, 24000, 36000, 48000, 60000].map(pt => {
-      const effExp   = Math.max(0, annualExpenses(inputs) - pt);
-      const fireNum  = swr > 0 ? effExp / swr : Infinity;
       const sim      = simulateYearsToFI({ ...inputs, baristaPartTimeIncome: pt }, netPath, "barista");
       const ageAtFI  = sim.yearsToFI === null ? null : inputs.age + sim.yearsToFI;
+      const ended    = endAge > 0 && ageAtFI !== null && ageAtFI >= endAge;
+      const effExp   = ended ? spend : Math.max(0, spend - pt);
+      const fireNum  = swr > 0 ? effExp / swr : Infinity;
       return { pt, effExp, fireNum, yearsToFI: sim.yearsToFI, ageAtFI, isCurrent: pt === (Number(inputs.baristaPartTimeIncome) || 0) };
     });
   }, [mode, inputs, netPath]);
@@ -1853,7 +1884,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   ? `Coast-ready at age ${inputs.age + yearsToCoast}, then retire at ${inputs.targetRetirementAge}`
                   : `Coast target not reached by age ${inputs.targetRetirementAge}`)
             : fiAge !== null
-              ? `${mode === "lean" ? "Lean FIRE" : mode === "barista" ? "Barista FIRE" : "FIRE"} at age ${fiAge} · ${result.yearsToFI} years away`
+              ? `${fiAtAgeText(fiAge, mode === "lean" ? "Lean FIRE" : mode === "barista" ? "Barista FIRE" : "FIRE")} · ${result.yearsToFI} years away`
               : `FIRE not reached in ${inputs.maxYears} years`}
       />
 
@@ -1869,10 +1900,12 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             </div>
             <div className="flex flex-wrap gap-2">
               {showMore && (
-                <button onClick={() => setInputs(s => s.advanced ? { ...s, advanced: false } : seedAdvancedFromSimple({ ...s, advanced: true }))}
-                  className={["rounded-xl border px-3 py-2 text-xs font-medium", inputs.advanced ? "border-violet-300/40 bg-violet-300/10 text-violet-100" : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"].join(" ")}>
-                  {inputs.advanced ? "Advanced: ON" : "Advanced: OFF"}
-                </button>
+                <div className="inline-flex rounded-xl border border-white/10 bg-white/5 p-0.5" role="group" aria-label="Basic or Advanced inputs">
+                  <button type="button" aria-pressed={!inputs.advanced} onClick={() => setInputs(s => s.advanced ? { ...s, advanced: false } : s)}
+                    className={["rounded-lg px-3 py-1.5 text-xs font-medium transition", !inputs.advanced ? "bg-emerald-600 text-white" : "text-slate-300 hover:bg-white/10"].join(" ")}>Basic</button>
+                  <button type="button" aria-pressed={inputs.advanced} onClick={() => setInputs(s => s.advanced ? s : seedAdvancedFromSimple({ ...s, advanced: true }))}
+                    className={["rounded-lg px-3 py-1.5 text-xs font-medium transition", inputs.advanced ? "bg-emerald-600 text-white" : "text-slate-300 hover:bg-white/10"].join(" ")}>Advanced</button>
+                </div>
               )}
               <button onClick={() => { setInputs(defaultsForMode(mode, initialIncome, spendingPreset)); setLinkedMove(false); setAbroadLabel(""); setPinnedCompareCityId(null); setShareStatus("idle"); }}
                 className="rounded-xl border border-red-300/40 bg-red-300/10 px-3 py-2 text-xs font-medium text-red-200 hover:bg-red-300/20">
@@ -1900,7 +1933,15 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
           )}
           {carriedOver && (
             <p className="mt-3 rounded-lg border border-emerald-400/20 bg-emerald-400/5 px-3 py-2 text-xs leading-5 text-emerald-100">
-              Your age, income, location and portfolio carried over from your last FIRE page. This style uses its own spending ({money(inputs.expensesMonthly, 0)}/mo{inputs.retirementDifferent ? `, ${money(inputs.retirementExpensesMonthly, 0)}/mo in retirement` : ""}) and a {inputs.withdrawalRatePct}% withdrawal rate; change them below if you want.
+              {carriedChoice === "mine"
+                ? <>Your age, income, location and portfolio carried over from your last FIRE page. This style uses its own spending ({money(inputs.expensesMonthly, 0)}/mo{inputs.retirementDifferent ? `, ${money(inputs.retirementExpensesMonthly, 0)}/mo in retirement` : ""}) and a {inputs.withdrawalRatePct}% withdrawal rate; change them below if you want.</>
+                : <>Showing this calculator&apos;s own example numbers instead of your inputs from the last FIRE page.</>}
+              <span className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Which inputs to start with">
+                <button type="button" aria-pressed={carriedChoice === "mine"} onClick={() => chooseCarried("mine")}
+                  className={["rounded-lg px-3 py-1.5 text-xs font-medium transition", carriedChoice === "mine" ? "bg-emerald-600 text-white" : "border border-white/10 text-slate-200 hover:bg-white/10"].join(" ")}>Use my previous inputs</button>
+                <button type="button" aria-pressed={carriedChoice === "example"} onClick={() => chooseCarried("example")}
+                  className={["rounded-lg px-3 py-1.5 text-xs font-medium transition", carriedChoice === "example" ? "bg-emerald-600 text-white" : "border border-white/10 text-slate-200 hover:bg-white/10"].join(" ")}>Start with this calculator&apos;s example</button>
+              </span>
             </p>
           )}
 
@@ -1981,7 +2022,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
             </div>)}
 
             {showMore && <Field label="401(k) contribution %" info="Percentage of salary contributed to a 401(k). Lowers taxable income." value={inputs.k401Pct} onChange={v => setInputs(s => ({ ...s, k401Pct: clamp(v, 0, 60) }))} suffix="%" />}
-            <Field label="Monthly spending" info="Used to calculate your FIRE target. Higher spending = larger number." value={inputs.expensesMonthly} onChange={v => { setBudgetByCategory(false); setInputs(s => ({ ...s, expensesMonthly: clamp(v, 0, 200_000) })); }} prefix="$" />
+            <Field label="Monthly spending now" info="Used to calculate your FIRE target. Higher spending = larger number." value={inputs.expensesMonthly} onChange={v => { setBudgetByCategory(false); setInputs(s => ({ ...s, expensesMonthly: clamp(v, 0, 200_000) })); }} prefix="$" />
             {(showMore || inputs.retirementDifferent) && <div className="sm:col-span-2">
               <label className="flex items-center gap-2 text-xs text-slate-200">
                 <input
@@ -2093,12 +2134,12 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
 
             {/* ── Advanced inputs ────────────────────────────────────────── */}
             {inputs.advanced && (<>
-              <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">ACCOUNT BALANCES</div>
+              <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">ADVANCED · ACCOUNT BALANCES</div>
               <Field label="401(k) balance" value={inputs.bal401k} onChange={v => setInputs(s => ({ ...s, bal401k: clamp(v, 0, 50_000_000) }))} prefix="$" />
               <Field label="IRA balance"    value={inputs.balIra}  onChange={v => setInputs(s => ({ ...s, balIra:  clamp(v, 0, 50_000_000) }))} prefix="$" />
               <Field label="Brokerage balance" value={inputs.balBrokerage} onChange={v => setInputs(s => ({ ...s, balBrokerage: clamp(v, 0, 50_000_000) }))} prefix="$" />
 
-              <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">YEARLY CONTRIBUTIONS</div>
+              <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">ADVANCED · YEARLY CONTRIBUTIONS</div>
 
               {/* 401k contribution + Traditional/Roth inline */}
               <div className="space-y-2">
@@ -2159,7 +2200,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 </div>
               </div>
 
-              <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">EMPLOYER MATCH</div>
+              <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">ADVANCED · EMPLOYER MATCH</div>
               <Field label="Employer match %" info="E.g. 50 = employer matches 50¢ per $1 you contribute." value={inputs.employerMatchPct} onChange={v => setInputs(s => ({ ...s, employerMatchPct: clamp(v, 0, 100) }))} suffix="%" />
               <Field label="Match cap (% of salary)" info="Employer only matches up to this % of your gross salary." value={inputs.employerMatchCapPct} onChange={v => setInputs(s => ({ ...s, employerMatchCapPct: clamp(v, 0, 25) }))} suffix="%" />
               {calcEmployerMatch(inputs) > 0 && (
@@ -2170,7 +2211,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
 
               {/* Withdrawal tax rate, shown only when Traditional accounts are selected */}
               {(inputs.taxTreatment401k === "traditional" || inputs.taxTreatmentIra === "traditional") && (<>
-                <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">WITHDRAWAL TAX ESTIMATE</div>
+                <div className="mt-2 text-xs font-semibold tracking-widest text-slate-300/80 sm:col-span-2">ADVANCED · WITHDRAWAL TAX ESTIMATE</div>
                 <Field
                   label="Est. withdrawal tax rate (%)"
                   info="Applied as a haircut to Traditional 401(k) and IRA balances to estimate your spendable portfolio. Roth and brokerage are unaffected. 15% is a reasonable default for most FIRE savers."
@@ -2327,6 +2368,18 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
 
               <ExampleResultsNotice />
 
+              {hasCoreInputs && fiAge !== null && fiAge >= EARLY_RETIREMENT_LIMIT_AGE && (
+                <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs leading-5 text-slate-300">
+                  Projected financial independence at {fiAge} falls beyond an early-retirement timeline. Saving more, spending less or choosing a different target can move it earlier.
+                </p>
+              )}
+
+              {hasCoreInputs && savingsRate < 0 && (
+                <div role="alert" className="rounded-xl border border-amber-300/40 bg-amber-300/10 px-4 py-3 text-sm leading-6 text-amber-100">
+                  <strong>Your current spending exceeds available income.</strong> This calculator does not fund that shortfall by withdrawing from your portfolio. It leaves the deficit unmodeled and counts only the saving you enter (none in Basic mode unless you set a yearly investment), so the timeline below assumes the gap is covered some other way and is optimistic until spending is at or below income.
+                </div>
+              )}
+
               {/* ── STANDARD ──────────────────────────────────────────────── */}
               {mode === "standard" && (<>
                 <h2 className="text-2xl font-bold tracking-tight text-white">Your FIRE milestone</h2>
@@ -2350,7 +2403,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
     <p className="text-xs text-slate-300">
       {result.yearsToFI === 0
         ? "You've hit your FIRE number, share the milestone."
-        : `FIRE at ${fiAge ?? "—"} · ${result.yearsToFI} years away`}
+        : `${fiAtAgeText(fiAge)} · ${result.yearsToFI} years away`}
     </p>
     <button
       onClick={handleShare}
@@ -2398,14 +2451,14 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     <div className="text-[11px] font-semibold uppercase tracking-widest text-emerald-300">Lean FIRE</div>
                     <div className="mt-2 text-xs text-slate-300">{money(inputs.retirementDifferent ? inputs.retirementExpensesMonthly : inputs.expensesMonthly, 0)}/mo in retirement</div>
                     <div className="mt-3 text-2xl font-bold text-white">{fireNumberShown}</div>
-                    <div className="mt-1 text-sm text-emerald-200">FIRE at age {fiAge ?? "—"}</div>
+                    <div className="mt-1 text-sm text-emerald-200">{fiAtAgeText(fiAge)}</div>
                     <div className="mt-1 text-xs text-slate-300">{result.yearsToFI !== null ? `${result.yearsToFI} years away` : "Not reached"}</div>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-300">{leanComparesToCurrent ? "Retiring on your current spending" : "Full FIRE (+50% spending)"}</div>
                     <div className="mt-2 text-xs text-slate-300">{money(leanComparesToCurrent ? inputs.expensesMonthly : inputs.expensesMonthly * 1.5, 0)}/mo in retirement</div>
                     <div className="mt-3 text-2xl font-bold text-white">{fullFireNumberShown(fullFireForLean)}</div>
-                    <div className="mt-1 text-sm text-slate-300">FIRE at age {fullFiAgeForLean ?? "—"}</div>
+                    <div className="mt-1 text-sm text-slate-300">{fiAtAgeText(fullFiAgeForLean)}</div>
                     <div className="mt-1 text-xs text-slate-300">{fullFireForLean?.yearsToFI !== null && fullFireForLean?.yearsToFI !== undefined ? `${fullFireForLean.yearsToFI} years away` : "Not reached"}</div>
                   </div>
                 </div>
@@ -2502,21 +2555,23 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     ? "Enter your inputs to see your Barista FIRE number."
                     : fiAge === null
                     ? <>Barista FIRE not projected within <strong>{inputs.maxYears} years</strong>. Try adjusting your inputs.</>
-                    : <>With <strong>{money(inputs.baristaPartTimeIncome, 0)}/yr</strong> of part-time income, your portfolio only needs to cover <strong>{money(Math.max(0, retirementAnnualFor(inputs, annualExp) - (Number(inputs.baristaPartTimeIncome) || 0)), 0)}/yr</strong>, reaching Barista FIRE at <strong>age {fiAge}</strong>.</>}
+                    : baristaIncomeEnded
+                    ? <>Your <strong>{money(inputs.baristaPartTimeIncome, 0)}/yr</strong> of part-time income ends at age {baristaEndAge}, before the projected milestone, so it provides no reduction in this scenario: your portfolio has to cover the full <strong>{money(baristaRetSpend, 0)}/yr</strong>, reaching financial independence at <strong>age {fiAge}</strong>.</>
+                    : <>With <strong>{money(inputs.baristaPartTimeIncome, 0)}/yr</strong> of part-time income{baristaEndAge > 0 ? ` until age ${baristaEndAge}` : ""}, your portfolio only needs to cover <strong>{money(baristaGapCovered, 0)}/yr</strong>{baristaEndAge > 0 ? ` until then, and full spending after` : ""}, reaching Barista FIRE at <strong>age {fiAge}</strong>.</>}
                 </p>
                 {/* Side-by-side */}
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-widest text-amber-300">Barista FIRE</div>
-                    <div className="mt-2 text-xs text-slate-300">{money(inputs.baristaPartTimeIncome, 0)}/yr part-time income</div>
+                    <div className="mt-2 text-xs text-slate-300">{money(inputs.baristaPartTimeIncome, 0)}/yr part-time income{baristaIncomeEnded ? ` (ends at ${baristaEndAge}, before this milestone: no reduction)` : baristaEndAge > 0 ? ` until age ${baristaEndAge}` : ""}</div>
                     <div className="mt-3 text-2xl font-bold text-white">{fireNumberShown}</div>
-                    <div className="mt-1 text-sm text-amber-200">FIRE at age {fiAge ?? "—"}</div>
+                    <div className="mt-1 text-sm text-amber-200">{fiAtAgeText(fiAge)}</div>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-300">Full FIRE (no part-time income)</div>
                     <div className="mt-2 text-xs text-slate-300">Portfolio covers all expenses, {dollarBasis}</div>
                     <div className="mt-3 text-2xl font-bold text-white">{fullFireNumberShown(fullFireForBarista)}</div>
-                    <div className="mt-1 text-sm text-slate-300">FIRE at age {fullFiAgeForBarista ?? "—"}</div>
+                    <div className="mt-1 text-sm text-slate-300">{fiAtAgeText(fullFiAgeForBarista)}</div>
                   </div>
                 </div>
                 {baristaYearsSaved !== null && baristaYearsSaved > 0 && (
@@ -2525,8 +2580,8 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   </div>
                 )}
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Stat label="Barista FIRE Number" value={hasCoreInputs ? fireNumberShown : "—"} helper={`At ${inputs.withdrawalRatePct}% withdrawal on the gap, ${dollarBasis}.${fireNumberTodayNote}`} highlight />
-                  <Stat label="Portfolio Gap Covered" value={hasCoreInputs ? money(Math.max(0, annualExp - (Number(inputs.baristaPartTimeIncome) || 0)), 0) : "—"} helper="Amount your portfolio must fund per year" />
+                  <Stat label="Barista FIRE Number" value={hasCoreInputs ? fireNumberShown : "—"} helper={baristaIncomeEnded ? `At ${inputs.withdrawalRatePct}% withdrawal on full spending, because the part-time income ends at ${baristaEndAge}, before this milestone; ${dollarBasis}.${fireNumberTodayNote}` : `At ${inputs.withdrawalRatePct}% withdrawal on the gap${baristaEndAge > 0 ? " (then full spending once the part-time income ends)" : ""}, ${dollarBasis}.${fireNumberTodayNote}`} highlight />
+                  <Stat label="Portfolio Gap Covered" value={hasCoreInputs ? money(baristaGapCovered, 0) : "—"} helper={baristaIncomeEnded ? "Full spending: the part-time income ends before this milestone" : "Amount your portfolio must fund per year"} />
                 </div>
                 <ProgressBar pct={progress.pct} label="Progress to Barista FIRE"
                   sublabel={<>{money(progress.current, 0)} {inputs.advanced ? "spendable toward FIRE" : "invested"} · {fiAge ? <>Projected under these assumptions: Barista FIRE at <span className="font-semibold text-slate-200">{fiAge}</span></> : "Keep building"}</>} />
@@ -2575,7 +2630,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                     { label: "Age", value: String(inputs.age), source: same(inputs.age, start.age) ? "sample" : "yours" },
                     { label: "Annual gross income", value: money(inputs.income, 0), source: same(inputs.income, start.income) ? "sample" : "yours" },
                     { label: "State", value: String(inputs.state).toUpperCase(), source: same(inputs.state, start.state) ? "sample" : "yours" },
-                    { label: "Monthly spending", value: money(inputs.expensesMonthly, 0), source: same(inputs.expensesMonthly, start.expensesMonthly) ? "sample" : "yours" },
+                    { label: "Monthly spending now", value: money(inputs.expensesMonthly, 0), source: same(inputs.expensesMonthly, start.expensesMonthly) ? "sample" : "yours" },
                     ...(inputs.retirementDifferent ? [{ label: "Monthly spending in retirement", value: money(inputs.retirementExpensesMonthly, 0), source: same(inputs.retirementExpensesMonthly, start.retirementExpensesMonthly) ? "planning" : "yours" } as const] : []),
                     { label: "Invested portfolio", value: money(inputs.currentPortfolio, 0), source: same(inputs.currentPortfolio, start.currentPortfolio) ? "sample" : "yours" },
                     { label: "Withdrawal rate", value: `${inputs.withdrawalRatePct}%`, source: same(inputs.withdrawalRatePct, start.withdrawalRatePct) ? "planning" : "yours" },
@@ -2630,7 +2685,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                             {(row!.deltaYears ?? 0) > 0 ? `${row!.deltaYears} yrs earlier` : (row!.deltaYears ?? 0) < 0 ? `${Math.abs(row!.deltaYears ?? 0)} yrs slower` : "Same"}
                           </div>
                         )}
-                        <div className="text-[12px] text-slate-300">{row!.ageAtFI === null ? "Not reached" : `FIRE at ${row!.ageAtFI}`}</div>
+                        <div className="text-[12px] text-slate-300">{row!.ageAtFI === null ? "Not reached" : fiAtAgeText(row!.ageAtFI)}</div>
                         {!row!.isBaseline && (
                           <button type="button" onClick={() => setPinnedCompareCityId(c => c === row!.cityId ? null : row!.cityId)}
                             className={["mt-1 rounded-lg border px-2 py-1 text-[11px] font-medium transition", pinnedCompareCityId === row!.cityId ? "border-sky-300/40 bg-sky-300/10 text-sky-200" : "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"].join(" ")}>

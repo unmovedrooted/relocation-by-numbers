@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { GridTable, level, num, orNA, toneStyles, usd } from "@/components/reportParts";
+import { GridTable, level, orNA, Tile, toneStyles, usd } from "@/components/reportParts";
 
 export type FireCityRow = {
   id: string;
@@ -15,7 +15,7 @@ export type FireCityRow = {
 };
 
 /** The ranking table with a salary and filing-status choice. The server renders the default (single, headline salary), so the page is complete without scripts. */
-export default function FireCitiesTable({ cities, salaries, defaultSalary, migrationYear }: { cities: FireCityRow[]; salaries: number[]; defaultSalary: number; migrationYear: string }) {
+export default function FireCitiesTable({ cities, salaries, defaultSalary }: { cities: FireCityRow[]; salaries: number[]; defaultSalary: number }) {
   const t = toneStyles("dark");
   const [salary, setSalary] = useState(defaultSalary);
   const [filing, setFiling] = useState<"single" | "married">("single");
@@ -24,6 +24,12 @@ export default function FireCitiesTable({ cities, salaries, defaultSalary, migra
     const at = c.byFiling[filing][String(salary)];
     return { c, monthlyNet: at.monthlyNet, stateTax: at.stateTax, afterRent: c.rent === null ? null : at.monthlyNet - c.rent };
   }).sort((a, b) => (b.afterRent ?? -Infinity) - (a.afterRent ?? -Infinity)), [cities, salary, filing]);
+
+  // The summary cards follow the same salary and filing choice as the table.
+  const top = ranked.find((x) => x.afterRent !== null);
+  const lowestRent = [...cities].filter((c) => c.rent !== null).sort((a, b) => a.rent! - b.rent!)[0];
+  const cheapest = [...cities].filter((c) => c.priceLevel !== null).sort((a, b) => a.priceLevel! - b.priceLevel!)[0];
+  const noTax = ranked.filter((x) => x.stateTax === 0);
 
   const who = filing === "single" ? "single filer" : "married couple filing jointly (one earner)";
   const button = (active: boolean) =>
@@ -48,12 +54,19 @@ export default function FireCitiesTable({ cities, salaries, defaultSalary, migra
           </div>
         </div>
       </div>
+      <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">At a glance, {filing === "single" ? "single filer" : "married filing jointly"} on {usd(salary)}</p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {top && <Tile tone="dark" label="Most left after rent" value={usd(top.afterRent!)} sub={`a month in ${top.c.name}`} />}
+        {lowestRent && <Tile tone="dark" label="Lowest typical rent" value={`${usd(lowestRent.rent!)}/mo`} sub={lowestRent.name} />}
+        {cheapest && <Tile tone="dark" label="Lowest price level" value={level(cheapest.priceLevel)} sub={`${cheapest.name} (U.S. = 100)`} />}
+        <Tile tone="dark" label="No state income tax" value={`${noTax.length} of ${cities.length}`} sub={noTax.length > 0 ? noTax.map((x) => x.c.name).join(", ") : "none of these cities"} />
+      </div>
       <p className={`mt-3 text-sm leading-6 ${t.body}`}>
         One {who} on {usd(salary)} a year in each city, after 2026 federal, state, local and payroll tax and the typical Census rent. Open a city for the full numbers.
       </p>
       <GridTable
         tone="dark"
-        columns={["City", "Take-home a month", "Typical rent", "Left after rent", "Price level", `State and city tax on ${usd(salary)}`, `State net migration (${migrationYear})`]}
+        columns={["City", "Take-home a month", "Typical rent", "Left after rent", "Price level", `State and city tax on ${usd(salary)}`]}
         rows={ranked.map((x, i) => [
           `${i + 1}. ${x.c.name}, ${x.c.stateCode.toUpperCase()}`,
           usd(x.monthlyNet),
@@ -61,9 +74,8 @@ export default function FireCitiesTable({ cities, salaries, defaultSalary, migra
           orNA(x.afterRent),
           level(x.c.priceLevel),
           x.stateTax === 0 ? "None" : usd(x.stateTax),
-          `${x.c.netMigration >= 0 ? "+" : ""}${num(x.c.netMigration)}`,
         ])}
-        minWidth="52rem"
+        minWidth="44rem"
       />
     </>
   );
