@@ -672,7 +672,7 @@ export default function AsiaRelocationCalculator() {
       { Metric: "Monthly flexibility after expenses", Value: displayAmount(results.monthlyFlexibility) },
       { Metric: "Comfort score", Value: `${results.comfort.band} · ${results.comfort.label}` },
       { Metric: "Upfront cash needed", Value: displayAmount(results.upfrontCashNeeded) },
-      { Metric: "Savings runway (after upfront costs)", Value: `${results.monthsCovered.toFixed(1)} months` },
+      { Metric: "Additional runway (beyond upfront costs and reserve)", Value: `${results.monthsCovered.toFixed(1)} months` },
       { Metric: "Cost-of-living-adjusted comparable income", Value: displayAmount(results.comparableSalary) },
       { Metric: `${toCityLabel} vs ${fromCityLabel} cost difference`, Value: `${Math.abs(results.relativeDifference * 100).toFixed(1)}% ${results.relativeDifference >= 0 ? "more" : "less"} expensive` },
     ];
@@ -753,6 +753,8 @@ export default function AsiaRelocationCalculator() {
     [
       { label: "monthly leftover", value: results.salaryReady ? results.monthlyFlexibility : null, format: (n) => displayAmount(n, 0) },
       { label: "upfront cash", value: results.salaryReady ? results.upfrontCashNeeded : null, format: (n) => displayAmount(n, 0) },
+      { label: "cash after upfront costs", value: results.salaryReady ? results.cashAfterUpfront : null, format: (n) => `${n < 0 ? "-" : ""}${displayAmount(Math.abs(n), 0)}` },
+      { label: "additional runway", value: results.salaryReady && Number.isFinite(results.monthsCovered) ? results.monthsCovered : null, format: (n) => `${n.toFixed(1)} months` },
     ],
   );
 
@@ -849,7 +851,7 @@ export default function AsiaRelocationCalculator() {
                 </label>
               )}
               <label className="text-sm">
-                <div className={labelHeadCls}>Current savings available</div>
+                <div className={labelHeadCls}>Current savings available <span className="text-slate-400 dark:text-slate-500">({originCurrency})</span></div>
                 <input className={inputCls} type="number" value={currentSavings} onChange={(e) => setCurrentSavings(sanitizeNumeric(e.target.value))} placeholder=" " />
               </label>
               <label className="text-sm">
@@ -891,7 +893,7 @@ export default function AsiaRelocationCalculator() {
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Rent in destination (monthly)</div><input className={inputCls} type="number" value={destinationRent} onChange={(e) => setDestinationRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Rent in destination (monthly) <span className="text-slate-400 dark:text-slate-500">(USD)</span></div><input className={inputCls} type="number" value={destinationRent} onChange={(e) => setDestinationRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
               {housingMode === "buy" ? (
                 <>
                   <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Estimated home price</div><input className={`${inputCls} opacity-70`} type="text" readOnly value={displayAmount(results.estimatedHomePrice ?? 0)} /></label>
@@ -907,9 +909,9 @@ export default function AsiaRelocationCalculator() {
                 </>
               ) : (
                 <>
-                  <label className="text-sm"><div className={labelHeadCls}>Deposit required</div><input className={inputCls} type="number" value={depositRequired} onChange={(e) => setDepositRequired(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
-                  <label className="text-sm"><div className={labelHeadCls}>First month rent</div><input className={inputCls} type="number" value={firstMonthRent} onChange={(e) => setFirstMonthRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
-                  <label className="text-sm"><div className={labelHeadCls}>Last month rent (if applicable)</div><input className={inputCls} type="number" value={lastMonthRent} onChange={(e) => setLastMonthRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+                  <label className="text-sm"><div className={labelHeadCls}>Deposit required <span className="text-slate-400 dark:text-slate-500">(USD)</span></div><input className={inputCls} type="number" value={depositRequired} onChange={(e) => setDepositRequired(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+                  <label className="text-sm"><div className={labelHeadCls}>First month rent <span className="text-slate-400 dark:text-slate-500">(USD)</span></div><input className={inputCls} type="number" value={firstMonthRent} onChange={(e) => setFirstMonthRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+                  <label className="text-sm"><div className={labelHeadCls}>Last month rent (if applicable) <span className="text-slate-400 dark:text-slate-500">(USD)</span></div><input className={inputCls} type="number" value={lastMonthRent} onChange={(e) => setLastMonthRent(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
                 </>
               )}
               <label className="text-sm"><div className={labelHeadCls}>Furnished or unfurnished</div>
@@ -956,19 +958,19 @@ export default function AsiaRelocationCalculator() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm">
-                <div className={labelHeadCls}>Groceries <span className="text-slate-400 dark:text-slate-500">(average, editable)</span></div>
+                <div className={labelHeadCls}>Groceries <span className="text-slate-400 dark:text-slate-500">(USD, average, editable)</span></div>
                 <input className={inputCls} type="number" value={groceries} onChange={(e) => setGroceries(sanitizeNumeric(e.target.value))} placeholder=" " />
               </label>
               <label className="text-sm">
-                <div className={labelHeadCls}>Utilities <span className="text-slate-400 dark:text-slate-500">(average, editable)</span></div>
+                <div className={labelHeadCls}>Utilities <span className="text-slate-400 dark:text-slate-500">(USD, average, editable)</span></div>
                 <input className={inputCls} type="number" value={utilities} onChange={(e) => setUtilities(sanitizeNumeric(e.target.value))} placeholder=" " />
               </label>
               <label className="text-sm">
-                <div className={labelHeadCls}>Transportation <span className="text-slate-400 dark:text-slate-500">(average, editable)</span></div>
+                <div className={labelHeadCls}>Transportation <span className="text-slate-400 dark:text-slate-500">(USD, average, editable)</span></div>
                 <input className={inputCls} type="number" value={transportation} onChange={(e) => setTransportation(sanitizeNumeric(e.target.value))} placeholder=" " />
               </label>
               <label className="text-sm">
-                <div className={labelHeadCls}>Healthcare <span className="text-slate-400 dark:text-slate-500">(average, editable)</span></div>
+                <div className={labelHeadCls}>Healthcare <span className="text-slate-400 dark:text-slate-500">(USD, average, editable)</span></div>
                 <input className={inputCls} type="number" value={healthcare} onChange={(e) => setHealthcare(sanitizeNumeric(e.target.value))} placeholder=" " />
               </label>
               <label className="text-sm sm:col-span-2">
@@ -986,13 +988,13 @@ export default function AsiaRelocationCalculator() {
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">One-Time Moving Costs</div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm"><div className={labelHeadCls}>Visa / permit estimate</div><input className={inputCls} type="number" value={visaCost} onChange={(e) => setVisaCost(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>One-way flight estimate</div><input className={inputCls} type="number" value={flightCost} onChange={(e) => setFlightCost(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Shipping / baggage estimate</div><input className={inputCls} type="number" value={shippingCost} onChange={(e) => setShippingCost(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Temporary housing estimate</div><input className={inputCls} type="number" value={temporaryStay} onChange={(e) => setTemporaryStay(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Setup / admin estimate</div><input className={inputCls} type="number" value={adminFees} onChange={(e) => setAdminFees(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
-              <label className="text-sm"><div className={labelHeadCls}>Furniture / setup estimate</div><input className={inputCls} type="number" value={furnitureSetup} onChange={(e) => setFurnitureSetup(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
-              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Recommended cash buffer</div><input className={inputCls} type="number" value={emergencyCashBuffer} onChange={(e) => setEmergencyCashBuffer(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Visa / permit estimate <span className="text-slate-400 dark:text-slate-500">(USD)</span></div><input className={inputCls} type="number" value={visaCost} onChange={(e) => setVisaCost(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>One-way flight estimate <span className="text-slate-400 dark:text-slate-500">(USD)</span></div><input className={inputCls} type="number" value={flightCost} onChange={(e) => setFlightCost(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Shipping / baggage estimate <span className="text-slate-400 dark:text-slate-500">(USD)</span></div><input className={inputCls} type="number" value={shippingCost} onChange={(e) => setShippingCost(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Temporary housing estimate <span className="text-slate-400 dark:text-slate-500">(USD)</span></div><input className={inputCls} type="number" value={temporaryStay} onChange={(e) => setTemporaryStay(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Setup / admin estimate <span className="text-slate-400 dark:text-slate-500">(USD)</span></div><input className={inputCls} type="number" value={adminFees} onChange={(e) => setAdminFees(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm"><div className={labelHeadCls}>Furniture / setup estimate <span className="text-slate-400 dark:text-slate-500">(USD)</span></div><input className={inputCls} type="number" value={furnitureSetup} onChange={(e) => setFurnitureSetup(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
+              <label className="text-sm sm:col-span-2"><div className={labelHeadCls}>Recommended cash buffer <span className="text-slate-400 dark:text-slate-500">(USD)</span></div><input className={inputCls} type="number" value={emergencyCashBuffer} onChange={(e) => setEmergencyCashBuffer(sanitizeNumeric(e.target.value))} placeholder=" " /></label>
             </div>
             <div className="mt-4 w-full text-xs text-slate-500 dark:text-slate-400">Planning estimates only.</div>
           </div>
@@ -1095,7 +1097,7 @@ export default function AsiaRelocationCalculator() {
               <div className="mt-2 font-semibold">Monthly living costs</div>
               <div>Total: <span className="font-bold">{displayAmount(results.livingCosts, 2)}</span></div>
               <div className="mt-2">Upfront cash needed: <span className="font-semibold">{displayAmount(results.upfrontCashNeeded)}</span></div>
-              <div>Months covered by savings after upfront costs: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
+              <div>Additional months covered beyond upfront costs and reserve: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
               <div className="mt-2">Housing % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
               <div>Essential costs % of net:{" "}<span className="font-semibold">{Number.isFinite(results.totalPctOfNet) ? `${results.totalPctOfNet.toFixed(1)}%` : "—"}</span></div>
             </div>
@@ -1138,8 +1140,17 @@ export default function AsiaRelocationCalculator() {
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Move Readiness</div>
             <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
-              {results.salaryReady ? `${results.comfort.band} · ${results.comfort.label}` : "—"}
+              {!results.salaryReady
+                ? "—"
+                : results.cashAfterUpfront < 0
+                  ? results.comfort.band === "D"
+                    ? "Monthly budget and upfront funding both fall short"
+                    : `Monthly budget ${results.comfort.band === "C" ? "is tight" : "works"}; upfront funding needed`
+                  : `${results.comfort.band} · ${results.comfort.label}`}
             </div>
+            {results.salaryReady && results.cashAfterUpfront < 0 && (
+              <div className="mt-1 text-sm font-semibold text-slate-700 dark:text-slate-300">Monthly budget: {results.comfort.band} · {results.comfort.label}</div>
+            )}
             <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">
               {!results.salaryReady
                 ? "Add your income to see whether this move looks comfortable, manageable, tight, or stretched."
@@ -1156,7 +1167,7 @@ export default function AsiaRelocationCalculator() {
                   <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.upfrontCashNeeded, 0)}</span>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <span>Months covered by savings after upfront costs</span>
+                  <span>Additional months covered beyond upfront costs and reserve</span>
                   <span className="font-semibold text-slate-900 dark:text-slate-100">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span>
                 </div>
               </div>

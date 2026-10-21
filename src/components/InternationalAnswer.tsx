@@ -36,8 +36,8 @@ export default function InternationalAnswer({
   const tone = (good: boolean | "mid") => good === true ? "text-emerald-700 dark:text-emerald-300" : good === "mid" ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300";
   const rows: Array<{ label: string; value: string; note: string; good: boolean | "mid" }> = [
     { label: "Monthly budget", value: comfortLabel, note: monthlyFlexibility >= 0 ? `${displayAmount(monthlyFlexibility, 0)} left each month` : "Costs exceed take-home pay", good: monthlyFlexibility < 0 ? false : /comfortable|strong|healthy/i.test(comfortLabel) ? true : "mid" },
-    { label: "Cash after upfront costs", value: `${cashAfterUpfront < 0 ? "-" : ""}${displayAmount(Math.abs(cashAfterUpfront), 0)}`, note: cashOk ? "Savings left once the move is paid for" : "Short of the upfront costs", good: cashOk },
-    { label: "Emergency runway", value: runwayLabel, note: `${runwayMonths.toFixed(1)} months of costs after the move`, good: runwayMonths >= 6 ? true : runwayMonths >= 3 ? "mid" : false },
+    { label: "Cash after upfront costs", value: `${cashAfterUpfront < 0 ? "-" : ""}${displayAmount(Math.abs(cashAfterUpfront), 0)}`, note: cashOk ? "Savings left after upfront costs and any emergency reserve you set aside" : "Short of the upfront costs", good: cashOk },
+    { label: "Additional runway", value: runwayLabel, note: `${runwayMonths.toFixed(1)} months of costs beyond upfront costs and your reserved emergency fund`, good: runwayMonths >= 6 ? true : runwayMonths >= 3 ? "mid" : false },
   ];
   return (
     <div className="mb-3 rounded-xl border border-violet-200 bg-violet-50/70 p-4 dark:border-violet-900/60 dark:bg-violet-950/20">

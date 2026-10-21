@@ -58,8 +58,8 @@ const SOUTH_AMERICA_VISA_CONTEXT: Record<string, {
   CO: {
     icon: "🇨🇴",
     program: "Digital Nomad Visa / Pensionado / Migrant Visa",
-    highlight: "Digital Nomad Visa, $800/mo",
-    notes: "Colombia's Digital Nomad Visa (V) is one of the most accessible in the world, remote workers earning just $800+/mo qualify for a 2-year renewable stay. Pensionado Visa requires $700+/mo in pension income. Migrant Visa (M) leads to permanent residency after 5 years of continuous stay. Medellín and Bogotá are the continent's top expat hubs. Cost of living is very low by North American and European standards.",
+    highlight: "Digital Nomad Visa, 3 monthly minimum wages",
+    notes: "Colombia's Digital Nomad Visa (V) is one of the most accessible in the world, remote workers qualify with income of at least three Colombian monthly minimum wages (SMMLV), which is about COP 5.25 million a month in 2026 (SMMLV COP 1,750,905); the dollar equivalent moves with the exchange rate. The pensioner category uses the same three-minimum-wage rule. Check the current amounts on the Cancillería site before applying. Migrant Visa (M) leads to permanent residency after 5 years of continuous stay. Medellín and Bogotá are the continent's top expat hubs. Cost of living is very low by North American and European standards.",
     estimatedFee: 160,
   },
   BR: {
@@ -593,6 +593,12 @@ const utilitiesFrom = familyUtilities * cityRatio(fromCityMultipliers.utilities,
           ? "Tight move, small surprises could create pressure."
           : "High-risk move, estimated expenses exceed income.";
 
+    const overallRecommendation = salaryReady && cashAfterUpfront < 0
+      ? monthlyFlexibility < 0
+        ? "Monthly budget and upfront funding both fall short: estimated expenses exceed income, and savings are below the one-time move costs."
+        : `${monthlyFlexibility >= 500 ? "Monthly budget works" : "Monthly budget is tight"}, but upfront funding is needed: your savings are below the one-time move costs.`
+      : recommendation;
+
     return {
       salaryReady, annualIncome, grossMonthly, currentTaxRate, targetTaxRate,
       currentTaxLabel: currentTaxEstimate.label, currentTaxNote: currentTaxEstimate.note,
@@ -610,7 +616,7 @@ monthsCovered,
 cashAfterUpfront,
 comparableSalary,
 relativeDifference,
-recommendation,
+recommendation: overallRecommendation,
     };
   }, [fromCityCode,
     mode, usTaxStatus, usSelfEmployed, salary, retirementIncome, salaryType, filing, fromCountry, toCountry,
@@ -647,7 +653,7 @@ recommendation,
       { Metric: "Monthly flexibility after expenses", Value: displayAmount(results.monthlyFlexibility) },
       { Metric: "Comfort score", Value: `${results.comfort.band} · ${results.comfort.label}` },
       { Metric: "Upfront cash needed", Value: displayAmount(results.upfrontCashNeeded) },
-      { Metric: "Savings runway (after upfront costs)", Value: `${results.monthsCovered.toFixed(1)} months` },
+      { Metric: "Additional runway (beyond upfront costs and reserve)", Value: `${results.monthsCovered.toFixed(1)} months` },
       { Metric: "Cost-of-living-adjusted comparable income", Value: displayAmount(results.comparableSalary) },
       { Metric: `${toCityLabel} vs ${fromCityLabel} cost difference`, Value: `${Math.abs(results.relativeDifference * 100).toFixed(1)}% ${results.relativeDifference >= 0 ? "more" : "less"} expensive` },
     ];
@@ -728,6 +734,8 @@ recommendation,
     [
       { label: "monthly leftover", value: results.salaryReady ? results.monthlyFlexibility : null, format: (n) => displayAmount(n, 0) },
       { label: "upfront cash", value: results.salaryReady ? results.upfrontCashNeeded : null, format: (n) => displayAmount(n, 0) },
+      { label: "cash after upfront costs", value: results.salaryReady ? results.cashAfterUpfront : null, format: (n) => `${n < 0 ? "-" : ""}${displayAmount(Math.abs(n), 0)}` },
+      { label: "additional runway", value: results.salaryReady && Number.isFinite(results.monthsCovered) ? results.monthsCovered : null, format: (n) => `${n.toFixed(1)} months` },
     ],
   );
 
@@ -974,7 +982,7 @@ recommendation,
               <div className="mt-2 font-semibold">Monthly living costs</div>
               <div>Total: <span className="font-bold">{displayAmount(results.livingCosts, 2)}</span></div>
               <div className="mt-2">Upfront cash needed: <span className="font-semibold">{displayAmount(results.upfrontCashNeeded)}</span></div>
-              <div>Months covered by savings after upfront costs: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
+              <div>Additional months covered beyond upfront costs and reserve: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
               <div className="mt-2">Essential costs % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
             </div>
             <div className="mt-4 border-t border-slate-200 dark:border-slate-800 pt-3 text-xs text-slate-500 dark:text-slate-400 space-y-1">

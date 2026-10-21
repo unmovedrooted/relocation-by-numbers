@@ -1,6 +1,7 @@
 "use client";
 
 import ChangeNote from "./ChangeNote";
+import { withUpfrontFunding } from "@/lib/moveVerdict";
 import { useChangeNote } from "@/lib/useChangeNote";
 import MobileResultBar from "./MobileResultBar";
 import ExampleResultsNotice from "./ExampleResultsNotice";
@@ -58,7 +59,7 @@ const EUROPE_VISA_CONTEXT: Record<string, {
   PT: {
     program: "D7 Passive Income / Digital Nomad Visa",
     highlight: "D7 Visa",
-    notes: "Popular with remote workers and retirees. Requires proof of passive income (~€760/mo minimum). Path to NHR tax regime (now IFICI). EU freedom of movement for EU citizens.",
+    notes: "Popular with remote workers and retirees. The D7 requires proof of regular passive income; Portugal's official visa guidance sets a reference minimum of €920 a month for 2026 for the main applicant, with more for family members. The old NHR tax regime is closed to new entrants; its successor, IFICI, applies only to specific qualifying activities and other conditions, so residency alone does not qualify you. EU freedom of movement for EU citizens.",
     estimatedFee: 250,
     euFreeMovement: true,
   },
@@ -1025,7 +1026,7 @@ requiredAnnualIncome,
 incomeGap,
 marginChangePct,
 flexibilityRatio,
-readinessRecommendation,
+readinessRecommendation: withUpfrontFunding(readinessRecommendation, cashAfterUpfront),
     };
   }, [fromCityCode,
     mode, salary, retirementIncome, filing, fromCountry, toCountry,
@@ -1077,7 +1078,7 @@ readinessRecommendation,
       { Metric: "Monthly flexibility after expenses", Value: displayAmount(results.monthlyFlexibility) },
       { Metric: "Comfort score", Value: `${results.comfort.band} · ${results.comfort.label}` },
       { Metric: "Upfront cash needed", Value: displayAmount(results.upfrontCashNeeded) },
-      { Metric: "Savings runway (after upfront costs)", Value: `${results.monthsCovered.toFixed(1)} months` },
+      { Metric: "Additional runway (beyond upfront costs and reserve)", Value: `${results.monthsCovered.toFixed(1)} months` },
       { Metric: "Cost-of-living-adjusted comparable income", Value: displayAmount(results.comparableSalary) },
       { Metric: `${toCityLabel} vs ${fromCityLabel} cost difference`, Value: `${Math.abs(results.relativeDifference * 100).toFixed(1)}% ${results.relativeDifference >= 0 ? "more" : "less"} expensive` },
     ];
@@ -1117,6 +1118,8 @@ readinessRecommendation,
     [
       { label: "monthly leftover", value: results.salaryReady ? results.monthlyFlexibility : null, format: (n) => displayAmount(n, 0) },
       { label: "upfront cash", value: results.salaryReady ? results.upfrontCashNeeded : null, format: (n) => displayAmount(n, 0) },
+      { label: "cash after upfront costs", value: results.salaryReady ? results.cashAfterUpfront : null, format: (n) => `${n < 0 ? "-" : ""}${displayAmount(Math.abs(n), 0)}` },
+      { label: "additional runway", value: results.salaryReady && Number.isFinite(results.monthsCovered) ? results.monthsCovered : null, format: (n) => `${n.toFixed(1)} months` },
     ],
   );
 
@@ -1169,7 +1172,7 @@ readinessRecommendation,
               {mode === "retired" ? (
                 <CalculatorImmediateNumberField
                   id="europe-retirement-income"
-                  label={<>Gross annual retirement income <span className="text-slate-400 dark:text-slate-500">({originCurrency})</span></>}
+                  label={`Gross annual retirement income (${originCurrency})`}
                   className={inputCls}
                   value={retirementIncome}
                   onChange={setRetirementIncome}
@@ -1178,7 +1181,7 @@ readinessRecommendation,
               ) : (
                 <CalculatorImmediateNumberField
                   id="europe-salary"
-                  label={<>Gross annual salary <span className="text-slate-400 dark:text-slate-500">({originCurrency})</span></>}
+                  label={`Gross annual salary (${originCurrency})`}
                   className={inputCls}
                   value={salary}
                   onChange={setSalary}
@@ -1243,7 +1246,7 @@ readinessRecommendation,
                 </CalculatorSelect>
               )}
 
-              <CalculatorImmediateNumberField id="europe-current-savings" label="Current savings available" className={inputCls} value={currentSavings} onChange={setCurrentSavings} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-current-savings" label={`Current savings available (${originCurrency})`} className={inputCls} value={currentSavings} onChange={setCurrentSavings} placeholder=" " />
 
               <CalculatorImmediateNumberField id="europe-adults" label="Number of adults" className={inputCls} min="1" step="1" value={adults} onChange={setAdults} placeholder=" " />
 
@@ -1284,7 +1287,7 @@ readinessRecommendation,
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <CalculatorImmediateNumberField id="europe-destination-rent" label="Rent in destination (monthly)" wrapperClassName="sm:col-span-2" className={inputCls} min="0" value={destinationRent} onChange={setDestinationRent} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-destination-rent" label={`Rent in destination (monthly) (${COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})`} wrapperClassName="sm:col-span-2" className={inputCls} min="0" value={destinationRent} onChange={setDestinationRent} placeholder=" " />
               {housingMode === "buy" ? (
                 <>
                   <div className="text-sm sm:col-span-2">
@@ -1301,9 +1304,9 @@ readinessRecommendation,
                 </>
               ) : (
                 <>
-                  <CalculatorImmediateNumberField id="europe-security-deposit" label="Deposit required" className={inputCls} min="0" value={depositRequired} onChange={setDepositRequired} placeholder=" " />
-                  <CalculatorImmediateNumberField id="europe-first-month-rent" label="First month rent" className={inputCls} min="0" value={firstMonthRent} onChange={setFirstMonthRent} placeholder=" " />
-                  <CalculatorImmediateNumberField id="europe-last-month-rent" label="Last month rent (if applicable)" className={inputCls} min="0" value={lastMonthRent} onChange={setLastMonthRent} placeholder=" " />
+                  <CalculatorImmediateNumberField id="europe-security-deposit" label={`Deposit required (${COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})`} className={inputCls} min="0" value={depositRequired} onChange={setDepositRequired} placeholder=" " />
+                  <CalculatorImmediateNumberField id="europe-first-month-rent" label={`First month rent (${COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})`} className={inputCls} min="0" value={firstMonthRent} onChange={setFirstMonthRent} placeholder=" " />
+                  <CalculatorImmediateNumberField id="europe-last-month-rent" label={`Last month rent (if applicable) (${COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})`} className={inputCls} min="0" value={lastMonthRent} onChange={setLastMonthRent} placeholder=" " />
                 </>
               )}
               <CalculatorSelect id="europe-furnishing" label="Furnished or unfurnished" className={selectCls} value={furnished} onChange={(e) => setFurnished(e.target.value as FurnishedType)}>
@@ -1437,13 +1440,13 @@ readinessRecommendation,
           <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:ring-slate-800/60">
             <div className="mb-3 text-sm font-semibold">One-Time Moving Costs</div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <CalculatorImmediateNumberField id="europe-visa-cost" label="Visa / permit estimate" className={inputCls} value={visaCost} onChange={setVisaCost} placeholder=" " />
-              <CalculatorImmediateNumberField id="europe-flight-cost" label="One-way flight estimate" className={inputCls} value={flightCost} onChange={setFlightCost} placeholder=" " />
-              <CalculatorImmediateNumberField id="europe-shipping-cost" label="Shipping / baggage estimate" className={inputCls} value={shippingCost} onChange={setShippingCost} placeholder=" " />
-              <CalculatorImmediateNumberField id="europe-temporary-stay" label="Temporary housing estimate" className={inputCls} value={temporaryStay} onChange={setTemporaryStay} placeholder=" " />
-              <CalculatorImmediateNumberField id="europe-admin-fees" label="Setup / admin estimate" className={inputCls} value={adminFees} onChange={setAdminFees} placeholder=" " />
-              <CalculatorImmediateNumberField id="europe-furniture-setup" label="Furniture / setup estimate" className={inputCls} value={furnitureSetup} onChange={setFurnitureSetup} placeholder=" " />
-              <CalculatorImmediateNumberField id="europe-emergency-cash-buffer" label="Recommended cash buffer" wrapperClassName="sm:col-span-2" className={inputCls} value={emergencyCashBuffer} onChange={setEmergencyCashBuffer} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-visa-cost" label={`Visa / permit estimate (${COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})`} className={inputCls} value={visaCost} onChange={setVisaCost} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-flight-cost" label={`One-way flight estimate (${COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})`} className={inputCls} value={flightCost} onChange={setFlightCost} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-shipping-cost" label={`Shipping / baggage estimate (${COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})`} className={inputCls} value={shippingCost} onChange={setShippingCost} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-temporary-stay" label={`Temporary housing estimate (${COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})`} className={inputCls} value={temporaryStay} onChange={setTemporaryStay} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-admin-fees" label={`Setup / admin estimate (${COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})`} className={inputCls} value={adminFees} onChange={setAdminFees} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-furniture-setup" label={`Furniture / setup estimate (${COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})`} className={inputCls} value={furnitureSetup} onChange={setFurnitureSetup} placeholder=" " />
+              <CalculatorImmediateNumberField id="europe-emergency-cash-buffer" label={`Recommended cash buffer (${COUNTRY_TO_CURRENCY[toCountry] ?? "EUR"})`} wrapperClassName="sm:col-span-2" className={inputCls} value={emergencyCashBuffer} onChange={setEmergencyCashBuffer} placeholder=" " />
             </div>
             <div className="mt-4 w-full text-xs text-slate-500 dark:text-slate-400">Planning estimates only.</div>
           </div>
@@ -1551,7 +1554,7 @@ readinessRecommendation,
                   <li key={item.label}>{item.label}: {displayAmount(item.amount)}</li>
                 ))}
               </ul>
-              <div>Months covered by savings after upfront costs: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
+              <div>Additional months covered beyond upfront costs and reserve: <span className="font-semibold">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
               <div className="mt-2">Housing % of net (target): <span className="font-semibold">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
             </div>
 

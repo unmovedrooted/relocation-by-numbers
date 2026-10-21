@@ -31,7 +31,7 @@ describe("EuropeRelocationCalculator immediate numeric fields", () => {
   });
 
   it("preserves savings and household field handlers and metadata", () => {
-    expect(source).toMatch(/id="europe-current-savings"[^>]*label="Current savings available"[^>]*value=\{currentSavings\}[^>]*onChange=\{setCurrentSavings\}/);
+    expect(source).toMatch(/id="europe-current-savings"[^>]*label=\{`Current savings available \([^`]*\)`\}[^>]*value=\{currentSavings\}[^>]*onChange=\{setCurrentSavings\}/);
     expect(source).toMatch(/id="europe-adults"[^>]*label="Number of adults"[^>]*min="1"[^>]*step="1"[^>]*value=\{adults\}[^>]*onChange=\{setAdults\}/);
     expect(source).toMatch(/id="europe-children"[^>]*label="Number of children"[^>]*min="0"[^>]*step="1"[^>]*value=\{children\}[^>]*onChange=\{setChildren\}/);
   });

@@ -17,7 +17,10 @@ const expectedFields = [
 describe("EuropeRelocationCalculator housing amount fields", () => {
   it("uses CalculatorImmediateNumberField for all four scoped fields", () => {
     for (const [id, label, value, setter] of expectedFields) {
-      expect(source).toMatch(new RegExp(`<CalculatorImmediateNumberField[^>]*id="${id}"[^>]*label="${label.replace(/[()?]/g, "\\$&")}"[^>]*min="0"[^>]*value=\\{${value}\\}[^>]*onChange=\\{${setter}\\}[^>]*placeholder=" "`, "s"));
+      // The label may carry the currency, written as a plain string or a template literal.
+      const escaped = label.replace(/[()?]/g, "\\$&");
+      const labelPattern = '(?:"' + escaped + '"|\\{`' + escaped + " \\([^`]*\\)`\\})";
+      expect(source).toMatch(new RegExp(`<CalculatorImmediateNumberField[^>]*id="${id}"[^>]*label=${labelPattern}[^>]*min="0"[^>]*value=\\{${value}\\}[^>]*onChange=\\{${setter}\\}[^>]*placeholder=" "`, "s"));
       expect(source.match(new RegExp(`id="${id}"`, "g"))).toHaveLength(1);
     }
   });

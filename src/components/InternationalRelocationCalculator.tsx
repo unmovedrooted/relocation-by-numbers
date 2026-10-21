@@ -1,6 +1,7 @@
 "use client";
 
 import ChangeNote from "./ChangeNote";
+import { withUpfrontFunding } from "@/lib/moveVerdict";
 import { useChangeNote } from "@/lib/useChangeNote";
 import MobileResultBar from "./MobileResultBar";
 import ExampleResultsNotice from "./ExampleResultsNotice";
@@ -600,7 +601,7 @@ const readinessRecommendation =
       housingTotal, rentTo, housingMode, estimatedHomePrice, buyMonthlyPI, downPaymentUsd, housingUtilities, carCostTo, carCostFrom, livingCosts,
       monthlyFlexibility,
       requiredNetMonthly, requiredGrossMonthly, requiredAnnualIncome,
-      incomeGap, marginChangePct, flexibilityRatio, readinessRecommendation,
+      incomeGap, marginChangePct, flexibilityRatio, readinessRecommendation: withUpfrontFunding(readinessRecommendation, cashAfterUpfront),
       pct, comfort,
       upfrontCashNeeded, monthsCovered, cashAfterUpfront, comparableSalary, relativeDifference,
     };
@@ -642,7 +643,7 @@ const readinessRecommendation =
       { Metric: "Monthly flexibility after expenses", Value: displayAmount(results.monthlyFlexibility) },
       { Metric: "Comfort score", Value: `${results.comfort.band} · ${results.comfort.label}` },
       { Metric: "Upfront cash needed", Value: displayAmount(results.upfrontCashNeeded) },
-      { Metric: "Savings runway (after upfront costs)", Value: `${results.monthsCovered.toFixed(1)} months` },
+      { Metric: "Additional runway (beyond upfront costs and reserve)", Value: `${results.monthsCovered.toFixed(1)} months` },
       { Metric: "Cost-of-living-adjusted comparable income", Value: displayAmount(results.comparableSalary) },
       { Metric: `${toCityLabel} vs ${fromCityLabel} cost difference`, Value: `${Math.abs(results.relativeDifference * 100).toFixed(1)}% ${results.relativeDifference >= 0 ? "more" : "less"} expensive` },
     ];
@@ -727,6 +728,8 @@ const readinessRecommendation =
     [
       { label: "monthly leftover", value: results.salaryReady ? results.monthlyFlexibility : null, format: (n) => displayAmount(n, 0) },
       { label: "upfront cash", value: results.salaryReady ? results.upfrontCashNeeded : null, format: (n) => displayAmount(n, 0) },
+      { label: "cash after upfront costs", value: results.salaryReady ? results.cashAfterUpfront : null, format: (n) => `${n < 0 ? "-" : ""}${displayAmount(Math.abs(n), 0)}` },
+      { label: "additional runway", value: results.salaryReady && Number.isFinite(results.monthsCovered) ? results.monthsCovered : null, format: (n) => `${n.toFixed(1)} months` },
     ],
   );
 
@@ -1197,7 +1200,7 @@ const readinessRecommendation =
                 <div className="pt-1">Total: <span className="font-bold text-slate-900 dark:text-slate-100">{displayAmount(results.livingCosts, 2)}</span></div>
               </div>
               <div className="mt-2">Upfront cash needed: <span className="font-semibold text-slate-900 dark:text-slate-100">{displayAmount(results.upfrontCashNeeded)}</span></div>
-              <div>Months covered by savings after upfront costs: <span className="font-semibold text-slate-900 dark:text-slate-100">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
+              <div>Additional months covered beyond upfront costs and reserve: <span className="font-semibold text-slate-900 dark:text-slate-100">{Number.isFinite(results.monthsCovered) ? results.monthsCovered.toFixed(1) : "—"}</span></div>
               <div className="mt-2">Housing % of net (target): <span className="font-semibold text-slate-900 dark:text-slate-100">{Number.isFinite(results.pct) ? `${results.pct.toFixed(1)}%` : "—"}</span></div>
             </div>
 

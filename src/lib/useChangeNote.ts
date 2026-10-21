@@ -11,12 +11,22 @@ export type TrackedOutput = { label: string; value: number | null; format: (n: n
  * Explains a change in the result after the visitor edits an input: which input they changed and how each headline result moved.
  * The note appears once typing pauses, only when one or two inputs changed (a pasted link or a reset changes many) and only when a result
  * actually moved. It names the input that changed rather than guessing at hidden causes. No financial inputs leave the page.
+ * Changes that happen without the visitor touching the page (defaults loading once a city is known, a restored link) are absorbed silently.
  */
 export function useChangeNote(fields: Record<string, TrackedField>, outputs: TrackedOutput[], settleMs = 700): { note: string | null; dismiss: () => void } {
   const committed = useRef<{ fields: Record<string, TrackedField>; outputs: TrackedOutput[] } | null>(null);
   const latest = useRef({ fields, outputs });
   latest.current = { fields, outputs };
   const [note, setNote] = useState<string | null>(null);
+  const touched = useRef(false);
+
+  // Only a visitor's own keystroke, click or choice can make a change worth explaining.
+  useEffect(() => {
+    const mark = () => { touched.current = true; };
+    const events = ["input", "change", "click", "keydown"] as const;
+    events.forEach((e) => document.addEventListener(e, mark, true));
+    return () => events.forEach((e) => document.removeEventListener(e, mark, true));
+  }, []);
 
   // A stable signature so the effect reruns only when an input or a result changes.
   const signature = JSON.stringify([Object.entries(fields).map(([k, f]) => [k, f.value]), outputs.map((o) => o.value)]);
@@ -35,6 +45,9 @@ export function useChangeNote(fields: Record<string, TrackedField>, outputs: Tra
         .map((o, i) => ({ o, was: before.outputs[i]?.value ?? null }))
         .filter(({ o, was }) => o.value !== null && was !== null && Math.abs(o.value - was) > 1e-9);
       committed.current = { fields: now.fields, outputs: now.outputs };
+      const byVisitor = touched.current;
+      touched.current = false;
+      if (!byVisitor) return;
       if (changed.length === 0 || changed.length > 2) { setNote(null); return; }
       if (moved.length === 0) {
         setNote(`You changed ${changed.map((k) => `${now.fields[k].label} from ${before.fields[k].value} to ${now.fields[k].value}`).join(" and ")}. The result did not change.`);
