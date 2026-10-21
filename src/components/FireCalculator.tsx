@@ -1416,8 +1416,8 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
 
   // Details that do not depend on the FIRE style (age, income, location, portfolio) carry over between the FIRE pages for the tab's session.
   // Spending and withdrawal assumptions belong to each style, so they start from the page's own defaults.
-  // First-time visitors see the core inputs (age, income, state, spending, portfolio); the rest sit behind "Show all inputs".
-  // Everything shows when the page was opened with carried-over details, a move, or Advanced mode.
+  // First-time visitors see the core inputs (age, income, state, spending, portfolio); the rest sit behind "More assumptions".
+  // Everything shows when the page was opened with a move or Advanced mode; carried-over values are listed in the defaults line until "More assumptions" is opened.
   const [showAllInputs, setShowAllInputs] = useState(false);
   const [budgetByCategory, setBudgetByCategory] = useState(false);
   const [spendingCats, setSpendingCats] = useState<Record<string, number>>(() => spendingPreset ? SPENDING_CATEGORY_DEFAULTS[spendingPreset] : {});
@@ -1472,7 +1472,7 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
     } catch { /* storage unavailable */ }
   }, [hydrated, inputs]);
 
-  const showMore = showAllInputs || inputs.advanced || carriedOver || linkedMove || !!abroadLabel;
+  const showMore = showAllInputs || inputs.advanced || linkedMove || !!abroadLabel;
 
   // ── Core derived values ───────────────────────────────────────────────────
   const annualExp =useMemo(() => annualExpenses(inputs), [inputs]);
@@ -2088,7 +2088,7 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               <div className="rounded-xl border border-white/10 bg-black/10 p-3 text-xs leading-5 text-slate-300 sm:col-span-2">
                 Using defaults: filing {inputs.filingStatus}, 401(k) {inputs.k401Pct}%, {inputs.volatility} returns, {inputs.withdrawalRatePct}% withdrawal, {inputs.inflationPct}% inflation. Saving is estimated from your after-tax income less spending.{" "}
                 <button type="button" onClick={() => setShowAllInputs(true)} className="font-semibold text-emerald-200 underline underline-offset-4 hover:text-emerald-100">
-                  Show all inputs
+                  More assumptions
                 </button>
               </div>
             )}
