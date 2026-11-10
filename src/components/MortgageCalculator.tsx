@@ -4,7 +4,8 @@ import AssumptionsCard, { sourceFor } from "./AssumptionsCard";
 import ChangeNote from "./ChangeNote";
 import { useChangeNote } from "@/lib/useChangeNote";
 import MobileResultBar from "./MobileResultBar";
-import { Children, cloneElement, isValidElement, useState, useMemo, useEffect, useCallback, useId, type ReactNode } from "react";
+import { Children, cloneElement, isValidElement, useState, useMemo, useEffect, useCallback, useId, useRef, type ReactNode } from "react";
+import { parseMortgageLink } from "@/lib/mortgageLink";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer,
@@ -975,12 +976,37 @@ function USTab() {
     "Higher Down",
   ]);
 
+  // Values carried over from a relocation result (see src/lib/mortgageLink.ts). The state's typical tax and insurance are skipped
+  // once for the fields the link already supplied, so the visitor's own figures are not replaced by state averages.
+  const [prefilledFrom, setPrefilledFrom] = useState<string | null>(null);
+  const carried = useRef<{ tax: boolean; insurance: boolean } | null>(null);
+  useEffect(() => {
+    const h = parseMortgageLink(new URLSearchParams(window.location.search));
+    if (!h) return;
+    if (h.homePrice !== undefined) setHomePrice(String(h.homePrice));
+    if (h.downPct !== undefined) setDownPct(String(h.downPct));
+    if (h.ratePct !== undefined) setRate(String(h.ratePct));
+    if (h.termYears !== undefined) setTerm(h.termYears);
+    if (h.propertyTaxPct !== undefined) setPropertyTaxRate(String(h.propertyTaxPct));
+    if (h.insuranceMonthly !== undefined) setInsurance(String(h.insuranceMonthly));
+    if (h.hoaMonthly !== undefined) setHoa(String(h.hoaMonthly));
+    if (h.grossIncome !== undefined) setGrossIncome(String(h.grossIncome));
+    if (h.monthlyRent !== undefined) setMonthlyRent(String(h.monthlyRent));
+    if (h.state && US_STATE_DEFAULTS[h.state]) {
+      carried.current = { tax: h.propertyTaxPct !== undefined, insurance: h.insuranceMonthly !== undefined };
+      setPropertyState(h.state);
+    }
+    setPrefilledFrom(h.place ?? (h.state && US_STATE_DEFAULTS[h.state] ? US_STATE_DEFAULTS[h.state].name : "your relocation result"));
+  }, []);
+
   useEffect(() => {
     if (!propertyState) return;
     const defaults = US_STATE_DEFAULTS[propertyState];
     if (!defaults) return;
-    setPropertyTaxRate(String(defaults.propertyTax));
-    setInsurance(String(defaults.insuranceMonthly));
+    const keep = carried.current;
+    carried.current = null;
+    if (!keep?.tax) setPropertyTaxRate(String(defaults.propertyTax));
+    if (!keep?.insurance) setInsurance(String(defaults.insuranceMonthly));
     setClosingCostPct(String(defaults.closingCostPct));
   }, [propertyState]);
 
@@ -1261,6 +1287,12 @@ function USTab() {
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <MobileResultBar targetId="mortgage-results" summary={hp > 0 && grossMonthly > 0 ? `${money(totalMonthly)}/mo · ${verdict.title}` : null} />
       <div className="space-y-3">
+        {prefilledFrom && (
+          <div role="status" className="rounded-xl border border-violet-200 bg-violet-50/70 px-4 py-3 text-sm text-slate-700 dark:border-violet-900/60 dark:bg-violet-950/20 dark:text-slate-300">
+            <span className="font-semibold text-slate-900 dark:text-white">Prefilled from your move to {prefilledFrom}.</span>{" "}
+            The home price, down payment, rate, property tax, insurance, income and rent came from the relocation calculator. Savings, debts and the other fields are still sample values, so replace them with your own.
+          </div>
+        )}
         <Card>
           <H2 action={<ResetButton onReset={handleReset} />}>Home &amp; Loan Details</H2>
           <div className="grid gap-3 sm:grid-cols-2">

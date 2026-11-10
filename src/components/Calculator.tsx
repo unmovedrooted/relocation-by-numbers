@@ -16,6 +16,8 @@ import {
 } from "../lib/wageTax";
 import type { FilingStatus } from "../lib/tax";
 import { monthlyHousingCost, estimatePmiMonthly } from "../lib/housing";
+import { buildMortgageLink } from "../lib/mortgageLink";
+import Link from "next/link";
 import TaxAssumptionsNote from "./TaxAssumptionsNote";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
@@ -559,6 +561,21 @@ export default function Calculator({
   ]);
 
   // ── Comparable salary ────────────────────────────────────────────────────
+  // The destination home, loan terms, pay and rent, handed to the mortgage calculator so nothing is typed twice.
+  const mortgageHref = useMemo(() => buildMortgageLink({
+    state: toState,
+    homePrice: n(homePrice),
+    downPct: n(downPct),
+    ratePct: n(ratePct),
+    termYears: n(termYears),
+    propertyTaxPct: n(propertyTaxPct),
+    insuranceMonthly: n(homeInsMonthly),
+    hoaMonthly: n(hoaMonthly),
+    grossIncome: n(salary),
+    monthlyRent: n(rentMonthly),
+    place: toCity && !toCity.id.startsWith("other-") ? `${toCity.name}, ${toState.toUpperCase()}` : undefined,
+  }), [toState, toCity, homePrice, downPct, ratePct, termYears, propertyTaxPct, homeInsMonthly, hoaMonthly, salary, rentMonthly]);
+
   const comparable = useMemo(() => {
     if (!fromCity || !toCity) return null;
     if (isFromOther || isToOther) return null;
@@ -1826,13 +1843,12 @@ export default function Calculator({
                 {comparable.pctLessMore >= 0 ? "less" : "more"} expensive than {comparable.fromCityName}.
               </p>
               <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Based on housing, transportation, and essential cost weighting.</div>
-              <button
-                type="button"
+              <Link
+                href={mortgageHref}
                 className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                onClick={() => window.open("http://relocationbynumbers.com/mortgage-calculator", "_blank", "noopener,noreferrer")}
               >
-                See if you can afford a mortgage →
-              </button>
+                See if you can afford to buy in {comparable.toCityName} (your numbers carry over) →
+              </Link>
               <button
                 type="button"
                 className="mt-2 flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
