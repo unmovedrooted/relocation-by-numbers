@@ -1,6 +1,7 @@
 import { estimateNetBreakdown } from "./wageTax";
 import type { FilingStatus } from "./tax";
 import type { StateCode } from "./states";
+import { retireeIncomeTax } from "./retirementStateView";
 
 // ─────────────────────────────────────────────────────────────────────────
 // TAX TREATMENT OF RETIREMENT-ACCOUNT WITHDRAWALS
@@ -38,6 +39,37 @@ export function withdrawalIncomeTax(
   const b = estimateNetBreakdown({ grossAnnual: gross, state, filing, k401Pct: 0 });
   const st = RETIREMENT_STATE_EXEMPT.has(state) ? 0 : b.state;
   return { total: b.federal + st, federal: b.federal, state: st }; // exclude FICA + local
+}
+
+/** From this age the age-aware estimate is used; younger withdrawals can be early distributions, which the state modules do not accept without more detail. */
+export const AGE_AWARE_FROM = 60;
+
+export type AgedWithdrawalTax = WithdrawalTax & {
+  /** True when the planner's household engine produced the figure; false when the simple wage-style estimate was used. */
+  ageAware: boolean;
+};
+
+/**
+ * Income tax on a gross traditional withdrawal for a retiree of the given age, treated as the only income.
+ *
+ * From AGE_AWARE_FROM it uses the planner's household engine: the federal standard deduction with the extra amount at 65 or older,
+ * the temporary senior deduction, and the state's own rules for retirement withdrawals at that age. The whole withdrawal belongs to
+ * one account owner, and a joint return assumes both spouses are the same age. Below that age, or when a state module cannot run,
+ * it falls back to withdrawalIncomeTax (standard deduction for a filer under 65, no early-withdrawal penalty).
+ */
+export function withdrawalIncomeTaxAtAge(
+  gross: number,
+  state: StateCode,
+  filing: FilingStatus,
+  accountType: WithdrawalAccountType,
+  age: number,
+): AgedWithdrawalTax {
+  if (accountType === "roth" || !Number.isFinite(gross) || gross <= 0) return { total: 0, federal: 0, state: 0, ageAware: Number.isFinite(age) && age >= AGE_AWARE_FROM };
+  if (Number.isFinite(age) && age >= AGE_AWARE_FROM) {
+    const r = retireeIncomeTax(state, { filing, age: Math.min(110, Math.round(age)), socialSecurity: 0, pension: 0, withdrawals: gross }, 0, true);
+    if (r) return { total: r.total, federal: r.federal, state: r.state, ageAware: true };
+  }
+  return { ...withdrawalIncomeTax(gross, state, filing, accountType), ageAware: false };
 }
 
 // Representative income used to read a state's marginal rate for the taxable

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, ComposedChart, Area, Line, XAxis, YAxis } from "recharts";
 import { STATES, type StateCode } from "../lib/states";
 import { type FilingStatus } from "../lib/tax";
-import { RETIREMENT_STATE_EXEMPT, withdrawalIncomeTax, representativeStateMarginalRate } from "../lib/retirementTax";
+import { RETIREMENT_STATE_EXEMPT, withdrawalIncomeTaxAtAge, representativeStateMarginalRate } from "../lib/retirementTax";
 import { accumulationPaths, RISK_PRESETS, type RiskLevel } from "../lib/monteCarlo";
 import { monthlyDepositFactor } from "../lib/depositTiming";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
@@ -291,8 +291,8 @@ export default function RetirementCalculator() {
     // growth (that's the balance drag above), so withdrawals aren't taxed again
     // as ordinary income, the supportable income is effectively after-tax.
     const incomeTax = isTaxable || isRoth
-      ? { total: 0, federal: 0, state: 0 }
-      : withdrawalIncomeTax(base.annualIncome, state, filing, "traditional");
+      ? { total: 0, federal: 0, state: 0, ageAware: true }
+      : withdrawalIncomeTaxAtAge(base.annualIncome, state, filing, "traditional", nz(retirementAge));
     const afterTaxAnnualIncome = base.annualIncome - incomeTax.total;
     const afterTaxMonthlyIncome = afterTaxAnnualIncome / 12;
     const incomeIsStateExempt = RETIREMENT_STATE_EXEMPT.has(state);
@@ -603,7 +603,7 @@ export default function RetirementCalculator() {
                       </>
                     ) : (
                       <>
-                        ≈ <span className="font-semibold">{money(results.afterTaxMonthlyIncome)}/mo</span> after an estimated {(results.incomeEffectiveTaxRate * 100).toFixed(1)}% income tax in {stateName} (traditional). A Roth account would be tax-free. Tax uses the standard deduction for a filer under 65; the extra deduction at 65+ and the temporary senior deduction are not applied, so tax may be overstated.
+                        ≈ <span className="font-semibold">{money(results.afterTaxMonthlyIncome)}/mo</span> after an estimated {(results.incomeEffectiveTaxRate * 100).toFixed(1)}% income tax in {stateName} (traditional). A Roth account would be tax-free. {results.incomeTax.ageAware ? `Tax is estimated for a retiree aged ${retirementAge} with this withdrawal as the only income: the standard deduction with the extra amount at 65 or older, the temporary senior deduction and ${stateName}'s rules for retirement withdrawals.` : "Tax uses the standard deduction for a filer under 65 and does not include the 10% early-withdrawal penalty that can apply before 59½."}
                       </>
                     )}
                   </p>

@@ -269,9 +269,10 @@ export default function Page() {
                     illustrate sequence-of-returns risk.
                   </p>
                   <p>
-                    Tax estimates treat the withdrawal as your only ordinary income with the standard deduction. They
-                    don&apos;t include Social Security, the extra standard deduction at 65+, or capital-gains rules for
-                    taxable brokerage accounts.
+                    Tax estimates treat the withdrawal as your only ordinary income. From age 60 they use the standard
+                    deduction with the extra amount at 65 or older, the temporary senior deduction and your state&apos;s rules
+                    for retirement withdrawals. They don&apos;t include Social Security or capital-gains rules for taxable
+                    brokerage accounts.
                   </p>
                   <p>
                     Required Minimum Distributions (age 73 or 75, by birth year) may force larger withdrawals than you choose here. This

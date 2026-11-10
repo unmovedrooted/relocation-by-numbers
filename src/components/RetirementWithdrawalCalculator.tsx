@@ -5,7 +5,7 @@ import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip }
 import { STATES, type StateCode } from "../lib/states";
 import { type FilingStatus } from "../lib/tax";
 import { TAX_YEAR } from "../lib/taxYear2026";
-import { RETIREMENT_STATE_EXEMPT, withdrawalIncomeTax } from "../lib/retirementTax";
+import { RETIREMENT_STATE_EXEMPT, withdrawalIncomeTaxAtAge } from "../lib/retirementTax";
 import { withdrawalPaths, RISK_PRESETS, type RiskLevel } from "../lib/monteCarlo";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
@@ -267,7 +267,7 @@ export default function RetirementWithdrawalCalculator() {
     if (mode === "howLong") {
       // Entered directly, or worked out from the amount you want to spend after income tax.
       grossWithdrawal = spendBasis === "aftertax"
-        ? grossForAfterTax(Math.max(0, nz(afterTaxSpend)), (g) => withdrawalIncomeTax(g, state, filing, accountType).total)
+        ? grossForAfterTax(Math.max(0, nz(afterTaxSpend)), (g) => withdrawalIncomeTaxAtAge(g, state, filing, accountType, nz(currentAge)).total)
         : Math.max(0, nz(annualWithdrawal));
       const sim = simulate(balance, grossWithdrawal, r);
       yearsLasts = sim.years;
@@ -289,7 +289,7 @@ export default function RetirementWithdrawalCalculator() {
       trajectory = sim.trajectory;
     }
 
-    const tax = withdrawalIncomeTax(grossWithdrawal, state, filing, accountType);
+    const tax = withdrawalIncomeTaxAtAge(grossWithdrawal, state, filing, accountType, nz(currentAge));
     const afterTaxAnnual = grossWithdrawal - tax.total;
     const afterTaxMonthly = afterTaxAnnual / 12;
     const effectiveTaxRate = grossWithdrawal > 0 ? tax.total / grossWithdrawal : 0;
@@ -783,8 +783,8 @@ export default function RetirementWithdrawalCalculator() {
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
                 All figures are in today&apos;s dollars. Tax estimates treat withdrawals as your only ordinary income
                 using {`${accountType === "roth" ? "Roth (tax-free)" : "traditional/taxable"}`} treatment and {TAX_YEAR}
-                federal &amp; state rules with the standard deduction; they don&apos;t include Social Security, the
-                extra standard deduction at 65+, capital-gains treatment, or Required Minimum Distributions (which
+                federal &amp; state rules{results.tax.ageAware ? `, estimated for your starting age of ${currentAge}: the standard deduction with the extra amount at 65 or older, the temporary senior deduction and your state's rules for retirement withdrawals` : " with the standard deduction for a filer under 65, and no early-withdrawal penalty"}. The tax is held at
+                that age for the whole projection. They don&apos;t include Social Security, capital-gains treatment, or Required Minimum Distributions (which
                 begin at age 73 or 75, depending on your birth year).{" "}
                 {viewMode === "montecarlo"
                   ? `The Monte Carlo view runs 5,000 seeded simulations drawing each year's return from a lognormal distribution around your expected return at the chosen volatility, a model of market risk, not a prediction.${mode === "safeAmount" && targetSuccess > 0 ? ` The withdrawal shown is the largest one that lasts the full retirement in at least ${targetSuccess}% of those simulations; a different return, volatility or inflation assumption would change it.` : ""}`
