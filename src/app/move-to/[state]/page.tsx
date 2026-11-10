@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { GUIDE_INFO } from "@/lib/calculatorSources";
 import CalculatorSources from "@/components/CalculatorSources";
+import StateTaxFacts from "@/components/StateTaxFacts";
+import StateCitiesTable from "@/components/StateCitiesTable";
 import Calculator from "@/components/Calculator";
 import { notFound } from "next/navigation";
 import AdSlot from "@/components/AdSlot";
@@ -260,6 +262,10 @@ export default async function MoveToStatePage({ params }: Props) {
             />
           </section>
         ) : null}
+
+        <StateTaxFacts code={stateCode} />
+
+        <StateCitiesTable code={stateCode} />
 
         <section className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800 space-y-4">
           <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">

@@ -2,6 +2,7 @@ import { averageStateRent } from "@/lib/stateRent";
 import type { Metadata } from "next";
 import { GUIDE_INFO } from "@/lib/calculatorSources";
 import CalculatorSources from "@/components/CalculatorSources";
+import StateTaxFacts from "@/components/StateTaxFacts";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { STATES, type StateCode } from "@/lib/states";
@@ -346,6 +347,8 @@ export default async function BestStateForFirePage({ params }: PageProps) {
           <p className="text-sm leading-relaxed text-slate-300">{stateContent.secondary}</p>
           <p className="text-sm leading-relaxed text-slate-300">{stateContent.caution}</p>
         </section>
+
+        <StateTaxFacts code={found.code} tone="dark" />
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4">
           <h2 className="text-xl font-semibold">

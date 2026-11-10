@@ -4,6 +4,7 @@ import { STATE_SS_CLASSIFICATION } from "./retirementPlan/stateSocialSecurityCov
 import { DEFAULT_PROFILE, MATERIAL, stateRetirementTax, treatment, type RetireeProfile, type SourceKey, type SourceTreatment } from "./retirementStateView";
 import { STATE_TAX_SOURCES, type SourceRef } from "./calculatorSources";
 import { getStateRuleNote, type StateRuleNote } from "./taxRuleNotes";
+import { paycheckStateRows } from "./calculatorTables";
 
 /**
  * Per-state retirement tax guide data.
@@ -149,4 +150,73 @@ export function guideFaq(g: StateGuide): { q: string; a: string }[] {
     { q: `Does ${n} tax pension income?`, a: `${treatmentSentence(g, "pension")} Pension rules often depend on the type of pension (private, federal, state or local government), your age and your total income, so your result can differ.` },
     { q: `Does ${n} tax 401(k) and IRA withdrawals?`, a: `${treatmentSentence(g, "withdrawals")} Many states give partial relief to older taxpayers, and some tax withdrawals as ordinary income with no relief. Your age and total income decide the amount.` },
   ];
+}
+
+// ─── State tax facts for state landing pages ─────────────────────────────────
+
+export type StateTaxFacts = Readonly<{
+  code: StateCode;
+  name: string;
+  /** Take-home pay for a single filer at each of PAYCHECK_SALARIES (75k, 100k, 150k). */
+  net: readonly number[];
+  /** State income tax plus employee-paid payroll programs at $100,000. */
+  workerStateTax: number;
+  /** 1 = highest take-home at $100,000, out of `total` jurisdictions. */
+  netRank: number;
+  /** Other jurisdictions with the same take-home at $100,000. */
+  netTies: number;
+  netMedian: number;
+  /** State income tax on the example retiree. */
+  retireeTax: number;
+  retireeAdded: Readonly<Record<SourceKey, number>>;
+  /** 1 = lowest retiree tax, out of `total` jurisdictions; ties share the better rank. */
+  retireeRank: number;
+  /** Other jurisdictions with the same retiree tax. */
+  retireeTies: number;
+  retireeMedian: number;
+  total: number;
+  hasGuidePage: boolean;
+}>;
+
+let factsCache: Map<StateCode, StateTaxFacts> | null = null;
+
+const median = (values: number[]) => {
+  const s = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+};
+
+/** Worker take-home and retiree tax for every state and DC, with ranks. Computed once, from the site's own engines. */
+export function stateTaxFacts(code: StateCode): StateTaxFacts {
+  if (!factsCache) {
+    const workers = paycheckStateRows();
+    const retirees = STATES.map((s) => {
+      const r = stateRetirementTax(s.code, EXAMPLE);
+      if (r.error) throw new Error(`${s.code}: ${r.error}`);
+      return { code: s.code, tax: r.stateTax, added: r.added };
+    });
+    const netMid = median(workers.map((w) => w.net[1]));
+    const taxMid = median(retirees.map((r) => r.tax));
+    factsCache = new Map();
+    for (const w of workers) {
+      const r = retirees.find((x) => x.code === w.code)!;
+      factsCache.set(w.code, {
+        code: w.code,
+        name: w.name,
+        net: w.net,
+        workerStateTax: w.stateTaxAt100k,
+        netRank: 1 + workers.filter((o) => o.net[1] > w.net[1] + 0.5).length,
+        netTies: workers.filter((o) => o.code !== w.code && Math.abs(o.net[1] - w.net[1]) <= 0.5).length,
+        netMedian: netMid,
+        retireeTax: r.tax,
+        retireeAdded: r.added,
+        retireeRank: 1 + retirees.filter((o) => o.tax < r.tax - 0.5).length,
+        retireeTies: retirees.filter((o) => o.code !== w.code && Math.abs(o.tax - r.tax) <= 0.5).length,
+        retireeMedian: taxMid,
+        total: workers.length,
+        hasGuidePage: hasModule(w.code),
+      });
+    }
+  }
+  return factsCache.get(code)!;
 }

@@ -44,3 +44,22 @@ describe("retirement state guide", () => {
     }
   });
 });
+
+describe("state tax facts for landing pages", () => {
+  it("covers all 51 jurisdictions with consistent ranks", async () => {
+    const { stateTaxFacts } = await import("./retirementStateGuide");
+    const tx = stateTaxFacts("tx");
+    const ca = stateTaxFacts("ca");
+    expect(tx.total).toBe(51);
+    expect(tx.netRank).toBe(1);
+    expect(tx.netTies).toBeGreaterThanOrEqual(1); // Florida earns the same take-home
+    expect(tx.workerStateTax).toBe(0);
+    expect(tx.retireeTax).toBe(0);
+    expect(tx.hasGuidePage).toBe(false);
+    expect(ca.netRank).toBeGreaterThan(40);
+    expect(ca.hasGuidePage).toBe(true);
+    expect(ca.net[1]).toBeLessThan(tx.net[1]);
+    expect(ca.retireeRank).toBeGreaterThan(tx.retireeRank);
+    expect(tx.netMedian).toBe(ca.netMedian);
+  });
+});
