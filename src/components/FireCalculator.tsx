@@ -29,6 +29,8 @@ import Link from "next/link";
 import ExampleResultsNotice from "./ExampleResultsNotice";
 import { parseFireAbroadLink, parseFireLink } from "@/lib/fireLink";
 import { monthlyDepositFactor } from "@/lib/depositTiming";
+import { returnPaths } from "@/lib/monteCarlo";
+import { BAD_START_DROP, fireAgeRange, retirementStress } from "@/lib/fireStress";
 
 // The AI-written FIRE report is hidden until the API key is live-tested. Set NEXT_PUBLIC_AI_REPORTS=1 to show it again.
 const AI_REPORTS_ENABLED = process.env.NEXT_PUBLIC_AI_REPORTS === "1";
@@ -103,6 +105,8 @@ type Inputs = {
   employerMatchCapPct: number;
   // ── New: volatility preset ──────────────────────────
   volatility: "conservative" | "moderate" | "aggressive";
+  /** Year-by-year returns (decimals) that replace the preset's average return. Set only by the market simulation, never stored. */
+  returnPath?: ArrayLike<number>;
   // ── Coast-specific ──────────────────────────────────
   coastAge:            number;
   targetRetirementAge: number;
@@ -187,6 +191,10 @@ const VOLATILITY_PRESETS = {
 } as const;
 
 const TAX_DRAG_BY_EFFICIENCY = { high: 0.2, medium: 0.5, low: 1.0 } as const;
+
+// How much yearly returns swing around each preset's average (standard deviation), and how many simulated markets are run.
+const RETURN_SWING = { conservative: 0.08, moderate: 0.13, aggressive: 0.18 } as const;
+const MARKET_PATHS = 1000;
 
 const VIRAL_COMPARE_CITIES = [
   "nyc-ny", "austin-tx", "raleigh-nc", "charlotte-nc", "denver-co",
@@ -568,6 +576,7 @@ return {
 // Base nominal return from volatility preset, used by growBuckets.
 function returnForYear(i: Inputs, yearIndex: number): number {
   const y       = Math.max(0, yearIndex);
+  if (i.returnPath && y < i.returnPath.length) return i.returnPath[y];
   const switchAt = clamp(Number(i.phase2StartsYear) || 0, 0, 200);
   const p       = VOLATILITY_PRESETS[i.volatility];
   return (y >= switchAt ? p.phase2 : p.phase1) / 100;
@@ -1513,6 +1522,34 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   const result = useMemo(() => simulateYearsToFI(inputs, netPath, mode), [inputs, netPath, mode]);
 
   const fiAge  = useMemo(() => result.yearsToFI === null ? null : inputs.age + result.yearsToFI, [inputs.age, result.yearsToFI]);
+
+  // How sure is the FIRE age? The same year-by-year model run through simulated markets: each year's return is drawn around the
+  // preset's average instead of equalling it. Standard and Lean only; the Coast and Barista targets depend on returns in other ways.
+  const marketRange = useMemo(() => {
+    if (mode !== "standard" && mode !== "lean") return null;
+    if (result.yearsToFI === 0) return null;
+    const years = horizonYears(inputs);
+    if (years < 1) return null;
+    const paths = returnPaths({ years, meanForYear: (y) => returnForYear(inputs, y), volatility: RETURN_SWING[inputs.volatility], nPaths: MARKET_PATHS });
+    return fireAgeRange(inputs.age, paths.map((returnPath) => simulateYearsToFI({ ...inputs, returnPath }, netPath, mode).yearsToFI));
+  }, [inputs, netPath, mode, result.yearsToFI]);
+
+  // After FIRE: does the portfolio last to 95? In today's dollars, starting from the FIRE number, with returns after inflation.
+  const afterFireStress = useMemo(() => {
+    if (mode !== "standard" && mode !== "lean") return null;
+    if (fiAge === null) return null;
+    const infl = (Number(inputs.inflationPct) || 0) / 100;
+    const nominalReturn = returnForYear(inputs, result.yearsToFI ?? 0);
+    const realReturn = (1 + nominalReturn) / (1 + infl) - 1;
+    const stress = retirementStress({
+      annualSpending: retirementAnnualFor(inputs, annualExpenses(inputs)),
+      withdrawalRatePct: Number(inputs.withdrawalRatePct) || 0,
+      realReturn,
+      volatility: RETURN_SWING[inputs.volatility],
+      fireAge: fiAge,
+    });
+    return stress ? { ...stress, nominalReturn, realReturn } : null;
+  }, [inputs, mode, fiAge, result.yearsToFI]);
   // The FIRE number is in the dollars of the year you reach it; this adds what that is worth in today's dollars.
   const [dollarView, setDollarView] = useState<"future" | "today">("today");
   const inView = (amount: number, years: number | null | undefined) =>
@@ -2611,6 +2648,57 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   </div>
                 </div>
               </>)}
+
+              {/* ── How sure is this: market range and after-FIRE stress test (Standard and Lean) ── */}
+              {(marketRange || afterFireStress) && (() => {
+                const ageText = (a: number) => (Number.isInteger(a) ? String(a) : a.toFixed(1));
+                const pct = (x: number) => `${Math.round(x * 100)}%`;
+                const swing = Math.round(RETURN_SWING[inputs.volatility] * 100);
+                return (
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+                    <div className="font-semibold text-white">How sure is this?</div>
+                    <p className="mt-1 text-xs leading-5 text-slate-400">
+                      The age above assumes the market delivers its average return every year. Real markets do not, so here is the same plan run through {MARKET_PATHS.toLocaleString("en-US")} simulated markets with yearly swings of about {swing}%.
+                    </p>
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      {marketRange && (
+                        <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+                          <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Likely FIRE age</div>
+                          <div className="mt-1 text-2xl font-bold text-white">
+                            {marketRange.early === null
+                              ? "Not reached in most markets"
+                              : marketRange.late === null
+                                ? `${ageText(marketRange.early)} or later`
+                                : marketRange.early === marketRange.late ? ageText(marketRange.early) : `${ageText(marketRange.early)} to ${ageText(marketRange.late)}`}
+                          </div>
+                          <p className="mt-1 text-xs leading-5 text-slate-400">
+                            {marketRange.median !== null ? `Middle outcome: age ${ageText(marketRange.median)}. ` : ""}
+                            {marketRange.late === null
+                              ? `You reach FIRE within the ${horizonYears(inputs)}-year projection in ${pct(marketRange.reachedShare)} of simulated markets, and not in the rest.`
+                              : "Eight in ten simulated markets land in this range; one in ten is earlier and one in ten is later."}
+                          </p>
+                        </div>
+                      )}
+                      {afterFireStress && fiAge !== null && (
+                        <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+                          <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">After FIRE: does the money last to 95?</div>
+                          <div className="mt-1 text-2xl font-bold text-white">{pct(afterFireStress.successRate)} of markets</div>
+                          <p className="mt-1 text-xs leading-5 text-slate-400">
+                            Spending stays the same in today&apos;s dollars for {afterFireStress.horizon} years, at your return setting after FIRE of {(afterFireStress.nominalReturn * 100).toFixed(1)}% a year
+                            ({(afterFireStress.realReturn * 100).toFixed(1)}% after inflation). With spending 10% lower: {pct(afterFireStress.successRateTenPctLess)}.{" "}
+                            {afterFireStress.badStartYears === null
+                              ? `If the market falls ${Math.round(BAD_START_DROP * 100)}% in your first year and then earns the average, the money still lasts to 95.`
+                              : `If the market falls ${Math.round(BAD_START_DROP * 100)}% in your first year and then earns the average, the money lasts about ${afterFireStress.badStartYears} years, to age ${ageText(fiAge + afterFireStress.badStartYears)}.`}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    <p className="mt-3 text-xs leading-5 text-slate-500">
+                      Simulated returns are random draws around your return setting, not forecasts or history. The after-FIRE test starts from your FIRE number and leaves out Social Security, pensions, changes in spending and taxes beyond the withdrawal-tax setting. Planning illustration only.
+                    </p>
+                  </div>
+                );
+              })()}
 
               {/* ── Shared: methodology note ───────────────────────────────── */}
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">

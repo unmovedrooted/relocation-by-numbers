@@ -249,3 +249,31 @@ export function withdrawalSuccessRate(opts: {
   }
   return survived / nPaths;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RETURN PATHS: random annual returns for callers that run their own year-by-year model (the FIRE calculator).
+// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * `nPaths` series of `years` annual returns. Year y's return is drawn from a lognormal distribution whose arithmetic mean is
+ * `meanForYear(y)` and whose standard deviation is `volatility` (both decimals), so the average of many paths reconciles with the
+ * deterministic projection. Seeded, so the same inputs always give the same paths.
+ */
+export function returnPaths(opts: {
+  years: number;
+  meanForYear: (yearIndex: number) => number;
+  volatility: number;
+  nPaths?: number;
+  seed?: number;
+}): Float64Array[] {
+  const years = Math.max(0, Math.round(opts.years));
+  const nPaths = Math.max(1, opts.nPaths ?? DEFAULT_PATHS);
+  const rng = mulberry32(opts.seed ?? DEFAULT_SEED);
+  const params = Array.from({ length: years }, (_, y) => lognormalParams(opts.meanForYear(y), opts.volatility));
+  const paths: Float64Array[] = [];
+  for (let p = 0; p < nPaths; p++) {
+    const path = new Float64Array(years);
+    for (let y = 0; y < years; y++) path[y] = Math.exp(params[y].mu + params[y].sigma * nextNormal(rng)) - 1;
+    paths.push(path);
+  }
+  return paths;
+}
