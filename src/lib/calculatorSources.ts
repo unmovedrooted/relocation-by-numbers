@@ -17,6 +17,10 @@ const RP_2025_19: SourceRef = { label: "IRS Rev. Proc. 2025-19: 2026 HSA limits 
 const PUB_969: SourceRef = { label: "IRS Publication 969: Health Savings Accounts", url: "https://www.irs.gov/publications/p969" };
 const PUB_590B: SourceRef = { label: "IRS Publication 590-B: Uniform Lifetime Table and RMD rules", url: "https://www.irs.gov/publications/p590b" };
 const IRB_2024_33: SourceRef = { label: "IRS Internal Revenue Bulletin 2024-33: final RMD regulations (start age by birth year)", url: "https://www.irs.gov/irb/2024-33_IRB" };
+const CENSUS_ACS: SourceRef = { label: "U.S. Census Bureau, American Community Survey 2020-2024: city rent, home values and property tax defaults", url: "https://www.census.gov/programs-surveys/acs" };
+const BEA_RPP: SourceRef = { label: "Bureau of Economic Analysis, Regional Price Parities: housing price levels by metro area and state", url: "https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area" };
+const CFPB_PMI: SourceRef = { label: "Consumer Financial Protection Bureau: what private mortgage insurance is and when it can be removed", url: "https://www.consumerfinance.gov/ask-cfpb/what-is-private-mortgage-insurance-en-122/" };
+const PUB_936: SourceRef = { label: "IRS Publication 936: Home Mortgage Interest Deduction (not modeled here)", url: "https://www.irs.gov/publications/p936" };
 const STATE_SOURCES_LINK: SourceRef = { label: "State income tax rules: the state agency or legislature documents listed by state", url: "/methodology#state-sources" };
 const LOCAL_SOURCES_LINK: SourceRef = { label: "Local income taxes modeled and their sources", url: "/methodology#tax-year-and-sources" };
 
@@ -128,11 +132,11 @@ export const CALCULATOR_INFO: Readonly<Record<string, CalculatorInfo>> = Object.
     ["/savings-rate-for-fire", "Savings Rate for FIRE"],
   ] as const).map(([path, name]) => [path, FIRE_INFO(name)] as const)),
   "/investment-calculator": { name: "Investment Calculator", taxDriven: false, sources: [], notes: ["Projects growth from the inputs you enter; no external data source is used."], exclusions: ["A projection, not investment advice; it does not include taxes on gains."] },
-  "/mortgage-calculator": { name: "Mortgage Calculator", taxDriven: false, sources: [], notes: [HOUSING_NOTE],
+  "/mortgage-calculator": { name: "Mortgage Calculator", taxDriven: false, sources: [CENSUS_ACS, BEA_RPP, CFPB_PMI], notes: [HOUSING_NOTE],
     exclusions: ["Does not include moving costs, currency conversion fees or cash reserve requirements.", "Property tax, insurance and closing costs are estimates unless you enter your own."] },
-  "/rent-vs-buy-calculator": { name: "Rent vs. Buy Calculator", taxDriven: false, sources: [], notes: [HOUSING_NOTE],
+  "/rent-vs-buy-calculator": { name: "Rent vs. Buy Calculator", taxDriven: false, sources: [CENSUS_ACS, BEA_RPP, CFPB_PMI, PUB_936], notes: [HOUSING_NOTE],
     exclusions: ["Does not model income-tax effects (mortgage-interest or SALT deductions, investment taxes), PMI or moving costs.", "Results are highly sensitive to the appreciation and investment-return assumptions."] },
-  "/housing-affordability-calculator": { name: "Housing Affordability", taxDriven: false, sources: [], notes: [HOUSING_NOTE],
+  "/housing-affordability-calculator": { name: "Housing Affordability", taxDriven: false, sources: [CENSUS_ACS, BEA_RPP, CFPB_PMI], notes: [HOUSING_NOTE],
     exclusions: ["A planning guideline, not lending advice; PMI is estimated automatically when the down payment is below 20%."] },
   "/compare-cities": { name: "Compare Cities Side by Side", taxDriven: false, sources: INTERNATIONAL_SOURCES, notes: [INTERNATIONAL_NOTE],
     exclusions: ["U.S. tax owed while living abroad is added only if you tick the U.S. citizen or green-card box; it covers federal income tax only, not self-employment, Social Security or state tax.", "Housing and living costs use each destination's typical values and tax uses a simplified estimate; use the matching regional calculator for a country-specific breakdown.", "Tax assumes remote or foreign-sourced income where applicable."] },
