@@ -95,7 +95,8 @@ export default function PlannerExplainer() {
         <p className="mt-3 text-sm leading-relaxed sm:text-base">
           Eight states levy no broad personal income tax. The other 42 states and DC each have their own module, built from that state&apos;s
           statutes and forms and tested against hand-calculated examples. Where a rule is not modeled, the planner says so in the notes
-          for that state instead of guessing.
+          for that state instead of guessing. You can read the result for any state on its own page in the{" "}
+          <Link className="font-semibold underline underline-offset-4" href="/retirement-state-tax">retirement tax by state guide</Link>.
         </p>
       </div>
 

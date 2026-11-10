@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import RetirementStateTaxView from "@/components/RetirementStateTaxView";
+import Link from "next/link";
 import CalculatorSources from "@/components/CalculatorSources";
+import { GUIDE_STATES, NO_INCOME_TAX_STATES } from "@/lib/retirementStateGuide";
 
 export const metadata: Metadata = {
   title: "Retirement Tax by State | Social Security, Pensions and 401(k) Withdrawals",
@@ -24,6 +26,18 @@ export default function RetirementStateTaxPage() {
         </p>
       </header>
       <RetirementStateTaxView />
+      <section aria-labelledby="by-state-heading" className="mt-10">
+        <h2 id="by-state-heading" className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Retirement taxes, state by state</h2>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+          Each state page shows the 2026 income tax on an example retiree, how age and income change it, and the official sources.
+          {" "}{NO_INCOME_TAX_STATES.map((s) => s.name).join(", ")} have no state income tax on wages.
+        </p>
+        <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-3 md:grid-cols-4">
+          {GUIDE_STATES.map((s) => (
+            <li key={s.code}><Link className="underline underline-offset-4 hover:no-underline" href={`/retirement-state-tax/${s.slug}`}>{s.name}</Link></li>
+          ))}
+        </ul>
+      </section>
       <CalculatorSources path="/retirement-state-tax" />
     </main>
   );

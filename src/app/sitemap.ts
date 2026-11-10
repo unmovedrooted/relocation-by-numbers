@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { findCity } from "@/lib/cities";
 import { STATES } from "@/lib/states";
+import { GUIDE_STATES } from "@/lib/retirementStateGuide";
 import {
   ALLOWED_FIRE_CITY_PAGES,
   ALLOWED_CITY_DETAIL_PAGES,
@@ -11,6 +12,7 @@ import {
 
 const CONTENT_UPDATED_ON = "2026-10-17";
 const LEGAL_UPDATED_ON = "2026-10-16";
+const RETIREMENT_GUIDE_UPDATED_ON = "2026-11-09";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://www.relocationbynumbers.com";
@@ -170,6 +172,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
     }));
 
+  const retirementStateGuidePages = GUIDE_STATES.map((state) => ({
+    url: `${baseUrl}/retirement-state-tax/${state.slug}`,
+    lastModified: new Date(RETIREMENT_GUIDE_UPDATED_ON),
+    priority: 0.6,
+    changeFrequency: "monthly" as const,
+  }));
+
   const salaryNeededPages = detailCities.map((city) => ({
     url: `${baseUrl}/salary-needed-in/${city.id}`,
     lastModified: now,
@@ -190,5 +199,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...bestStatesFirePages,
     ...moveToPages,
     ...salaryNeededPages,
+    ...retirementStateGuidePages,
   ];
 }
