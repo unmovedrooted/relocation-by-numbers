@@ -3,6 +3,7 @@ import Script from "next/script";
 import Link from "next/link";
 import RmdCalculator from "@/components/RmdCalculator";
 import CalculatorSources from "@/components/CalculatorSources";
+import { RmdTables } from "@/components/CalculatorTables";
 
 const SITE_URL = "https://www.relocationbynumbers.com";
 const PAGE_PATH = "/rmd-calculator";
@@ -109,6 +110,8 @@ export default function Page() {
 
         <section className="mx-auto max-w-5xl space-y-10 px-4 pb-12 sm:px-6">
           <RmdCalculator />
+
+          <RmdTables />
 
           <section aria-labelledby="how-heading" className="rounded-2xl bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
             <div className="grid gap-6 lg:grid-cols-2">

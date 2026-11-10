@@ -106,7 +106,7 @@ export function firstRmdYear(birthDate: string): number {
 }
 
 // IRS Pub. 590-B, Table III (2022 onward); age 120 means 120 and older.
-const UNIFORM: Record<number, number> = {
+export const UNIFORM: Record<number, number> = {
   70: 29.1, 71: 28.2, 72: 27.4, 73: 26.5, 74: 25.5, 75: 24.6, 76: 23.7, 77: 22.9,
   78: 22, 79: 21.1, 80: 20.2, 81: 19.4, 82: 18.5, 83: 17.7, 84: 16.8, 85: 16,
   86: 15.2, 87: 14.4, 88: 13.7, 89: 12.9, 90: 12.2, 91: 11.5, 92: 10.8,

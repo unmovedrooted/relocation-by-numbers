@@ -3,6 +3,7 @@ import Script from "next/script";
 import Link from "next/link";
 import RothConversionCalculator from "@/components/RothConversionCalculator";
 import CalculatorSources from "@/components/CalculatorSources";
+import { RothTables } from "@/components/CalculatorTables";
 
 const SITE_URL = "https://www.relocationbynumbers.com";
 const PAGE_PATH = "/roth-conversion-calculator";
@@ -167,6 +168,8 @@ export default function Page() {
 
         <section className="mx-auto max-w-5xl space-y-10 px-4 pb-12 sm:px-6">
           <RothConversionCalculator />
+
+          <RothTables />
 
           <section
             aria-labelledby="what-included-heading"

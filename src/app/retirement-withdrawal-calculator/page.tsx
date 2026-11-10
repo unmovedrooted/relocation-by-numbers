@@ -3,6 +3,7 @@ import Script from "next/script";
 import Link from "next/link";
 import RetirementWithdrawalCalculator from "@/components/RetirementWithdrawalCalculator";
 import CalculatorSources from "@/components/CalculatorSources";
+import { WithdrawalTable } from "@/components/CalculatorTables";
 
 // ─────────────────────────────────────────────────────────────
 // METADATA
@@ -208,6 +209,8 @@ export default function Page() {
 
         <section className="mx-auto max-w-5xl space-y-10 px-4 pb-12 sm:px-6">
           <RetirementWithdrawalCalculator />
+
+          <WithdrawalTable />
 
           <section
             aria-labelledby="what-included-heading"
