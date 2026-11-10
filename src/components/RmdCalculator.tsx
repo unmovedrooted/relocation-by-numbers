@@ -8,6 +8,7 @@ import { estimatedBirthYear, rmdStartAge } from "../lib/rmdRules";
 import { TAX_YEAR } from "../lib/taxYear2026";
 import { withdrawalIncomeTax } from "../lib/retirementTax";
 import { retireeIncomeTax } from "../lib/retirementStateView";
+import { firstRmdChoice } from "../lib/rmdFirstYear";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -158,7 +159,11 @@ export default function RmdCalculator() {
     }
 
     const firstRmd = ageN < startRmdAge ? schedule[0] : null;
-    return { ageN, bal0, required, thisYearRmd, thisYearDivisor, thisYearTax, schedule, firstRmd, startAge, startRmdAge, birthYearUsed, simpleTaxUsed };
+    // The take-it-or-delay choice exists only for the first RMD, so it is shown until that year has passed.
+    const firstChoice = ageN <= startRmdAge && schedule.length >= 2
+      ? firstRmdChoice({ startBalance: schedule[0].startBalance, firstAge: schedule[0].age, divisorFirst: schedule[0].divisor, divisorSecond: schedule[1].divisor, returnRate: r, taxOn })
+      : null;
+    return { ageN, bal0, required, thisYearRmd, thisYearDivisor, thisYearTax, schedule, firstRmd, startAge, startRmdAge, birthYearUsed, simpleTaxUsed, firstChoice };
   }, [age, birthYear, balance, expectedReturnPct, filing, state, otherIncome]);
 
   const inputsReady = results.bal0 > 0 && results.ageN > 0;
@@ -243,6 +248,44 @@ export default function RmdCalculator() {
                   <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">RMDs begin at age {results.startRmdAge}</div>
                   <p className="mt-2 text-sm leading-5 opacity-90">
                     In {results.startRmdAge - results.ageN} year{results.startRmdAge - results.ageN === 1 ? "" : "s"}. At {(nz(expectedReturnPct)).toFixed(1)}% growth, your first RMD is projected at about <span className="font-semibold">{money(results.firstRmd?.rmd ?? 0)}</span>.
+                  </p>
+                </div>
+              )}
+
+              {results.firstChoice && (
+                <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+                  <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Your first RMD: take it at {results.firstChoice.firstAge}, or delay to April 1?</div>
+                  <p className="mb-3 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                    You may take the first RMD in the year you turn {results.firstChoice.firstAge}, or wait until April 1 of the next year. Waiting puts two RMDs in one tax year, because the second is still due that December.
+                  </p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[26rem] border-collapse text-sm">
+                      <thead>
+                        <tr className="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                          <th scope="col" className="py-2 pr-3 font-semibold"><span className="sr-only">Item</span></th>
+                          <th scope="col" className="py-2 pr-3 font-semibold">Take it at {results.firstChoice.firstAge}</th>
+                          <th scope="col" className="py-2 font-semibold">Delay to April 1</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-slate-700 dark:divide-slate-800 dark:text-slate-300">
+                        <tr><td className="py-2 pr-3">RMDs in the year you turn {results.firstChoice.firstAge}</td><td className="py-2 pr-3">{money(results.firstChoice.takeInFirstYear.year1Rmd)}</td><td className="py-2">{money(0)}</td></tr>
+                        <tr><td className="py-2 pr-3">Tax that year</td><td className="py-2 pr-3">{money(results.firstChoice.takeInFirstYear.year1Tax)}</td><td className="py-2">{money(0)}</td></tr>
+                        <tr><td className="py-2 pr-3">RMDs in the next year</td><td className="py-2 pr-3">{money(results.firstChoice.takeInFirstYear.year2Rmd)}</td><td className="py-2">{money(results.firstChoice.delayToApril.year2Rmd)} (two RMDs)</td></tr>
+                        <tr><td className="py-2 pr-3">Tax that year</td><td className="py-2 pr-3">{money(results.firstChoice.takeInFirstYear.year2Tax)}</td><td className="py-2">{money(results.firstChoice.delayToApril.year2Tax)}</td></tr>
+                        <tr className="font-semibold text-slate-900 dark:text-white"><td className="py-2 pr-3">Tax over the two years</td><td className="py-2 pr-3">{money(results.firstChoice.takeInFirstYear.totalTax)}</td><td className="py-2">{money(results.firstChoice.delayToApril.totalTax)}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
+                    {Math.abs(results.firstChoice.extraTaxFromDelay) < 1
+                      ? "On these inputs the estimated tax is the same either way."
+                      : results.firstChoice.extraTaxFromDelay > 0
+                        ? <>On these inputs, delaying costs about <span className="font-semibold">{money(results.firstChoice.extraTaxFromDelay)}</span> more in income tax over the two years.</>
+                        : <>On these inputs, delaying saves about <span className="font-semibold">{money(-results.firstChoice.extraTaxFromDelay)}</span> in income tax over the two years.</>}
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                    Uses the same tax estimate, other income and growth rate as above, with the same other income in both years. A delayed first RMD is still in the account at year end, so the second RMD is slightly larger. Not included: the effect of the
+                    extra income on Medicare premiums (IRMAA) and on how much of your Social Security is taxed, either of which can make doubling up cost more. Estimates only, not tax advice.
                   </p>
                 </div>
               )}
