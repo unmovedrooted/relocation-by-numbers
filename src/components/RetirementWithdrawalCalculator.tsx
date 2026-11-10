@@ -782,9 +782,9 @@ export default function RetirementWithdrawalCalculator() {
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
                 All figures are in today&apos;s dollars. Tax estimates treat withdrawals as your only ordinary income
-                using {`${accountType === "roth" ? "Roth (tax-free)" : "traditional/taxable"}`} treatment and {TAX_YEAR}
-                federal &amp; state rules{results.tax.ageAware ? `, estimated for your starting age of ${currentAge}: the standard deduction with the extra amount at 65 or older, the temporary senior deduction and your state's rules for retirement withdrawals` : " with the standard deduction for a filer under 65, and no early-withdrawal penalty"}. The tax is held at
-                that age for the whole projection. They don&apos;t include Social Security, capital-gains treatment, or Required Minimum Distributions (which
+                using {`${accountType === "roth" ? "Roth (tax-free)" : "traditional/taxable"}`} treatment and {TAX_YEAR}{" "}
+                federal &amp; state rules{results.tax.ageAware ? `, estimated for your starting age of ${currentAge}: the standard deduction with the extra amount at 65 or older, the temporary senior deduction and your state's rules for retirement withdrawals. The tax is held at that age for the whole projection` : " with the standard deduction for a filer under 65, and no early-withdrawal penalty"}.
+                They don&apos;t include Social Security, capital-gains treatment, or Required Minimum Distributions (which
                 begin at age 73 or 75, depending on your birth year).{" "}
                 {viewMode === "montecarlo"
                   ? `The Monte Carlo view runs 5,000 seeded simulations drawing each year's return from a lognormal distribution around your expected return at the chosen volatility, a model of market risk, not a prediction.${mode === "safeAmount" && targetSuccess > 0 ? ` The withdrawal shown is the largest one that lasts the full retirement in at least ${targetSuccess}% of those simulations; a different return, volatility or inflation assumption would change it.` : ""}`
