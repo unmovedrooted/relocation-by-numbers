@@ -585,6 +585,9 @@ const readinessRecommendation =
     const cashAfterUpfront = convertLocalToUsd(nonNegative(currentSavings), fromCountry) - upfrontCashNeeded;
     const monthsCovered = totalMonthlyOutflow > 0 ? Math.max(0, convertLocalToUsd(nonNegative(currentSavings), fromCountry) - upfrontCashNeeded) / totalMonthlyOutflow : 0;
 
+    // Months of destination costs covered by everything left after the one-time costs, counting the emergency reserve set aside above.
+    const cushionMonths = totalMonthlyOutflow > 0 ? Math.max(0, cashAfterUpfront + destToUsd(nonNegative(emergencyCashBuffer))) / totalMonthlyOutflow : 0;
+
     const currentProfile = getCountryByCode(fromCountry);
     const fromIndex = currentCityDefaults?.costIndex ?? currentProfile?.monthlyCostIndexSingle ?? 1;
     const toIndex   = targetCityDefaults?.costIndex  ?? targetProfile?.monthlyCostIndexSingle  ?? 1;
@@ -601,7 +604,7 @@ const readinessRecommendation =
       housingTotal, rentTo, housingMode, estimatedHomePrice, buyMonthlyPI, downPaymentUsd, housingUtilities, carCostTo, carCostFrom, livingCosts,
       monthlyFlexibility,
       requiredNetMonthly, requiredGrossMonthly, requiredAnnualIncome,
-      incomeGap, marginChangePct, flexibilityRatio, readinessRecommendation: withUpfrontFunding(readinessRecommendation, cashAfterUpfront),
+      incomeGap, marginChangePct, flexibilityRatio, readinessRecommendation: withUpfrontFunding(readinessRecommendation, cashAfterUpfront, cushionMonths),
       pct, comfort,
       upfrontCashNeeded, monthsCovered, cashAfterUpfront, comparableSalary, relativeDifference,
     };
@@ -1106,7 +1109,7 @@ const readinessRecommendation =
             <div id="intl-results" className="mb-2 scroll-mt-4 text-sm font-semibold text-slate-900 dark:text-slate-100">Results</div>
             <ChangeNote note={changeNote} onDismiss={dismissChangeNote} />
             <ExampleResultsNotice className="mb-3" />
-            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} cashAfterUpfront={results.cashAfterUpfront} comfortLabel={results.comfort.label} displayAmount={displayAmount} />
+            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} cashAfterUpfront={results.cashAfterUpfront} comfortLabel={results.comfort.label} displayAmount={displayAmount} taxMissingFactor={results.targetMissingFactor} />
             <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">{INT_TAX_LABEL} · Planning estimates only</div>
 
             <div className="mb-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">

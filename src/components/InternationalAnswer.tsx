@@ -1,3 +1,5 @@
+import { US_TAX_ABROAD_MISSING_FACTOR } from "@/lib/internationalTaxes";
+
 /**
  * The answer in two sentences, above the detailed breakdown on the international calculators: what is left each month in the
  * destination, what has to be paid up front, and how long savings last after that. All amounts arrive already converted for display.
@@ -11,6 +13,7 @@ export default function InternationalAnswer({
   cashAfterUpfront,
   comfortLabel,
   displayAmount,
+  taxMissingFactor,
 }: {
   toCityLabel: string;
   salaryReady: boolean;
@@ -21,6 +24,8 @@ export default function InternationalAnswer({
   cashAfterUpfront: number;
   comfortLabel: string;
   displayAmount: (amountUsd: number, digits?: number) => string;
+  /** The tax estimate's stated gap. When it is the U.S.-tax-abroad gap, a warning is shown with the answer, because it can change the decision. */
+  taxMissingFactor?: string;
 }) {
   if (!salaryReady) return null;
   const left = monthlyFlexibility >= 0
@@ -54,6 +59,13 @@ export default function InternationalAnswer({
           </div>
         ))}
       </div>
+      {taxMissingFactor === US_TAX_ABROAD_MISSING_FACTOR && (
+        <div role="note" className="mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm leading-6 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200">
+          <strong>U.S. citizens and green-card holders:</strong> this estimate adds U.S. federal tax but leaves out U.S. state income tax and income tax treaties.
+          Some states keep taxing people who move abroad without ending their residency there, and a treaty can change which country taxes pensions, Social Security and other income.
+          Either one can move the result enough to change the decision, so confirm it with a cross-border tax adviser before you rely on this number.
+        </div>
+      )}
     </div>
   );
 }

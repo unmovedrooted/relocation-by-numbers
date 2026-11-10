@@ -959,6 +959,9 @@ const readinessRecommendation =
   totalMonthlyOutflow > 0
     ? Math.max(0, convertLocalToUsd(nonNegative(currentSavings), fromCountry) - upfrontCashNeeded) / totalMonthlyOutflow
     : 0;
+    // Months of destination costs covered by everything left after the one-time costs, counting the emergency reserve set aside above.
+    const cushionMonths = totalMonthlyOutflow > 0 ? Math.max(0, cashAfterUpfront + destToUsd(nonNegative(emergencyCashBuffer))) / totalMonthlyOutflow : 0;
+
 
     const currentProfile = getCountryByCode(fromCountry);
     const fromIndex = currentCityDefaults?.costIndex ?? currentProfile?.monthlyCostIndexSingle ?? 1;
@@ -1026,7 +1029,7 @@ requiredAnnualIncome,
 incomeGap,
 marginChangePct,
 flexibilityRatio,
-readinessRecommendation: withUpfrontFunding(readinessRecommendation, cashAfterUpfront),
+readinessRecommendation: withUpfrontFunding(readinessRecommendation, cashAfterUpfront, cushionMonths),
     };
   }, [fromCityCode,
     mode, salary, retirementIncome, filing, fromCountry, toCountry,
@@ -1464,7 +1467,7 @@ readinessRecommendation: withUpfrontFunding(readinessRecommendation, cashAfterUp
             <div id="intl-results" className="mb-2 scroll-mt-4 text-sm font-semibold">Results</div>
             <ChangeNote note={changeNote} onDismiss={dismissChangeNote} />
             <ExampleResultsNotice className="mb-3" />
-            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} cashAfterUpfront={results.cashAfterUpfront} comfortLabel={results.comfort.label} displayAmount={displayAmount} />
+            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} cashAfterUpfront={results.cashAfterUpfront} comfortLabel={results.comfort.label} displayAmount={displayAmount} taxMissingFactor={results.targetMissingFactor} />
             <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
               {EUROPE_TAX_ASSUMPTIONS_LABEL} · Planning estimates only
             </div>

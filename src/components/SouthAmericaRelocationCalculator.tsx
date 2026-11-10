@@ -614,6 +614,7 @@ const utilitiesFrom = familyUtilities * cityRatio(fromCityMultipliers.utilities,
       upfrontCashNeeded,
 monthsCovered,
 cashAfterUpfront,
+      targetMissingFactor: targetTaxEstimate.missingFactor ?? "",
 comparableSalary,
 relativeDifference,
 recommendation: overallRecommendation,
@@ -945,7 +946,7 @@ recommendation: overallRecommendation,
             <div id="intl-results" className="mb-2 scroll-mt-4 text-sm font-semibold">Results</div>
             <ChangeNote note={changeNote} onDismiss={dismissChangeNote} />
             <ExampleResultsNotice className="mb-3" />
-            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} cashAfterUpfront={results.cashAfterUpfront} comfortLabel={results.comfort.label} displayAmount={displayAmount} />
+            <InternationalAnswer toCityLabel={toCityLabel} salaryReady={results.salaryReady} monthlyFlexibility={results.monthlyFlexibility} upfrontCashNeeded={results.upfrontCashNeeded} monthsCovered={results.monthsCovered} cashAfterUpfront={results.cashAfterUpfront} comfortLabel={results.comfort.label} displayAmount={displayAmount} taxMissingFactor={results.targetMissingFactor} />
             <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">Assumptions updated: October 2026 · Planning estimates only</div>
             <div className="mb-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
               <div>Current city: <span className="font-semibold">{fromCityLabel}</span></div>
