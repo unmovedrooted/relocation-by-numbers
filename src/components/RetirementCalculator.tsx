@@ -9,6 +9,7 @@ import { accumulationPaths, RISK_PRESETS, type RiskLevel } from "../lib/monteCar
 import { monthlyDepositFactor } from "../lib/depositTiming";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
+import Link from "next/link";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -316,6 +317,19 @@ export default function RetirementCalculator() {
 
   const inputsReady = results.years > 0 && (results.startingBalance > 0 || results.annualContribution > 0);
   const stateName = STATES.find((s) => s.code === state)?.name ?? state;
+
+  // Hand the projection to the withdrawal calculator: the balance in today's dollars, starting at the retirement age, with the 4% reference
+  // withdrawal as a starting point. A taxable account has no equivalent there, so the account type is only passed for traditional and Roth.
+  const withdrawalHref = useMemo(() => {
+    const qs = new URLSearchParams({ mode: "howLong", balance: String(Math.round(results.projectedBalance)), withdrawal: String(Math.round(results.annualIncome)) });
+    if (retirementAge) qs.set("age", retirementAge);
+    if (accountType !== "taxable") qs.set("account", accountType);
+    qs.set("filing", filing);
+    qs.set("state", state);
+    if (expectedReturnPct) qs.set("return", expectedReturnPct);
+    if (inflationPct) qs.set("inflation", inflationPct);
+    return `/retirement-withdrawal-calculator?${qs.toString()}`;
+  }, [results.projectedBalance, results.annualIncome, retirementAge, accountType, filing, state, expectedReturnPct, inflationPct]);
   const growthPct = results.projectedBalance > 0 ? (results.growth / results.projectedBalance) * 100 : 0;
 
   const volatility = riskLevel === "custom" ? Math.max(0, nz(customVolatilityPct)) / 100 : RISK_PRESETS[riskLevel].volatilityPct / 100;
@@ -603,6 +617,23 @@ export default function RetirementCalculator() {
                   </p>
                 </div>
               ) : null}
+
+              {results.projectedBalance > 0 && (
+                <div data-next-step className="rounded-2xl border border-violet-200 bg-violet-50/70 p-4 text-sm text-slate-700 dark:border-violet-900/60 dark:bg-violet-950/20 dark:text-slate-300">
+                  <p>
+                    <span className="font-semibold text-slate-900 dark:text-white">Next: will it last?</span> This page projects what you save. The withdrawal calculator tests how long{" "}
+                    {money(results.projectedBalance)} lasts once you start spending it, including a range of market outcomes. Your balance, retirement age, state, filing status and return
+                    assumptions carry over.
+                  </p>
+                  <Link href={withdrawalHref} className="mt-3 inline-flex items-center rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-700">
+                    See how long {money(results.projectedBalance)} lasts →
+                  </Link>
+                  <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                    This calculator does not include Social Security or a pension. To add them and see taxes year by year, use the{" "}
+                    <Link href="/complete-retirement-plan" className="font-semibold underline underline-offset-4 hover:no-underline">Complete Retirement Plan</Link>.
+                  </p>
+                </div>
+              )}
 
               {viewMode === "average" ? (
                 <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
