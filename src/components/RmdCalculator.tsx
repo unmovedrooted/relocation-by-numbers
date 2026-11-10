@@ -7,6 +7,7 @@ import { type FilingStatus } from "../lib/tax";
 import { estimatedBirthYear, rmdStartAge } from "../lib/rmdRules";
 import { TAX_YEAR } from "../lib/taxYear2026";
 import { withdrawalIncomeTax } from "../lib/retirementTax";
+import { retireeIncomeTax } from "../lib/retirementStateView";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -114,9 +115,19 @@ export default function RmdCalculator() {
     const required = ageN >= startRmdAge;
     // Tax the RMD adds on top of any other taxable income (pension, taxable Social Security, interest), in today's dollars.
     const other = Math.max(0, nz(otherIncome));
-    const taxOn = (rmd: number) => other > 0
+    const simpleTaxOn = (rmd: number) => other > 0
       ? Math.max(0, withdrawalIncomeTax(other + rmd, state, filing, "traditional").total - withdrawalIncomeTax(other, state, filing, "traditional").total)
       : withdrawalIncomeTax(rmd, state, filing, "traditional").total;
+    // Age-aware estimate from the planner's household engine: the extra standard deduction at 65 or older, the temporary senior deduction and
+    // the state's retirement-income rules. The whole RMD belongs to one owner. Falls back to the simple estimate if the state module cannot run.
+    let simpleTaxUsed = false;
+    const taxOn = (rmd: number, atAge: number) => {
+      const profile = { filing, age: atAge, socialSecurity: 0, pension: 0, withdrawals: rmd };
+      const withRmd = retireeIncomeTax(state, profile, other, true);
+      const without = other > 0 ? retireeIncomeTax(state, { ...profile, withdrawals: 0 }, other, true) : { total: 0 };
+      if (!withRmd || !without) { simpleTaxUsed = true; return simpleTaxOn(rmd); }
+      return Math.max(0, withRmd.total - without.total);
+    };
 
     // This-year RMD (if required now).
     let thisYearRmd = 0;
@@ -126,7 +137,7 @@ export default function RmdCalculator() {
       thisYearDivisor = divisorForAge(ageN);
       if (thisYearDivisor) {
         thisYearRmd = bal0 / thisYearDivisor;
-        thisYearTax = taxOn(thisYearRmd);
+        thisYearTax = taxOn(thisYearRmd, ageN);
       }
     }
 
@@ -141,13 +152,13 @@ export default function RmdCalculator() {
     for (let a = startAge; a <= 95 && bal > 1; a++) {
       const div = divisorForAge(a) ?? 2.0;
       const rmd = bal / div;
-      const tax = taxOn(rmd);
+      const tax = taxOn(rmd, a);
       schedule.push({ age: a, startBalance: bal, divisor: div, rmd, tax });
       bal = (bal - rmd) * (1 + r);
     }
 
     const firstRmd = ageN < startRmdAge ? schedule[0] : null;
-    return { ageN, bal0, required, thisYearRmd, thisYearDivisor, thisYearTax, schedule, firstRmd, startAge, startRmdAge, birthYearUsed };
+    return { ageN, bal0, required, thisYearRmd, thisYearDivisor, thisYearTax, schedule, firstRmd, startAge, startRmdAge, birthYearUsed, simpleTaxUsed };
   }, [age, birthYear, balance, expectedReturnPct, filing, state, otherIncome]);
 
   const inputsReady = results.bal0 > 0 && results.ageN > 0;
@@ -273,7 +284,7 @@ export default function RmdCalculator() {
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                RMDs from traditional IRAs and 401(k)s must begin by April 1 of the year after the year you reach age {results.startRmdAge} (then by December 31 each year after). The starting age is 73 if you were born 1951 to 1959 and 75 if you were born in 1960 or later; the age shown here uses your birth year, or an estimate from your age if you leave it blank. Missing one triggers a 25% penalty (10% if corrected promptly). This uses the Uniform Lifetime Table; a spouse more than 10 years younger as sole beneficiary uses a different table. Roth IRAs have no lifetime RMDs. The tax shown uses the standard deduction for a filer under 65; the extra deduction at 65+ and the temporary senior deduction are not applied, so it may be overstated. Estimates only, not tax advice.
+                RMDs from traditional IRAs and 401(k)s must begin by April 1 of the year after the year you reach age {results.startRmdAge} (then by December 31 each year after). The starting age is 73 if you were born 1951 to 1959 and 75 if you were born in 1960 or later; the age shown here uses your birth year, or an estimate from your age if you leave it blank. Missing one triggers a 25% penalty (10% if corrected promptly). This uses the Uniform Lifetime Table; a spouse more than 10 years younger as sole beneficiary uses a different table. Roth IRAs have no lifetime RMDs. {results.simpleTaxUsed ? "The tax shown uses the standard deduction for a filer under 65; the extra deduction at 65+ and the temporary senior deduction are not applied, so it may be overstated." : `The tax shown uses the ${TAX_YEAR} standard deduction with the extra amount for age 65 or older, the temporary senior deduction (through 2028, reduced at higher incomes) and your state's rules for IRA withdrawals at your age; a joint return assumes both spouses are the same age.`} If you are still working, your current employer&apos;s 401(k) may let you delay its RMDs until you retire, if the plan allows it and you do not own more than 5% of the business; IRAs do not get that exception. Estimates only, not tax advice.
               </div>
             </>
           )}

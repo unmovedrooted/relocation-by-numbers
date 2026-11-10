@@ -38,7 +38,7 @@ export const DEFAULT_PROFILE: RetireeProfile = { filing: "single", age: 67, soci
 
 const WITHDRAWAL_DATE = "2026-07-01";
 
-function buildInput(state: StateCode, p: RetireeProfile): HouseholdTaxInput {
+function buildInput(state: StateCode, p: RetireeProfile, otherOrdinary = 0, withdrawalsOwnedByOne = false, otherKind: "other" | "interest" = "other"): HouseholdTaxInput {
   const married = p.filing === "married";
   const owners = married ? ["one", "two"] : ["one"];
   const birthDate = `${2026 - p.age}-06-30`;
@@ -50,9 +50,11 @@ function buildInput(state: StateCode, p: RetireeProfile): HouseholdTaxInput {
     // A pension from a private employer, paid to the first spouse; Hawaii exempts employer-funded pensions.
     income.push({ ownerId: "one", kind: "pension", amount: p.pension, pensionType: "private", hawaiiPensionTreatment: "exempt", pensionAfter59Half: p.pension });
   }
+  // Other fully taxable ordinary income (interest, the taxable part of other income), with no retirement-income treatment.
+  if (otherOrdinary > 0) income.push({ ownerId: "one", kind: otherKind, amount: otherOrdinary });
   const retirementIncome: RetirementIncomeItem[] = p.withdrawals > 0
     // Modeled as traditional IRA withdrawals: New York's module declines workplace-plan distributions without more detail.
-    ? owners.map((id) => ({ ownerId: id, source: "traditional-ira" as const, date: WITHDRAWAL_DATE, amount: share(p.withdrawals) }))
+    ? (withdrawalsOwnedByOne ? ["one"] : owners).map((id, _i, list) => ({ ownerId: id, source: "traditional-ira" as const, date: WITHDRAWAL_DATE, amount: p.withdrawals / list.length }))
     : [];
   const cityId = NEUTRAL_CITY[state];
 
@@ -88,6 +90,29 @@ export function stateRetirementTax(state: StateCode, p: RetireeProfile = DEFAULT
   } catch (e) {
     return { state, stateTax: 0, added: zero, error: e instanceof Error ? e.message : "This state could not be calculated." };
   }
+}
+
+export type RetireeIncomeTax = Readonly<{ federal: number; state: number; total: number }>;
+
+/**
+ * Federal and state income tax for a retiree household of the given age, from the planner's household engine: the federal standard
+ * deduction with the extra amount at 65 or older, the temporary senior deduction, and the state's own rules for retirement income.
+ * `otherOrdinary` is other fully taxable income. `withdrawalsOwnedByOne` puts the whole withdrawal on one spouse (an RMD belongs to
+ * one account owner) instead of splitting it. Local income taxes are left out. Returns null when the state module cannot run.
+ */
+export function retireeIncomeTax(state: StateCode, p: RetireeProfile, otherOrdinary = 0, withdrawalsOwnedByOne = false): RetireeIncomeTax | null {
+  // A few state modules (New York) decline unclassified "other" income; taxable interest is the closest fully taxable class they accept.
+  for (const kind of ["other", "interest"] as const) {
+    try {
+      const r = estimateHouseholdTax(buildInput(state, p, Math.max(0, otherOrdinary), withdrawalsOwnedByOne, kind));
+      // The net investment income tax is left out: the other income stands for pensions and similar income, which it does not reach.
+      const federal = r.regularFederal + r.alternativeMinimumTax;
+      return { federal, state: r.stateTax, total: federal + r.stateTax };
+    } catch {
+      // try the next classification
+    }
+  }
+  return null;
 }
 
 /** Every state, lowest total state tax first (states that could not be calculated last). */

@@ -68,3 +68,41 @@ describe("retirement state view", () => {
     expect(r.stateTax).toBeLessThan(stateRetirementTax("ca", DEFAULT_PROFILE).stateTax * 2);
   });
 });
+
+describe("retireeIncomeTax (age-aware federal and state tax for the RMD calculator)", () => {
+  const rmd = { filing: "single" as const, age: 73, socialSecurity: 0, pension: 0, withdrawals: 18_868 };
+
+  it("an $18,868 RMD as the only income owes no federal tax at 73: standard deduction, age-65 amount and senior deduction exceed it", async () => {
+    const { retireeIncomeTax } = await import("./retirementStateView");
+    // 16,100 + 2,050 + 6,000 = 24,150 of deductions against 18,868 of income.
+    expect(retireeIncomeTax("tx", rmd, 0, true)).toEqual({ federal: 0, state: 0, total: 0 });
+  });
+
+  it("hand-calculated: the same RMD on top of $60,000 of other taxable income, Texas", async () => {
+    const { retireeIncomeTax } = await import("./retirementStateView");
+    // With the RMD: 78,868 - 16,100 - 2,050 - (6,000 - 6% of 3,868 = 5,767.92) = 54,950.08 taxable.
+    // Without it: 60,000 - 16,100 - 2,050 - 6,000 = 35,850 taxable.
+    // Added tax: 12% of (50,400 - 35,850) + 22% of (54,950.08 - 50,400) = 1,746 + 1,001.02 = 2,747.02.
+    const withRmd = retireeIncomeTax("tx", rmd, 60_000, true)!;
+    const without = retireeIncomeTax("tx", { ...rmd, withdrawals: 0 }, 60_000, true)!;
+    expect(withRmd.federal - without.federal).toBeCloseTo(2_747.02, 2);
+    expect(withRmd.state).toBe(0);
+  });
+
+  it("runs in every state, single and married, with and without other income", async () => {
+    const { retireeIncomeTax } = await import("./retirementStateView");
+    const { STATES } = await import("./states");
+    for (const { code } of STATES) {
+      for (const other of [0, 30_000]) {
+        expect(retireeIncomeTax(code, rmd, other, true), `${code} single other=${other}`).not.toBeNull();
+        expect(retireeIncomeTax(code, { filing: "married", age: 80, socialSecurity: 0, pension: 0, withdrawals: 45_000 }, other, true), `${code} married other=${other}`).not.toBeNull();
+      }
+    }
+  });
+
+  it("states that exempt IRA withdrawals at this age add no state tax, and Oregon does tax them", async () => {
+    const { retireeIncomeTax } = await import("./retirementStateView");
+    for (const s of ["il", "pa", "ms", "tx", "fl"] as const) expect(retireeIncomeTax(s, rmd, 0, true)!.state, s).toBe(0);
+    expect(retireeIncomeTax("or", rmd, 0, true)!.state).toBeGreaterThan(0);
+  });
+});
