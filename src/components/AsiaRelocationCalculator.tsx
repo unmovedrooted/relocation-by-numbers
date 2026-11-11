@@ -1,6 +1,7 @@
 "use client";
 
 import ChangeNote from "./ChangeNote";
+import { SHORT_RUNWAY_MONTHS } from "@/lib/moveVerdict";
 import { useChangeNote } from "@/lib/useChangeNote";
 import MobileResultBar from "./MobileResultBar";
 import ExampleResultsNotice from "./ExampleResultsNotice";
@@ -612,6 +613,7 @@ export default function AsiaRelocationCalculator() {
     const totalMonthlyOutflow = housingTotal + livingCosts;
     // Savings left once the upfront costs are paid (negative when they fall short).
     const cashAfterUpfront = convertLocalToUsd(nz(currentSavings), fromCountry) - upfrontCashNeeded;
+    const cushionMonths = totalMonthlyOutflow > 0 ? Math.max(0, cashAfterUpfront + nz(emergencyCashBuffer)) / totalMonthlyOutflow : 0;
     const monthsCovered = totalMonthlyOutflow > 0
       ? Math.max(0, convertLocalToUsd(nz(currentSavings), fromCountry) - upfrontCashNeeded) / totalMonthlyOutflow
       : 0;
@@ -633,7 +635,7 @@ export default function AsiaRelocationCalculator() {
       pct: housingPctOfNet * 100,
       totalPctOfNet: totalPctOfNet * 100,
       comfort,
-      upfrontCashNeeded, monthsCovered, cashAfterUpfront, comparableSalary, relativeDifference,
+      upfrontCashNeeded, monthsCovered, cashAfterUpfront, cushionMonths, comparableSalary, relativeDifference,
       housingMode, estimatedHomePrice, buyMonthlyPI, downPaymentUsd,
     };
   }, [fromCityCode,
@@ -1146,7 +1148,9 @@ export default function AsiaRelocationCalculator() {
                   ? results.comfort.band === "D"
                     ? "Monthly budget and upfront funding both fall short"
                     : `Monthly budget ${results.comfort.band === "C" ? "is tight" : "works"}; upfront funding needed`
-                  : `${results.comfort.band} · ${results.comfort.label}`}
+                  : results.comfort.band === "A" && results.cushionMonths < SHORT_RUNWAY_MONTHS
+                    ? "Monthly budget works; cash runway is short"
+                    : `${results.comfort.band} · ${results.comfort.label}`}
             </div>
             {results.salaryReady && results.cashAfterUpfront < 0 && (
               <div className="mt-1 text-sm font-semibold text-slate-700 dark:text-slate-300">Monthly budget: {results.comfort.band} · {results.comfort.label}</div>
@@ -1180,6 +1184,8 @@ export default function AsiaRelocationCalculator() {
                   ? "Your risk is tight cash flow, small changes could break your budget."
                   : results.upfrontCashNeeded > convertLocalToUsd(nz(currentSavings), fromCountry)
                   ? "Your risk is upfront cash, you don't have enough saved for the move."
+                  : results.cushionMonths < SHORT_RUNWAY_MONTHS
+                  ? `After upfront costs, your savings including the reserved emergency fund cover about ${results.cushionMonths.toFixed(1)} months of costs. Build a larger cushion before committing.`
                   : "You have breathing room, this move looks financially stable based on your inputs."}
               </div>
             )}

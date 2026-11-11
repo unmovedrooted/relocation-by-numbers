@@ -1,6 +1,7 @@
 "use client";
 
 import ChangeNote from "./ChangeNote";
+import { SHORT_RUNWAY_MONTHS } from "@/lib/moveVerdict";
 import { useChangeNote } from "@/lib/useChangeNote";
 import MobileResultBar from "./MobileResultBar";
 import ExampleResultsNotice from "./ExampleResultsNotice";
@@ -572,6 +573,7 @@ const utilitiesFrom = familyUtilities * cityRatio(fromCityMultipliers.utilities,
     // FIX 5: Convert savings from origin currency to USD before dividing
     // Savings left once the upfront costs are paid (negative when they fall short).
     const cashAfterUpfront = originToUsd(nz(currentSavings)) - upfrontCashNeeded;
+    const cushionMonths = totalMonthlyOutflow > 0 ? Math.max(0, cashAfterUpfront + destinationInputToUsd(nz(emergencyCashBuffer), "emergency")) / totalMonthlyOutflow : 0;
     const monthsCovered = totalMonthlyOutflow > 0
   ? Math.max(0, originToUsd(nz(currentSavings)) - upfrontCashNeeded) / totalMonthlyOutflow
   : 0;
@@ -597,7 +599,9 @@ const utilitiesFrom = familyUtilities * cityRatio(fromCityMultipliers.utilities,
       ? monthlyFlexibility < 0
         ? "Monthly budget and upfront funding both fall short: estimated expenses exceed income, and savings are below the one-time move costs."
         : `${monthlyFlexibility >= 500 ? "Monthly budget works" : "Monthly budget is tight"}, but upfront funding is needed: your savings are below the one-time move costs.`
-      : recommendation;
+      : salaryReady && monthlyFlexibility >= 500 && cushionMonths < SHORT_RUNWAY_MONTHS
+        ? `Monthly budget works; cash runway is short. After upfront costs, your savings including the reserved emergency fund cover about ${cushionMonths.toFixed(1)} months of costs. Build a larger cushion before committing.`
+        : recommendation;
 
     return {
       salaryReady, annualIncome, grossMonthly, currentTaxRate, targetTaxRate,

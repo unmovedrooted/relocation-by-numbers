@@ -1,6 +1,7 @@
 "use client";
 
 import MobileResultBar from "./MobileResultBar";
+import { withUpfrontFunding } from "@/lib/moveVerdict";
 import ExampleResultsNotice from "./ExampleResultsNotice";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { usWageEffectiveRate } from "@/lib/usCityTax";
@@ -220,6 +221,9 @@ interface VerdictResults {
   monthlyFlexibility: number;
   upfrontCashNeeded:  number;
   monthsCovered:      number;
+  cashAfterUpfront: number;
+  cushionMonths: number;
+  usTaxWarning: boolean;
   pct:                number;
   salaryReady:        boolean;
   targetIsDisclaimer: boolean;
@@ -243,6 +247,11 @@ function RelocationVerdict({ results, toCityLabel, displayAmount }: {
     monthsCovered >= 6 ? "strong" : monthsCovered >= 3 ? "adequate" : "thin";
 
   const pending = pendingAssumptions.length > 0;
+  const verdict = withUpfrontFunding({
+    label: comfort.label,
+    tone: monthlyFlexibility < 0 || comfort.band === "D" ? "risk" : comfort.band === "A" ? "good" : "caution",
+    note: comfort.note,
+  }, results.cashAfterUpfront, results.cushionMonths);
   const pendingText = pendingAssumptions.join(" and ");
   const taxSentence = targetIsDisclaimer
     ? "Tax impact for this scenario is not yet modeled, consult a local advisor."
@@ -269,6 +278,8 @@ function RelocationVerdict({ results, toCityLabel, displayAmount }: {
   return (
     <div className={`rounded-2xl border p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ${colorMap[verdictColor]}`}>
       <div className="text-xs font-semibold uppercase tracking-[0.14em] mb-2">{pending ? "Decision Summary (provisional)" : "Decision Summary"}</div>
+      <p className="mb-2 text-sm font-semibold">{verdict.label}</p>
+      {verdict.label !== comfort.label && <p className="mb-2 text-sm leading-6">{verdict.note}</p>}
       <p className="text-sm leading-6">
         Moving to <strong>{toCityLabel}</strong>, housing takes up{" "}
         <strong>{pct.toFixed(0)}%</strong> of estimated net income, rated{" "}
@@ -283,6 +294,13 @@ function RelocationVerdict({ results, toCityLabel, displayAmount }: {
       )}
       {comfort.band === "D" && (
         <p className="mt-2 text-sm font-semibold">⚠ Housing is consuming a high share of estimated income. Try a lower rent or higher income scenario.</p>
+      )}
+      {results.usTaxWarning && (
+        <div role="note" className="mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm leading-6 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200">
+          <strong>U.S. citizens and green-card holders:</strong> this estimate adds U.S. federal tax but leaves out U.S. state income tax and income tax treaties.
+          Some states keep taxing people who move abroad without ending their residency there, and a treaty can change which country taxes pensions, Social Security and other income.
+          Either one can move the result enough to change the decision, so confirm it with a cross-border tax adviser before you rely on this number.
+        </div>
       )}
       <p className="mt-3 text-xs opacity-70">Planning estimates only. Not financial or tax advice.</p>
     </div>
@@ -849,6 +867,7 @@ const savingsUsd =
 
 const remainingSavingsAfterMove =
   savingsUsd - upfrontCashNeeded;
+const cushionMonths = totalMonthlyExpensesTo > 0 ? Math.max(0, remainingSavingsAfterMove + safetyNet) / totalMonthlyExpensesTo : 0;
 
 const monthsCovered =
   totalMonthlyExpensesTo > 0 && remainingSavingsAfterMove > 0
@@ -914,6 +933,9 @@ const relativeDifference =
   upfrontCashNeeded,
   startupCosts,
   safetyNet,
+  cashAfterUpfront: remainingSavingsAfterMove,
+  cushionMonths,
+  usTaxWarning: usAbroad !== null,
   monthsCovered,
 
   comparableSalary,
