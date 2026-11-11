@@ -1110,7 +1110,7 @@ export default function Calculator({
                 />
               </label>
 
-              <div className="text-sm">
+              <div className="text-sm sm:col-span-2">
                 <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Income impact</div>
                 <div className="flex w-full items-center justify-between rounded-xl border border-slate-300 p-2 dark:border-slate-700">
                   {results.salaryReady ? (
@@ -1140,17 +1140,6 @@ export default function Calculator({
               </label>
 
               <label className="text-sm">
-                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Target state</div>
-                <select
-                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
-                  value={toState}
-                  onChange={(e) => { const state = e.target.value as StateCode; setToState(state); setToCityId(""); setToCityOther(""); clearTyped(); }}
-                >
-                  {STATES.map((s) => <option key={s.code} value={s.code}>{s.name} ({s.code.toUpperCase()})</option>)}
-                </select>
-              </label>
-
-              <label className="text-sm">
                 <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Current city (optional)</div>
                 <select
                   className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
@@ -1168,6 +1157,17 @@ export default function Calculator({
                   {fromCities.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}{c.tier ? `, ${c.tier}` : ""}</option>
                   ))}
+                </select>
+              </label>
+
+              <label className="text-sm">
+                <div className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">Target state</div>
+                <select
+                  className="h-11 w-full rounded-xl bg-slate-50 px-3 text-sm text-slate-900 ring-1 ring-slate-200 shadow-inner outline-none transition focus:bg-white focus:ring-4 focus:ring-blue-500/15 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:focus:bg-slate-800"
+                  value={toState}
+                  onChange={(e) => { const state = e.target.value as StateCode; setToState(state); setToCityId(""); setToCityOther(""); clearTyped(); }}
+                >
+                  {STATES.map((s) => <option key={s.code} value={s.code}>{s.name} ({s.code.toUpperCase()})</option>)}
                 </select>
               </label>
 
