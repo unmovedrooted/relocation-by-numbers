@@ -31,6 +31,7 @@ import { parseFireAbroadLink, parseFireLink } from "@/lib/fireLink";
 import { monthlyDepositFactor } from "@/lib/depositTiming";
 import { returnPaths } from "@/lib/monteCarlo";
 import { BAD_START_DROP, fireAgeRange, retirementStress } from "@/lib/fireStress";
+import { MAX_LIFE_EVENTS, describeEvent, eventCashAt, eventTarget, usableEvents, type LifeEvent, type LifeEventKind } from "@/lib/fireEvents";
 
 // The AI-written FIRE report is hidden until the API key is live-tested. Set NEXT_PUBLIC_AI_REPORTS=1 to show it again.
 const AI_REPORTS_ENABLED = process.env.NEXT_PUBLIC_AI_REPORTS === "1";
@@ -107,6 +108,8 @@ type Inputs = {
   volatility: "conservative" | "moderate" | "aggressive";
   /** Year-by-year returns (decimals) that replace the preset's average return. Set only by the market simulation, never stored. */
   returnPath?: ArrayLike<number>;
+  /** Dated spending and income changes and one-time costs, in today's dollars (Standard and Lean pages). */
+  lifeEvents?: readonly LifeEvent[];
   // ── Coast-specific ──────────────────────────────────
   coastAge:            number;
   targetRetirementAge: number;
@@ -541,6 +544,32 @@ function initBuckets(i: Inputs, netBasis: NetBasis): {
 //   Brokerage:   base return minus tax drag (drag applied each year on gains)
 //   Employer match flows into the 401k bucket only.
 //   autoContrib is only used in simple mode when yearlyInvestment is blank.
+// Life events (src/lib/fireEvents.ts): the year's net cash, inflated to that year, is added to the taxable account when it is
+// positive and taken out when it is negative (taxable first, then the IRA, then the 401(k); no withdrawal tax or penalty is
+// modelled). It is applied at the end of the year.
+function applyLifeEvents(b: Buckets, i: Inputs, yearIndex: number): Buckets {
+  if (!i.lifeEvents || i.lifeEvents.length === 0) return b;
+  const infl = (Number(i.inflationPct) || 0) / 100;
+  const cash = eventCashAt(i.lifeEvents, Math.round(i.age) + yearIndex) * Math.pow(1 + infl, yearIndex);
+  if (cash === 0) return b;
+  if (cash > 0) return { ...b, bBrokerage: b.bBrokerage + cash };
+  let rest = -cash;
+  const take = (balance: number) => { const t = Math.min(Math.max(0, balance), rest); rest -= t; return balance - t; };
+  const bBrokerage = take(b.bBrokerage);
+  const bIra = take(b.bIra);
+  const b401k = take(b.b401k);
+  return { b401k, bIra, bBrokerage };
+}
+
+// The portfolio needed to stop at year y: lasting spending (including lasting life-event changes) at the withdrawal rate, plus a
+// lump sum for temporary and still-to-come life events. Both are inflated to year y.
+function fireTargetWithEvents(i: Inputs, baseExpenses: number, y: number, swr: number, infl: number): number {
+  const grow = Math.pow(1 + infl, y);
+  if (!i.lifeEvents || i.lifeEvents.length === 0) return (baseExpenses * grow) / swr;
+  const { perpetual, bridge } = eventTarget(i.lifeEvents, Math.round(i.age) + y);
+  return Math.max(0, (Math.max(0, baseExpenses + perpetual) * grow) / swr + bridge * grow);
+}
+
 function growBuckets(
   b: Buckets,
   i: Inputs,
@@ -566,11 +595,11 @@ function growBuckets(
 
 // Each year's contribution arrives as twelve monthly end-of-month deposits (see depositTiming.ts), so it earns part of the
 // year's return; the taxable bucket uses its own return after tax drag.
-return {
+return applyLifeEvents({
   b401k: b.b401k * (1 + r) + Math.max(0, c401k) * monthlyDepositFactor(r),
   bIra: b.bIra * (1 + r) + Math.max(0, cIra) * monthlyDepositFactor(r),
   bBrokerage: b.bBrokerage * (1 + brokerageReturn) + Math.max(0, cBrokerage) * monthlyDepositFactor(brokerageReturn),
-};
+}, i, yearIndex);
 }
 
 // Base nominal return from volatility preset, used by growBuckets.
@@ -681,7 +710,7 @@ function simulateYearsToFI(
   // The portfolio needed at a given year. Barista uses its own target (which can account for the part-time income ending).
   const targetAt = (y: number) => mode === "barista"
     ? baristaTargetAt(i, rawTarget, y)
-    : swr > 0 ? (baseExpenses * Math.pow(1 + infl, y)) / swr : Infinity;
+    : swr > 0 ? fireTargetWithEvents(i, baseExpenses, y, swr, infl) : Infinity;
   const fire0 = targetAt(0);
  if (calcSpendableFromBuckets(i, buckets) >= fire0) {
   return {
@@ -777,8 +806,9 @@ function buildProjectionWithExpenses(
   const spendablePortfolio = calcSpendableFromBuckets(i, b);
   const expY = targetBase * Math.pow(1 + infl, y);
   const effExpY = effBase * Math.pow(1 + infl, y);
-  const fullTgt = swr > 0 ? expY / swr : Infinity;
-  const effTgt = mode === "barista" ? baristaTargetAt(i, targetBase, y) : swr > 0 ? effExpY / swr : Infinity;
+  const withEvents = mode === "standard" || mode === "lean";
+  const fullTgt = swr > 0 ? (withEvents ? fireTargetWithEvents(i, targetBase, y, swr, infl) : expY / swr) : Infinity;
+  const effTgt = mode === "barista" ? baristaTargetAt(i, targetBase, y) : swr > 0 ? (withEvents ? fireTargetWithEvents(i, effBase, y, swr, infl) : effExpY / swr) : Infinity;
 
   return {
     age,
@@ -1534,10 +1564,20 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
     return fireAgeRange(inputs.age, paths.map((returnPath) => simulateYearsToFI({ ...inputs, returnPath }, netPath, mode).yearsToFI));
   }, [inputs, netPath, mode, result.yearsToFI]);
 
+  // Life events: the ones with usable numbers, and the FIRE age without them, to show what they change.
+  const activeEvents = useMemo(() => (mode === "standard" || mode === "lean" ? usableEvents(inputs.lifeEvents) : []), [inputs.lifeEvents, mode]);
+  const withoutEvents = useMemo(() => {
+    if (activeEvents.length === 0) return null;
+    const r = simulateYearsToFI({ ...inputs, lifeEvents: undefined }, netPath, mode);
+    return { yearsToFI: r.yearsToFI, age: r.yearsToFI === null ? null : inputs.age + r.yearsToFI };
+  }, [activeEvents, inputs, netPath, mode]);
+
   // After FIRE: does the portfolio last to 95? In today's dollars, starting from the FIRE number, with returns after inflation.
   const afterFireStress = useMemo(() => {
     if (mode !== "standard" && mode !== "lean") return null;
     if (fiAge === null) return null;
+    // The test assumes level spending from a portfolio equal to the FIRE number, which no longer holds once life events change spending or income over time.
+    if (activeEvents.length > 0) return null;
     const infl = (Number(inputs.inflationPct) || 0) / 100;
     const nominalReturn = returnForYear(inputs, result.yearsToFI ?? 0);
     const realReturn = (1 + nominalReturn) / (1 + infl) - 1;
@@ -1549,7 +1589,7 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
       fireAge: fiAge,
     });
     return stress ? { ...stress, nominalReturn, realReturn } : null;
-  }, [inputs, mode, fiAge, result.yearsToFI]);
+  }, [inputs, mode, fiAge, result.yearsToFI, activeEvents]);
   // The FIRE number is in the dollars of the year you reach it; this adds what that is worth in today's dollars.
   const [dollarView, setDollarView] = useState<"future" | "today">("today");
   const inView = (amount: number, years: number | null | undefined) =>
@@ -2288,6 +2328,71 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
               </div>
             </details>}
 
+            {/* ── Life events (Standard and Lean) ────────────────────────── */}
+            {(mode === "standard" || mode === "lean") && (
+              <details className="group rounded-xl border border-white/10 bg-black/10 p-3 sm:col-span-2" open={(inputs.lifeEvents?.length ?? 0) > 0 || undefined}>
+                <summary className="cursor-pointer list-none text-xs font-medium text-slate-200">
+                  <span className="mr-1 inline-block transition group-open:rotate-90">▸</span>
+                  Life events
+                  <span className="ml-2 font-normal text-slate-300">{activeEvents.length > 0 ? `${activeEvents.length} in this plan` : "Kids, a home purchase, Social Security, a pension, a pay change"}</span>
+                </summary>
+                <p className="mt-2 text-xs leading-5 text-slate-300">
+                  Add things that will change your spending or income at a known age. Enter amounts in today&apos;s dollars; they are inflated to the year they happen. Income is take-home (after tax).
+                </p>
+                <div className="mt-3 space-y-3">
+                  {(inputs.lifeEvents ?? []).map((e, idx) => {
+                    const update = (patch: Partial<LifeEvent>) => setInputs(s => ({ ...s, lifeEvents: (s.lifeEvents ?? []).map((x, j) => (j === idx ? { ...x, ...patch } : x)) }));
+                    const cls = "h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10";
+                    const sign = e.amount < 0 ? -1 : 1;
+                    return (
+                      <div key={e.id} className="rounded-xl border border-white/10 bg-black/20 p-3">
+                        <div className="grid gap-x-4 gap-y-3 sm:grid-cols-2">
+                          <label className="block text-xs text-slate-300">
+                            <span className="mb-1 block font-medium text-slate-200">What happens</span>
+                            <select aria-label={`Life event ${idx + 1} type`} value={e.kind} onChange={ev => update({ kind: ev.target.value as LifeEventKind, endAge: 0 })} className={cls}>
+                              <option value="one-time" className="bg-slate-900">One-time cost</option>
+                              <option value="spending" className="bg-slate-900">Spending changes (per month)</option>
+                              <option value="income" className="bg-slate-900">Income changes (take-home per year)</option>
+                            </select>
+                          </label>
+                          <label className="block text-xs text-slate-300">
+                            <span className="mb-1 block font-medium text-slate-200">Name (optional)</span>
+                            <input aria-label={`Life event ${idx + 1} name`} type="text" maxLength={40} value={e.label} onChange={ev => update({ label: ev.target.value })} placeholder={e.kind === "one-time" ? "Down payment" : e.kind === "spending" ? "College" : "Social Security"} className={cls} />
+                          </label>
+                          {e.kind !== "one-time" && (
+                            <label className="block text-xs text-slate-300">
+                              <span className="mb-1 block font-medium text-slate-200">Direction</span>
+                              <select aria-label={`Life event ${idx + 1} direction`} value={sign} onChange={ev => update({ amount: Math.abs(e.amount) * Number(ev.target.value) })} className={cls}>
+                                <option value={1} className="bg-slate-900">{e.kind === "spending" ? "Spending goes up" : "Income goes up or starts"}</option>
+                                <option value={-1} className="bg-slate-900">{e.kind === "spending" ? "Spending goes down" : "Income goes down"}</option>
+                              </select>
+                            </label>
+                          )}
+                          <Field label={e.kind === "one-time" ? "Cost" : e.kind === "spending" ? "Amount per month" : "Amount per year"} prefix="$" value={Math.abs(e.amount)} onChange={v => update({ amount: Math.max(0, v) * sign })} />
+                          <Field label={e.kind === "one-time" ? "At age" : "Starting at age"} value={e.startAge} onChange={v => update({ startAge: Math.round(clamp(v, 0, 110)) })} />
+                          {e.kind !== "one-time" && (
+                            <Field label="Through age (0 = no end)" value={e.endAge} onChange={v => update({ endAge: Math.round(clamp(v, 0, 110)) })} />
+                          )}
+                        </div>
+                        <button type="button" onClick={() => setInputs(s => ({ ...s, lifeEvents: (s.lifeEvents ?? []).filter((_, j) => j !== idx) }))} className="mt-3 text-xs font-medium text-rose-300 underline underline-offset-4 hover:no-underline">
+                          Remove this event
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+                {(inputs.lifeEvents?.length ?? 0) < MAX_LIFE_EVENTS && (
+                  <button
+                    type="button"
+                    onClick={() => setInputs(s => ({ ...s, lifeEvents: [...(s.lifeEvents ?? []), { id: `e${Date.now()}${(s.lifeEvents ?? []).length}`, label: "", kind: "one-time", startAge: Math.round(s.age) + 5, endAge: 0, amount: 0 }] }))}
+                    className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-slate-200 hover:bg-white/10"
+                  >
+                    + Add a life event
+                  </button>
+                )}
+              </details>
+            )}
+
             {/* ── Move compare ───────────────────────────────────────────── */}
             <div className="mt-2 rounded-xl border border-white/10 bg-black/20 p-4 sm:col-span-2">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -2649,6 +2754,28 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                 </div>
               </>)}
 
+              {/* ── Life events in this plan and what they change ── */}
+              {activeEvents.length > 0 && withoutEvents && (
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+                  <div className="font-semibold text-white">Life events in this plan</div>
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-xs leading-5">
+                    {activeEvents.map((e) => <li key={e.id}>{describeEvent(e)}</li>)}
+                  </ul>
+                  <p className="mt-3 text-sm leading-6">
+                    {fiAge !== null && withoutEvents.age !== null
+                      ? fiAge === withoutEvents.age
+                        ? `With these events your FIRE age stays at ${fiAge}.`
+                        : `With these events you reach FIRE at age ${fiAge}. Without them it would be age ${withoutEvents.age}, ${Math.abs(fiAge - withoutEvents.age)} ${Math.abs(fiAge - withoutEvents.age) === 1 ? "year" : "years"} ${fiAge > withoutEvents.age ? "earlier" : "later"}.`
+                      : fiAge === null
+                        ? `With these events you do not reach FIRE within the projection${withoutEvents.age !== null ? `; without them it would be age ${withoutEvents.age}` : ""}.`
+                        : `With these events you reach FIRE at age ${fiAge}; without them you would not reach it within the projection.`}
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-slate-400">
+                    Lasting changes move the yearly amount your portfolio must cover. Temporary changes and costs still ahead of your FIRE date are added to the target as a lump sum, with no investment growth assumed on it. Money for an event comes from your taxable account first; taxes on income changes and penalties on early retirement-account withdrawals are not modelled.
+                  </p>
+                </div>
+              )}
+
               {/* ── How sure is this: market range and after-FIRE stress test (Standard and Lean) ── */}
               {(marketRange || afterFireStress) && (() => {
                 const ageText = (a: number) => (Number.isInteger(a) ? String(a) : a.toFixed(1));
@@ -2693,6 +2820,11 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                         </div>
                       )}
                     </div>
+                    {activeEvents.length > 0 && (
+                      <p className="mt-3 text-xs leading-5 text-slate-400">
+                        The after-FIRE test is not shown while life events are in the plan: it assumes level spending, and your events change spending or income over time. The Complete Retirement Plan models that year by year.
+                      </p>
+                    )}
                     <p className="mt-3 text-xs leading-5 text-slate-500">
                       Simulated returns are random draws around your return setting, not forecasts or history. The after-FIRE test starts from your FIRE number and leaves out Social Security, pensions, changes in spending and taxes beyond the withdrawal-tax setting. Planning illustration only.
                     </p>
