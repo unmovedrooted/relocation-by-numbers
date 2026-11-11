@@ -6,6 +6,10 @@ import { useChangeNote } from "@/lib/useChangeNote";
 import MobileResultBar from "./MobileResultBar";
 import { Children, cloneElement, isValidElement, useState, useMemo, useEffect, useCallback, useId, useRef, type ReactNode } from "react";
 import { parseMortgageLink } from "@/lib/mortgageLink";
+import { nonHousingPriceLevel, renovationPlan, stayVsBuy, trueMonthlyCost } from "@/lib/mortgageExtras";
+import { estimateNetBreakdown } from "@/lib/wageTax";
+import { governmentState } from "@/lib/governmentData";
+import type { StateCode } from "@/lib/states";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer,
@@ -968,6 +972,15 @@ function USTab() {
   const [movingBudget,        setMovingBudget]         = useState("5000");
   const [monthlySaving,       setMonthlySaving]        = useState("");
   const [stressLevel,      setStressLevel]      = useState<StressLevel>("none");
+  // True monthly cost, renovation budget, and buying here against staying put (see src/lib/mortgageExtras.ts).
+  const [utilities,          setUtilities]          = useState("300");
+  const [renovationCost,     setRenovationCost]     = useState("");
+  const [contingencyPct,     setContingencyPct]     = useState("15");
+  const [renovationFinanced, setRenovationFinanced] = useState(false);
+  const [stayState,          setStayState]          = useState("");
+  const [stayFiling,         setStayFiling]         = useState<"single" | "married">("single");
+  const [stayHousing,        setStayHousing]        = useState("");
+  const [stayOtherSpending,  setStayOtherSpending]  = useState("2500");
   const [appreciationPMI,  setAppreciationPMI]  = useState(false);
   const [scenarioNames, setScenarioNames] = useState([
     "Buy Now",
@@ -1067,6 +1080,33 @@ function USTab() {
     cashAfterClose >= emergencyFundTarget ? "healthy"
     : cashAfterClose >= 0                 ? "tight"
     : "danger";
+
+  // What owning costs each month beyond the lender's payment: a maintenance reserve and utilities.
+  const trueCost = trueMonthlyCost({ payment: totalMonthly, homePrice: hp, maintenancePctPerYear: nz(maintenanceRate), utilitiesMonthly: nz(utilities) });
+
+  // Renovation: the work plus a contingency, paid in cash or added to the loan at the same rate and term.
+  const renovation = renovationPlan({
+    homePrice: hp, renovationCost: nz(renovationCost), contingencyPct: nz(contingencyPct), financed: renovationFinanced,
+    ratePct: r, termYears: term, savings: nz(currentSavings), cashToClose: lenderCashToClose, movingCosts: nz(movingBudget), reserveTarget: emergencyFundTarget,
+  });
+
+  // Buying in the property's state against staying where you are: take-home pay in each state, housing, and other spending
+  // scaled by the two states' price levels for goods and services other than housing.
+  const stayComparison = useMemo(() => {
+    const income = nz(grossIncome);
+    if (!stayState || !propertyState || !(income > 0) || !(hp > 0)) return null;
+    const takeHome = (state: string) => estimateNetBreakdown({ grossAnnual: income, state: state as StateCode, filing: stayFiling, k401Pct: 0 }).net / 12;
+    const levelStay = nonHousingPriceLevel(governmentState(stayState as StateCode)?.rpp);
+    const levelBuy = nonHousingPriceLevel(governmentState(propertyState as StateCode)?.rpp);
+    return {
+      scaled: levelStay !== null && levelBuy !== null,
+      ...stayVsBuy({
+        takeHomeStayMonthly: takeHome(stayState), takeHomeBuyMonthly: takeHome(propertyState),
+        housingStayMonthly: stayHousing === "" ? nz(monthlyRent) : nz(stayHousing), housingBuyMonthly: trueCost.total + (renovation?.addedMonthlyPayment ?? 0),
+        otherSpendingStayMonthly: nz(stayOtherSpending), priceLevelStay: levelStay ?? 0, priceLevelBuy: levelBuy ?? 0,
+      }),
+    };
+  }, [stayState, propertyState, grossIncome, hp, stayFiling, stayHousing, monthlyRent, stayOtherSpending, trueCost.total, renovation?.addedMonthlyPayment]);
 
   const breakEvenMonth = useMemo(() => calcBreakEven({
     downPayment: dp, closingCosts: estimatedClosing,
@@ -1250,6 +1290,8 @@ function USTab() {
     setAppreciation("3.5"); setRentGrowth("3.0"); setInvestReturn("7.0"); setTaxDeductRate(String(RVB.taxBenefitPct)); setSellingCostPct(String(RVB.sellingCostPct));
     setCurrentSavings("80000"); setEmergencyFundMonths("6"); setMovingBudget("5000");
     setStressLevel("none"); setAppreciationPMI(false);
+    setUtilities("300"); setRenovationCost(""); setContingencyPct("15"); setRenovationFinanced(false);
+    setStayState(""); setStayFiling("single"); setStayHousing(""); setStayOtherSpending("2500");
     setScenarioNames(["Buy Now", "Rent 2 Yrs, Buy", "Cheaper Home", "Higher Down"]);
   }
 
@@ -1345,6 +1387,10 @@ function USTab() {
                tip="Recommended: 1–2% of home value annually.">
               <input className={inputCls()} type="number" step="0.1" value={maintenanceRate} onChange={e => setMaintenanceRate(e.target.value)} />
             </F>
+            <F label="Utilities ($/mo)"
+               tip="Your estimate for electricity, gas, water, trash and internet. Not part of the lender's payment, but part of what the home costs you each month.">
+              <input className={inputCls()} type="number" value={utilities} onChange={e => setUtilities(e.target.value)} placeholder="300" />
+            </F>
             <F label="Extra monthly payment" tipSide="right"
                tip="Additional principal per month. Reduces total interest and shortens loan." span2>
               <input className={inputCls()} type="number" value={extraMonthly} onChange={e => setExtraMonthly(e.target.value)} placeholder="0" />
@@ -1417,6 +1463,49 @@ function USTab() {
             </F>
             <F label="Monthly amount you can save (optional)" tip="Used only to estimate how long it would take to close a cash gap. Leave blank if you are not sure.">
               <input className={inputCls()} type="number" value={monthlySaving} onChange={e => setMonthlySaving(e.target.value)} placeholder="e.g. 1500" />
+            </F>
+          </div>
+        </Card>
+
+        <Card>
+          <H2>Renovation Budget (optional)</H2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <F label="Renovation cost" tip="What you expect the work to cost, before any cushion for surprises." span2>
+              <input className={inputCls()} type="number" value={renovationCost} onChange={e => setRenovationCost(e.target.value)} placeholder="e.g. 50000" />
+            </F>
+            <F label="Contingency (%)" tip="A cushion for surprises once the work starts. 10 to 20% is a common allowance; older homes often need more.">
+              <input className={inputCls()} type="number" value={contingencyPct} onChange={e => setContingencyPct(e.target.value)} />
+            </F>
+            <F label="How you pay for it" tipSide="right" tip="Financing adds the renovation budget to the loan at the same rate and term. That needs a renovation mortgage and the lender's approval.">
+              <select className={selectCls} value={renovationFinanced ? "loan" : "cash"} onChange={e => setRenovationFinanced(e.target.value === "loan")}>
+                <option value="cash">Cash from savings</option>
+                <option value="loan">Added to the mortgage</option>
+              </select>
+            </F>
+          </div>
+        </Card>
+
+        <Card>
+          <H2>Buy Here or Stay Put (optional)</H2>
+          <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">Compares what is left each month if you buy this home with what is left where you live now. Choose the property state above first.</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <F label="State you live in now" span2>
+              <select className={selectCls} value={stayState} onChange={e => setStayState(e.target.value)}>
+                <option value="">Select state</option>
+                {US_STATES_LIST.map(st => <option key={st.code} value={st.code}>{st.name}</option>)}
+              </select>
+            </F>
+            <F label="Tax filing status">
+              <select className={selectCls} value={stayFiling} onChange={e => setStayFiling(e.target.value === "married" ? "married" : "single")}>
+                <option value="single">Single</option>
+                <option value="married">Married filing jointly</option>
+              </select>
+            </F>
+            <F label="Housing cost now ($/mo)" tipSide="right" tip="Your current rent or mortgage payment with utilities. Leave blank to use the monthly rent entered above.">
+              <input className={inputCls()} type="number" value={stayHousing} onChange={e => setStayHousing(e.target.value)} placeholder={monthlyRent} />
+            </F>
+            <F label="Other spending now ($/mo)" tip="Everything except housing: food, transport, insurance, childcare and the rest. It is scaled to the new state's price level." span2>
+              <input className={inputCls()} type="number" value={stayOtherSpending} onChange={e => setStayOtherSpending(e.target.value)} />
             </F>
           </div>
         </Card>
@@ -1512,6 +1601,30 @@ function USTab() {
         </Card>
 
         <Card>
+          <H2>True Monthly Cost of Owning</H2>
+          <div className="space-y-2 text-sm">
+            {[
+              { label: "Mortgage payment (principal, interest, tax, insurance, HOA, PMI)", value: trueCost.payment },
+              { label: `Maintenance reserve (${nz(maintenanceRate)}% of the home's value a year)`, value: trueCost.maintenance },
+              { label: "Utilities", value: trueCost.utilities },
+              ...(renovation && renovation.addedMonthlyPayment > 0 ? [{ label: "Renovation financed with the mortgage", value: renovation.addedMonthlyPayment }] : []),
+            ].map(row => (
+              <div key={row.label} className="flex justify-between gap-3">
+                <span className="text-slate-600 dark:text-slate-400">{row.label}</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100">{money(row.value, 0)}</span>
+              </div>
+            ))}
+            <div className="mt-2 flex justify-between border-t border-slate-200 dark:border-slate-800 pt-2">
+              <span className="font-semibold text-slate-900 dark:text-slate-100">What the home costs each month</span>
+              <span className="text-xl font-bold text-violet-700 dark:text-violet-300">{money(trueCost.total + (renovation?.addedMonthlyPayment ?? 0), 0)}</span>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
+            Lenders qualify you on the mortgage payment alone. Maintenance and utilities are not in that figure, but you pay them every month, so budget for this total.
+          </p>
+        </Card>
+
+        <Card>
           <H2>First Year &amp; 5-Year Cost</H2>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
@@ -1589,6 +1702,91 @@ function USTab() {
             Cash after close below is your savings minus the first two lines; the reserve is what you would like left over.
           </p>
         </Card>
+
+        {renovation && (
+          <Card>
+            <H2>Renovation Budget</H2>
+            <div className="space-y-2 text-sm">
+              {[
+                { label: "Renovation work", value: money(nz(renovationCost)) },
+                { label: `Contingency (${nz(contingencyPct)}%)`, value: money(renovation.contingency) },
+                { label: "Renovation budget", value: money(renovation.budget) },
+                { label: "Purchase price plus renovation", value: money(renovation.allInCost) },
+                { label: renovationFinanced ? "Added to the monthly payment" : "Cash paid for the renovation", value: renovationFinanced ? `${money(renovation.addedMonthlyPayment, 0)}/mo` : money(renovation.cashForRenovation) },
+              ].map(row => (
+                <div key={row.label} className="flex justify-between gap-3">
+                  <span className="text-slate-600 dark:text-slate-400">{row.label}</span>
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">{row.value}</span>
+                </div>
+              ))}
+              <div className="mt-2 flex justify-between border-t border-slate-200 dark:border-slate-800 pt-2">
+                <span className="font-semibold text-slate-900 dark:text-slate-100">Cash left after closing, moving{renovationFinanced ? "" : " and the renovation"}</span>
+                <span className={`text-xl font-bold ${renovation.cashAfterEverything < 0 ? "text-rose-700 dark:text-rose-300" : "text-slate-900 dark:text-slate-100"}`}>{renovation.cashAfterEverything < 0 ? "-" : ""}{money(Math.abs(renovation.cashAfterEverything))}</span>
+              </div>
+            </div>
+            <div className={`mt-3 rounded-xl px-3 py-2 text-xs font-semibold ${renovation.cashAfterEverything < 0 ? "bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-200" : renovation.reserveGap < 0 ? "bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200" : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200"}`}>
+              {renovation.cashAfterEverything < 0
+                ? `Your savings are ${money(Math.abs(renovation.cashAfterEverything))} short of covering closing, moving and this renovation.`
+                : renovation.reserveGap < 0
+                  ? `You can pay for it, but you would be ${money(Math.abs(renovation.reserveGap))} below your emergency fund target of ${money(emergencyFundTarget)}.`
+                  : `You can pay for it and keep your emergency fund target of ${money(emergencyFundTarget)}, with ${money(renovation.reserveGap)} to spare.`}
+            </div>
+            <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
+              {renovationFinanced
+                ? "Financing assumes the renovation budget is added to the loan at the same rate and term, which needs a renovation mortgage and the lender's approval. The extra payment is not included in the affordability ratios above."
+                : "The renovation is paid from savings after closing. The cash figures elsewhere on this page do not include it."}{" "}
+              Contractor quotes vary widely; treat the contingency as a floor, not a guarantee.
+            </p>
+          </Card>
+        )}
+
+        {stayComparison && (
+          <Card>
+            <H2>Buy Here or Stay Put</H2>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[26rem] border-collapse text-sm">
+                <thead>
+                  <tr className="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    <th scope="col" className="py-2 pr-3 font-semibold">Each month</th>
+                    <th scope="col" className="py-2 pr-3 font-semibold">Stay in {US_STATE_DEFAULTS[stayState]?.name ?? "current state"}</th>
+                    <th scope="col" className="py-2 pr-3 font-semibold">Buy in {US_STATE_DEFAULTS[propertyState]?.name ?? "new state"}</th>
+                    <th scope="col" className="py-2 font-semibold">Change</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700 dark:divide-slate-800 dark:text-slate-300">
+                  {([
+                    ["Take-home pay", "takeHome", 1],
+                    ["Housing", "housing", -1],
+                    ["Other spending", "otherSpending", -1],
+                  ] as const).map(([label, key, good]) => (
+                    <tr key={key}>
+                      <td className="py-2 pr-3">{label}</td>
+                      <td className="py-2 pr-3">{money(stayComparison.stay[key], 0)}</td>
+                      <td className="py-2 pr-3">{money(stayComparison.buy[key], 0)}</td>
+                      <td className={`py-2 ${stayComparison.change[key] * good > 0 ? "text-emerald-700 dark:text-emerald-300" : stayComparison.change[key] * good < 0 ? "text-rose-700 dark:text-rose-300" : ""}`}>{stayComparison.change[key] >= 0 ? "+" : "-"}{money(Math.abs(stayComparison.change[key]), 0)}</td>
+                    </tr>
+                  ))}
+                  <tr className="font-semibold text-slate-900 dark:text-white">
+                    <td className="py-2 pr-3">Left over</td>
+                    <td className="py-2 pr-3">{stayComparison.stay.leftOver < 0 ? "-" : ""}{money(Math.abs(stayComparison.stay.leftOver), 0)}</td>
+                    <td className="py-2 pr-3">{stayComparison.buy.leftOver < 0 ? "-" : ""}{money(Math.abs(stayComparison.buy.leftOver), 0)}</td>
+                    <td className={`py-2 ${stayComparison.change.leftOver >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"}`}>{stayComparison.change.leftOver >= 0 ? "+" : "-"}{money(Math.abs(stayComparison.change.leftOver), 0)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div className={`mt-3 rounded-xl px-3 py-2 text-xs font-semibold ${stayComparison.change.leftOver >= 0 ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200" : "bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-200"}`}>
+              {stayComparison.change.leftOver >= 0
+                ? `Buying here leaves about ${money(stayComparison.change.leftOver, 0)} more each month than staying.`
+                : `Buying here leaves about ${money(Math.abs(stayComparison.change.leftOver), 0)} less each month than staying.`}
+            </div>
+            <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
+              Same pay in both places. Take-home pay uses each state&apos;s income tax for {stayFiling === "married" ? "a joint return" : "a single filer"} with the standard deduction and no local taxes. Housing after buying is the true monthly cost above.
+              {stayComparison.scaled ? " Other spending is scaled by the two states' price levels for goods and services from the Bureau of Economic Analysis." : " Price-level data was not available for one of the states, so other spending is left unchanged."}{" "}
+              It does not count the equity you build by owning, moving costs or a change of job. Planning estimate, not tax advice.
+            </p>
+          </Card>
+        )}
 
         <div className={`rounded-2xl border p-5 shadow-[0_6px_20px_rgba(15,23,42,0.07)] ${
           cashStatus === "healthy" ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/30"
