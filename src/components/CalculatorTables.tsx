@@ -67,7 +67,7 @@ export function RmdTables() {
       <Table
         caption="IRS Uniform Lifetime Table with example required minimum distributions"
         head={["Age", "Distribution period", "Share of balance", ...RMD_BALANCES.map((b) => `RMD on ${usd(b)}`)]}
-        note={<>Source: IRS Publication 590-B, Table III (Uniform Lifetime). A different table applies if your sole beneficiary is a spouse more than 10 years younger. Amounts are the balance divided by the period, before tax.</>}
+        note={<>Source: IRS Publication 590-B, Table III (Uniform Lifetime). A different table (Table II, joint life) applies if your sole beneficiary is a spouse more than 10 years younger; the calculator above uses it when you enter your spouse&apos;s age. Amounts are the balance divided by the period, before tax.</>}
       >
         {rows.map((r) => (
           <tr key={r.age}>

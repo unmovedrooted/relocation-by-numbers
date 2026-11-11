@@ -9,6 +9,7 @@ import { TAX_YEAR } from "../lib/taxYear2026";
 import { withdrawalIncomeTax } from "../lib/retirementTax";
 import { retireeIncomeTax } from "../lib/retirementStateView";
 import { firstRmdChoice } from "../lib/rmdFirstYear";
+import { jointLifeDivisor } from "../lib/rmdJointLife";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import SavedScenariosPanel from "./SavedScenariosPanel";
@@ -78,6 +79,9 @@ export default function RmdCalculator() {
   const [filing, setFiling] = useState<FilingStatus>("single");
   const [state, setState] = useState<StateCode>("fl");
   const [otherIncome, setOtherIncome] = useState("");
+  // A spouse who is the sole beneficiary of the account and more than 10 years younger uses IRS Table II instead of the Uniform Lifetime Table.
+  const [spouseSole, setSpouseSole] = useState(false);
+  const [spouseAge, setSpouseAge] = useState("");
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
 
   const nz = (v: string) => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
@@ -91,6 +95,7 @@ export default function RmdCalculator() {
     const vF = qs.get("filing") as FilingStatus | null; if (vF === "single" || vF === "married") setFiling(vF);
     const vS = qs.get("state"); if (vS) setState(vS as StateCode);
     const vO = qs.get("other"); if (vO) setOtherIncome(vO);
+    const vSp = qs.get("spouse"); if (vSp) { setSpouseSole(true); setSpouseAge(vSp); }
   }, []);
 
   useEffect(() => {
@@ -103,8 +108,9 @@ export default function RmdCalculator() {
     qs.set("filing", filing);
     qs.set("state", state);
     if (otherIncome) qs.set("other", otherIncome);
+    if (spouseSole && spouseAge) qs.set("spouse", spouseAge);
     setQS(qs);
-  }, [age, birthYear, balance, expectedReturnPct, filing, state, otherIncome]);
+  }, [age, birthYear, balance, expectedReturnPct, filing, state, otherIncome, spouseSole, spouseAge]);
 
   const results = useMemo(() => {
     const ageN = Math.round(nz(age));
@@ -114,6 +120,17 @@ export default function RmdCalculator() {
     const birthYearUsed = birthYearN >= 1900 && birthYearN <= TAX_YEAR ? birthYearN : estimatedBirthYear(ageN, TAX_YEAR);
     const startRmdAge = rmdStartAge(birthYearUsed);
     const required = ageN >= startRmdAge;
+    // IRS Table II applies when a spouse who is more than 10 years younger is the sole beneficiary; the spouse ages one year with you.
+    const spouseAgeN = Math.round(nz(spouseAge));
+    const jointRequested = spouseSole && spouseAgeN > 0;
+    const jointApplies = jointRequested && jointLifeDivisor(Math.max(ageN, startRmdAge), spouseAgeN + Math.max(0, startRmdAge - ageN)) !== null;
+    const divisorFor = (a: number): number | null => {
+      if (jointApplies) {
+        const joint = jointLifeDivisor(a, spouseAgeN + (a - ageN));
+        if (joint !== null) return joint;
+      }
+      return divisorForAge(a);
+    };
     // Tax the RMD adds on top of any other taxable income (pension, taxable Social Security, interest), in today's dollars.
     const other = Math.max(0, nz(otherIncome));
     const simpleTaxOn = (rmd: number) => other > 0
@@ -135,7 +152,7 @@ export default function RmdCalculator() {
     let thisYearDivisor: number | null = null;
     let thisYearTax = 0;
     if (required) {
-      thisYearDivisor = divisorForAge(ageN);
+      thisYearDivisor = divisorFor(ageN);
       if (thisYearDivisor) {
         thisYearRmd = bal0 / thisYearDivisor;
         thisYearTax = taxOn(thisYearRmd, ageN);
@@ -151,7 +168,7 @@ export default function RmdCalculator() {
     }
     const schedule: RmdRow[] = [];
     for (let a = startAge; a <= 95 && bal > 1; a++) {
-      const div = divisorForAge(a) ?? 2.0;
+      const div = divisorFor(a) ?? 2.0;
       const rmd = bal / div;
       const tax = taxOn(rmd, a);
       schedule.push({ age: a, startBalance: bal, divisor: div, rmd, tax });
@@ -163,8 +180,8 @@ export default function RmdCalculator() {
     const firstChoice = ageN <= startRmdAge && schedule.length >= 2
       ? firstRmdChoice({ startBalance: schedule[0].startBalance, firstAge: schedule[0].age, divisorFirst: schedule[0].divisor, divisorSecond: schedule[1].divisor, returnRate: r, taxOn })
       : null;
-    return { ageN, bal0, required, thisYearRmd, thisYearDivisor, thisYearTax, schedule, firstRmd, startAge, startRmdAge, birthYearUsed, simpleTaxUsed, firstChoice };
-  }, [age, birthYear, balance, expectedReturnPct, filing, state, otherIncome]);
+    return { ageN, bal0, required, thisYearRmd, thisYearDivisor, thisYearTax, schedule, firstRmd, startAge, startRmdAge, birthYearUsed, simpleTaxUsed, firstChoice, jointRequested, jointApplies };
+  }, [age, birthYear, balance, expectedReturnPct, filing, state, otherIncome, spouseSole, spouseAge]);
 
   const inputsReady = results.bal0 > 0 && results.ageN > 0;
   const stateName = STATES.find((s) => s.code === state)?.name ?? state;
@@ -178,7 +195,7 @@ export default function RmdCalculator() {
     ];
     if (results.required && results.thisYearDivisor) {
       rows.push(
-        { Metric: "Uniform Lifetime divisor", Value: results.thisYearDivisor },
+        { Metric: results.jointApplies ? "Joint life (Table II) divisor" : "Uniform Lifetime divisor", Value: results.thisYearDivisor },
         { Metric: "This year's RMD", Value: money(results.thisYearRmd) },
         { Metric: "RMD as % of balance", Value: `${rmdPct.toFixed(2)}%` },
         { Metric: "Est. income tax on the RMD", Value: money(results.thisYearTax) },
@@ -212,6 +229,16 @@ export default function RmdCalculator() {
               <label className="text-sm"><div className={labelHeadCls}>Birth year (optional)<InfoTip text="RMDs begin at 73 if you were born 1951 to 1959 and at 75 if you were born in 1960 or later. Leave blank to estimate your birth year from your age; someone aged 66 could be born in either 1959 or 1960." /></div><input className={inputCls} type="number" min="1900" value={birthYear} onChange={(e) => setBirthYear(e.target.value)} placeholder={String(estimatedBirthYear(Math.round(nz(age)), TAX_YEAR))} /></label>
               <label className="text-sm"><div className={labelHeadCls}>Prior year-end balance<InfoTip text="Your traditional (pre-tax) IRA / 401(k) balance as of December 31 last year. Roth IRAs, and, from 2024, Roth 401(k)s, have no RMDs." /></div><input className={inputCls} type="number" min="0" value={balance} onChange={(e) => setBalance(e.target.value)} placeholder=" " /></label>
               <label className="text-sm"><div className={labelHeadCls}>Expected annual return (%)<InfoTip text="Used to project future balances and RMDs. RMDs are recalculated each year from that year's balance and divisor." /></div><input className={inputCls} type="number" step="0.1" value={expectedReturnPct} onChange={(e) => setExpectedReturnPct(e.target.value)} placeholder=" " /></label>
+            <label className="flex items-start gap-2 text-sm sm:col-span-2">
+                <input type="checkbox" className="mt-1" checked={spouseSole} onChange={(e) => setSpouseSole(e.target.checked)} />
+                <span>My spouse is the only beneficiary of this account and is more than 10 years younger than me</span>
+              </label>
+              {spouseSole && (
+                <label className="text-sm">
+                  <div className={labelHeadCls}>Spouse&apos;s age<InfoTip text="Your spouse's age this year. The IRS joint life table (Table II) gives a longer distribution period, so a smaller RMD, when the spouse is more than 10 years younger and the only beneficiary for the whole year." /></div>
+                  <input className={inputCls} type="number" value={spouseAge} onChange={(e) => setSpouseAge(e.target.value)} placeholder="e.g. 60" />
+                </label>
+              )}
             </div>
           </div>
 
@@ -249,6 +276,14 @@ export default function RmdCalculator() {
                   <p className="mt-2 text-sm leading-5 opacity-90">
                     In {results.startRmdAge - results.ageN} year{results.startRmdAge - results.ageN === 1 ? "" : "s"}. At {(nz(expectedReturnPct)).toFixed(1)}% growth, your first RMD is projected at about <span className="font-semibold">{money(results.firstRmd?.rmd ?? 0)}</span>.
                   </p>
+                </div>
+              )}
+
+              {results.jointRequested && (
+                <div role="status" className={`rounded-2xl border p-4 text-sm ${results.jointApplies ? "border-emerald-200 bg-emerald-50/70 text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:text-emerald-200" : "border-amber-200 bg-amber-50/70 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-200"}`}>
+                  {results.jointApplies
+                    ? "These RMDs use IRS Table II (joint life expectancy) because your spouse is the sole beneficiary and more than 10 years younger. It gives a longer period than the Uniform Lifetime Table, so each RMD is smaller. Your spouse must be the only beneficiary of the account for the whole year; naming anyone else, or a divorce, ends it."
+                    : "The Uniform Lifetime Table is used. Table II applies only when your spouse is at least 11 years younger than you by age (a gap of exactly 10 years can still qualify by birth date, which this calculator cannot tell from ages), and the ages must fall inside the IRS table."}
                 </div>
               )}
 
@@ -292,7 +327,7 @@ export default function RmdCalculator() {
 
               <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
                 <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Projected RMDs by age</div>
-                <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">Each year&apos;s RMD from the balance and Uniform Lifetime divisor.</div>
+                <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">Each year&apos;s RMD from the balance and {results.jointApplies ? "IRS Table II (joint life) divisor" : "Uniform Lifetime divisor"}.</div>
                 <div className="h-[200px] w-full">
                   <ResponsiveContainer initialDimension={{ width: 480, height: 280 }} width="100%" height="100%">
                     <BarChart data={results.schedule} margin={{ top: 10, right: 8, left: 8, bottom: 0 }}>
@@ -327,7 +362,7 @@ export default function RmdCalculator() {
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                RMDs from traditional IRAs and 401(k)s must begin by April 1 of the year after the year you reach age {results.startRmdAge} (then by December 31 each year after). The starting age is 73 if you were born 1951 to 1959 and 75 if you were born in 1960 or later; the age shown here uses your birth year, or an estimate from your age if you leave it blank. Missing one triggers a 25% penalty (10% if corrected promptly). This uses the Uniform Lifetime Table; a spouse more than 10 years younger as sole beneficiary uses a different table. Roth IRAs have no lifetime RMDs. {results.simpleTaxUsed ? "The tax shown uses the standard deduction for a filer under 65; the extra deduction at 65+ and the temporary senior deduction are not applied, so it may be overstated." : `The tax shown uses the ${TAX_YEAR} standard deduction with the extra amount for age 65 or older, the temporary senior deduction (through 2028, reduced at higher incomes) and your state's rules for IRA withdrawals at your age; a joint return assumes both spouses are the same age.`} If you are still working, your current employer&apos;s 401(k) may let you delay its RMDs until you retire, if the plan allows it and you do not own more than 5% of the business; IRAs do not get that exception. Estimates only, not tax advice.
+                RMDs from traditional IRAs and 401(k)s must begin by April 1 of the year after the year you reach age {results.startRmdAge} (then by December 31 each year after). The starting age is 73 if you were born 1951 to 1959 and 75 if you were born in 1960 or later; the age shown here uses your birth year, or an estimate from your age if you leave it blank. Missing one triggers a 25% penalty (10% if corrected promptly). This uses the Uniform Lifetime Table unless you tick the spouse box above, in which case it uses IRS Table II (joint life). Roth IRAs have no lifetime RMDs. {results.simpleTaxUsed ? "The tax shown uses the standard deduction for a filer under 65; the extra deduction at 65+ and the temporary senior deduction are not applied, so it may be overstated." : `The tax shown uses the ${TAX_YEAR} standard deduction with the extra amount for age 65 or older, the temporary senior deduction (through 2028, reduced at higher incomes) and your state's rules for IRA withdrawals at your age; a joint return assumes both spouses are the same age.`} If you are still working, your current employer&apos;s 401(k) may let you delay its RMDs until you retire, if the plan allows it and you do not own more than 5% of the business; IRAs do not get that exception. Estimates only, not tax advice.
               </div>
             </>
           )}

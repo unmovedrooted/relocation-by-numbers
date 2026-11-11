@@ -147,7 +147,7 @@ export default function Page() {
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Good to know</h3>
                 <div className="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-300">
                   <p>Missing an RMD triggers a 25% penalty (10% if corrected promptly), so the deadlines matter.</p>
-                  <p>This uses the Uniform Lifetime Table. If your sole beneficiary is a spouse more than 10 years younger, a different (lower) table applies.</p>
+                  <p>This uses the Uniform Lifetime Table. If your spouse is your only beneficiary and is more than 10 years younger, tick the box and enter their age: the calculator then uses the IRS joint life table (Table II), which gives a smaller RMD.</p>
                   <p>Roth IRAs, and, since 2024, Roth 401(k)s, have no lifetime RMDs.</p>
                   <p>It&apos;s a planning estimate, not tax advice.</p>
                 </div>
