@@ -1572,6 +1572,37 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
     return { yearsToFI: r.yearsToFI, age: r.yearsToFI === null ? null : inputs.age + r.yearsToFI };
   }, [activeEvents, inputs, netPath, mode]);
 
+  // Three cities side by side: the same income, savings and plan, taxed in each city and with spending scaled to its housing
+  // price level. Moving costs and a change of pay are left to the single-move comparison.
+  const [pickedCompareCities, setPickedCompareCities] = useState<string[] | null>(null);
+  const cityOptions = useMemo(
+    () => STATES.flatMap((st) => citiesForState(st.code)).filter((c) => !c.id.startsWith("other-")).sort((a, b) => a.name.localeCompare(b.name)),
+    [],
+  );
+  const compareCityIds = useMemo(
+    () => pickedCompareCities ?? VIRAL_COMPARE_CITIES.filter((id) => findCity(id)?.state !== inputs.state).slice(0, 3),
+    [pickedCompareCities, inputs.state],
+  );
+  const threeCityRows = useMemo(() => {
+    if (mode !== "standard" && mode !== "lean") return null;
+    const baselineCityId = getBaselineCityIdForState(inputs.state);
+    const baseExp = annualExpenses(inputs);
+    return compareCityIds.map((cityId) => {
+      const city = findCity(cityId);
+      if (!city) return null;
+      const exp = expenseAdjustedForCity(baseExp, cityId, baselineCityId);
+      const scenario: Inputs = {
+        ...inputs,
+        state: city.state,
+        expensesMonthly: exp / 12,
+        retirementExpensesMonthly: inputs.retirementDifferent && baseExp > 0 ? (inputs.retirementExpensesMonthly * exp) / baseExp : inputs.retirementExpensesMonthly,
+      };
+      const net = makeNetPath({ gross: inputs.income, state: city.state, filing: inputs.filingStatus, k401Pct: inputs.k401Pct, cityId, salaryGrowthPct: inputs.salaryGrowthPct, inflationPct: inputs.inflationPct });
+      const sim = simulateYearsToFI(scenario, net, mode);
+      return { cityId, name: `${city.name}, ${city.state.toUpperCase()}`, takeHome: net(0), monthlySpending: exp / 12, sim, age: sim.yearsToFI === null ? null : inputs.age + sim.yearsToFI };
+    });
+  }, [compareCityIds, inputs, mode]);
+
   // After FIRE: does the portfolio last to 95? In today's dollars, starting from the FIRE number, with returns after inflation.
   const afterFireStress = useMemo(() => {
     if (mode !== "standard" && mode !== "lean") return null;
@@ -2831,6 +2862,71 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                   </div>
                 );
               })()}
+
+              {/* ── Three cities side by side (Standard and Lean) ── */}
+              {threeCityRows && (
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+                  <div className="font-semibold text-white">Compare three cities side by side</div>
+                  <p className="mt-1 text-xs leading-5 text-slate-400">
+                    Same pay, savings and plan in each place. Take-home pay uses each city&apos;s state and local income tax, and spending is scaled by its housing price level.
+                  </p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                    {[0, 1, 2].map((slot) => (
+                      <select
+                        key={slot}
+                        aria-label={`City ${slot + 1} to compare`}
+                        value={compareCityIds[slot] ?? ""}
+                        onChange={(e) => setPickedCompareCities(() => { const next = [...compareCityIds]; next[slot] = e.target.value; return next.filter(Boolean); })}
+                        className="h-10 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 text-sm text-white shadow-inner outline-none transition focus:border-emerald-400/50 focus:ring-4 focus:ring-emerald-400/10"
+                      >
+                        <option value="" className="bg-slate-900">Choose a city…</option>
+                        {cityOptions.map((c) => <option key={c.id} value={c.id} className="bg-slate-900">{c.name}, {c.state.toUpperCase()}</option>)}
+                      </select>
+                    ))}
+                  </div>
+                  <div className="mt-3 overflow-x-auto rounded-xl border border-white/10">
+                    <table className="w-full min-w-[34rem] border-collapse text-sm">
+                      <thead className="bg-black/20 text-left text-xs uppercase tracking-wide text-slate-400">
+                        <tr>
+                          <th scope="col" className="px-3 py-2 font-semibold">Place</th>
+                          <th scope="col" className="px-3 py-2 font-semibold">Take-home pay</th>
+                          <th scope="col" className="px-3 py-2 font-semibold">Spending a month</th>
+                          <th scope="col" className="px-3 py-2 font-semibold">FIRE number</th>
+                          <th scope="col" className="px-3 py-2 font-semibold">FIRE age</th>
+                          <th scope="col" className="px-3 py-2 font-semibold">Compared with now</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/10">
+                        <tr>
+                          <td className="px-3 py-2 font-semibold text-white">Where you are now</td>
+                          <td className="px-3 py-2">{money(netAt(netPath, 0, inputs), 0)}</td>
+                          <td className="px-3 py-2">{money(inputs.expensesMonthly, 0)}</td>
+                          <td className="px-3 py-2">{fullFireNumberShown(result)}</td>
+                          <td className="px-3 py-2 font-semibold text-white">{fiAge === null ? "Not reached" : fiAge}</td>
+                          <td className="px-3 py-2">Baseline</td>
+                        </tr>
+                        {threeCityRows.map((row, idx) => row && (
+                          <tr key={`${row.cityId}-${idx}`}>
+                            <td className="px-3 py-2 font-semibold text-white">{row.name}</td>
+                            <td className="px-3 py-2">{money(row.takeHome, 0)}</td>
+                            <td className="px-3 py-2">{money(row.monthlySpending, 0)}</td>
+                            <td className="px-3 py-2">{fullFireNumberShown(row.sim)}</td>
+                            <td className="px-3 py-2 font-semibold text-white">{row.age === null ? "Not reached" : row.age}</td>
+                            <td className={`px-3 py-2 ${row.age !== null && fiAge !== null && row.age < fiAge ? "text-emerald-300" : row.age !== null && fiAge !== null && row.age > fiAge ? "text-rose-300" : ""}`}>
+                              {row.age === null || fiAge === null
+                                ? row.age === null && fiAge === null ? "Same" : row.age === null ? "Later" : "Sooner"
+                                : row.age === fiAge ? "Same" : `${Math.abs(fiAge - row.age)} ${Math.abs(fiAge - row.age) === 1 ? "year" : "years"} ${row.age < fiAge ? "sooner" : "later"}`}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="mt-3 text-xs leading-5 text-slate-500">
+                    Spending is scaled from your current spending by each city&apos;s housing price level (Bureau of Economic Analysis), with 60% of spending treated as housing-linked, measured against the largest city in your current state. Moving costs and a change of pay are not included; use the move comparison in the inputs for one move in detail.
+                  </p>
+                </div>
+              )}
 
               {/* ── Shared: methodology note ───────────────────────────────── */}
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
