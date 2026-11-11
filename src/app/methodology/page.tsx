@@ -5,11 +5,13 @@ import { STATE_RULE_NOTES, taxRulesVerifiedLabel, PAYROLL_PROGRAMS_NOTE, TAX_YEA
 import { CALCULATOR_INFO, LOCAL_TAX_SOURCES, STATE_TAX_SOURCES } from "../../lib/calculatorSources";
 import { STATE_PAYROLL_PROGRAMS } from "../../lib/statePayrollPrograms";
 import type { StateCode } from "../../lib/states";
+import { GOVERNMENT_DATA_META } from "../../lib/governmentData";
+import { FX_SOURCE } from "../../lib/internationalFx";
 
 export const metadata: Metadata = {
   title: "Methodology & Data Sources",
   description:
-    "Learn how Relocation by Numbers estimates taxes, housing, cost of living, affordability, relocation budgets, and FIRE timelines across cities, states, and international destinations.",
+    "Understand relocation budgets, housing and living-cost data, moving expenses, affordability, and the tax and retirement assumptions behind our planning estimates.",
   alternates: {
     canonical: "https://www.relocationbynumbers.com/methodology",
   },
@@ -25,13 +27,13 @@ export default function MethodologyPage() {
           </div>
 
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            How Relocation by Numbers Works
+            How Our Relocation Calculators Work
           </h1>
 
           <p className="max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-400 sm:text-lg">
-            Relocation by Numbers is built to help users compare how taxes, housing,
-            cost of living, and location-based spending may affect affordability,
-            relocation decisions, and financial independence planning before they move.
+            Understand how a move could change your monthly budget, how much cash you
+            need upfront, and what financial cushion remains. Here is where our numbers
+            come from, how we use them, and what the results can and cannot tell you.
           </p>
 
           <p className="max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">
@@ -41,11 +43,35 @@ export default function MethodologyPage() {
           </p>
 
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Assumptions updated: October 2026
+            U.S. tax assumptions: {TAX_YEAR}. Individual data vintages and review dates are listed below.
           </p>
         </header>
 
-        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <nav aria-label="Methodology sections" className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="text-lg font-semibold">On this page</h2>
+          <ul className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+            {[
+              ["overview", "How relocation results work"],
+              ["understanding-estimates", "Inputs, estimates and uncertainty"],
+              ["housing", "Housing and affordability"],
+              ["cost-of-living", "Cost of living"],
+              ["moving-costs", "Moving costs and cash readiness"],
+              ["international", "International relocation"],
+              ["data-sources", "Data vintages and fallbacks"],
+              ["tax-estimates", "Simplified taxes"],
+              ["tax-year-and-sources", "Tax coverage and limits"],
+              ["state-sources", "State and local sources"],
+              ["fire", "FIRE methodology"],
+              ["retirement", "Retirement models"],
+              ["exclusions-by-tool", "Calculator-specific limitations"],
+              ["updates", "Documentation updates"],
+            ].map(([id, label]) => (
+              <li key={id}><a href={`#${id}`} className="underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4">{label}</a></li>
+            ))}
+          </ul>
+        </nav>
+
+        <section id="purpose" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             What these tools are designed to do
           </h2>
@@ -71,14 +97,14 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <section id="overview" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            How the core model works
+            How we calculate your relocation results
           </h2>
 
-          <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100">1. Income input</h3>
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">1. Your information</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 The model starts with user inputs such as salary, filing status,
                 household assumptions, savings, and housing choices where relevant.
@@ -86,34 +112,288 @@ export default function MethodologyPage() {
             </div>
 
             <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100">2. Tax estimate</h3>
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">2. Location data</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
-                Federal, payroll, state, or country-level tax assumptions are applied
-                to estimate after-tax income for planning comparison purposes.
+                Housing defaults, regional price levels and destination assumptions
+                provide starting estimates. Replace them with your own costs where editable.
               </p>
             </div>
 
             <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100">3. Cost adjustment</h3>
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">3. Moving costs</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
-                Housing and other recurring cost assumptions are applied so the tool
-                can estimate budget pressure in the origin and destination.
+                One-time expenses, deposits and other cash requirements are separated
+                from the recurring monthly budget. Defaults are not moving-company quotes.
               </p>
             </div>
 
             <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100">4. Planning output</h3>
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">4. Estimated take-home pay</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
-                The result is a comparison view showing tradeoffs such as affordability,
-                comparable salary, monthly flexibility, or FIRE impact.
+                Simplified taxes help estimate what income remains to pay for the move
+                and everyday life. Coverage depends on the tool and jurisdiction.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 sm:col-span-2">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">5. Your results</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                Compare monthly financial impact, upfront cash needs and longer-term
+                tradeoffs. A comfortable monthly budget alone does not mean you can fund the move.
               </p>
             </div>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <section id="understanding-estimates" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            Tax estimates
+            Understand the numbers and their uncertainty
+          </h2>
+
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
+            <p>
+              Not every number on the site is the same kind of input. In general, the
+              models distinguish the information supplied from the rules applied to it:
+            </p>
+
+            <ul className="list-disc space-y-2 pl-5">
+              <li><span className="font-medium text-slate-900 dark:text-slate-100">Your inputs:</span> amounts you provide, such as rent or a mover&apos;s quote. Their usefulness depends on accuracy and what the quote includes.</li>
+              <li><span className="font-medium text-slate-900 dark:text-slate-100">Public data:</span> published housing statistics and regional price indexes. These describe an area, not a specific available home or your household.</li>
+              <li>
+                <span className="font-medium text-slate-900 dark:text-slate-100">Rule-based inputs:</span> examples include
+                tax brackets, filing status logic, and structured formula-based calculations.
+              </li>
+              <li>
+                <span className="font-medium text-slate-900 dark:text-slate-100">Planning estimates:</span> examples include
+                housing assumptions, monthly essentials, and affordability comparisons built from location data.
+              </li>
+              <li>
+                <span className="font-medium text-slate-900 dark:text-slate-100">Comparison heuristics:</span> examples include
+                weighted affordability logic, comfort signals, and scenario-planning shortcuts used to keep the tools practical.
+              </li>
+            </ul>
+
+            <p>
+              That distinction matters because some outputs are closer to structured formula results,
+              while others are best treated as directional planning estimates rather than exact figures.
+              A loan payment calculated from entered loan terms has a different uncertainty from
+              a grocery budget scaled by a regional index. Neither guarantees the final bill.
+            </p>
+          </div>
+        </section>
+
+        <section id="housing" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            Housing and affordability estimates
+          </h2>
+
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
+            <p>
+              Housing estimates are one of the largest parts of the model because housing
+              is often the biggest recurring expense in a move. Depending on the calculator,
+              users may compare renting or buying and estimate how much of their take-home
+              pay may go toward housing.
+            </p>
+
+            <p>
+              Buy-mode estimates may include mortgage principal and interest, property taxes,
+              homeowners insurance, HOA costs, and PMI when down payment assumptions suggest
+              PMI may apply. Rent-mode estimates may include monthly rent and renter-related
+              housing costs where relevant.
+            </p>
+
+            <p>
+              City rent, home-price and property-tax defaults come from the U.S. Census Bureau American Community
+              Survey 2020-2024 (5-year estimates). Rent is what households that moved in during 2023 or later
+              pay, converted to the contract-rent basis (tables B25113, B25058 and B25064); home price is the
+              owner-reported value of homes bought in 2023 or later (B25109). Where that group is too small to be
+              reliable (margin of error above 25% of the estimate), the all-renter or all-owner median is used
+              instead, and the city page says which. The property-tax rate is median real estate taxes paid
+              divided by median home value (B25103 and B25077); a city without its own figure uses its state&apos;s.
+            </p>
+
+            <p>
+              These housing calculations are designed for planning comparison only and do not
+              represent a mortgage approval, underwriting decision, or final lender quote.
+            </p>
+          </div>
+        </section>
+
+        <section id="cost-of-living" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            Cost of living assumptions
+          </h2>
+
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
+            <p>
+              Cost-of-living comparisons use location-specific assumptions for categories
+              such as housing, groceries, utilities, transportation, healthcare, and
+              other recurring living expenses when those inputs are available in the model.
+            </p>
+
+            <p>
+              City price levels come from the Bureau of Economic Analysis Regional Price Parities for 2024, which
+              compare a metro area (or the state, for cities outside a metro area) with the national average of
+              1.00. Housing uses the housing index and utilities the utilities index. BEA does not publish
+              separate indexes for groceries, transportation or healthcare, so groceries and transportation use
+              the goods index and healthcare uses the other-services index.
+            </p>
+
+            <p>
+              The national dollar budgets those indexes scale (groceries, utilities, transportation, healthcare,
+              childcare and miscellaneous), plus insurance, closing costs and state sales tax, are planning
+              assumptions rather than government figures.
+            </p>
+
+            <p>
+              On the U.S. relocation homepage, the current-city monthly starting budget is
+              $600 groceries, $250 utilities, $300 transportation, $300 dining and $200
+              miscellaneous. Destination groceries, utilities and transportation use the
+              destination-to-origin ratio of the relevant price indexes; without both cities&apos;
+              index data, the starting amounts are used. Editable destination amounts replace
+              these estimates. This is not a measured household spending average.
+            </p>
+
+            <p>
+              The homepage&apos;s separate cost-of-living index weights housing 35%, groceries 15%,
+              utilities 10%, transportation 15%, healthcare 10% and an unadjusted remainder 15%.
+              That index is not the monthly expense total: the cash budget adds its individual
+              expense amounts. International and regional tools use their own city/country
+              presets and editable costs, not this U.S. index-weight formula.
+            </p>
+
+            <p>
+              These estimates should be treated as directional planning inputs. Actual
+              living costs vary by neighborhood, household size, commute, lifestyle,
+              insurance choices, and personal spending habits.
+            </p>
+          </div>
+        </section>
+
+        <section id="moving-costs" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            Moving and setup expenses
+          </h2>
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">U.S. relocation homepage</h3>
+            <p>
+              Blank moving fields use $1,500 for movers or a truck, $500 for travel and
+              $2,000 for furniture/setup. These are fixed planning allowances: they do not
+              calculate distance, shipment weight, household size or a mover&apos;s price.
+              Replace them with quotes; an explicitly entered zero is different from a blank.
+            </p>
+            <p>
+              Lease-break costs default to zero. Fees default to zero when renting, or 3%
+              of the home price when buying. The rental deposit defaults to two months of
+              entered rent. Housing overlap is entered months multiplied by destination monthly
+              housing cost. Buying also adds the entered down payment to cash required.
+            </p>
+            <ul className="list-disc space-y-2 pl-5">
+              <li>Spent moving costs = movers + travel + setup + lease-break costs + fees + housing overlap.</li>
+              <li>Cash needed upfront = spent moving costs + refundable deposit + down payment, where applicable.</li>
+              <li>Monthly change = destination take-home pay minus destination housing/living costs, less the equivalent current-location remainder.</li>
+              <li>First-year impact = 12 × monthly change − spent moving costs. Refundable deposits and down payments are cash requirements, not spent costs in this comparison.</li>
+              <li>Months to earn back costs = spent costs ÷ positive monthly improvement, rounded up. With no positive improvement, there is no payback unless spent costs are zero.</li>
+            </ul>
+            <p>
+              The shared U.S. move-comparison engine varies estimated housing by 10%, living
+              costs by 15% and one-time amounts by 25% for its low/high cases. User-entered
+              amounts stay fixed. These spreads are sensitivity assumptions, not confidence
+              intervals or quoted price ranges.
+            </p>
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">International and regional tools</h3>
+            <p>
+              These have separate destination presets and cost fields, not the homepage&apos;s
+              $1,500/$500/$2,000 allowances. Upfront items can include deposits, prepaid rent,
+              visa fees, flights, shipping, temporary stays, administration, furniture and
+              an emergency reserve. Read the itemized result and replace presets with actual
+              costs. A cash reserve is money set aside, not a fee paid to a third party.
+            </p>
+            <p>
+              For example, Europe adds rental deposit and first/last rent (or a purchase down
+              payment), visa, flight, shipping, temporary stay, admin, conditional furniture
+              and an emergency buffer. Furnished housing excludes furniture setup. Additional
+              runway divides savings left after all upfront requirements by monthly costs;
+              the cash-cushion verdict includes the emergency reserve in available savings.
+              A cushion below three months can downgrade an otherwise comfortable monthly
+              verdict. This is a planning signal, not a guarantee or lending standard.
+            </p>
+          </div>
+        </section>
+
+        <section id="international" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            International relocation estimates
+          </h2>
+
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
+            <p>
+              International tools add another layer beyond domestic relocation because
+              visa path, residency status, one-time setup costs, and country-specific
+              tax treatment often matter as much as monthly living costs.
+            </p>
+
+            <p>
+              Depending on the destination and tool, international relocation estimates
+              may include destination-city rent and essentials, one-time moving costs,
+              visa or permit fee assumptions, healthcare-related costs, and country-level
+              tax treatment for planning purposes.
+            </p>
+
+            <p>
+              These tools do not fully model every immigration path, residency rule,
+              employer sponsorship structure, treaty rule, or local legal edge case.
+              They are intended to help users compare scenarios before pursuing official
+              visa or tax guidance.
+            </p>
+          </div>
+        </section>
+
+        <section id="data-sources" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            Data sources, vintages and fallbacks
+          </h2>
+
+          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
+            <p>Data year, import date and review date are different. Reorganizing this page does not refresh the underlying figures.</p>
+            <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800" role="region" aria-label="Data sources and fallback table" tabIndex={0}>
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <caption className="sr-only">Source vintage, recorded update and fallback by data category</caption>
+                <thead className="bg-slate-50 dark:bg-slate-950"><tr>
+                  <th scope="col" className="p-3">Data and use</th><th scope="col" className="p-3">Source / data year</th><th scope="col" className="p-3">Recorded update</th><th scope="col" className="p-3">Fallback or limitation</th>
+                </tr></thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                  <tr><th scope="row" className="p-3 font-medium">U.S. city housing defaults</th><td className="p-3"><a href={GOVERNMENT_DATA_META.census.source} className="underline">Census ACS</a>: {GOVERNMENT_DATA_META.census.vintage}</td><td className="p-3">Imported {GOVERNMENT_DATA_META.generatedOn}</td><td className="p-3">All-renter/all-owner medians when recent-mover samples are unreliable; state property-tax rate when the city rate is missing.</td></tr>
+                  <tr><th scope="row" className="p-3 font-medium">U.S. price-level indexes</th><td className="p-3"><a href="https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area" className="underline">BEA</a>: {GOVERNMENT_DATA_META.bea.vintage}</td><td className="p-3">Imported {GOVERNMENT_DATA_META.generatedOn}</td><td className="p-3">State index where metro data is unavailable; indexes scale planning budgets rather than supplying household dollar spending.</td></tr>
+                  <tr><th scope="row" className="p-3">Moving and living budgets</th><td className="p-3">Internal planning assumptions; not a survey vintage</td><td className="p-3">No independent source-review date recorded</td><td className="p-3">Tool-specific defaults; replace editable estimates with your own quotes and budget.</td></tr>
+                  <tr><th scope="row" className="p-3">International rents and essentials</th><td className="p-3">Mixed official statistics, market estimates and planning defaults; source years vary by city</td><td className="p-3">Source notes record rent checks in October 2026, including October 14 market estimates</td><td className="p-3">City/country presets are not all official averages. Groceries, utilities, transport, healthcare and setup are planning estimates.</td></tr>
+                  <tr><th scope="row" className="p-3">International exchange rates</th><td className="p-3"><a href={FX_SOURCE.url} className="underline">{FX_SOURCE.name}</a>, {FX_SOURCE.asOf}</td><td className="p-3">Quarter-end snapshot, not a live feed</td><td className="p-3">Some rates have separately documented exceptions. Actual bank rates, spreads and transfer fees may differ.</td></tr>
+                  <tr><th scope="row" className="p-3">U.S. wage-tax rules</th><td className="p-3">Tax year {TAX_YEAR}; IRS, state and local sources below</td><td className="p-3">Checked {taxRulesVerifiedLabel()}</td><td className="p-3"><a href="#tax-year-and-sources" className="underline">Held, derived and unconfirmed state figures</a> remain explicitly listed.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Relocation by Numbers uses a combination of public tax parameters, housing and
+              cost assumptions, internally maintained location data, and comparison logic built
+              for planning usefulness across the site.
+            </p>
+
+            <p>
+              Depending on the calculator, inputs may come from structured tax assumptions,
+              city or state cost defaults, rent and housing parameters, relocation cost estimates,
+              and internal modeling designed to compare locations on a consistent basis.
+            </p>
+
+            <p>
+              Because taxes, housing markets, living costs, and international rules change over time,
+              assumptions may be revised as models improve or newer data becomes available.
+            </p>
+          </div>
+        </section>
+
+        <section id="tax-estimates" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            Simplified taxes and take-home pay
           </h2>
 
           <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
@@ -140,7 +420,7 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section id="tax-year-and-sources" className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <section id="tax-year-and-sources" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             U.S. tax year, sources and known limits
           </h2>
@@ -163,7 +443,7 @@ export default function MethodologyPage() {
               </ul>
             </div>
 
-            <div id="state-payroll">
+            <div id="state-payroll" className="scroll-mt-24">
               <h3 className="font-semibold text-slate-900 dark:text-slate-100">State payroll programs included</h3>
               <p className="mt-2">{PAYROLL_PROGRAMS_NOTE}</p>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6">
@@ -222,7 +502,7 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section id="state-sources" className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <section id="state-sources" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             State and local tax sources
           </h2>
@@ -253,135 +533,7 @@ export default function MethodologyPage() {
           </ul>
         </section>
 
-        <section id="exclusions-by-tool" className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            What each tool leaves out
-          </h2>
-          <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
-            The same limits shown at the bottom of each calculator page.
-          </p>
-          <div className="mt-3 space-y-4">
-            {Object.entries(CALCULATOR_INFO).map(([path, info]) => (
-              <div key={path}>
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100">
-                  <Link href={path} className="underline underline-offset-2">{info.name}</Link>
-                </h3>
-                <ul className="mt-1 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-600 dark:text-slate-400">
-                  {info.exclusions.map((item) => <li key={item}>{item}</li>)}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            Housing and affordability estimates
-          </h2>
-
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
-            <p>
-              Housing estimates are one of the largest parts of the model because housing
-              is often the biggest recurring expense in a move. Depending on the calculator,
-              users may compare renting or buying and estimate how much of their take-home
-              pay may go toward housing.
-            </p>
-
-            <p>
-              Buy-mode estimates may include mortgage principal and interest, property taxes,
-              homeowners insurance, HOA costs, and PMI when down payment assumptions suggest
-              PMI may apply. Rent-mode estimates may include monthly rent and renter-related
-              housing costs where relevant.
-            </p>
-
-            <p>
-              City rent, home-price and property-tax defaults come from the U.S. Census Bureau American Community
-              Survey 2020-2024 (5-year estimates). Rent is what households that moved in during 2023 or later
-              pay, converted to the contract-rent basis (tables B25113, B25058 and B25064); home price is the
-              owner-reported value of homes bought in 2023 or later (B25109). Where that group is too small to be
-              reliable (margin of error above 25% of the estimate), the all-renter or all-owner median is used
-              instead, and the city page says which. The property-tax rate is median real estate taxes paid
-              divided by median home value (B25103 and B25077); a city without its own figure uses its state&apos;s.
-            </p>
-
-            <p>
-              These housing calculations are designed for planning comparison only and do not
-              represent a mortgage approval, underwriting decision, or final lender quote.
-            </p>
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            Cost of living assumptions
-          </h2>
-
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
-            <p>
-              Cost-of-living comparisons use location-specific assumptions for categories
-              such as housing, groceries, utilities, transportation, healthcare, and
-              other recurring living expenses when those inputs are available in the model.
-            </p>
-
-            <p>
-              City price levels come from the Bureau of Economic Analysis Regional Price Parities for 2024, which
-              compare a metro area (or the state, for cities outside a metro area) with the national average of
-              1.00. Housing uses the housing index and utilities the utilities index. BEA does not publish
-              separate indexes for groceries, transportation or healthcare, so groceries and transportation use
-              the goods index and healthcare uses the other-services index.
-            </p>
-
-            <p>
-              The national dollar budgets those indexes scale (groceries, utilities, transportation, healthcare,
-              childcare and miscellaneous), plus insurance, closing costs and state sales tax, are planning
-              assumptions rather than government figures.
-            </p>
-
-            <p>
-              In some parts of the site, weighted category comparisons are used so the
-              model reflects the fact that housing usually matters more than smaller
-              spending categories. In other parts of the site, the comparison may rely
-              more heavily on rent-based logic, city-level defaults, or broader affordability
-              heuristics when a full category-level model is not available.
-            </p>
-
-            <p>
-              These estimates should be treated as directional planning inputs. Actual
-              living costs vary by neighborhood, household size, commute, lifestyle,
-              insurance choices, and personal spending habits.
-            </p>
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            International relocation estimates
-          </h2>
-
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
-            <p>
-              International tools add another layer beyond domestic relocation because
-              visa path, residency status, one-time setup costs, and country-specific
-              tax treatment often matter as much as monthly living costs.
-            </p>
-
-            <p>
-              Depending on the destination and tool, international relocation estimates
-              may include destination-city rent and essentials, one-time moving costs,
-              visa or permit fee assumptions, healthcare-related costs, and country-level
-              tax treatment for planning purposes.
-            </p>
-
-            <p>
-              These tools do not fully model every immigration path, residency rule,
-              employer sponsorship structure, treaty rule, or local legal edge case.
-              They are intended to help users compare scenarios before pursuing official
-              visa or tax guidance.
-            </p>
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <section id="fire" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             FIRE calculations
           </h2>
@@ -415,10 +567,23 @@ export default function MethodologyPage() {
               withdrawal rate; the &ldquo;Lean / Chubby / Fat&rdquo; labels are community
               conventions rather than official thresholds.
             </p>
+            <p>
+              Coast FIRE asks how much must already be invested to grow toward the future
+              retirement target without further contributions after coasting. Barista FIRE
+              reduces the spending gap by assumed part-time income; when an end age is
+              entered, the model also accounts for funding full spending after that income ends.
+              These are different scenarios, not promises of a safe withdrawal outcome.
+            </p>
+            <p>
+              Shared FIRE limitations: simplified wage-tax estimates, limited filing statuses
+              and no filing-ready return. Returns, inflation, contributions and future spending
+              are assumptions. Full exclusions for each variant are retained in the
+              <a href="#exclusions-by-tool" className="ml-1 underline underline-offset-2">calculator-specific limitations</a> below.
+            </p>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <section id="retirement" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Retirement planning calculators
           </h2>
@@ -450,65 +615,40 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <section id="exclusions-by-tool" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            Exact inputs, modeled estimates, and heuristics
+            What each tool leaves out
           </h2>
-
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
-            <p>
-              Not every number on the site is the same kind of input. In general, the
-              models rely on three different layers:
-            </p>
-
-            <ul className="list-disc space-y-2 pl-5">
-              <li>
-                <span className="font-medium text-slate-900 dark:text-slate-100">Rule-based inputs:</span> examples include
-                tax brackets, filing status logic, and structured formula-based calculations.
-              </li>
-              <li>
-                <span className="font-medium text-slate-900 dark:text-slate-100">Modeled estimates:</span> examples include
-                housing assumptions, monthly essentials, and affordability comparisons built from location data.
-              </li>
-              <li>
-                <span className="font-medium text-slate-900 dark:text-slate-100">Comparison heuristics:</span> examples include
-                weighted affordability logic, comfort signals, and scenario-planning shortcuts used to keep the tools practical.
-              </li>
-            </ul>
-
-            <p>
-              That distinction matters because some outputs are closer to structured formula results,
-              while others are best treated as directional planning estimates rather than exact figures.
-            </p>
+          <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
+            These are the same limits shown on each calculator page. Open a tool to read
+            its full exclusions; shared wording is retained so no tool-specific warning is lost.
+          </p>
+          <div className="mt-3 space-y-4">
+            {Object.entries(CALCULATOR_INFO).map(([path, info]) => (
+              <details key={path} className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+                <summary className="cursor-pointer font-semibold text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-4 dark:text-slate-100">
+                  {info.name}
+                </summary>
+                <Link href={path} className="mt-3 inline-block text-sm underline underline-offset-2">Open {info.name}</Link>
+                <ul className="mt-1 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                  {info.exclusions.map((item) => <li key={item}>{item}</li>)}
+                </ul>
+              </details>
+            ))}
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <section id="updates" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            Data sources and updates
+            Documentation updates
           </h2>
-
-          <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
-            <p>
-              Relocation by Numbers uses a combination of public tax parameters, housing and
-              cost assumptions, internally maintained location data, and comparison logic built
-              for planning usefulness across the site.
-            </p>
-
-            <p>
-              Depending on the calculator, inputs may come from structured tax assumptions,
-              city or state cost defaults, rent and housing parameters, relocation cost estimates,
-              and internal modeling designed to compare locations on a consistent basis.
-            </p>
-
-            <p>
-              Because taxes, housing markets, living costs, and international rules change over time,
-              assumptions may be revised as models improve or newer data becomes available.
-            </p>
-          </div>
+          <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-7 text-slate-700 dark:text-slate-300">
+            <li><time dateTime="2026-11-11">November 11, 2026</time>: reorganized this page around relocation, documented moving-cost defaults and added navigation and source/fallback notes. No calculation rules or datasets changed.</li>
+          </ul>
+          <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">This log starts with the documentation restructure. It is not a claim that every source was independently reverified on that date.</p>
         </section>
 
-        <section className="rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-6">
+        <section id="disclaimer" className="scroll-mt-24 rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-6">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Important disclaimer
           </h2>
@@ -520,7 +660,7 @@ export default function MethodologyPage() {
           </p>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <section id="explore-tools" className="scroll-mt-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Explore the tools
           </h2>
