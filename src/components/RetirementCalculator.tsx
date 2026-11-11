@@ -10,6 +10,10 @@ import { monthlyDepositFactor } from "../lib/depositTiming";
 import { downloadCsv, type CsvRow } from "../lib/csvExport";
 import { downloadPdfReport, type PdfRow } from "../lib/pdfExport";
 import Link from "next/link";
+import { retireeIncomeTax } from "../lib/retirementStateView";
+import { retirementIncomePlan, spendingInOtherState } from "../lib/retirementIncomePlan";
+import { governmentState } from "../lib/governmentData";
+import { TAX_YEAR } from "../lib/taxYear2026";
 import SavedScenariosPanel from "./SavedScenariosPanel";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -165,6 +169,11 @@ export default function RetirementCalculator() {
   const [customVolatilityPct, setCustomVolatilityPct] = useState<string>("13");
 
   const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared" | "error">("idle");
+  // Other retirement income and a spending target, in today's dollars (optional), and a second state to compare.
+  const [socialSecurityMonthly, setSocialSecurityMonthly] = useState<string>("");
+  const [pensionAnnual, setPensionAnnual] = useState<string>("");
+  const [spendingTarget, setSpendingTarget] = useState<string>("");
+  const [compareState, setCompareState] = useState<string>("");
 
   const nz = (v: string) => {
     const x = Number(v);
@@ -191,6 +200,10 @@ export default function RetirementCalculator() {
     const vRisk = qs.get("risk");
     if (vRisk === "conservative" || vRisk === "balanced" || vRisk === "aggressive" || vRisk === "custom") setRiskLevel(vRisk);
     const vVol = qs.get("vol"); if (vVol) setCustomVolatilityPct(vVol);
+    const vSs = qs.get("ss"); if (vSs) setSocialSecurityMonthly(vSs);
+    const vPen = qs.get("pension"); if (vPen) setPensionAnnual(vPen);
+    const vSpend = qs.get("spend"); if (vSpend) setSpendingTarget(vSpend);
+    const vCmp = qs.get("compare"); if (vCmp && STATES.some((st) => st.code === vCmp)) setCompareState(vCmp);
   }, []);
 
   // ── QS SYNC ──────────────────────────────────────────────────────────
@@ -211,8 +224,12 @@ export default function RetirementCalculator() {
       qs.set("risk", riskLevel);
       if (riskLevel === "custom" && customVolatilityPct) qs.set("vol", customVolatilityPct);
     }
+    if (socialSecurityMonthly) qs.set("ss", socialSecurityMonthly);
+    if (pensionAnnual) qs.set("pension", pensionAnnual);
+    if (spendingTarget) qs.set("spend", spendingTarget);
+    if (compareState) qs.set("compare", compareState);
     setQS(qs);
-  }, [currentAge, retirementAge, currentSavings, monthlyContribution, expectedReturnPct, inflationPct, state, filing, accountType, viewMode, riskLevel, customVolatilityPct]);
+  }, [currentAge, retirementAge, currentSavings, monthlyContribution, expectedReturnPct, inflationPct, state, filing, accountType, viewMode, riskLevel, customVolatilityPct, socialSecurityMonthly, pensionAnnual, spendingTarget, compareState]);
 
   const results = useMemo(() => {
     const years = Math.max(0, nz(retirementAge) - nz(currentAge));
@@ -317,6 +334,34 @@ export default function RetirementCalculator() {
 
   const inputsReady = results.years > 0 && (results.startingBalance > 0 || results.annualContribution > 0);
   const stateName = STATES.find((s) => s.code === state)?.name ?? state;
+
+  // The retirement income picture: portfolio withdrawals (the 4% reference) plus Social Security and a pension, taxed together as one
+  // household with the age-65 deductions and the state's retirement rules, set against a spending target. Roth and taxable
+  // withdrawals add no income tax here, so only Social Security and the pension are taxed for those accounts.
+  const incomePicture = useMemo(() => {
+    const ssAnnual = Math.max(0, nz(socialSecurityMonthly)) * 12;
+    const penAnnual = Math.max(0, nz(pensionAnnual));
+    const target = Math.max(0, nz(spendingTarget));
+    if (ssAnnual === 0 && penAnnual === 0 && target === 0) return null;
+    const portfolio = results.annualIncome;
+    const taxedWithdrawals = results.isTaxable || results.isRoth ? 0 : portfolio;
+    const ageForTax = Math.max(60, Math.round(nz(retirementAge)));
+    const build = (st: StateCode, monthlyTarget: number) => {
+      const t = retireeIncomeTax(st, { filing, age: ageForTax, socialSecurity: ssAnnual, pension: penAnnual, withdrawals: taxedWithdrawals }, 0, true);
+      return retirementIncomePlan({
+        portfolioIncomeAnnual: portfolio, socialSecurityAnnual: ssAnnual, pensionAnnual: penAnnual,
+        spendingTargetMonthly: monthlyTarget, withdrawalRate: SAFE_WITHDRAWAL_RATE, taxAnnual: t ? t.total : null,
+      });
+    };
+    const here = build(state, target);
+    let there: { name: string; target: number; plan: ReturnType<typeof build> } | null = null;
+    if (compareState && compareState !== state) {
+      const level = (code: string) => governmentState(code as StateCode)?.rpp?.allItems ?? null;
+      const movedTarget = spendingInOtherState(target, level(state), level(compareState));
+      there = { name: STATES.find((st) => st.code === compareState)?.name ?? compareState, target: movedTarget, plan: build(compareState as StateCode, movedTarget) };
+    }
+    return { ssAnnual, penAnnual, target, here, there, ageForTax };
+  }, [socialSecurityMonthly, pensionAnnual, spendingTarget, compareState, state, filing, retirementAge, results.annualIncome, results.isTaxable, results.isRoth]);
 
   // Hand the projection to the withdrawal calculator: the balance in today's dollars, starting at the retirement age, with the 4% reference
   // withdrawal as a starting point. A taxable account has no equivalent there, so the account type is only passed for traditional and Roth.
@@ -522,6 +567,41 @@ export default function RetirementCalculator() {
           </div>
 
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Retirement income and spending (optional)</div>
+            <p className="mb-3 text-xs leading-5 text-slate-500 dark:text-slate-400">Add what you expect from Social Security and a pension and what you want to spend, all in today&apos;s dollars, to see whether your income covers it.</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="text-sm">
+                <div className={labelHeadCls}>
+                  Social Security ($/month)
+                  <InfoTip text="The monthly benefit you expect at the age you start it, in today's dollars, for the whole household. Your statement at ssa.gov shows it. The calculator treats it as received from your retirement age." />
+                </div>
+                <input className={inputCls} type="number" value={socialSecurityMonthly} onChange={(e) => setSocialSecurityMonthly(e.target.value)} placeholder="e.g. 2400" />
+              </label>
+              <label className="text-sm">
+                <div className={labelHeadCls}>Pension ($/year)</div>
+                <input className={inputCls} type="number" value={pensionAnnual} onChange={(e) => setPensionAnnual(e.target.value)} placeholder="e.g. 12000" />
+              </label>
+              <label className="text-sm">
+                <div className={labelHeadCls}>
+                  Spending target ($/month, after tax)
+                  <InfoTip text="What you want to spend each month in retirement, in today's dollars, after income tax." />
+                </div>
+                <input className={inputCls} type="number" value={spendingTarget} onChange={(e) => setSpendingTarget(e.target.value)} placeholder="e.g. 5000" />
+              </label>
+              <label className="text-sm">
+                <div className={labelHeadCls}>
+                  Compare retiring in another state
+                  <InfoTip text="Shows the same income and spending target after moving to this state: its income tax on your retirement income, with the target scaled by its overall price level." />
+                </div>
+                <select className={selectCls} value={compareState} onChange={(e) => setCompareState(e.target.value)}>
+                  <option value="">No comparison</option>
+                  {STATES.filter((st) => st.code !== state).map((st) => (<option key={st.code} value={st.code}>{st.name}</option>))}
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
             <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Assumptions</div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm">
@@ -618,6 +698,52 @@ export default function RetirementCalculator() {
                 </div>
               ) : null}
 
+              {incomePicture && (() => {
+                const sign = (n: number) => (n < 0 ? "-" : "");
+                const row = (label: string, a: string, b?: string) => (
+                  <tr key={label}><td className="py-1.5 pr-3">{label}</td><td className="py-1.5 pr-3 font-semibold text-slate-900 dark:text-slate-100">{a}</td>{b !== undefined && <td className="py-1.5 font-semibold text-slate-900 dark:text-slate-100">{b}</td>}</tr>
+                );
+                const { here, there } = incomePicture;
+                const gap = here.gapMonthly;
+                return (
+                  <div className="rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
+                    <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">Your retirement income at {retirementAge}</div>
+                    <div className="mt-3 overflow-x-auto">
+                      <table className="w-full min-w-[22rem] border-collapse text-sm text-slate-600 dark:text-slate-300">
+                        <thead>
+                          <tr className="text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                            <th scope="col" className="py-1.5 pr-3 font-semibold"><span className="sr-only">Item</span></th>
+                            <th scope="col" className="py-1.5 pr-3 font-semibold">{stateName}</th>
+                            {there && <th scope="col" className="py-1.5 font-semibold">{there.name}</th>}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                          {row("Portfolio withdrawals (4% rule)", money(results.annualIncome), there ? money(results.annualIncome) : undefined)}
+                          {incomePicture.ssAnnual > 0 && row("Social Security", money(incomePicture.ssAnnual), there ? money(incomePicture.ssAnnual) : undefined)}
+                          {incomePicture.penAnnual > 0 && row("Pension", money(incomePicture.penAnnual), there ? money(incomePicture.penAnnual) : undefined)}
+                          {row("Income tax (federal and state)", here.taxAnnual === null ? "n/a" : money(here.taxAnnual), there ? (there.plan.taxAnnual === null ? "n/a" : money(there.plan.taxAnnual)) : undefined)}
+                          {row("After-tax income a month", money(here.afterTaxMonthly), there ? money(there.plan.afterTaxMonthly) : undefined)}
+                          {incomePicture.target > 0 && row("Spending target a month", money(incomePicture.target), there ? money(there.target) : undefined)}
+                          {incomePicture.target > 0 && row("Left over (or short) a month", `${sign(here.gapMonthly ?? 0)}${money(Math.abs(here.gapMonthly ?? 0))}`, there ? `${sign(there.plan.gapMonthly ?? 0)}${money(Math.abs(there.plan.gapMonthly ?? 0))}` : undefined)}
+                        </tbody>
+                      </table>
+                    </div>
+                    {gap !== null && (
+                      <div className={`mt-3 rounded-xl px-3 py-2 text-sm font-semibold ${gap >= 0 ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200" : "bg-rose-50 text-rose-800 dark:bg-rose-950/30 dark:text-rose-200"}`}>
+                        {gap >= 0
+                          ? `Your income covers your target with about ${money(gap)} a month to spare in ${stateName}.`
+                          : `Your income covers about ${Math.round((here.coverage ?? 0) * 100)}% of your target in ${stateName}, ${money(Math.abs(gap))} a month short. Closing that would take about ${money(here.extraSavingsNeeded ?? 0)} more saved by ${retirementAge}.`}
+                        {there && there.plan.gapMonthly !== null && ((there.plan.gapMonthly - gap) >= 1 || (there.plan.gapMonthly - gap) <= -1) &&
+                          ` In ${there.name} the monthly difference changes by ${there.plan.gapMonthly - gap >= 0 ? "+" : "-"}${money(Math.abs(there.plan.gapMonthly - gap))}.`}
+                      </div>
+                    )}
+                    <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                      All amounts are in today&apos;s dollars. Income tax is for one household with these three income sources together: the {TAX_YEAR} standard deduction with the extra amount at 65 or older, the temporary senior deduction, the tax on Social Security and each state&apos;s rules for retirement income (calculated as a retiree aged {incomePicture.ageForTax}). Roth and taxable-account withdrawals are not taxed here. Social Security is treated as starting at your retirement age; it is not adjusted for when you claim. The spending target in {there ? there.name : "another state"}{" "}is scaled by that state&apos;s overall price level (Bureau of Economic Analysis). Healthcare costs, RMDs and local taxes are not included. Planning estimate, not tax advice.
+                    </p>
+                  </div>
+                );
+              })()}
+
               {results.projectedBalance > 0 && (
                 <div data-next-step className="rounded-2xl border border-violet-200 bg-violet-50/70 p-4 text-sm text-slate-700 dark:border-violet-900/60 dark:bg-violet-950/20 dark:text-slate-300">
                   <p>
@@ -629,7 +755,7 @@ export default function RetirementCalculator() {
                     See how long {money(results.projectedBalance)} lasts →
                   </Link>
                   <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                    This calculator does not include Social Security or a pension. To add them and see taxes year by year, use the{" "}
+                    For Social Security timing, RMDs, healthcare costs and taxes year by year, use the{" "}
                     <Link href="/complete-retirement-plan" className="font-semibold underline underline-offset-4 hover:no-underline">Complete Retirement Plan</Link>.
                   </p>
                 </div>
