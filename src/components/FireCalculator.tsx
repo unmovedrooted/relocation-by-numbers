@@ -31,6 +31,7 @@ import { parseFireAbroadLink, parseFireLink } from "@/lib/fireLink";
 import { monthlyDepositFactor } from "@/lib/depositTiming";
 import { returnPaths } from "@/lib/monteCarlo";
 import { BAD_START_DROP, fireAgeRange, retirementStress } from "@/lib/fireStress";
+import { breakEvenYear } from "@/lib/moveBreakEven";
 import { MAX_LIFE_EVENTS, describeEvent, eventCashAt, eventTarget, usableEvents, type LifeEvent, type LifeEventKind } from "@/lib/fireEvents";
 
 // The AI-written FIRE report is hidden until the API key is live-tested. Set NEXT_PUBLIC_AI_REPORTS=1 to show it again.
@@ -1745,6 +1746,13 @@ export default function FireCalculator({ initialIncome = 0, hideFAQ = false }: F
   }, [inputs.moveCompareOn, movedScenario, mode]);
   const movedFiAge    = useMemo(() => !movedResult || movedResult.yearsToFI === null ? null : inputs.age + movedResult.yearsToFI, [inputs.age, movedResult]);
   const moveDeltaYears = useMemo(() => fiAge === null || movedFiAge === null ? null : fiAge - movedFiAge, [fiAge, movedFiAge]);
+  // When the move pays back its upfront cost: the first year the portfolio on the move path is at least the stay-put portfolio.
+  const moveBreakEven = useMemo(() => {
+    if (!inputs.moveCompareOn || !(Number(inputs.movedCost) > 0)) return null;
+    const stay = buildProjectionWithExpenses(inputs, netPath, null, annualExpenses(inputs), mode).map((pt) => pt.portfolio);
+    const moved = buildProjectionWithExpenses(movedScenario.inputs, movedScenario.net, null, annualExpenses(movedScenario.inputs), mode).map((pt) => pt.portfolio);
+    return { year: breakEvenYear(stay, moved), horizon: Math.min(stay.length, moved.length) - 1 };
+  }, [inputs, netPath, movedScenario, mode]);
 
   // ── Viral city results ────────────────────────────────────────────────────
   const viralCityResults = useMemo(() => {
@@ -2492,7 +2500,24 @@ const reportInputs = useMemo<FireReportInputs>(() => ({
                           <span className="font-semibold">{moveDeltaYears !== 0 ? `${Math.abs(moveDeltaYears)} yrs` : ""}</span>
                         </div>
                       )}
+                      {moveBreakEven && (
+                        <div className="flex justify-between gap-3">
+                          <span className="text-emerald-100/80">Moving cost of {money(inputs.movedCost, 0)} paid back</span>
+                          <span className="text-right font-semibold">
+                            {moveBreakEven.year === null
+                              ? `Not within ${moveBreakEven.horizon} years`
+                              : moveBreakEven.year === 0
+                                ? "Right away"
+                                : `After ${moveBreakEven.year} ${moveBreakEven.year === 1 ? "year" : "years"} (age ${Math.round(inputs.age) + moveBreakEven.year})`}
+                          </span>
+                        </div>
+                      )}
                     </div>
+                    {moveBreakEven && (
+                      <p className="mt-3 text-xs leading-5 text-emerald-100/70">
+                        Break-even is the first year your invested portfolio after the move is at least what it would be if you stayed. It counts the moving cost, the change in take-home pay and the change in spending{moveBreakEven.year === null ? "; with these inputs the move does not add enough saving to catch up" : ""}.
+                      </p>
+                    )}
                   </div>
                 </>
               )}
